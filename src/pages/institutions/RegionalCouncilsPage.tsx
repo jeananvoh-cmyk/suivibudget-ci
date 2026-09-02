@@ -1,0 +1,344 @@
+import React, { useState } from 'react';
+import { ArrowLeft, Search, MapPin, ChevronDown, ArrowRight, FileText, Globe, ExternalLink, Info, Eye, EyeOff } from 'lucide-react';
+import { Institution, BudgetProject } from '../../types';
+import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
+import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
+import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
+
+interface RegionalCouncilsPageProps {
+  onBack: () => void;
+  institutions: Institution[];
+  allProjects: BudgetProject[];
+  onNavigateToProjects: (regionName: string) => void;
+}
+
+export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
+  onBack,
+  institutions,
+  allProjects,
+  onNavigateToProjects,
+}) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDistrictFilter, setSelectedDistrictFilter] = useState('ALL');
+  const [page, setPage] = useState(1);
+  const [revealedParties, setRevealedParties] = useState<Record<string, boolean>>({});
+  const [revealAllParties, setRevealAllParties] = useState<boolean>(false);
+
+  const toggleRevealParty = (id: string) => {
+    setRevealedParties(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+  const PAGE_SIZE = 8;
+
+  const [selectedInstForDoc, setSelectedInstForDoc] = useState<Institution | null>(null);
+  const [selectedInstForDetail, setSelectedInstForDetail] = useState<Institution | null>(null);
+
+  const normalize = (s: string) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+  // Unique Districts
+  const uniqueDistricts = Array.from(
+    new Set(institutions.filter(i => (i.type === 'REGION' || i.type === 'DISTRICT') && i.district).map(i => i.district))
+  ).filter(Boolean).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
+
+  // Filtered Regions
+  const filteredRegions = institutions.filter(i => {
+    if (i.type !== 'REGION' && i.type !== 'DISTRICT') return false;
+
+    const matchesSearch = !searchQuery.trim() ||
+      normalize(i.name).includes(normalize(searchQuery)) ||
+      normalize(i.region).includes(normalize(searchQuery)) ||
+      (i.district && normalize(i.district).includes(normalize(searchQuery))) ||
+      (i.departement && normalize(i.departement).includes(normalize(searchQuery)));
+
+    const matchesDistrict = selectedDistrictFilter === 'ALL' ||
+      normalize(i.district) === normalize(selectedDistrictFilter);
+
+    return matchesSearch && matchesDistrict;
+  }).sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+
+  const totalPages = Math.ceil(filteredRegions.length / PAGE_SIZE) || 1;
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const startIndex = (safePage - 1) * PAGE_SIZE;
+  const endIndex = Math.min(startIndex + PAGE_SIZE, filteredRegions.length);
+  const paginatedRegions = filteredRegions.slice(startIndex, endIndex);
+
+  return (
+    <div className="space-y-10 animate-in fade-in duration-300">
+      
+      {/* Top Navigation & Clean Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-sans">
+            Conseils Régionaux & Districts (33)
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl font-medium">
+            Les 31 régions et 2 districts autonomes de Côte d'Ivoire, leurs dotations budgétaires, présidents et contacts officiels.
+          </p>
+        </div>
+      </div>
+
+      {/* Filter Toolbar */}
+      <div className="flex justify-center mb-4">
+        <button
+          type="button"
+          onClick={() => setRevealAllParties(!revealAllParties)}
+          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl border text-xs font-bold transition-all shadow-xs ${
+            revealAllParties 
+              ? 'bg-slate-900 border-slate-900 text-white' 
+              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+          }`}
+          title="Afficher ou masquer tous les partis politiques"
+        >
+          {revealAllParties ? <EyeOff className="w-3.5 h-3.5 text-brand-orange" /> : <Eye className="w-3.5 h-3.5 text-slate-400" />}
+          <span>{revealAllParties ? 'Masquer tous les partis' : '️ Afficher tous les partis politiques'}</span>
+        </button>
+      </div>
+      <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-3xl mx-auto">
+        <div>
+          <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1 ml-1">
+            District Autonome ({uniqueDistricts.length})
+          </label>
+          <div className="relative">
+            <select
+              value={selectedDistrictFilter}
+              onChange={(e) => {
+                setSelectedDistrictFilter(e.target.value);
+                setPage(1);
+              }}
+              className="w-full appearance-none pl-3 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-brand-orange"
+            >
+              <option value="ALL"> Tous les Districts</option>
+              {uniqueDistricts.map(dist => (
+                <option key={dist} value={dist}>{dist}</option>
+              ))}
+            </select>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1 ml-1">
+            Recherche Région / Chef-lieu
+          </label>
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Région, chef-lieu (ex: Gbêkê, San Pedro)..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
+              className="w-full pl-8 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-brand-orange"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Grid of Regions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {paginatedRegions.map((inst) => {
+          const functioningPct = inst.total_budget_fcfa > 0 
+            ? Math.round((inst.budget_functioning_fcfa / inst.total_budget_fcfa) * 100) 
+            : 0;
+          const investmentPct = inst.total_budget_fcfa > 0 ? (100 - functioningPct) : 0;
+          const relatedProjectsCount = allProjects.filter(p => 
+            p.region_name.toLowerCase() === inst.region.toLowerCase()
+          ).length;
+
+          return (
+            <div key={inst.id} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-brand-blue/50 transition-all flex flex-col justify-between group">
+              <div>
+                <div className="flex items-start gap-4 mb-3">
+                  {inst.leader_photo_url ? (
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm flex-shrink-0 cursor-zoom-in group/photo">
+                      <img 
+                        src={inst.leader_photo_url} 
+                        alt={inst.leader_name || inst.name}
+                        className="w-full h-full object-cover object-top transition-transform duration-300 ease-out group-hover/photo:scale-125" 
+                      />
+                    </div>
+                  ) : null}
+
+                  <div className="space-y-1 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                      <span className="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700">
+                        {inst.district ? `District ${inst.district}` : 'Collectivité Territoriale'}
+                      </span>
+                      {inst.political_party && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleRevealParty(inst.id);
+                          }}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all border cursor-pointer ${
+                            (revealAllParties || revealedParties[inst.id])
+                              ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                              : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                          }`}
+                          title="Cliquer pour afficher ou masquer l'étiquette politique du président"
+                        >
+                          {(revealAllParties || revealedParties[inst.id]) ? (
+                            <>
+                              <EyeOff className="w-3 h-3 text-brand-orange" />
+                              <span>{inst.political_party}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Eye className="w-3 h-3 text-slate-400" />
+                              <span>Parti politique</span>
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-black text-slate-900 group-hover:text-brand-blue transition-colors leading-snug">
+                      {inst.name}
+                    </h3>
+                    {inst.leader_name && (
+                      <div className="text-xs text-slate-600 font-bold mt-0.5">
+                        {inst.leader_title || 'Président'} : <span className="text-brand-blue">{inst.leader_name}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-2 mt-3">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-500 font-bold uppercase">Dotation Budgétaire Régionale</span>
+                    <span className="font-black text-slate-900">
+                      {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold">({formatAmountInWords(inst.total_budget_fcfa)})</span>
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden flex">
+                    <div className="bg-brand-blue h-full" style={{ width: `${functioningPct}%` }}></div>
+                    <div className="bg-emerald-500 h-full" style={{ width: `${investmentPct}%` }}></div>
+                  </div>
+                  <div className="flex justify-between text-[11px] font-semibold text-slate-600">
+                    <span className="text-brand-blue">Fonct. : {functioningPct}% ({formatFCFA(inst.budget_functioning_fcfa)} - {formatAmountInWords(inst.budget_functioning_fcfa)})</span>
+                    <span className="text-emerald-700">Invest. : {investmentPct}% ({formatFCFA(inst.budget_investment_fcfa)} - {formatAmountInWords(inst.budget_investment_fcfa)})</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs gap-2">
+                <div className="flex items-center gap-1.5 min-w-0" onClick={(e) => e.stopPropagation()}>
+                  {inst.website && (
+                    <a
+                      href={inst.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-brand-blue hover:text-white text-slate-600 flex items-center justify-center transition-colors shadow-2xs flex-shrink-0"
+                      title={`Site officiel : ${inst.website}`}
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                  {inst.facebook_url && (
+                    <a
+                      href={inst.facebook_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-600 flex items-center justify-center transition-colors shadow-2xs flex-shrink-0"
+                      title={`Page Facebook : ${inst.facebook_url}`}
+                    >
+                      <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                      </svg>
+                    </a>
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedInstForDoc(inst);
+                    }}
+                    className="px-2 sm:px-2.5 py-1 bg-blue-50/90 hover:bg-brand-blue hover:text-white text-brand-blue border border-blue-100 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer flex-shrink-0"
+                    title="Générer une demande officielle de documents publics (Loi n°2013-867)"
+                  >
+                    <FileText className="w-3 h-3" />
+                    <span className="whitespace-nowrap">Demande de Documents</span>
+                  </button>
+
+                  <button
+                    onClick={() => setSelectedInstForDetail(inst)}
+                    className="px-2 sm:px-2.5 py-1 bg-brand-blue/10 hover:bg-brand-blue hover:text-white text-brand-blue rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 flex-shrink-0 cursor-pointer"
+                    title="Consulter la fiche détaillée du Conseil Régional"
+                  >
+                    <Info className="w-3 h-3" />
+                    <span className="whitespace-nowrap">Fiche Région</span>
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => onNavigateToProjects(inst.region)}
+                  className="px-4 py-2 bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-bold rounded-full transition-all flex items-center gap-1.5 shadow-xs"
+                >
+                  <span>Voir les projets ({relatedProjectsCount})</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Pagination Bar */}
+      {filteredRegions.length > 0 && (
+        <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 mt-8">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setPage(p => Math.max(1, p - 1));
+                window.scrollTo({ top: 350, behavior: 'smooth' });
+              }}
+              disabled={safePage <= 1}
+              className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-black text-base shadow-2xs"
+            >
+              ‹
+            </button>
+
+            <div className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-brand-blue font-black text-xs sm:text-sm shadow-2xs">
+              Page {safePage} / {totalPages}
+            </div>
+
+            <button
+              onClick={() => {
+                setPage(p => Math.min(totalPages, p + 1));
+                window.scrollTo({ top: 350, behavior: 'smooth' });
+              }}
+              disabled={safePage >= totalPages}
+              className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all font-black text-base shadow-2xs"
+            >
+              ›
+            </button>
+          </div>
+
+          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            AFFICHAGE {startIndex + 1}-{endIndex} SUR {filteredRegions.length}
+          </div>
+        </div>
+      )}
+
+      {/* Modal Demande RI */}
+      <OfficialDocRequestModal
+        isOpen={!!selectedInstForDoc}
+        onClose={() => setSelectedInstForDoc(null)}
+        institution={selectedInstForDoc}
+      />
+
+      {/* Modal Fiche Détaillée Région */}
+      <InstitutionDetailModal
+        isOpen={!!selectedInstForDetail}
+        onClose={() => setSelectedInstForDetail(null)}
+        institution={selectedInstForDetail}
+        allProjects={allProjects}
+        onNavigateToProjects={onNavigateToProjects}
+      />
+
+    </div>
+  );
+};
