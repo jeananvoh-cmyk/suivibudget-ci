@@ -1,15 +1,15 @@
 {
-  "name": "Vie Publique CI - Observatoire Citoyen",
-  "short_name": "ViePublique",
-  "description": "Suivi citoyen du budget et des infrastructures publiques en Côte d'Ivoire",
+  "name": "SuiviBudget Côte d'Ivoire - Observatoire Citoyen",
+  "short_name": "SuiviBudget CI",
+  "description": "Plateforme citoyenne de transparence budgétaire et de suivi des chantiers publics en Côte d'Ivoire",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0066CC",
   "icons": [
     {
-      "src": "/vite.svg",
-      "sizes": "192x192 512x512",
+      "src": "/favicon.svg",
+      "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
