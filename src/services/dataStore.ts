@@ -29,6 +29,17 @@ const STORAGE_KEYS = {
   SUBSCRIBERS: 'suivibudget_subscribers_v1',
 };
 
+async function safeSupabaseExec(promiseLike: any, contextMsg: string): Promise<void> {
+  try {
+    const res = await promiseLike;
+    if (res && res.error) {
+      console.warn(`[Supabase Sync Warning] ${contextMsg}:`, res.error);
+    }
+  } catch (err) {
+    console.warn(`[Supabase Network Warning] ${contextMsg}:`, err);
+  }
+}
+
 export interface NewsletterSubscriber {
   id: string;
   first_name: string;
@@ -344,6 +355,7 @@ class DataStore {
           locality_details: d.locality_details,
           verification_status: d.verification_status,
           moderator_notes: d.moderator_notes,
+          confirmations_count: d.confirmations_count || 1,
           created_at: d.created_at,
         }));
 
@@ -531,23 +543,24 @@ class DataStore {
 
     // Live Supabase Insert (if configured)
     if (isSupabaseConfigured()) {
-      supabase.from('citizen_proofs').insert([{
-        id: newProof.id,
-        project_id: newProof.project_id,
-        project_title: newProof.project_title,
-        commune_name: newProof.commune_name,
-        region_name: newProof.region_name,
-        citizen_name: newProof.citizen_name,
-        image_url: newProof.image_url,
-        video_url: newProof.video_url,
-        media_type: newProof.media_type,
-        citizen_status_claim: newProof.citizen_status_claim,
-        comment: newProof.comment,
-        locality_details: newProof.locality_details,
-        verification_status: 'PENDING',
-      }]).then(({ error }) => {
-        if (error) console.warn("Supabase proof upload sync notification:", error);
-      }).catch(err => console.warn("Supabase network notification:", err));
+      safeSupabaseExec(
+        supabase.from('citizen_proofs').insert([{
+          id: newProof.id,
+          project_id: newProof.project_id,
+          project_title: newProof.project_title,
+          commune_name: newProof.commune_name,
+          region_name: newProof.region_name,
+          citizen_name: newProof.citizen_name,
+          image_url: newProof.image_url,
+          video_url: newProof.video_url,
+          media_type: newProof.media_type,
+          citizen_status_claim: newProof.citizen_status_claim,
+          comment: newProof.comment,
+          locality_details: newProof.locality_details,
+          verification_status: 'PENDING',
+        }]),
+        'Upload Preuve Citoyenne'
+      );
     }
 
     return newProof;
@@ -574,14 +587,15 @@ class DataStore {
 
       // Live Supabase Update (if configured)
       if (isSupabaseConfigured()) {
-        supabase.from('citizen_proofs').update({
-          verification_status: status,
-          moderator_notes: moderatorNotes || null,
-          verified_at: new Date().toISOString(),
-          verified_by: this.authState.fullName || 'Modérateur',
-        }).eq('id', proofId).then(({ error }) => {
-          if (error) console.warn("Supabase proof moderation sync:", error);
-        }).catch(err => console.warn("Supabase network notification:", err));
+        safeSupabaseExec(
+          supabase.from('citizen_proofs').update({
+            verification_status: status,
+            moderator_notes: moderatorNotes || null,
+            verified_at: new Date().toISOString(),
+            verified_by: this.authState.fullName || 'Modérateur',
+          }).eq('id', proofId),
+          'Modération Preuve Citoyenne'
+        );
       }
     }
   }
@@ -593,9 +607,10 @@ class DataStore {
 
     // Live Supabase Delete (if configured)
     if (isSupabaseConfigured()) {
-      supabase.from('citizen_proofs').delete().eq('id', proofId).then(({ error }) => {
-        if (error) console.warn("Supabase proof deletion sync:", error);
-      }).catch(err => console.warn("Supabase network notification:", err));
+      safeSupabaseExec(
+        supabase.from('citizen_proofs').delete().eq('id', proofId),
+        'Suppression Preuve Citoyenne'
+      );
     }
   }
 
@@ -1082,14 +1097,15 @@ class DataStore {
 
     // Live Supabase Insert (if configured)
     if (isSupabaseConfigured()) {
-      supabase.from('newsletter_subscribers').insert([{
-        id: newSub.id,
-        first_name: newSub.first_name,
-        email: newSub.email,
-        commune: newSub.commune,
-      }]).then(({ error }) => {
-        if (error) console.warn("Supabase newsletter sync notification:", error);
-      }).catch(err => console.warn("Supabase network notification:", err));
+      safeSupabaseExec(
+        supabase.from('newsletter_subscribers').insert([{
+          id: newSub.id,
+          first_name: newSub.first_name,
+          email: newSub.email,
+          commune: newSub.commune,
+        }]),
+        'Inscription Newsletter'
+      );
     }
 
     return { success: true, message: "Inscription réussie ! Vous recevrez nos prochaines alertes citoyennes." };
