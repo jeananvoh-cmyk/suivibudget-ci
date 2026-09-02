@@ -50,9 +50,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   const currentText = getActiveText();
 
   const getProjectDirectUrl = () => {
-    if (typeof window === 'undefined') return `https://civicdata.ci/?tab=projects&project=${project.id}`;
+    if (typeof window === 'undefined') return `https://suivibudget-ci.vercel.app/projets?project=${project.id}`;
     const url = new URL(window.location.origin);
-    url.searchParams.set('tab', 'projects');
+    url.pathname = '/projets';
     url.searchParams.set('project', project.id);
     return url.toString();
   };

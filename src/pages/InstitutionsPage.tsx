@@ -24,8 +24,15 @@ export const InstitutionsPage: React.FC<InstitutionsPageProps> = ({
   onNavigateToProjects,
   initialView,
 }) => {
-  // Read initial view from URL params if present (e.g. ?tab=institutions&view=regulateurs)
+  // Read initial view from path or query params
   const getInitialViewFromUrl = (): AnnuaireView => {
+    const path = window.location.pathname.toLowerCase();
+    if (path.includes('/ministeres') || path.includes('/gouvernement')) return 'MINISTRIES';
+    if (path.includes('/grandes-institutions')) return 'INSTITUTIONS';
+    if (path.includes('/regulateurs') || path.includes('/autorites')) return 'REGULATORS';
+    if (path.includes('/mairies') || path.includes('/communes')) return 'MUNICIPAL';
+    if (path.includes('/regions') || path.includes('/districts')) return 'REGIONAL';
+
     const params = new URLSearchParams(window.location.search);
     const viewParam = params.get('view');
     if (viewParam === 'ministeres' || viewParam === 'gouvernement') return 'MINISTRIES';
@@ -37,6 +44,12 @@ export const InstitutionsPage: React.FC<InstitutionsPageProps> = ({
   };
 
   const [currentView, setCurrentView] = useState<AnnuaireView>(getInitialViewFromUrl);
+
+  useEffect(() => {
+    if (initialView) {
+      setCurrentView(initialView);
+    }
+  }, [initialView]);
 
   const institutions = dataStore.getInstitutions();
   const allProjects = dataStore.getProjects();
@@ -51,14 +64,14 @@ export const InstitutionsPage: React.FC<InstitutionsPageProps> = ({
 
   const handleNavigateToSection = (view: AnnuaireView) => {
     setCurrentView(view);
-    const url = new URL(window.location.href);
-    if (view === 'MINISTRIES') url.searchParams.set('view', 'ministeres');
-    else if (view === 'INSTITUTIONS') url.searchParams.set('view', 'institutions');
-    else if (view === 'REGULATORS') url.searchParams.set('view', 'regulateurs');
-    else if (view === 'MUNICIPAL') url.searchParams.set('view', 'mairies');
-    else if (view === 'REGIONAL') url.searchParams.set('view', 'regions');
-    else url.searchParams.delete('view');
-    window.history.pushState({}, '', url.toString());
+    let targetPath = '/institutions';
+    if (view === 'MINISTRIES') targetPath = '/institutions/ministeres';
+    else if (view === 'INSTITUTIONS') targetPath = '/institutions/grandes-institutions';
+    else if (view === 'REGULATORS') targetPath = '/institutions/regulateurs';
+    else if (view === 'MUNICIPAL') targetPath = '/institutions/mairies';
+    else if (view === 'REGIONAL') targetPath = '/institutions/regions';
+
+    window.history.pushState({}, '', targetPath);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

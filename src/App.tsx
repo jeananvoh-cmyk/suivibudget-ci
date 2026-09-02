@@ -10,6 +10,7 @@ import { CheckCircle2, Lock, LogOut } from 'lucide-react';
 import { ProjectDetailModal } from './components/ProjectDetailModal';
 import { OfficialDocRequestModal } from './components/OfficialDocRequestModal';
 import { Footer } from './components/Footer';
+import { getCleanPath, parseRoute, AnnuaireSection } from './utils/navigation';
 
 // Lazy-loaded Pages for code splitting & ultra-fast initial bundle
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
@@ -26,48 +27,23 @@ const SpotlightSearchModal = lazy(() => import('./components/SpotlightSearchModa
 const PrivateSentinelModal = lazy(() => import('./components/PrivateSentinelModal').then(m => ({ default: m.PrivateSentinelModal })));
 
 export function App() {
-  const getInitialTab = (): ActiveTab => {
-    const params = new URLSearchParams(window.location.search);
-    const tabParam = params.get('tab') as ActiveTab;
-    const viewParam = params.get('view');
-    const projectParam = params.get('project');
-    if (projectParam) return 'projects';
-    if (viewParam && ['mairies', 'communes', 'regions', 'districts', 'ministeres', 'grandes-institutions', 'institutions', 'regulateurs', 'autorites', 'aai'].includes(viewParam)) {
-      return 'institutions';
-    }
-    if (['home', 'projects', 'institutions', 'observatory', 'admin'].includes(tabParam)) {
-      return tabParam;
-    }
-    return 'home';
-  };
+  const initialRoute = parseRoute(
+    typeof window !== 'undefined' ? window.location.pathname : '/',
+    typeof window !== 'undefined' ? window.location.search : ''
+  );
 
-  const getInitialAnnuaireView = (): 'INDEX' | 'MINISTRIES' | 'INSTITUTIONS' | 'REGULATORS' | 'MUNICIPAL' | 'REGIONAL' => {
-    const params = new URLSearchParams(window.location.search);
-    const viewParam = params.get('view');
-    if (viewParam === 'ministeres' || viewParam === 'gouvernement') return 'MINISTRIES';
-    if (viewParam === 'grandes-institutions' || viewParam === 'institutions') return 'INSTITUTIONS';
-    if (viewParam === 'regulateurs' || viewParam === 'autorites' || viewParam === 'aai') return 'REGULATORS';
-    if (viewParam === 'mairies' || viewParam === 'communes') return 'MUNICIPAL';
-    if (viewParam === 'regions' || viewParam === 'districts') return 'REGIONAL';
-    return 'INDEX';
-  };
-
-  const getInitialSelectedProject = (): BudgetProject | null => {
-    const params = new URLSearchParams(window.location.search);
-    const projectParam = params.get('project');
-    if (projectParam) {
-      return dataStore.getProjectById(projectParam) || null;
-    }
-    return null;
-  };
-
-  const [activeTab, setActiveTab] = useState<ActiveTab>(getInitialTab);
-  const [annuaireView, setAnnuaireView] = useState<'INDEX' | 'MINISTRIES' | 'INSTITUTIONS' | 'REGULATORS' | 'MUNICIPAL' | 'REGIONAL'>(getInitialAnnuaireView);
+  const [activeTab, setActiveTab] = useState<ActiveTab>(initialRoute.tab);
+  const [annuaireView, setAnnuaireView] = useState<AnnuaireSection>(initialRoute.section);
   const [searchQuery, setSearchQuery] = useState('');
   
   // Modal states
   const [isSpotlightOpen, setIsSpotlightOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<BudgetProject | null>(getInitialSelectedProject);
+  const [selectedProject, setSelectedProject] = useState<BudgetProject | null>(() => {
+    if (initialRoute.projectId) {
+      return dataStore.getProjectById(initialRoute.projectId) || null;
+    }
+    return null;
+  });
   const [isSendProofOpen, setIsSendProofOpen] = useState(false);
   const [targetProofProject, setTargetProofProject] = useState<BudgetProject | null>(null);
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -81,12 +57,16 @@ export function App() {
   const allProjects = dataStore.getProjects();
   const auth = dataStore.getAuth();
 
-  // Sync tab with URL and update dynamic SEO
-  const handleTabChange = (tab: ActiveTab) => {
+  // Unified Clean Path Navigation Function (No ?tab= query params)
+  const navigateTo = (
+    tab: ActiveTab, 
+    section: AnnuaireSection = 'INDEX', 
+    projectId: string | null = null
+  ) => {
     setActiveTab(tab);
-    const url = new URL(window.location.href);
-    url.searchParams.set('tab', tab);
-    window.history.pushState({}, '', url.toString());
+    setAnnuaireView(section);
+    const cleanUrl = getCleanPath(tab, section, projectId);
+    window.history.pushState({}, '', cleanUrl);
 
     // Update SEO dynamically
     const tabTitles: Record<ActiveTab, string> = {
@@ -99,21 +79,21 @@ export function App() {
     updateDocumentSeo({ title: tabTitles[tab] });
   };
 
+  const handleTabChange = (tab: ActiveTab) => {
+    navigateTo(tab, tab === 'institutions' ? annuaireView : 'INDEX');
+  };
+
   const handleSelectProject = (project: BudgetProject | null) => {
     setSelectedProject(project);
-    const url = new URL(window.location.href);
+    navigateTo('projects', 'INDEX', project ? project.id : null);
     if (project) {
-      url.searchParams.set('tab', 'projects');
-      url.searchParams.set('project', project.id);
       updateDocumentSeo({
         title: project.title,
         description: `Projet citoyen : ${project.title} (${project.commune_name || project.region_name}) - Suivi des investissements publics en Côte d'Ivoire.`,
       });
     } else {
-      url.searchParams.delete('project');
       updateDocumentSeo({ title: "Suivi des Projets d'Investissement Public" });
     }
-    window.history.pushState({}, '', url.toString());
   };
 
   // Keyboard shortcut for discrete Admin access (Ctrl+Shift+A or Alt+A)
@@ -128,12 +108,22 @@ export function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeTab]);
 
+  // Canonical URL redirect on mount if legacy ?tab= was used or alias path was visited
+  useEffect(() => {
+    const route = parseRoute(window.location.pathname, window.location.search);
+    if (route.needsCanonicalRedirect) {
+      const cleanUrl = getCleanPath(route.tab, route.section, route.projectId);
+      window.history.replaceState({}, '', cleanUrl);
+    }
+  }, []);
+
   // Listen for browser back/forward buttons
   useEffect(() => {
     const handlePopState = () => {
-      setActiveTab(getInitialTab());
-      setAnnuaireView(getInitialAnnuaireView());
-      setSelectedProject(getInitialSelectedProject());
+      const route = parseRoute(window.location.pathname, window.location.search);
+      setActiveTab(route.tab);
+      setAnnuaireView(route.section);
+      setSelectedProject(route.projectId ? dataStore.getProjectById(route.projectId) || null : null);
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -172,29 +162,19 @@ export function App() {
 
   const handleNavigateToProjectsWithFilter = (query: string) => {
     setSearchQuery(query);
-    handleTabChange('projects');
+    navigateTo('projects', 'INDEX');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleNavigateToAnnuaireSection = (section: any) => {
-    setAnnuaireView(section);
-    handleTabChange('institutions');
-    const url = new URL(window.location.href);
-    url.searchParams.set('tab', 'institutions');
-    if (section === 'MINISTRIES') url.searchParams.set('view', 'ministeres');
-    else if (section === 'INSTITUTIONS') url.searchParams.set('view', 'institutions');
-    else if (section === 'REGULATORS') url.searchParams.set('view', 'regulateurs');
-    else if (section === 'MUNICIPAL') url.searchParams.set('view', 'mairies');
-    else if (section === 'REGIONAL') url.searchParams.set('view', 'regions');
-    else url.searchParams.delete('view');
-    window.history.pushState({}, '', url.toString());
+    navigateTo('institutions', section);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleLogout = () => {
     dataStore.logout();
     showToast('Déconnexion réussie.');
-    handleTabChange('home');
+    navigateTo('home');
   };
 
   return (
