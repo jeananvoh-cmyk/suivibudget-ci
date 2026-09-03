@@ -48,6 +48,8 @@ export function getCleanPath(
       }
     case 'observatory':
       return '/observatoire';
+    case 'documents':
+      return '/documents';
     case 'admin':
       return '/admin';
     default:
@@ -89,6 +91,8 @@ export function parseRoute(pathname: string, search: string): RouteState {
     } else {
       section = 'INDEX';
     }
+  } else if (normalizedPath === '/documents' || normalizedPath === '/rapports' || normalizedPath === '/publications') {
+    tab = 'documents';
   } else if (normalizedPath === '/observatoire' || normalizedPath === '/observatory') {
     tab = 'observatory';
   } else if (normalizedPath === '/admin') {
@@ -101,6 +105,7 @@ export function parseRoute(pathname: string, search: string): RouteState {
   if (tabParam) {
     needsCanonicalRedirect = true;
     if (tabParam === 'projects') tab = 'projects';
+    else if (tabParam === 'documents' || tabParam === 'rapports') tab = 'documents';
     else if (tabParam === 'institutions') {
       tab = 'institutions';
       if (viewParam === 'ministeres') section = 'MINISTRIES';

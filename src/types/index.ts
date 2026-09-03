@@ -150,4 +150,31 @@ export interface SiteSettings {
   announcement_banner_type?: 'info' | 'success' | 'warning';
 }
 
-export type ActiveTab = 'home' | 'institutions' | 'projects' | 'observatory' | 'admin';
+export type DocumentCategory = 
+  | 'RAPPORT_AUDIT' 
+  | 'MARCHE_PUBLIC' 
+  | 'BUDGET_OFFICIEL' 
+  | 'LOI_CAIDP' 
+  | 'ETUDE_TECHNIQUE' 
+  | 'GUIDE_CITOYEN';
+
+export type DocumentFormat = 'PDF' | 'EXCEL' | 'WORD' | 'CSV';
+
+export interface PublicDocument {
+  id: string;
+  title: string;
+  category: DocumentCategory;
+  institution_name: string;
+  year: number;
+  description: string;
+  file_url: string;
+  file_name: string;
+  file_size?: string;
+  file_format: DocumentFormat;
+  published_at: string;
+  downloads_count: number;
+  is_official: boolean;
+  tags?: string[];
+}
+
+export type ActiveTab = 'home' | 'institutions' | 'projects' | 'observatory' | 'documents' | 'admin';

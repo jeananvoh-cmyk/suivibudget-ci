@@ -180,6 +180,17 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Observatoire Citoyen</span>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             </button>
+
+            <button
+              onClick={() => setActiveTab('documents')}
+              className={`py-2 transition-all relative ${
+                activeTab === 'documents'
+                  ? 'text-brand-blue font-bold after:content-[""] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-brand-blue'
+                  : 'text-slate-700 hover:text-brand-blue'
+              }`}
+            >
+              <span>Documents & Lois</span>
+            </button>
           </nav>
 
         </div>

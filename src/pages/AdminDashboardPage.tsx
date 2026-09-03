@@ -7,6 +7,7 @@ import { formatFCFA, formatDateFR, getStatusConfig, formatAmountInWords } from '
 import { SocialPostGenerator } from '../components/SocialPostGenerator';
 import { CaidpRiManager } from '../components/CaidpRiManager';
 import { ModeratorManager } from '../components/ModeratorManager';
+import { DocumentManager } from '../components/DocumentManager';
 import { 
   ShieldCheck, 
   CheckCircle2, 
@@ -56,7 +57,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   onOpenShare,
 }) => {
   const auth = dataStore.getAuth();
-  const [adminTab, setAdminTab] = useState<'caidp_manager' | 'moderation' | 'budget_table' | 'institutions_manager' | 'news_manager' | 'social_generator' | 'site_settings' | 'digital_opportunities' | 'team_moderators'>(
+  const [adminTab, setAdminTab] = useState<'caidp_manager' | 'documents_manager' | 'moderation' | 'budget_table' | 'institutions_manager' | 'news_manager' | 'social_generator' | 'site_settings' | 'digital_opportunities' | 'team_moderators'>(
     auth.role === 'MODERATOR' ? 'moderation' : 'caidp_manager'
   );
   
@@ -733,6 +734,21 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           </button>
 
           <button
+            onClick={() => setAdminTab('documents_manager')}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              adminTab === 'documents_manager'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <FileText className="w-4 h-4 text-purple-600" />
+            <span>Documents Publics</span>
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-800">
+              {dataStore.getDocuments().length}
+            </span>
+          </button>
+
+          <button
             onClick={() => setAdminTab('institutions_manager')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               adminTab === 'institutions_manager'
@@ -861,6 +877,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       {/* ========================================================================= */}
       {adminTab === 'caidp_manager' && (
         <CaidpRiManager onShowToast={showToast} />
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 0.5: PUBLIC DOCUMENTS MANAGER (CAIDP LIBRARY) */}
+      {/* ========================================================================= */}
+      {adminTab === 'documents_manager' && (
+        <DocumentManager onShowToast={showToast} />
       )}
 
       {/* ========================================================================= */}

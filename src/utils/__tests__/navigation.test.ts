@@ -21,8 +21,9 @@ describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
       expect(getCleanPath('institutions', 'REGIONAL')).toBe('/institutions/regions');
     });
 
-    it('generates clean path for observatory and admin', () => {
+    it('generates clean path for observatory, documents and admin', () => {
       expect(getCleanPath('observatory')).toBe('/observatoire');
+      expect(getCleanPath('documents')).toBe('/documents');
       expect(getCleanPath('admin')).toBe('/admin');
     });
   });
@@ -73,6 +74,13 @@ describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
 
       expect(parseRoute('/observatoire', '')).toEqual({
         tab: 'observatory',
+        section: 'INDEX',
+        projectId: null,
+        needsCanonicalRedirect: false,
+      });
+
+      expect(parseRoute('/documents', '')).toEqual({
+        tab: 'documents',
         section: 'INDEX',
         projectId: null,
         needsCanonicalRedirect: false,

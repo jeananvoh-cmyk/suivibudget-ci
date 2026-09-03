@@ -6,7 +6,8 @@ import {
   ProjectStatus, 
   UserRole,
   NewsArticle,
-  SiteSettings 
+  SiteSettings,
+  PublicDocument
 } from '../types';
 import { RAW_BUDGET_PROJECTS } from '../data/budgetData';
 import { INSTITUTIONS_DATA } from '../data/institutionsData';
@@ -27,6 +28,7 @@ const STORAGE_KEYS = {
   AUTH: 'civicdata_auth_v7',
   CAIDP_RI: 'civicdata_caidp_ri_v2',
   SUBSCRIBERS: 'suivibudget_subscribers_v1',
+  DOCUMENTS: 'suivibudget_public_documents_v1',
 };
 
 async function safeSupabaseExec(promiseLike: any, contextMsg: string): Promise<void> {
@@ -196,6 +198,105 @@ export interface AuthState {
   expiresAt?: number;
 }
 
+export const INITIAL_PUBLIC_DOCUMENTS: PublicDocument[] = [
+  {
+    id: 'doc-caidp-loi-2013-867',
+    title: "Loi n° 2013-867 du 23 décembre 2013 relative à l'accès à l'information d'intérêt public",
+    category: 'LOI_CAIDP',
+    institution_name: "Assemblée Nationale & CAIDP",
+    year: 2013,
+    description: "Texte de loi fondamental garantissant le droit de tout citoyen d'accéder aux informations et documents administratifs détenus par les organismes publics en Côte d'Ivoire.",
+    file_url: "https://caidp.ci/documents/Loi_2013_867_CAIDP.pdf",
+    file_name: "Loi_2013_867_CAIDP_Cote_d_Ivoire.pdf",
+    file_size: "1.2 Mo",
+    file_format: "PDF",
+    published_at: "2013-12-23",
+    downloads_count: 142,
+    is_official: true,
+    tags: ["Loi", "CAIDP", "Droit Citoyen", "Transparence", "Information Publique"]
+  },
+  {
+    id: 'doc-caidp-decret-application',
+    title: "Décret n° 2014-462 portant attributions, organisation et fonctionnement de la CAIDP",
+    category: 'LOI_CAIDP',
+    institution_name: "Présidence de la République & CAIDP",
+    year: 2014,
+    description: "Décret d'application fixant les modalités pratiques de désignation des Responsables de l'Information (RI) et le délai légal de communication obligatoire (30 jours).",
+    file_url: "https://caidp.ci/documents/Decret_2014_462_CAIDP.pdf",
+    file_name: "Decret_2014_462_Fonctionnement_CAIDP.pdf",
+    file_size: "850 Ko",
+    file_format: "PDF",
+    published_at: "2014-08-06",
+    downloads_count: 98,
+    is_official: true,
+    tags: ["Décret", "RI", "Procédure", "CAIDP"]
+  },
+  {
+    id: 'doc-budget-synthese-2026',
+    title: "Synthèse Citoyenne & Chiffres Clés du Budget de l'État 2026",
+    category: 'BUDGET_OFFICIEL',
+    institution_name: "Ministère des Finances et du Budget",
+    year: 2026,
+    description: "Document officiel de vulgarisation budgétaire présentant les 15 300 milliards FCFA de dépenses et investissements publics, ventilés par grandes priorités (Éducation, Santé, Routes, Sécurité).",
+    file_url: "https://budget.gouv.ci/documents/Synthese_Budget_Citoyen_2026.pdf",
+    file_name: "Synthese_Budget_Citoyen_2026_CI.pdf",
+    file_size: "4.5 Mo",
+    file_format: "PDF",
+    published_at: "2026-01-05",
+    downloads_count: 315,
+    is_official: true,
+    tags: ["Loi de Finances 2026", "Budget Citoyen", "Finances Publiques"]
+  },
+  {
+    id: 'doc-livre-blanc-collectivites',
+    title: "Livre Blanc : Portails Web et Transparence des Collectivités Locales de Côte d'Ivoire",
+    category: 'ETUDE_TECHNIQUE',
+    institution_name: "Observatoire SuiviBudget & Collectivités",
+    year: 2026,
+    description: "Audit d'impact et guide méthodologique sur la présence numérique des 201 mairies et 31 régions, l'affichage public des budgets locaux et l'application du droit à l'information.",
+    file_url: "/documents/LIVRE_BLANC_PORTAILS_WEB_COLLECTIVITES_CI.md",
+    file_name: "LIVRE_BLANC_PORTAILS_WEB_COLLECTIVITES_CI.pdf",
+    file_size: "2.1 Mo",
+    file_format: "PDF",
+    published_at: "2026-02-15",
+    downloads_count: 230,
+    is_official: true,
+    tags: ["Livre Blanc", "Mairies", "Régions", "Audit", "Décentralisation"]
+  },
+  {
+    id: 'doc-cour-des-comptes-guide',
+    title: "Rapport Public Annuel sur l'Exécution du Budget et la Gestion des Deniers Publics",
+    category: 'RAPPORT_AUDIT',
+    institution_name: "Cour des Comptes de Côte d'Ivoire",
+    year: 2025,
+    description: "Observations, constatations d'irrégularités et recommandations de la Cour des Comptes sur la gestion financière et l'efficacité des dépenses des ministères et sociétés publiques.",
+    file_url: "https://courdescomptes.ci/rapports/Rapport_Public_Annuel_Cour_Des_Comptes.pdf",
+    file_name: "Rapport_Public_Annuel_Cour_Des_Comptes.pdf",
+    file_size: "6.8 Mo",
+    file_format: "PDF",
+    published_at: "2025-11-20",
+    downloads_count: 489,
+    is_official: true,
+    tags: ["Cour des Comptes", "Audit", "Contrôle", "Gouvernance"]
+  },
+  {
+    id: 'doc-dgmp-marches-publics',
+    title: "Rapport d'Analyse et de Surveillance des Marchés Publics en Côte d'Ivoire",
+    category: 'MARCHE_PUBLIC',
+    institution_name: "Direction Générale des Marchés Publics (DGMP)",
+    year: 2025,
+    description: "Bilan statistique officiel sur la passation des marchés publics : proportion des appels d'offres ouverts vs gré à gré, délais de traitement et conformité réglementaire.",
+    file_url: "https://marchespublics.ci/documents/Rapport_Annuel_DGMP.pdf",
+    file_name: "Rapport_Annuel_DGMP_Marches_Publics.pdf",
+    file_size: "3.7 Mo",
+    file_format: "PDF",
+    published_at: "2025-10-12",
+    downloads_count: 278,
+    is_official: true,
+    tags: ["Marchés Publics", "DGMP", "Appels d'offres", "Contrats"]
+  }
+];
+
 const DEFAULT_SETTINGS: SiteSettings = {
   fiscal_year: 2026,
   contact_email: 'contact.suivi@gmail.com',
@@ -212,6 +313,7 @@ class DataStore {
   private institutions: Institution[] = [];
   private proofs: CitizenProof[] = [];
   private articles: NewsArticle[] = [];
+  private documents: PublicDocument[] = [];
   private caidpDirectory: CaidpEntity[] = [];
   private subscribers: NewsletterSubscriber[] = [];
   private settings: SiteSettings = { ...DEFAULT_SETTINGS };
@@ -325,7 +427,21 @@ class DataStore {
       this.authState = { isAuthenticated: false, email: '', fullName: '', role: 'CITIZEN' };
     }
 
-    // 8. Live Supabase Cloud Sync (if configured)
+    // 8. Public Documents
+    this.documents = [...INITIAL_PUBLIC_DOCUMENTS];
+    try {
+      const storedDocs = localStorage.getItem(STORAGE_KEYS.DOCUMENTS);
+      if (storedDocs) {
+        const parsed = JSON.parse(storedDocs);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.documents = parsed;
+        }
+      }
+    } catch (e) {
+      console.warn("Could not read documents from localStorage", e);
+    }
+
+    // 9. Live Supabase Cloud Sync (if configured)
     this.initSupabaseSync();
   }
 
@@ -336,6 +452,21 @@ class DataStore {
         .from('citizen_proofs')
         .select('*')
         .order('created_at', { ascending: false });
+
+      // Sync public documents from Supabase if table exists
+      try {
+        const { data: remoteDocs, error: docsError } = await supabase
+          .from('public_documents')
+          .select('*')
+          .order('published_at', { ascending: false });
+        if (!docsError && Array.isArray(remoteDocs) && remoteDocs.length > 0) {
+          this.documents = remoteDocs;
+          this.saveDocuments();
+          this.notify();
+        }
+      } catch (err) {
+        // Table not present yet, silent fallback
+      }
 
       if (!error && Array.isArray(data) && data.length > 0) {
         const remoteProofs: CitizenProof[] = data.map(d => ({
@@ -703,6 +834,100 @@ class DataStore {
     this.notify();
   }
 
+  // --- PUBLIC DOCUMENTS MANAGEMENT ---
+  public getDocuments(): PublicDocument[] {
+    return [...this.documents];
+  }
+
+  public getDocumentById(id: string): PublicDocument | undefined {
+    return this.documents.find(d => d.id === id);
+  }
+
+  public addDocument(docData: Omit<PublicDocument, 'id' | 'downloads_count' | 'published_at'> & { published_at?: string }): PublicDocument {
+    const newDoc: PublicDocument = {
+      ...docData,
+      id: `doc-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+      downloads_count: 0,
+      published_at: docData.published_at || new Date().toISOString().split('T')[0],
+      is_official: docData.is_official ?? true,
+    };
+    this.documents.unshift(newDoc);
+    this.saveDocuments();
+    this.notify();
+
+    if (isSupabaseConfigured()) {
+      safeSupabaseExec(
+        supabase.from('public_documents').insert([{
+          id: newDoc.id,
+          title: newDoc.title,
+          category: newDoc.category,
+          institution_name: newDoc.institution_name,
+          year: newDoc.year,
+          description: newDoc.description,
+          file_url: newDoc.file_url,
+          file_name: newDoc.file_name,
+          file_size: newDoc.file_size || '1.0 Mo',
+          file_format: newDoc.file_format,
+          published_at: newDoc.published_at,
+          downloads_count: newDoc.downloads_count,
+          is_official: newDoc.is_official,
+          tags: newDoc.tags || []
+        }]),
+        'Adding public document'
+      );
+    }
+
+    return newDoc;
+  }
+
+  public updateDocument(id: string, updates: Partial<PublicDocument>): boolean {
+    const idx = this.documents.findIndex(d => d.id === id);
+    if (idx === -1) return false;
+    this.documents[idx] = { ...this.documents[idx], ...updates };
+    this.saveDocuments();
+    this.notify();
+
+    if (isSupabaseConfigured()) {
+      safeSupabaseExec(
+        supabase.from('public_documents').update(updates).eq('id', id),
+        'Updating public document'
+      );
+    }
+    return true;
+  }
+
+  public deleteDocument(id: string): boolean {
+    const idx = this.documents.findIndex(d => d.id === id);
+    if (idx === -1) return false;
+    this.documents = this.documents.filter(d => d.id !== id);
+    this.saveDocuments();
+    this.notify();
+
+    if (isSupabaseConfigured()) {
+      safeSupabaseExec(
+        supabase.from('public_documents').delete().eq('id', id),
+        'Deleting public document'
+      );
+    }
+    return true;
+  }
+
+  public incrementDocumentDownloads(id: string): void {
+    const doc = this.documents.find(d => d.id === id);
+    if (doc) {
+      doc.downloads_count = (doc.downloads_count || 0) + 1;
+      this.saveDocuments();
+      this.notify();
+
+      if (isSupabaseConfigured()) {
+        safeSupabaseExec(
+          supabase.from('public_documents').update({ downloads_count: doc.downloads_count }).eq('id', id),
+          'Incrementing document downloads'
+        );
+      }
+    }
+  }
+
   // --- SITE SETTINGS ---
   public updateSettings(newSettings: Partial<SiteSettings>) {
     this.settings = { ...this.settings, ...newSettings };
@@ -1066,6 +1291,14 @@ class DataStore {
       localStorage.setItem(STORAGE_KEYS.CAIDP_RI, JSON.stringify(this.caidpDirectory));
     } catch (e) {
       console.warn("Storage quota exceeded for caidp directory", e);
+    }
+  }
+
+  private saveDocuments() {
+    try {
+      localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(this.documents));
+    } catch (e) {
+      console.warn("Storage quota exceeded for public documents", e);
     }
   }
 

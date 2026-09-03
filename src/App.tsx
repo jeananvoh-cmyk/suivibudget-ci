@@ -19,6 +19,7 @@ const ProjectsPage = lazy(() => import('./pages/ProjectsPage').then(m => ({ defa
 const ObservatoryPage = lazy(() => import('./pages/ObservatoryPage').then(m => ({ default: m.ObservatoryPage })));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage').then(m => ({ default: m.AdminDashboardPage })));
 const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage').then(m => ({ default: m.AdminLoginPage })));
+const DocumentsPage = lazy(() => import('./pages/DocumentsPage').then(m => ({ default: m.DocumentsPage })));
 
 // Lazy-loaded Secondary Modals
 const SendProofModal = lazy(() => import('./components/SendProofModal').then(m => ({ default: m.SendProofModal })));
@@ -74,6 +75,7 @@ export function App() {
       projects: "Suivi des Projets d'Investissement Public",
       institutions: "Budgets & Annuaire des Responsables",
       observatory: "Observatoire Citoyen & Remontées Terrain",
+      documents: "Bibliothèque Publique & Documents Administratifs (CAIDP)",
       admin: "Espace Administration & Modération",
     };
     updateDocumentSeo({ title: tabTitles[tab] });
@@ -273,6 +275,12 @@ export function App() {
                 const p = dataStore.getProjectById(projId);
                 if (p) handleSelectProject(p);
               }}
+            />
+          )}
+
+          {activeTab === 'documents' && (
+            <DocumentsPage
+              onNavigateToCaidp={() => handleNavigateToAnnuaireSection('INDEX')}
             />
           )}
 
