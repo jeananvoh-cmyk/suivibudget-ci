@@ -154,7 +154,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
               <div>
                 <div className="flex items-start gap-4 mb-3">
                   {inst.leader_photo_url ? (
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm flex-shrink-0 cursor-zoom-in group/photo">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 min-w-[5rem] max-w-[5rem] sm:min-w-[6rem] sm:max-w-[6rem] aspect-square rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm flex-shrink-0 cursor-zoom-in group/photo">
                       <img 
                         src={inst.leader_photo_url} 
                         alt={inst.leader_name || inst.name}
@@ -218,15 +218,19 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                     <div className="bg-brand-blue h-full" style={{ width: `${functioningPct}%` }}></div>
                     <div className="bg-emerald-500 h-full" style={{ width: `${investmentPct}%` }}></div>
                   </div>
-                  <div className="flex justify-between text-[11px] font-semibold text-slate-600">
-                    <span className="text-brand-blue">Fonct. : {functioningPct}% ({formatFCFA(inst.budget_functioning_fcfa)} - {formatAmountInWords(inst.budget_functioning_fcfa)})</span>
-                    <span className="text-emerald-700">Invest. : {investmentPct}% ({formatFCFA(inst.budget_investment_fcfa)} - {formatAmountInWords(inst.budget_investment_fcfa)})</span>
+                  <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-semibold text-slate-600 gap-1 pt-1">
+                    <span className="text-brand-blue">
+                      Fonct. : <strong className="font-bold">{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
+                    </span>
+                    <span className="text-emerald-700">
+                      Invest. : <strong className="font-bold">{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs gap-2">
-                <div className="flex items-center gap-1.5 min-w-0" onClick={(e) => e.stopPropagation()}>
+              <div className="pt-4 mt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-1.5 flex-wrap" onClick={(e) => e.stopPropagation()}>
                   {inst.website && (
                     <a
                       href={inst.website}
@@ -256,16 +260,16 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                       e.stopPropagation();
                       setSelectedInstForDoc(inst);
                     }}
-                    className="px-2 sm:px-2.5 py-1 bg-blue-50/90 hover:bg-brand-blue hover:text-white text-brand-blue border border-blue-100 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer flex-shrink-0"
+                    className="px-2.5 py-1.5 bg-blue-50/90 hover:bg-brand-blue hover:text-white text-brand-blue border border-blue-100 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer flex-shrink-0"
                     title="Générer une demande officielle de documents publics (Loi n°2013-867)"
                   >
-                    <FileText className="w-3 h-3" />
-                    <span className="whitespace-nowrap">Demande de Documents</span>
+                    <FileText className="w-3 h-3 text-brand-orange" />
+                    <span className="whitespace-nowrap">Demande CAIDP</span>
                   </button>
 
                   <button
                     onClick={() => setSelectedInstForDetail(inst)}
-                    className="px-2 sm:px-2.5 py-1 bg-brand-blue/10 hover:bg-brand-blue hover:text-white text-brand-blue rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 flex-shrink-0 cursor-pointer"
+                    className="px-2.5 py-1.5 bg-brand-blue/10 hover:bg-brand-blue hover:text-white text-brand-blue rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 flex-shrink-0 cursor-pointer"
                     title="Consulter la fiche détaillée du Conseil Régional"
                   >
                     <Info className="w-3 h-3" />
@@ -273,13 +277,15 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                   </button>
                 </div>
 
-                <button
-                  onClick={() => onNavigateToProjects(inst.region)}
-                  className="px-4 py-2 bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-bold rounded-full transition-all flex items-center gap-1.5 shadow-xs"
-                >
-                  <span>Voir les projets ({relatedProjectsCount})</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                <div className="flex-shrink-0 w-full sm:w-auto">
+                  <button
+                    onClick={() => onNavigateToProjects(inst.region)}
+                    className="w-full sm:w-auto px-4 py-2 bg-brand-blue hover:bg-brand-blue-dark active:scale-95 text-white text-xs font-bold rounded-xl sm:rounded-full transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                  >
+                    <span>Voir les projets ({relatedProjectsCount})</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
           );

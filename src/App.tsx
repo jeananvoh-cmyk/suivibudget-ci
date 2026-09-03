@@ -232,7 +232,7 @@ export function App() {
       />
 
       {/* 2. Main Tab Content with Suspense Code Splitting */}
-      <main className="flex-1">
+      <main className="flex-1 pb-24 lg:pb-0">
         <Suspense fallback={<LoadingScreen message="Chargement des données citoyennes..." />}>
           {activeTab === 'home' && (
             <HomePage
