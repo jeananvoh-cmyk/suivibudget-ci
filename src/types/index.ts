@@ -143,6 +143,7 @@ export interface SiteSettings {
   fiscal_year: number;
   contact_email: string;
   contact_phone: string;
+  facebook_url?: string;
   platform_title: string;
   announcement_banner_enabled: boolean;
   announcement_banner_text: string;

@@ -227,6 +227,18 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             )}
           </button>
 
+          <div className="pt-2 text-center">
+            <a
+              href="https://www.facebook.com/profile.php?id=61593791261798"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] font-bold text-[#1877F2] hover:underline inline-flex items-center gap-1.5"
+            >
+              <Facebook className="w-3.5 h-3.5" />
+              <span>Rejoindre notre page officielle Facebook</span>
+            </a>
+          </div>
+
         </div>
 
       </div>

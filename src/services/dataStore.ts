@@ -301,6 +301,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
   fiscal_year: 2026,
   contact_email: 'contact.suivi@gmail.com',
   contact_phone: '+225 07 00 00 00 00',
+  facebook_url: 'https://www.facebook.com/profile.php?id=61593791261798',
   platform_title: 'SuiviBudget Côte d\'Ivoire - Observatoire Citoyen des Budgets Publics & Chantiers',
   announcement_banner_enabled: false,
   announcement_banner_text: "",
