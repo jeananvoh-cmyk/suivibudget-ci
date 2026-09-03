@@ -195,12 +195,12 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </nav>
 
-          {/* RIGHT ACTION: QUICK SPOTLIGHT SEARCH (Ctrl+K) */}
+          {/* RIGHT ACTION: QUICK SPOTLIGHT SEARCH (Ctrl+K) - Displayed on all pages except Home */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            {onOpenSpotlight && (
+            {onOpenSpotlight && activeTab !== 'home' && (
               <button
                 onClick={onOpenSpotlight}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 transition-all text-xs font-semibold border border-slate-200 shadow-2xs cursor-pointer active:scale-95"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 transition-all text-xs font-semibold border border-slate-200 shadow-2xs cursor-pointer active:scale-95 animate-in fade-in duration-200"
                 title="Recherche rapide de communes, chantiers, ministères (Raccourci: Ctrl+K)"
               >
                 <Search className="w-3.5 h-3.5 text-slate-500" />
