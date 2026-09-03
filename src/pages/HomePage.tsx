@@ -61,7 +61,6 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [readingArticle, setReadingArticle] = useState<NewsArticle | null>(null);
   const [shuffleSeed, setShuffleSeed] = useState(0);
   const [selectedProximityCity, setSelectedProximityCity] = useState<string>('ALL');
-  const [proximitySearchText, setProximitySearchText] = useState<string>('');
   const allProjects = dataStore.getProjects();
   const allArticles = dataStore.getArticles();
   const stats = dataStore.getImpactStats();
@@ -227,22 +226,21 @@ export const HomePage: React.FC<HomePageProps> = ({
     return remaining;
   }, [localCommunalProjects, shuffleSeed]);
 
-  // Proximity projects based on selected frequent city or search query
+  // Proximity projects based on selected frequent city
   const proximityFilteredProjects = useMemo(() => {
-    const query = (proximitySearchText || (selectedProximityCity !== 'ALL' ? selectedProximityCity : '')).trim().toLowerCase();
-
-    if (!query) {
+    if (selectedProximityCity === 'ALL') {
       // Default: 6 diverse communal projects across 6 distinct cities
       return defaultDiverseLocalGrid;
     }
 
+    const query = selectedProximityCity.trim().toLowerCase();
     return localCommunalProjects.filter(p => 
       (p.commune_name && p.commune_name.toLowerCase().includes(query)) ||
       (p.region_name && p.region_name.toLowerCase().includes(query)) ||
       (p.title && p.title.toLowerCase().includes(query)) ||
       (p.details && p.details.toLowerCase().includes(query))
     );
-  }, [localCommunalProjects, proximitySearchText, selectedProximityCity, defaultDiverseLocalGrid]);
+  }, [localCommunalProjects, selectedProximityCity, defaultDiverseLocalGrid]);
 
   return (
     <div className="space-y-14 pb-24 bg-slate-50">
@@ -613,64 +611,49 @@ export const HomePage: React.FC<HomePageProps> = ({
           </button>
         </div>
 
-        {/* Proximity Search Bar & Frequent Cities (Requested UX) */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs mb-8 space-y-4">
-          {/* Quick Search Input */}
-          <div className="relative max-w-xl">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={proximitySearchText}
-              onChange={(e) => {
-                setProximitySearchText(e.target.value);
-                if (e.target.value) setSelectedProximityCity('ALL');
-              }}
-              placeholder="Rechercher une ville, une commune (ex: Cocody, Bouaké, Korhogo)..."
-              className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:bg-white transition-all"
-            />
-            {proximitySearchText && (
+        {/* Proximity Local Selector (Option 1: Clean, no duplicate search bar) */}
+        <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-2xs mb-8 space-y-3">
+          
+          {/* Header with label & quick reset */}
+          <div className="flex items-center justify-between gap-3 text-xs">
+            <span className="font-bold text-slate-700 flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-brand-blue" />
+              <span>Filtrer les chantiers de proximité par localité :</span>
+            </span>
+
+            {selectedProximityCity !== 'ALL' && (
               <button
-                onClick={() => setProximitySearchText('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-full"
+                onClick={() => setSelectedProximityCity('ALL')}
+                className="text-xs font-bold text-brand-blue hover:text-brand-blue-dark flex items-center gap-1 cursor-pointer transition-colors"
               >
+                <span>Toutes les localités</span>
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
-          {/* Villes Fréquentes Pills */}
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <span className="text-xs font-semibold text-slate-500 mr-1 flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-brand-blue" />
-              Villes fréquentes :
-            </span>
-
+          {/* Villes Fréquentes: Single fluid horizontal scrolling row on mobile/tablet, wrap on desktop */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5 scrollbar-none -mx-1 px-1">
             <button
-              onClick={() => {
-                setSelectedProximityCity('ALL');
-                setProximitySearchText('');
-              }}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
-                selectedProximityCity === 'ALL' && !proximitySearchText
-                  ? 'bg-brand-blue text-white shadow-2xs'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+              onClick={() => setSelectedProximityCity('ALL')}
+              className={`flex-shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                selectedProximityCity === 'ALL'
+                  ? 'bg-slate-900 text-white shadow-sm border border-slate-900'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60'
               }`}
             >
               Toutes les localités
             </button>
 
             {FREQUENT_CITIES.map((city) => {
-              const isActive = selectedProximityCity === city && !proximitySearchText;
+              const isActive = selectedProximityCity === city;
               return (
                 <button
                   key={city}
-                  onClick={() => {
-                    setSelectedProximityCity(city);
-                    setProximitySearchText('');
-                  }}
-                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                  onClick={() => setSelectedProximityCity(city)}
+                  className={`flex-shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-brand-blue text-white shadow-2xs'
+                      ? 'bg-brand-blue text-white shadow-sm border border-brand-blue'
                       : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                   }`}
                 >
@@ -681,25 +664,22 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Status Bar */}
-          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+          <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
             <span className="font-medium">
-              {proximitySearchText || selectedProximityCity !== 'ALL' ? (
+              {selectedProximityCity !== 'ALL' ? (
                 <>
-                  <span className="font-bold text-slate-900">{proximityFilteredProjects.length}</span> chantiers d'infrastructure trouvés pour <span className="font-bold text-brand-blue">« {proximitySearchText || selectedProximityCity} »</span>
+                  <span className="font-bold text-slate-900">{proximityFilteredProjects.length}</span> chantiers d'infrastructure affichés pour <span className="font-bold text-brand-blue">« {selectedProximityCity} »</span>
                 </>
               ) : (
                 <>
-                  Panorama de chantiers concrets d'infrastructures à travers la Côte d'Ivoire
+                  Panorama des chantiers concrets de voirie, santé, écoles et eau potable à travers la Côte d'Ivoire
                 </>
               )}
             </span>
 
-            {(proximitySearchText || selectedProximityCity !== 'ALL') && (
+            {selectedProximityCity !== 'ALL' && (
               <button
-                onClick={() => {
-                  setSelectedProximityCity('ALL');
-                  setProximitySearchText('');
-                }}
+                onClick={() => setSelectedProximityCity('ALL')}
                 className="text-brand-blue hover:underline font-bold"
               >
                 Réinitialiser
@@ -724,14 +704,11 @@ export const HomePage: React.FC<HomePageProps> = ({
         ) : (
           <div className="text-center py-12 bg-white rounded-3xl border border-slate-200 p-8 space-y-3">
             <p className="text-slate-600 font-bold text-sm">
-              Aucun chantier d'investissement trouvé pour « {proximitySearchText || selectedProximityCity} ».
+              Aucun chantier d'investissement trouvé pour « {selectedProximityCity} ».
             </p>
             <button
-              onClick={() => {
-                setSelectedProximityCity('ALL');
-                setProximitySearchText('');
-              }}
-              className="px-4 py-2 bg-brand-blue text-white text-xs font-bold rounded-xl"
+              onClick={() => setSelectedProximityCity('ALL')}
+              className="px-4 py-2 bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
             >
               Afficher toutes les localités
             </button>

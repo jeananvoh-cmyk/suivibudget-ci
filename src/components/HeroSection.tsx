@@ -70,6 +70,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 placeholder="Rechercher une commune, un ministère, un projet (ex: Bouaké, CHU, Route)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    onExploreClick();
+                  }
+                }}
                 className="w-full pl-12 pr-4 py-2.5 bg-transparent rounded-full text-slate-900 placeholder:text-slate-400 text-sm sm:text-base focus:outline-hidden font-medium"
               />
             </div>
