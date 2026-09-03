@@ -10,6 +10,7 @@ import { CheckCircle2, Lock, LogOut } from 'lucide-react';
 import { ProjectDetailModal } from './components/ProjectDetailModal';
 import { OfficialDocRequestModal } from './components/OfficialDocRequestModal';
 import { Footer } from './components/Footer';
+import { CookieBanner } from './components/CookieBanner';
 import { getCleanPath, parseRoute, AnnuaireSection } from './utils/navigation';
 
 // Lazy-loaded Pages for code splitting & ultra-fast initial bundle
@@ -398,6 +399,9 @@ export function App() {
         onNavigateTab={handleTabChange} 
         onOpenDocModal={() => setIsDocRequestOpen(true)} 
       />
+
+      {/* 6. Cookie & Privacy Consent Banner (ARTCI Compliant) */}
+      <CookieBanner />
 
     </div>
   );

@@ -1,0 +1,27 @@
+# SuiviBudget Côte d'Ivoire
+
+> SuiviBudget Côte d'Ivoire est la plateforme civique de référence pour la transparence budgétaire, le suivi citoyen des investissements publics et l'accès aux documents administratifs en République de Côte d'Ivoire.
+
+## Informations Clés
+- **Nom du service** : SuiviBudget Côte d'Ivoire
+- **URL officielle** : https://suivibudget.vercel.app
+- **Cadre légal** : Loi de Finances Initiale 2026 (LFI 2026), Loi n° 2013-867 relative à l'accès à l'information d'intérêt public (CAIDP), Loi n° 2013-450 sur la protection des données à caractère personnel (ARTCI).
+- **Couverture géographique** : République de Côte d'Ivoire (31 régions, 2 districts autonomes d'Abidjan et Yamoussoukro, 201 communes).
+
+## Chiffres et Données Clés
+- **Volume d'investissements publics suivis** : 3 461 Milliards FCFA votés au titre de la Loi de Finances 2026.
+- **Nombre de chantiers répertoriés** : 4 701 projets d'infrastructures physiques (routes, ponts, écoles, collèges, centres de santé, forages, châteaux d'eau, marchés).
+- **Collectivités territoriales répertoriées** : 201 mairies (avec noms des maires, budgets d'investissement et de fonctionnement, contacts officiels) et 31 conseils régionaux.
+- **Pouvoir exécutif répertorié** : 35 ministères et 13 grandes institutions de la République.
+- **Répertoire CAIDP** : Coordonnées des Responsables de l'Information (RI) officiellement désignés pour traiter les demandes citoyennes d'accès aux documents publics sous 30 jours (délai légal).
+
+## Piliers et Fonctionnalités de la Plateforme
+1. **Suivi des Projets (/projects)** : Moteur de recherche et filtres par région, commune, secteur d'activité (Voirie, Santé, Éducation, Eau potable) avec fiches budgétaires détaillées.
+2. **Annuaire des Institutions & Budgets (/institutions)** : Données financières ventilées par commune, fiches des ministères et comparateur budgétaire intercommunal.
+3. **Observatoire Citoyen (/observatory)** : Espace participatif permettant aux citoyens de déposer des photographies et des constats de terrain sur l'avancement réel des chantiers (Tracka civique).
+4. **Bibliothèque Publique & Documents (/documents)** : Téléchargement libre et direct des lois de finances, rapports d'audit de la Cour des Comptes et formulaires types de demande CAIDP.
+
+## Contact & Communauté
+- **Email officiel** : contact.suivi@gmail.com
+- **Chaîne WhatsApp officielle** : https://whatsapp.com/channel/0029VaSuiviBudgetCIRepublic
+- **Page Facebook officielle** : https://www.facebook.com/profile.php?id=61593791261798
