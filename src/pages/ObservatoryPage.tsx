@@ -63,18 +63,6 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
 
   return (
     <div className="relative">
-      {/* Mobile Floating Action Button (FAB) */}
-      {activeTab === 'gallery' && (
-        <div className="fixed bottom-6 right-6 z-40 md:hidden print:hidden">
-          <button
-            onClick={() => onOpenSendProof()}
-            className="flex items-center gap-2 px-5 py-3.5 bg-brand-orange hover:bg-brand-orange-dark text-white rounded-full shadow-2xl font-black text-sm active:scale-95 transition-all border-2 border-white cursor-pointer"
-          >
-            <Camera className="w-5 h-5" />
-            <span>Déposer un constat</span>
-          </button>
-        </div>
-      )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-7 pb-24 bg-[#FAFAFA]">
         

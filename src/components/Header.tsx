@@ -1,4 +1,5 @@
 import React from 'react';
+import { Search } from 'lucide-react';
 import { ActiveTab } from '../types';
 import { dataStore } from '../services/dataStore';
 
@@ -18,6 +19,7 @@ export const Header: React.FC<HeaderProps> = ({
   setActiveTab,
   onNavigateToAnnuaireSection,
   onOpenPrivateSentinel,
+  onOpenSpotlight,
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-2xs">
@@ -193,20 +195,19 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </nav>
 
-          {/* RIGHT ACTION: OFFICIAL FACEBOOK COMMUNITY */}
-          <div className="flex items-center gap-2.5 flex-shrink-0">
-            <a
-              href="https://www.facebook.com/profile.php?id=61593791261798"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 hover:bg-[#1877F2] text-[#1877F2] hover:text-white transition-all text-xs font-bold border border-blue-200/80 shadow-2xs group"
-              title="Rejoignez notre communauté sur Facebook"
-            >
-              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-              </svg>
-              <span className="hidden sm:inline">Page Facebook</span>
-            </a>
+          {/* RIGHT ACTION: QUICK SPOTLIGHT SEARCH (Ctrl+K) */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {onOpenSpotlight && (
+              <button
+                onClick={onOpenSpotlight}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 transition-all text-xs font-semibold border border-slate-200 shadow-2xs cursor-pointer active:scale-95"
+                title="Recherche rapide de communes, chantiers, ministères (Raccourci: Ctrl+K)"
+              >
+                <Search className="w-3.5 h-3.5 text-slate-500" />
+                <span className="hidden sm:inline">Recherche rapide</span>
+                <kbd className="hidden lg:inline-block px-1.5 py-0.5 text-[10px] font-mono font-bold bg-white rounded-md border border-slate-200 text-slate-500 shadow-2xs">Ctrl K</kbd>
+              </button>
+            )}
           </div>
 
         </div>

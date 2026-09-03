@@ -49,6 +49,11 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   const [onlyPhysical, setOnlyPhysical] = useState<boolean>(true); // Youth friendly default: filter out pure salaries/provisions
   const [sortBy, setSortBy] = useState<'amount-desc' | 'amount-asc' | 'title'>('amount-desc');
   const [viewMode, setViewMode] = useState<'GRID' | 'TABLE'>('GRID');
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  const activeFiltersCount = (selectedCategory !== 'ALL' ? 1 : 0) + 
+    (selectedRegion !== 'ALL' ? 1 : 0) + 
+    (sortBy !== 'amount-desc' ? 1 : 0);
 
   // Helper for physical infrastructure filter (youth filter)
   const isAbstractProject = (p: BudgetProject) => {
@@ -359,95 +364,131 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
           </div>
         </div>
 
-        {/* MIDDLE LEVEL: Search Bar + Filter Dropdowns + Around Me */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5">
-          {/* Main Search Input */}
-          <div className="lg:col-span-5 relative">
-            <input
-              type="text"
-              placeholder="Rechercher un chantier, une commune, un collège, un hôpital..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-900 transition-all placeholder:text-slate-400 text-slate-900"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded-full"
-              >
-                
-              </button>
-            )}
+        {/* MIDDLE LEVEL: Search Bar + Mobile Filters Trigger */}
+        <div className="space-y-2.5">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5">
+            {/* Main Search Input */}
+            <div className="lg:col-span-12 relative">
+              <input
+                type="text"
+                placeholder="Rechercher un chantier, une commune, un collège, un hôpital..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-900 transition-all placeholder:text-slate-400 text-slate-900"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded-full"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Region Dropdown */}
-          <div className="lg:col-span-3">
-            <select
-              value={selectedRegion}
-              onChange={(e) => {
-                setSelectedRegion(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-900 cursor-pointer transition-all truncate"
+          {/* Mobile Filters Toggle Button (Hidden on Desktop) */}
+          <div className="flex lg:hidden items-center justify-between gap-2 pt-1">
+            <button
+              onClick={() => setShowMobileFilters(!showMobileFilters)}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                showMobileFilters || activeFiltersCount > 0
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'
+              }`}
             >
-              <option value="ALL">Toutes les Régions ({uniqueRegions.length})</option>
-              {uniqueRegions.map(reg => (
-                <option key={reg} value={reg}>{reg}</option>
-              ))}
-            </select>
-          </div>
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>{showMobileFilters ? 'Masquer les filtres' : 'Filtres & Tri (Régions, Thématiques...)'}</span>
+              {activeFiltersCount > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-brand-orange text-white text-[10px] font-black">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
 
-          {/* Sort Dropdown */}
-          <div className="lg:col-span-2">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-900 cursor-pointer transition-all truncate"
-            >
-              <option value="amount-desc">Budget Décroissant</option>
-              <option value="amount-asc">Budget Croissant</option>
-              <option value="title">Alphabétique (A-Z)</option>
-            </select>
-          </div>
-
-          {/* Around Me Button */}
-          <div className="lg:col-span-2">
             <button
               onClick={handleLocateMe}
               disabled={isLocating}
-              className="w-full flex items-center justify-center py-2.5 px-3 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white rounded-2xl text-xs font-black shadow-xs transition-all"
+              className="flex items-center gap-1.5 py-2 px-3 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex-shrink-0 cursor-pointer"
               title="Afficher les chantiers géolocalisés autour de ma position GPS"
             >
-              <span>{isLocating ? 'Géolocalisation...' : 'Près de moi'}</span>
+              <Navigation className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Près de moi</span>
+              <span className="sm:hidden">GPS</span>
             </button>
           </div>
-        </div>
 
-        {/* BOTTOM LEVEL: All Categories Fully Visible without scroll (Wrap) */}
-        <div className="pt-2 border-t border-slate-100">
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            {CATEGORIES.map((cat) => {
-              const isSelected = selectedCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    setSelectedCategory(cat.id);
-                    setCurrentPage(1);
-                  }}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
-                    isSelected
-                      ? 'bg-slate-900 text-white shadow-sm'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60'
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              );
-            })}
+          {/* Advanced Dropdowns (Collapsible on Mobile, always visible on Desktop) */}
+          <div className={`${showMobileFilters ? 'grid' : 'hidden lg:grid'} grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 pt-1`}>
+            {/* Region Dropdown */}
+            <div className="lg:col-span-5">
+              <select
+                value={selectedRegion}
+                onChange={(e) => {
+                  setSelectedRegion(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-900 cursor-pointer transition-all truncate"
+              >
+                <option value="ALL">Toutes les Régions ({uniqueRegions.length})</option>
+                {uniqueRegions.map(reg => (
+                  <option key={reg} value={reg}>{reg}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sort Dropdown */}
+            <div className="lg:col-span-4">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-900 cursor-pointer transition-all truncate"
+              >
+                <option value="amount-desc">Budget Décroissant</option>
+                <option value="amount-asc">Budget Croissant</option>
+                <option value="title">Alphabétique (A-Z)</option>
+              </select>
+            </div>
+
+            {/* Around Me Button (Desktop) */}
+            <div className="hidden lg:block lg:col-span-3">
+              <button
+                onClick={handleLocateMe}
+                disabled={isLocating}
+                className="w-full flex items-center justify-center py-2.5 px-3 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white rounded-2xl text-xs font-black shadow-xs transition-all cursor-pointer"
+                title="Afficher les chantiers géolocalisés autour de ma position GPS"
+              >
+                <span>{isLocating ? 'Géolocalisation...' : 'Près de moi'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Categories Filter (Collapsible on Mobile, always visible on Desktop) */}
+          <div className={`${showMobileFilters ? 'block' : 'hidden lg:block'} pt-2 border-t border-slate-100`}>
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              {CATEGORIES.map((cat) => {
+                const isSelected = selectedCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => {
+                      setSelectedCategory(cat.id);
+                      setCurrentPage(1);
+                    }}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-slate-900 text-white shadow-sm'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60'
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
