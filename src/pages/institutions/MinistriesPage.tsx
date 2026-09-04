@@ -209,30 +209,62 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="max-w-3xl mx-auto bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center gap-3">
-        <div className="relative w-full sm:w-1/3">
-          <select
-            value={selectedGender}
-            onChange={(e) => setSelectedGender(e.target.value as any)}
-            className="w-full appearance-none pl-3.5 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white"
-          >
-            <option value="ALL">Tous les membres</option>
-            <option value="F">Femmes ministres</option>
-            <option value="M">Hommes ministres</option>
-          </select>
-          <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-        </div>
-
-        <div className="relative w-full sm:w-2/3">
+      {/* Filter & Search Bar */}
+      <div className="max-w-3xl mx-auto space-y-3">
+        {/* Recherche textuelle */}
+        <div className="relative w-full bg-white rounded-2xl border border-slate-200 shadow-xs focus-within:border-brand-blue transition-colors">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Rechercher par nom de ministre, ministère, secteur..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white font-medium"
+            className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-transparent rounded-2xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none font-medium"
           />
+        </div>
+
+        {/* Filtre paritaire républicain (Segmented Control tactile) */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-2 sm:p-2.5 rounded-2xl border border-slate-200 shadow-xs">
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-xl w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setSelectedGender('ALL')}
+              className={`flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
+                selectedGender === 'ALL'
+                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200/70'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              Tous <span className="ml-1 text-[11px] font-semibold text-slate-500">35</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedGender('F')}
+              className={`flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
+                selectedGender === 'F'
+                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200/70'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              Femmes <span className="ml-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded-md">6 • 17%</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedGender('M')}
+              className={`flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
+                selectedGender === 'M'
+                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200/70'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              Hommes <span className="ml-1 text-[11px] font-semibold text-blue-800 bg-blue-100/80 px-1.5 py-0.5 rounded-md">29 • 83%</span>
+            </button>
+          </div>
+
+          <div className="text-[11px] font-medium text-slate-500 px-2 sm:px-1 flex items-center justify-between sm:justify-end gap-2">
+            <span>Observatoire parité exécutif</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md">Loi n°2019-870</span>
+          </div>
         </div>
       </div>
 
