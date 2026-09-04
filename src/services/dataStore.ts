@@ -237,7 +237,7 @@ export const INITIAL_PUBLIC_DOCUMENTS: PublicDocument[] = [
     category: 'BUDGET_OFFICIEL',
     institution_name: "Ministère des Finances et du Budget",
     year: 2026,
-    description: "Document officiel de vulgarisation budgétaire présentant les 15 300 milliards FCFA de dépenses et investissements publics, ventilés par grandes priorités (Éducation, Santé, Routes, Sécurité).",
+    description: "Document officiel de vulgarisation budgétaire présentant les 15 339,2 milliards FCFA de dépenses et investissements publics (LFI 2026), ventilés par grandes priorités (Éducation, Santé, Routes, Sécurité).",
     file_url: "https://budget.gouv.ci/documents/Synthese_Budget_Citoyen_2026.pdf",
     file_name: "Synthese_Budget_Citoyen_2026_CI.pdf",
     file_size: "4.5 Mo",
@@ -246,6 +246,22 @@ export const INITIAL_PUBLIC_DOCUMENTS: PublicDocument[] = [
     downloads_count: 315,
     is_official: true,
     tags: ["Loi de Finances 2026", "Budget Citoyen", "Finances Publiques"]
+  },
+  {
+    id: 'doc-collectivites-loi-2012-1128',
+    title: "Loi n° 2012-1128 portant organisation des collectivités territoriales en Côte d'Ivoire",
+    category: 'LOI_CAIDP',
+    institution_name: "Ministère de l'Intérieur et de la Sécurité & DGDD",
+    year: 2012,
+    description: "Cadre légal régissant le fonctionnement, les compétences, l'autonomie financière et la gestion budgétaire des 201 communes et 31 régions.",
+    file_url: "https://dgdd.interieur.gouv.ci/documents/Loi_2012_1128_Collectivites_Territoriales.pdf",
+    file_name: "Loi_2012_1128_Organisation_Collectivites_CI.pdf",
+    file_size: "1.8 Mo",
+    file_format: "PDF",
+    published_at: "2012-12-13",
+    downloads_count: 185,
+    is_official: true,
+    tags: ["Collectivités", "Décentralisation", "Mairies", "Régions", "Loi"]
   },
   {
     id: 'doc-livre-blanc-collectivites',

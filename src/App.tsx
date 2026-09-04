@@ -82,8 +82,8 @@ export function App() {
     updateDocumentSeo({ title: tabTitles[tab] });
   };
 
-  const handleTabChange = (tab: ActiveTab) => {
-    navigateTo(tab, tab === 'institutions' ? annuaireView : 'INDEX');
+  const handleTabChange = (tab: ActiveTab, section?: AnnuaireSection) => {
+    navigateTo(tab, section || (tab === 'institutions' ? annuaireView : 'INDEX'));
   };
 
   const handleSelectProject = (project: BudgetProject | null) => {
