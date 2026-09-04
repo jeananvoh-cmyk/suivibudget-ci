@@ -15,7 +15,7 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "facebook_url": "https://www.facebook.com/Presidence.ci",
     "leader_name": "S.E.M. ALASSANE OUATTARA",
     "leader_title": "Président de la République, Chef de l'État",
-    "leader_photo_url": "https://www.gouv.ci/uploads/institutions/175277585572.png",
+    "leader_photo_url": "https://www.gouv.ci/uploads/contacts/177210730046.jpg",
     "leader_bio": "S.E.M. Alassane Ouattara est un économiste de renommée internationale et homme d'État ivoirien. Titulaire d'un Master et d'un Doctorat d'État (Ph.D.) en Sciences Économiques de l'Université de Pennsylvanie (Philadelphie, USA), il a accompli une carrière exceptionnelle au Fonds Monétaire International (FMI) dont il a été Directeur Général Adjoint, puis Gouverneur de la Banque Centrale des États de l'Afrique de l'Ouest (BCEAO). Premier Ministre de Côte d'Ivoire de 1990 à 1993 sous la présidence de Félix Houphouët-Boigny, il a assaini l'économie et modernisé l'appareil d'État. Élu Président de la République en novembre 2010 et réélu en 2015 et 2020, il conduit la transformation structurelle de la Côte d'Ivoire : paix et stabilité retrouvées, taux de croissance parmi les plus élevés au monde, construction de milliers de kilomètres d'autoroutes, de ponts historiques, d'hôpitaux, d'écoles et d'universités dans toutes les régions du pays.",
     "leader_education": [
       "Doctorat d'État (Ph.D.) en Sciences Économiques - University of Pennsylvania (USA)",
@@ -241,6 +241,51 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "budget_not_published": false
   },
   {
+    "id": "inst-cour-supreme",
+    "name": "La Cour Suprême de Côte d'Ivoire",
+    "type": "INSTITUTION",
+    "region": "Abidjan",
+    "district": "Autonome d'Abidjan",
+    "departement": "Plateau",
+    "address": "Plateau, Rue du Commerce, Abidjan",
+    "website": "https://www.coursupreme.ci",
+    "facebook_url": "https://www.facebook.com/CourSupremeCI",
+    "leader_name": "M. RENE FRANCOIS APHING KOUASSI",
+    "leader_title": "Président de la Cour Suprême",
+    "leader_photo_url": "https://www.gouv.ci/uploads/institutions/Aphing-Kouassi-1.jpg",
+    "leader_bio": "M. René François Aphing-Kouassi est un éminent magistrat hors hiérarchie et homme d'État ivoirien. Diplômé en Droit et de l'École Nationale de la Magistrature, il a exercé les fonctions de Garde des Sceaux, Ministre de la Justice, avant de présider la Cour Suprême de Côte d'Ivoire. Haute autorité judiciaire du pays, il a dirigé l'institution régulatrice de l'ordre juridictionnel ivoirien.",
+    "leader_education": [
+      "Diplôme de Magistrat - Section Magistrature",
+      "Licence et Maîtrise en Droit Privé - Faculté de Droit d'Abidjan"
+    ],
+    "leader_experience": [
+      "Président de la Cour Suprême de Côte d'Ivoire",
+      "Garde des Sceaux, Ministre de la Justice",
+      "Magistrat hors hiérarchie"
+    ],
+    "mission_summary": "La Cour Suprême est l'institution judiciaire historique suprême de l'État de Côte d'Ivoire. Conformément à la Constitution, elle a veillé à la régulation du droit et à la bonne administration de la justice, avant l'autonomisation institutionnelle de la Cour de Cassation, du Conseil d'État et de la Cour des Comptes.",
+    "organigramme_summary": [
+      "Chambre Judiciaire",
+      "Chambre Administrative",
+      "Chambre des Comptes",
+      "Parquet Général près la Cour Suprême"
+    ],
+    "organigramme_details": [
+      {
+        "title": "Organisation Judiciaire Historique",
+        "items": [
+          "Présidence de la Cour Suprême",
+          "Chambres Judiciaires et Administratives"
+        ]
+      }
+    ],
+    "info_officer_title": "Service d'Accès aux Documents Publics (Loi n°2013-867)",
+    "budget_functioning_fcfa": 0,
+    "budget_investment_fcfa": 0,
+    "total_budget_fcfa": 0,
+    "budget_not_published": true
+  },
+  {
     "id": "inst-cour-comptes",
     "name": "La Cour des Comptes de Côte d'Ivoire",
     "type": "INSTITUTION",
@@ -250,10 +295,10 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "address": "Cocody Angré 7e Tranche, Boulevard Latrille, Abidjan",
     "website": "https://www.courdescomptes.ci",
     "facebook_url": "https://www.facebook.com/CourDesComptesCI",
-    "leader_name": "M. DIOMANDE KANVALY",
+    "leader_name": "M. KANVALY DIOMANDE",
     "leader_title": "Président de la Cour des Comptes",
     "leader_photo_url": "https://www.gouv.ci/uploads/institutions/175277717353.jpg",
-    "leader_bio": "M. Diomandé Kanvaly est un magistrat financier émérite et juriste expert en finances publiques. Diplômé de l'ENA (section Magistrature financière) et titulaire d'un DESS en Gestion des Finances Publiques, il a présidé la Chambre des Comptes de la Cour Suprême avant d'être nommé Premier Président de la Cour des Comptes lors de son érection en institution constitutionnelle autonome en 2018. Il est l'artisan de la publication annuelle des Rapports Publics de la Cour des Comptes sur la conformité de l'exécution des budgets de l'État, des ministères et des entreprises publiques, garantissant aux citoyens ivoiriens la stricte transparence des deniers publics.",
+    "leader_bio": "M. Kanvaly Diomandé est un magistrat financier émérite et juriste expert en finances publiques. Diplômé de l'ENA (section Magistrature financière) et titulaire d'un DESS en Gestion des Finances Publiques, il a présidé la Chambre des Comptes de la Cour Suprême avant d'être nommé Premier Président de la Cour des Comptes lors de son érection en institution constitutionnelle autonome en 2018. Il est l'artisan de la publication annuelle des Rapports Publics de la Cour des Comptes sur la conformité de l'exécution des budgets de l'État, des ministères et des entreprises publiques, garantissant aux citoyens ivoiriens la stricte transparence des deniers publics.",
     "leader_education": [
       "Diplôme de Magistrat Financier - École Nationale d'Administration (ENA)",
       "DESS en Finances Publiques et Contrôle de Gestion de l'État"
@@ -307,18 +352,19 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "address": "Plateau, Boulevard Angoulvant, Abidjan",
     "website": "https://www.conseildetat.ci",
     "facebook_url": "https://www.facebook.com/ConseilDEtatCI",
-    "leader_name": "M. PATRICE YAO KOUAKOU",
+    "leader_name": "M. IBRAHIME COULIBALY-KUIBIERT",
     "leader_title": "Président du Conseil d'État",
     "leader_photo_url": "https://www.gouv.ci/uploads/institutions/177818878228.jpg",
-    "leader_bio": "M. Patrice Yao Kouakou est un magistrat hors hiérarchie et juriste de droit public de très haute réputation. Diplômé de l'ENA et de l'Université Félix Houphouët-Boigny, il a dirigé la Chambre Administrative de la Cour Suprême. Premier Président du Conseil d'État, il incarne le sommet de la justice administrative en Côte d'Ivoire, garantissant le respect de la légalité par les ministères, préfectures et mairies, et protégeant les droits des citoyens et entreprises face aux actes de la puissance publique.",
+    "leader_bio": "M. Ibrahime Coulibaly-Kuibiert est un haut magistrat hors hiérarchie ivoirien. Diplômé de l'École Nationale d'Administration (ENA, section Magistrature), il a exercé les fonctions de Secrétaire Général du Conseil Constitutionnel, puis Directeur de Cabinet du Ministère de la Justice, avant de présider la Commission Électorale Indépendante (CEI). Nommé Président du Conseil d'État, il préside la plus haute juridiction de l'ordre administratif en Côte d'Ivoire, régulant le contentieux de l'action publique et veillant à la stricte légalité républicaine.",
     "leader_education": [
-      "Diplôme de Magistrat (Section Administrative) - ENA Abidjan",
-      "Maîtrise en Droit Public et Contentieux Administratif"
+      "Diplôme de Magistrat (Section Judiciaire et Administrative) - ENA Abidjan",
+      "Maîtrise en Droit - Université Félix Houphouët-Boigny Abidjan"
     ],
     "leader_experience": [
-      "Président du Conseil d'État (2020 - Présent)",
-      "Président de la Chambre Administrative de la Cour Suprême",
-      "Conseiller d'État et Juge Administratif"
+      "Président du Conseil d'État (Présent)",
+      "Président de la Commission Électorale Indépendante - CEI (2019 - 2025)",
+      "Secrétaire Général du Conseil Constitutionnel de Côte d'Ivoire",
+      "Directeur de Cabinet au Ministère de la Justice et des Droits de l'Homme"
     ],
     "mission_summary": "Le Conseil d'État est la plus haute juridiction de l'ordre administratif. Il juge en dernier ressort les recours pour excès de pouvoir dirigés contre les décrets, arrêtés et décisions des autorités administratives (ministères, préfets, maires) et exerce une fonction consultative de conseil juridique auprès du Gouvernement.",
     "organigramme_summary": [
@@ -579,7 +625,7 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "address": "Avenue Jean-Paul II, Boulevard Clozel, Abidjan Plateau",
     "website": "https://www.cesec.ci",
     "facebook_url": "https://www.facebook.com/cesec.ci",
-    "leader_name": "Dr EUGENE AKA AOUELE",
+    "leader_name": "Dr AKA AOUELE",
     "leader_title": "Président du CESEC",
     "leader_photo_url": "https://www.gouv.ci/uploads/institutions/175277668733.jpg",
     "leader_bio": "Le Dr Eugène Aka Aouélé est un docteur d'État en pharmacie, économiste de la santé et homme d'État ivoirien. Diplômé de l'Université de Caen (France) et titulaire d'un diplôme d'Économie de la Santé, il a été Vice-Président de l'Assemblée Nationale, Ministre de la Santé et de l'Hygiène Publique (2018-2021) où il a géré avec succès la riposte nationale à la pandémie de Covid-19, et Ministre des Eaux et Forêts. Président du Conseil Régional du Sud-Comoé et Président de l'Assemblée des Régions et Districts de Côte d'Ivoire (ARDCI), il préside le CESEC depuis avril 2021, transformant l'institution en pôle consultatif stratégique d'orientation socio-économique et environnementale pour le développement du pays.",
@@ -638,7 +684,7 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "address": "Siège National de la CNRCT, Yamoussoukro",
     "website": "https://cnrct.ci",
     "facebook_url": "https://www.facebook.com/cnrct.ci",
-    "leader_name": "Nanan DESIRE AMON PAUL TANOE",
+    "leader_name": "M. DESIRE AMON PAUL TANOE",
     "leader_title": "Président du Directoire de la CNRCT",
     "leader_photo_url": "https://www.gouv.ci/uploads/institutions/17527754068.jpg",
     "leader_bio": "Sa Majesté Nanan Désiré Amon Paul Tanoé est le Roi des N'Zima Kotoko de Grand-Bassam et un diplomate de carrière de très haut rang. Titulaire d'une Maîtrise en Droit International et Sciences Politiques de l'Université de Paris, il a représenté la Côte d'Ivoire en tant qu'Ambassadeur Extraordinaire et Plénipotentiaire auprès de l'Organisation des Nations Unies (ONU à New York), en France et dans plusieurs chancelleries stratégiques. Intronisé Roi de Grand-Bassam en 2003, il préside le Directoire de la Chambre Nationale des Rois et Chefs Traditionnels depuis sa création constitutionnelle, œuvrant pour la préservation des coutumes, la conciliation des chefferies et la cohésion nationale interethnique.",
@@ -692,7 +738,7 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "address": "Cocody Riviera 3, Boulevard François Mitterrand, Abidjan",
     "website": "https://www.habg.ci",
     "facebook_url": "https://www.facebook.com/HABGCotedIvoire",
-    "leader_name": "M. EPONON ZORO BI BALLO EPITHACE",
+    "leader_name": "M. EPIPHANE ZORO BI BALLO",
     "leader_title": "Président de la HABG",
     "leader_photo_url": "https://www.gouv.ci/uploads/institutions/175277653110.jpg",
     "leader_bio": "M. Eponon Zoro Bi Ballo Épithace est un magistrat hors hiérarchie et expert reconnu en droits de l'homme et gouvernance publique. Diplômé de l'ENA (section Magistrature) et titulaire d'un DEA en Droit International des Droits de l'Homme, il a exercé comme magistrat et juge, avant de diriger le Centre International pour la Justice Transitionnelle. Secrétaire d'État chargé du Renforcement des Capacités (2019-2021), puis Ministre de la Promotion de la Bonne Gouvernance et de la Lutte contre la Corruption (2021-2023), il est nommé Président de la HABG en octobre 2023 pour intensifier la prévention de la corruption, le contrôle strict des déclarations de patrimoine des assujettis publics et les enquêtes sur les atteintes à la probité publique.",
