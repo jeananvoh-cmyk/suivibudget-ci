@@ -31,6 +31,7 @@ import {
   Camera,
   Video,
   Landmark,
+  Building2,
   Globe,
   User,
   Users,
@@ -894,7 +895,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
             <div>
               <div className="flex items-center gap-2">
-                <span className="p-2 rounded-xl bg-blue-50 text-brand-blue font-bold text-lg">🏛️</span>
+                <span className="p-2 rounded-xl bg-blue-50 text-brand-blue font-bold">
+                  <Building2 className="w-5 h-5 text-brand-blue" />
+                </span>
                 <h3 className="text-xl font-extrabold text-navy-900">
                   Annuaire & Responsables ({filteredInstitutions.length} affichées / {allInstitutions.length} au total)
                 </h3>
@@ -930,7 +933,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-black uppercase tracking-wider">📸 Photos à ajouter</span>
+                <span className="text-[10px] font-black uppercase tracking-wider">Photos à ajouter</span>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${instStatusFilter === 'NO_PHOTO' ? 'bg-white text-amber-900' : 'bg-amber-200/80 text-amber-900'}`}>
                   {Math.round((instStats.withoutPhotoCount / instStats.total) * 100)}% manquantes
                 </span>
@@ -953,7 +956,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-black uppercase tracking-wider">🌐 Sans Site Web</span>
+                <span className="text-[10px] font-black uppercase tracking-wider">Sans Site Web</span>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${instStatusFilter === 'NO_WEBSITE' ? 'bg-white text-sky-900' : 'bg-sky-200/80 text-sky-900'}`}>
                   {instStats.withoutWebCount} à créer
                 </span>
@@ -976,7 +979,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-black uppercase tracking-wider">📱 Sans Page Facebook</span>
+                <span className="text-[10px] font-black uppercase tracking-wider">Sans Page Facebook</span>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${instStatusFilter === 'NO_FACEBOOK' ? 'bg-white text-blue-900' : 'bg-blue-200/80 text-blue-900'}`}>
                   {instStats.withoutFbCount} manquantes
                 </span>
@@ -999,7 +1002,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-black uppercase tracking-wider">⚠️ Sans Web ni Facebook</span>
+                <span className="text-[10px] font-black uppercase tracking-wider">Sans Web ni Facebook</span>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${instStatusFilter === 'NO_DIGITAL' ? 'bg-white text-rose-900' : 'bg-rose-200/80 text-rose-900'}`}>
                   Priorité
                 </span>
@@ -1067,10 +1070,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 mr-1">Statut :</span>
               {[
                 { id: 'ALL', label: 'Tous les statuts' },
-                { id: 'NO_PHOTO', label: `📸 Photos manquantes (${instStats.withoutPhotoCount})` },
-                { id: 'NO_WEBSITE', label: `🌐 Sans site web officiel (${instStats.withoutWebCount})` },
-                { id: 'NO_FACEBOOK', label: `📱 Sans page Facebook (${instStats.withoutFbCount})` },
-                { id: 'NO_DIGITAL', label: `⚠️ Sans présence en ligne (${instStats.withoutDigitalCount})` },
+                { id: 'NO_PHOTO', label: `Photos manquantes (${instStats.withoutPhotoCount})` },
+                { id: 'NO_WEBSITE', label: `Sans site web officiel (${instStats.withoutWebCount})` },
+                { id: 'NO_FACEBOOK', label: `Sans page Facebook (${instStats.withoutFbCount})` },
+                { id: 'NO_DIGITAL', label: `Sans présence en ligne (${instStats.withoutDigitalCount})` },
               ].map(status => (
                 <button
                   key={status.id}
@@ -2089,7 +2092,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
             <div className="border-b border-slate-100 pb-4">
               <div className="flex items-center gap-2">
-                <span className="p-2 rounded-xl bg-blue-50 text-brand-blue font-bold text-lg">🌍</span>
+                <span className="p-2 rounded-xl bg-blue-50 text-brand-blue font-bold">
+                  <Globe className="w-5 h-5 text-brand-blue" />
+                </span>
                 <h3 className="text-xl font-extrabold text-navy-900">
                   Benchmark International : Les Meilleures Pratiques Mondiales
                 </h3>
@@ -2105,7 +2110,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <div className="bg-slate-50 hover:bg-white rounded-2xl border border-slate-200 p-4 transition-all hover:shadow-md space-y-2.5 flex flex-col justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center gap-1.5 text-xs font-black text-slate-900">
-                    <span className="text-base">🇬🇧</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-200 text-slate-700">UK</span>
                     <span>Gov.uk & Bristol</span>
                   </div>
                   <div className="text-[11px] font-bold text-brand-blue uppercase tracking-wider">Clarté Radicale</div>
@@ -2120,7 +2125,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <div className="bg-slate-50 hover:bg-white rounded-2xl border border-slate-200 p-4 transition-all hover:shadow-md space-y-2.5 flex flex-col justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center gap-1.5 text-xs font-black text-slate-900">
-                    <span className="text-base">🇫🇷</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-200 text-slate-700">FR</span>
                     <span>Ville de Lyon & Paris</span>
                   </div>
                   <div className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Transparence & Projets</div>
@@ -2135,7 +2140,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <div className="bg-slate-50 hover:bg-white rounded-2xl border border-slate-200 p-4 transition-all hover:shadow-md space-y-2.5 flex flex-col justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center gap-1.5 text-xs font-black text-slate-900">
-                    <span className="text-base">🇸🇬</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-200 text-slate-700">SG</span>
                     <span>GovTech Singapour</span>
                   </div>
                   <div className="text-[11px] font-bold text-purple-700 uppercase tracking-wider">Moments de Vie</div>
@@ -2150,7 +2155,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <div className="bg-slate-50 hover:bg-white rounded-2xl border border-slate-200 p-4 transition-all hover:shadow-md space-y-2.5 flex flex-col justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center gap-1.5 text-xs font-black text-slate-900">
-                    <span className="text-base">🇷🇼</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-200 text-slate-700">RW</span>
                     <span>Kigali & Irembo</span>
                   </div>
                   <div className="text-[11px] font-bold text-sky-700 uppercase tracking-wider">Tout-Mobile Money</div>
@@ -2165,7 +2170,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <div className="bg-slate-50 hover:bg-white rounded-2xl border border-slate-200 p-4 transition-all hover:shadow-md space-y-2.5 flex flex-col justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center gap-1.5 text-xs font-black text-slate-900">
-                    <span className="text-base">🇺🇸</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-200 text-slate-700">US</span>
                     <span>New York 311</span>
                   </div>
                   <div className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Signalements 311</div>
@@ -2185,7 +2190,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
             <div className="border-b border-slate-100 pb-4">
               <div className="flex items-center gap-2">
-                <span className="p-2 rounded-xl bg-amber-50 text-amber-800 font-bold text-lg">🏛️</span>
+                <span className="p-2 rounded-xl bg-amber-50 text-amber-800 font-bold">
+                  <Landmark className="w-5 h-5 text-amber-700" />
+                </span>
                 <h3 className="text-xl font-extrabold text-navy-900">
                   Architecture du MVP : Le Portail Standardisé Prêt à Déployer
                 </h3>
@@ -2263,7 +2270,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="p-2 rounded-xl bg-sky-50 text-sky-700 font-bold text-lg">📋</span>
+                  <span className="p-2 rounded-xl bg-sky-50 text-sky-700 font-bold">
+                    <FileSpreadsheet className="w-5 h-5 text-sky-700" />
+                  </span>
                   <h3 className="text-xl font-extrabold text-navy-900">
                     Répertoire de Prospection ({filteredProspects.length} collectivités sans site web)
                   </h3>
@@ -2345,7 +2354,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       <td className="py-3 px-4 font-bold text-navy-900">
                         <div className="flex items-center gap-2">
                           <span className="p-1 rounded-md bg-slate-100 text-slate-600 text-[10px]">
-                            {inst.type === 'REGION' ? '🏛️ Région' : '🏢 Mairie'}
+                            {inst.type === 'REGION' ? 'Région' : 'Mairie'}
                           </span>
                           <span>{inst.name}</span>
                         </div>

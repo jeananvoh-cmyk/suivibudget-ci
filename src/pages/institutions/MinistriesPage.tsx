@@ -217,9 +217,9 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
             onChange={(e) => setSelectedGender(e.target.value as any)}
             className="w-full appearance-none pl-3.5 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white"
           >
-            <option value="ALL">👤 Tous les membres</option>
-            <option value="F">👩 Femmes ministres</option>
-            <option value="M">👨 Hommes ministres</option>
+            <option value="ALL">Tous les membres</option>
+            <option value="F">Femmes ministres</option>
+            <option value="M">Hommes ministres</option>
           </select>
           <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>

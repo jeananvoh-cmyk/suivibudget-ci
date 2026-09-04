@@ -619,7 +619,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                     }`}
                   >
                     <Camera className="w-3.5 h-3.5 text-brand-orange" />
-                    <span>📷 Photo</span>
+                    <span>Photo</span>
                   </button>
 
                   <button
@@ -632,7 +632,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                     }`}
                   >
                     <Video className="w-3.5 h-3.5 text-brand-blue" />
-                    <span>🎥 Vidéo (15-30s)</span>
+                    <span>Vidéo (15-30s)</span>
                   </button>
                 </div>
 

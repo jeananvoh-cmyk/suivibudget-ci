@@ -66,8 +66,8 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
       ` *SUIVI CITOYEN - ${actionInfo.shareCategoryLabel}*\n\n` +
       ` *Intitulé :* ${project.title}\n` +
       ` *Budget Alloué :* ${formatFCFA(project.budget_amount_fcfa)} (${formatAmountInWords(project.budget_amount_fcfa)} FCFA)\n` +
-      `🏛️ *Autorité Responsable :* ${entityInfo.entityName}\n` +
-      `📍 *Localisation :* ${project.region_name || project.commune_name}\n\n` +
+      `*Autorité Responsable :* ${entityInfo.entityName}\n` +
+      `*Localisation :* ${project.region_name || project.commune_name}\n\n` +
       `Citoyens et riverains, suivez la réalisation effective sur la plateforme citoyenne : ${window.location.origin}/projets?project=${encodeURIComponent(project.id)}`
     );
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');

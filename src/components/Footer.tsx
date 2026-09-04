@@ -2,19 +2,8 @@ import React, { useState } from 'react';
 import { 
   Send, 
   CheckCircle2, 
-  ShieldCheck, 
-  FileText, 
-  Download, 
   Lock, 
-  ExternalLink, 
-  Layers, 
-  Landmark, 
-  ArrowRight, 
-  Mail,
-  AlertTriangle,
-  HeartHandshake,
-  Scale,
-  Building2
+  Mail 
 } from 'lucide-react';
 import { dataStore } from '../services/dataStore';
 import { ActiveTab } from '../types';
@@ -257,21 +246,22 @@ export const Footer: React.FC<FooterProps> = ({
           </p>
           
           <div className="pt-1 text-[11px] space-y-1">
-            <a
-              href={`mailto:${contactEmail}?subject=${encodeURIComponent("[Signalement Erreur] Donnée à rectifier")}`}
-              className="inline-flex items-center gap-1 text-amber-700 hover:text-amber-900 font-semibold cursor-pointer"
-            >
-              <AlertTriangle className="w-3 h-3 text-amber-600" />
-              <span>Signaler une erreur</span>
-            </a>
-            <br />
-            <a
-              href={`mailto:${contactEmail}?subject=${encodeURIComponent("[Contribution] Proposition d'aide / Partenariat")}`}
-              className="inline-flex items-center gap-1 text-brand-blue hover:text-blue-900 font-semibold cursor-pointer"
-            >
-              <HeartHandshake className="w-3 h-3 text-brand-blue" />
-              <span>Proposer une contribution</span>
-            </a>
+            <div>
+              <a
+                href={`mailto:${contactEmail}?subject=${encodeURIComponent("[Signalement Erreur] Donnée à rectifier")}`}
+                className="text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                Signaler une erreur
+              </a>
+            </div>
+            <div>
+              <a
+                href={`mailto:${contactEmail}?subject=${encodeURIComponent("[Contribution] Proposition d'aide / Partenariat")}`}
+                className="text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                Proposer une contribution
+              </a>
+            </div>
             {/* Official Community Channels (The ONLY consolidated place) */}
             <div className="pt-2">
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
@@ -311,49 +301,44 @@ export const Footer: React.FC<FooterProps> = ({
 
         {/* Column 2 : Open Data & Datasets */}
         <div className="space-y-2">
-          <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1">
-            <Layers className="w-3 h-3 text-brand-orange" />
-            <span>Open Data (CSV)</span>
+          <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+            Open Data (CSV)
           </h4>
-          <ul className="space-y-1.5 text-[11px]">
+          <ul className="space-y-2 text-[11px]">
             <li>
               <button
                 onClick={() => handleExportCsv('PROJECTS')}
-                className="hover:text-brand-orange transition-colors flex items-center gap-1.5 text-left text-slate-600 cursor-pointer group"
+                className="hover:text-slate-900 transition-colors text-left text-slate-600 cursor-pointer"
                 title="Télécharger l'intégralité des 4 701 chantiers publics d'investissement LFI 2026 en CSV"
               >
-                <Download className="w-3 h-3 text-slate-400 group-hover:text-brand-orange" />
-                <span>4 701 Chantiers Publics (LFI)</span>
+                4 701 Chantiers Publics (LFI)
               </button>
             </li>
             <li>
               <button
                 onClick={() => handleExportCsv('COMMUNES')}
-                className="hover:text-brand-orange transition-colors flex items-center gap-1.5 text-left text-slate-600 cursor-pointer group"
+                className="hover:text-slate-900 transition-colors text-left text-slate-600 cursor-pointer"
                 title="Télécharger la liste des 201 communes avec leurs budgets et maires en CSV"
               >
-                <Download className="w-3 h-3 text-slate-400 group-hover:text-brand-orange" />
-                <span>201 Communes & Maires</span>
+                201 Communes & Maires
               </button>
             </li>
             <li>
               <button
                 onClick={() => handleExportCsv('REGIONS')}
-                className="hover:text-brand-orange transition-colors flex items-center gap-1.5 text-left text-slate-600 cursor-pointer group"
+                className="hover:text-slate-900 transition-colors text-left text-slate-600 cursor-pointer"
                 title="Télécharger les budgets et contacts des 31 régions et 2 districts en CSV"
               >
-                <Download className="w-3 h-3 text-slate-400 group-hover:text-brand-orange" />
-                <span>31 Régions & 2 Districts</span>
+                31 Régions & 2 Districts
               </button>
             </li>
             <li>
               <button
                 onClick={() => handleExportCsv('CAIDP')}
-                className="hover:text-brand-orange transition-colors flex items-center gap-1.5 text-left text-slate-600 cursor-pointer group"
+                className="hover:text-slate-900 transition-colors text-left text-slate-600 cursor-pointer"
                 title="Télécharger le répertoire officiel CAIDP des Responsables de l'Information en CSV"
               >
-                <Download className="w-3 h-3 text-slate-400 group-hover:text-brand-orange" />
-                <span>Répertoire Officiel CAIDP</span>
+                Répertoire Officiel CAIDP
               </button>
             </li>
           </ul>
@@ -361,39 +346,35 @@ export const Footer: React.FC<FooterProps> = ({
 
         {/* Column 3 : Citizen Tools & Rights */}
         <div className="space-y-2">
-          <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1">
-            <FileText className="w-3 h-3 text-brand-blue" />
-            <span>Outils Citoyens</span>
+          <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+            Outils Citoyens
           </h4>
-          <ul className="space-y-1.5 text-[11px]">
+          <ul className="space-y-2 text-[11px]">
             <li>
               <button
                 onClick={() => onNavigateTab('documents')}
-                className="hover:text-brand-blue transition-colors flex items-center gap-1.5 text-slate-600 cursor-pointer text-left group"
+                className="hover:text-slate-900 transition-colors text-slate-600 cursor-pointer text-left"
                 title="Consulter la bibliothèque de documents légaux et générer une demande CAIDP"
               >
-                <FileText className="w-3 h-3 text-brand-blue" />
-                <span>Demande de Documents (CAIDP)</span>
+                Demande de Documents (CAIDP)
               </button>
             </li>
             <li>
               <button
                 onClick={() => onNavigateTab('observatory')}
-                className="hover:text-emerald-700 transition-colors flex items-center gap-1.5 text-slate-600 cursor-pointer text-left group"
+                className="hover:text-slate-900 transition-colors text-slate-600 cursor-pointer text-left"
                 title="Consulter les constats citoyens et les preuves de terrain"
               >
-                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                <span>Observatoire & Constats</span>
+                Observatoire & Constats
               </button>
             </li>
             <li>
               <button
                 onClick={() => onNavigateTab('institutions', 'MUNICIPAL')}
-                className="hover:text-brand-orange transition-colors flex items-center gap-1.5 text-slate-600 cursor-pointer text-left group"
+                className="hover:text-slate-900 transition-colors text-slate-600 cursor-pointer text-left"
                 title="Accéder directement aux budgets et fiches des 201 communes de Côte d'Ivoire"
               >
-                <Building2 className="w-3 h-3 text-brand-orange" />
-                <span>Budgets des 201 Mairies</span>
+                Budgets des 201 Mairies
               </button>
             </li>
             <li>
@@ -401,11 +382,11 @@ export const Footer: React.FC<FooterProps> = ({
                 href="https://www.caidp.ci"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-blue-700 transition-colors flex items-center gap-1.5 text-slate-600 group"
+                className="hover:text-slate-900 transition-colors text-slate-600 inline-flex items-center gap-1"
                 title="Portail national officiel de la CAIDP (caidp.ci)"
               >
-                <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-blue-600" />
                 <span>Portail CAIDP (caidp.ci)</span>
+                <span className="text-[10px] text-slate-400">↗</span>
               </a>
             </li>
           </ul>
@@ -413,39 +394,35 @@ export const Footer: React.FC<FooterProps> = ({
 
         {/* Column 4 : Republican Legal Framework */}
         <div className="space-y-2">
-          <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1">
-            <ShieldCheck className="w-3 h-3 text-emerald-700" />
-            <span>Cadre Légal</span>
+          <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+            Cadre Légal
           </h4>
-          <ul className="space-y-1.5 text-[11px] text-slate-600">
+          <ul className="space-y-2 text-[11px] text-slate-600">
             <li>
               <button
                 onClick={() => onNavigateTab('documents')}
-                className="hover:text-emerald-700 transition-colors flex items-center gap-1.5 text-left text-slate-600 cursor-pointer group"
+                className="hover:text-slate-900 transition-colors text-left text-slate-600 cursor-pointer"
                 title="Consulter la Loi de Finances 2026 (15 339,2 Milliards FCFA)"
               >
-                <Scale className="w-3 h-3 text-slate-400 group-hover:text-emerald-600 flex-shrink-0" />
-                <span>Loi de Finances 2026 (15 339 Mrds)</span>
+                Loi de Finances 2026 (15 339 Mrds)
               </button>
             </li>
             <li>
               <button
                 onClick={() => onNavigateTab('documents')}
-                className="hover:text-emerald-700 transition-colors flex items-center gap-1.5 text-left text-slate-600 cursor-pointer group"
+                className="hover:text-slate-900 transition-colors text-left text-slate-600 cursor-pointer"
                 title="Consulter la Loi n°2013-867 relative à l'accès à l'information d'intérêt public"
               >
-                <Scale className="w-3 h-3 text-slate-400 group-hover:text-emerald-600 flex-shrink-0" />
-                <span>Loi n°2013-867 Accès à l'Information</span>
+                Loi n°2013-867 Accès à l'Information
               </button>
             </li>
             <li>
               <button
                 onClick={() => onNavigateTab('documents')}
-                className="hover:text-emerald-700 transition-colors flex items-center gap-1.5 text-left text-slate-600 cursor-pointer group"
+                className="hover:text-slate-900 transition-colors text-left text-slate-600 cursor-pointer"
                 title="Consulter le Code des Collectivités Territoriales (Loi n°2012-1128)"
               >
-                <Building2 className="w-3 h-3 text-slate-400 group-hover:text-emerald-600 flex-shrink-0" />
-                <span>Code des Collectivités (Loi n°2012-1128)</span>
+                Code des Collectivités (Loi n°2012-1128)
               </button>
             </li>
             <li>
@@ -453,11 +430,11 @@ export const Footer: React.FC<FooterProps> = ({
                 href="https://www.courdescomptes.ci"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-emerald-700 transition-colors flex items-center gap-1.5 text-slate-600 group"
+                className="hover:text-slate-900 transition-colors text-slate-600 inline-flex items-center gap-1"
                 title="Site officiel de la Cour des Comptes de la République de Côte d'Ivoire"
               >
-                <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-emerald-600 flex-shrink-0" />
                 <span>Cour des Comptes de Côte d'Ivoire</span>
+                <span className="text-[10px] text-slate-400">↗</span>
               </a>
             </li>
           </ul>

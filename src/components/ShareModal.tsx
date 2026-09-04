@@ -58,13 +58,13 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(currentText + "\n\n🔗 Consulter ce projet : " + getProjectDirectUrl());
+    navigator.clipboard.writeText(currentText + "\n\nConsulter ce projet : " + getProjectDirectUrl());
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleDirectWhatsApp = () => {
-    const text = encodeURIComponent(generateWhatsAppMessage(project) + "\n\n🔗 Lien officiel : " + getProjectDirectUrl());
+    const text = encodeURIComponent(generateWhatsAppMessage(project) + "\n\nLien officiel : " + getProjectDirectUrl());
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
   };
 

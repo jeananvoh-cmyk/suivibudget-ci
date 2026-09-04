@@ -173,8 +173,8 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                     <span className="text-2xl font-black text-slate-900 mt-0.5 block">{inProgressProofs}</span>
                     <span className="text-[11px] text-slate-600">Travaux en cours constatés</span>
                   </div>
-                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
-                    🟡
+                  <div className="w-10 h-10 rounded-xl bg-amber-100/70 text-amber-800 flex items-center justify-center">
+                    <span className="w-3.5 h-3.5 rounded-full bg-amber-500"></span>
                   </div>
                 </div>
 
@@ -185,8 +185,8 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                     <span className="text-2xl font-black text-slate-900 mt-0.5 block">{completedProofs}</span>
                     <span className="text-[11px] text-slate-600">Ouvrages opérationnels</span>
                   </div>
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
-                    🟢
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100/70 text-emerald-800 flex items-center justify-center">
+                    <span className="w-3.5 h-3.5 rounded-full bg-emerald-500"></span>
                   </div>
                 </div>
 
@@ -197,8 +197,8 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                     <span className="text-2xl font-black text-slate-900 mt-0.5 block">{notStartedProofs}</span>
                     <span className="text-[11px] text-slate-600">Chantiers en attente</span>
                   </div>
-                  <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-800 flex items-center justify-center font-bold">
-                    🔴
+                  <div className="w-10 h-10 rounded-xl bg-rose-100/70 text-rose-800 flex items-center justify-center">
+                    <span className="w-3.5 h-3.5 rounded-full bg-rose-500"></span>
                   </div>
                 </div>
               </div>

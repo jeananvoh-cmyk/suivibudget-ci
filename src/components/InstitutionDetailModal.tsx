@@ -631,7 +631,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                 </div>
               ) : (
                 <div className="text-center py-10 bg-white rounded-2xl border border-slate-200 p-6 space-y-2">
-                  <div className="text-2xl">🔍</div>
+                  <div className="flex justify-center"><Search className="w-7 h-7 text-slate-300" /></div>
                   <h5 className="text-sm font-black text-slate-800">Aucun projet ne correspond à ce filtre</h5>
                   <p className="text-xs text-slate-500">
                     Consultez l'ensemble des {relatedProjects.length} chantiers en réinitialisant les critères.
@@ -961,16 +961,22 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   )}
 
                   {riEmail ? (
-                    <div className="text-slate-300 pt-1">✉️ {riEmail}</div>
+                    <div className="text-slate-300 pt-1 flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                      <span>{riEmail}</span>
+                    </div>
                   ) : null}
 
                   {riPhone ? (
-                    <div className="text-slate-300">📞 {riPhone}</div>
+                    <div className="text-slate-300 flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                      <span>{riPhone}</span>
+                    </div>
                   ) : null}
 
                   {!riEmail && !riPhone && (
                     <div className="pt-1 text-[11px] text-slate-400">
-                      ℹ️ Contacts directs non publiés sur le registre public CAIDP. Saisine par courrier écrit ou via{' '}
+                      Contacts directs non publiés sur le registre public CAIDP. Saisine par courrier écrit ou via{' '}
                       <a href="https://caidp.ci" target="_blank" rel="noopener noreferrer" className="text-brand-orange font-bold hover:underline">caidp.ci</a>.
                     </div>
                   )}
