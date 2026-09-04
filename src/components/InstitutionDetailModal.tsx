@@ -114,12 +114,26 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
 
   const totalLinesAmount = entityBudgetLines.reduce((sum, l) => sum + (l.montant_fcfa || 0), 0);
 
-  // Budget ratios
+  // Budget ratios (Safe zero & exact proportion handling)
   const functioningBudget = institution.budget_functioning_fcfa || 0;
   const investmentBudget = institution.budget_investment_fcfa || 0;
-  const totalBudget = institution.total_budget_fcfa || (functioningBudget + investmentBudget) || 1;
-  const functioningPct = Math.round((functioningBudget / totalBudget) * 100) || 65;
-  const investmentPct = Math.round((investmentBudget / totalBudget) * 100) || 35;
+  const totalBudget = institution.total_budget_fcfa || (functioningBudget + investmentBudget) || 0;
+
+  let functioningPct = 0;
+  let investmentPct = 0;
+
+  if (totalBudget > 0) {
+    if (investmentBudget === 0 && functioningBudget > 0) {
+      functioningPct = 100;
+      investmentPct = 0;
+    } else if (functioningBudget === 0 && investmentBudget > 0) {
+      functioningPct = 0;
+      investmentPct = 100;
+    } else {
+      functioningPct = Math.round((functioningBudget / totalBudget) * 100);
+      investmentPct = 100 - functioningPct;
+    }
+  }
 
   // Resolve CAIDP Information Officer accurately from registry
   const caidpMatch = dataStore.findCaidpEntity(institution.name) || findCaidpRI(institution.name);
@@ -316,13 +330,13 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   </span>
 
                   {institution.green_line_number && (
-                    <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
-                      <Phone className="w-2.5 h-2.5" /> N° Vert : {institution.green_line_number}
+                    <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 whitespace-nowrap">
+                      <Phone className="w-2.5 h-2.5 flex-shrink-0" /> N° Vert : {institution.green_line_number}
                     </span>
                   )}
                 </div>
 
-                <h2 className="text-lg sm:text-xl font-black text-slate-900 leading-tight truncate" title={institution.name}>
+                <h2 className="text-base sm:text-xl font-black text-slate-900 leading-snug line-clamp-2" title={institution.name}>
                   {institution.name}
                 </h2>
 
@@ -356,11 +370,12 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   href={institution.facebook_url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200/80 shadow-2xs transition-colors"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-blue-50 text-[#1877F2] hover:bg-[#1877F2] hover:text-white border border-blue-200/80 shadow-2xs transition-colors"
                   title={`Page Facebook : ${institution.facebook_url}`}
                 >
-                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24">
+                    <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    <path fill="#FFFFFF" d="M16.671 15.457l.532-3.47h-3.328v-2.25c0-.949.465-1.874 1.956-1.874h1.542V4.91s-1.374-.235-2.686-.235c-2.741 0-4.533 1.662-4.533 4.669v2.227H7.078v3.47h3.076V23.93c.613.096 1.24.143 1.875.143s1.262-.047 1.875-.143v-8.473h2.767z"/>
                   </svg>
                   <span>Facebook</span>
                 </a>
@@ -371,7 +386,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   setSelectedProjectForDoc(null);
                   setDocModalOpen(true);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-brand-blue hover:bg-brand-blue-dark text-white shadow-2xs transition-colors cursor-pointer"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-brand-blue hover:bg-brand-blue-dark text-white shadow-2xs transition-colors cursor-pointer"
                 title="Générer une demande officielle de documents publics (Loi n°2013-867)"
               >
                 <FileText className="w-3.5 h-3.5" />
@@ -390,15 +405,15 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
 
           {/* Liens Web/Facebook sur Mobile */}
           {(institution.website || institution.facebook_url) && (
-            <div className="flex sm:hidden items-center gap-2 pt-3 mt-2 border-t border-slate-200/60">
+            <div className="flex sm:hidden items-center gap-2 pt-2.5 mt-2 border-t border-slate-200/60">
               {institution.website && isSafeUrl(institution.website) && (
                 <a 
                   href={institution.website} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-slate-700 border border-slate-200 shadow-2xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 shadow-2xs active:scale-95 transition-all"
                 >
-                  <Globe className="w-3 h-3" />
+                  <Globe className="w-3.5 h-3.5 text-slate-500" />
                   <span>Site Web</span>
                 </a>
               )}
@@ -407,9 +422,12 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   href={institution.facebook_url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-50 text-[#1877F2] border border-blue-200 shadow-2xs active:scale-95 transition-all"
                 >
-                  <span className="font-bold">f</span>
+                  <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24">
+                    <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    <path fill="#FFFFFF" d="M16.671 15.457l.532-3.47h-3.328v-2.25c0-.949.465-1.874 1.956-1.874h1.542V4.91s-1.374-.235-2.686-.235c-2.741 0-4.533 1.662-4.533 4.669v2.227H7.078v3.47h3.076V23.93c.613.096 1.24.143 1.875.143s1.262-.047 1.875-.143v-8.473h2.767z"/>
+                  </svg>
                   <span>Facebook</span>
                 </a>
               )}
@@ -683,13 +701,22 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 block">Dépenses d'Investissement Public</span>
                     <span className="text-lg font-black text-slate-900 block">{formatFCFA(institution.budget_investment_fcfa)}</span>
                     <span className="text-xs font-bold text-emerald-800 block">({investmentPct}% du budget total)</span>
+                    {investmentBudget === 0 && (
+                      <span className="text-[10px] text-slate-500 block pt-0.5 italic">
+                        Crédits d'investissement portés par les ministères sectoriels
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 {/* Jauge Bicolore */}
                 <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden flex">
-                  <div className="bg-sky-600 h-full" style={{ width: `${functioningPct}%` }} title={`Fonctionnement: ${functioningPct}%`}></div>
-                  <div className="bg-emerald-500 h-full" style={{ width: `${investmentPct}%` }} title={`Investissement: ${investmentPct}%`}></div>
+                  {functioningPct > 0 && (
+                    <div className="bg-sky-600 h-full transition-all duration-500" style={{ width: `${functioningPct}%` }} title={`Fonctionnement: ${functioningPct}%`}></div>
+                  )}
+                  {investmentPct > 0 && (
+                    <div className="bg-emerald-500 h-full transition-all duration-500" style={{ width: `${investmentPct}%` }} title={`Investissement: ${investmentPct}%`}></div>
+                  )}
                 </div>
               </div>
 
