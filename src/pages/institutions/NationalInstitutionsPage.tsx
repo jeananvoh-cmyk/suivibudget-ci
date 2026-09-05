@@ -149,8 +149,14 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
               <div className="relative flex-shrink-0">
                 <div className="w-36 h-36 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-3xl overflow-hidden border-4 border-amber-400 shadow-2xl bg-[#081a2f] cursor-zoom-in group/pres">
                   <img 
-                    src={presidence.leader_photo_url || "https://www.gouv.ci/uploads/institutions/175277585572.png"} 
+                    src={presidence.leader_photo_url || "/images/presidence_alassane_ouattara.png"} 
                     alt={presidence.leader_name}
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.src.includes('175277585572.png')) {
+                        target.src = "https://www.gouv.ci/uploads/institutions/175277585572.png";
+                      }
+                    }}
                     className="w-full h-full object-cover object-top transition-transform duration-500 ease-out group-hover/pres:scale-110" 
                   />
                 </div>

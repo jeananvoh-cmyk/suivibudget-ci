@@ -15,7 +15,7 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "facebook_url": "https://www.facebook.com/Presidence.ci",
     "leader_name": "S.E.M. ALASSANE OUATTARA",
     "leader_title": "Président de la République, Chef de l'État",
-    "leader_photo_url": "https://www.gouv.ci/uploads/contacts/177210730046.jpg",
+    "leader_photo_url": "/images/presidence_alassane_ouattara.png",
     "leader_bio": "S.E.M. Alassane Ouattara est un économiste de renommée internationale et homme d'État ivoirien. Titulaire d'un Master et d'un Doctorat d'État (Ph.D.) en Sciences Économiques de l'Université de Pennsylvanie (Philadelphie, USA), il a accompli une carrière exceptionnelle au Fonds Monétaire International (FMI) dont il a été Directeur Général Adjoint, puis Gouverneur de la Banque Centrale des États de l'Afrique de l'Ouest (BCEAO). Premier Ministre de Côte d'Ivoire de 1990 à 1993 sous la présidence de Félix Houphouët-Boigny, il a assaini l'économie et modernisé l'appareil d'État. Élu Président de la République en novembre 2010 et réélu en 2015 et 2020, il conduit la transformation structurelle de la Côte d'Ivoire : paix et stabilité retrouvées, taux de croissance parmi les plus élevés au monde, construction de milliers de kilomètres d'autoroutes, de ponts historiques, d'hôpitaux, d'écoles et d'universités dans toutes les régions du pays.",
     "leader_education": [
       "Doctorat d'État (Ph.D.) en Sciences Économiques - University of Pennsylvania (USA)",

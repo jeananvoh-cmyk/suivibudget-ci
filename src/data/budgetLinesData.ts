@@ -268596,7 +268596,347 @@ export function getBudgetLinesForEntity(entityName: string, entityType?: string,
     }
   }
 
-  // 5. If it's a generic ministry, synthesize standard budget breakdown based on missions
+  // 5. Institutions de la République (Cour des Comptes, Présidence, Assemblée Nationale, Sénat, etc.)
+  if (entityType === 'INSTITUTION' || q.includes('COMPTE') || q.includes('PRESID') || q.includes('ASSEMB') || q.includes('SENAT') || q.includes('CONSTITUTION') || q.includes('HABG') || q.includes('MEDIATEUR')) {
+    // 5.1 La Cour des Comptes de Côte d'Ivoire (8 851 161 351 FCFA)
+    if (q.includes('COMPTE')) {
+      return [
+        {
+          libelle: "Construire et Équiper le siège de la Cour des Comptes (Projet National d'Investissement LFI 2026)",
+          montant_fcfa: 1934700000,
+          evolution_pct: 12.5,
+          categorie: "INFRASTRUCTURE",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "COUR DES COMPTES",
+          sous_categorie_3: "Siège & Équipements de Contrôle Financier",
+          nature: "Investissements",
+          year: 2026
+        },
+        {
+          libelle: "Dépenses de Personnel (Rémunération des Magistrats Financiers, Conseillers maîtres et Greffiers)",
+          montant_fcfa: 4841522946,
+          evolution_pct: 4.8,
+          categorie: "PERSONNEL",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "COUR DES COMPTES",
+          sous_categorie_3: "Magistrature Financière & Greffe Central",
+          nature: "Personnel",
+          year: 2026
+        },
+        {
+          libelle: "Biens et Services (Missions d'audit d'État, contrôles de régularité et publication des Rapports Publics Annuels)",
+          montant_fcfa: 2074938405,
+          evolution_pct: 5.2,
+          categorie: "FONCTIONNEMENT",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "COUR DES COMPTES",
+          sous_categorie_3: "Audits, Contrôles & Publications Officielles",
+          nature: "Biens et services",
+          year: 2026
+        }
+      ];
+    }
+
+    // 5.2 La Présidence de la République (193 633 705 615 FCFA)
+    if (q.includes('PRESID')) {
+      return [
+        {
+          libelle: "Transfert d'Équipement des structures de défense et de sécurité / CNS",
+          montant_fcfa: 41300000000,
+          evolution_pct: 8.0,
+          categorie: "SECURITE",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "PRESIDENCE",
+          sous_categorie_3: "Conseil National de Sécurité (CNS)",
+          nature: "Investissements",
+          year: 2026
+        },
+        {
+          libelle: "Projet Intégré de Nutrition et de Développement de la Petite Enfance (PINUT-DPE)",
+          montant_fcfa: 4107422500,
+          evolution_pct: 10.2,
+          categorie: "SANTE",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "PRESIDENCE",
+          sous_categorie_3: "Programmes Prioritaires Sociaux",
+          nature: "Investissements",
+          year: 2026
+        },
+        {
+          libelle: "Programme d'amélioration du climat des affaires & Compétitivité",
+          montant_fcfa: 3200000000,
+          evolution_pct: 6.5,
+          categorie: "ECONOMIE",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "PRESIDENCE",
+          sous_categorie_3: "Climat des Affaires & Investissements",
+          nature: "Investissements",
+          year: 2026
+        },
+        {
+          libelle: "Projet Abidjan Legacy Program (COP15 Restauration des Terres)",
+          montant_fcfa: 1940000000,
+          evolution_pct: 4.1,
+          categorie: "ENVIRONNEMENT",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "PRESIDENCE",
+          sous_categorie_3: "Initiatives Environnementales",
+          nature: "Investissements",
+          year: 2026
+        },
+        {
+          libelle: "Programme National Multisectoriel de Nutrition / Secteur Gouvernance",
+          montant_fcfa: 1500000000,
+          evolution_pct: 5.0,
+          categorie: "SANTE",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "PRESIDENCE",
+          sous_categorie_3: "Nutrition & Santé Maternelle",
+          nature: "Investissements",
+          year: 2026
+        },
+        {
+          libelle: "Construire les bâtiments annexes et réhabiliter le siège de l'Inspection Générale d'Etat (IGE)",
+          montant_fcfa: 1443100000,
+          evolution_pct: 7.2,
+          categorie: "INFRASTRUCTURE",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "PRESIDENCE",
+          sous_categorie_3: "Infrastructures d'Inspection & Contrôle",
+          nature: "Investissements",
+          year: 2026
+        },
+        {
+          libelle: "Programme de Valorisation des Compétences Féminines",
+          montant_fcfa: 900000000,
+          evolution_pct: 3.5,
+          categorie: "SOCIAL",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "PRESIDENCE",
+          sous_categorie_3: "Promotion du Genre & Compétences",
+          nature: "Investissements",
+          year: 2026
+        },
+        {
+          libelle: "Projet de mise en oeuvre de l'identifiant unique des entreprises / CEPICI",
+          montant_fcfa: 360000000,
+          evolution_pct: 5.0,
+          categorie: "NUMERIQUE",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "PRESIDENCE",
+          sous_categorie_3: "Dématérialisation & Formalisation",
+          nature: "Investissements",
+          year: 2026
+        },
+        {
+          libelle: "Dépenses de Personnel (Cabinet Présidentiel, Secrétariat Général, CNS, État-Major Particulier et GSPR)",
+          montant_fcfa: 85455709869,
+          evolution_pct: 4.2,
+          categorie: "PERSONNEL",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "PRESIDENCE",
+          sous_categorie_3: "Cabinet, SG & Services Spécialisés",
+          nature: "Personnel",
+          year: 2026
+        },
+        {
+          libelle: "Biens et Services (Sécurité d'État, logistique républicaine, relations internationales et représentations officielles)",
+          montant_fcfa: 56970473246,
+          evolution_pct: 3.8,
+          categorie: "FONCTIONNEMENT",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "PRESIDENCE",
+          sous_categorie_3: "Sécurité d'État & Fonctionnement Opérationnel",
+          nature: "Biens et services",
+          year: 2026
+        }
+      ];
+    }
+
+    // 5.3 L'Assemblée Nationale (33 480 000 000 FCFA)
+    if (q.includes('ASSEMB')) {
+      return [
+        {
+          libelle: "Modernisation des équipements numériques, sonorisation et vote électronique de l'Hémicycle",
+          montant_fcfa: 1850000000,
+          evolution_pct: 9.0,
+          categorie: "INFRASTRUCTURE",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "ASSEMBLEE NATIONALE",
+          sous_categorie_3: "Modernisation Parlementaire",
+          nature: "Investissements",
+          year: 2026
+        },
+        {
+          libelle: "Réhabilitation et travaux d'aménagement des bâtiments annexes et bureaux des Députés",
+          montant_fcfa: 1500000000,
+          evolution_pct: 6.0,
+          categorie: "INFRASTRUCTURE",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "ASSEMBLEE NATIONALE",
+          sous_categorie_3: "Patrimoine & Aménagements",
+          nature: "Investissements",
+          year: 2026
+        },
+        {
+          libelle: "Indemnités parlementaires, salaires et cotisations du personnel de l'Assemblée Nationale",
+          montant_fcfa: 21091000000,
+          evolution_pct: 3.5,
+          categorie: "PERSONNEL",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "ASSEMBLEE NATIONALE",
+          sous_categorie_3: "Députés & Administration Parlementaire",
+          nature: "Personnel",
+          year: 2026
+        },
+        {
+          libelle: "Fonctionnement des commissions permanentes, sessions ordinaires et contrôle de l'action gouvernementale",
+          montant_fcfa: 9039000000,
+          evolution_pct: 4.0,
+          categorie: "FONCTIONNEMENT",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "ASSEMBLEE NATIONALE",
+          sous_categorie_3: "Commissions & Activités Législatives",
+          nature: "Biens et services",
+          year: 2026
+        }
+      ];
+    }
+
+    // 5.4 Le Sénat de Côte d'Ivoire (16 250 000 000 FCFA)
+    if (q.includes('SENAT')) {
+      return [
+        {
+          libelle: "Aménagement et équipements du siège institutionnel du Sénat à Yamoussoukro",
+          montant_fcfa: 1625000000,
+          evolution_pct: 8.5,
+          categorie: "INFRASTRUCTURE",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "SENAT",
+          sous_categorie_3: "Siège Yamoussoukro & Logistique",
+          nature: "Investissements",
+          year: 2026
+        },
+        {
+          libelle: "Indemnités sénatoriales et rémunération du personnel de la chambre haute",
+          montant_fcfa: 10237500000,
+          evolution_pct: 3.0,
+          categorie: "PERSONNEL",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "SENAT",
+          sous_categorie_3: "Sénateurs & Personnel Administratif",
+          nature: "Personnel",
+          year: 2026
+        },
+        {
+          libelle: "Missions d'évaluation des politiques publiques, représentation des collectivités et sessions",
+          montant_fcfa: 4387500000,
+          evolution_pct: 4.5,
+          categorie: "FONCTIONNEMENT",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "SENAT",
+          sous_categorie_3: "Commissions & Sessions Législatives",
+          nature: "Biens et services",
+          year: 2026
+        }
+      ];
+    }
+
+    // 5.5 Le Conseil Constitutionnel (3 860 437 235 FCFA - 100% Fonctionnement et Juridictionnel)
+    if (q.includes('CONSTITUTION')) {
+      return [
+        {
+          libelle: "Rémunération et traitements des Conseillers Constitutionnels et Magistrats du Greffe",
+          montant_fcfa: 2702306065,
+          evolution_pct: 3.2,
+          categorie: "PERSONNEL",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "CONSEIL CONSTITUTIONNEL",
+          sous_categorie_3: "Collège Juridictionnel & Magistrature",
+          nature: "Personnel",
+          year: 2026
+        },
+        {
+          libelle: "Organisation du contentieux électoral, contrôle de constitutionnalité et greffe",
+          montant_fcfa: 1158131170,
+          evolution_pct: 4.0,
+          categorie: "FONCTIONNEMENT",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "CONSEIL CONSTITUTIONNEL",
+          sous_categorie_3: "Greffe, Documentation & Scrutins",
+          nature: "Biens et services",
+          year: 2026
+        }
+      ];
+    }
+
+    // 5.6 Haute Autorité pour la Bonne Gouvernance - HABG (4 750 000 000 FCFA)
+    if (q.includes('HABG') || q.includes('BONNE GOUVERNANCE')) {
+      return [
+        {
+          libelle: "Digitalisation de la plateforme des déclarations de patrimoine et outils d'investigation financière",
+          montant_fcfa: 1425000000,
+          evolution_pct: 15.0,
+          categorie: "NUMERIQUE",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "HABG",
+          sous_categorie_3: "Digitalisation & Systèmes Anti-Corruption",
+          nature: "Investissements",
+          year: 2026
+        },
+        {
+          libelle: "Traitements et salaires des Commissaires, enquêteurs et juristes d'investigation",
+          montant_fcfa: 2327500000,
+          evolution_pct: 4.1,
+          categorie: "PERSONNEL",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "HABG",
+          sous_categorie_3: "Direction des Enquêtes & Commissaires",
+          nature: "Personnel",
+          year: 2026
+        },
+        {
+          libelle: "Campagnes de sensibilisation citoyenne, enquêtes terrain et coopération internationale",
+          montant_fcfa: 997500000,
+          evolution_pct: 3.5,
+          categorie: "FONCTIONNEMENT",
+          sous_categorie_1: "INSTITUTIONS",
+          sous_categorie_2: "HABG",
+          sous_categorie_3: "Prévention & Sensibilisation",
+          nature: "Biens et services",
+          year: 2026
+        }
+      ];
+    }
+
+    // 5.7 Ventilation standard pour les autres institutions constitutionnelles
+    return [
+      {
+        libelle: `Dépenses de Personnel et Rémunérations statutaires - ${entityName}`,
+        montant_fcfa: 3500000000,
+        evolution_pct: 3.0,
+        categorie: "PERSONNEL",
+        sous_categorie_1: "INSTITUTIONS",
+        sous_categorie_2: entityName,
+        sous_categorie_3: "Personnel & Traitements",
+        nature: "Personnel",
+        year: 2026
+      },
+      {
+        libelle: `Biens et services, fonctionnement des services et missions officielles`,
+        montant_fcfa: 1500000000,
+        evolution_pct: 2.5,
+        categorie: "FONCTIONNEMENT",
+        sous_categorie_1: "INSTITUTIONS",
+        sous_categorie_2: entityName,
+        sous_categorie_3: "Fonctionnement Opérationnel",
+        nature: "Biens et services",
+        year: 2026
+      }
+    ];
+  }
+
+  // 6. If it's a generic ministry, synthesize standard budget breakdown based on missions
   if (entityType === 'MINISTERE' || q.includes('MINIST')) {
     return [
       {
