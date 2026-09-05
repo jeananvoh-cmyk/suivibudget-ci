@@ -440,18 +440,18 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
       setDocumentSubject(`Communication des pièces officielles du marché public : ${project.title}`);
     } else if (institution) {
       if (institution.type === 'MAIRIE') {
-        setDocumentSubject(`Communication du Budget Primitif, Compte Administratif, PTI & Marchés Publics (${institution.name})`);
+        setDocumentSubject(`Communication du Budget Primitif, Compte Administratif, PTI & Marchés Publics`);
       } else if (institution.type === 'REGION' || institution.type === 'DISTRICT') {
-        setDocumentSubject(`Communication du Budget Régional, Programme Triennal (PTD) & Marchés Publics (${institution.name})`);
+        setDocumentSubject(`Communication du Budget Régional, Programme Triennal (PTD) & Marchés Publics`);
       } else if (institution.type === 'MINISTERE') {
-        setDocumentSubject(`Communication des Rapports de Performance (RAP), PPM & Budgets-Programmes (${institution.name})`);
+        setDocumentSubject(`Communication des Rapports de Performance (RAP), PPM & Budgets-Programmes`);
       } else if (institution.type === 'AUTORITE_REGULATION') {
-        setDocumentSubject(`Communication des Décisions de Régulation, Bilan des Redevances & Audits (${institution.name})`);
+        setDocumentSubject(`Communication des Décisions de Régulation, Bilan des Redevances & Audits`);
       } else {
-        setDocumentSubject(`Accès aux documents budgétaires, rapports d'activité & marchés publics (${institution.name})`);
+        setDocumentSubject(`Communication des documents budgétaires, rapports d'activité & marchés publics`);
       }
     } else {
-      setDocumentSubject(`Demande officielle de communication de documents administratifs (Loi n°2013-867)`);
+      setDocumentSubject(`Demande de communication de documents administratifs`);
     }
   }, [isOpen, project, institution, resolvedEntityType]);
 
@@ -545,27 +545,42 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
   };
 
   const handleCopyText = () => {
+    const senderLines = [
+      `Nom & Prénom : ${citizenName || '[Nom et Prénom]'}`,
+      userStatus !== 'CITOYEN' 
+        ? `Qualité : ${userStatus === 'JOURNALISTE' ? 'Journaliste Professionnel (Délai d\'urgence : 15 jours - Art. 12)' : userStatus === 'CHERCHEUR' ? 'Chercheur / Universitaire (Délai d\'urgence : 15 jours - Art. 12)' : 'Organisation de la Société Civile (OSC)'}` 
+        : null,
+      `Email : ${citizenEmail || '[Email de réception]'}`,
+      citizenPhone?.trim() ? `Téléphone : ${citizenPhone.trim()}` : null,
+      citizenAddress?.trim() ? `Résidence : ${citizenAddress.trim()}` : null,
+    ].filter(Boolean).join('\n');
+
+    const legalReference = hasNominatedRi
+      ? `Cadre légal : Loi n°2013-867 relative à l'accès à l'information d'intérêt public (CAIDP)`
+      : `Fondement légal : Articles 2, 4, 10 & 12 de la Loi n°2013-867 relative à l'accès à l'information d'intérêt public.`;
+
+    const introText = hasNominatedRi
+      ? `En votre qualité de Responsable de l'Information désigné(e) au titre de la Loi n°2013-867 en République de Côte d'Ivoire, j'ai l'honneur de solliciter la communication des documents administratifs suivants :`
+      : `Dans le cadre de la promotion de la transparence administrative et du suivi citoyen garanti par la Loi n°2013-867 du 23 décembre 2013 relative à l'accès à l'information d'intérêt public en République de Côte d'Ivoire, j'ai l'honneur de solliciter la communication des documents administratifs suivants relatifs à votre organisme :`;
+
     const fullText = 
       `DEMANDE D'ACCÈS AUX DOCUMENTS PUBLICS\n` +
       `Application de la Loi n°2013-867 du 23 décembre 2013 (CAIDP)\n` +
       `Réf : ${referenceNumber} — Fait le : ${todayStr}\n\n` +
       `LE DEMANDEUR :\n` +
-      `Nom & Prénom : ${citizenName || '[Nom et Prénom]'}\n` +
-      `Qualité : ${userStatus === 'CITOYEN' ? 'Citoyen / Usager' : userStatus === 'JOURNALISTE' ? 'Journaliste Professionnel' : userStatus === 'CHERCHEUR' ? 'Chercheur / Universitaire' : 'Organisation de la Société Civile (OSC)'}\n` +
-      `Email : ${citizenEmail || '[Email de contact]'}\n` +
-      `Téléphone : ${citizenPhone || '[Téléphone]'}\n` +
-      `Adresse / Résidence : ${citizenAddress || 'Côte d\'Ivoire'}\n\n` +
+      `${senderLines}\n\n` +
       `DESTINATAIRE :\n` +
       `${dynamicRecipientTitle}\n` +
       `Organisme : ${targetEntityName}\n` +
       (hasDirectEmail ? `Email : ${displayEmail}\n` : '') +
       (hasDirectPhone ? `Téléphone : ${displayPhone}\n` : '') +
       `\n` +
-      `OBJET : Demande de communication de documents d'intérêt public\n` +
-      `Fondement légal : Articles 2, 4, 7, 8, 10 & 12 de la Loi n°2013-867 relative à l'accès à l'information d'intérêt public.\n\n` +
+      `OBJET : ${documentSubject}\n` +
+      `${legalReference}\n\n` +
       `${dynamicSalutation},\n\n` +
-      `Dans le cadre du suivi citoyen et de la promotion de la transparence de l'action publique garantis par la Loi n°2013-867 du 23 décembre 2013 en République de Côte d'Ivoire, j'ai l'honneur de solliciter respectueusement la communication des documents administratifs suivants :\n\n` +
+      `${introText}\n\n` +
       `${formattedDocumentList}\n\n` +
+      (!hasNominatedRi ? `Pour rappel, l'Article 10 de la Loi n°2013-867 fait obligation à tout organisme public de désigner un Responsable de l'Information pour traiter les demandes citoyennes, et l'Article 12 prévoit un délai maximum de 30 jours pour la mise à disposition des pièces demandées.\n\n` : '') +
       `Je vous saurais gré de bien vouloir me transmettre ces éléments par voie électronique à l'adresse indiquée ci-dessus, ou de m'indiquer les modalités pratiques de leur consultation dans les délais prévus par la réglementation en vigueur (conformément à l'Article 12 de la Loi n°2013-867).\n\n` +
       `Je reste à votre entière disposition pour tout échange facilitant le bon traitement de cette démarche constructive.\n\n` +
       `Dans l'attente de votre réponse, je vous prie d'agréer, ${dynamicSalutation}, l'expression de mes salutations distinguées et respectueuses.\n\n` +
@@ -580,21 +595,35 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
   };
 
   const handleSendEmail = () => {
-    const subject = encodeURIComponent(`[Loi n°2013-867] Demande d'accès aux documents publics - ${targetEntityName} - Réf: ${referenceNumber}`);
+    const subject = hasNominatedRi
+      ? encodeURIComponent(`Demande de documents : ${documentSubject} (Réf: ${referenceNumber})`)
+      : encodeURIComponent(`[Loi n°2013-867 / CAIDP] Demande de documents publics : ${documentSubject} - ${targetEntityName}`);
+
+    const senderLines = [
+      `- Demandeur : ${citizenName || '[Nom et Prénom]'}`,
+      userStatus !== 'CITOYEN' 
+        ? `- Qualité : ${userStatus === 'JOURNALISTE' ? 'Journaliste Professionnel (Délai d\'urgence : 15 jours)' : userStatus === 'CHERCHEUR' ? 'Chercheur / Universitaire (Délai d\'urgence : 15 jours)' : 'Société Civile (OSC)'}` 
+        : null,
+      `- Email : ${citizenEmail || '[Email de réception]'}`,
+      citizenPhone?.trim() ? `- Téléphone : ${citizenPhone.trim()}` : null,
+      citizenAddress?.trim() ? `- Résidence : ${citizenAddress.trim()}` : null,
+    ].filter(Boolean).join('\n');
+
+    const introText = hasNominatedRi
+      ? `En votre qualité de Responsable de l'Information (RI) désigné(e) au titre de la Loi n°2013-867 (CAIDP), j'ai l'honneur de solliciter la communication des documents administratifs suivants :`
+      : `En application de la Loi n°2013-867 du 23 décembre 2013 relative à l'accès à l'information d'intérêt public en République de Côte d'Ivoire, j'ai l'honneur de solliciter la communication des documents administratifs suivants relatifs à votre organisme :`;
+
     const body = encodeURIComponent(
       `${dynamicSalutation},\n\n` +
-      `En application de la Loi n°2013-867 du 23 décembre 2013 relative à l'accès à l'information d'intérêt public en République de Côte d'Ivoire, j'ai l'honneur de solliciter respectueusement la communication des documents administratifs suivants :\n\n` +
+      `${introText}\n\n` +
       `OBJET : ${documentSubject}\n\n` +
       `DOCUMENTS SOLLICITÉS :\n` +
       `${formattedDocumentList}\n\n` +
-      `Je vous saurais gré de bien vouloir me transmettre ces éléments par voie électronique en réponse à cet email ou de m'indiquer les modalités de consultation, dans les délais prévus par la réglementation en vigueur (Article 12 de la Loi n°2013-867).\n\n` +
-      `Je reste à votre disposition pour toute précision utile.\n\n` +
+      (!hasNominatedRi ? `Pour rappel, l'Article 10 de la Loi n°2013-867 fait obligation à tout organisme public de désigner un Responsable de l'Information pour traiter les demandes du public, et l'Article 12 impartit un délai légal maximum de 30 jours pour la transmission des pièces.\n\n` : '') +
+      `Je vous saurais gré de bien vouloir me transmettre ces éléments par voie électronique en réponse à cet email ou de m'indiquer les modalités de consultation (Article 12 de la Loi n°2013-867).\n\n` +
+      `Je reste à votre entière disposition pour toute précision utile.\n\n` +
       `COORDONNÉES DU DEMANDEUR :\n` +
-      `Nom & Prénom : ${citizenName || '[Votre Nom et Prénom]'}\n` +
-      `Qualité : ${userStatus === 'CITOYEN' ? 'Citoyen / Usager' : userStatus === 'JOURNALISTE' ? 'Journaliste Professionnel' : userStatus === 'CHERCHEUR' ? 'Chercheur / Universitaire' : 'Société Civile'}\n` +
-      `Email : ${citizenEmail || '[Votre Email]'}\n` +
-      `Téléphone : ${citizenPhone || '[Votre Téléphone]'}\n` +
-      `Résidence : ${citizenAddress || 'Côte d\'Ivoire'}\n\n` +
+      `${senderLines}\n\n` +
       `Fait le ${todayStr} • Réf : ${referenceNumber}\n` +
       `Généré via la plateforme citoyenne SuiviBudget Côte d'Ivoire (suivibudget.ci).`
     );
@@ -905,14 +934,22 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
               
               {/* User Legal Status Selector */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider">
-                  Votre qualité de demandeur (Définit les délais légaux impartis) :
-                </label>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">
+                    Qualité ou profil du demandeur <span className="text-slate-400 font-normal lowercase">(facultatif)</span>
+                  </label>
+                  <span className="text-[10px] text-brand-blue font-bold">
+                    Non requis par la loi sauf pour délai d'urgence
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  L'Article 4 de la Loi 2013-867 garantit l'accès sans justification de statut. Sélectionner « Journaliste » ou « Chercheur » permet d'activer le délai d'urgence de 15 jours (Art. 12).
+                </p>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {[
                     { id: 'CITOYEN', label: 'Citoyen / Usager', delay: '30 jours' },
-                    { id: 'JOURNALISTE', label: 'Journaliste', delay: '15 jours' },
-                    { id: 'CHERCHEUR', label: 'Chercheur / Universitaire', delay: '15 jours' },
+                    { id: 'JOURNALISTE', label: 'Journaliste', delay: '15 jours (urgent)' },
+                    { id: 'CHERCHEUR', label: 'Chercheur / Universitaire', delay: '15 jours (urgent)' },
                     { id: 'OSC', label: 'Société Civile / ONG', delay: '30 jours' },
                   ].map((s) => (
                     <button
@@ -935,15 +972,22 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
 
               {/* Citizen Identity & Contact Details */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-4 shadow-2xs">
-                <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">
-                  Coordonnées pour la réception des documents
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">
+                    Coordonnées pour la réception des documents
+                  </h3>
+                  <span className="text-[10px] text-slate-500 font-medium">
+                    * Informations requises par la loi
+                  </span>
+                </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Nom & Prénom(s) du demandeur *</label>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Nom & Prénom(s) du demandeur * <span className="text-emerald-700 font-semibold text-[10px]">(Requis pour la recevabilité de la demande)</span>
+                  </label>
                   <input
                     type="text"
-                    placeholder="Ex: Kouassi Jean-Marc"
+                    placeholder="Ex: Kouassi Jean-Marc (ou Raison Sociale d'une ONG)"
                     value={citizenName}
                     onChange={(e) => setCitizenName(e.target.value)}
                     className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:bg-white focus:border-brand-blue font-medium"
@@ -952,7 +996,9 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Email de transmission *</label>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Email de réception * <span className="text-emerald-700 font-semibold text-[10px]">(Requis pour recevoir les documents)</span>
+                    </label>
                     <input
                       type="email"
                       placeholder="jean@exemple.ci"
@@ -962,10 +1008,12 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Téléphone de contact</label>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Numéro de téléphone <span className="text-slate-400 font-normal text-[10px]">(Facultatif - non exigé par la loi)</span>
+                    </label>
                     <input
                       type="tel"
-                      placeholder="+225 07 00 00 00"
+                      placeholder="+225 07 00 00 00 (optionnel)"
                       value={citizenPhone}
                       onChange={(e) => setCitizenPhone(e.target.value)}
                       className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:bg-white focus:border-brand-blue font-medium"
@@ -974,10 +1022,12 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Ville / Commune de résidence</label>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Ville ou commune de résidence <span className="text-slate-400 font-normal text-[10px]">(Facultatif - aucun critère de résidence exigé)</span>
+                  </label>
                   <input
                     type="text"
-                    placeholder="Ex: Abidjan, Cocody ou Bouaké"
+                    placeholder="Ex: Abidjan, Bouaké ou San-Pédro (optionnel)"
                     value={citizenAddress}
                     onChange={(e) => setCitizenAddress(e.target.value)}
                     className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:bg-white focus:border-brand-blue font-medium"
@@ -985,13 +1035,28 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Intitulé ou Objet de la demande</label>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Intitulé ou Objet de la demande
+                  </label>
                   <input
                     type="text"
                     value={documentSubject}
                     onChange={(e) => setDocumentSubject(e.target.value)}
                     className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:bg-white focus:border-brand-blue font-bold text-slate-900"
                   />
+                </div>
+              </div>
+
+              {/* Legal Guarantees Reminder Notice */}
+              <div className="p-4 bg-blue-50/70 border border-blue-200/80 rounded-2xl flex items-start gap-3 text-xs text-slate-700 leading-relaxed shadow-2xs">
+                <ShieldCheck className="w-5 h-5 text-brand-blue shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <strong className="block text-brand-blue font-black">
+                    Ce que prévoit la Loi n°2013-867 (Art. 4 & 6) :
+                  </strong>
+                  <p className="text-[11px] text-slate-600 leading-normal">
+                    L'accès aux documents administratifs est ouvert à toute personne, <strong>sans obligation de motiver la demande</strong> ni de justifier d'un intérêt particulier. Aucun critère de profession ou de lieu de résidence n'est requis. Seuls votre nom et votre adresse de contact (email) sont nécessaires pour identifier votre demande et vous transmettre les pièces.
+                  </p>
                 </div>
               </div>
 
@@ -1043,12 +1108,14 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
                   <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
                     <span className="font-black text-slate-400 uppercase text-[10px] block mb-1">LE DEMANDEUR :</span>
                     <p className="font-black text-slate-900 text-sm">{citizenName || '[Nom et Prénom]'}</p>
-                    <p className="text-slate-600 font-semibold text-[11px]">
-                      Qualité : {userStatus === 'CITOYEN' ? 'Citoyen / Usager' : userStatus === 'JOURNALISTE' ? 'Journaliste Professionnel' : userStatus === 'CHERCHEUR' ? 'Chercheur / Universitaire' : 'Société Civile'}
-                    </p>
-                    <p className="text-slate-600">{citizenEmail || '[Email de contact]'}</p>
-                    <p className="text-slate-600">{citizenPhone || '[Téléphone]'}</p>
-                    <p className="text-slate-600">{citizenAddress || '[Commune de résidence, Côte d\'Ivoire]'}</p>
+                    {userStatus !== 'CITOYEN' && (
+                      <p className="text-brand-blue font-bold text-[11px]">
+                        Qualité : {userStatus === 'JOURNALISTE' ? 'Journaliste Professionnel (Délai d\'urgence : 15 jours)' : userStatus === 'CHERCHEUR' ? 'Chercheur / Universitaire (Délai d\'urgence : 15 jours)' : 'Organisation de la Société Civile (OSC)'}
+                      </p>
+                    )}
+                    <p className="text-slate-600 font-mono text-[11px]">{citizenEmail || '[Email de réception]'}</p>
+                    {citizenPhone?.trim() && <p className="text-slate-600">Tél : {citizenPhone.trim()}</p>}
+                    {citizenAddress?.trim() && <p className="text-slate-600">Résidence : {citizenAddress.trim()}</p>}
                   </div>
 
                   <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-1 sm:text-right">
@@ -1075,21 +1142,47 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
                 </div>
 
                 {/* Letter Subject */}
-                <div className="font-sans text-xs bg-blue-50/60 p-3.5 rounded-xl border border-blue-100">
-                  <span className="font-black text-slate-900">OBJET : </span>
-                  <span className="font-bold text-slate-800">{documentSubject}</span>
-                  <p className="text-slate-600 text-[11px] mt-0.5 font-medium">Fondement légal : Articles 2, 4, 7, 8, 10 & 12 de la Loi n°2013-867 relative à l'accès à l'information d'intérêt public.</p>
+                <div className="font-sans text-xs bg-blue-50/60 p-3.5 rounded-xl border border-blue-100 space-y-1">
+                  <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+                    <div>
+                      <span className="font-black text-slate-900">OBJET : </span>
+                      <span className="font-bold text-slate-800">{documentSubject}</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-brand-blue shrink-0 font-mono">
+                      Réf. : {referenceNumber}
+                    </span>
+                  </div>
+                  {hasNominatedRi ? (
+                    <p className="text-slate-500 text-[11px] font-medium">
+                      Cadre légal : Loi n°2013-867 relative à l'accès à l'information d'intérêt public (CAIDP)
+                    </p>
+                  ) : (
+                    <p className="text-slate-600 text-[11px] font-medium">
+                      Fondement légal : Articles 2, 4, 10 & 12 de la Loi n°2013-867 (Obligation légale de communication & désignation de RI).
+                    </p>
+                  )}
                 </div>
 
                 {/* Letter Body */}
                 <div className="text-xs leading-relaxed space-y-3.5 pt-1 text-slate-800 font-sans">
                   <p className="font-semibold">{dynamicSalutation},</p>
-                  <p>
-                    Dans le cadre de la promotion de la transparence administrative et du suivi citoyen garanti par la <strong>Loi n°2013-867 du 23 décembre 2013</strong> relative à l'accès à l'information d'intérêt public en République de Côte d'Ivoire, j'ai l'honneur de solliciter respectueusement la communication des documents administratifs suivants :
-                  </p>
+                  {hasNominatedRi ? (
+                    <p>
+                      En votre qualité de Responsable de l'Information désigné(e) au titre de la <strong>Loi n°2013-867</strong> relative à l'accès à l'information d'intérêt public en République de Côte d'Ivoire, j'ai l'honneur de solliciter respectueusement la communication des documents administratifs suivants :
+                    </p>
+                  ) : (
+                    <p>
+                      Dans le cadre de la promotion de la transparence administrative et du suivi citoyen garanti par la <strong>Loi n°2013-867 du 23 décembre 2013</strong> relative à l'accès à l'information d'intérêt public en République de Côte d'Ivoire, j'ai l'honneur de solliciter respectueusement la communication des documents administratifs suivants relatifs à votre organisme :
+                    </p>
+                  )}
                   <div className="bg-slate-50 p-4 rounded-xl border-l-4 border-brand-blue font-sans text-xs text-slate-900 whitespace-pre-line leading-relaxed shadow-2xs">
                     {formattedDocumentList}
                   </div>
+                  {!hasNominatedRi && (
+                    <p className="text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                      <em>Pour rappel :</em> Conformément à l'Article 10 de la Loi n°2013-867, tout organisme public est tenu de désigner un Responsable de l'Information pour instruire les demandes du public, et l'Article 12 prévoit un délai légal maximum de 30 jours pour la communication des pièces sollicitées.
+                    </p>
+                  )}
                   <p>
                     Je vous saurais gré de bien vouloir me transmettre ces éléments par voie électronique à l'adresse indiquée ci-dessus, ou de m'indiquer les modalités pratiques de leur consultation dans les délais prévus par la réglementation en vigueur (conformément à l'Article 12 de la Loi n°2013-867).
                   </p>
