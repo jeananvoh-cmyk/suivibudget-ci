@@ -198,16 +198,38 @@ CREATE POLICY "Anyone can insert a confirmation."
     ON proof_confirmations FOR INSERT WITH CHECK (true);
 
 -- ==============================================================================
--- STORAGE BUCKET CONFIGURATION (Pour les photos citoyennes)
+-- STORAGE BUCKET CONFIGURATION (Pour les photos & vidéos citoyennes)
 -- ==============================================================================
-INSERT INTO storage.buckets (id, name, public) 
-VALUES ('citizen_photos', 'citizen_photos', true)
-ON CONFLICT (id) DO NOTHING;
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types) 
+VALUES (
+    'citizen_photos', 
+    'citizen_photos', 
+    true, 
+    26214400, 
+    ARRAY['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime']
+)
+ON CONFLICT (id) DO UPDATE SET
+    file_size_limit = 26214400,
+    allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime'];
 
+-- Consultation publique des médias
 CREATE POLICY "Citizen photos are publicly accessible"
     ON storage.objects FOR SELECT
     USING (bucket_id = 'citizen_photos');
 
-CREATE POLICY "Anyone can upload citizen photos"
+-- Upload sécurisé : vérification stricte d'extension et taille maximale (25 Mo)
+CREATE POLICY "Strict citizen media upload only"
     ON storage.objects FOR INSERT
-    WITH CHECK (bucket_id = 'citizen_photos');
+    WITH CHECK (
+        bucket_id = 'citizen_photos' 
+        AND (LOWER(storage.extension(name)) IN ('jpg', 'jpeg', 'png', 'webp', 'mp4', 'webm', 'mov'))
+        AND ((metadata->>'size')::bigint <= 26214400)
+    );
+
+-- Seuls les administrateurs et modérateurs peuvent supprimer des médias citoyens
+CREATE POLICY "Admins and Moderators can delete citizen media"
+    ON storage.objects FOR DELETE
+    USING (
+        bucket_id = 'citizen_photos' 
+        AND is_admin_or_moderator()
+    );

@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Institution, BudgetProject, BudgetLineItem } from '../types';
 import { formatFCFA, formatAmountInWords } from '../utils/formatters';
-import { getBudgetLinesForEntity } from '../data/budgetLinesData';
 import { 
   X, 
   Globe, 
@@ -87,14 +86,40 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   const [projectSearch, setProjectSearch] = useState('');
   const [selectedProjectCategory, setSelectedProjectCategory] = useState('ALL');
 
-  if (!isOpen || !institution) return null;
+  // Dynamic async budget lines loader (Lazy bundle splitting to save 31MB initial download)
+  const [entityBudgetLines, setEntityBudgetLines] = useState<BudgetLineItem[]>([]);
+  const [isLoadingLines, setIsLoadingLines] = useState(false);
 
-  // Retrieve granular budget lines
-  const entityBudgetLines = getBudgetLinesForEntity(
-    institution.name, 
-    institution.type, 
-    institution.leader_title || institution.leader_name
-  );
+  useEffect(() => {
+    if (!isOpen || !institution) {
+      setEntityBudgetLines([]);
+      return;
+    }
+    let isMounted = true;
+    setIsLoadingLines(true);
+    import('../data/budgetLinesData')
+      .then(({ getBudgetLinesForEntity }) => {
+        if (isMounted) {
+          const lines = getBudgetLinesForEntity(
+            institution.name, 
+            institution.type, 
+            institution.leader_title || institution.leader_name
+          );
+          setEntityBudgetLines(lines);
+          setIsLoadingLines(false);
+        }
+      })
+      .catch((err) => {
+        console.warn("Erreur chargement dynamique des lignes budgétaires:", err);
+        if (isMounted) setIsLoadingLines(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, institution?.id, institution?.name, institution?.type, institution?.leader_title, institution?.leader_name]);
+
+  if (!isOpen || !institution) return null;
 
   // Extract unique natures
   const uniqueNatures = Array.from(new Set(
@@ -448,7 +473,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
             { 
               id: 'FINANCES', 
               label: 'Budget & Finances',
-              badge: entityBudgetLines.length > 0 ? `${entityBudgetLines.length} lignes` : 'Exercice 2026'
+              badge: isLoadingLines ? 'Chargement...' : (entityBudgetLines.length > 0 ? `${entityBudgetLines.length} lignes` : 'Exercice 2026')
             },
             { 
               id: 'LEADER_MISSIONS', 
@@ -721,7 +746,13 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
               </div>
 
               {/* Lignes Budgétaires Détaillées */}
-              {entityBudgetLines.length > 0 && (
+              {isLoadingLines ? (
+                <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 space-y-3">
+                  <div className="w-7 h-7 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto"></div>
+                  <p className="text-xs font-bold text-slate-700">Chargement des lignes budgétaires officielles (LFI 2026)...</p>
+                  <p className="text-[11px] text-slate-400">Décompression asynchrone des programmes et dotations...</p>
+                </div>
+              ) : entityBudgetLines.length > 0 ? (
                 <div className="space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-3 rounded-2xl border border-slate-200">
                     <div className="relative flex-1 w-full">
@@ -784,7 +815,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     </div>
                   </div>
                 </div>
-              )}
+              ) : null}
 
             </div>
           )}

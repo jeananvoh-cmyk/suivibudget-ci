@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { dataStore } from '../services/dataStore';
 import { AuthSecurityService } from '../services/authSecurity';
+import { isSupabaseConfigured } from '../services/supabase';
 import { 
   ShieldCheck, 
   Lock, 
@@ -367,8 +368,14 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
             <span>Sécurité Renforcée : SHA-256 + Sel Aléatoire + Anti-Brute Force (5 essais max)</span>
           </div>
           <p>
-            Aucun mot de passe n'est stocké en clair. Votre accès est chiffré localement.
+            Aucun mot de passe n'est stocké en clair. Votre accès est protégé et journalisé.
           </p>
+          <div className="pt-1 flex items-center justify-center">
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-bold text-[9px] ${isSupabaseConfigured() ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-200 text-slate-700'}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${isSupabaseConfigured() ? 'bg-emerald-600 animate-pulse' : 'bg-slate-500'}`} />
+              {isSupabaseConfigured() ? 'Supabase Backend Actif (Auth RLS)' : 'Mode Autonome / Local'}
+            </span>
+          </div>
         </div>
 
       </div>

@@ -107,6 +107,9 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
   const videoInputRef = useRef<HTMLInputElement>(null);
   const videoRecordRef = useRef<HTMLInputElement>(null);
 
+  const DRAFT_KEY = 'suivibudget_proof_draft';
+  const [hasDraftRestored, setHasDraftRestored] = useState(false);
+
   // Reset when modal opens with targetProject
   useEffect(() => {
     if (targetProject) {
@@ -115,6 +118,65 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
       setIsChangingProject(false);
     }
   }, [targetProject]);
+
+  // Restore draft when modal opens without a specific targetProject
+  useEffect(() => {
+    if (targetProject) return;
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) {
+        const draft = JSON.parse(saved);
+        if (draft.projectId) {
+          const found = projects.find((p) => p.id === draft.projectId);
+          if (found) setSelectedProject(found);
+        }
+        if (draft.citizenStatus) setCitizenStatus(draft.citizenStatus);
+        if (draft.comment) setComment(draft.comment);
+        if (draft.locality) setLocality(draft.locality);
+        if (draft.observationDate) setObservationDate(draft.observationDate);
+        if (draft.citizenName) setCitizenName(draft.citizenName);
+        if (draft.citizenContact) setCitizenContact(draft.citizenContact);
+        setHasDraftRestored(true);
+      }
+    } catch (e) {
+      console.warn('Erreur lecture brouillon:', e);
+    }
+  }, [targetProject, projects]);
+
+  // Auto-save draft on changes to survive network loss or accidental closure
+  useEffect(() => {
+    if (targetProject) return;
+    if (!comment && !locality && !citizenName && !selectedProject) return;
+
+    try {
+      const draft = {
+        projectId: selectedProject?.id,
+        citizenStatus,
+        comment,
+        locality,
+        observationDate,
+        citizenName,
+        citizenContact,
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch {
+      // Ignore localStorage quotas
+    }
+  }, [targetProject, selectedProject, citizenStatus, comment, locality, observationDate, citizenName, citizenContact]);
+
+  const handleClearDraft = () => {
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {}
+    setHasDraftRestored(false);
+    setSelectedProject(null);
+    setComment('');
+    setLocality('');
+    setCitizenName('');
+    setCitizenContact('');
+    setCitizenStatus('IN_PROGRESS');
+  };
 
   // Filter projects for search in step 1
   const searchResults = useMemo(() => {
@@ -289,6 +351,11 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
         citizen_name: citizenName.trim() || 'Citoyen Observateur',
       });
 
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch {}
+      setHasDraftRestored(false);
+
       setIsSubmitting(false);
       setShowSuccess(true);
 
@@ -358,6 +425,22 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                   style={{ width: `${(currentStep / 3) * 100}%` }}
                 />
               </div>
+
+              {hasDraftRestored && !targetProject && (
+                <div className="mt-2.5 px-3 py-1.5 bg-amber-50 border border-amber-200/80 rounded-xl flex items-center justify-between text-xs text-amber-800">
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    Brouillon non envoyé restauré
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleClearDraft}
+                    className="font-bold text-amber-700 hover:text-amber-900 underline ml-2"
+                  >
+                    Effacer
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

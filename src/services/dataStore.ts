@@ -643,6 +643,9 @@ class DataStore {
 
   public logout() {
     AuthSecurityService.clearSession();
+    if (isSupabaseConfigured()) {
+      supabase.auth.signOut().catch(() => {});
+    }
     this.authState = {
       isAuthenticated: false,
       email: '',

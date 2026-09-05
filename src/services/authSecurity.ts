@@ -4,6 +4,8 @@
 // Salage aléatoire, Protection Anti-Brute Force, et Gestion Multi-Comptes Modérateurs.
 // =========================================================================
 
+import { supabase, isSupabaseConfigured } from './supabase';
+
 export interface ModeratorUser {
   id: string;
   email: string;
@@ -392,6 +394,48 @@ export class AuthSecurityService {
     const cleanId = identifier.trim().toLowerCase();
     const passwordTrimmed = plaintextPassword.trim();
 
+    // 0. Connect to Supabase Auth if configured and identifier is an email
+    if (isSupabaseConfigured() && cleanId.includes('@')) {
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: cleanId,
+          password: passwordTrimmed,
+        });
+
+        if (data?.user && !error) {
+          this.resetFailedAttempts();
+
+          let role: 'ADMIN' | 'MODERATOR' | 'DATA_MANAGER' = 'ADMIN';
+          let fullName = data.user.user_metadata?.full_name || 'Administrateur National';
+
+          try {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('full_name, role')
+              .eq('id', data.user.id)
+              .single();
+
+            if (profile) {
+              if (profile.role) role = profile.role as 'ADMIN' | 'MODERATOR' | 'DATA_MANAGER';
+              if (profile.full_name) fullName = profile.full_name;
+            }
+          } catch (profileErr) {
+            console.warn('Could not fetch user profile from profiles table:', profileErr);
+          }
+
+          return {
+            success: true,
+            needsPasswordChange: false,
+            role,
+            fullName,
+            email: data.user.email || cleanId,
+          };
+        }
+      } catch (sbErr) {
+        console.warn('Supabase Auth error, falling back to local credentials:', sbErr);
+      }
+    }
+
     // 1. Check Super Admin Accounts
     const superAdminLogins = ['admin', 'admin@civicdata.ci', 'superadmin', 'direction@civicdata.ci', 'contact.suivi@gmail.com'];
     if (superAdminLogins.includes(cleanId)) {
@@ -485,6 +529,14 @@ export class AuthSecurityService {
       localStorage.setItem(AUTH_STORAGE_KEYS.ADMIN_NEEDS_CHANGE, 'false');
       localStorage.setItem(AUTH_STORAGE_KEYS.PASSWORD_CHANGED_AT, new Date().toISOString());
       this.resetFailedAttempts();
+
+      if (isSupabaseConfigured()) {
+        try {
+          await supabase.auth.updateUser({ password: newPassword });
+        } catch (sbErr) {
+          console.warn("Supabase password sync warning:", sbErr);
+        }
+      }
 
       return { success: true };
     } catch (e: any) {
