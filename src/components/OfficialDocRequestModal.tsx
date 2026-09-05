@@ -47,286 +47,12 @@ interface OfficialDocRequestModalProps {
 
 type UserLegalStatus = 'CITOYEN' | 'JOURNALISTE' | 'CHERCHEUR' | 'OSC';
 
-export type CaidpPillarCategory = 
-  | 'ALL'
-  | 'PRIORITY'
-  | 'FINANCES'
-  | 'PROCUREMENT'
-  | 'PLANIFICATION'
-  | 'BILAN_AUDIT'
-  | 'DELIBERATIONS'
-  | 'PRESTATIONS_IDENTITE'
-  | 'POLITIQUES_EIES';
-
-interface LegalDocItem {
-  id: string;
-  category: 'FINANCES' | 'PROCUREMENT' | 'PLANIFICATION' | 'BILAN_AUDIT' | 'DELIBERATIONS' | 'PRESTATIONS_IDENTITE' | 'POLITIQUES_EIES';
-  categoryLabel: string;
-  title: string;
-  description: string;
-  legalBasis: string;
-  isPriorityForCivic: boolean;
-  applicableTypes: ('MAIRIE' | 'REGION' | 'MINISTERE' | 'INSTITUTION' | 'AUTORITE_REGULATION' | 'PROJECT')[];
-}
-
-/**
- * Catalogue Officiel des Documents Publics (Loi n°2013-867 / CAIDP)
- */
-const ALL_LEGAL_DOCUMENTS: LegalDocItem[] = [
-  // =========================================================================
-  // FINANCES & DÉPENSES PUBLIQUES
-  // =========================================================================
-  {
-    id: 'budget_organisme_et_fonds',
-    category: 'FINANCES',
-    categoryLabel: 'Finances & Budget',
-    title: 'Budget Primitif (BP) de l\'organisme & Fonds gérés',
-    description: 'Budget annuel voté / alloué, dotations de fonctionnement et d\'investissement, fonds spéciaux et annexes.',
-    legalBasis: 'Art. 2 & 4 • Loi n°2013-867',
-    isPriorityForCivic: true,
-    applicableTypes: ['MAIRIE', 'REGION', 'MINISTERE', 'INSTITUTION', 'AUTORITE_REGULATION'],
-  },
-  {
-    id: 'etat_execution_budget_compte_admin',
-    category: 'FINANCES',
-    categoryLabel: 'Finances & Budget',
-    title: 'État d\'exécution du Budget & Compte Administratif (CA)',
-    description: 'Rapports semestriels et annuels d\'exécution des dépenses et recettes, consommation des crédits et bilans clos.',
-    legalBasis: 'Art. 4 • Loi n°2013-867',
-    isPriorityForCivic: true,
-    applicableTypes: ['MAIRIE', 'REGION', 'MINISTERE', 'INSTITUTION', 'AUTORITE_REGULATION'],
-  },
-  {
-    id: 'plan_passation_marches_ppm',
-    category: 'PROCUREMENT',
-    categoryLabel: 'Marchés Publics',
-    title: 'Plan de Passation des Marchés (PPM) & Marchés Programmés',
-    description: 'Calendrier prévisionnel annuel des marchés publics à lancer, montants alloués et modes de passation retenus.',
-    legalBasis: 'Code des Marchés Publics',
-    isPriorityForCivic: true,
-    applicableTypes: ['MAIRIE', 'REGION', 'MINISTERE', 'INSTITUTION', 'AUTORITE_REGULATION', 'PROJECT'],
-  },
-  {
-    id: 'marches_publics_passes_attributions',
-    category: 'PROCUREMENT',
-    categoryLabel: 'Marchés Publics',
-    title: 'Marchés Publics Passés & Procès-Verbaux d\'Attribution',
-    description: 'Registre des avis d\'attribution, identité des entreprises attributaires, montants contractuels adjugés et PV d\'ouverture.',
-    legalBasis: 'Art. 4 & 12 • Loi n°2013-867',
-    isPriorityForCivic: true,
-    applicableTypes: ['MAIRIE', 'REGION', 'MINISTERE', 'INSTITUTION', 'AUTORITE_REGULATION', 'PROJECT'],
-  },
-  {
-    id: 'etat_execution_marches_reception',
-    category: 'PROCUREMENT',
-    categoryLabel: 'Marchés Publics',
-    title: 'État d\'Exécution des Marchés & PV de Réception des Travaux',
-    description: 'État d\'avancement physique et financier des chantiers, PV de réception provisoire/définitive et décomptes.',
-    legalBasis: 'Art. 4 • Loi n°2013-867',
-    isPriorityForCivic: true,
-    applicableTypes: ['MAIRIE', 'REGION', 'MINISTERE', 'INSTITUTION', 'AUTORITE_REGULATION', 'PROJECT'],
-  },
-  {
-    id: 'bilans_financiers_et_analyses',
-    category: 'FINANCES',
-    categoryLabel: 'Finances & Budget',
-    title: 'Bilans Financiers, Rapports d\'Analyses & Comptes de Gestion',
-    description: 'États financiers certifiés, rapports de gestion comptable et états comparatifs des réalisations.',
-    legalBasis: 'Art. 4 • Loi n°2013-867',
-    isPriorityForCivic: true,
-    applicableTypes: ['MAIRIE', 'REGION', 'MINISTERE', 'INSTITUTION', 'AUTORITE_REGULATION'],
-  },
-  {
-    id: 'subventions_dons_conventions_bailleurs',
-    category: 'FINANCES',
-    categoryLabel: 'Finances & Budget',
-    title: 'Subventions, Dons, Legs & Conventions de Financement',
-    description: 'Accords financiers avec les partenaires techniques et financiers (PTF), appuis extérieurs et coopération.',
-    legalBasis: 'Art. 2 • Loi n°2013-867',
-    isPriorityForCivic: false,
-    applicableTypes: ['MAIRIE', 'REGION', 'MINISTERE', 'INSTITUTION', 'AUTORITE_REGULATION'],
-  },
-  {
-    id: 'taxes_locales_odp_recouvrement',
-    category: 'FINANCES',
-    categoryLabel: 'Fiscalité Locale',
-    title: 'Recouvrement des Taxes Locales & Droits d\'Occupation du Domaine Public (ODP)',
-    description: 'Tarification des taxes municipales/régionales, droits de place sur les marchés et recettes fiscales recouvrées.',
-    legalBasis: 'Art. 2 & 4 • Loi n°2013-867',
-    isPriorityForCivic: false,
-    applicableTypes: ['MAIRIE', 'REGION'],
-  },
-
-  // =========================================================================
-  // PLANIFICATION & INVESTISSEMENTS
-  // =========================================================================
-  {
-    id: 'programme_triennal_pti_ptd',
-    category: 'PLANIFICATION',
-    categoryLabel: 'Planification',
-    title: 'Programme Triennal d\'Investissement (PTI / PTD) & Projets',
-    description: 'Cartographie pluriannuelle des chantiers (Écoles, CHR/Dispensaires, Voiries, Hydraulique), coûts et localisations.',
-    legalBasis: 'Art. 2 & 4 • Loi n°2013-867',
-    isPriorityForCivic: true,
-    applicableTypes: ['MAIRIE', 'REGION'],
-  },
-  {
-    id: 'plan_travail_annuel_budgetise_ptab',
-    category: 'PLANIFICATION',
-    categoryLabel: 'Planification',
-    title: 'Plan de Travail Annuel Budgétisé (PTAB) & Plan d\'Actions',
-    description: 'Matrice opérationnelle des activités programmées, indicateurs de mise en œuvre et allocation budgétaire.',
-    legalBasis: 'Art. 2 & 4 • Loi n°2013-867',
-    isPriorityForCivic: true,
-    applicableTypes: ['MINISTERE', 'REGION', 'INSTITUTION', 'AUTORITE_REGULATION'],
-  },
-
-  // =========================================================================
-  // BILAN, AUDITS & DÉLIBÉRATIONS
-  // =========================================================================
-  {
-    id: 'rapports_annuels_activite_rap',
-    category: 'BILAN_AUDIT',
-    categoryLabel: 'Bilan & Activités',
-    title: 'Rapports Annuels d\'Activité & Rapports de Performance (RAP)',
-    description: 'Bilan d\'exécution des politiques publiques, atteinte des objectifs de développement et rapports sectoriels.',
-    legalBasis: 'Art. 2 & 7 • Loi n°2013-867',
-    isPriorityForCivic: true,
-    applicableTypes: ['MAIRIE', 'REGION', 'MINISTERE', 'INSTITUTION', 'AUTORITE_REGULATION'],
-  },
-  {
-    id: 'proces_verbaux_deliberations_conseils',
-    category: 'DELIBERATIONS',
-    categoryLabel: 'Délibérations',
-    title: 'Procès-Verbaux des Sessions & Délibérations du Conseil',
-    description: 'Comptes-rendus intégraux des sessions plénières du Conseil Municipal / Régional et décisions exécutoires.',
-    legalBasis: 'Art. 2 & 4 • Loi n°2013-867',
-    isPriorityForCivic: true,
-    applicableTypes: ['MAIRIE', 'REGION'],
-  },
-  {
-    id: 'rapports_audits_cour_des_comptes',
-    category: 'BILAN_AUDIT',
-    categoryLabel: 'Audits & Contrôle',
-    title: 'Rapports d\'Audits (Cour des Comptes, Inspections Générales)',
-    description: 'Conclusions des missions d\'audit financier, d\'évaluation de gestion publique et recommandations officielles.',
-    legalBasis: 'Art. 2 & 4 • Loi n°2013-867',
-    isPriorityForCivic: true,
-    applicableTypes: ['MINISTERE', 'INSTITUTION', 'AUTORITE_REGULATION', 'REGION', 'MAIRIE'],
-  },
-  {
-    id: 'arretes_decisions_reglementaires',
-    category: 'DELIBERATIONS',
-    categoryLabel: 'Actes Juridiques',
-    title: 'Arrêtés, Décisions Règlementaires & Circulaires d\'Application',
-    description: 'Actes administratifs unilatéraux, règlements de police administrative, arrêtés de voirie et circulaires.',
-    legalBasis: 'Art. 2 • Loi n°2013-867',
-    isPriorityForCivic: false,
-    applicableTypes: ['MAIRIE', 'REGION', 'MINISTERE', 'INSTITUTION', 'AUTORITE_REGULATION'],
-  },
-  {
-    id: 'statistiques_chiffres_etudes_sectorielles',
-    category: 'BILAN_AUDIT',
-    categoryLabel: 'Données & Études',
-    title: 'Données Statistiques Officielles & Rapports d\'Études Sectorielles',
-    description: 'Bases de données chiffrées d\'intérêt public, recensements d\'équipements publics et rapports d\'impact.',
-    legalBasis: 'Art. 2 • Loi n°2013-867',
-    isPriorityForCivic: false,
-    applicableTypes: ['MINISTERE', 'REGION', 'MAIRIE', 'INSTITUTION', 'AUTORITE_REGULATION'],
-  },
-
-  // =========================================================================
-  // POLITIQUES PUBLIQUES & ENVIRONNEMENT (EIES)
-  // =========================================================================
-  {
-    id: 'etude_impact_environnemental_eies',
-    category: 'POLITIQUES_EIES',
-    categoryLabel: 'Environnement & EIES',
-    title: 'Étude d\'Impact Environnemental et Social (EIES) & Plans de Gestion',
-    description: 'Rapport d\'évaluation des impacts écologiques, plan de gestion environnementale et sociale (PGES) validé par l\'ANDE.',
-    legalBasis: 'Code de l\'Environnement • Loi 2013-867',
-    isPriorityForCivic: true,
-    applicableTypes: ['MINISTERE', 'PROJECT', 'REGION', 'MAIRIE'],
-  },
-  {
-    id: 'documents_cadres_politiques_sociales',
-    category: 'POLITIQUES_EIES',
-    categoryLabel: 'Politiques Publiques',
-    title: 'Documents Cadres de Politiques Sociales, Économiques & Sanitaires',
-    description: 'Stratégies sectorielles nationales et régionales de développement, schémas directeurs et plans d\'action.',
-    legalBasis: 'Art. 2 • Loi n°2013-867',
-    isPriorityForCivic: false,
-    applicableTypes: ['MINISTERE', 'REGION', 'INSTITUTION'],
-  },
-
-  // =========================================================================
-  // GOUVERNANCE, PRESTATIONS & SERVICES
-  // =========================================================================
-  {
-    id: 'organigramme_nominatif_responsables',
-    category: 'PRESTATIONS_IDENTITE',
-    categoryLabel: 'Gouvernance',
-    title: 'Organigramme Officiel Nominatif & Textes Juridiques de Création',
-    description: 'Structure administrative avec identification nominative des directeurs, décrets ou arrêtés organiques de création.',
-    legalBasis: 'Art. 2 • Loi n°2013-867',
-    isPriorityForCivic: false,
-    applicableTypes: ['MAIRIE', 'REGION', 'MINISTERE', 'INSTITUTION', 'AUTORITE_REGULATION'],
-  },
-  {
-    id: 'guides_procedures_prestations_usagers',
-    category: 'PRESTATIONS_IDENTITE',
-    categoryLabel: 'Services Usagers',
-    title: 'Guides des Démarches & Manuels de Procédures pour Usagers',
-    description: 'Modalités d\'accès aux services publics (démarches d\'état civil, autorisations, permis), coûts et formulaires types.',
-    legalBasis: 'Art. 2 • Loi n°2013-867',
-    isPriorityForCivic: false,
-    applicableTypes: ['MAIRIE', 'MINISTERE', 'AUTORITE_REGULATION', 'REGION'],
-  },
-  {
-    id: 'decisions_regulation_sanctions_licences',
-    category: 'DELIBERATIONS',
-    categoryLabel: 'Régulation & Décisions',
-    title: 'Décisions de Régulation, Sanctions Administratives & Agréments',
-    description: 'Avis de conformité, licences d\'exploitation, décisions tarifaires, sanctions et mises en demeure notifiées.',
-    legalBasis: 'Art. 2 & 4 • Loi n°2013-867',
-    isPriorityForCivic: true,
-    applicableTypes: ['AUTORITE_REGULATION'],
-  },
-  {
-    id: 'rapport_redevances_regulation_sectorielle',
-    category: 'FINANCES',
-    categoryLabel: 'Redevances & Régulation',
-    title: 'Rapport Annuel de Régulation & Perception des Redevances',
-    description: 'Bilan de perception des redevances et taxes sectorielles, audits de qualité de service et conformité.',
-    legalBasis: 'Art. 2 & 4 • Loi n°2013-867',
-    isPriorityForCivic: true,
-    applicableTypes: ['AUTORITE_REGULATION'],
-  },
-
-  // =========================================================================
-  // PROJET / CHANTIER CIBLÉ
-  // =========================================================================
-  {
-    id: 'dao_cahier_prescriptions_techniques',
-    category: 'PROCUREMENT',
-    categoryLabel: 'Projet Ciblé',
-    title: 'Dossier d\'Appel d\'Offres (DAO) & Spécifications Techniques du Chantier',
-    description: 'Cahier des clauses techniques particulières (CCTP), bordereau des prix et devis quantitatif estimatif de l\'ouvrage.',
-    legalBasis: 'Code des Marchés Publics • Art. 4 & 12',
-    isPriorityForCivic: true,
-    applicableTypes: ['PROJECT'],
-  },
-  {
-    id: 'pv_reception_decompte_financier_projet',
-    category: 'PROCUREMENT',
-    categoryLabel: 'Projet Ciblé',
-    title: 'PV de Réception des Travaux & Décompte Général Définitif des Paiements',
-    description: 'Procès-verbal de réception provisoire/définitive de l\'ouvrage et état récapitulatif des sommes décaissées.',
-    legalBasis: 'Code des Marchés Publics • Art. 4',
-    isPriorityForCivic: true,
-    applicableTypes: ['PROJECT'],
-  }
-];
+import { 
+  LegalDocItem, 
+  CaidpPillarCategory, 
+  resolveSpecificEntityKey, 
+  getDocumentsForEntity 
+} from '../data/caidpDocumentsCatalog';
 
 export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = ({
   isOpen,
@@ -407,14 +133,15 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
   const hasDirectPhone = Boolean(rawPhone && rawPhone !== "Pas de numéro" && rawPhone.trim() !== "");
   const displayPhone = hasDirectPhone ? rawPhone : "Non publié au registre public";
 
-  // Filter available documents for this specific entity type
+  // Resolve specific key (e.g. HABG, MIN_CONSTRUCTION, COUR_DES_COMPTES, etc.)
+  const specificEntityKey = useMemo(() => {
+    return resolveSpecificEntityKey(institution, Boolean(project), resolvedEntityType);
+  }, [institution, project, resolvedEntityType]);
+
+  // Filter available documents for this specific entity and sector
   const availableDocs = useMemo(() => {
-    const matched = ALL_LEGAL_DOCUMENTS.filter(doc => doc.applicableTypes.includes(resolvedEntityType));
-    if (matched.length === 0) {
-      return ALL_LEGAL_DOCUMENTS.filter(doc => !doc.applicableTypes.includes('PROJECT'));
-    }
-    return matched;
-  }, [resolvedEntityType]);
+    return getDocumentsForEntity(resolvedEntityType, specificEntityKey);
+  }, [resolvedEntityType, specificEntityKey]);
 
   // Priority docs for this entity type (Civic Monitoring Core)
   const priorityDocs = useMemo(() => {
@@ -427,6 +154,28 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
     if (activePillarFilter === 'PRIORITY') return priorityDocs;
     return availableDocs.filter(d => d.category === activePillarFilter);
   }, [availableDocs, priorityDocs, activePillarFilter]);
+
+  // Dynamic category tabs based on available docs for this entity
+  const categoryFilters = useMemo(() => {
+    const categoriesInDocs = Array.from(new Set(availableDocs.map(d => d.category)));
+    const categoryLabels: Record<string, string> = {
+      FINANCES: 'Finances & Budget',
+      PROCUREMENT: 'Marchés Publics',
+      PLANIFICATION: 'Planification',
+      BILAN_AUDIT: 'Bilan & Audits',
+      DELIBERATIONS: 'Délibérations & Actes',
+      URBANISME_FONCIER: 'Urbanisme & Foncier',
+      ENVIRONNEMENT_SANTE: 'Environnement & Santé',
+    };
+    return [
+      { id: 'ALL' as CaidpPillarCategory, label: `Tous (${availableDocs.length})` },
+      { id: 'PRIORITY' as CaidpPillarCategory, label: `Essentiels (${priorityDocs.length})` },
+      ...categoriesInDocs.map(cat => ({
+        id: cat as CaidpPillarCategory,
+        label: categoryLabels[cat] || cat,
+      }))
+    ];
+  }, [availableDocs, priorityDocs]);
 
   // Initialize selection with priority documents on entity change or modal open
   useEffect(() => {
@@ -461,7 +210,10 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
     year: 'numeric',
   });
 
-  const referenceNumber = `CAIDP-SB-${Date.now().toString().slice(-6)}`;
+  const referenceNumber = useMemo(() => {
+    return `SB-2026-${Math.floor(100000 + Math.random() * 900000)}`;
+  }, []);
+
   const legalDelayDays = (userStatus === 'JOURNALISTE' || userStatus === 'CHERCHEUR') ? 15 : 30;
 
   // Toggle single document selection
@@ -494,33 +246,33 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
     setSelectedDocIds([]);
   };
 
-  // Computed document list for letter
+  // Computed document list for letter and email
   const formattedDocumentList = useMemo(() => {
     const selectedItems = availableDocs.filter(d => selectedDocIds.includes(d.id));
     
-    let text = selectedItems.map((d, index) => `${index + 1}. ${d.title}\n   (${d.description} — Réf: ${d.legalBasis})`).join('\n\n');
+    let text = selectedItems.map((d, index) => `${index + 1}. ${d.title}\n   (Réf. légale : ${d.legalBasis})`).join('\n\n');
     
     if (project) {
-      text += `\n\nPrécisions sur le marché public ciblé :\n` +
-              `- Intitulé de l'ouvrage : ${project.title}\n` +
-              `- Montant alloué au budget : ${formatFCFA(project.budget_amount_fcfa)} (Exercice ${project.fiscal_year || 2026})\n` +
+      text += `\n\nPrécisions sur le projet ciblé :\n` +
+              `- Intitulé : ${project.title}\n` +
+              `- Montant alloué : ${formatFCFA(project.budget_amount_fcfa)} (Exercice ${project.fiscal_year || 2026})\n` +
               `- Référence Loi de Finances : ${project.source || 'Loi de Finances 2026'}`;
     }
 
     if (customNotes.trim()) {
-      text += `\n\nCompléments spécifiques du demandeur :\n${customNotes.trim()}`;
+      text += `\n\nPrécisions complémentaires du demandeur :\n${customNotes.trim()}`;
     }
 
-    return text || '1. Tous documents administratifs et budgétaires communicables relatifs à l\'exercice des missions d\'intérêt public de l\'organisme.';
+    return text || '1. Documents administratifs et budgétaires communicables relatifs à l\'exercice des missions d\'intérêt public de l\'organisme.';
   }, [availableDocs, selectedDocIds, project, customNotes]);
 
   // Dynamic salutation based on entity type and RI availability
   const dynamicSalutation = useMemo(() => {
-    if (hasNominatedRi) return `Madame, Monsieur le Responsable de l'Information`;
+    if (hasNominatedRi) return `Monsieur le Responsable de l'Information`;
     if (resolvedEntityType === 'MAIRIE') return `Monsieur le Maire`;
     if (resolvedEntityType === 'REGION') return `Monsieur le Président du Conseil Régional`;
     if (resolvedEntityType === 'MINISTERE') return `Monsieur le Ministre`;
-    return `Monsieur le Président / Directeur Général`;
+    return `Monsieur le Directeur Général / Président`;
   }, [hasNominatedRi, resolvedEntityType]);
 
   // Dynamic recipient title for the envelope/header
@@ -529,65 +281,73 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
       return `À l'attention de ${infoOfficerName}\nResponsable de l'Information (Art. 10 Loi n°2013-867)`;
     }
     if (resolvedEntityType === 'MAIRIE') {
-      return `À l'attention de Monsieur le Maire\n(Assumant les fonctions de Responsable de l'Information - Art. 10)`;
+      return `À l'attention de Monsieur le Maire\nMairie de ${targetEntityName}`;
     }
     if (resolvedEntityType === 'REGION') {
-      return `À l'attention de Monsieur le Président du Conseil Régional\n(Assumant les fonctions de Responsable de l'Information - Art. 10)`;
+      return `À l'attention de Monsieur le Président du Conseil Régional\n${targetEntityName}`;
     }
     if (resolvedEntityType === 'MINISTERE') {
-      return `À l'attention de Monsieur le Ministre\n(Et du Responsable de l'Information - Art. 10)`;
+      return `À l'attention de Monsieur le Ministre\n${targetEntityName}`;
     }
-    return `À l'attention de la Direction Générale / Présidence\n(Assumant les fonctions de Responsable de l'Information - Art. 10)`;
-  }, [hasNominatedRi, infoOfficerName, resolvedEntityType]);
+    return `À l'attention de la Direction Générale / Présidence\n${targetEntityName}`;
+  }, [hasNominatedRi, infoOfficerName, resolvedEntityType, targetEntityName]);
 
   const handlePrint = () => {
+    const selectedItems = availableDocs.filter(d => selectedDocIds.includes(d.id));
+    dataStore.logCaidpRequest({
+      action_type: 'PRINT_PDF',
+      entity_type: resolvedEntityType,
+      entity_name: targetEntityName,
+      has_ri: hasNominatedRi,
+      document_titles: selectedItems.map(d => d.title),
+      document_categories: Array.from(new Set(selectedItems.map(d => d.category))),
+      user_status: userStatus,
+      commune: caidpMatch?.commune || project?.commune_name || institution?.departement,
+    });
     window.print();
   };
 
   const handleCopyText = () => {
+    const selectedItems = availableDocs.filter(d => selectedDocIds.includes(d.id));
+    dataStore.logCaidpRequest({
+      action_type: 'COPIED',
+      entity_type: resolvedEntityType,
+      entity_name: targetEntityName,
+      has_ri: hasNominatedRi,
+      document_titles: selectedItems.map(d => d.title),
+      document_categories: Array.from(new Set(selectedItems.map(d => d.category))),
+      user_status: userStatus,
+      commune: caidpMatch?.commune || project?.commune_name || institution?.departement,
+    });
+
     const senderLines = [
-      `Nom & Prénom : ${citizenName || '[Nom et Prénom]'}`,
+      `Demandeur : ${citizenName || '[Nom et Prénom]'}`,
       userStatus !== 'CITOYEN' 
-        ? `Qualité : ${userStatus === 'JOURNALISTE' ? 'Journaliste Professionnel (Délai d\'urgence : 15 jours - Art. 12)' : userStatus === 'CHERCHEUR' ? 'Chercheur / Universitaire (Délai d\'urgence : 15 jours - Art. 12)' : 'Organisation de la Société Civile (OSC)'}` 
+        ? `Qualité : ${userStatus === 'JOURNALISTE' ? 'Journaliste Professionnel' : userStatus === 'CHERCHEUR' ? 'Chercheur / Universitaire' : 'Organisation de la Société Civile (OSC)'}` 
         : null,
       `Email : ${citizenEmail || '[Email de réception]'}`,
       citizenPhone?.trim() ? `Téléphone : ${citizenPhone.trim()}` : null,
       citizenAddress?.trim() ? `Résidence : ${citizenAddress.trim()}` : null,
     ].filter(Boolean).join('\n');
 
-    const legalReference = hasNominatedRi
-      ? `Cadre légal : Loi n°2013-867 relative à l'accès à l'information d'intérêt public (CAIDP)`
-      : `Fondement légal : Articles 2, 4, 10 & 12 de la Loi n°2013-867 relative à l'accès à l'information d'intérêt public.`;
-
-    const introText = hasNominatedRi
-      ? `En votre qualité de Responsable de l'Information désigné(e) au titre de la Loi n°2013-867 en République de Côte d'Ivoire, j'ai l'honneur de solliciter la communication des documents administratifs suivants :`
-      : `Dans le cadre de la promotion de la transparence administrative et du suivi citoyen garanti par la Loi n°2013-867 du 23 décembre 2013 relative à l'accès à l'information d'intérêt public en République de Côte d'Ivoire, j'ai l'honneur de solliciter la communication des documents administratifs suivants relatifs à votre organisme :`;
-
     const fullText = 
-      `DEMANDE D'ACCÈS AUX DOCUMENTS PUBLICS\n` +
-      `Application de la Loi n°2013-867 du 23 décembre 2013 (CAIDP)\n` +
-      `Réf : ${referenceNumber} — Fait le : ${todayStr}\n\n` +
-      `LE DEMANDEUR :\n` +
+      `DEMANDE DE COMMUNICATION DE DOCUMENTS ADMINISTRATIFS\n` +
+      `Application de la Loi n°2013-867 du 23 décembre 2013\n` +
+      `Réf. demandeur : ${referenceNumber} — Fait le ${todayStr}\n\n` +
       `${senderLines}\n\n` +
-      `DESTINATAIRE :\n` +
-      `${dynamicRecipientTitle}\n` +
-      `Organisme : ${targetEntityName}\n` +
+      `Destinataire : ${dynamicRecipientTitle.replace(/\n/g, ' - ')}\n` +
       (hasDirectEmail ? `Email : ${displayEmail}\n` : '') +
-      (hasDirectPhone ? `Téléphone : ${displayPhone}\n` : '') +
       `\n` +
-      `OBJET : ${documentSubject}\n` +
-      `${legalReference}\n\n` +
+      `Objet : ${documentSubject}\n\n` +
       `${dynamicSalutation},\n\n` +
-      `${introText}\n\n` +
+      `Dans le cadre des dispositions de la Loi n°2013-867 du 23 décembre 2013 relative à l'accès à l'information d'intérêt public en République de Côte d'Ivoire, j'ai l'honneur de solliciter la bienveillante communication des documents suivants relatifs à votre organisme :\n\n` +
       `${formattedDocumentList}\n\n` +
-      (!hasNominatedRi ? `Pour rappel, l'Article 10 de la Loi n°2013-867 fait obligation à tout organisme public de désigner un Responsable de l'Information pour traiter les demandes citoyennes, et l'Article 12 prévoit un délai maximum de 30 jours pour la mise à disposition des pièces demandées.\n\n` : '') +
-      `Je vous saurais gré de bien vouloir me transmettre ces éléments par voie électronique à l'adresse indiquée ci-dessus, ou de m'indiquer les modalités pratiques de leur consultation dans les délais prévus par la réglementation en vigueur (conformément à l'Article 12 de la Loi n°2013-867).\n\n` +
-      `Je reste à votre entière disposition pour tout échange facilitant le bon traitement de cette démarche constructive.\n\n` +
-      `Dans l'attente de votre réponse, je vous prie d'agréer, ${dynamicSalutation}, l'expression de mes salutations distinguées et respectueuses.\n\n` +
-      `Signature du Demandeur :\n` +
+      `Je vous remercie par avance de l'attention portée à cette démarche constructive et d'intérêt général, et vous saurais gré de bien vouloir mettre ces éléments à disposition par voie électronique à l'adresse indiquée ci-dessus ou de m'indiquer les modalités pratiques de leur consultation.\n\n` +
+      `Je reste à votre entière disposition pour tout renseignement facilitant le traitement de cette demande.\n\n` +
+      `Veuillez agréer, ${dynamicSalutation}, l'expression de mes salutations distinguées et respectueuses.\n\n` +
       `${citizenName || '[Nom du Demandeur]'}\n\n` +
-      `--- \n` +
-      `Document généré via la plateforme citoyenne SuiviBudget Côte d'Ivoire (suivibudget.ci) • Réf: ${referenceNumber}`;
+      `---\n` +
+      `Document préparé via la plateforme civique SuiviBudget Côte d'Ivoire (suivibudget.ci) • Réf. : ${referenceNumber}`;
 
     navigator.clipboard.writeText(fullText);
     setIsCopied(true);
@@ -595,38 +355,44 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
   };
 
   const handleSendEmail = () => {
-    const subject = hasNominatedRi
-      ? encodeURIComponent(`Demande de documents : ${documentSubject} (Réf: ${referenceNumber})`)
-      : encodeURIComponent(`[Loi n°2013-867 / CAIDP] Demande de documents publics : ${documentSubject} - ${targetEntityName}`);
+    const selectedItems = availableDocs.filter(d => selectedDocIds.includes(d.id));
+    dataStore.logCaidpRequest({
+      action_type: 'EMAIL_SENT',
+      entity_type: resolvedEntityType,
+      entity_name: targetEntityName,
+      has_ri: hasNominatedRi,
+      document_titles: selectedItems.map(d => d.title),
+      document_categories: Array.from(new Set(selectedItems.map(d => d.category))),
+      user_status: userStatus,
+      commune: caidpMatch?.commune || project?.commune_name || institution?.departement,
+    });
 
-    const senderLines = [
-      `- Demandeur : ${citizenName || '[Nom et Prénom]'}`,
+    const subject = encodeURIComponent(
+      `Demande de communication de documents : ${documentSubject} - ${targetEntityName}`
+    );
+
+    const senderSignature = [
+      citizenName ? `${citizenName}` : null,
       userStatus !== 'CITOYEN' 
-        ? `- Qualité : ${userStatus === 'JOURNALISTE' ? 'Journaliste Professionnel (Délai d\'urgence : 15 jours)' : userStatus === 'CHERCHEUR' ? 'Chercheur / Universitaire (Délai d\'urgence : 15 jours)' : 'Société Civile (OSC)'}` 
+        ? `Qualité : ${userStatus === 'JOURNALISTE' ? 'Journaliste Professionnel' : userStatus === 'CHERCHEUR' ? 'Chercheur / Universitaire' : 'Organisation de la Société Civile (OSC)'}`
         : null,
-      `- Email : ${citizenEmail || '[Email de réception]'}`,
-      citizenPhone?.trim() ? `- Téléphone : ${citizenPhone.trim()}` : null,
-      citizenAddress?.trim() ? `- Résidence : ${citizenAddress.trim()}` : null,
+      citizenEmail ? `Email : ${citizenEmail}` : null,
+      citizenPhone?.trim() ? `Tél : ${citizenPhone.trim()}` : null,
+      citizenAddress?.trim() ? `Résidence : ${citizenAddress.trim()}` : null,
     ].filter(Boolean).join('\n');
-
-    const introText = hasNominatedRi
-      ? `En votre qualité de Responsable de l'Information (RI) désigné(e) au titre de la Loi n°2013-867 (CAIDP), j'ai l'honneur de solliciter la communication des documents administratifs suivants :`
-      : `En application de la Loi n°2013-867 du 23 décembre 2013 relative à l'accès à l'information d'intérêt public en République de Côte d'Ivoire, j'ai l'honneur de solliciter la communication des documents administratifs suivants relatifs à votre organisme :`;
 
     const body = encodeURIComponent(
       `${dynamicSalutation},\n\n` +
-      `${introText}\n\n` +
-      `OBJET : ${documentSubject}\n\n` +
-      `DOCUMENTS SOLLICITÉS :\n` +
+      `Dans le cadre de la démarche citoyenne d'accès aux documents publics garantie par la Loi n°2013-867 du 23 décembre 2013 en République de Côte d'Ivoire, j'ai l'honneur de solliciter respectueusement la communication des documents administratifs suivants relatifs à votre organisme :\n\n` +
       `${formattedDocumentList}\n\n` +
-      (!hasNominatedRi ? `Pour rappel, l'Article 10 de la Loi n°2013-867 fait obligation à tout organisme public de désigner un Responsable de l'Information pour traiter les demandes du public, et l'Article 12 impartit un délai légal maximum de 30 jours pour la transmission des pièces.\n\n` : '') +
-      `Je vous saurais gré de bien vouloir me transmettre ces éléments par voie électronique en réponse à cet email ou de m'indiquer les modalités de consultation (Article 12 de la Loi n°2013-867).\n\n` +
-      `Je reste à votre entière disposition pour toute précision utile.\n\n` +
-      `COORDONNÉES DU DEMANDEUR :\n` +
-      `${senderLines}\n\n` +
-      `Fait le ${todayStr} • Réf : ${referenceNumber}\n` +
-      `Généré via la plateforme citoyenne SuiviBudget Côte d'Ivoire (suivibudget.ci).`
+      `Je vous remercie par avance pour l'attention bienveillante que vous porterez à cette démarche d'intérêt général et vous saurais gré de bien vouloir m'adresser ces éléments par voie électronique (en pièce jointe ou via un lien officiel de consultation) en réponse à ce courriel.\n\n` +
+      `Je reste à votre entière disposition pour tout renseignement facilitant le traitement de cette demande.\n\n` +
+      `Veuillez agréer, ${dynamicSalutation}, l'expression de mes salutations distinguées et respectueuses.\n\n` +
+      `${senderSignature}\n\n` +
+      `---\n` +
+      `Demande formulée via la plateforme civique SuiviBudget (suivibudget.ci) • Réf. : ${referenceNumber}`
     );
+
     window.location.href = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
   };
 
@@ -645,7 +411,7 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
         {/* ========================================================================= */}
         {/* MODAL HEADER : SOBRE, LUMINEUX & HARMONISÉ AU RESTE DU SITE */}
         {/* ========================================================================= */}
-        <div className="p-4 sm:p-5 bg-gradient-to-r from-slate-50 via-sky-50/25 to-slate-50 border-b border-slate-200 flex items-start justify-between gap-3 flex-shrink-0">
+        <div className="p-4 sm:p-5 bg-gradient-to-r from-slate-50 via-sky-50/25 to-slate-50 border-b border-slate-200 flex items-start justify-between gap-3 flex-shrink-0 print:hidden">
           <div className="flex items-start gap-3 min-w-0 flex-1">
             <div className="w-10 h-10 rounded-2xl bg-brand-blue/10 border border-brand-blue/20 text-brand-blue flex items-center justify-center flex-shrink-0 mt-0.5">
               <Landmark className="w-5 h-5 text-brand-blue" />
@@ -690,7 +456,7 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
         {/* ========================================================================= */}
         {/* STEPPER CLAIR ET RESPONSIVE (1. DOCUMENTS • 2. DEMANDEUR • 3. LETTRE) */}
         {/* ========================================================================= */}
-        <div className="bg-white border-b border-slate-200 px-3 sm:px-6 py-2 flex items-center justify-between gap-2 flex-shrink-0">
+        <div className="bg-white border-b border-slate-200 px-3 sm:px-6 py-2 flex items-center justify-between gap-2 flex-shrink-0 print:hidden">
           <div className="grid grid-cols-3 gap-1.5 sm:gap-3 w-full sm:max-w-xl">
             <button
               onClick={() => setActiveTab('SELECTION')}
@@ -814,21 +580,11 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
                     <Filter className="w-3 h-3" />
                     <span>Filtre :</span>
                   </span>
-                  {[
-                    { id: 'ALL', label: `Tous (${availableDocs.length})` },
-                    { id: 'PRIORITY', label: `Essentiels (${priorityDocs.length})` },
-                    { id: 'FINANCES', label: 'Finances & Budget' },
-                    { id: 'PROCUREMENT', label: 'Marchés Publics' },
-                    { id: 'PLANIFICATION', label: 'Planification' },
-                    { id: 'BILAN_AUDIT', label: 'Bilan & Audits' },
-                    { id: 'DELIBERATIONS', label: 'Délibérations' },
-                    { id: 'POLITIQUES_EIES', label: 'Politiques & EIES' },
-                    { id: 'PRESTATIONS_IDENTITE', label: 'Gouvernance & Services' },
-                  ].map((filterItem) => (
+                  {categoryFilters.map((filterItem) => (
                     <button
                       type="button"
                       key={filterItem.id}
-                      onClick={() => setActivePillarFilter(filterItem.id as CaidpPillarCategory)}
+                      onClick={() => setActivePillarFilter(filterItem.id)}
                       className={`px-2.5 py-1 rounded-lg transition-all flex-shrink-0 cursor-pointer ${
                         activePillarFilter === filterItem.id
                           ? 'bg-slate-900 text-white font-black shadow-2xs'
@@ -864,7 +620,7 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
                           )}
                         </div>
 
-                        <div className="space-y-1 flex-1 min-w-0">
+                        <div className="space-y-1.5 flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${
                               isSelected ? 'bg-brand-blue text-white' : 'bg-slate-100 text-slate-700'
@@ -889,8 +645,34 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
                             {doc.description}
                           </p>
 
-                          <div className={`text-[10px] font-mono font-semibold pt-0.5 ${isSelected ? 'text-brand-blue font-bold' : 'text-slate-400'}`}>
-                            Réf : {doc.legalBasis}
+                          {/* Plain French Explanation */}
+                          {doc.easyExplanation && (
+                            <div className={`text-[11px] p-2 rounded-xl flex items-start gap-1.5 leading-snug ${
+                              isSelected ? 'bg-white/80 text-blue-950 font-medium' : 'bg-amber-50/80 text-amber-950 border border-amber-200/60'
+                            }`}>
+                              <span className="shrink-0 text-xs">💡</span>
+                              <span><strong>En clair :</strong> {doc.easyExplanation}</span>
+                            </div>
+                          )}
+
+                          <div className="flex items-center justify-between gap-2 flex-wrap pt-0.5">
+                            <div className={`text-[10px] font-mono font-semibold flex items-center gap-1 ${isSelected ? 'text-brand-blue font-bold' : 'text-slate-500'}`}>
+                              <Scale className="w-3 h-3 text-slate-400 shrink-0" />
+                              <span>Réf. légale : {doc.legalBasis}</span>
+                            </div>
+
+                            {doc.officialPortalUrl && (
+                              <a
+                                href={doc.officialPortalUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center gap-1 text-[10px] font-bold text-brand-blue hover:text-brand-blue-dark hover:underline cursor-pointer"
+                                title="Consulter la publication sur le portail officiel de l'organisme"
+                              >
+                                <span>Portail officiel ↗</span>
+                              </a>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1084,131 +866,117 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
 
           {/* TAB 3: OFFICIAL PRINTABLE REPUBLICAN LETTER PREVIEW */}
           {activeTab === 'PREVIEW' && (
-            <div className="space-y-5 animate-in fade-in duration-200">
+            <div className="space-y-4 animate-in fade-in duration-200 print:m-0 print:p-0">
               
-              {/* Official Letter Preview Sheet */}
-              <div className="bg-white p-6 sm:p-10 rounded-3xl border border-slate-300 shadow-md font-serif text-slate-900 space-y-6 print:m-0 print:p-0 print:border-none print:shadow-none">
+              {/* Official Letter Preview Sheet (Strictly 1-Page A4) */}
+              <div 
+                id="official-printable-letter"
+                className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-300 shadow-md font-sans text-slate-900 space-y-3.5 print:m-0 print:p-0 print:border-none print:shadow-none print:text-[10pt] print:leading-normal print:space-y-2.5"
+              >
                 
                 {/* Header : Reference & Legal Framework */}
-                <div className="flex items-start justify-between border-b border-slate-200 pb-4 font-sans">
+                <div className="flex items-start justify-between border-b border-slate-200 pb-2.5 font-sans">
                   <div>
                     <span className="text-[11px] font-black uppercase tracking-wider text-brand-blue block">
                       Demande d'accès aux documents publics
                     </span>
-                    <p className="text-[11px] text-slate-500 font-medium">Application de la Loi n°2013-867 du 23 décembre 2013 (CAIDP)</p>
+                    <p className="text-[10px] text-slate-500 font-medium">Application de la Loi n° 2013-867 du 23 décembre 2013</p>
                   </div>
-                  <div className="text-right text-[11px] text-slate-600 font-sans">
-                    <span className="font-bold block text-slate-900 font-mono">Réf : {referenceNumber}</span>
+                  <div className="text-right text-[10px] text-slate-600 font-sans">
+                    <span className="font-bold block text-slate-900 font-mono">Réf. demandeur : {referenceNumber}</span>
                     <span>Fait le {todayStr}</span>
                   </div>
                 </div>
 
-                {/* Letter Headers (Sender & Recipient) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 font-sans text-xs pt-1">
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
-                    <span className="font-black text-slate-400 uppercase text-[10px] block mb-1">LE DEMANDEUR :</span>
-                    <p className="font-black text-slate-900 text-sm">{citizenName || '[Nom et Prénom]'}</p>
+                {/* Letter Headers (Sender on Left & Recipient on Right) */}
+                <div className="grid grid-cols-2 gap-4 font-sans text-xs pt-1">
+                  <div className="bg-slate-50 print:bg-transparent p-3 print:p-0 rounded-xl border border-slate-200 print:border-none space-y-0.5 text-[11px]">
+                    <span className="font-black text-slate-400 uppercase text-[9px] block mb-0.5">LE DEMANDEUR :</span>
+                    <p className="font-bold text-slate-900 text-xs">{citizenName || '[Nom et Prénom du demandeur]'}</p>
                     {userStatus !== 'CITOYEN' && (
-                      <p className="text-brand-blue font-bold text-[11px]">
-                        Qualité : {userStatus === 'JOURNALISTE' ? 'Journaliste Professionnel (Délai d\'urgence : 15 jours)' : userStatus === 'CHERCHEUR' ? 'Chercheur / Universitaire (Délai d\'urgence : 15 jours)' : 'Organisation de la Société Civile (OSC)'}
+                      <p className="text-brand-blue font-semibold text-[10px]">
+                        Qualité : {userStatus === 'JOURNALISTE' ? 'Journaliste Professionnel (Urgence 15j)' : userStatus === 'CHERCHEUR' ? 'Chercheur / Universitaire (Urgence 15j)' : 'Organisation de la Société Civile (OSC)'}
                       </p>
                     )}
-                    <p className="text-slate-600 font-mono text-[11px]">{citizenEmail || '[Email de réception]'}</p>
-                    {citizenPhone?.trim() && <p className="text-slate-600">Tél : {citizenPhone.trim()}</p>}
-                    {citizenAddress?.trim() && <p className="text-slate-600">Résidence : {citizenAddress.trim()}</p>}
+                    <p className="text-slate-600 font-mono text-[10px]">{citizenEmail || '[Email de réception]'}</p>
+                    {citizenPhone?.trim() && <p className="text-slate-600 text-[10px]">Tél : {citizenPhone.trim()}</p>}
+                    {citizenAddress?.trim() && <p className="text-slate-600 text-[10px]">Résidence : {citizenAddress.trim()}</p>}
                   </div>
 
-                  <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-1 sm:text-right">
-                    <span className="font-black text-brand-blue uppercase text-[10px] block mb-1">DESTINATAIRE :</span>
-                    <p className="font-black text-slate-900 text-xs whitespace-pre-line leading-snug">
-                      {hasNominatedRi 
-                        ? `À l'attention de ${infoOfficerName}\nResponsable de l'Information (Art. 10)`
-                        : resolvedEntityType === 'MAIRIE'
-                        ? `À l'attention de Monsieur le Maire\n(Assumant les fonctions de RI - Art. 10)`
-                        : resolvedEntityType === 'REGION'
-                        ? `À l'attention de Monsieur le Président du Conseil Régional\n(Assumant les fonctions de RI - Art. 10)`
-                        : resolvedEntityType === 'MINISTERE'
-                        ? `À l'attention de Monsieur le Ministre\n(Et du Responsable de l'Information - Art. 10)`
-                        : `À l'attention de la Direction Générale / Présidence\n(Assumant les fonctions de RI - Art. 10)`
-                      }
+                  <div className="bg-blue-50/40 print:bg-transparent p-3 print:p-0 rounded-xl border border-blue-100 print:border-none space-y-0.5 text-right text-[11px]">
+                    <span className="font-black text-brand-blue uppercase text-[9px] block mb-0.5">DESTINATAIRE :</span>
+                    <p className="font-bold text-slate-900 text-xs whitespace-pre-line leading-snug">
+                      {dynamicRecipientTitle}
                     </p>
-                    <p className="font-bold text-slate-800 pt-0.5">{targetEntityName}</p>
                     {infoOfficerFunction && hasNominatedRi && (
-                      <p className="text-[11px] text-slate-500">{infoOfficerFunction}</p>
+                      <p className="text-[10px] text-slate-500">{infoOfficerFunction}</p>
                     )}
-                    {hasDirectEmail && <p className="text-slate-600 font-mono text-[11px]">Email : {displayEmail}</p>}
-                    {hasDirectPhone && <p className="text-slate-600 font-mono text-[11px]">Tél : {displayPhone}</p>}
+                    {hasDirectEmail && <p className="text-slate-600 font-mono text-[10px]">Email : {displayEmail}</p>}
+                    {hasDirectPhone && <p className="text-slate-600 font-mono text-[10px]">Tél : {displayPhone}</p>}
                   </div>
                 </div>
 
                 {/* Letter Subject */}
-                <div className="font-sans text-xs bg-blue-50/60 p-3.5 rounded-xl border border-blue-100 space-y-1">
+                <div className="font-sans text-xs bg-slate-50 print:bg-transparent p-2.5 print:p-0 rounded-xl border border-slate-200 print:border-none space-y-0.5">
                   <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
                     <div>
                       <span className="font-black text-slate-900">OBJET : </span>
                       <span className="font-bold text-slate-800">{documentSubject}</span>
                     </div>
-                    <span className="text-[10px] font-bold text-brand-blue shrink-0 font-mono">
-                      Réf. : {referenceNumber}
-                    </span>
                   </div>
-                  {hasNominatedRi ? (
-                    <p className="text-slate-500 text-[11px] font-medium">
-                      Cadre légal : Loi n°2013-867 relative à l'accès à l'information d'intérêt public (CAIDP)
-                    </p>
-                  ) : (
-                    <p className="text-slate-600 text-[11px] font-medium">
-                      Fondement légal : Articles 2, 4, 10 & 12 de la Loi n°2013-867 (Obligation légale de communication & désignation de RI).
-                    </p>
-                  )}
+                  <p className="text-slate-500 text-[10px] font-medium">
+                    Fondement légal : Loi n° 2013-867 relative à l'accès à l'information d'intérêt public en République de Côte d'Ivoire.
+                  </p>
                 </div>
 
                 {/* Letter Body */}
-                <div className="text-xs leading-relaxed space-y-3.5 pt-1 text-slate-800 font-sans">
+                <div className="text-[11px] print:text-[10pt] leading-relaxed space-y-2 text-slate-800 font-sans">
                   <p className="font-semibold">{dynamicSalutation},</p>
-                  {hasNominatedRi ? (
-                    <p>
-                      En votre qualité de Responsable de l'Information désigné(e) au titre de la <strong>Loi n°2013-867</strong> relative à l'accès à l'information d'intérêt public en République de Côte d'Ivoire, j'ai l'honneur de solliciter respectueusement la communication des documents administratifs suivants :
-                    </p>
-                  ) : (
-                    <p>
-                      Dans le cadre de la promotion de la transparence administrative et du suivi citoyen garanti par la <strong>Loi n°2013-867 du 23 décembre 2013</strong> relative à l'accès à l'information d'intérêt public en République de Côte d'Ivoire, j'ai l'honneur de solliciter respectueusement la communication des documents administratifs suivants relatifs à votre organisme :
-                    </p>
-                  )}
-                  <div className="bg-slate-50 p-4 rounded-xl border-l-4 border-brand-blue font-sans text-xs text-slate-900 whitespace-pre-line leading-relaxed shadow-2xs">
+                  
+                  <p>
+                    Dans le cadre des dispositions de la <strong>Loi n° 2013-867 du 23 décembre 2013</strong> relative à l'accès à l'information d'intérêt public en République de Côte d'Ivoire, j'ai l'honneur de solliciter la bienveillante communication des documents administratifs suivants relatifs à votre organisme :
+                  </p>
+
+                  <div className="bg-slate-50 print:bg-transparent p-2.5 print:p-1 rounded-xl border-l-3 border-brand-blue print:border-l-2 print:border-slate-400 font-sans text-[11px] print:text-[9.5pt] text-slate-900 whitespace-pre-line leading-relaxed shadow-2xs print:shadow-none">
                     {formattedDocumentList}
                   </div>
-                  {!hasNominatedRi && (
-                    <p className="text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                      <em>Pour rappel :</em> Conformément à l'Article 10 de la Loi n°2013-867, tout organisme public est tenu de désigner un Responsable de l'Information pour instruire les demandes du public, et l'Article 12 prévoit un délai légal maximum de 30 jours pour la communication des pièces sollicitées.
-                    </p>
-                  )}
+
                   <p>
-                    Je vous saurais gré de bien vouloir me transmettre ces éléments par voie électronique à l'adresse indiquée ci-dessus, ou de m'indiquer les modalités pratiques de leur consultation dans les délais prévus par la réglementation en vigueur (conformément à l'Article 12 de la Loi n°2013-867).
+                    Je vous remercie par avance de l'attention bienveillante que vous voudrez bien porter à cette démarche citoyenne et constructive, et vous saurais gré de bien vouloir me transmettre ces éléments par voie électronique à l'adresse indiquée ci-dessus ou de m'indiquer les modalités pratiques de leur consultation dans les délais prévus par la réglementation en vigueur (délai légal maximum de {legalDelayDays} jours - Article 12 de la Loi n° 2013-867).
                   </p>
+
                   <p>
-                    Je reste à votre entière disposition pour tout échange complémentaire facilitant le bon traitement de cette démarche constructive.
-                  </p>
-                  <p>
-                    Dans l'attente de votre réponse, je vous prie d'agréer, {dynamicSalutation}, l'expression de mes salutations distinguées et respectueuses.
+                    Je reste à votre entière disposition pour tout renseignement facilitant le bon traitement de cette demande et vous prie d'agréer, {dynamicSalutation}, l'expression de mes salutations distinguées et respectueuses.
                   </p>
                 </div>
 
-                {/* Signature Area */}
-                <div className="flex justify-between items-end pt-8 font-sans border-t border-slate-100">
-                  <div className="text-[10px] text-slate-400">
-                    <span>Modèle généré avec horodatage numérique • Plateforme Civique SuiviBudget Côte d'Ivoire</span>
+                {/* Signature & Official Arrival Discharge Box */}
+                <div className="flex justify-between items-end pt-3 font-sans border-t border-slate-200 print:pt-2">
+                  <div className="border border-dashed border-slate-300 p-2 rounded-lg text-[9px] print:text-[8.5pt] space-y-0.5 w-52 print:w-48">
+                    <span className="font-bold uppercase tracking-wider text-slate-600 block text-[8px]">
+                      Cadre réservé au Service Courrier
+                    </span>
+                    <p className="text-slate-500">Date d'arrivée : ____ / ____ / 2026</p>
+                    <p className="text-slate-500">N° d'enregistrement : ________________</p>
+                    <p className="text-slate-400 italic pt-0.5 text-[7.5px]">Cachet et signature</p>
                   </div>
-                  <div className="text-center">
-                    <span className="text-xs font-bold text-slate-800 block mb-6">Signature du Demandeur</span>
-                    <span className="text-[11px] text-slate-600 font-bold italic">{citizenName || '[Nom du Demandeur]'}</span>
+
+                  <div className="text-right space-y-4 print:space-y-3">
+                    <span className="text-xs font-bold text-slate-800 block">Signature du Demandeur</span>
+                    <span className="text-xs font-bold text-slate-900 italic block">{citizenName || '[Nom du Demandeur]'}</span>
                   </div>
+                </div>
+
+                {/* Discreet footer reference */}
+                <div className="pt-2 text-[9px] text-slate-400 flex items-center justify-between border-t border-slate-100 print:border-none">
+                  <span>Réf. demandeur : <strong className="font-mono text-slate-600">{referenceNumber}</strong></span>
+                  <span>Plateforme civique SuiviBudget Côte d'Ivoire (suivibudget.ci) • En application de la Loi n° 2013-867</span>
                 </div>
 
               </div>
 
               {/* CAIDP Official Saisine Link */}
-              <div className="bg-slate-100 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-600">
+              <div className="bg-slate-100 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-600 print:hidden">
                 <div className="flex items-center gap-2">
                   <Info className="w-4 h-4 text-brand-blue flex-shrink-0" />
                   <span>
@@ -1234,7 +1002,7 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
         {/* ========================================================================= */}
         {/* ACTION BUTTONS STICKY FOOTER (CONTEXTUEL, THUMB-ZONE OPTIMISÉ SUR MOBILE) */}
         {/* ========================================================================= */}
-        <div className="p-3.5 sm:p-4 bg-white/95 backdrop-blur-md border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 flex-shrink-0 sticky bottom-0 z-30 shadow-lg sm:shadow-none">
+        <div className="p-3.5 sm:p-4 bg-white/95 backdrop-blur-md border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 flex-shrink-0 sticky bottom-0 z-30 shadow-lg sm:shadow-none print:hidden">
           <div className="text-xs text-slate-600 font-medium w-full sm:w-auto text-center sm:text-left flex items-center justify-between sm:justify-start gap-2">
             {activeTab === 'SELECTION' && (
               <span className="font-semibold text-slate-700">

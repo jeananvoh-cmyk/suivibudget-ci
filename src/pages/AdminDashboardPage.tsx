@@ -8,6 +8,7 @@ import { SocialPostGenerator } from '../components/SocialPostGenerator';
 import { CaidpRiManager } from '../components/CaidpRiManager';
 import { ModeratorManager } from '../components/ModeratorManager';
 import { DocumentManager } from '../components/DocumentManager';
+import { CaidpAnalyticsManager } from '../components/CaidpAnalyticsManager';
 import { 
   ShieldCheck, 
   CheckCircle2, 
@@ -46,7 +47,8 @@ import {
   Eye,
   Megaphone,
   Layers,
-  LogOut
+  LogOut,
+  BarChart3
 } from 'lucide-react';
 
 interface AdminDashboardPageProps {
@@ -58,7 +60,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   onOpenShare,
 }) => {
   const auth = dataStore.getAuth();
-  const [adminTab, setAdminTab] = useState<'caidp_manager' | 'documents_manager' | 'moderation' | 'budget_table' | 'institutions_manager' | 'news_manager' | 'social_generator' | 'site_settings' | 'digital_opportunities' | 'team_moderators'>(
+  const [adminTab, setAdminTab] = useState<'caidp_manager' | 'caidp_analytics' | 'documents_manager' | 'moderation' | 'budget_table' | 'institutions_manager' | 'news_manager' | 'social_generator' | 'site_settings' | 'digital_opportunities' | 'team_moderators'>(
     auth.role === 'MODERATOR' ? 'moderation' : 'caidp_manager'
   );
   
@@ -735,6 +737,21 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           </button>
 
           <button
+            onClick={() => setAdminTab('caidp_analytics')}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              adminTab === 'caidp_analytics'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4 text-emerald-600" />
+            <span>Impact & Demandes CAIDP</span>
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
+              {dataStore.getCaidpRequestStats().totalRequests}
+            </span>
+          </button>
+
+          <button
             onClick={() => setAdminTab('documents_manager')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               adminTab === 'documents_manager'
@@ -878,6 +895,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       {/* ========================================================================= */}
       {adminTab === 'caidp_manager' && (
         <CaidpRiManager onShowToast={showToast} />
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 0.2: CAIDP REQUESTS & CITIZEN IMPACT ANALYTICS */}
+      {/* ========================================================================= */}
+      {adminTab === 'caidp_analytics' && (
+        <CaidpAnalyticsManager onShowToast={showToast} />
       )}
 
       {/* ========================================================================= */}

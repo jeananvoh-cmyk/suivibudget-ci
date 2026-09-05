@@ -29,7 +29,33 @@ const STORAGE_KEYS = {
   CAIDP_RI: 'civicdata_caidp_ri_v2',
   SUBSCRIBERS: 'suivibudget_subscribers_v1',
   DOCUMENTS: 'suivibudget_public_documents_v1',
+  CAIDP_LOGS: 'suivibudget_caidp_requests_log_v1',
 };
+
+export interface CaidpRequestEvent {
+  id: string;
+  created_at: string;
+  action_type: 'EMAIL_SENT' | 'PRINT_PDF' | 'COPIED';
+  entity_type: 'MAIRIE' | 'REGION' | 'MINISTERE' | 'INSTITUTION' | 'AUTORITE_REGULATION' | 'PROJECT';
+  entity_name: string;
+  has_ri: boolean;
+  document_titles: string[];
+  document_categories: string[];
+  user_status?: string;
+  commune?: string;
+}
+
+export interface CaidpRequestStats {
+  totalRequests: number;
+  emailSentCount: number;
+  printPdfCount: number;
+  copiedCount: number;
+  withRiCount: number;
+  withoutRiCount: number;
+  byEntityType: Record<string, number>;
+  topDocuments: { title: string; count: number }[];
+  recentEvents: CaidpRequestEvent[];
+}
 
 async function safeSupabaseExec(promiseLike: any, contextMsg: string): Promise<void> {
   try {
@@ -332,6 +358,7 @@ class DataStore {
   private articles: NewsArticle[] = [];
   private documents: PublicDocument[] = [];
   private caidpDirectory: CaidpEntity[] = [];
+  private caidpLogs: CaidpRequestEvent[] = [];
   private subscribers: NewsletterSubscriber[] = [];
   private settings: SiteSettings = { ...DEFAULT_SETTINGS };
   private authState: AuthState = {
@@ -458,7 +485,21 @@ class DataStore {
       console.warn("Could not read documents from localStorage", e);
     }
 
-    // 9. Live Supabase Cloud Sync (if configured)
+    // 9. CAIDP Requests Log (Telemetry)
+    this.caidpLogs = [];
+    try {
+      const storedLogs = localStorage.getItem(STORAGE_KEYS.CAIDP_LOGS);
+      if (storedLogs) {
+        const parsed = JSON.parse(storedLogs);
+        if (Array.isArray(parsed)) {
+          this.caidpLogs = parsed;
+        }
+      }
+    } catch (e) {
+      console.warn("Could not read caidp logs from localStorage", e);
+    }
+
+    // 10. Live Supabase Cloud Sync (if configured)
     this.initSupabaseSync();
   }
 
@@ -1373,6 +1414,102 @@ class DataStore {
       localStorage.setItem(STORAGE_KEYS.SUBSCRIBERS, JSON.stringify(this.subscribers));
     } catch (e) {
       console.warn("Storage quota exceeded for subscribers", e);
+    }
+  }
+
+  // ==========================================
+  // CAIDP REQUESTS & ANALYTICS TRACKING
+  // ==========================================
+  public logCaidpRequest(event: Omit<CaidpRequestEvent, 'id' | 'created_at'>): CaidpRequestEvent {
+    const newLog: CaidpRequestEvent = {
+      ...event,
+      id: `caidp-req-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      created_at: new Date().toISOString(),
+    };
+
+    this.caidpLogs.unshift(newLog); // latest first
+    this.saveCaidpLogs();
+    this.notify();
+
+    if (isSupabaseConfigured()) {
+      safeSupabaseExec(
+        supabase.from('caidp_document_requests_log').insert([newLog]),
+        'Enregistrement statistique requête CAIDP'
+      );
+    }
+
+    return newLog;
+  }
+
+  public getCaidpRequests(): CaidpRequestEvent[] {
+    return [...this.caidpLogs];
+  }
+
+  public getCaidpRequestStats(): CaidpRequestStats {
+    const totalRequests = this.caidpLogs.length;
+    let emailSentCount = 0;
+    let printPdfCount = 0;
+    let copiedCount = 0;
+    let withRiCount = 0;
+    let withoutRiCount = 0;
+    const byEntityType: Record<string, number> = {
+      MAIRIE: 0,
+      REGION: 0,
+      MINISTERE: 0,
+      INSTITUTION: 0,
+      AUTORITE_REGULATION: 0,
+      PROJECT: 0,
+    };
+    const docCountMap: Record<string, number> = {};
+
+    for (const log of this.caidpLogs) {
+      if (log.action_type === 'EMAIL_SENT') emailSentCount++;
+      else if (log.action_type === 'PRINT_PDF') printPdfCount++;
+      else if (log.action_type === 'COPIED') copiedCount++;
+
+      if (log.has_ri) withRiCount++;
+      else withoutRiCount++;
+
+      if (log.entity_type) {
+        byEntityType[log.entity_type] = (byEntityType[log.entity_type] || 0) + 1;
+      }
+
+      if (Array.isArray(log.document_titles)) {
+        for (const title of log.document_titles) {
+          docCountMap[title] = (docCountMap[title] || 0) + 1;
+        }
+      }
+    }
+
+    const topDocuments = Object.entries(docCountMap)
+      .map(([title, count]) => ({ title, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    return {
+      totalRequests,
+      emailSentCount,
+      printPdfCount,
+      copiedCount,
+      withRiCount,
+      withoutRiCount,
+      byEntityType,
+      topDocuments,
+      recentEvents: this.caidpLogs.slice(0, 50),
+    };
+  }
+
+  public clearCaidpRequests(): void {
+    this.caidpLogs = [];
+    this.saveCaidpLogs();
+    this.notify();
+  }
+
+  private saveCaidpLogs() {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CAIDP_LOGS, JSON.stringify(this.caidpLogs.slice(0, 500)));
+    } catch (e) {
+      console.warn("Storage quota exceeded for caidp logs", e);
     }
   }
 
