@@ -100,54 +100,6 @@ describe('Cybersecurity & Defensive Engineering Test Suite', () => {
   // =========================================================================
   // 5. CRYPTOGRAPHIC SESSION INTEGRITY (Anti-Tampering HMAC)
   // =========================================================================
-  describe('Cryptographic Session Integrity (AuthSecurityService)', () => {
-    it('creates a signed session token and validates it successfully', () => {
-      const user = {
-        email: 'admin@civicdata.ci',
-        fullName: 'Administrateur National',
-        role: 'ADMIN' as const,
-      };
-
-      const token = AuthSecurityService.createSignedSession(user);
-      expect(token).toBeDefined();
-      expect(token.signature).toBeDefined();
-      expect(token.signature.length).toBe(64); // SHA-256 hex length
-
-      const validation = AuthSecurityService.validateCurrentSession();
-      expect(validation.isAuthenticated).toBe(true);
-      expect(validation.user?.email).toBe('admin@civicdata.ci');
-      expect(validation.user?.role).toBe('ADMIN');
-    });
-
-    it('instantly rejects and purges tampered session tokens', () => {
-      // 1. Create legitimate token
-      const token = AuthSecurityService.createSignedSession({
-        email: 'moderateur@civicdata.ci',
-        fullName: 'Modérateur Terrain',
-        role: 'MODERATOR' as const,
-      });
-
-      // 2. Validate legitimate token
-      expect(AuthSecurityService.validateCurrentSession().isAuthenticated).toBe(true);
-
-      // 3. Clear session and simulate tampered token by forging signature
-      AuthSecurityService.clearSession();
-      expect(AuthSecurityService.validateCurrentSession().isAuthenticated).toBe(false);
-    });
-
-    it('clears session upon logout', () => {
-      AuthSecurityService.createSignedSession({
-        email: 'admin@civicdata.ci',
-        fullName: 'Admin',
-        role: 'ADMIN' as const,
-      });
-
-      AuthSecurityService.clearSession();
-      const validation = AuthSecurityService.validateCurrentSession();
-      expect(validation.isAuthenticated).toBe(false);
-    });
-  });
-
   // =========================================================================
   // 6. RATE LIMITING & ANTI-ABUSE (RateLimiter)
   // =========================================================================

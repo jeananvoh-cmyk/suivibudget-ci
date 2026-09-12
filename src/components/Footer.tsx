@@ -1,3 +1,4 @@
+import { reportActionError } from '../utils/actionError';
 import React, { useState } from 'react';
 import { 
   Send, 
@@ -35,7 +36,9 @@ export const Footer: React.FC<FooterProps> = ({
     .map(i => i.name.replace(/^Mairie (de |d'|du )/i, '').trim())
     .sort((a, b) => a.localeCompare(b, 'fr'));
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
+    try {
+
     e.preventDefault();
     setErrorMessage(null);
 
@@ -44,7 +47,7 @@ export const Footer: React.FC<FooterProps> = ({
       return;
     }
 
-    const res = dataStore.subscribeNewsletter(firstName, email, commune);
+    const res = await dataStore.subscribeNewsletter(firstName, email, commune);
     if (res.success) {
       setSubscribed(true);
       setFirstName('');
@@ -53,6 +56,8 @@ export const Footer: React.FC<FooterProps> = ({
     } else {
       setErrorMessage(res.message);
     }
+
+    } catch (error) { reportActionError(error); }
   };
 
   const handleExportCsv = (type: 'COMMUNES' | 'REGIONS' | 'CAIDP' | 'PROJECTS') => {

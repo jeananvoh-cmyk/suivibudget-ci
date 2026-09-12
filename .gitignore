@@ -34,3 +34,7 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Reproducible generated datasets
+/public/data/
+/supabase/.temp/

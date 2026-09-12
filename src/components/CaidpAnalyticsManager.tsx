@@ -33,7 +33,7 @@ interface CaidpAnalyticsManagerProps {
 export const CaidpAnalyticsManager: React.FC<CaidpAnalyticsManagerProps> = ({ onShowToast }) => {
   const [stats, setStats] = useState<CaidpRequestStats>(() => dataStore.getCaidpRequestStats());
   const [searchQuery, setSearchQuery] = useState('');
-  const [actionFilter, setActionFilter] = useState<'ALL' | 'EMAIL_SENT' | 'PRINT_PDF' | 'COPIED'>('ALL');
+  const [actionFilter, setActionFilter] = useState<'ALL' | 'EMAIL_OPENED' | 'PRINT_OPENED' | 'COPIED'>('ALL');
   const [entityFilter, setEntityFilter] = useState<string>('ALL');
 
   // Reactive subscription to DataStore changes
@@ -92,7 +92,7 @@ export const CaidpAnalyticsManager: React.FC<CaidpAnalyticsManagerProps> = ({ on
     const rows = logs.map(l => [
       sanitizeCsvCell(l.id),
       sanitizeCsvCell(new Date(l.created_at).toLocaleString('fr-FR')),
-      sanitizeCsvCell(l.action_type === 'EMAIL_SENT' ? 'Email transmis au RI' : l.action_type === 'PRINT_PDF' ? 'Courrier Imprimé / PDF' : 'Texte Copié'),
+      sanitizeCsvCell(l.action_type === 'EMAIL_OPENED' ? 'Messagerie ouverte' : l.action_type === 'PRINT_OPENED' ? 'Impression ouverte' : 'Texte Copié'),
       sanitizeCsvCell(entityLabels[l.entity_type]?.label || l.entity_type),
       sanitizeCsvCell(l.entity_name),
       sanitizeCsvCell(l.has_ri ? 'OUI' : 'NON'),
@@ -137,7 +137,7 @@ export const CaidpAnalyticsManager: React.FC<CaidpAnalyticsManagerProps> = ({ on
     : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6"><p className="p-4 bg-amber-50 text-amber-900 rounded-xl text-sm">Historique de cette session uniquement. Une ouverture de messagerie ou d’impression ne prouve ni l’envoi ni la réception d’une demande. Ces actions ne constituent pas une mesure d’impact national.</p>
       
       {/* 1. HEADER & ACTIONS BAR */}
       <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -147,7 +147,7 @@ export const CaidpAnalyticsManager: React.FC<CaidpAnalyticsManagerProps> = ({ on
               <BarChart3 className="w-5 h-5" />
             </div>
             <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight font-sans">
-              Impact & Suivi des Demandes CAIDP
+              Actions CAIDP de cette session
             </h2>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-50 text-brand-blue border border-blue-200/80">
               Loi n°2013-867
@@ -188,39 +188,39 @@ export const CaidpAnalyticsManager: React.FC<CaidpAnalyticsManagerProps> = ({ on
         {/* Total Requêtes */}
         <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1 col-span-2 sm:col-span-1">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[10px] font-black uppercase tracking-wider">Total Démarches</span>
+            <span className="text-[10px] font-black uppercase tracking-wider">Actions préparatoires</span>
             <FileSpreadsheet className="w-4 h-4 text-brand-blue" />
           </div>
           <p className="text-2xl font-black text-slate-900 font-sans tracking-tight">
             {stats.totalRequests}
           </p>
           <span className="text-[10px] text-slate-500 font-semibold block">
-            Générées sur la plateforme
+            Observées dans cette session
           </span>
         </div>
 
-        {/* Emails envoyés aux RI */}
+        {/* Ouvertures de messagerie aux RI */}
         <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[10px] font-black uppercase tracking-wider">Emails aux RI</span>
+            <span className="text-[10px] font-black uppercase tracking-wider">Messagerie ouverte</span>
             <Mail className="w-4 h-4 text-emerald-600" />
           </div>
           <p className="text-2xl font-black text-emerald-600 font-sans tracking-tight">
-            {stats.emailSentCount}
+            {stats.emailOpenedCount}
           </p>
           <span className="text-[10px] text-emerald-700/80 font-semibold block">
-            Transmission directe
+            Envoi non confirmé
           </span>
         </div>
 
         {/* Courriers Imprimés / PDF */}
         <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[10px] font-black uppercase tracking-wider">Courriers PDF / Print</span>
+            <span className="text-[10px] font-black uppercase tracking-wider">Impression ouverte</span>
             <Printer className="w-4 h-4 text-slate-800" />
           </div>
           <p className="text-2xl font-black text-slate-800 font-sans tracking-tight">
-            {stats.printPdfCount}
+            {stats.printOpenedCount}
           </p>
           <span className="text-[10px] text-slate-500 font-semibold block">
             Dépôts physiques / guichet
@@ -361,7 +361,7 @@ export const CaidpAnalyticsManager: React.FC<CaidpAnalyticsManagerProps> = ({ on
               <span>Journal Chronologique des Démarches</span>
             </h3>
             <p className="text-[11px] text-slate-500">
-              Historique des requêtes préparées ou envoyées via l'application
+              Historique des actions préparatoires de cette session
             </p>
           </div>
 
@@ -385,8 +385,8 @@ export const CaidpAnalyticsManager: React.FC<CaidpAnalyticsManagerProps> = ({ on
               className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 cursor-pointer"
             >
               <option value="ALL">Toutes les actions</option>
-              <option value="EMAIL_SENT">Emails au RI</option>
-              <option value="PRINT_PDF">Courriers Imprimés / PDF</option>
+              <option value="EMAIL_OPENED">Messagerie ouverte</option>
+              <option value="PRINT_OPENED">Courriers Imprimés / PDF</option>
               <option value="COPIED">Textes Copiés</option>
             </select>
 
@@ -478,16 +478,16 @@ export const CaidpAnalyticsManager: React.FC<CaidpAnalyticsManagerProps> = ({ on
 
                       {/* Type d'Action */}
                       <td className="px-4 py-3 whitespace-nowrap">
-                        {evt.action_type === 'EMAIL_SENT' && (
+                        {evt.action_type === 'EMAIL_OPENED' && (
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-emerald-50 text-emerald-800 border border-emerald-300">
                             <Mail className="w-3 h-3 text-emerald-600" />
-                            <span>Email RI</span>
+                            <span>Messagerie ouverte</span>
                           </span>
                         )}
-                        {evt.action_type === 'PRINT_PDF' && (
+                        {evt.action_type === 'PRINT_OPENED' && (
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-slate-900 text-white">
                             <Printer className="w-3 h-3 text-white" />
-                            <span>PDF / Imprimé</span>
+                            <span>Impression ouverte</span>
                           </span>
                         )}
                         {evt.action_type === 'COPIED' && (

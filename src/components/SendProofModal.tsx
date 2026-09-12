@@ -1,6 +1,7 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { BudgetProject, ProjectStatus } from '../types';
 import { validateImageBinary, validateVideoBinary, compressAndSanitizeImage, sanitizeCoordinates } from '../utils/security';
+import { uploadEvidence } from '../services/backend';
 import { dataStore } from '../services/dataStore';
 import { formatFCFA, formatAmountInWords } from '../utils/formatters';
 import { matchesSmartSearch } from '../utils/searchHelpers';
@@ -66,7 +67,6 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
   targetProject,
   onSuccessToast,
 }) => {
-  if (!isOpen) return null;
 
   const projects = dataStore.getProjects();
   
@@ -85,7 +85,6 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
   const [comment, setComment] = useState('');
   const [locality, setLocality] = useState(targetProject?.locality_village_neighborhood || '');
   const [citizenName, setCitizenName] = useState('');
-  const [citizenContact, setCitizenContact] = useState('');
   const [observationDate, setObservationDate] = useState(new Date().toISOString().slice(0, 10));
   const [isSwornCertified, setIsSwornCertified] = useState(true);
   
@@ -93,6 +92,10 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
   const [mediaType, setMediaType] = useState<'IMAGE' | 'VIDEO'>('IMAGE');
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const submission = useRef<{ id: string; path?: string }>({ id: crypto.randomUUID() });
+  const submittingRef = useRef(false);
+  useEffect(() => () => { if (previewVideo) URL.revokeObjectURL(previewVideo); }, [previewVideo]);
   const [isProcessingMedia, setIsProcessingMedia] = useState(false);
   
   // UI states
@@ -121,11 +124,11 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
 
   // Restore draft when modal opens without a specific targetProject
   useEffect(() => {
-    if (targetProject) return;
     try {
       const saved = localStorage.getItem(DRAFT_KEY);
       if (saved) {
         const draft = JSON.parse(saved);
+        if (targetProject && draft.projectId !== targetProject.id) return;
         if (draft.projectId) {
           const found = projects.find((p) => p.id === draft.projectId);
           if (found) setSelectedProject(found);
@@ -135,7 +138,6 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
         if (draft.locality) setLocality(draft.locality);
         if (draft.observationDate) setObservationDate(draft.observationDate);
         if (draft.citizenName) setCitizenName(draft.citizenName);
-        if (draft.citizenContact) setCitizenContact(draft.citizenContact);
         setHasDraftRestored(true);
       }
     } catch (e) {
@@ -145,7 +147,6 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
 
   // Auto-save draft on changes to survive network loss or accidental closure
   useEffect(() => {
-    if (targetProject) return;
     if (!comment && !locality && !citizenName && !selectedProject) return;
 
     try {
@@ -156,14 +157,13 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
         locality,
         observationDate,
         citizenName,
-        citizenContact,
         updatedAt: new Date().toISOString(),
       };
       localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
     } catch {
       // Ignore localStorage quotas
     }
-  }, [targetProject, selectedProject, citizenStatus, comment, locality, observationDate, citizenName, citizenContact]);
+  }, [targetProject, selectedProject, citizenStatus, comment, locality, observationDate, citizenName]);
 
   const handleClearDraft = () => {
     try {
@@ -174,7 +174,6 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
     setComment('');
     setLocality('');
     setCitizenName('');
-    setCitizenContact('');
     setCitizenStatus('IN_PROGRESS');
   };
 
@@ -195,6 +194,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
 
   // Handle Photo Selection
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (submittingRef.current) return;
     const file = e.target.files?.[0];
     if (file) {
       setErrorMessage(null);
@@ -213,6 +213,9 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
       try {
         // 2. Compress and sanitize via Canvas
         const sanitizedDataUrl = await compressAndSanitizeImage(file);
+        const blob = await (await fetch(sanitizedDataUrl)).blob();
+        setMediaFile(new File([blob], 'constat.jpg', { type: 'image/jpeg' }));
+        submission.current = { id: crypto.randomUUID() };
         setPreviewImage(sanitizedDataUrl);
         setPreviewVideo(null);
         setMediaType('IMAGE');
@@ -226,6 +229,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
 
   // Handle Video Selection (15-30s direct short video)
   const handleVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (submittingRef.current) return;
     const file = e.target.files?.[0];
     if (file) {
       setErrorMessage(null);
@@ -243,8 +247,10 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
 
       try {
         const videoUrl = URL.createObjectURL(file);
+        setMediaFile(file);
+        submission.current = { id: crypto.randomUUID() };
         setPreviewVideo(videoUrl);
-        setPreviewImage('https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=800&q=80'); // Thumbnail fallback
+        setPreviewImage('/favicon.svg');
         setMediaType('VIDEO');
       } catch (err: any) {
         setErrorMessage("Erreur lors de la lecture de la vidéo : " + (err.message || ''));
@@ -312,7 +318,8 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
   };
 
   // Final Submit
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    if (submittingRef.current) return;
     e.preventDefault();
     setErrorMessage(null);
 
@@ -338,36 +345,25 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
       return;
     }
 
-    setIsSubmitting(true);
-    setTimeout(() => {
-      dataStore.submitProof({
-        project_id: selectedProject.id,
-        image_url: previewImage || 'https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=800&q=80',
-        video_url: previewVideo || undefined,
-        media_type: mediaType,
-        citizen_status_claim: citizenStatus,
-        comment: comment.trim(),
-        locality_details: locality.trim(),
-        citizen_name: citizenName.trim() || 'Citoyen Observateur',
+    if (!mediaFile) { setErrorMessage('Veuillez joindre à nouveau votre fichier.'); return; }
+    setIsSubmitting(true); submittingRef.current = true;
+    try {
+      if (!submission.current.path) submission.current.path = await uploadEvidence(mediaFile, submission.current.id);
+      await dataStore.submitProof({
+        request_id: submission.current.id, evidence_path: submission.current.path,
+        project_id: selectedProject.id, media_type: mediaType,
+        citizen_status_claim: citizenStatus, comment: comment.trim(), locality_details: locality.trim(),
+        citizen_name: citizenName.trim() || 'Citoyen observateur', observation_date: observationDate,
       });
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* Optional browser storage. */ }
+      setHasDraftRestored(false); setShowSuccess(true);
+      onSuccessToast?.('Votre constat a été reçu. Il sera examiné avant publication.');
+      setTimeout(onClose, 1800);
+    } catch (error) {
+      if (!submission.current.path) submission.current = { id: crypto.randomUUID() };
+      setErrorMessage(error instanceof Error ? error.message : 'Envoi non confirmé. Votre brouillon est conservé.');
+    } finally { setIsSubmitting(false); submittingRef.current = false; }
 
-      try {
-        localStorage.removeItem(DRAFT_KEY);
-      } catch {}
-      setHasDraftRestored(false);
-
-      setIsSubmitting(false);
-      setShowSuccess(true);
-
-      if (onSuccessToast) {
-        onSuccessToast(mediaType === 'VIDEO' ? 'Votre vidéo de constat a été transmise avec succès au comité !' : 'Votre constat citoyen a été transmis avec succès au registre de modération !');
-      }
-
-      setTimeout(() => {
-        setShowSuccess(false);
-        onClose();
-      }, 1800);
-    }, 600);
   };
 
   return (
@@ -397,7 +393,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
             </div>
 
             <button
-              onClick={onClose}
+              onClick={() => { if (!submittingRef.current) onClose(); }}
               className="p-2 rounded-full hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-colors"
               title="Fermer"
             >
@@ -665,7 +661,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                 <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
                   <button
                     type="button"
-                    onClick={onClose}
+                    onClick={() => { if (!submittingRef.current) onClose(); }}
                     className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
                   >
                     Annuler
@@ -830,7 +826,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
 
                         <div className="text-[10px] text-slate-400 flex items-center justify-center gap-1.5 pt-1">
                           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>Anonymisation automatique & suppression des métadonnées privées</span>
+                          <span>Photos réencodées sans métadonnées ; vérifiez les visages et détails identifiants</span>
                         </div>
                       </div>
                     )}
@@ -987,7 +983,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
             {/* ÉTAPE 3 : TÉMOIGNAGE, IDENTITÉ & VALIDATION RÉPUBLICAINE     */}
             {/* ------------------------------------------------------------- */}
             {currentStep === 3 && (
-              <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in duration-200">
+              <form aria-busy={isSubmitting} onSubmit={handleSubmit} className="space-y-5 animate-in fade-in duration-200">
                 
                 {/* 1. Observation Description */}
                 <div>
@@ -1031,31 +1027,17 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                       <input
                         type="text"
                         placeholder="Ex: Observateur Citoyen / Kouassi K."
-                        value={citizenName}
+                        aria-describedby="citizen-name-notice" value={citizenName}
                         onChange={(e) => setCitizenName(e.target.value)}
                         className="w-full pl-10 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/30"
                       />
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                      Contact de traçabilité (Facultatif)
-                    </label>
-                    <div className="relative">
-                      <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
-                      <input
-                        type="text"
-                        placeholder="Ex: 07 00 00 00 00 / email@domaine.ci"
-                        value={citizenContact}
-                        onChange={(e) => setCitizenContact(e.target.value)}
-                        className="w-full pl-10 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/30"
-                      />
-                    </div>
-                    <span className="text-[10px] text-slate-400 mt-0.5 block">Confidentiel, uniquement pour nos modérateurs si besoin.</span>
-                  </div>
+
                 </div>
 
+                <p id="citizen-name-notice" className="text-xs text-slate-500">Le nom ou pseudonyme renseigné accompagnera votre constat publié. Évitez les coordonnées personnelles et les personnes identifiables dans les médias.</p>
                 {/* 3. Sworn Engagement & Friendly Legal Context */}
                 <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-2xl space-y-2">
                   <label className="flex items-start gap-3 cursor-pointer select-none">

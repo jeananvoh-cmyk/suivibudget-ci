@@ -1,3 +1,4 @@
+import { loadBudgetLines } from '../services/budgetLines';
 import React, { useState, useEffect } from 'react';
 import { Institution, BudgetProject, BudgetLineItem } from '../types';
 import { formatFCFA, formatAmountInWords } from '../utils/formatters';
@@ -126,6 +127,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   // Dynamic async budget lines loader (Lazy bundle splitting to save 31MB initial download)
   const [entityBudgetLines, setEntityBudgetLines] = useState<BudgetLineItem[]>([]);
   const [isLoadingLines, setIsLoadingLines] = useState(false);
+  const [linesError, setLinesError] = useState(false);
 
   useEffect(() => {
     if (!isOpen || !institution) {
@@ -134,22 +136,10 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
     }
     let isMounted = true;
     setIsLoadingLines(true);
-    import('../data/budgetLinesData')
-      .then(({ getBudgetLinesForEntity }) => {
-        if (isMounted) {
-          const lines = getBudgetLinesForEntity(
-            institution.name, 
-            institution.type, 
-            institution.leader_title || institution.leader_name
-          );
-          setEntityBudgetLines(lines);
-          setIsLoadingLines(false);
-        }
-      })
-      .catch((err) => {
-        console.warn("Erreur chargement dynamique des lignes budgétaires:", err);
-        if (isMounted) setIsLoadingLines(false);
-      });
+    setLinesError(false); setEntityBudgetLines([]);
+    loadBudgetLines(institution.id, institution.name, institution.leader_title || '')
+      .then(lines => { if (isMounted) { setEntityBudgetLines(lines); setIsLoadingLines(false); } })
+      .catch(() => { if (isMounted) { setLinesError(true); setIsLoadingLines(false); } });
 
     return () => {
       isMounted = false;
@@ -888,7 +878,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
               )}
 
               {/* Lignes Budgétaires Détaillées */}
-              {isLoadingLines ? (
+              {linesError ? <p role="alert" className="p-4 text-rose-700">Chargement impossible. Fermez puis rouvrez la fiche pour réessayer.</p> : isLoadingLines ? (
                 <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 space-y-3">
                   <div className="w-7 h-7 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto"></div>
                   <p className="text-xs font-bold text-slate-700">Chargement des lignes budgétaires officielles (LFI 2026)...</p>

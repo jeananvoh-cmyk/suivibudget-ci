@@ -1,3 +1,4 @@
+import { reportActionError } from './utils/actionError';
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { ActiveTab, BudgetProject } from './types';
 import { dataStore } from './services/dataStore';
@@ -54,6 +55,7 @@ export function App() {
   const [isPrivateSentinelOpen, setIsPrivateSentinelOpen] = useState(false);
   const [targetShareProject, setTargetShareProject] = useState<BudgetProject | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastIsError, setToastIsError] = useState(false);
 
   const institutions = dataStore.getInstitutions();
   const allProjects = dataStore.getProjects();
@@ -141,7 +143,17 @@ export function App() {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    const handleError = (event: Event) => { setToastIsError(true); setToastMessage((event as CustomEvent<string>).detail); };
+    const refresh = () => { void dataStore.refreshAuth(); void dataStore.refreshSharedData(); };
+    window.addEventListener('civic-action-error', handleError);
+    window.addEventListener('focus', refresh);
+    const timer = setInterval(refresh, 4 * 60 * 1000);
+    return () => { window.removeEventListener('civic-action-error', handleError); window.removeEventListener('focus', refresh); clearInterval(timer); };
+  }, []);
+
   const showToast = (message: string) => {
+    setToastIsError(false);
     setToastMessage(message);
     setTimeout(() => {
       setToastMessage(null);
@@ -174,10 +186,14 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleLogout = () => {
-    dataStore.logout();
+  const handleLogout = async () => {
+    try {
+
+    await dataStore.logout();
     showToast('Déconnexion réussie.');
     navigateTo('home');
+
+    } catch (error) { reportActionError(error); }
   };
 
   return (
@@ -185,10 +201,10 @@ export function App() {
       
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-20 right-4 z-50 animate-in slide-in-from-top duration-300 max-w-sm">
+        <div role={toastIsError ? "alert" : "status"} className="fixed top-20 right-4 z-50 animate-in slide-in-from-top duration-300 max-w-sm">
           <div className="bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center flex-shrink-0">
-              <CheckCircle2 className="w-5 h-5" />
+              {toastIsError ? <span aria-label="Erreur">!</span> : <CheckCircle2 className="w-5 h-5" />}
             </div>
             <p className="text-xs font-semibold leading-snug">{toastMessage}</p>
           </div>
@@ -232,6 +248,7 @@ export function App() {
         onOpenPrivateSentinel={() => setIsPrivateSentinelOpen(true)}
       />
 
+      {dataStore.syncError && <div role="status" className="mx-4 p-3 bg-amber-50 text-amber-900 text-sm rounded-xl">{dataStore.syncError} <button className="underline" onClick={() => void dataStore.refreshSharedData()}>Réessayer</button></div>}
       {/* 2. Main Tab Content with Suspense Code Splitting */}
       <main className="flex-1 pb-24 lg:pb-0">
         <Suspense fallback={<LoadingScreen message="Chargement des données citoyennes..." />}>

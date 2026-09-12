@@ -1,14 +1,15 @@
+import { reportActionError } from '../utils/actionError';
 import { matchesSmartSearch, normalizeSearchText } from '../utils/searchHelpers';
 import { AuthSecurityService } from '../services/authSecurity';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, lazy } from 'react';
 import { BudgetProject, ProjectStatus, Institution, NewsArticle, SiteSettings } from '../types';
 import { dataStore } from '../services/dataStore';
 import { formatFCFA, formatDateFR, getStatusConfig, formatAmountInWords } from '../utils/formatters';
-import { SocialPostGenerator } from '../components/SocialPostGenerator';
-import { CaidpRiManager } from '../components/CaidpRiManager';
-import { ModeratorManager } from '../components/ModeratorManager';
-import { DocumentManager } from '../components/DocumentManager';
-import { CaidpAnalyticsManager } from '../components/CaidpAnalyticsManager';
+const SocialPostGenerator = lazy(() => import('../components/SocialPostGenerator').then(m => ({ default: m.SocialPostGenerator })));
+const CaidpRiManager = lazy(() => import('../components/CaidpRiManager').then(m => ({ default: m.CaidpRiManager })));
+const ModeratorManager = lazy(() => import('../components/ModeratorManager').then(m => ({ default: m.ModeratorManager })));
+const DocumentManager = lazy(() => import('../components/DocumentManager').then(m => ({ default: m.DocumentManager })));
+const CaidpAnalyticsManager = lazy(() => import('../components/CaidpAnalyticsManager').then(m => ({ default: m.CaidpAnalyticsManager })));
 import { 
   ShieldCheck, 
   CheckCircle2, 
@@ -100,8 +101,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     region_name: '',
     category: 'Santé',
     budget_amount_fcfa: 25000000,
-    current_status: 'IN_PROGRESS' as ProjectStatus,
-    progress_percentage: 50,
+    current_status: 'UNKNOWN' as ProjectStatus,
+    source: '', source_url: '', source_page: '', source_version: '', source_verified_at: '',
+    budget_stage: 'UNSPECIFIED' as NonNullable<BudgetProject['budget_stage']>, status_verified_at: '',
+    institution_response: '', institution_response_source_url: '', institution_response_at: '',
+    progress_percentage: 0,
     contractor_name: '',
     locality_village_neighborhood: '',
     details: '',
@@ -164,9 +168,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   };
 
   // Moderation action
-  const handleModerate = (proofId: string, status: 'APPROVED' | 'REJECTED') => {
-    dataStore.moderateProof(proofId, status);
+  const handleModerate = async (proofId: string, status: 'APPROVED' | 'REJECTED') => {
+    try {
+
+    await dataStore.moderateProof(proofId, status);
     showToast(status === 'APPROVED' ? 'Preuve citoyenne validée et publiée !' : 'Preuve rejetée.', 'info');
+
+    } catch (error) { reportActionError(error); }
   };
 
   // Filter and sort for budget table
@@ -209,13 +217,15 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     }
   };
 
-  const handleSaveProject = (e: React.FormEvent) => {
+  const handleSaveProject = async (e: React.FormEvent) => {
+    try {
+
     e.preventDefault();
     if (editingProject) {
-      dataStore.updateProject(editingProject.id, projectForm);
+      await dataStore.updateProject(editingProject.id, projectForm);
       showToast('Projet mis à jour avec succès !');
     } else {
-      dataStore.addProject({
+      await dataStore.addProject({
         ...projectForm,
         fiscal_year: siteSettings.fiscal_year || 2026,
         nature_expense: 'Investissements',
@@ -224,12 +234,16 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     }
     setIsAddModalOpen(false);
     setEditingProject(null);
+
+    } catch (error) { reportActionError(error); }
   };
 
-  const handleProcessImportCSV = () => {
+  const handleProcessImportCSV = async () => {
+    try {
+
     if (!csvUploadText.trim()) return;
     const targetYear = importTargetYear === 'AUTO' ? undefined : parseInt(importTargetYear, 10);
-    const result = dataStore.importFromCSV(csvUploadText, {
+    const result = await dataStore.importFromCSV(csvUploadText, {
       mode: importMode,
       targetYear
     });
@@ -247,6 +261,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       setCsvUploadText('');
       setImportStatus(null);
     }, 2500);
+
+    } catch (error) { reportActionError(error); }
   };
 
   const handleExportCSV = () => {
@@ -474,7 +490,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     setIsCreateInstModalOpen(true);
   };
 
-  const handleSaveInstitution = (e: React.FormEvent) => {
+  const handleSaveInstitution = async (e: React.FormEvent) => {
+    try {
+
     e.preventDefault();
     const total = (instForm.budget_functioning_fcfa || 0) + (instForm.budget_investment_fcfa || 0);
     
@@ -484,25 +502,31 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         ...instForm,
         total_budget_fcfa: total > 0 ? total : (instForm.total_budget_fcfa || editingInst.total_budget_fcfa),
       };
-      dataStore.updateInstitution(updated);
+      await dataStore.updateInstitution(updated);
       showToast('Informations et photo de l\'entité mises à jour !');
       setIsEditInstModalOpen(false);
       setEditingInst(null);
     } else {
-      dataStore.addInstitution({
+      await dataStore.addInstitution({
         ...instForm,
         total_budget_fcfa: total > 0 ? total : instForm.total_budget_fcfa,
       });
       showToast('Nouvelle entité ajoutée avec succès !');
       setIsCreateInstModalOpen(false);
     }
+
+    } catch (error) { reportActionError(error); }
   };
 
-  const handleDeleteInstitution = (id: string, name: string) => {
+  const handleDeleteInstitution = async (id: string, name: string) => {
+    try {
+
     if (confirm(`Êtes-vous sûr de vouloir supprimer l'entité "${name}" ?`)) {
-      dataStore.deleteInstitution(id);
+      await dataStore.deleteInstitution(id);
       showToast('Entité supprimée.');
     }
+
+    } catch (error) { reportActionError(error); }
   };
 
   // ==========================================
@@ -554,24 +578,32 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     setIsArticleModalOpen(true);
   };
 
-  const handleSaveArticle = (e: React.FormEvent) => {
+  const handleSaveArticle = async (e: React.FormEvent) => {
+    try {
+
     e.preventDefault();
     if (editingArticle) {
-      dataStore.updateArticle(editingArticle.id, articleForm);
+      await dataStore.updateArticle(editingArticle.id, articleForm);
       showToast('Publication mise à jour !');
     } else {
-      dataStore.addArticle(articleForm);
+      await dataStore.addArticle(articleForm);
       showToast('Nouvel article / rapport publié avec succès !');
     }
     setIsArticleModalOpen(false);
     setEditingArticle(null);
+
+    } catch (error) { reportActionError(error); }
   };
 
-  const handleDeleteArticle = (id: string, title: string) => {
+  const handleDeleteArticle = async (id: string, title: string) => {
+    try {
+
     if (confirm(`Supprimer la publication "${title}" ?`)) {
-      dataStore.deleteArticle(id);
+      await dataStore.deleteArticle(id);
       showToast('Publication supprimée.');
     }
+
+    } catch (error) { reportActionError(error); }
   };
 
   // ==========================================
@@ -581,10 +613,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [backupJsonInput, setBackupJsonInput] = useState('');
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
 
-  const handleSaveSettings = (e: React.FormEvent) => {
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    try {
+
     e.preventDefault();
-    dataStore.updateSettings(settingsForm);
+    await dataStore.updateSettings(settingsForm);
     showToast('Paramètres généraux du site enregistrés !');
+
+    } catch (error) { reportActionError(error); }
   };
 
   const handleDownloadBackup = () => {
@@ -600,12 +636,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     showToast('Fichier de sauvegarde téléchargé ! Conservez-le précieusement.');
   };
 
-  const handleRestoreBackup = () => {
+  const handleRestoreBackup = async () => {
+    try {
+
     if (!backupJsonInput.trim()) {
       alert('Veuillez coller le contenu JSON de votre sauvegarde.');
       return;
     }
-    const res = dataStore.importFullBackup(backupJsonInput);
+    const res = await dataStore.importFullBackup(backupJsonInput);
     if (res.success) {
       showToast(res.message, 'success');
       setIsBackupModalOpen(false);
@@ -613,14 +651,20 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     } else {
       alert(res.message);
     }
+
+    } catch (error) { reportActionError(error); }
   };
 
-  const handleResetFactory = () => {
+  const handleResetFactory = async () => {
+    try {
+
     const confirmation = prompt('ATTENTION : Pour réinitialiser le site aux données officielles d\'origine, tapez "RESET" en majuscules :');
     if (confirmation === 'RESET') {
-      dataStore.resetToFactoryDefaults();
+      await dataStore.resetToFactoryDefaults();
       showToast('Plateforme réinitialisée avec les données d\'origine.', 'info');
     }
+
+    } catch (error) { reportActionError(error); }
   };
 
   const uniqueRegions = Array.from(new Set(allProjects.map(p => p.region_name))).sort();
@@ -706,7 +750,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
           {/* Logout Button */}
           <button
-            onClick={() => dataStore.logout()}
+            onClick={async () => { try { return await dataStore.logout(); } catch (error) { reportActionError(error); } }}
             className="px-3 py-2.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white rounded-xl text-xs font-bold transition-all border border-rose-500/30 flex items-center gap-1.5 cursor-pointer"
             title="Se déconnecter"
           >
@@ -745,7 +789,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             }`}
           >
             <BarChart3 className="w-4 h-4 text-emerald-600" />
-            <span>Impact & Demandes CAIDP</span>
+            <span>Actions CAIDP de cette session</span>
             <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
               {dataStore.getCaidpRequestStats().totalRequests}
             </span>
@@ -1317,8 +1361,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     region_name: '',
                     category: 'Santé',
                     budget_amount_fcfa: 25000000,
-                    current_status: 'IN_PROGRESS',
-                    progress_percentage: 50,
+                    current_status: 'UNKNOWN',
+                    source: '', source_url: '', source_page: '', source_version: '', source_verified_at: '',
+                    budget_stage: 'UNSPECIFIED', status_verified_at: '', institution_response: '', institution_response_source_url: '', institution_response_at: '',
+                    progress_percentage: 0,
                     contractor_name: '',
                     locality_village_neighborhood: '',
                     details: '',
@@ -1471,6 +1517,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                                 category: p.category,
                                 budget_amount_fcfa: p.budget_amount_fcfa,
                                 current_status: p.current_status,
+                                source: p.source || '', source_url: p.source_url || '', source_page: p.source_page || '', source_version: p.source_version || '', source_verified_at: p.source_verified_at || '',
+                                budget_stage: p.budget_stage || 'UNSPECIFIED', status_verified_at: p.status_verified_at || '',
+                                institution_response: p.institution_response || '', institution_response_source_url: p.institution_response_source_url || '', institution_response_at: p.institution_response_at || '',
                                 progress_percentage: p.progress_percentage,
                                 contractor_name: p.contractor_name || '',
                                 locality_village_neighborhood: p.locality_village_neighborhood || '',
@@ -1491,12 +1540,16 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                             <Share2 className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => {
+                            onClick={async () => {
+    try {
+
                               if (confirm(`Supprimer définitivement le projet "${p.title}" ?`)) {
-                                dataStore.deleteProject(p.id);
+                                await dataStore.deleteProject(p.id);
                                 showToast('Projet supprimé.');
                               }
-                            }}
+
+    } catch (error) { reportActionError(error); }
+  }}
                             className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
                             title="Supprimer"
                           >
@@ -2815,7 +2868,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     onChange={(e) => setProjectForm({ ...projectForm, current_status: e.target.value as ProjectStatus })}
                     className="w-full p-2 border rounded-xl"
                   >
-                    <option value="NOT_STARTED"> Non commencé</option>
+                    <option value="UNKNOWN">Avancement non renseigné</option><option value="SUSPENDED">Suspendu</option><option value="NOT_STARTED"> Non commencé</option>
                     <option value="IN_PROGRESS"> En cours</option>
                     <option value="COMPLETED"> Terminé</option>
                   </select>
@@ -2881,7 +2934,21 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   Enregistrer
                 </button>
               </div>
-            </form>
+            <div className="col-span-full space-y-3 border-t pt-4">
+                  <h3 className="font-bold">Sources et réponse institutionnelle</h3>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {([
+                      ['source', 'Document source'], ['source_url', 'Lien de la pièce justificative'], ['source_page', 'Page'],
+                      ['source_version', 'Version du document'], ['source_verified_at', 'Date de vérification de la source'],
+                      ['status_verified_at', 'Date de vérification de l’avancement'],
+                      ['institution_response', 'Réponse de l’institution'], ['institution_response_source_url', 'Source de la réponse'], ['institution_response_at', 'Date de la réponse']
+                    ] as const).map(([key, label]) => <label key={key} className="text-xs">{label}<input className="block w-full border rounded-lg p-2" type={key.endsWith('_url') ? 'url' : key.endsWith('_at') ? 'date' : 'text'} value={projectForm[key]} onChange={e => setProjectForm({ ...projectForm, [key]: e.target.value })} /></label>)}
+                    <label className="text-xs">Nature du montant<select className="block w-full border rounded-lg p-2" value={projectForm.budget_stage} onChange={e => setProjectForm({ ...projectForm, budget_stage: e.target.value as NonNullable<BudgetProject['budget_stage']> })}>
+                      <option value="UNSPECIFIED">Non précisée</option><option value="VOTED">Budget voté</option><option value="COMMITTED">Montant engagé</option><option value="PAID">Montant payé</option>
+                    </select></label>
+                  </div>
+                </div>
+</form>
           </div>
         </div>
       )}
@@ -3119,7 +3186,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <textarea
                 rows={5}
                 value={csvUploadText}
-                onChange={(e) => setCsvUploadText(e.target.value)}
+                onChange={(e) => setCsvUploadText(e.target.value)} aria-label="CSV : title;commune_name;region_name;budget_amount_fcfa;fiscal_year;source"
                 placeholder="Annee;Type;Ministere;Service;Programme;Nature;Libelle;Valeur&#10;2027;EMPLOIS;MINISTERES;...;Travaux de construction;450000000"
                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono select-all focus:bg-white transition-colors"
               />
