@@ -1,3 +1,4 @@
+import { reportActionError } from '../utils/actionError';
 import React, { useState, useMemo } from 'react';
 import { 
   FileText, 
@@ -149,7 +150,9 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    try {
+
     e.preventDefault();
 
     if (!formData.title.trim() || !formData.institution_name.trim() || !formData.file_url.trim()) {
@@ -163,7 +166,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
       .filter(t => t.length > 0);
 
     if (editingDoc) {
-      dataStore.updateDocument(editingDoc.id, {
+      await dataStore.updateDocument(editingDoc.id, {
         title: formData.title.trim(),
         category: formData.category,
         institution_name: formData.institution_name.trim(),
@@ -178,7 +181,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
       });
       onShowToast('Document public mis à jour avec succès.');
     } else {
-      dataStore.addDocument({
+      await dataStore.addDocument({
         title: formData.title.trim(),
         category: formData.category,
         institution_name: formData.institution_name.trim(),
@@ -195,12 +198,18 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
     }
 
     setIsAddModalOpen(false);
+
+    } catch (error) { reportActionError(error); }
   };
 
-  const handleDelete = (id: string) => {
-    dataStore.deleteDocument(id);
+  const handleDelete = async (id: string) => {
+    try {
+
+    await dataStore.deleteDocument(id);
     setDeleteConfirmId(null);
     onShowToast('Document supprimé de la bibliothèque.');
+
+    } catch (error) { reportActionError(error); }
   };
 
   return (

@@ -8,7 +8,10 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "ingest:budget": "node scripts/ingest_budget_csv.cjs"
+    "ingest:budget": "node scripts/ingest_budget_csv.cjs",
+    "predev": "node scripts/build-data.mjs",
+    "prebuild": "node scripts/build-data.mjs",
+    "check:data": "node scripts/build-data.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
@@ -20,6 +23,7 @@
     "tailwind-merge": "^3.0.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
     "@types/node": "^22.13.4",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",

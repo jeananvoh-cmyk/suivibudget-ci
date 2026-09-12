@@ -1,3 +1,4 @@
+import { isSafeUrl } from '../utils/security';
 import React, { useState } from 'react';
 import { BudgetProject, CitizenProof } from '../types';
 import { formatFCFA, formatAmountInWords, formatDateFR, getStatusConfig, getProjectEntityInfo, getProjectTypeActionInfo } from '../utils/formatters';
@@ -173,6 +174,15 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
           {activeTab === 'budget' && (
             <div className="space-y-6 animate-in fade-in duration-150">
               
+              <div className="p-4 bg-blue-50 rounded-xl text-sm space-y-2">
+                <p><strong>Traçabilité :</strong> {project.source_verified_at ? `Vérification : ${project.source_verified_at}` : 'Pièce justificative non vérifiée dans la plateforme.'}</p>
+                <p>Page : {project.source_page || 'non renseignée'} · Version : {project.source_version || 'non renseignée'}</p>
+                {project.source_url && isSafeUrl(project.source_url) && <a href={project.source_url} target="_blank" rel="noopener noreferrer" className="underline">Consulter la pièce justificative</a>}
+                <p>Nature du montant : {({ VOTED: 'budget voté', COMMITTED: 'montant engagé', PAID: 'montant payé', UNSPECIFIED: 'non précisée' })[project.budget_stage || 'UNSPECIFIED']}. Un budget voté ne prouve pas un paiement.</p>
+                <p>Avancement : {getStatusConfig(project.current_status).label}</p>
+                {project.institution_response && <div><strong>Réponse de l’institution ({project.institution_response_at || 'date non renseignée'}) :</strong><p>{project.institution_response}</p>
+                  {project.institution_response_source_url && isSafeUrl(project.institution_response_source_url) && <a className="underline" href={project.institution_response_source_url} target="_blank" rel="noopener noreferrer">Source de la réponse</a>}</div>}
+              </div>
               {/* BUDGET & STATUS HIGHLIGHT BOX */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
@@ -190,8 +200,8 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                     </div>
                   </div>
                   <div className="text-[11px] text-slate-500 mt-3 pt-3 border-t border-slate-200 flex items-center justify-between">
-                    <span>Source officielle</span>
-                    <span className="font-bold text-slate-800">{project.source || 'Loi de Finances 2026 (DGBF)'}</span>
+                    <span>Source déclarée</span>
+                    <span className="font-bold text-slate-800">{project.source || 'Source non renseignée'}</span>
                   </div>
                 </div>
 

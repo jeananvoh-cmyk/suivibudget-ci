@@ -1,3 +1,5 @@
+import { parseCsv } from '../utils/csv';
+import { INITIAL_PUBLIC_DOCUMENTS } from '../data/publicDocuments';
 import { 
   BudgetProject, 
   CitizenProof, 
@@ -9,9 +11,9 @@ import {
   SiteSettings,
   PublicDocument
 } from '../types';
-import { RAW_BUDGET_PROJECTS } from '../data/budgetData';
+import { RAW_BUDGET_PROJECTS, loadBudgetProjects } from '../data/budgetData';
 import { INSTITUTIONS_DATA } from '../data/institutionsData';
-import { INITIAL_CITIZEN_PROOFS } from '../data/initialProofs';
+import { readContent, readProofs, saveContent, saveContentBatch, requireBackend, requireStaff, ensureCitizenSession, type ContentKind } from './backend';
 import { INITIAL_ARTICLES } from '../data/initialArticles';
 import { detectCategoryFromExpense } from '../data/categories';
 import { CAIDP_MASTER_DIRECTORY, CaidpEntity } from '../data/caidpRiData';
@@ -19,23 +21,11 @@ import { AuthSecurityService } from './authSecurity';
 import { sanitizeCsvCell } from '../utils/security';
 import { supabase, isSupabaseConfigured } from './supabase';
 
-const STORAGE_KEYS = {
-  PROJECTS: 'civicdata_projects_v2026_clean_v3',
-  INSTITUTIONS: 'civicdata_institutions_v10',
-  PROOFS: 'civicdata_proofs_v12',
-  ARTICLES: 'civicdata_articles_v10',
-  SETTINGS: 'civicdata_settings_v7',
-  AUTH: 'civicdata_auth_v7',
-  CAIDP_RI: 'civicdata_caidp_ri_v2',
-  SUBSCRIBERS: 'suivibudget_subscribers_v1',
-  DOCUMENTS: 'suivibudget_public_documents_v1',
-  CAIDP_LOGS: 'suivibudget_caidp_requests_log_v1',
-};
 
 export interface CaidpRequestEvent {
   id: string;
   created_at: string;
-  action_type: 'EMAIL_SENT' | 'PRINT_PDF' | 'COPIED';
+  action_type: 'EMAIL_OPENED' | 'PRINT_OPENED' | 'COPIED';
   entity_type: 'MAIRIE' | 'REGION' | 'MINISTERE' | 'INSTITUTION' | 'AUTORITE_REGULATION' | 'PROJECT';
   entity_name: string;
   has_ri: boolean;
@@ -47,8 +37,8 @@ export interface CaidpRequestEvent {
 
 export interface CaidpRequestStats {
   totalRequests: number;
-  emailSentCount: number;
-  printPdfCount: number;
+  emailOpenedCount: number;
+  printOpenedCount: number;
   copiedCount: number;
   withRiCount: number;
   withoutRiCount: number;
@@ -57,16 +47,6 @@ export interface CaidpRequestStats {
   recentEvents: CaidpRequestEvent[];
 }
 
-async function safeSupabaseExec(promiseLike: any, contextMsg: string): Promise<void> {
-  try {
-    const res = await promiseLike;
-    if (res && res.error) {
-      console.warn(`[Supabase Sync Warning] ${contextMsg}:`, res.error);
-    }
-  } catch (err) {
-    console.warn(`[Supabase Network Warning] ${contextMsg}:`, err);
-  }
-}
 
 export interface NewsletterSubscriber {
   id: string;
@@ -224,120 +204,6 @@ export interface AuthState {
   expiresAt?: number;
 }
 
-export const INITIAL_PUBLIC_DOCUMENTS: PublicDocument[] = [
-  {
-    id: 'doc-caidp-loi-2013-867',
-    title: "Loi n° 2013-867 du 23 décembre 2013 relative à l'accès à l'information d'intérêt public",
-    category: 'LOI_CAIDP',
-    institution_name: "Assemblée Nationale & CAIDP",
-    year: 2013,
-    description: "Texte de loi fondamental garantissant le droit de tout citoyen d'accéder aux informations et documents administratifs détenus par les organismes publics en Côte d'Ivoire.",
-    file_url: "https://caidp.ci/documents/Loi_2013_867_CAIDP.pdf",
-    file_name: "Loi_2013_867_CAIDP_Cote_d_Ivoire.pdf",
-    file_size: "1.2 Mo",
-    file_format: "PDF",
-    published_at: "2013-12-23",
-    downloads_count: 142,
-    is_official: true,
-    tags: ["Loi", "CAIDP", "Droit Citoyen", "Transparence", "Information Publique"]
-  },
-  {
-    id: 'doc-caidp-decret-application',
-    title: "Décret n° 2014-462 portant attributions, organisation et fonctionnement de la CAIDP",
-    category: 'LOI_CAIDP',
-    institution_name: "Présidence de la République & CAIDP",
-    year: 2014,
-    description: "Décret d'application fixant les modalités pratiques de désignation des Responsables de l'Information (RI) et le délai légal de communication obligatoire (30 jours).",
-    file_url: "https://caidp.ci/documents/Decret_2014_462_CAIDP.pdf",
-    file_name: "Decret_2014_462_Fonctionnement_CAIDP.pdf",
-    file_size: "850 Ko",
-    file_format: "PDF",
-    published_at: "2014-08-06",
-    downloads_count: 98,
-    is_official: true,
-    tags: ["Décret", "RI", "Procédure", "CAIDP"]
-  },
-  {
-    id: 'doc-budget-synthese-2026',
-    title: "Synthèse Citoyenne & Chiffres Clés du Budget de l'État 2026",
-    category: 'BUDGET_OFFICIEL',
-    institution_name: "Ministère des Finances et du Budget",
-    year: 2026,
-    description: "Document officiel de vulgarisation budgétaire présentant les 15 339,2 milliards FCFA de dépenses et investissements publics (LFI 2026), ventilés par grandes priorités (Éducation, Santé, Routes, Sécurité).",
-    file_url: "https://budget.gouv.ci/documents/Synthese_Budget_Citoyen_2026.pdf",
-    file_name: "Synthese_Budget_Citoyen_2026_CI.pdf",
-    file_size: "4.5 Mo",
-    file_format: "PDF",
-    published_at: "2026-01-05",
-    downloads_count: 315,
-    is_official: true,
-    tags: ["Loi de Finances 2026", "Budget Citoyen", "Finances Publiques"]
-  },
-  {
-    id: 'doc-collectivites-loi-2012-1128',
-    title: "Loi n° 2012-1128 portant organisation des collectivités territoriales en Côte d'Ivoire",
-    category: 'LOI_CAIDP',
-    institution_name: "Ministère de l'Intérieur et de la Sécurité & DGDD",
-    year: 2012,
-    description: "Cadre légal régissant le fonctionnement, les compétences, l'autonomie financière et la gestion budgétaire des 201 communes et 31 régions.",
-    file_url: "https://dgdd.interieur.gouv.ci/documents/Loi_2012_1128_Collectivites_Territoriales.pdf",
-    file_name: "Loi_2012_1128_Organisation_Collectivites_CI.pdf",
-    file_size: "1.8 Mo",
-    file_format: "PDF",
-    published_at: "2012-12-13",
-    downloads_count: 185,
-    is_official: true,
-    tags: ["Collectivités", "Décentralisation", "Mairies", "Régions", "Loi"]
-  },
-  {
-    id: 'doc-livre-blanc-collectivites',
-    title: "Livre Blanc : Portails Web et Transparence des Collectivités Locales de Côte d'Ivoire",
-    category: 'ETUDE_TECHNIQUE',
-    institution_name: "Observatoire SuiviBudget & Collectivités",
-    year: 2026,
-    description: "Audit d'impact et guide méthodologique sur la présence numérique des 201 mairies et 31 régions, l'affichage public des budgets locaux et l'application du droit à l'information.",
-    file_url: "/documents/LIVRE_BLANC_PORTAILS_WEB_COLLECTIVITES_CI.md",
-    file_name: "LIVRE_BLANC_PORTAILS_WEB_COLLECTIVITES_CI.pdf",
-    file_size: "2.1 Mo",
-    file_format: "PDF",
-    published_at: "2026-02-15",
-    downloads_count: 230,
-    is_official: true,
-    tags: ["Livre Blanc", "Mairies", "Régions", "Audit", "Décentralisation"]
-  },
-  {
-    id: 'doc-cour-des-comptes-guide',
-    title: "Rapport Public Annuel sur l'Exécution du Budget et la Gestion des Deniers Publics",
-    category: 'RAPPORT_AUDIT',
-    institution_name: "Cour des Comptes de Côte d'Ivoire",
-    year: 2025,
-    description: "Observations, constatations d'irrégularités et recommandations de la Cour des Comptes sur la gestion financière et l'efficacité des dépenses des ministères et sociétés publiques.",
-    file_url: "https://courdescomptes.ci/rapports/Rapport_Public_Annuel_Cour_Des_Comptes.pdf",
-    file_name: "Rapport_Public_Annuel_Cour_Des_Comptes.pdf",
-    file_size: "6.8 Mo",
-    file_format: "PDF",
-    published_at: "2025-11-20",
-    downloads_count: 489,
-    is_official: true,
-    tags: ["Cour des Comptes", "Audit", "Contrôle", "Gouvernance"]
-  },
-  {
-    id: 'doc-dgmp-marches-publics',
-    title: "Rapport d'Analyse et de Surveillance des Marchés Publics en Côte d'Ivoire",
-    category: 'MARCHE_PUBLIC',
-    institution_name: "Direction Générale des Marchés Publics (DGMP)",
-    year: 2025,
-    description: "Bilan statistique officiel sur la passation des marchés publics : proportion des appels d'offres ouverts vs gré à gré, délais de traitement et conformité réglementaire.",
-    file_url: "https://marchespublics.ci/documents/Rapport_Annuel_DGMP.pdf",
-    file_name: "Rapport_Annuel_DGMP_Marches_Publics.pdf",
-    file_size: "3.7 Mo",
-    file_format: "PDF",
-    published_at: "2025-10-12",
-    downloads_count: 278,
-    is_official: true,
-    tags: ["Marchés Publics", "DGMP", "Appels d'offres", "Contrats"]
-  }
-];
 
 const DEFAULT_SETTINGS: SiteSettings = {
   fiscal_year: 2026,
@@ -351,7 +217,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
   announcement_banner_type: "info",
 };
 
-class DataStore {
+export class DataStore {
   private projects: BudgetProject[] = [];
   private institutions: Institution[] = [];
   private proofs: CitizenProof[] = [];
@@ -369,195 +235,74 @@ class DataStore {
   };
   private listeners: (() => void)[] = [];
 
+  public readonly ready: Promise<void>;
   constructor() {
-    this.init();
+    this.ready = this.init();
   }
 
-  private init() {
-    // 1. Projects - Retain only tangible, physically verifiable investments
-    this.projects = [...RAW_BUDGET_PROJECTS].filter(isTangiblePhysicalProject);
-    try {
-      const storedProjects = localStorage.getItem(STORAGE_KEYS.PROJECTS);
-      if (storedProjects) {
-        const parsed = JSON.parse(storedProjects);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          this.projects = parsed.filter(isTangiblePhysicalProject);
-        }
-      }
-    } catch (e) {
-      console.warn("Could not read projects from localStorage", e);
-    }
-
-    // 2. Institutions
+  private async init() {
+    await loadBudgetProjects();
+    this.projects = RAW_BUDGET_PROJECTS.filter(isTangiblePhysicalProject);
     this.institutions = [...INSTITUTIONS_DATA];
-    try {
-      const storedInstitutions = localStorage.getItem(STORAGE_KEYS.INSTITUTIONS);
-      if (storedInstitutions) {
-        const parsed = JSON.parse(storedInstitutions);
-        if (Array.isArray(parsed) && parsed.length >= 100) {
-          this.institutions = parsed;
-        }
-      }
-    } catch (e) {
-      console.warn("Could not read institutions from localStorage", e);
-    }
-
-    // 3. Proofs
-    this.proofs = [...INITIAL_CITIZEN_PROOFS];
-    try {
-      const storedProofs = localStorage.getItem(STORAGE_KEYS.PROOFS);
-      if (storedProofs) {
-        const parsed = JSON.parse(storedProofs);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          this.proofs = parsed;
-        }
-      }
-    } catch (e) {
-      console.warn("Could not read proofs from localStorage", e);
-    }
-    if (this.proofs.length === 0 && INITIAL_CITIZEN_PROOFS.length > 0) {
-      this.proofs = [...INITIAL_CITIZEN_PROOFS];
-    }
-
-    // 4. Articles
     this.articles = [...INITIAL_ARTICLES];
-    try {
-      const storedArticles = localStorage.getItem(STORAGE_KEYS.ARTICLES);
-      if (storedArticles) {
-        const parsed = JSON.parse(storedArticles);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          this.articles = parsed;
-        }
-      }
-    } catch (e) {
-      console.warn("Could not read articles from localStorage", e);
-    }
-
-    // 5. CAIDP RI Directory
+    this.documents = INITIAL_PUBLIC_DOCUMENTS.map(d => ({ ...d, downloads_count: 0 }));
     this.caidpDirectory = [...CAIDP_MASTER_DIRECTORY];
-    try {
-      const storedCaidp = localStorage.getItem(STORAGE_KEYS.CAIDP_RI);
-      if (storedCaidp) {
-        const parsed = JSON.parse(storedCaidp);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          this.caidpDirectory = parsed;
-        }
-      }
-    } catch (e) {
-      console.warn("Could not read caidp directory from localStorage", e);
-    }
-
-    // 6. Settings
-    try {
-      const storedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-      if (storedSettings) {
-        this.settings = { ...DEFAULT_SETTINGS, ...JSON.parse(storedSettings) };
-      }
-    } catch (e) {
-      console.warn("Could not read settings from localStorage", e);
-    }
-
-    // 7. Auth (Cryptographically validated session)
-    const session = AuthSecurityService.validateCurrentSession();
-    if (session.isAuthenticated && session.user) {
-      this.authState = {
-        isAuthenticated: true,
-        email: session.user.email,
-        fullName: session.user.fullName,
-        role: session.user.role as UserRole,
-        expiresAt: session.user.expiresAt,
-      };
-    } else {
-      this.authState = { isAuthenticated: false, email: '', fullName: '', role: 'CITIZEN' };
-    }
-
-    // 8. Public Documents
-    this.documents = [...INITIAL_PUBLIC_DOCUMENTS];
-    try {
-      const storedDocs = localStorage.getItem(STORAGE_KEYS.DOCUMENTS);
-      if (storedDocs) {
-        const parsed = JSON.parse(storedDocs);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          this.documents = parsed;
-        }
-      }
-    } catch (e) {
-      console.warn("Could not read documents from localStorage", e);
-    }
-
-    // 9. CAIDP Requests Log (Telemetry)
+    this.proofs = [];
     this.caidpLogs = [];
-    try {
-      const storedLogs = localStorage.getItem(STORAGE_KEYS.CAIDP_LOGS);
-      if (storedLogs) {
-        const parsed = JSON.parse(storedLogs);
-        if (Array.isArray(parsed)) {
-          this.caidpLogs = parsed;
-        }
-      }
-    } catch (e) {
-      console.warn("Could not read caidp logs from localStorage", e);
+    this.settings = { ...DEFAULT_SETTINGS };
+    if (isSupabaseConfigured()) {
+      void this.refreshAuth();
+      void this.initSupabaseSync();
+      // Don't await Auth calls inside the Supabase auth-state callback (deadlock).
+      supabase.auth.onAuthStateChange(() => {
+        ++this.syncGeneration;
+        AuthSecurityService.clearSession();
+        this.proofs = []; this.subscribers = []; this.caidpLogs = [];
+        this.notify();
+        setTimeout(() => { void this.refreshAuth(); void this.initSupabaseSync(); }, 0);
+      });
     }
-
-    // 10. Live Supabase Cloud Sync (if configured)
-    this.initSupabaseSync();
   }
 
+  private syncGeneration = 0;
   private async initSupabaseSync() {
+    const generation = ++this.syncGeneration;
     if (!isSupabaseConfigured()) return;
     try {
-      const { data, error } = await supabase
-        .from('citizen_proofs')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      // Sync public documents from Supabase if table exists
-      try {
-        const { data: remoteDocs, error: docsError } = await supabase
-          .from('public_documents')
-          .select('*')
-          .order('published_at', { ascending: false });
-        if (!docsError && Array.isArray(remoteDocs) && remoteDocs.length > 0) {
-          this.documents = remoteDocs;
-          this.saveDocuments();
-          this.notify();
+      const [content, proofs] = await Promise.all([readContent(), readProofs()]);
+      if (generation !== this.syncGeneration) return;
+      const merge = <T extends { id: string }>(defaults: T[], kind: ContentKind): T[] => {
+        const map = new Map(defaults.map(item => [item.id, item]));
+        for (const row of content.filter(row => row.kind === kind)) {
+          if (row.deleted) map.delete(row.id);
+          else map.set(row.id, { ...row.data, id: row.id } as T);
         }
-      } catch (err) {
-        // Table not present yet, silent fallback
-      }
-
-      if (!error && Array.isArray(data) && data.length > 0) {
-        const remoteProofs: CitizenProof[] = data.map(d => ({
-          id: d.id,
-          project_id: d.project_id,
-          project_title: d.project_title,
-          commune_name: d.commune_name,
-          region_name: d.region_name || '',
-          citizen_name: d.citizen_name || 'Sentinelle Citoyenne',
-          user_name: d.citizen_name || 'Sentinelle Citoyenne',
-          image_url: d.image_url,
-          photo_url: d.image_url,
-          video_url: d.video_url,
-          media_type: d.media_type || (d.video_url ? 'VIDEO' : 'IMAGE'),
-          citizen_status_claim: d.citizen_status_claim,
-          comment: d.comment,
-          locality_details: d.locality_details,
-          verification_status: d.verification_status,
-          moderator_notes: d.moderator_notes,
-          confirmations_count: d.confirmations_count || 1,
-          created_at: d.created_at,
-        }));
-
-        const existingMap = new Map(this.proofs.map(p => [p.id, p]));
-        remoteProofs.forEach(rp => existingMap.set(rp.id, rp));
-        this.proofs = Array.from(existingMap.values());
-        this.saveProofs();
-        this.notify();
-      }
-    } catch (e) {
-      console.warn("Supabase background sync silent catch:", e);
+        return [...map.values()];
+      };
+      this.projects = merge(RAW_BUDGET_PROJECTS, 'projects').filter(isTangiblePhysicalProject);
+      this.institutions = merge(INSTITUTIONS_DATA, 'institutions');
+      this.articles = merge(INITIAL_ARTICLES, 'articles');
+      this.documents = merge(INITIAL_PUBLIC_DOCUMENTS, 'documents');
+      this.caidpDirectory = merge(CAIDP_MASTER_DIRECTORY, 'caidp');
+      const settings = content.find(row => row.kind === 'settings' && row.id === 'global' && !row.deleted);
+      this.settings = { ...DEFAULT_SETTINGS, ...settings?.data };
+      this.proofs = proofs;
+      this.syncError = null;
+      this.notify();
+    } catch (error) {
+      if (generation !== this.syncGeneration) return;
+      this.syncError = 'Les mises à jour partagées sont indisponibles. Le catalogue initial reste consultable.';
+      this.notify();
     }
   }
+
+  public syncError: string | null = null;
+  public async refreshAuth() {
+    try { await AuthSecurityService.refreshSession(); }
+    catch { AuthSecurityService.clearSession(); }
+    this.notify();
+  }
+  public async refreshSharedData() { await this.initSupabaseSync(); }
 
   public subscribe(listener: () => void) {
     this.listeners.push(listener);
@@ -580,11 +325,7 @@ class DataStore {
   }
 
   public getApprovedProofs(): CitizenProof[] {
-    const realApproved = this.proofs.filter(p => p.verification_status === 'APPROVED' && !p.is_demo);
-    if (realApproved.length > 0) {
-      return realApproved;
-    }
-    return this.proofs.filter(p => p.verification_status === 'APPROVED');
+    return this.proofs.filter(p => p.verification_status === 'APPROVED' && !p.is_demo);
   }
 
   public hasRealProofs(): boolean {
@@ -592,11 +333,12 @@ class DataStore {
   }
 
   public getAllProofs(): CitizenProof[] {
+    if (!['ADMIN', 'MODERATOR'].includes(this.getAuth().role)) return [];
     return this.proofs;
   }
 
   public getPendingProofs(): CitizenProof[] {
-    return this.proofs.filter(p => p.verification_status === 'PENDING');
+    return this.getAllProofs().filter(p => p.verification_status === 'PENDING');
   }
 
   public getArticles(): NewsArticle[] {
@@ -622,7 +364,7 @@ class DataStore {
   }
 
   public getProofsForProject(projectId: string): CitizenProof[] {
-    return this.proofs.filter(p => p.project_id === projectId && p.verification_status === 'APPROVED');
+    return this.proofs.filter(p => p.project_id === projectId && p.verification_status === 'APPROVED' && !p.is_demo);
   }
 
   public getAuth(): AuthState {
@@ -643,14 +385,14 @@ class DataStore {
 
   // --- STATS CALCULATION ---
   public getImpactStats(): ImpactStats {
-    const totalCommunes = 201;
-    const totalRegions = 33;
-    const totalCollectivites = 234;
-    const totalBudgetLines = this.projects.length > 0 ? this.projects.length : 4354;
+    const totalCommunes = this.institutions.filter(i => i.type === 'MAIRIE').length;
+    const totalRegions = this.institutions.filter(i => i.type === 'REGION' || i.type === 'DISTRICT').length;
+    const totalCollectivites = totalCommunes + totalRegions;
+    const totalBudgetLines = this.projects.length;
     const totalInvestmentsFcfa = this.projects.reduce((sum, p) => sum + p.budget_amount_fcfa, 0);
-    const verifiedProofs = this.proofs.filter(p => p.verification_status === 'APPROVED').length;
-    const totalProofs = this.proofs.length;
-    const proofsVerificationRate = totalProofs > 0 ? Math.round((verifiedProofs / totalProofs) * 100) : 100;
+    const verifiedProofs = this.getApprovedProofs().length;
+    const totalProofs = this.proofs.filter(p => !p.is_demo).length;
+    const proofsVerificationRate = totalProofs > 0 ? Math.round((verifiedProofs / totalProofs) * 100) : 0;
 
     return {
       totalCommunes,
@@ -664,235 +406,128 @@ class DataStore {
   }
 
   // --- AUTH MANAGEMENT ---
-  public login(email: string, fullName: string, role: UserRole) {
-    const assignedRole = (role === 'ADMIN' || role === 'MODERATOR' || role === 'DATA_MANAGER') ? role : 'MODERATOR';
-    const assignedName = fullName || (assignedRole === 'ADMIN' ? 'Administrateur National' : 'Modérateur Terrain');
-    const token = AuthSecurityService.createSignedSession({
-      email,
-      fullName: assignedName,
-      role: assignedRole,
-    });
-    this.authState = {
-      isAuthenticated: true,
-      email: token.payload.email,
-      fullName: token.payload.fullName,
-      role: token.payload.role as UserRole,
-      expiresAt: token.payload.expiresAt,
-    };
-    this.notify();
-  }
+  // Staff identity can only come from a server-validated session.
+  public async login() { await this.refreshAuth(); }
 
-  public logout() {
+  public async logout() {
+    ++this.syncGeneration;
     AuthSecurityService.clearSession();
-    if (isSupabaseConfigured()) {
-      supabase.auth.signOut().catch(() => {});
-    }
-    this.authState = {
-      isAuthenticated: false,
-      email: '',
-      fullName: '',
-      role: 'CITIZEN',
-      expiresAt: 0,
-    };
+    this.proofs = []; this.subscribers = []; this.caidpLogs = [];
     this.notify();
+    if (isSupabaseConfigured()) {
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
+      if (error) throw new Error('Déconnexion serveur non confirmée. Réessayez.');
+      await this.initSupabaseSync();
+    }
   }
 
   // --- CITIZEN PROOF SUBMISSION & MODERATION ---
-  public submitProof(proofData: {
-    project_id: string;
-    image_url: string;
-    video_url?: string;
-    media_type?: 'IMAGE' | 'VIDEO';
-    citizen_status_claim: ProjectStatus;
-    comment: string;
-    locality_details?: string;
-    citizen_name?: string;
-  }): CitizenProof {
+  public async submitProof(proofData: {
+    request_id: string; evidence_path: string; project_id: string;
+    media_type: 'IMAGE' | 'VIDEO'; citizen_status_claim: ProjectStatus;
+    comment: string; locality_details?: string; citizen_name?: string; observation_date?: string;
+  }): Promise<CitizenProof> {
+    const ownerId = await ensureCitizenSession();
     const project = this.getProjectById(proofData.project_id);
-    const newProof: CitizenProof = {
-      id: `proof-${Date.now()}`,
-      project_id: proofData.project_id,
-      project_title: project ? project.title : 'Projet d\'infrastructure locale',
-      commune_name: project ? project.commune_name : 'Côte d\'Ivoire',
-      region_name: project ? project.region_name : '',
-      citizen_name: proofData.citizen_name || 'Citoyen Observateur',
-      user_name: proofData.citizen_name || 'Citoyen Observateur',
-      image_url: proofData.image_url,
-      photo_url: proofData.image_url,
-      video_url: proofData.video_url,
-      media_type: proofData.media_type || (proofData.video_url ? 'VIDEO' : 'IMAGE'),
-      citizen_status_claim: proofData.citizen_status_claim,
-      comment: proofData.comment,
-      locality_details: proofData.locality_details || (project ? project.locality_village_neighborhood : ''),
-      verification_status: 'PENDING',
-      confirmations_count: 1,
-      created_at: new Date().toISOString(),
-    };
-
-    this.proofs.unshift(newProof);
-    this.saveProofs();
-    this.notify();
-
-    // Live Supabase Insert (if configured)
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('citizen_proofs').insert([{
-          id: newProof.id,
-          project_id: newProof.project_id,
-          project_title: newProof.project_title,
-          commune_name: newProof.commune_name,
-          region_name: newProof.region_name,
-          citizen_name: newProof.citizen_name,
-          image_url: newProof.image_url,
-          video_url: newProof.video_url,
-          media_type: newProof.media_type,
-          citizen_status_claim: newProof.citizen_status_claim,
-          comment: newProof.comment,
-          locality_details: newProof.locality_details,
-          verification_status: 'PENDING',
-        }]),
-        'Upload Preuve Citoyenne'
-      );
-    }
-
-    return newProof;
+    if (!project) throw new Error('Projet introuvable. Sélectionnez à nouveau le chantier.');
+    if (!proofData.evidence_path.startsWith(ownerId + '/')) throw new Error('Fichier non associé à votre envoi.');
+    const { request_id, evidence_path, ...input } = proofData;
+    const payload = { ...input, project_title: project.title, commune_name: project.commune_name,
+      region_name: project.region_name, citizen_name: proofData.citizen_name || 'Citoyen observateur' };
+    const { data, error } = await supabase.rpc('civic_submit_proof', {
+      request_id, evidence_path, payload,
+    });
+    if (error || data !== request_id) throw new Error('Réception non confirmée. Votre brouillon est conservé ; réessayez.');
+    // No optimistic approval or durable storage of private evidence in localStorage.
+    return { ...payload, id: request_id, image_url: '', verification_status: 'PENDING',
+      confirmations_count: 0, created_at: new Date().toISOString() } as CitizenProof;
   }
 
-  public confirmProof(proofId: string) {
-    const idx = this.proofs.findIndex(p => p.id === proofId);
-    if (idx !== -1) {
-      this.proofs[idx].confirmations_count = (this.proofs[idx].confirmations_count || 1) + 1;
-      this.saveProofs();
-      this.notify();
-    }
+  public async confirmProof(proofId: string) {
+    await ensureCitizenSession();
+    const { error } = await supabase.rpc('civic_confirm_proof', { proof_id: proofId });
+    if (error) throw new Error('Confirmation non enregistrée. Réessayez.');
   }
 
-  public moderateProof(proofId: string, status: 'APPROVED' | 'REJECTED', moderatorNotes?: string) {
-    const idx = this.proofs.findIndex(p => p.id === proofId);
-    if (idx !== -1) {
-      this.proofs[idx].verification_status = status;
-      if (moderatorNotes) {
-        this.proofs[idx].moderator_notes = moderatorNotes;
-      }
-      this.saveProofs();
-      this.notify();
-
-      // Live Supabase Update (if configured)
-      if (isSupabaseConfigured()) {
-        safeSupabaseExec(
-          supabase.from('citizen_proofs').update({
-            verification_status: status,
-            moderator_notes: moderatorNotes || null,
-            verified_at: new Date().toISOString(),
-            verified_by: this.authState.fullName || 'Modérateur',
-          }).eq('id', proofId),
-          'Modération Preuve Citoyenne'
-        );
-      }
-    }
+  public async moderateProof(proofId: string, status: 'APPROVED' | 'REJECTED', moderatorNotes?: string) {
+    await requireStaff(['ADMIN', 'MODERATOR']);
+    const { error } = await supabase.rpc('civic_moderate_proof', { proof_id: proofId, decision: status,
+      notes: moderatorNotes || '' });
+    if (error) throw new Error('Décision non enregistrée. Réessayez.');
+    await this.initSupabaseSync();
   }
 
-  public deleteProof(proofId: string) {
-    this.proofs = this.proofs.filter(p => p.id !== proofId);
-    this.saveProofs();
-    this.notify();
-
-    // Live Supabase Delete (if configured)
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('citizen_proofs').delete().eq('id', proofId),
-        'Suppression Preuve Citoyenne'
-      );
-    }
+  public async deleteProof(proofId: string) {
+    await this.moderateProof(proofId, 'REJECTED', 'Retiré de la publication');
   }
 
   // --- PROJECT CRUD ---
-  public addProject(project: Omit<BudgetProject, 'id' | 'created_at'>): BudgetProject {
-    const newProject: BudgetProject = {
-      ...project,
-      id: `custom-${Date.now()}`,
-      created_at: new Date().toISOString(),
-    };
-    this.projects.unshift(newProject);
-    this.saveProjects();
-    this.notify();
-    return newProject;
+  public async addProject(project: Omit<BudgetProject, 'id' | 'created_at'>): Promise<BudgetProject> {
+    const record = { ...project, id: crypto.randomUUID(), created_at: new Date().toISOString() } as BudgetProject;
+    await saveContent('projects', record.id, record);
+    this.projects = [record, ...this.projects]; this.notify();
+    return record;
   }
 
-  public updateProject(id: string, updates: Partial<BudgetProject>) {
-    this.projects = this.projects.map(p => {
-      if (p.id === id) {
-        return { ...p, ...updates };
-      }
-      return p;
-    });
-    this.saveProjects();
-    this.notify();
+  public async updateProject(id: string, updates: Partial<BudgetProject>): Promise<boolean> {
+    const current = this.projects.find(item => item.id === id);
+    if (!current) throw new Error('Fiche introuvable. Actualisez la page.');
+    const record = { ...current, ...updates, id };
+    await saveContent('projects', id, record);
+    this.projects = this.projects.map(item => item.id === id ? record : item);
+    this.notify(); return true;
   }
 
-  public deleteProject(id: string) {
-    this.projects = this.projects.filter(p => p.id !== id);
-    this.saveProjects();
-    this.notify();
+  public async deleteProject(id: string): Promise<boolean> {
+    await saveContent('projects', id, {}, true);
+    this.projects = this.projects.filter(item => item.id !== id);
+    this.notify(); return true;
   }
 
   // --- INSTITUTION CRUD ---
-  public addInstitution(instData: Omit<Institution, 'id'>): Institution {
-    const newInst: Institution = {
-      ...instData,
-      id: `inst-custom-${Date.now()}`,
-    };
-    this.institutions.unshift(newInst);
-    this.saveInstitutions();
-    this.notify();
-    return newInst;
+  public async addInstitution(instData: Omit<Institution, 'id'>): Promise<Institution> {
+    const record = { ...instData, id: crypto.randomUUID() } as Institution;
+    await saveContent('institutions', record.id, record);
+    this.institutions = [record, ...this.institutions]; this.notify();
+    return record;
   }
 
-  public updateInstitution(updatedInst: Institution) {
-    const idx = this.institutions.findIndex(inst => inst.id === updatedInst.id);
-    if (idx !== -1) {
-      this.institutions[idx] = { ...this.institutions[idx], ...updatedInst };
-    } else {
-      this.institutions.unshift(updatedInst);
-    }
-    this.saveInstitutions();
-    this.notify();
+  public async updateInstitution(updatedInst: Institution): Promise<boolean> {
+    const current = this.institutions.find(item => item.id === updatedInst.id);
+    if (!current) throw new Error('Fiche introuvable. Actualisez la page.');
+    const record = updatedInst;
+    await saveContent('institutions', updatedInst.id, record);
+    this.institutions = this.institutions.map(item => item.id === updatedInst.id ? record : item);
+    this.notify(); return true;
   }
 
-  public deleteInstitution(id: string) {
-    this.institutions = this.institutions.filter(inst => inst.id !== id);
-    this.saveInstitutions();
-    this.notify();
+  public async deleteInstitution(id: string): Promise<boolean> {
+    await saveContent('institutions', id, {}, true);
+    this.institutions = this.institutions.filter(item => item.id !== id);
+    this.notify(); return true;
   }
 
   // --- ARTICLES / PUBLICATIONS CRUD ---
-  public addArticle(articleData: Omit<NewsArticle, 'id' | 'published_at'>): NewsArticle {
-    const newArticle: NewsArticle = {
-      ...articleData,
-      id: `art-${Date.now()}`,
-      published_at: new Date().toISOString().split('T')[0],
-    };
-    this.articles.unshift(newArticle);
-    this.saveArticles();
-    this.notify();
-    return newArticle;
+  public async addArticle(articleData: Omit<NewsArticle, 'id' | 'published_at'>): Promise<NewsArticle> {
+    const record = { ...articleData, id: crypto.randomUUID(), published_at: new Date().toISOString() } as NewsArticle;
+    await saveContent('articles', record.id, record);
+    this.articles = [record, ...this.articles]; this.notify();
+    return record;
   }
 
-  public updateArticle(id: string, updates: Partial<NewsArticle>) {
-    this.articles = this.articles.map(a => {
-      if (a.id === id) {
-        return { ...a, ...updates };
-      }
-      return a;
-    });
-    this.saveArticles();
-    this.notify();
+  public async updateArticle(id: string, updates: Partial<NewsArticle>): Promise<boolean> {
+    const current = this.articles.find(item => item.id === id);
+    if (!current) throw new Error('Fiche introuvable. Actualisez la page.');
+    const record = { ...current, ...updates, id };
+    await saveContent('articles', id, record);
+    this.articles = this.articles.map(item => item.id === id ? record : item);
+    this.notify(); return true;
   }
 
-  public deleteArticle(id: string) {
-    this.articles = this.articles.filter(a => a.id !== id);
-    this.saveArticles();
-    this.notify();
+  public async deleteArticle(id: string): Promise<boolean> {
+    await saveContent('articles', id, {}, true);
+    this.articles = this.articles.filter(item => item.id !== id);
+    this.notify(); return true;
   }
 
   // --- PUBLIC DOCUMENTS MANAGEMENT ---
@@ -904,224 +539,71 @@ class DataStore {
     return this.documents.find(d => d.id === id);
   }
 
-  public addDocument(docData: Omit<PublicDocument, 'id' | 'downloads_count' | 'published_at'> & { published_at?: string }): PublicDocument {
-    const newDoc: PublicDocument = {
-      ...docData,
-      id: `doc-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
-      downloads_count: 0,
-      published_at: docData.published_at || new Date().toISOString().split('T')[0],
-      is_official: docData.is_official ?? true,
-    };
-    this.documents.unshift(newDoc);
-    this.saveDocuments();
-    this.notify();
-
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').insert([{
-          id: newDoc.id,
-          title: newDoc.title,
-          category: newDoc.category,
-          institution_name: newDoc.institution_name,
-          year: newDoc.year,
-          description: newDoc.description,
-          file_url: newDoc.file_url,
-          file_name: newDoc.file_name,
-          file_size: newDoc.file_size || '1.0 Mo',
-          file_format: newDoc.file_format,
-          published_at: newDoc.published_at,
-          downloads_count: newDoc.downloads_count,
-          is_official: newDoc.is_official,
-          tags: newDoc.tags || []
-        }]),
-        'Adding public document'
-      );
-    }
-
-    return newDoc;
+  public async addDocument(docData: Omit<PublicDocument, 'id' | 'downloads_count' | 'published_at'> & { published_at?: string }): Promise<PublicDocument> {
+    const record = { ...docData, id: crypto.randomUUID(), published_at: docData.published_at || new Date().toISOString(), downloads_count: 0 } as PublicDocument;
+    await saveContent('documents', record.id, record);
+    this.documents = [record, ...this.documents]; this.notify();
+    return record;
   }
 
-  public updateDocument(id: string, updates: Partial<PublicDocument>): boolean {
-    const idx = this.documents.findIndex(d => d.id === id);
-    if (idx === -1) return false;
-    this.documents[idx] = { ...this.documents[idx], ...updates };
-    this.saveDocuments();
-    this.notify();
-
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').update(updates).eq('id', id),
-        'Updating public document'
-      );
-    }
-    return true;
+  public async updateDocument(id: string, updates: Partial<PublicDocument>): Promise<boolean> {
+    const current = this.documents.find(item => item.id === id);
+    if (!current) throw new Error('Fiche introuvable. Actualisez la page.');
+    const record = { ...current, ...updates, id };
+    await saveContent('documents', id, record);
+    this.documents = this.documents.map(item => item.id === id ? record : item);
+    this.notify(); return true;
   }
 
-  public deleteDocument(id: string): boolean {
-    const idx = this.documents.findIndex(d => d.id === id);
-    if (idx === -1) return false;
-    this.documents = this.documents.filter(d => d.id !== id);
-    this.saveDocuments();
-    this.notify();
-
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').delete().eq('id', id),
-        'Deleting public document'
-      );
-    }
-    return true;
+  public async deleteDocument(id: string): Promise<boolean> {
+    await saveContent('documents', id, {}, true);
+    this.documents = this.documents.filter(item => item.id !== id);
+    this.notify(); return true;
   }
 
-  public incrementDocumentDownloads(id: string): void {
-    const doc = this.documents.find(d => d.id === id);
-    if (doc) {
-      doc.downloads_count = (doc.downloads_count || 0) + 1;
-      this.saveDocuments();
-      this.notify();
-
-      if (isSupabaseConfigured()) {
-        safeSupabaseExec(
-          supabase.from('public_documents').update({ downloads_count: doc.downloads_count }).eq('id', id),
-          'Incrementing document downloads'
-        );
-      }
-    }
+  public incrementDocumentDownloads(_id: string): void {
+    // Opening a link does not prove a completed download. No fabricated counter.
   }
 
   // --- SITE SETTINGS ---
-  public updateSettings(newSettings: Partial<SiteSettings>) {
-    this.settings = { ...this.settings, ...newSettings };
-    this.saveSettings();
-    this.notify();
+  public async updateSettings(newSettings: Partial<SiteSettings>) {
+    const settings = { ...this.settings, ...newSettings };
+    await saveContent('settings', 'global', settings);
+    this.settings = settings; this.notify();
   }
 
   // --- SMART MULTI-YEAR CSV IMPORT ---
-  public importFromCSV(csvText: string, options?: { mode?: 'APPEND' | 'REPLACE_YEAR', targetYear?: number }): { 
-    successCount: number; 
-    errorCount: number;
-    detectedYear: number;
-    totalAmountFcfa: number;
-  } {
-    let successCount = 0;
-    let errorCount = 0;
-    let totalAmountFcfa = 0;
-    const lines = csvText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-
-    if (lines.length <= 1) return { successCount: 0, errorCount: 0, detectedYear: 2026, totalAmountFcfa: 0 };
-
-    const delimiter = lines[0].includes(';') ? ';' : ',';
-    const sampleCols = lines[1].split(delimiter).map(c => c.trim().replace(/^"/, '').replace(/"$/, ''));
-    
-    let detectedYear = options?.targetYear || this.settings.fiscal_year || 2026;
-    if (!options?.targetYear && sampleCols[0] && /^\d{4}$/.test(sampleCols[0])) {
-      detectedYear = parseInt(sampleCols[0], 10);
-    }
-
-    const newProjects: BudgetProject[] = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      try {
-        const parts = lines[i].split(delimiter).map(p => p.trim().replace(/^"/, '').replace(/"$/, ''));
-        if (parts.length < 4) continue;
-
-        // DGBF 9-column format
-        if (parts.length >= 9 && (parts[1] === 'EMPLOIS' || parts[1] === 'RESSOURCES' || parts[2] === 'MINISTERES' || parts[2] === 'INSTITUTIONS')) {
-          const cat1 = parts[1];
-          const entity = parts[3];
-          const service = parts[4];
-          const prog = parts[5];
-          const nature = parts[6];
-          const libelle = parts[7];
-          const val = parseFloat(parts[8].replace(/\s/g, '').replace(/,/g, '.')) || 0;
-
-          if (cat1 !== 'EMPLOIS') continue;
-
-          const natLower = nature.toLowerCase();
-          const isInvest = natLower.includes('investiss') || natLower.includes('capital') || natLower.includes('equipement');
-
-          if (isInvest && val >= 10000000 && libelle && !libelle.toLowerCase().startsWith('provision') && !libelle.toLowerCase().startsWith('prendre en charge la tva')) {
-            const category = detectCategoryFromExpense(nature, `${libelle} ${prog} ${entity}`);
-            
-            newProjects.push({
-              id: `nat-proj-${detectedYear}-${Date.now()}-${i}`,
-              title: libelle,
-              details: `${prog} • Piloté par : ${entity} (${service})`,
-              budget_amount_fcfa: val,
-              fiscal_year: detectedYear,
-              current_status: 'NOT_STARTED',
-              progress_percentage: 0,
-              contractor_name: "Attribution par appel d'offres / Marché public",
-              category,
-              region_name: 'National / Multi-Régions',
-              commune_name: entity,
-              institution_name: entity,
-              ministry_name: entity,
-              program_name: prog,
-              service_name: service,
-              nature_expense: 'Investissements',
-              scope_level: 'NATIONAL',
-              created_at: new Date().toISOString(),
-              source: `Loi de Finances ${detectedYear} (DGBF)`,
-            });
-            totalAmountFcfa += val;
-            successCount++;
-          }
-        } else {
-          // Collectivités format
-          let commune = parts[0] || 'Collectivité Locale';
-          let region = parts[1] || 'Région';
-          let details = parts[2] || 'Investissement public';
-          let valStr = parts[3] || '0';
-
-          if (parts.length >= 8) {
-            region = parts[3] || 'Région';
-            commune = parts[4] || 'Conseil Régional';
-            details = parts[7] || 'Investissement régional';
-            valStr = parts[8] || parts[7] || '0';
-          }
-
-          const val = parseFloat(valStr.replace(/\s/g, '').replace(/,/g, '.')) || 0;
-          if (val >= 1000000) {
-            const category = detectCategoryFromExpense(details, commune);
-            newProjects.push({
-              id: `loc-proj-${detectedYear}-${Date.now()}-${i}`,
-              commune_name: commune,
-              region_name: region,
-              category,
-              nature_expense: 'Investissements',
-              title: details.length > 120 ? `${details.substring(0, 117)}...` : details,
-              details,
-              budget_amount_fcfa: val,
-              fiscal_year: detectedYear,
-              current_status: 'NOT_STARTED',
-              progress_percentage: 0,
-              contractor_name: "Marché public / Appel d'offres",
-              scope_level: 'LOCAL',
-              created_at: new Date().toISOString(),
-              source: `Budget Primitif ${detectedYear}`,
-            });
-            totalAmountFcfa += val;
-            successCount++;
-          }
-        }
-      } catch {
-        errorCount++;
-      }
-    }
-
-    if (newProjects.length > 0) {
-      if (options?.mode === 'REPLACE_YEAR') {
-        this.projects = [...newProjects, ...this.projects.filter(p => p.fiscal_year !== detectedYear)];
-      } else {
-        this.projects = [...newProjects, ...this.projects];
-      }
-      this.updateSettings({ fiscal_year: detectedYear });
-      this.saveProjects();
-      this.notify();
-    }
-
-    return { successCount, errorCount, detectedYear, totalAmountFcfa };
+  public async importFromCSV(csvText: string, options?: { mode?: 'APPEND' | 'REPLACE_YEAR'; targetYear?: number }): Promise<{ successCount: number; errorCount: number; detectedYear: number; totalAmountFcfa: number }> {
+    const rows = parseCsv(csvText);
+    const headers = rows.shift()?.map(h => h.trim()) || [];
+    const required = ['title','commune_name','region_name','budget_amount_fcfa','fiscal_year','source'];
+    if (required.some(key => !headers.includes(key)) || new Set(headers).size !== headers.length) throw new Error('Colonnes requises : ' + required.join(';'));
+    const seen = new Set<string>();
+    const projects = rows.map((row, index) => {
+      if (row.length !== headers.length) throw new Error(`Nombre de colonnes incorrect à la ligne ${index + 2}.`);
+      const item = Object.fromEntries(headers.map((key,i) => [key, row[i].trim()]));
+      const amount = Number(item.budget_amount_fcfa.replace(/[\s\u202f\u00a0]/g,'').replace(',','.'));
+      const year = Number(item.fiscal_year);
+      if (!item.title || !item.source || !item.budget_amount_fcfa || !Number.isSafeInteger(amount) || amount < 0 || !Number.isInteger(year) || year < 2000 || year > 2200) throw new Error(`Donnée budgétaire invalide à la ligne ${index + 2}.`);
+      if (options?.targetYear && options.targetYear !== year) throw new Error('Exercice différent de celui sélectionné.');
+      const id = item.id || crypto.randomUUID();
+      if (seen.has(id)) throw new Error(`Identifiant en double : ${id}`);
+      seen.add(id);
+      return { ...item, id, budget_amount_fcfa: amount, fiscal_year: year, current_status: 'UNKNOWN',
+        progress_percentage: 0, nature_expense: 'Investissements', scope_level: item.scope_level === 'NATIONAL' ? 'NATIONAL' : 'LOCAL', budget_stage: 'VOTED' } as BudgetProject;
+    });
+    if (!projects.length) throw new Error('Aucun projet à importer.');
+    const year = projects[0].fiscal_year;
+    if (projects.some(p => p.fiscal_year !== year)) throw new Error('Importez un seul exercice à la fois.');
+    const removed = options?.mode === 'REPLACE_YEAR' ? this.projects.filter(p => p.fiscal_year === year && !seen.has(p.id)) : [];
+    await saveContentBatch([
+      ...removed.map(p => ({ kind: 'projects' as const, id: p.id, data: {}, deleted: true })),
+      ...projects.map(p => ({ kind: 'projects' as const, id: p.id, data: p })),
+    ]);
+    const map = new Map(this.projects.filter(p => !removed.includes(p)).map(p => [p.id,p]));
+    projects.forEach(p => map.set(p.id,p));
+    this.projects = [...map.values()]; this.notify();
+    return { successCount: projects.length, errorCount: 0, detectedYear: year, totalAmountFcfa: projects.reduce((sum,p) => sum+p.budget_amount_fcfa,0) };
   }
 
   // --- FULL BACKUP & RESTORE (JSON) ---
@@ -1138,50 +620,12 @@ class DataStore {
     return JSON.stringify(backupData, null, 2);
   }
 
-  public importFullBackup(jsonString: string): { success: boolean; message: string } {
-    try {
-      const data = JSON.parse(jsonString);
-      if (!data || typeof data !== 'object') {
-        return { success: false, message: 'Format de fichier JSON invalide.' };
-      }
-
-      if (Array.isArray(data.projects)) this.projects = data.projects;
-      if (Array.isArray(data.institutions)) this.institutions = data.institutions;
-      if (Array.isArray(data.articles)) this.articles = data.articles;
-      if (Array.isArray(data.proofs)) this.proofs = data.proofs;
-      if (data.settings && typeof data.settings === 'object') this.settings = { ...DEFAULT_SETTINGS, ...data.settings };
-
-      this.saveProjects();
-      this.saveInstitutions();
-      this.saveArticles();
-      this.saveProofs();
-      this.saveSettings();
-      this.notify();
-
-      return { 
-        success: true, 
-        message: `Restauration réussie ! (${this.projects.length} projets, ${this.institutions.length} entités, ${this.articles.length} publications)` 
-      };
-    } catch (e: any) {
-      return { success: false, message: `Erreur lors de la lecture du fichier : ${e.message}` };
-    }
+  public async importFullBackup(_jsonString: string): Promise<{ success: boolean; message: string }> {
+    return { success: false, message: 'La restauration globale doit être effectuée depuis une sauvegarde serveur vérifiée. Utilisez les imports par catalogue pour les corrections ciblées.' };
   }
 
-  public resetToFactoryDefaults() {
-    this.projects = [...RAW_BUDGET_PROJECTS];
-    this.institutions = [...INSTITUTIONS_DATA];
-    this.proofs = [...INITIAL_CITIZEN_PROOFS];
-    this.articles = [...INITIAL_ARTICLES];
-    this.caidpDirectory = [...CAIDP_MASTER_DIRECTORY];
-    this.settings = { ...DEFAULT_SETTINGS };
-
-    this.saveProjects();
-    this.saveInstitutions();
-    this.saveProofs();
-    this.saveArticles();
-    this.saveCaidpDirectory();
-    this.saveSettings();
-    this.notify();
+  public async resetToFactoryDefaults() {
+    throw new Error('La réinitialisation globale est désactivée pour protéger les données partagées.');
   }
 
   // --- CAIDP RI DIRECTORY CRUD ---
@@ -1205,38 +649,30 @@ class DataStore {
     });
   }
 
-  public updateCaidpEntity(id: string, updates: Partial<CaidpEntity>) {
-    this.caidpDirectory = this.caidpDirectory.map(item => {
-      if (item.id === id) {
-        return { ...item, ...updates };
-      }
-      return item;
-    });
-    this.saveCaidpDirectory();
-    this.notify();
+  public async updateCaidpEntity(id: string, updates: Partial<CaidpEntity>): Promise<boolean> {
+    const current = this.caidpDirectory.find(item => item.id === id);
+    if (!current) throw new Error('Fiche introuvable. Actualisez la page.');
+    const record = { ...current, ...updates, id };
+    await saveContent('caidp', id, record);
+    this.caidpDirectory = this.caidpDirectory.map(item => item.id === id ? record : item);
+    this.notify(); return true;
   }
 
-  public addCaidpEntity(entityData: Omit<CaidpEntity, 'id'>): CaidpEntity {
-    const newEntity: CaidpEntity = {
-      ...entityData,
-      id: `caidp-custom-${Date.now()}`,
-    };
-    this.caidpDirectory.unshift(newEntity);
-    this.saveCaidpDirectory();
-    this.notify();
-    return newEntity;
+  public async addCaidpEntity(entityData: Omit<CaidpEntity, 'id'>): Promise<CaidpEntity> {
+    const record = { ...entityData, id: crypto.randomUUID() } as CaidpEntity;
+    await saveContent('caidp', record.id, record);
+    this.caidpDirectory = [record, ...this.caidpDirectory]; this.notify();
+    return record;
   }
 
-  public deleteCaidpEntity(id: string) {
+  public async deleteCaidpEntity(id: string): Promise<boolean> {
+    await saveContent('caidp', id, {}, true);
     this.caidpDirectory = this.caidpDirectory.filter(item => item.id !== id);
-    this.saveCaidpDirectory();
-    this.notify();
+    this.notify(); return true;
   }
 
-  public resetCaidpDirectory() {
-    this.caidpDirectory = [...CAIDP_MASTER_DIRECTORY];
-    this.saveCaidpDirectory();
-    this.notify();
+  public async resetCaidpDirectory() {
+    throw new Error('La réinitialisation globale est désactivée pour protéger les données partagées.');
   }
 
   public exportCaidpDirectoryToCSV(): string {
@@ -1256,18 +692,19 @@ class DataStore {
     return [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
   }
 
-  public importCaidpDirectoryFromCSV(csvText: string): { successCount: number; errorCount: number } {
+  public async importCaidpDirectoryFromCSV(csvText: string): Promise<{ successCount: number; errorCount: number }> {
+    const directory = this.caidpDirectory.map(item => ({ ...item }));
     let successCount = 0;
     let errorCount = 0;
-    const lines = csvText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    const lines = parseCsv(csvText);
     if (lines.length <= 1) return { successCount: 0, errorCount: 0 };
 
-    const delimiter = lines[0].includes(';') ? ';' : ',';
+    if (lines[0].length !== 10) throw new Error('Utilisez le format CSV exporté par le répertoire (10 colonnes).');
 
     for (let i = 1; i < lines.length; i++) {
       try {
-        const parts = lines[i].split(delimiter).map(p => p.trim().replace(/^"/, '').replace(/"$/, ''));
-        if (parts.length < 3) continue;
+        const parts = lines[i].map(p => p.trim());
+        if (parts.length != 10 || !parts[1]) throw new Error('Ligne incomplète');
 
         const orgName = parts[1] || parts[0];
         const category = (parts[2] as any) || 'SOCIETE_ETAT';
@@ -1276,21 +713,21 @@ class DataStore {
         const email = parts[7] || parts[4] || "Pas d'email";
         const phone = parts[8] || parts[5] || "Pas de numéro";
 
-        const existingIdx = this.caidpDirectory.findIndex(e => 
+        const existingIdx = directory.findIndex(e =>
           e.company_name.toLowerCase().trim() === orgName.toLowerCase().trim()
         );
 
         if (existingIdx !== -1) {
-          this.caidpDirectory[existingIdx] = {
-            ...this.caidpDirectory[existingIdx],
-            ri_name: riName || this.caidpDirectory[existingIdx].ri_name,
-            ri_function: riFunc || this.caidpDirectory[existingIdx].ri_function,
-            email: email || this.caidpDirectory[existingIdx].email,
-            phone: phone || this.caidpDirectory[existingIdx].phone,
+          directory[existingIdx] = {
+            ...directory[existingIdx],
+            ri_name: riName || directory[existingIdx].ri_name,
+            ri_function: riFunc || directory[existingIdx].ri_function,
+            email: email || directory[existingIdx].email,
+            phone: phone || directory[existingIdx].phone,
             source: "Importé par l'Admin"
           };
         } else {
-          this.caidpDirectory.push({
+          directory.push({
             id: `caidp-import-${Date.now()}-${i}`,
             company_name: orgName,
             category: category,
@@ -1309,136 +746,46 @@ class DataStore {
       }
     }
 
-    this.saveCaidpDirectory();
-    this.notify();
+    if (errorCount) throw new Error('Import annulé : corrigez les lignes invalides.');
+    await saveContentBatch(directory.filter(item => JSON.stringify(item) !== JSON.stringify(this.caidpDirectory.find(old => old.id === item.id)))
+      .map(item => ({ kind: 'caidp' as const, id: item.id, data: item })));
+    this.caidpDirectory = directory; this.notify();
     return { successCount, errorCount };
   }
 
   // --- PERSISTENCE HELPERS ---
-  private saveProjects() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(this.projects));
-    } catch (e) {
-      console.warn("Storage quota exceeded for projects", e);
-    }
-  }
 
-  private saveInstitutions() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.INSTITUTIONS, JSON.stringify(this.institutions));
-    } catch (e) {
-      console.warn("Storage quota exceeded for institutions", e);
-    }
-  }
 
-  private saveProofs() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.PROOFS, JSON.stringify(this.proofs));
-    } catch (e) {
-      console.warn("Storage quota exceeded for proofs", e);
-    }
-  }
 
-  private saveArticles() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.ARTICLES, JSON.stringify(this.articles));
-    } catch (e) {
-      console.warn("Storage quota exceeded for articles", e);
-    }
-  }
 
-  private saveCaidpDirectory() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.CAIDP_RI, JSON.stringify(this.caidpDirectory));
-    } catch (e) {
-      console.warn("Storage quota exceeded for caidp directory", e);
-    }
-  }
 
-  private saveDocuments() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(this.documents));
-    } catch (e) {
-      console.warn("Storage quota exceeded for public documents", e);
-    }
-  }
 
   // ==========================================
   // NEWSLETTER & CITIZEN ALERTS SUBSCRIBERS
   // ==========================================
-  public subscribeNewsletter(firstName: string, email: string, commune: string): { success: boolean; message: string } {
-    const cleanEmail = email.trim().toLowerCase();
-    if (!cleanEmail || !cleanEmail.includes('@')) {
-      return { success: false, message: "Veuillez fournir une adresse email valide." };
-    }
-
-    const exists = this.subscribers.find(s => s.email.toLowerCase() === cleanEmail);
-    if (exists) {
-      return { success: true, message: "Vous êtes déjà inscrit aux alertes citoyennes !" };
-    }
-
-    const newSub: NewsletterSubscriber = {
-      id: `sub-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-      first_name: firstName.trim() || 'Citoyen',
-      email: cleanEmail,
-      commune: commune.trim() || 'Côte d\'Ivoire',
-      created_at: new Date().toISOString(),
-    };
-
-    this.subscribers.push(newSub);
-    this.saveSubscribers();
-    this.notify();
-
-    // Live Supabase Insert (if configured)
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('newsletter_subscribers').insert([{
-          id: newSub.id,
-          first_name: newSub.first_name,
-          email: newSub.email,
-          commune: newSub.commune,
-        }]),
-        'Inscription Newsletter'
-      );
-    }
-
-    return { success: true, message: "Inscription réussie ! Vous recevrez nos prochaines alertes citoyennes." };
+  public async subscribeNewsletter(firstName: string, email: string, commune: string): Promise<{ success: boolean; message: string }> {
+    try {
+      await ensureCitizenSession();
+      const { error } = await supabase.rpc('civic_subscribe', { subscriber_email: email.trim().toLowerCase(),
+        subscriber_name: firstName.trim(), subscriber_commune: commune.trim() });
+      if (error) throw error;
+      return { success: true, message: 'Votre demande d’inscription est enregistrée.' };
+    } catch { return { success: false, message: 'Inscription non confirmée. Réessayez ultérieurement.' }; }
   }
 
   public getSubscribers(): NewsletterSubscriber[] {
     return [...this.subscribers];
   }
 
-  private saveSubscribers() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.SUBSCRIBERS, JSON.stringify(this.subscribers));
-    } catch (e) {
-      console.warn("Storage quota exceeded for subscribers", e);
-    }
-  }
+  private saveSubscribers() {}
 
   // ==========================================
   // CAIDP REQUESTS & ANALYTICS TRACKING
   // ==========================================
-  public logCaidpRequest(event: Omit<CaidpRequestEvent, 'id' | 'created_at'>): CaidpRequestEvent {
-    const newLog: CaidpRequestEvent = {
-      ...event,
-      id: `caidp-req-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-      created_at: new Date().toISOString(),
-    };
-
-    this.caidpLogs.unshift(newLog); // latest first
-    this.saveCaidpLogs();
-    this.notify();
-
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('caidp_document_requests_log').insert([newLog]),
-        'Enregistrement statistique requête CAIDP'
-      );
-    }
-
-    return newLog;
+  public logCaidpRequest(event: Omit<CaidpRequestEvent, 'id' | 'created_at'>): void {
+    const newLog = { ...event, id: crypto.randomUUID(), created_at: new Date().toISOString() };
+    // Local action history only. No claim of national impact, delivery, or response.
+    this.caidpLogs.unshift(newLog); this.notify();
   }
 
   public getCaidpRequests(): CaidpRequestEvent[] {
@@ -1447,8 +794,8 @@ class DataStore {
 
   public getCaidpRequestStats(): CaidpRequestStats {
     const totalRequests = this.caidpLogs.length;
-    let emailSentCount = 0;
-    let printPdfCount = 0;
+    let emailOpenedCount = 0;
+    let printOpenedCount = 0;
     let copiedCount = 0;
     let withRiCount = 0;
     let withoutRiCount = 0;
@@ -1463,8 +810,8 @@ class DataStore {
     const docCountMap: Record<string, number> = {};
 
     for (const log of this.caidpLogs) {
-      if (log.action_type === 'EMAIL_SENT') emailSentCount++;
-      else if (log.action_type === 'PRINT_PDF') printPdfCount++;
+      if (log.action_type === 'EMAIL_OPENED') emailOpenedCount++;
+      else if (log.action_type === 'PRINT_OPENED') printOpenedCount++;
       else if (log.action_type === 'COPIED') copiedCount++;
 
       if (log.has_ri) withRiCount++;
@@ -1488,8 +835,8 @@ class DataStore {
 
     return {
       totalRequests,
-      emailSentCount,
-      printPdfCount,
+      emailOpenedCount,
+      printOpenedCount,
       copiedCount,
       withRiCount,
       withoutRiCount,
@@ -1501,25 +848,11 @@ class DataStore {
 
   public clearCaidpRequests(): void {
     this.caidpLogs = [];
-    this.saveCaidpLogs();
+
     this.notify();
   }
 
-  private saveCaidpLogs() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.CAIDP_LOGS, JSON.stringify(this.caidpLogs.slice(0, 500)));
-    } catch (e) {
-      console.warn("Storage quota exceeded for caidp logs", e);
-    }
-  }
 
-  private saveSettings() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(this.settings));
-    } catch (e) {
-      console.warn("Storage quota exceeded for settings", e);
-    }
-  }
 }
 
 export const dataStore = new DataStore();

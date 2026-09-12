@@ -1,18 +1,17 @@
-import { BudgetProject } from '../types';
-import officialNationalProjects2026 from './officialNationalProjects2026.json';
-import { OFFICIAL_CSV_PROJECTS } from './officialProjectsFromCsv';
-
-export const NATIONAL_BUDGET_PROJECTS: BudgetProject[] = (officialNationalProjects2026 as unknown as BudgetProject[]).map(p => ({
-  ...p,
-  scope_level: 'NATIONAL' as const,
-}));
-
-export const LOCAL_BUDGET_PROJECTS: BudgetProject[] = OFFICIAL_CSV_PROJECTS.map(p => ({
-  ...p,
-  scope_level: 'LOCAL' as const,
-}));
-
-export const RAW_BUDGET_PROJECTS: BudgetProject[] = [
-  ...LOCAL_BUDGET_PROJECTS,
-  ...NATIONAL_BUDGET_PROJECTS,
-];
+import type { BudgetProject } from '../types';
+export let RAW_BUDGET_PROJECTS: BudgetProject[] = [];
+let loading: Promise<void> | undefined;
+export async function loadBudgetProjects(): Promise<void> {
+  if (!loading) loading = (async () => {
+    const manifestResponse = await fetch('/data/projects-manifest.json');
+    if (!manifestResponse.ok) throw new Error('Catalogue indisponible. Réessayez.');
+    const manifest = await manifestResponse.json();
+    if (typeof manifest.url !== 'string' || !/^\/data\/projects-[0-9a-f]+\.json$/.test(manifest.url)) throw new Error('Index du catalogue invalide.');
+    const response = await fetch(manifest.url);
+    if (!response.ok) throw new Error('Chargement du catalogue impossible.');
+    const projects = await response.json();
+    if (!Array.isArray(projects) || projects.length !== manifest.count) throw new Error('Catalogue incomplet.');
+    RAW_BUDGET_PROJECTS = projects;
+  })().catch(error => { loading = undefined; throw error; });
+  await loading;
+}

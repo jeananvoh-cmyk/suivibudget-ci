@@ -1,6 +1,6 @@
 // Types for CivicData CI Platform
 
-export type ProjectStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+export type ProjectStatus = 'UNKNOWN' | 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'SUSPENDED';
 
 export type VerificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
@@ -85,6 +85,15 @@ export interface BudgetProject {
   locality_village_neighborhood?: string;
   created_at: string;
   source?: string;
+  source_url?: string;
+  source_page?: string;
+  source_version?: string;
+  source_verified_at?: string;
+  budget_stage?: 'VOTED' | 'COMMITTED' | 'PAID' | 'UNSPECIFIED';
+  status_verified_at?: string;
+  institution_response?: string;
+  institution_response_source_url?: string;
+  institution_response_at?: string;
   scope_level?: 'LOCAL' | 'NATIONAL';
   ministry_name?: string;
   program_name?: string;
@@ -159,7 +168,7 @@ export type DocumentCategory =
   | 'ETUDE_TECHNIQUE' 
   | 'GUIDE_CITOYEN';
 
-export type DocumentFormat = 'PDF' | 'EXCEL' | 'WORD' | 'CSV';
+export type DocumentFormat = 'PDF' | 'EXCEL' | 'WORD' | 'CSV' | 'MARKDOWN';
 
 export interface PublicDocument {
   id: string;

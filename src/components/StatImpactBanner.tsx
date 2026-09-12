@@ -32,10 +32,10 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
           </div>
           <div>
             <div className="text-3xl font-black text-slate-900 tracking-tight">
-              234
+              {stats.totalCollectivites ?? 0}
             </div>
             <p className="text-xs text-slate-600 font-semibold mt-1.5 leading-snug">
-              201 communes + 33 régions et districts
+              {stats.totalCommunes} communes + {stats.totalRegions} régions et districts référencés
             </p>
           </div>
         </div>
@@ -68,10 +68,10 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
           </div>
           <div>
             <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              {formatCompactFCFA(stats.totalInvestmentsFcfa || 175648952140)}
+              {formatCompactFCFA(stats.totalInvestmentsFcfa)}
             </div>
             <p className="text-xs text-slate-600 font-semibold mt-1.5 leading-snug">
-              Montant voté Loi de Finances
+              Total des dotations du catalogue
             </p>
           </div>
         </div>
@@ -86,12 +86,12 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
           </div>
           <div>
             <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              {verifiedCount > 0 ? `${verifiedCount} Validé${verifiedCount > 1 ? 's' : ''}` : '100% Vérifiable'}
+              {verifiedCount > 0 ? `${verifiedCount} Validé${verifiedCount > 1 ? 's' : ''}` : '0 constat validé'}
             </div>
             <p className="text-xs text-slate-600 font-semibold mt-1.5 leading-snug">
               {verifiedCount > 0 
                 ? `${verifiedCount} contribution${verifiedCount > 1 ? 's' : ''} certifiée${verifiedCount > 1 ? 's' : ''} sur le terrain` 
-                : 'Auditable avec preuves de terrain'}
+                : 'En attente de contributions vérifiées'}
             </p>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { reportActionError } from '../utils/actionError';
 import React, { useState, useEffect } from 'react';
 import { AuthSecurityService, ModeratorUser } from '../services/authSecurity';
 import { 
@@ -45,8 +46,12 @@ export const ModeratorManager: React.FC = () => {
     setTimeout(() => setNotification(null), 3500);
   };
 
-  const loadModerators = () => {
-    setModerators(AuthSecurityService.getModerators());
+  const loadModerators = async () => {
+    try {
+
+    setModerators(await AuthSecurityService.getModerators());
+
+    } catch (error) { reportActionError(error); }
   };
 
   useEffect(() => {
@@ -79,18 +84,26 @@ export const ModeratorManager: React.FC = () => {
     }
   };
 
-  const handleToggleStatus = (id: string) => {
-    AuthSecurityService.toggleModeratorStatus(id);
+  const handleToggleStatus = async (id: string) => {
+    try {
+
+    await AuthSecurityService.toggleModeratorStatus(id, moderators.find(m => m.id === id)?.status === 'ACTIVE');
     loadModerators();
     showToast("Statut du compte mis à jour.");
+
+    } catch (error) { reportActionError(error); }
   };
 
-  const handleDelete = (mod: ModeratorUser) => {
-    if (window.confirm(`Confirmez-vous la suppression du compte modérateur de ${mod.full_name} (${mod.email}) ?`)) {
-      AuthSecurityService.deleteModerator(mod.id);
+  const handleDelete = async (mod: ModeratorUser) => {
+    try {
+
+    if (window.confirm(`Confirmez-vous le retrait des droits du compte modérateur de ${mod.full_name} (${mod.email}) ?`)) {
+      await AuthSecurityService.deleteModerator(mod.id);
       loadModerators();
-      showToast("Compte modérateur supprimé.");
+      showToast("Droits du compte retirés.");
     }
+
+    } catch (error) { reportActionError(error); }
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -295,7 +308,7 @@ export const ModeratorManager: React.FC = () => {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
-                    placeholder="Au moins 6 caractères"
+                    placeholder="Au moins 12 caractères"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-blue focus:bg-white pr-10"
@@ -310,27 +323,7 @@ export const ModeratorManager: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-                <span className="font-bold text-slate-800 block text-[11px]">Permissions accordées :</span>
-                <label className="flex items-center gap-2 text-slate-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={canModerateProofs}
-                    onChange={(e) => setCanModerateProofs(e.target.checked)}
-                    className="rounded text-brand-blue"
-                  />
-                  <span>Approuver et modérer les preuves citoyennes</span>
-                </label>
-                <label className="flex items-center gap-2 text-slate-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={canManageProjects}
-                    onChange={(e) => setCanManageProjects(e.target.checked)}
-                    className="rounded text-brand-blue"
-                  />
-                  <span>Éditer et actualiser les projets d'investissement</span>
-                </label>
-              </div>
+              <p className="p-3 bg-slate-50 rounded-xl text-sm">{role === 'MODERATOR' ? 'Peut examiner les constats et gérer les publications et documents.' : 'Peut gérer les projets, institutions et responsables de l’information.'}</p>
 
               <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-100">
                 <button
@@ -377,7 +370,7 @@ export const ModeratorManager: React.FC = () => {
                   <input
                     type={showNewPass ? 'text' : 'password'}
                     required
-                    placeholder="Au moins 6 caractères"
+                    placeholder="Au moins 12 caractères"
                     value={newPass}
                     onChange={(e) => setNewPass(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand-blue focus:bg-white pr-10"

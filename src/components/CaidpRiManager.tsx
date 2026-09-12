@@ -1,3 +1,4 @@
+import { reportActionError } from '../utils/actionError';
 import React, { useState, useMemo } from 'react';
 import { CaidpEntity, EntityPublicCategory } from '../data/caidpRiData';
 import { dataStore } from '../services/dataStore';
@@ -152,7 +153,9 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast }) =
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEdit = (e: React.FormEvent) => {
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    try {
+
     e.preventDefault();
     if (!editForm.company_name.trim()) {
       onShowToast("Veuillez saisir le nom de l'organisme public.", 'error');
@@ -160,21 +163,27 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast }) =
     }
 
     if (editingItem) {
-      dataStore.updateCaidpEntity(editingItem.id, editForm);
+      await dataStore.updateCaidpEntity(editingItem.id, editForm);
       onShowToast(`Coordonnées du RI pour "${editForm.company_name}" mises à jour avec succès !`, 'success');
     } else {
-      dataStore.addCaidpEntity(editForm);
+      await dataStore.addCaidpEntity(editForm);
       onShowToast(`Nouvel organisme public "${editForm.company_name}" ajouté au répertoire CAIDP !`, 'success');
     }
     setIsEditModalOpen(false);
     setEditingItem(null);
+
+    } catch (error) { reportActionError(error); }
   };
 
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (id: string, name: string) => {
+    try {
+
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer "${name}" du répertoire CAIDP ?`)) {
-      dataStore.deleteCaidpEntity(id);
+      await dataStore.deleteCaidpEntity(id);
       onShowToast(`"${name}" a été supprimé du répertoire.`, 'info');
     }
+
+    } catch (error) { reportActionError(error); }
   };
 
   const handleExportCSV = () => {
@@ -190,15 +199,19 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast }) =
     onShowToast('Exportation du fichier CSV réussie !', 'success');
   };
 
-  const handleImportCSV = () => {
+  const handleImportCSV = async () => {
+    try {
+
     if (!importCsvText.trim()) {
       onShowToast('Veuillez coller le contenu CSV à importer.', 'error');
       return;
     }
-    const result = dataStore.importCaidpDirectoryFromCSV(importCsvText);
+    const result = await dataStore.importCaidpDirectoryFromCSV(importCsvText);
     onShowToast(` Importation terminée : ${result.successCount} organismes mis à jour ou ajoutés !`, 'success');
     setIsImportModalOpen(false);
     setImportCsvText('');
+
+    } catch (error) { reportActionError(error); }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

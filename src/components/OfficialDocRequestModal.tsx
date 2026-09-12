@@ -295,7 +295,7 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
   const handlePrint = () => {
     const selectedItems = availableDocs.filter(d => selectedDocIds.includes(d.id));
     dataStore.logCaidpRequest({
-      action_type: 'PRINT_PDF',
+      action_type: 'PRINT_OPENED',
       entity_type: resolvedEntityType,
       entity_name: targetEntityName,
       has_ri: hasNominatedRi,
@@ -307,18 +307,9 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
     window.print();
   };
 
-  const handleCopyText = () => {
+  const handleCopyText = async () => {
     const selectedItems = availableDocs.filter(d => selectedDocIds.includes(d.id));
-    dataStore.logCaidpRequest({
-      action_type: 'COPIED',
-      entity_type: resolvedEntityType,
-      entity_name: targetEntityName,
-      has_ri: hasNominatedRi,
-      document_titles: selectedItems.map(d => d.title),
-      document_categories: Array.from(new Set(selectedItems.map(d => d.category))),
-      user_status: userStatus,
-      commune: caidpMatch?.commune || project?.commune_name || institution?.departement,
-    });
+
 
     const senderLines = [
       `Demandeur : ${citizenName || '[Nom et Prénom]'}`,
@@ -349,7 +340,18 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
       `---\n` +
       `Document préparé via la plateforme civique SuiviBudget Côte d'Ivoire (suivibudget.ci) • Réf. : ${referenceNumber}`;
 
-    navigator.clipboard.writeText(fullText);
+    try { await navigator.clipboard.writeText(fullText); }
+    catch { window.alert("Copie impossible. Sélectionnez le texte pour le copier manuellement."); return; }
+    dataStore.logCaidpRequest({
+      action_type: 'COPIED',
+      entity_type: resolvedEntityType,
+      entity_name: targetEntityName,
+      has_ri: hasNominatedRi,
+      document_titles: selectedItems.map(d => d.title),
+      document_categories: Array.from(new Set(selectedItems.map(d => d.category))),
+      user_status: userStatus,
+      commune: caidpMatch?.commune || project?.commune_name || institution?.departement,
+    });
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 3000);
   };
@@ -357,7 +359,7 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
   const handleSendEmail = () => {
     const selectedItems = availableDocs.filter(d => selectedDocIds.includes(d.id));
     dataStore.logCaidpRequest({
-      action_type: 'EMAIL_SENT',
+      action_type: 'EMAIL_OPENED',
       entity_type: resolvedEntityType,
       entity_name: targetEntityName,
       has_ri: hasNominatedRi,

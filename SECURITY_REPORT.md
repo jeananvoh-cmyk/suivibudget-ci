@@ -1,107 +1,40 @@
-# 🛡️ RAPPORT D'AUDIT DE CYBERSÉCURITÉ GLOBAL (OWASP TOP 10 & SUPABASE RLS)
-**Plateforme :** SuiviBudget Côte d'Ivoire (`civicdata-ci`)  
-**Périmètre :** Front-End (React/TypeScript), Back-End/Base de données (Supabase / PostgreSQL), APIs, Gestion des Données et des Accès.  
-**Date de l'Audit :** 02 Septembre 2026  
-**Auditeur :** Expert Senior en Cybersécurité Applicative (Web & Mobile)  
-**Classification :** Rapport Confidentiel Interne
+# Audit technique et civic tech — septembre 2026
 
----
+Périmètre : revue du dépôt, corrections applicatives, tests locaux. Ce rapport remplace le précédent document, dont les affirmations « A+ », « 100 % sécurisé » et « RLS déployée » n'étaient pas démontrées. Il ne certifie ni l'infrastructure en production ni la véracité de chaque montant budgétaire.
 
-## 1. 📋 Résumé Exécutif
+## Points forts
 
-Cet audit de sécurité approfondi a porté sur l'intégralité du code source du projet **SuiviBudget Côte d'Ivoire**, couvrant l'arborescence applicative (`/src`, `/pages`, `/components`, `/services`, `/utils`, `/data`, `/supabase`), les flux de données citoyennes, la modération terrain, ainsi que les mécanismes d'accès administrateurs.
+- Couverture territoriale et catalogue budgétaire conséquents, recherche et fiches détaillées.
+- Parcours citoyen utile : constats terrain, modération et préparation de demandes d'accès à l'information.
+- Base TypeScript, validation des liens et protection des exports CSV déjà présentes.
+- Traitement des photos par réencodage et premiers en-têtes de sécurité existants.
 
-### Bilan Global de Sécurité :
-- **Nombre de vulnérabilités critiques identifiées :** 2 *(Corrigées à 100%)*
-- **Nombre de vulnérabilités élevées identifiées :** 3 *(Corrigées à 100%)*
-- **Nombre de vulnérabilités moyennes / faibles :** 3 *(Corrigées à 100%)*
-- **Couverture Row Level Security (RLS) Supabase :** 100% (7 tables sur 7 sécurisées)
-- **Score de Posture de Sécurité :** **A+ (Conforme aux standards OWASP Top 10)**
+## Faiblesses corrigées dans cette branche
 
----
+| Constat | Correction |
+| --- | --- |
+| Identités et sessions administrateur simulées dans le navigateur | Supabase Auth vérifie l'identité ; seuls les rôles serveur `app_metadata` sont acceptés. Aucun compte de secours local. |
+| Rôles modifiables via profils ou métadonnées utilisateur | Nouvelles politiques PostgreSQL fondées sur le rôle courant dans `auth.users`, avec contrôle de suspension ; anciens droits client révoqués après le contrôle de migration. |
+| Modifications locales présentées comme enregistrées | Écritures serveur attendues, erreurs explicites et contrôle de révision contre l'écrasement concurrent. Imports validés et transactionnels. |
+| Signalements et vidéos sans preuve de persistance | Téléversement privé réel, accusé serveur, requêtes idempotentes, statut initial imposé en base, validation des propriétaires et quota par compte. |
+| Données de démonstration et compteurs donnant une impression d'impact réel | Statistiques fondées sur les constats approuvés hors démonstration ; préparation de courriel clairement distinguée de l'envoi ; compteurs de téléchargement fictifs supprimés. |
+| Répartitions budgétaires de secours inventées | Aucun montant généré lorsqu'une institution n'a pas de correspondance exacte. Chargement à la demande des lignes existantes. |
+| Statut de réalisation supposé à partir du budget | Statut « non renseigné », distinction du budget voté, champs de provenance et réponse de l'institution. |
+| Absence de contrôle automatisé reproductible | Tests unitaires et PostgreSQL/PGlite, build TypeScript/Vite et workflow GitHub Actions. |
 
-## 2. 🔍 Analyse Détaillée selon le Référentiel OWASP Top 10 (2021)
+## Vérifications et limites
 
-| Catégorie OWASP | Risque Potentiel | Statut Initial | Correctif Appliqué | Sévérité |
-| :--- | :--- | :---: | :--- | :---: |
-| **A01:2021 – Broken Access Control** | Contournement du Back-Office via `localStorage` falsifié ou accès non autorisé aux tables Supabase | 🔴 Vulnérable | • Remplacement par **Session HMAC cryptographique** en `sessionStorage` volatile (TTL 2h).<br>• Déploiement de **RLS strict** sur 100% des tables Supabase (`supabase/schema.sql`). | **CRITIQUE** |
-| **A02:2021 – Cryptographic Failures** | Altération de session ou interception HTTP | 🟡 Moyen | • Hachage SHA-256 pur avec salage unique par compte.<br>• Forçage HTTPS + HSTS (`max-age=31536000`). | **ÉLEVÉ** |
-| **A03:2021 – Injection** | • Injection XSS via URLs `javascript:`<br>• Injection de formule Excel/CSV (`=CMD\|...`) | 🔴 Vulnérable | • Validation stricte des protocoles URLs (`isSafeUrl`).<br>• Échappement automatique des caractères dangereux (`=, +, -, @`) dans tous les exports CSV (`sanitizeCsvCell`). | **ÉLEVÉ** |
-| **A04:2021 – Insecure Design** | • Téléversement d'exécutables masqués en images/vidéos<br>• Triangulation du domicile du citoyen via GPS | 🟡 Moyen | • Validation binaire des Magic Bytes (JPEG, PNG, WebP, MP4, WebM) + Re-rendu Canvas.<br>• Troncature Privacy by Design des coordonnées GPS à ~100m. | **ÉLEVÉ** |
-| **A05:2021 – Security Misconfiguration** | • Fuite accidentelle de la clé `service_role`<br>• Clickjacking / Absence d'en-têtes HTTP de sécurité | 🔴 Vulnérable | • **Garde-fou runtime** bloquant l'usage de `service_role` côté client (`supabase.ts`).<br>• Fichiers de configuration des en-têtes HTTP de production (`_headers` et `vercel.json` : CSP, X-Frame-Options DENY, nosniff). | **CRITIQUE** |
-| **A06:2021 – Vulnerable and Outdated Components** | Dépendances npm compromises | 🟢 Conforme | Audit npm réalisé : Zéro vulnérabilité critique dans le fichier `package.json`. | **FAIBLE** |
-| **A07:2021 – Identification & Auth Failures** | Attaques par force brute sur le mot de passe Super Admin | 🟡 Moyen | Verrouillage automatique de sécurité après 5 tentatives infructueuses (lockout de 5 minutes) + Exigence de complexité (8+ car., maj/min/chiffre/spécial). | **ÉLEVÉ** |
-| **A08:2021 – Software & Data Integrity** | Corruption ou falsification lors de l'import/export de données | 🟢 Conforme | Vérification de schéma et parsing sécurisé dans `dataStore.ts`. | **MOYEN** |
-| **A09:2021 – Security Logging Failures** | Traçabilité des validations de preuves citoyennes | 🟢 Conforme | Enregistrement de `verified_by`, `verified_at` et `moderator_notes` lors de chaque décision de modération. | **MOYEN** |
-| **A10:2021 – SSRF & Open Redirects** | Redirection vers des sites tiers malveillants | 🟢 Conforme | Liens sortants encapsulés avec `rel="noopener noreferrer"` et validation `isSafeUrl`. | **FAIBLE** |
+Les 53 tests locaux et le build TypeScript/Vite passent. Le contrôle de types de la fonction Edge passe également dans GitHub Actions. La suite couvre les refus d'élévation de privilèges, la révocation d'un rôle malgré un ancien JWT, l'isolation des médias en attente, la modération, les confirmations dédupliquées, la confidentialité des abonnements, le retour arrière transactionnel, les imports et les erreurs de persistance. Un test vérifie que la migration refuse une installation contenant des données historiques sans les modifier.
 
----
+Le build local produit 7 162 projets. Le manifeste des lignes comporte 1 326 clés exactes ; 9 clés ambiguës sont volontairement écartées. Ce contrôle porte sur la structure des données, pas sur leur correspondance aux documents officiels. Les publications référencées ne deviennent pas « officielles » ou « vérifiées » automatiquement.
 
-## 3. 🗄️ Audit Supabase & Architecture Row Level Security (RLS)
+La vérification navigateur automatisée n'a pas pu aboutir : démarrage du pilote impossible puis téléchargement de Chromium en échec. Les migrations n'ont pas été appliquées à une base distante et la fonction Edge n'a pas été déployée. Une recette réelle reste obligatoire avant fusion et production, selon [DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
-Un schéma SQL de production complet a été généré dans [`supabase/schema.sql`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/supabase/schema.sql) et [`supabase/migrations/20260902_init_rls.sql`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/supabase/migrations/20260902_init_rls.sql).
+## Améliorations restant à valider sur l'exploitation réelle
 
-### Matrice des Politiques RLS Déployées :
-
-| Table | RLS Activé | Lecture Publique (SELECT) | Écriture Citoyenne (INSERT) | Modération / Admin (UPDATE / DELETE) |
-| :--- | :---: | :---: | :---: | :---: |
-| `public.projects` | ✅ **OUI** | ✅ Accessible à tous | ❌ Non | ✅ `ADMIN` & `DATA_MANAGER` |
-| `public.institutions` | ✅ **OUI** | ✅ Accessible à tous | ❌ Non | ✅ `ADMIN` & `DATA_MANAGER` |
-| `public.citizen_proofs` | ✅ **OUI** | 🔒 **Preuves validées uniquement** (`APPROVED`) | ✅ **Citoyens (statut forcé `PENDING`)** | ✅ `ADMIN` & `MODERATOR` |
-| `public.caidp_directory` | ✅ **OUI** | ✅ Accessible à tous | ❌ Non | ✅ `ADMIN` & `DATA_MANAGER` |
-| `public.news_articles` | ✅ **OUI** | 🔒 **Articles publiés uniquement** (`is_published=true`) | ❌ Non | ✅ `ADMIN` & `MODERATOR` |
-| `public.newsletter_subscribers` | ✅ **OUI** | ❌ **JAMAIS lisible par le public** (Anti-Scraping) | ✅ **Inscription publique autorisée** | ✅ Super `ADMIN` uniquement |
-| `public.site_settings` | ✅ **OUI** | ✅ Accessible à tous | ❌ Non | ✅ Super `ADMIN` uniquement |
-
----
-
-## 4. 🔑 Audit des Clés Secrètes & Données Sensibles
-
-1. **Clé Supabase `service_role` (Bypass RLS) :**
-   - **Audit :** Aucune clé `service_role` n'est hardcodée dans le code source.
-   - **Sécurité proactive ajoutée :** Dans [`src/services/supabase.ts`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/src/services/supabase.ts), un filtre d'interdiction analyse le payload JWT au démarrage. Si un développeur tente d'injecter une clé `service_role` dans les variables `VITE_SUPABASE_*`, l'application **bloque immédiatement l'exécution** pour empêcher toute fuite côté navigateur.
-2. **Clé Publique `anon` :**
-   - Utilise les variables d'environnement `import.meta.env.VITE_SUPABASE_URL` et `import.meta.env.VITE_SUPABASE_ANON_KEY`.
-3. **Mots de passe :**
-   - Aucun mot de passe en clair n'est stocké. Tous les identifiants sont salés individuellement et hachés via SHA-256.
-
----
-
-## 5. 🛠️ Liste des Fichiers et Correctifs Appliqués
-
-1. **[`src/services/authSecurity.ts`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/src/services/authSecurity.ts)** :
-   - Implémentation du système de **Tokens de session signés par HMAC**.
-   - Méthodes `createSignedSession()`, `validateCurrentSession()`, `clearSession()`.
-2. **[`src/services/dataStore.ts`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/src/services/dataStore.ts)** :
-   - Migration de la persistance auth de `localStorage` vers `sessionStorage` avec validation cryptographique continue.
-   - Échappement systématique des formules CSV (`sanitizeCsvCell`).
-3. **[`src/utils/security.ts`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/src/utils/security.ts)** :
-   - Ajout des fonctions `isSafeUrl()`, `sanitizeCsvCell()`, `sanitizeCoordinates()`, `validateVideoBinary()`.
-4. **[`src/components/SendProofModal.tsx`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/src/components/SendProofModal.tsx)** :
-   - Validation binaire des vidéos (MP4/WebM Magic Bytes).
-   - Troncature des coordonnées GPS pour la protection de la vie privée citoyenne.
-5. **[`src/components/Footer.tsx`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/src/components/Footer.tsx)** :
-   - Sécurisation anti-injection des exports CSV des 201 communes, régions et annuaire CAIDP.
-6. **[`src/services/supabase.ts`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/src/services/supabase.ts)** :
-   - Barrière de sécurité empêchant toute exposition de `service_role`.
-7. **[`public/_headers`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/public/_headers) & [`vercel.json`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/vercel.json)** :
-   - Configuration des en-têtes HTTP de sécurité : `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, `Strict-Transport-Security`, `Permissions-Policy`.
-8. **[`supabase/schema.sql`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/supabase/schema.sql)** :
-   - Schéma de base de données PostgreSQL complet avec **100% de politiques RLS activées**.
-
----
-
-## 6. 🚀 Recommandations pour le Déploiement en Production
-
-1. **Variables d'Environnement (.env.production) :**
-   - Renseigner `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` dans l'interface de votre hébergeur (Vercel / Netlify / Cloudflare / Serveur Dédié).
-   - **Ne jamais renseigner la clé `SUPABASE_SERVICE_ROLE_KEY` dans le frontend.**
-2. **Certificat SSL/TLS :**
-   - Vérifier que le renouvellement automatique Let's Encrypt / Cloudflare SSL est actif pour forcer le cadenas HTTPS.
-3. **Exécution du script SQL RLS :**
-   - Copier le contenu de `supabase/schema.sql` dans l'éditeur SQL de votre tableau de bord Supabase pour activer instantanément toutes les règles de sécurité.
-
----
-
-### 🏁 Conclusion
-L'application **SuiviBudget Côte d'Ivoire** est désormais entièrement protégée contre les vulnérabilités du top 10 OWASP, garantit l'anonymat des citoyens, neutralise les tentatives d'usurpation d'accès administrateur et dispose d'une architecture de sécurité par défaut (*Security by Design*).
+- Relier chaque montant à un document source, une page et une version ; faire relire les imports et les statuts par un responsable éditorial.
+- Recetter clavier, lecteur d'écran, mobile et réseau lent. Mesurer les performances réelles ; le catalogue complet est encore téléchargé au démarrage.
+- Configurer les limites Auth, la protection contre les robots et la surveillance. Le quota de cinq signalements par heure est par compte ; une nouvelle identité anonyme peut le contourner.
+- Définir durée de conservation, suppression des médias orphelins, consentement, traitement des contestations et procédure de retrait. Les vidéos ne bénéficient pas d'un nettoyage de métadonnées côté serveur ni d'une analyse antivirus.
+- Vérifier sauvegardes/restauration, journaux d'accès et alertes. Un lien signé déjà émis peut rester utilisable jusqu'à cinq minutes après un retrait.
+- Formaliser une politique de contribution, une licence pour les données et un processus de correction contradictoire avec les institutions.

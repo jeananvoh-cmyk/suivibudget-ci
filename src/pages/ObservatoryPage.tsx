@@ -1,3 +1,4 @@
+import { reportActionError } from '../utils/actionError';
 import React, { useState } from 'react';
 import { CitizenProof, ProjectStatus, BudgetProject } from '../types';
 import { dataStore } from '../services/dataStore';
@@ -48,8 +49,12 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
     return matchesSearch && matchesStatus;
   });
 
-  const handleConfirm = (proofId: string) => {
-    dataStore.confirmProof(proofId);
+  const handleConfirm = async (proofId: string) => {
+    try {
+
+    await dataStore.confirmProof(proofId);
+
+    } catch (error) { reportActionError(error); }
   };
 
   // Metrics for Budget Voté vs Avancement Constaté
@@ -135,11 +140,11 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                 </div>
                 <div className="space-y-1 text-xs">
                   <div className="font-bold text-slate-900 flex items-center gap-2">
-                    <span>Espace Démonstration Pédagogique</span>
+                    <span>Aucun constat validé pour le moment</span>
                     <span className="text-[10px] bg-blue-200/80 text-blue-900 px-2 py-0.5 rounded-full font-semibold">Phase Initiale</span>
                   </div>
                   <p className="text-slate-600 leading-relaxed">
-                    Ces premières fiches illustrent concrètement comment les constats photographiques et vidéos permettent de vérifier l'avancement des chantiers. Dès la validation des premiers signalements transmis par les citoyens de votre commune, cet espace basculera automatiquement sur les preuves du terrain.
+                    Les contributions reçues apparaîtront ici après examen. L’absence de constat ne renseigne pas sur l’avancement réel d’un chantier.
                   </p>
                 </div>
               </div>

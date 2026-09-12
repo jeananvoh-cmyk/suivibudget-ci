@@ -81,7 +81,7 @@ export function formatDateFR(dateString: string): string {
 /**
  * Get visual badge colors and labels for project status
  */
-export function getStatusConfig(status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED') {
+export function getStatusConfig(status: import('../types').ProjectStatus) {
   switch (status) {
     case 'NOT_STARTED':
       return {
@@ -107,9 +107,11 @@ export function getStatusConfig(status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLET
         icon: '',
         progressColor: 'bg-emerald-500',
       };
+    case 'SUSPENDED':
+      return { label: 'Suspendu', badgeClass: 'bg-rose-50 text-rose-800', dotClass: 'bg-rose-500', icon: '', progressColor: 'bg-rose-500' };
     default:
       return {
-        label: 'Voté au Budget',
+        label: 'Avancement non renseigné',
         badgeClass: 'bg-slate-100 text-slate-700 border-slate-200 font-bold',
         dotClass: 'bg-slate-400',
         icon: '️',

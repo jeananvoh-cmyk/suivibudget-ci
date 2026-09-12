@@ -116,13 +116,6 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
               <span className="text-[10px] text-slate-300 block font-bold uppercase tracking-wider">Documents</span>
               <span className="text-lg sm:text-2xl font-black text-white">{documents.length}</span>
             </div>
-            <div className="w-px h-8 bg-white/20"></div>
-            <div>
-              <span className="text-[10px] text-slate-300 block font-bold uppercase tracking-wider">Téléchargements</span>
-              <span className="text-lg sm:text-2xl font-black text-brand-orange">
-                {documents.reduce((sum, d) => sum + (d.downloads_count || 0), 0)}
-              </span>
-            </div>
             <div className="w-px h-8 bg-white/20 hidden sm:block"></div>
             <div className="hidden sm:block">
               <span className="text-[10px] text-slate-300 block font-bold uppercase tracking-wider">Accès Libre</span>
@@ -288,7 +281,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                     <span className="mx-1">•</span>
                     <span>{doc.file_size || 'PDF'}</span>
                     <div className="text-[10px] text-slate-400 mt-0.5">
-                      {doc.downloads_count || 0} téléchargements
+                      Consultation libre
                     </div>
                   </div>
 

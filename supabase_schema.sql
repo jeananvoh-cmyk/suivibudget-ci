@@ -1,3 +1,4 @@
+-- ARCHIVE HISTORIQUE : ne pas déployer seul. Voir docs/DEPLOYMENT.md et les migrations.
 -- ==============================================================================
 -- CIVICDATA CI / SUIVIBUDGET CI - SCHEMA SUPABASE SQL COMPLET & IDEMPOTENT
 -- Standard de Securite : Row Level Security (RLS) active sur 100% des tables
