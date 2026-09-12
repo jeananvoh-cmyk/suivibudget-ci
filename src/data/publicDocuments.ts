@@ -113,4 +113,3 @@ export const INITIAL_PUBLIC_DOCUMENTS: PublicDocument[] = [
     tags: ["Marchés Publics", "DGMP", "Appels d'offres", "Contrats"]
   }
 ];
-

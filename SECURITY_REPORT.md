@@ -24,7 +24,7 @@ Périmètre : revue du dépôt, corrections applicatives, tests locaux. Ce rappo
 
 ## Vérifications et limites
 
-La suite couvre les refus d'élévation de privilèges, la révocation d'un rôle malgré un ancien JWT, l'isolation des médias en attente, la modération, les confirmations dédupliquées, la confidentialité des abonnements, le retour arrière transactionnel, les imports et les erreurs de persistance. Un test vérifie que la migration refuse une installation contenant des données historiques sans les modifier.
+Les 53 tests locaux et le build TypeScript/Vite passent. Le contrôle de types de la fonction Edge passe également dans GitHub Actions. La suite couvre les refus d'élévation de privilèges, la révocation d'un rôle malgré un ancien JWT, l'isolation des médias en attente, la modération, les confirmations dédupliquées, la confidentialité des abonnements, le retour arrière transactionnel, les imports et les erreurs de persistance. Un test vérifie que la migration refuse une installation contenant des données historiques sans les modifier.
 
 Le build local produit 7 162 projets. Le manifeste des lignes comporte 1 326 clés exactes ; 9 clés ambiguës sont volontairement écartées. Ce contrôle porte sur la structure des données, pas sur leur correspondance aux documents officiels. Les publications référencées ne deviennent pas « officielles » ou « vérifiées » automatiquement.
 
