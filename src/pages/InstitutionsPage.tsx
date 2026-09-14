@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Institution, BudgetProject } from '../types';
 import { dataStore } from '../services/dataStore';
 import { GOVERNMENT_OFFICIALS } from '../data/governmentData';
@@ -51,8 +51,13 @@ export const InstitutionsPage: React.FC<InstitutionsPageProps> = ({
     }
   }, [initialView]);
 
-  const institutions = dataStore.getInstitutions();
-  const allProjects = dataStore.getProjects();
+  const [storeTick, setStoreTick] = useState(0);
+  useEffect(() => {
+    return dataStore.subscribe(() => setStoreTick(t => t + 1));
+  }, []);
+
+  const institutions = useMemo(() => dataStore.getInstitutions(), [storeTick]);
+  const allProjects = useMemo(() => dataStore.getProjects(), [storeTick]);
 
   const mairiesCount = institutions.filter(i => i.type === 'MAIRIE').length;
   const regionsCount = institutions.filter(i => i.type === 'REGION' || i.type === 'DISTRICT').length;
