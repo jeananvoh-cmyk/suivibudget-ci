@@ -1,5 +1,5 @@
 import { matchesSmartSearch } from '../utils/searchHelpers';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { BudgetProject, ImpactStats, NewsArticle } from '../types';
 import { HeroSection } from '../components/HeroSection';
 import { StatImpactBanner } from '../components/StatImpactBanner';
@@ -63,7 +63,13 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [selectedProximityCity, setSelectedProximityCity] = useState<string>('ALL');
   const allProjects = dataStore.getProjects();
   const allArticles = dataStore.getArticles();
-  const stats = dataStore.getImpactStats();
+  const [stats, setStats] = useState<ImpactStats>(() => dataStore.getImpactStats());
+
+  useEffect(() => {
+    return dataStore.subscribe(() => {
+      setStats(dataStore.getImpactStats());
+    });
+  }, []);
 
   // Filter projects for the search / category
   const filteredProjects = allProjects.filter((p) => {

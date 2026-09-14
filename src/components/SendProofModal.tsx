@@ -30,7 +30,9 @@ import {
   Building2,
   Landmark,
   HardHat,
-  Play
+  Play,
+  MessageCircle,
+  Copy
 } from 'lucide-react';
 
 const FREQUENT_CITIES = [
@@ -91,9 +93,18 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
   
   // Media Type: IMAGE or VIDEO
   const [mediaType, setMediaType] = useState<'IMAGE' | 'VIDEO'>('IMAGE');
+  const [signboardStatus, setSignboardStatus] = useState<'PRESENT' | 'ABSENT' | 'UNSPECIFIED'>('PRESENT');
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewSecondaryImage, setPreviewSecondaryImage] = useState<string | null>(null);
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
   const [isProcessingMedia, setIsProcessingMedia] = useState(false);
+  const [citizenWhatsApp, setCitizenWhatsApp] = useState('');
+  const [createdTrackingCode, setCreatedTrackingCode] = useState<string | null>(null);
+  const [copiedCode, setCopiedCode] = useState(false);
+  
+  // Anti-bot & Security
+  const [honeypotValue, setHoneypotValue] = useState('');
+  const formOpenedAtRef = useRef<number>(Date.now());
   
   // UI states
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -104,6 +115,8 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const secondaryFileInputRef = useRef<HTMLInputElement>(null);
+  const secondaryCameraInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const videoRecordRef = useRef<HTMLInputElement>(null);
 
@@ -224,6 +237,33 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
     }
   };
 
+  // Handle Secondary Photo Selection (Signboard or Landmark)
+  const handleSecondaryPhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setErrorMessage(null);
+      setIsProcessingMedia(true);
+
+      const validation = await validateImageBinary(file);
+      if (!validation.isValid) {
+        setErrorMessage(validation.error || "Fichier d'image secondaire non valide.");
+        setIsProcessingMedia(false);
+        if (secondaryFileInputRef.current) secondaryFileInputRef.current.value = '';
+        if (secondaryCameraInputRef.current) secondaryCameraInputRef.current.value = '';
+        return;
+      }
+
+      try {
+        const sanitizedDataUrl = await compressAndSanitizeImage(file);
+        setPreviewSecondaryImage(sanitizedDataUrl);
+      } catch (err: any) {
+        setErrorMessage("Erreur lors du traitement de l'image secondaire : " + (err.message || ''));
+      } finally {
+        setIsProcessingMedia(false);
+      }
+    }
+  };
+
   // Handle Video Selection (15-30s direct short video)
   const handleVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -316,6 +356,20 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
     e.preventDefault();
     setErrorMessage(null);
 
+    // Anti-bot check: Honeypot
+    if (honeypotValue.trim()) {
+      console.warn("Automated bot submission prevented via honeypot.");
+      setShowSuccess(true);
+      return;
+    }
+
+    // Anti-bot check: Submissions under 1.2 seconds
+    if (Date.now() - formOpenedAtRef.current < 1200) {
+      console.warn("Automated bot submission prevented via time-to-submit check.");
+      setShowSuccess(true);
+      return;
+    }
+
     if (!selectedProject) {
       setErrorMessage("Aucun chantier sélectionné.");
       setCurrentStep(1);
@@ -340,16 +394,21 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
 
     setIsSubmitting(true);
     setTimeout(() => {
-      dataStore.submitProof({
+      const newProof = dataStore.submitProof({
         project_id: selectedProject.id,
         image_url: previewImage || 'https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=800&q=80',
+        secondary_image_url: previewSecondaryImage || undefined,
         video_url: previewVideo || undefined,
         media_type: mediaType,
         citizen_status_claim: citizenStatus,
         comment: comment.trim(),
         locality_details: locality.trim(),
         citizen_name: citizenName.trim() || 'Citoyen Observateur',
+        citizen_whatsapp: citizenWhatsApp.trim() || citizenContact.trim() || undefined,
+        signboard_status: signboardStatus,
       });
+
+      setCreatedTrackingCode(newProof.tracking_code || 'CST-CI-2026');
 
       try {
         localStorage.removeItem(DRAFT_KEY);
@@ -360,13 +419,8 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
       setShowSuccess(true);
 
       if (onSuccessToast) {
-        onSuccessToast(mediaType === 'VIDEO' ? 'Votre vidéo de constat a été transmise avec succès au comité !' : 'Votre constat citoyen a été transmis avec succès au registre de modération !');
+        onSuccessToast(mediaType === 'VIDEO' ? 'Votre vidéo de constat a été transmise aux modérateurs pour certification terrain.' : 'Votre constat citoyen a été transmis aux modérateurs pour certification terrain.');
       }
-
-      setTimeout(() => {
-        setShowSuccess(false);
-        onClose();
-      }, 1800);
     }, 600);
   };
 
@@ -450,16 +504,69 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
         {/* ========================================================= */}
         {showSuccess ? (
           /* SUCCESS STATE */
-          <div className="p-10 sm:p-14 text-center space-y-4 my-auto">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto animate-bounce shadow-xs">
+          <div className="p-8 sm:p-12 text-center space-y-5 my-auto">
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-xs">
               <CheckCircle2 className="w-10 h-10" />
             </div>
-            <h4 className="text-2xl font-black text-slate-900 tracking-tight">
-              Constat Transmis avec Succès !
-            </h4>
-            <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-              Merci pour votre engagement citoyen. Votre signalement ({mediaType === 'VIDEO' ? 'vidéo de terrain' : 'photographie'}) a été enregistré dans le registre de modération républicain et sera publié sur l'Observatoire après vérification.
-            </p>
+            
+            <div>
+              <h4 className="text-2xl font-black text-slate-900 tracking-tight">
+                Constat Transmis avec Succès !
+              </h4>
+              <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto mt-1 leading-relaxed">
+                Votre contribution citoyenne a été transmise aux modérateurs pour vérification terrain avant publication.
+              </p>
+            </div>
+
+            {/* Tracking Code Card */}
+            {createdTrackingCode && (
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl max-w-md mx-auto space-y-2">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">
+                  Votre Identifiant Unique de Suivi
+                </span>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-lg sm:text-xl font-mono font-black text-brand-blue tracking-wide bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
+                    {createdTrackingCode}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (createdTrackingCode) {
+                        navigator.clipboard.writeText(createdTrackingCode);
+                        setCopiedCode(true);
+                        setTimeout(() => setCopiedCode(false), 2000);
+                      }
+                    }}
+                    className="p-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+                    title="Copier le code"
+                  >
+                    {copiedCode ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </div>
+                <p className="text-[10.5px] text-slate-500">
+                  Conservez cet identifiant pour tout échange ou réclamation auprès de l'Observatoire.
+                </p>
+              </div>
+            )}
+
+            {citizenWhatsApp && (
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-center justify-center gap-2 max-w-md mx-auto">
+                <MessageCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>
+                  Notification WhatsApp activée pour le <strong>{citizenWhatsApp}</strong> dès validation.
+                </span>
+              </div>
+            )}
+
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-8 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-bold shadow-md transition-colors cursor-pointer"
+              >
+                Fermer
+              </button>
+            </div>
           </div>
         ) : (
           <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1">
@@ -719,6 +826,73 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                   </button>
                 </div>
 
+                {/* Signboard Status Selector */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700">
+                    Affichage légal & Panneau de chantier *
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setSignboardStatus('PRESENT')}
+                      className={`p-3 rounded-2xl border-2 text-left transition-all flex items-center gap-3 cursor-pointer ${
+                        signboardStatus === 'PRESENT'
+                          ? 'bg-emerald-50/70 border-emerald-500 text-emerald-950 shadow-xs'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        signboardStatus === 'PRESENT' ? 'bg-emerald-500 text-white' : 'border border-slate-300'
+                      }`}>
+                        {signboardStatus === 'PRESENT' && <Check className="w-3.5 h-3.5" />}
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold">Panneau officiel visible</div>
+                        <div className="text-[10.5px] text-slate-500">Panneau d'information présent sur le site</div>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setSignboardStatus('ABSENT')}
+                      className={`p-3 rounded-2xl border-2 text-left transition-all flex items-center gap-3 cursor-pointer ${
+                        signboardStatus === 'ABSENT'
+                          ? 'bg-amber-50/70 border-amber-500 text-amber-950 shadow-xs'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        signboardStatus === 'ABSENT' ? 'bg-amber-500 text-white' : 'border border-slate-300'
+                      }`}>
+                        {signboardStatus === 'ABSENT' && <Check className="w-3.5 h-3.5" />}
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold">Aucun panneau officiel</div>
+                        <div className="text-[10.5px] text-slate-500">Photographiez un repère fixe ou un engin</div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Pedagogical Hint */}
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-700 flex items-start gap-3 shadow-2xs">
+                  <div className="w-7 h-7 rounded-xl bg-blue-100 text-brand-blue flex items-center justify-center flex-shrink-0 mt-0.5 text-sm font-bold">
+                    ℹ️
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="font-bold text-slate-900">
+                      {signboardStatus === 'PRESENT'
+                        ? "Photographiez le panneau officiel si possible"
+                        : "Absence de panneau d'information (Défaut d'affichage légal)"}
+                    </div>
+                    <p className="text-slate-600 leading-relaxed text-[11.5px]">
+                      {signboardStatus === 'PRESENT'
+                        ? "Le panneau mentionne obligatoirement l'entreprise, le budget et le délai contractuel d'exécution."
+                        : "Votre constat permettra de documenter l'absence de panneau obligatoire. Photographiez l'ouvrage, un engin identifiable ou un bâtiment voisin."}
+                    </p>
+                  </div>
+                </div>
+
                 {/* Hidden File Inputs */}
                 <input
                   type="file"
@@ -731,6 +905,21 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                   type="file"
                   ref={cameraInputRef}
                   onChange={handlePhotoChange}
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                />
+                <input
+                  type="file"
+                  ref={secondaryFileInputRef}
+                  onChange={handleSecondaryPhotoChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <input
+                  type="file"
+                  ref={secondaryCameraInputRef}
+                  onChange={handleSecondaryPhotoChange}
                   accept="image/*"
                   capture="environment"
                   className="hidden"
@@ -834,6 +1023,62 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                         </div>
                       </div>
                     )}
+
+                    {/* 1.B SECONDARY PHOTO (SIGNBOARD OR LANDMARK) */}
+                    <div className="mt-4 pt-3 border-t border-slate-200/80 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-bold text-slate-700">
+                          {signboardStatus === 'PRESENT'
+                            ? 'Photo 2 (Optionnelle) : Panneau officiel de chantier'
+                            : 'Photo 2 (Optionnelle) : Repère géographique, bâtiment ou engin'}
+                        </label>
+                        <span className="text-[10px] text-slate-500 font-semibold bg-slate-100 px-2 py-0.5 rounded">
+                          Recommandé
+                        </span>
+                      </div>
+
+                      {previewSecondaryImage ? (
+                        <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 group h-36">
+                          <img
+                            src={previewSecondaryImage}
+                            alt="Photo complémentaire"
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute top-2 left-2 px-2.5 py-0.5 bg-brand-blue text-white rounded-md text-[10px] font-bold shadow-xs">
+                            {signboardStatus === 'PRESENT' ? 'Panneau officiel' : 'Repère fixe'}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setPreviewSecondaryImage(null)}
+                            className="absolute top-2 right-2 p-1.5 bg-rose-600 text-white rounded-lg hover:bg-rose-700 shadow"
+                            title="Supprimer la photo secondaire"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => secondaryCameraInputRef.current?.click()}
+                            disabled={isProcessingMedia}
+                            className="flex-1 py-2 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                            <Camera className="w-3.5 h-3.5 text-slate-500" />
+                            <span>Ajouter via caméra</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => secondaryFileInputRef.current?.click()}
+                            disabled={isProcessingMedia}
+                            className="flex-1 py-2 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                            <Upload className="w-3.5 h-3.5 text-slate-500" />
+                            <span>Galerie</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -1039,21 +1284,39 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                      Contact de traçabilité (Facultatif)
+                    <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1 flex items-center justify-between">
+                      <span>Numéro WhatsApp (Suivi)</span>
+                      <span className="text-[10.5px] text-emerald-600 font-bold flex items-center gap-1">
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        Alerte gratuite
+                      </span>
                     </label>
                     <div className="relative">
                       <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
                       <input
-                        type="text"
-                        placeholder="Ex: 07 00 00 00 00 / email@domaine.ci"
-                        value={citizenContact}
-                        onChange={(e) => setCitizenContact(e.target.value)}
-                        className="w-full pl-10 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/30"
+                        type="tel"
+                        placeholder="Ex: 07 01 02 03 04"
+                        value={citizenWhatsApp}
+                        onChange={(e) => setCitizenWhatsApp(e.target.value)}
+                        className="w-full pl-10 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500/30 font-medium"
                       />
                     </div>
-                    <span className="text-[10px] text-slate-400 mt-0.5 block">Confidentiel, uniquement pour nos modérateurs si besoin.</span>
+                    <span className="text-[10px] text-slate-400 mt-0.5 block">
+                      Recevez la validation ou les observations des modérateurs directement sur WhatsApp.
+                    </span>
                   </div>
+                </div>
+
+                {/* Invisible Anti-Bot Honeypot Field */}
+                <div className="opacity-0 absolute -left-[9999px] h-0 w-0 pointer-events-none" aria-hidden="true">
+                  <input
+                    type="text"
+                    name="form_antispam_honeypot"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={honeypotValue}
+                    onChange={(e) => setHoneypotValue(e.target.value)}
+                  />
                 </div>
 
                 {/* 3. Sworn Engagement & Friendly Legal Context */}

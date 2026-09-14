@@ -86,12 +86,12 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
         <div className="p-6 bg-white border-b border-slate-200 flex items-start justify-between gap-4 print:border-b-2 print:border-slate-900">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black border ${entityInfo.entityBadgeClass}`}>
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${entityInfo.entityBadgeClass}`}>
                 <Building className="w-3.5 h-3.5" />
                 <span>{entityInfo.entityName}</span>
               </span>
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
-                Exercice {project.fiscal_year || 2026}
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                {project.fiscal_year_label || `Exercice ${project.fiscal_year || 2026}`}
               </span>
             </div>
 
@@ -102,8 +102,8 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
             {/* Sub-location */}
             {hasSpecificNeighborhood && (
               <div className="flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 mt-2">
-                <MapPin className="w-4 h-4 text-brand-orange flex-shrink-0" />
-                <span className="font-semibold text-slate-800">{project.locality_village_neighborhood}</span>
+                <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                <span className="font-semibold text-slate-700">{project.locality_village_neighborhood}</span>
               </div>
             )}
           </div>
@@ -129,14 +129,14 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
         {/* ========================================================================= */}
         {/* 2-TAB SWITCHER: DONNÉES & BUDGET vs CONSTATS & VIDÉOS TERRAIN             */}
         {/* ========================================================================= */}
-        <div className="px-6 pt-4 bg-slate-50/70 border-b border-slate-200 flex items-center gap-2 print:hidden">
+        <div className="px-6 pt-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2 print:hidden">
           
           <button
             onClick={() => setActiveTab('budget')}
-            className={`pb-3 px-4 font-black text-xs sm:text-sm border-b-2 transition-all flex items-center gap-2 ${
+            className={`pb-3 px-4 font-bold text-xs sm:text-sm border-b-2 transition-all flex items-center gap-2 ${
               activeTab === 'budget'
-                ? 'border-brand-blue text-brand-blue'
-                : 'border-transparent text-slate-500 hover:text-slate-900'
+                ? 'border-slate-900 text-slate-900'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
             <Layers className="w-4 h-4" />
@@ -145,19 +145,15 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 
           <button
             onClick={() => setActiveTab('proofs')}
-            className={`pb-3 px-4 font-black text-xs sm:text-sm border-b-2 transition-all flex items-center gap-2 ${
+            className={`pb-3 px-4 font-bold text-xs sm:text-sm border-b-2 transition-all flex items-center gap-2 ${
               activeTab === 'proofs'
-                ? 'border-brand-orange text-brand-orange'
-                : 'border-transparent text-slate-500 hover:text-slate-900'
+                ? 'border-slate-900 text-slate-900'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
             <Camera className="w-4 h-4" />
             <span>Suivi Terrain & Vidéos</span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-              proofs.length > 0
-                ? 'bg-brand-orange text-white'
-                : 'bg-slate-200 text-slate-600'
-            }`}>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700">
               {proofs.length}
             </span>
           </button>
@@ -191,7 +187,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   </div>
                   <div className="text-[11px] text-slate-500 mt-3 pt-3 border-t border-slate-200 flex items-center justify-between">
                     <span>Source officielle</span>
-                    <span className="font-bold text-slate-800">{project.source || 'Loi de Finances 2026 (DGBF)'}</span>
+                    <span className="font-semibold text-slate-800">{project.source || 'Loi de Finances (DGBF)'}</span>
                   </div>
                 </div>
 
@@ -210,12 +206,12 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                     </div>
                     
                     <div className="mt-3">
-                      <div className="flex justify-between text-xs font-bold text-slate-700 mb-1.5">
+                      <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1.5">
                         <span>Constat citoyen terrain</span>
                         {proofs.length > 0 ? (
                           <button
                             onClick={() => setActiveTab('proofs')}
-                            className="text-brand-orange hover:underline font-black"
+                            className="text-slate-700 hover:text-slate-900 underline underline-offset-2 font-bold"
                           >
                             {proofs.length} constat(s) disponible(s) →
                           </button>
@@ -227,16 +223,16 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                       {proofs.length > 0 ? (
                         <div 
                           onClick={() => setActiveTab('proofs')}
-                          className="p-3 bg-white rounded-xl border border-brand-orange/30 cursor-pointer hover:bg-orange-50/50 transition-colors flex items-center justify-between"
+                          className="p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-slate-300 hover:bg-slate-50/70 transition-colors flex items-center justify-between"
                         >
-                          <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+                          <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
                             <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                             <span>{proofs[0].citizen_status_claim === 'COMPLETED' ? 'Terminé sur le terrain' : proofs[0].citizen_status_claim === 'IN_PROGRESS' ? 'En cours d\'exécution' : 'Non démarré'}</span>
                           </div>
-                          <span className="text-xs font-bold text-brand-orange">Voir les médias ➔</span>
+                          <span className="text-xs font-semibold text-slate-600 hover:text-slate-900">Voir les médias ➔</span>
                         </div>
                       ) : (
-                        <div className="p-3 bg-slate-100/70 rounded-xl text-xs text-slate-500 italic">
+                        <div className="p-3 bg-white rounded-xl border border-slate-200 text-xs text-slate-500 italic">
                           Aucun constat photo/vidéo validé pour l'instant.
                         </div>
                       )}
@@ -253,16 +249,16 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 
               {/* ADMINISTRATIVE DETAILS & ATTRIBUTION */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-wider text-slate-600">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
                   Détails & Attribution Administrative
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div className="flex items-start gap-2.5">
-                    <Briefcase className="w-4 h-4 text-brand-blue mt-0.5 flex-shrink-0" />
+                    <Briefcase className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
                     <div>
                       <span className="text-xs text-slate-500 block">Attribution & Marché</span>
-                      <span className="font-bold text-slate-900">
+                      <span className="font-semibold text-slate-900">
                         {project.contractor_name && !project.contractor_name.includes('Bailleurs')
                           ? project.contractor_name
                           : "Marché public / Appel d'offres ouvert"}
@@ -271,10 +267,10 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   </div>
 
                   <div className="flex items-start gap-2.5">
-                    <Building className="w-4 h-4 text-brand-blue mt-0.5 flex-shrink-0" />
+                    <Building className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
                     <div>
                       <span className="text-xs text-slate-500 block">Tutelle Administrative</span>
-                      <span className="font-bold text-slate-900">
+                      <span className="font-semibold text-slate-900">
                         {project.ministry_name || entityInfo.entityName}
                       </span>
                     </div>
@@ -282,10 +278,10 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 
                   {!isDetailsRedundant && (
                     <div className="flex items-start gap-2.5 sm:col-span-2">
-                      <FileText className="w-4 h-4 text-brand-blue mt-0.5 flex-shrink-0" />
+                      <FileText className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
                       <div>
                         <span className="text-xs text-slate-500 block">Programme & Spécifications</span>
-                        <span className="text-xs font-medium text-slate-700">
+                        <span className="text-xs font-normal text-slate-700 leading-relaxed">
                           {project.details}
                         </span>
                       </div>
@@ -295,15 +291,15 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
               </div>
 
               {/* TABLEAU DE BORD D'ACTIONS CITOYENNES */}
-              <div className="print:hidden bg-slate-900 text-white rounded-3xl p-6 space-y-4 shadow-md">
+              <div className="print:hidden bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
                 <div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-brand-orange text-white mb-1.5">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-200 text-slate-700 mb-2">
                     {actionInfo.badge}
                   </div>
-                  <h4 className="text-base sm:text-lg font-black text-white">
+                  <h4 className="text-base font-bold text-slate-900">
                     {actionInfo.heading}
                   </h4>
-                  <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
+                  <p className="text-xs text-slate-600 leading-relaxed max-w-2xl mt-1">
                     {actionInfo.description}
                   </p>
                 </div>
@@ -313,32 +309,29 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   {/* Action 1: Photo / Vidéo */}
                   <button
                     onClick={() => onOpenSendProof(project)}
-                    className="py-3 px-4 bg-brand-orange hover:bg-brand-orange-dark active:scale-98 text-white rounded-2xl text-xs font-black shadow-sm flex items-center justify-center gap-2 transition-all"
+                    className="py-2.5 px-4 bg-slate-900 hover:bg-slate-800 active:scale-98 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center justify-center gap-2 transition-colors"
                   >
-                    <Camera className="w-4 h-4" />
+                    <Camera className="w-4 h-4 text-white" />
                     <span>Envoyer photo / vidéo</span>
                   </button>
 
                   {/* Action 2: Demande CAIDP */}
                   <button
                     onClick={() => onOpenDocRequest(project)}
-                    className="py-3 px-4 bg-slate-800 hover:bg-slate-700 active:scale-98 text-white border border-slate-700 rounded-2xl text-xs font-black shadow-sm flex items-center justify-center gap-2 transition-all"
+                    className="py-2.5 px-4 bg-white hover:bg-slate-100 active:scale-98 text-slate-800 border border-slate-300 rounded-xl text-xs font-semibold shadow-2xs flex items-center justify-center gap-2 transition-colors"
                     title="Demander les documents officiels du marché (Délai légal CAIDP : 30 jours)"
                   >
-                    <Scale className="w-4 h-4 text-brand-orange" />
+                    <Scale className="w-4 h-4 text-slate-600" />
                     <span>Demander les pièces (CAIDP)</span>
                   </button>
 
                   {/* Action 3: WhatsApp Share */}
                   <button
                     onClick={handleWhatsAppShare}
-                    className="py-3 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white rounded-2xl text-xs font-black shadow-sm flex items-center justify-center gap-2 transition-all"
+                    className="py-2.5 px-4 bg-white hover:bg-slate-100 active:scale-98 text-slate-800 border border-slate-300 rounded-xl text-xs font-semibold shadow-2xs flex items-center justify-center gap-2 transition-colors"
                     title="Partager cette fiche sur WhatsApp"
                   >
-                    <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-                      <path fill="#25D366" d="M12.004 2C6.48 2 2 6.48 2 12.004c0 1.95.56 3.77 1.53 5.31L2.2 21.8a.5.5 0 0 0 .61.61l4.57-1.34a9.96 9.96 0 0 0 4.62 1.14c5.52 0 10-4.48 10-10.004C22.004 6.48 17.524 2 12.004 2z"/>
-                      <path fill="#FFFFFF" d="M17.47 14.38c-.3-.15-1.78-.88-2.06-.98-.28-.1-.48-.15-.68.15-.2.3-.78 1-.95 1.2-.18.2-.35.23-.65.08-.3-.15-1.27-.47-2.42-1.5-.9-.8-1.5-1.79-1.68-2.09-.18-.3-.02-.46.13-.61.14-.14.3-.35.45-.53.15-.18.2-.3.3-.5.1-.2.05-.38-.03-.53-.07-.15-.67-1.63-.92-2.23-.25-.6-.5-.51-.68-.52h-.58c-.2 0-.53.08-.8.38-.28.3-1.06 1.03-1.06 2.51s1.08 2.91 1.23 3.11c.15.2 2.12 3.24 5.14 4.54.72.31 1.28.5 1.72.63.72.23 1.38.2 1.9.12.58-.09 1.78-.73 2.03-1.43.25-.7.25-1.3.18-1.43-.08-.13-.28-.2-.58-.35z"/>
-                    </svg>
+                    <MessageCircle className="w-4 h-4 text-slate-600" />
                     <span>Partager sur WhatsApp</span>
                   </button>
 
@@ -356,8 +349,8 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
               
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                 <div>
-                  <h4 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
-                    <Camera className="w-4 h-4 text-brand-orange" />
+                  <h4 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+                    <Camera className="w-4 h-4 text-slate-700" />
                     <span>Constats et Preuves Multimédias ({proofs.length})</span>
                   </h4>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -367,7 +360,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 
                 <button
                   onClick={() => onOpenSendProof(project)}
-                  className="px-4 py-2 bg-brand-orange hover:bg-brand-orange-dark text-white rounded-xl text-xs font-black shadow-sm flex items-center justify-center gap-1.5 transition-all self-start sm:self-auto"
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 transition-colors self-start sm:self-auto"
                 >
                   <Camera className="w-3.5 h-3.5" />
                   <span>+ Ajouter un constat</span>
@@ -377,11 +370,11 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
               {proofs.length === 0 ? (
                 /* Clean Empty State */
                 <div className="text-center py-12 px-6 bg-slate-50/70 rounded-3xl border-2 border-dashed border-slate-200 space-y-4">
-                  <div className="w-14 h-14 rounded-2xl bg-orange-100 text-brand-orange flex items-center justify-center mx-auto shadow-2xs">
-                    <Camera className="w-7 h-7" />
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center mx-auto shadow-2xs">
+                    <Camera className="w-6 h-6" />
                   </div>
                   <div className="space-y-1 max-w-md mx-auto">
-                    <h4 className="text-sm font-black text-slate-900">
+                    <h4 className="text-sm font-bold text-slate-900">
                       Aucun constat citoyen pour ce chantier
                     </h4>
                     <p className="text-xs text-slate-500 leading-relaxed">
@@ -390,7 +383,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   </div>
                   <button
                     onClick={() => onOpenSendProof(project)}
-                    className="px-6 py-2.5 bg-brand-orange hover:bg-brand-orange-dark text-white rounded-full text-xs font-bold shadow-sm transition-all inline-flex items-center gap-2"
+                    className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors inline-flex items-center gap-2"
                   >
                     <Camera className="w-4 h-4" />
                     <span>Déposer la première photo / vidéo</span>
@@ -435,7 +428,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 
                             {/* Media Type Tag */}
                             <div className="absolute top-2.5 right-2.5 pointer-events-none bg-black/60 backdrop-blur-xs text-white px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1">
-                              {isVideo ? <Video className="w-3 h-3 text-sky-400" /> : <Camera className="w-3 h-3 text-orange-400" />}
+                              {isVideo ? <Video className="w-3 h-3 text-sky-400" /> : <Camera className="w-3 h-3 text-slate-300" />}
                               <span>{isVideo ? 'Vidéo 15-30s' : 'Photo HD'}</span>
                             </div>
 
@@ -468,7 +461,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                         {/* Card Footer: Locality */}
                         {proof.locality_details && (
                           <div className="p-3 bg-slate-100/70 border-t border-slate-200 text-[11px] text-slate-600 flex items-center gap-1">
-                            <MapPin className="w-3 h-3 text-brand-orange flex-shrink-0" />
+                            <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
                             <span className="truncate">{proof.locality_details}</span>
                           </div>
                         )}

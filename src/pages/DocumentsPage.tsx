@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   FileText, 
   Download, 
@@ -31,7 +31,13 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedYear, setSelectedYear] = useState<string>('ALL');
 
-  const documents = dataStore.getDocuments();
+  const [documents, setDocuments] = useState<PublicDocument[]>(() => dataStore.getDocuments());
+
+  useEffect(() => {
+    return dataStore.subscribe(() => {
+      setDocuments(dataStore.getDocuments());
+    });
+  }, []);
 
   // Extract unique years
   const availableYears = useMemo(() => {
@@ -288,7 +294,9 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                     <span className="mx-1">•</span>
                     <span>{doc.file_size || 'PDF'}</span>
                     <div className="text-[10px] text-slate-400 mt-0.5">
-                      {doc.downloads_count || 0} téléchargements
+                      {doc.downloads_count && doc.downloads_count > 1 
+                        ? `${doc.downloads_count} téléchargements` 
+                        : `${doc.downloads_count || 0} téléchargement`}
                     </div>
                   </div>
 

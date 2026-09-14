@@ -6,6 +6,38 @@ import { CitizenProof } from '../types';
 // ces exemples démonstratifs sont automatiquement remplacés par les vrais constats du terrain.
 export const INITIAL_CITIZEN_PROOFS: CitizenProof[] = [
   {
+    id: "proof-real-seguela-touba-1",
+    project_id: "proj-infra-seguela-touba-104mrd",
+    project_title: "Aménagement et bitumage de l'axe Séguéla-Sifié-Touba (126 km) & pont sur le fleuve Sassandra",
+    commune_name: "Séguéla / Touba",
+    region_name: "Worodougou & Bafing",
+    citizen_name: "André Silver Konan",
+    user_name: "André Silver Konan (Journaliste d'investigation)",
+    image_url: "/images/seguela_touba_route_1.png",
+    photo_url: "/images/seguela_touba_route_1.png",
+    media_type: "IMAGE",
+    citizen_status_claim: "IN_PROGRESS",
+    comment: "Les travaux de bitumage de l'axe Séguéla-Touba sont presque terminés. Avec ce projet, c'est un désenclavement majeur de deux régions : Worodougou et Bafing. Auparavant, pour aller de Séguéla à Touba, deux chefs-lieux de régions voisins, il fallait faire un grand tour par Daloa, remonter sur Duékoué, passer par Man, puis Biankouma, avant d'arriver à Touba. Soit 431 km, alors que la distance entre Séguéla et Touba est de 126 km, via le pont sur le Sassandra.",
+    locality_details: "Axe Séguéla-Sifié-Touba (126 km), Pont sur le Sassandra",
+    geo_latitude: 7.958,
+    geo_longitude: -7.056,
+    verification_status: "APPROVED",
+    moderator_notes: "Constat réel documenté sur le terrain par le journaliste d'investigation André Silver Konan. Données officielles recoupées avec le Ministère de l'Équipement et de l'Entretien Routier (MEER) et l'AGEROUTE.",
+    confirmations_count: 57,
+    is_demo: false,
+    source_url: "https://www.facebook.com/100044636310185/posts/1628140728683789/",
+    source_credit: "André Silver Konan",
+    additional_photos: [
+      "/images/seguela_touba_route_2.png"
+    ],
+    contractual_duration: "36 à 42 mois",
+    start_date: "2021-08-01",
+    target_delivery_date: "2025-2026",
+    contractor_name: "PORTEO BTP (Contrôle : 2HCI • Maîtrise d'ouvrage déléguée : AGEROUTE)",
+    financial_source: "100% Fonds Propres de l'État de Côte d'Ivoire (Trésor Public)",
+    created_at: "2025-02-28T16:00:00Z"
+  },
+  {
     id: "demo-proof-1",
     project_id: "proj-com-1482",
     project_title: "Reprofilage lourd (10 000ml) : Quartiers Petit-Paris, Haoussabougou, Sinistre",

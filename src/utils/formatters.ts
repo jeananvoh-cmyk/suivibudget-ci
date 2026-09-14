@@ -320,3 +320,88 @@ export function getProjectTypeActionInfo(title: string, category?: string, scope
     shareCategoryLabel: isNational ? "GRAND CHANTIER DE L'ÉTAT" : "CHANTIER PUBLIC"
   };
 }
+
+/**
+ * Calculate the percentage of contractual time elapsed based on start date and duration in months.
+ * Compares with today's date dynamically.
+ * Returns an object with percentage, overdue flag, days elapsed, and estimated delivery date.
+ */
+export function calculateContractualElapsedPercentage(startDateStr?: string, durationMonths?: number): {
+  percent: number;
+  rawPercent: number;
+  isOverdue: boolean;
+  daysRemaining: number;
+  daysElapsed: number;
+  totalDays: number;
+  formattedTargetDate: string;
+} {
+  if (!startDateStr || !durationMonths || durationMonths <= 0) {
+    return {
+      percent: 0,
+      rawPercent: 0,
+      isOverdue: false,
+      daysRemaining: 0,
+      daysElapsed: 0,
+      totalDays: 0,
+      formattedTargetDate: ''
+    };
+  }
+
+  let startTimestamp = Date.parse(startDateStr);
+  if (isNaN(startTimestamp)) {
+    // Try French month parsing (e.g. "Août 2021", "Mars 2024")
+    const frMonths: Record<string, number> = {
+      janvier: 0, fevrier: 1, 'février': 1, mars: 2, avril: 3, mai: 4, juin: 5,
+      juillet: 6, aout: 7, 'août': 7, septembre: 8, octobre: 9, novembre: 10, decembre: 11, 'décembre': 11
+    };
+    const parts = startDateStr.toLowerCase().split(/[\s-]+/);
+    if (parts.length >= 2) {
+      const m = frMonths[parts[0]];
+      const y = parseInt(parts[1], 10);
+      if (m !== undefined && !isNaN(y)) {
+        startTimestamp = new Date(y, m, 1).getTime();
+      }
+    }
+  }
+
+  if (isNaN(startTimestamp)) {
+    return {
+      percent: 0,
+      rawPercent: 0,
+      isOverdue: false,
+      daysRemaining: 0,
+      daysElapsed: 0,
+      totalDays: 0,
+      formattedTargetDate: ''
+    };
+  }
+
+  const startDate = new Date(startTimestamp);
+  const now = new Date();
+  
+  const totalDays = Math.max(1, Math.round(durationMonths * 30.4375));
+  const targetDate = new Date(startDate.getTime() + totalDays * 24 * 60 * 60 * 1000);
+  
+  const elapsedMillis = now.getTime() - startDate.getTime();
+  const daysElapsed = Math.max(0, Math.round(elapsedMillis / (24 * 60 * 60 * 1000)));
+  const daysRemaining = Math.max(0, Math.round((targetDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)));
+  
+  const rawPercent = Math.round((daysElapsed / totalDays) * 100);
+  const percent = Math.min(100, Math.max(0, rawPercent));
+  const isOverdue = now.getTime() > targetDate.getTime();
+  
+  const formattedTargetDate = targetDate.toLocaleDateString('fr-FR', {
+    month: 'long',
+    year: 'numeric'
+  });
+
+  return {
+    percent,
+    rawPercent,
+    isOverdue,
+    daysRemaining,
+    daysElapsed,
+    totalDays,
+    formattedTargetDate
+  };
+}
