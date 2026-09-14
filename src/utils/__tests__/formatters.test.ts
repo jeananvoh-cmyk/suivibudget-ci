@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatFCFA, formatAmountInWords, formatCompactFCFA, getProjectEntityInfo, getStatusConfig } from '../formatters';
+import { formatFCFA, formatAmountInWords, formatCompactFCFA, getProjectEntityInfo, getStatusConfig, getProjectTier, getProjectTierBadge } from '../formatters';
 
 describe('Formatters Unit Tests', () => {
   it('formats FCFA amounts with space separators', () => {
@@ -50,5 +50,36 @@ describe('Formatters Unit Tests', () => {
 
     const completed = getStatusConfig('COMPLETED');
     expect(completed.label).toBe('Terminé / Livré');
+  });
+
+  it('classifies project tiers correctly (MUNICIPAL vs REGIONAL vs STATE)', () => {
+    // Explicit tier
+    expect(getProjectTier({ project_tier: 'MUNICIPAL' })).toBe('MUNICIPAL');
+    expect(getProjectTier({ project_tier: 'STATE' })).toBe('STATE');
+
+    // Bouaké flagship project
+    expect(getProjectTier({ id: 'proj-bouake-maby-marche' })).toBe('MUNICIPAL');
+    
+    // Municipal CSV ID
+    expect(getProjectTier({ id: 'proj-com-2275', commune_name: 'Bouaké' })).toBe('MUNICIPAL');
+
+    // Regional Council CSV ID
+    expect(getProjectTier({ id: 'proj-reg-312', region_name: 'Gbêkê' })).toBe('REGIONAL');
+
+    // National project
+    expect(getProjectTier({ id: 'proj-nat-100', scope_level: 'NATIONAL' })).toBe('STATE');
+
+    // Badge styling and labels
+    const muniBadge = getProjectTierBadge('MUNICIPAL');
+    expect(muniBadge.label).toBe('Projet Municipal');
+    expect(muniBadge.icon).toBe('🏛️');
+
+    const regBadge = getProjectTierBadge('REGIONAL');
+    expect(regBadge.label).toBe('Conseil Régional');
+    expect(regBadge.icon).toBe('🌍');
+
+    const stateBadge = getProjectTierBadge('STATE');
+    expect(stateBadge.label).toBe("Investissement de l'État");
+    expect(stateBadge.icon).toBe('🇨🇮');
   });
 });
