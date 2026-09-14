@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Search, MapPin, ChevronDown, ArrowRight, FileText, Globe, ExternalLink, Info, Eye, EyeOff } from 'lucide-react';
 import { Institution, BudgetProject } from '../../types';
-import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
+import { formatFCFA, formatAmountInWords, getInstitutionLeaderGender } from '../../utils/formatters';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
 
@@ -20,6 +20,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDistrictFilter, setSelectedDistrictFilter] = useState('ALL');
+  const [selectedGender, setSelectedGender] = useState<'ALL' | 'M' | 'F'>('ALL');
   const [page, setPage] = useState(1);
   const [revealedParties, setRevealedParties] = useState<Record<string, boolean>>({});
   const [revealAllParties, setRevealAllParties] = useState<boolean>(false);
@@ -37,6 +38,14 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
 
   const normalize = (s: string) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
+  // Dynamic Parity Stats for Regional Councils & Districts
+  const allRegions = institutions.filter(i => i.type === 'REGION' || i.type === 'DISTRICT');
+  const totalRegionsCount = allRegions.length;
+  const femaleRegionsCount = allRegions.filter(r => getInstitutionLeaderGender(r) === 'F').length;
+  const maleRegionsCount = totalRegionsCount - femaleRegionsCount;
+  const femaleRegionsPct = totalRegionsCount > 0 ? Math.round((femaleRegionsCount / totalRegionsCount) * 100) : 0;
+  const maleRegionsPct = totalRegionsCount > 0 ? 100 - femaleRegionsPct : 0;
+
   // Unique Districts
   const uniqueDistricts = Array.from(
     new Set(institutions.filter(i => (i.type === 'REGION' || i.type === 'DISTRICT') && i.district).map(i => i.district))
@@ -45,6 +54,8 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
   // Filtered Regions
   const filteredRegions = institutions.filter(i => {
     if (i.type !== 'REGION' && i.type !== 'DISTRICT') return false;
+
+    const matchesGender = selectedGender === 'ALL' || getInstitutionLeaderGender(i) === selectedGender;
 
     const matchesSearch = !searchQuery.trim() ||
       normalize(i.name).includes(normalize(searchQuery)) ||
@@ -55,7 +66,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
     const matchesDistrict = selectedDistrictFilter === 'ALL' ||
       normalize(i.district) === normalize(selectedDistrictFilter);
 
-    return matchesSearch && matchesDistrict;
+    return matchesSearch && matchesDistrict && matchesGender;
   }).sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
 
   const totalPages = Math.ceil(filteredRegions.length / PAGE_SIZE) || 1;
@@ -79,62 +90,120 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
         </div>
       </div>
 
-      {/* Filter Toolbar */}
-      <div className="flex justify-center mb-4">
-        <button
-          type="button"
-          onClick={() => setRevealAllParties(!revealAllParties)}
-          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl border text-xs font-bold transition-all shadow-xs ${
-            revealAllParties 
-              ? 'bg-slate-900 border-slate-900 text-white' 
-              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-          }`}
-          title="Afficher ou masquer tous les partis politiques"
-        >
-          {revealAllParties ? <EyeOff className="w-3.5 h-3.5 text-brand-orange" /> : <Eye className="w-3.5 h-3.5 text-slate-400" />}
-          <span>{revealAllParties ? 'Masquer tous les partis' : '️ Afficher tous les partis politiques'}</span>
-        </button>
-      </div>
-      <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-3xl mx-auto">
-        <div>
-          <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1 ml-1">
-            District Autonome ({uniqueDistricts.length})
-          </label>
-          <div className="relative">
-            <select
-              value={selectedDistrictFilter}
-              onChange={(e) => {
-                setSelectedDistrictFilter(e.target.value);
+      {/* Filter Toolbar & Observatoire Parité */}
+      <div className="max-w-3xl mx-auto space-y-3">
+        {/* Filtre paritaire républicain (Segmented Control tactile) */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-2 sm:p-2.5 rounded-2xl border border-slate-200 shadow-xs">
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-xl w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedGender('ALL');
                 setPage(1);
               }}
-              className="w-full appearance-none pl-3 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-brand-orange"
+              className={`flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
+                selectedGender === 'ALL'
+                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200/70'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
             >
-              <option value="ALL"> Tous les Districts</option>
-              {uniqueDistricts.map(dist => (
-                <option key={dist} value={dist}>{dist}</option>
-              ))}
-            </select>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              Tous <span className="ml-1 text-[11px] font-semibold text-slate-500">{totalRegionsCount}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedGender('F');
+                setPage(1);
+              }}
+              className={`flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
+                selectedGender === 'F'
+                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200/70'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              Femmes <span className="ml-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded-md">{femaleRegionsCount} • {femaleRegionsPct}%</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedGender('M');
+                setPage(1);
+              }}
+              className={`flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
+                selectedGender === 'M'
+                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200/70'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              Hommes <span className="ml-1 text-[11px] font-semibold text-blue-800 bg-blue-100/80 px-1.5 py-0.5 rounded-md">{maleRegionsCount} • {maleRegionsPct}%</span>
+            </button>
+          </div>
+
+          <div className="text-[11px] font-medium text-slate-500 px-2 sm:px-1 flex items-center justify-between sm:justify-end gap-2">
+            <span>Observatoire parité exécutif</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md">Loi n°2019-870</span>
           </div>
         </div>
 
-        <div>
-          <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1 ml-1">
-            Recherche Région / Chef-lieu
-          </label>
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Région, chef-lieu (ex: Gbêkê, San Pedro)..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-              className="w-full pl-8 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-brand-orange"
-            />
+        {/* Filtres District & Recherche */}
+        <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1 ml-1">
+              District Autonome ({uniqueDistricts.length})
+            </label>
+            <div className="relative">
+              <select
+                value={selectedDistrictFilter}
+                onChange={(e) => {
+                  setSelectedDistrictFilter(e.target.value);
+                  setPage(1);
+                }}
+                className="w-full appearance-none pl-3 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:border-brand-orange"
+              >
+                <option value="ALL">Tous les Districts</option>
+                {uniqueDistricts.map(dist => (
+                  <option key={dist} value={dist}>{dist}</option>
+                ))}
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
           </div>
+
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1 ml-1">
+              Recherche Région / Chef-lieu
+            </label>
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Région, chef-lieu (ex: Gbêkê, San Pedro)..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+                className="w-full pl-8 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-brand-orange"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Bouton Partis */}
+        <div className="flex justify-center pt-1">
+          <button
+            type="button"
+            onClick={() => setRevealAllParties(!revealAllParties)}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl border text-xs font-bold transition-all shadow-xs ${
+              revealAllParties 
+                ? 'bg-slate-900 border-slate-900 text-white' 
+                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+            }`}
+            title="Afficher ou masquer tous les partis politiques"
+          >
+            {revealAllParties ? <EyeOff className="w-3.5 h-3.5 text-brand-orange" /> : <Eye className="w-3.5 h-3.5 text-slate-400" />}
+            <span>{revealAllParties ? 'Masquer tous les partis' : 'Afficher tous les partis politiques'}</span>
+          </button>
         </div>
       </div>
 
