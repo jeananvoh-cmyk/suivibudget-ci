@@ -16,7 +16,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 0,
     "total_budget_fcfa": 0,
     "is_tax_quota_commune": true,
-    "leader_name": "KANDIA CAMARA",
+    "leader_name": "KAMISSOKO KANDIA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "https://www.gouv.ci/uploads/institutions/175277729223.jpg",
     "political_party": "RHDP",
@@ -24,7 +24,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, assainissement, voirie, éducation de proximité et développement urbain de la Commune d'Abobo (Budget municipal autonome financé sur ressources propres et taxes locales).",
     "website": "https://mairieabobo.ci",
     "facebook_url": "https://www.facebook.com/MairieAboboOfficiel",
-    "leader_bio": "Mme Kandia Kamissoko Camara est la Présidente du Sénat de Côte d'Ivoire et Maire de la Commune d'Abobo depuis 2021 (réélue en 2023). Elle supervise la transformation historique d'Abobo dans le cadre du Plan d'Urgence d'Abobo (PUA) : Échangeur moderne du Rond-point de la Mairie, grand CHU d'Abobo, Lycée d'Excellence de Jeunes Filles, Agora sportive et réhabilitation complète des voies urbaines.",
+    "leader_bio": "M. / Mme KAMISSOKO KANDIA (professeur de lycee), élu(e) à la tête de la Mairie de Abobo pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Licence d'Anglais et Lettres Modernes - Université Félix Houphouët-Boigny",
       "Certificat d'Aptitude Pédagogique (CAPES)"
@@ -78,7 +78,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 0,
     "total_budget_fcfa": 0,
     "is_tax_quota_commune": true,
-    "leader_name": "FARIKOU SOUMAHORO",
+    "leader_name": "SOUMAHORO FARIKOU",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "https://viepublique.ci/public/Maires/farikou_soumahoro.png",
     "political_party": "RHDP",
@@ -86,7 +86,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Gestion du pôle commercial et des marchés d'Adjamé, régulation du transport urbain, voirie et services aux administrés (Régime fiscal communal propre).",
     "website": "https://mairie-mairiedeadjam.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAdjam",
-    "leader_bio": "M. / Mme FARIKOU SOUMAHORO, élu(e) à la tête de la Mairie de Adjamé, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme SOUMAHORO FARIKOU (commercant), élu(e) à la tête de la Mairie de Adjamé pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -137,7 +137,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 0,
     "total_budget_fcfa": 0,
     "is_tax_quota_commune": true,
-    "leader_name": "PAULIN CLAUDE DANHO",
+    "leader_name": "DANHO PAULIN CLAUDE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "https://viepublique.ci/public/Maires/paulin_danho.png",
     "political_party": "RHDP",
@@ -145,7 +145,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Aménagement des berges lagunaires, préservation environnementale, cohésion sociale et infrastructures de proximité à Attécoubé.",
     "website": "https://mairie-mairiedattcoub.ci",
     "facebook_url": "https://www.facebook.com/MairiedeMairiedAttcoub",
-    "leader_bio": "M. / Mme PAULIN CLAUDE DANHO, élu(e) à la tête de la Mairie d'Attécoubé, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DANHO PAULIN CLAUDE (ingenieur electronicien), élu(e) à la tête de la Mairie d'Attécoubé pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -196,7 +196,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 0,
     "total_budget_fcfa": 0,
     "is_tax_quota_commune": true,
-    "leader_name": "JEAN-MARC YACE",
+    "leader_name": "YACE JEAN-MARC",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "https://viepublique.ci/public/Maires/jean_marc_yace.png",
     "political_party": "PDCI-RDA",
@@ -204,7 +204,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Cadre de vie, modernisation des services municipaux, digitalisation de l'état civil, espaces verts et voirie résidentielle de Cocody.",
     "website": "https://mairiecocody.ci",
     "facebook_url": "https://www.facebook.com/MairiedeCocodyOfficiel",
-    "leader_bio": "M. Jean-Marc Yacé est un chef d'entreprise de premier plan, gestionnaire et homme politique ivoirien. Ancien consul honoraire du Mexique en Côte d'Ivoire, il a été élu Maire de la prestigieuse Commune de Cocody en 2018 et réélu avec un large plébiscite en 2023. Il conduit la modernisation urbaine et écologique de Cocody : plan de drainage et curage préventif des bassins d'orages, vidéo-surveillance de proximité, dématérialisation des actes d'état civil, réhabilitation des centres de santé municipaux et soutien à l'autonomisation des jeunes et des femmes.",
+    "leader_bio": "M. / Mme YACE JEAN-MARC (administrateur de societe), élu(e) à la tête de la Mairie de Cocody pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Sciences de Gestion et Management d'Entreprises",
       "Formations Spécialisées en Administration Territoriale et Diplomatie Économique"
@@ -258,7 +258,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 0,
     "total_budget_fcfa": 0,
     "is_tax_quota_commune": true,
-    "leader_name": "NARCISSE TOUSSAINT BALLEY",
+    "leader_name": "IBRAHIMA CISSE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "https://viepublique.ci/public/Maires/narcisse_balley.png",
     "political_party": "RHDP",
@@ -266,7 +266,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Salubrité publique, embellissement urbain, modernisation des infrastructures marchandes et sécurité de proximité à Koumassi.",
     "website": "https://mairie-mairiedekoumassi.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKoumassi",
-    "leader_bio": "M. / Mme NARCISSE TOUSSAINT BALLEY, élu(e) à la tête de la Mairie de Koumassi, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme IBRAHIMA CISSE (directeur général), élu(e) à la tête de la Mairie de Koumassi pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -317,15 +317,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 0,
     "total_budget_fcfa": 0,
     "is_tax_quota_commune": true,
-    "leader_name": "RAOUL ABY",
+    "leader_name": "ABY AKROBOU RAOUL MODESTE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "https://viepublique.ci/public/Maires/raoul_aby.png",
-    "political_party": "PDCI-RDA",
+    "political_party": "PDCI-RDA / PPA-CI",
     "mandature": "2023-2028",
     "mission_summary": "Développement économique local, appui aux artisans et commerçants, voirie et actions sociales de proximité à Marcory.",
     "website": "https://mairie-mairiedemarcory.ci",
     "facebook_url": "https://www.facebook.com/MairiedeMarcory",
-    "leader_bio": "M. / Mme RAOUL ABY, élu(e) à la tête de la Mairie de Marcory, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ABY AKROBOU RAOUL MODESTE (ingenieur), élu(e) à la tête de la Mairie de Marcory pour la mandature 2023-2028 sous la bannière PDCI-RDA / PPA-CI, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -376,7 +376,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 0,
     "total_budget_fcfa": 0,
     "is_tax_quota_commune": true,
-    "leader_name": "JACQUES GABRIEL EHOUO",
+    "leader_name": "EHOUO JACQUES GABRIEL",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "https://viepublique.ci/public/Maires/jacques_ehouo.png",
     "political_party": "PDCI-RDA",
@@ -384,7 +384,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Gestion du centre des affaires de la nation, stationnement urbain, transition écologique et services administratifs de pointe au Plateau.",
     "website": "https://mairie-mairiedeleplateau.ci",
     "facebook_url": "https://www.facebook.com/MairiedeLePlateau",
-    "leader_bio": "M. / Mme JACQUES GABRIEL EHOUO, élu(e) à la tête de la Mairie de Le Plateau, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme EHOUO JACQUES GABRIEL (biochimiste ingenieur), élu(e) à la tête de la Mairie de Le Plateau pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -435,7 +435,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 0,
     "total_budget_fcfa": 0,
     "is_tax_quota_commune": true,
-    "leader_name": "DR. EMMOU SYLVESTRE",
+    "leader_name": "EMMOU ACKAH GEORGES SYLVESTRE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "https://viepublique.ci/public/Maires/sylvestre_emmou.png",
     "political_party": "PDCI-RDA",
@@ -443,7 +443,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Hub aéroportuaire et maritime, soutien à la pêche artisanale, voirie côtière et programmes de santé communautaire à Port-Bouët.",
     "website": "https://mairie-mairiedeportbout.ci",
     "facebook_url": "https://www.facebook.com/MairiedePortBout",
-    "leader_bio": "M. / Mme DR. EMMOU SYLVESTRE, élu(e) à la tête de la Mairie de Port-Bouët, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme EMMOU ACKAH GEORGES SYLVESTRE (medecin), élu(e) à la tête de la Mairie de Port-Bouët pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -494,7 +494,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 0,
     "total_budget_fcfa": 0,
     "is_tax_quota_commune": true,
-    "leader_name": "FRANCOIS ALBERT AMICHIA",
+    "leader_name": "AMICHIA FRANCOIS ALBERT",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "https://viepublique.ci/public/Maires/francois_amichia.png",
     "political_party": "RHDP",
@@ -502,7 +502,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Commune historique et culturelle, animation du grand marché, infrastructures sportives et promotion du vivre-ensemble à Treichville.",
     "website": "https://mairietreichville.ci",
     "facebook_url": "https://www.facebook.com/MairieDeTreichville",
-    "leader_bio": "M. François Albert Amichia est un cadre dirigeant et grand serviteur de l'État. Diplômé de l'École Supérieure de Commerce d'Abidjan (ESCA), il est Maire de la Commune de Treichville depuis 1996, Ancien Ministre des Sports, Ancien Ministre de la Ville, et Président du Comité d'Organisation de la Coupe d'Afrique des Nations (COCAN 2023). Il a fait de Treichville un modèle national de cohésion sociale, de culture urbaine et de services municipaux de proximité.",
+    "leader_bio": "M. / Mme AMICHIA FRANCOIS ALBERT (enseignant chercheur), élu(e) à la tête de la Mairie de Treichville pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme de l'École Supérieure de Commerce d'Abidjan (ESCA)",
       "Certificat Supérieur en Management Public Territorial"
@@ -565,7 +565,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Plus grande commune de Côte d'Ivoire : modernisation des grands axes, insertion des jeunes, centres sociaux et dynamisme économique à Yopougon.",
     "website": "https://mairieyopougon.ci",
     "facebook_url": "https://www.facebook.com/mairiedeyopougon",
-    "leader_bio": "M. Adama Bictogo est un capitaine d'industrie, chef d'entreprise et grand homme d'État ivoirien. Fondateur du Groupe SNEDAI, il a été Ministre de l'Intégration Africaine (2011-2012) et Président de l'Assemblée Nationale de Côte d'Ivoire (2022-2026). Élu Maire de Yopougon en septembre 2023, il déploie un vaste programme de transformation pour la plus grande commune du pays : rénovation des voiries et trottoirs, réhabilitation des marchés municipaux, construction d'agoras sportives et culturelles, et fonds d'appui direct aux micro-entrepreneurs et commerçantes.",
+    "leader_bio": "M. / Mme ADAMA BICTOGO (president directeur), élu(e) à la tête de la Mairie de Yopougon pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme d'Études Supérieures en Gestion et Stratégie d'Entreprises (Paris)",
       "Formations Internationales en Gouvernance et Financement du Développement"
@@ -631,7 +631,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Abengourou.",
     "website": "https://mairie-mairiedeabengourou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAbengourou",
-    "leader_bio": "M. / Mme ADOM HERVE PATRICK, élu(e) à la tête de la Mairie de Abengourou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ADOM HERVE PATRICK (cadre financier), élu(e) à la tête de la Mairie de Abengourou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -693,7 +693,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Aboisso.",
     "website": "https://mairie-mairiedeaboisso.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAboisso",
-    "leader_bio": "M. / Mme N'GOUAN JEREMIE ALFRED, élu(e) à la tête de la Mairie de Aboisso, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme N'GOUAN JEREMIE ALFRED (directeur de societe), élu(e) à la tête de la Mairie de Aboisso pour la mandature 2023-2028 sous la bannière PDCI-RDA / PPA-CI, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -755,7 +755,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Adiake.",
     "website": "https://mairie-mairiedeadiake.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAdiake",
-    "leader_bio": "M. / Mme SIE HIEN, élu(e) à la tête de la Mairie de Adiake, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme SIE HIEN (ingenieur genie civil), élu(e) à la tête de la Mairie de Adiake pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -809,7 +809,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 563504143,
     "total_budget_fcfa": 720352057,
     "is_tax_quota_commune": false,
-    "leader_name": "ATSE BAH  FLORENCE  SOSTERNE  EPSE ACHI",
+    "leader_name": "ATSE BAH FLORENCE SOSTERNE EPSE ACHI",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -817,7 +817,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Adzope.",
     "website": "https://mairie-mairiedeadzope.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAdzope",
-    "leader_bio": "M. / Mme ATSE BAH  FLORENCE  SOSTERNE  EPSE ACHI, élu(e) à la tête de la Mairie de Adzope, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ATSE BAH FLORENCE SOSTERNE EPSE ACHI (cadre commercial), élu(e) à la tête de la Mairie de Adzope pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -879,7 +879,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Affery.",
     "website": "https://mairie-mairiedeaffery.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAffery",
-    "leader_bio": "M. / Mme BEDA ASSI CELAIRE, élu(e) à la tête de la Mairie de Affery, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BEDA ASSI CELAIRE (directeur general d'entreprise), élu(e) à la tête de la Mairie de Affery pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -941,7 +941,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Agboville.",
     "website": "https://mairie-mairiedeagboville.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAgboville",
-    "leader_bio": "M. / Mme N'CHO ACHO ALBERT, élu(e) à la tête de la Mairie de Agboville, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme N'CHO ACHO ALBERT (retraite), élu(e) à la tête de la Mairie de Agboville pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1003,7 +1003,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Agnibilekro.",
     "website": "https://mairie-mairiedeagnibilekro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAgnibilekro",
-    "leader_bio": "M. / Mme FOFANA SIANDOU, élu(e) à la tête de la Mairie de Agnibilekro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme FOFANA SIANDOU (economiste), élu(e) à la tête de la Mairie de Agnibilekro pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1057,7 +1057,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 454572266,
     "total_budget_fcfa": 572998213,
     "is_tax_quota_commune": false,
-    "leader_name": "ATSE BAH  FLORENCE  SOSTERNE  EPSE ACHI",
+    "leader_name": "YAPO SERVAIS EULOGE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -1065,7 +1065,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Agou.",
     "website": "https://mairie-mairiedeagou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAgou",
-    "leader_bio": "M. / Mme ATSE BAH  FLORENCE  SOSTERNE  EPSE ACHI, élu(e) à la tête de la Mairie de Agou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme YAPO SERVAIS EULOGE (chef d'entreprise), élu(e) à la tête de la Mairie de Agou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1119,7 +1119,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 536163448,
     "total_budget_fcfa": 683367874,
     "is_tax_quota_commune": false,
-    "leader_name": "SANON  KOFFI  MARCEL",
+    "leader_name": "SANON KOFFI MARCEL",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -1127,7 +1127,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Akoupe.",
     "website": "https://mairie-mairiedeakoupe.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAkoupe",
-    "leader_bio": "M. / Mme SANON  KOFFI  MARCEL, élu(e) à la tête de la Mairie de Akoupe, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme SANON KOFFI MARCEL (inspecteur du travail), élu(e) à la tête de la Mairie de Akoupe pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1181,7 +1181,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 520725179,
     "total_budget_fcfa": 641321354,
     "is_tax_quota_commune": false,
-    "leader_name": "OSSIN  YAPI SIMPLICE",
+    "leader_name": "OSSIN YAPI SIMPLICE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -1189,7 +1189,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Alepe.",
     "website": "https://mairie-mairiedealepe.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAlepe",
-    "leader_bio": "M. / Mme OSSIN  YAPI SIMPLICE, élu(e) à la tête de la Mairie de Alepe, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OSSIN YAPI SIMPLICE (maire), élu(e) à la tête de la Mairie de Alepe pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1251,7 +1251,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Anoumaba.",
     "website": "https://mairie-mairiedeanoumaba.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAnoumaba",
-    "leader_bio": "M. / Mme ASSOUMOU YAH BEATRICE, élu(e) à la tête de la Mairie de Anoumaba, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ASSOUMOU YAH BEATRICE (communicateur), élu(e) à la tête de la Mairie de Anoumaba pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1314,7 +1314,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Anyama.",
     "website": "https://mairie-mairiedeanyama.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAnyama",
-    "leader_bio": "M. / Mme BAMBA FATIMA, élu(e) à la tête de la Mairie de Anyama, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BAMBA FATIMA (comptable), élu(e) à la tête de la Mairie de Anyama pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1368,7 +1368,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 455067097,
     "total_budget_fcfa": 576466896,
     "is_tax_quota_commune": false,
-    "leader_name": "KOUAME  BADOU  HARLETTE",
+    "leader_name": "KOUAME BADOU HARLETTE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -1376,7 +1376,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Arrah.",
     "website": "https://mairie-mairiedearrah.ci",
     "facebook_url": "https://www.facebook.com/MairiedeArrah",
-    "leader_bio": "M. / Mme KOUAME  BADOU  HARLETTE, élu(e) à la tête de la Mairie de Arrah, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOUAME BADOU HARLETTE (cadre en communication), élu(e) à la tête de la Mairie de Arrah pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1430,7 +1430,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 491549817,
     "total_budget_fcfa": 604181312,
     "is_tax_quota_commune": false,
-    "leader_name": "SIE HIEN",
+    "leader_name": "MAGNE WOELFFELL PIERRE RENE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -1438,7 +1438,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Assinie-mafia.",
     "website": "https://mairie-mairiedeassiniemafia.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAssiniemafia",
-    "leader_bio": "M. / Mme SIE HIEN, élu(e) à la tête de la Mairie de Assinie-mafia, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme MAGNE WOELFFELL PIERRE RENE (administrateur de societe), élu(e) à la tête de la Mairie de Assinie-mafia pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1492,7 +1492,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 464724653,
     "total_budget_fcfa": 586290370,
     "is_tax_quota_commune": false,
-    "leader_name": "YOBOUA KOUABENAN  CEVERIN",
+    "leader_name": "YOBOUA KOUABENAN CEVERIN",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -1500,7 +1500,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Assuefry.",
     "website": "https://mairie-mairiedeassuefry.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAssuefry",
-    "leader_bio": "M. / Mme YOBOUA KOUABENAN  CEVERIN, élu(e) à la tête de la Mairie de Assuefry, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme YOBOUA KOUABENAN CEVERIN (commercant), élu(e) à la tête de la Mairie de Assuefry pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1562,7 +1562,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Attiegouakro.",
     "website": "https://mairie-mairiedeattiegouakro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAttiegouakro",
-    "leader_bio": "M. / Mme KOUAME KOUAKOU N'ZOUAKO JEROME, élu(e) à la tête de la Mairie de Attiegouakro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOUAME KOUAKOU N'ZOUAKO JEROME (administrateur financier), élu(e) à la tête de la Mairie de Attiegouakro pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1616,15 +1616,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 491368479,
     "total_budget_fcfa": 603936013,
     "is_tax_quota_commune": false,
-    "leader_name": "N'GOUAN JEREMIE ALFRED",
+    "leader_name": "ELLOGNE EBA KOUTOUA SEVERIN CHRISTIAN",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "PDCI-RDA / PPA-CI",
+    "political_party": "INDEPENDANT",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Ayame.",
     "website": "https://mairie-mairiedeayame.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAyame",
-    "leader_bio": "M. / Mme N'GOUAN JEREMIE ALFRED, élu(e) à la tête de la Mairie de Ayame, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ELLOGNE EBA KOUTOUA SEVERIN CHRISTIAN (ingenieur commercial), élu(e) à la tête de la Mairie de Ayame pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1678,7 +1678,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 476349475,
     "total_budget_fcfa": 599192505,
     "is_tax_quota_commune": false,
-    "leader_name": "N'CHO ACHO ALBERT",
+    "leader_name": "ALAIN EKISSI",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -1686,7 +1686,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Azaguie.",
     "website": "https://mairie-mairiedeazaguie.ci",
     "facebook_url": "https://www.facebook.com/MairiedeAzaguie",
-    "leader_bio": "M. / Mme N'CHO ACHO ALBERT, élu(e) à la tête de la Mairie de Azaguie, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ALAIN EKISSI (entrepreneur), élu(e) à la tête de la Mairie de Azaguie pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1748,7 +1748,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bako.",
     "website": "https://mairie-mairiedebako.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBako",
-    "leader_bio": "M. / Mme KONE MABANA DITE JOSEPHINE EPSE FANY, élu(e) à la tête de la Mairie de Bako, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KONE MABANA DITE JOSEPHINE EPSE FANY (employe de banque), élu(e) à la tête de la Mairie de Bako pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1810,7 +1810,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bangolo.",
     "website": "https://mairie-mairiedebangolo.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBangolo",
-    "leader_bio": "M. / Mme GAH YEMONLI ARSENE, élu(e) à la tête de la Mairie de Bangolo, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme GAH YEMONLI ARSENE (operateur economique), élu(e) à la tête de la Mairie de Bangolo pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1872,7 +1872,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bassawa.",
     "website": "https://mairie-mairiedebassawa.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBassawa",
-    "leader_bio": "M. / Mme KARIDIOULA SOULEYMANE, élu(e) à la tête de la Mairie de Bassawa, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KARIDIOULA SOULEYMANE (ingenieur rh), élu(e) à la tête de la Mairie de Bassawa pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1934,7 +1934,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bediala.",
     "website": "https://mairie-mairiedebediala.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBediala",
-    "leader_bio": "M. / Mme KOUAME BAH JEAN YVES YAO, élu(e) à la tête de la Mairie de Bediala, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOUAME BAH JEAN YVES YAO (maire), élu(e) à la tête de la Mairie de Bediala pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -1996,7 +1996,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Beoumi.",
     "website": "https://mairie-mairiedebeoumi.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBeoumi",
-    "leader_bio": "M. / Mme KOUASSI KOUADIO JEAN-MARC, élu(e) à la tête de la Mairie de Beoumi, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOUASSI KOUADIO JEAN-MARC (agriculteur), élu(e) à la tête de la Mairie de Beoumi pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2058,7 +2058,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bettie.",
     "website": "https://mairie-mairiedebettie.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBettie",
-    "leader_bio": "M. / Mme KOUAKOU AMALAMAN JEAN-BAPTISTE, élu(e) à la tête de la Mairie de Bettie, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOUAKOU AMALAMAN JEAN-BAPTISTE (cadre gestionnaire), élu(e) à la tête de la Mairie de Bettie pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2120,7 +2120,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Biankouma.",
     "website": "https://mairie-mairiedebiankouma.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBiankouma",
-    "leader_bio": "M. / Mme MANIGA GBA JEAN JACQUES, élu(e) à la tête de la Mairie de Biankouma, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme MANIGA GBA JEAN JACQUES (entrepreneur), élu(e) à la tête de la Mairie de Biankouma pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2174,7 +2174,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 458816804,
     "total_budget_fcfa": 577055936,
     "is_tax_quota_commune": false,
-    "leader_name": "MEMAN  ANDRE  NARCISSE",
+    "leader_name": "MEMAN ANDRE NARCISSE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -2182,7 +2182,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bin-houye.",
     "website": "https://mairie-mairiedebinhouye.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBinhouye",
-    "leader_bio": "M. / Mme MEMAN  ANDRE  NARCISSE, élu(e) à la tête de la Mairie de Bin-houye, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme MEMAN ANDRE NARCISSE (administrateur financier), élu(e) à la tête de la Mairie de Bin-houye pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2237,7 +2237,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "total_budget_fcfa": 1017785296,
     "is_tax_quota_commune": true,
     "tax_quota_note": "Non bénéficiaire des dotations directes de l'État (Financement assuré par la quote-part des impôts reversée directement)",
-    "leader_name": "DOUMBIA  ISSOUF",
+    "leader_name": "DOUMBIA ISSOUF",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -2245,7 +2245,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bingerville.",
     "website": "https://mairie-mairiedebingerville.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBingerville",
-    "leader_bio": "M. / Mme DOUMBIA  ISSOUF, élu(e) à la tête de la Mairie de Bingerville, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DOUMBIA ISSOUF (chef d'entreprise), élu(e) à la tête de la Mairie de Bingerville pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2307,7 +2307,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Blolequin.",
     "website": "https://mairie-mairiedeblolequin.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBlolequin",
-    "leader_bio": "M. / Mme OUAHI THIERY, élu(e) à la tête de la Mairie de Blolequin, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OUAHI THIERY (juriste), élu(e) à la tête de la Mairie de Blolequin pour la mandature 2023-2028 sous la bannière PDCI-RDA / PPA-CI, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2369,7 +2369,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bocanda.",
     "website": "https://mairie-mairiedebocanda.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBocanda",
-    "leader_bio": "M. / Mme KRAMO KOUASSI, élu(e) à la tête de la Mairie de Bocanda, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KRAMO KOUASSI (administrateur de societe), élu(e) à la tête de la Mairie de Bocanda pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2423,7 +2423,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 421498287,
     "total_budget_fcfa": 531440903,
     "is_tax_quota_commune": false,
-    "leader_name": "KOUASSI KOUADIO JEAN-MARC",
+    "leader_name": "ATSE AKISSI ALICE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -2431,7 +2431,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bodokro.",
     "website": "https://mairie-mairiedebodokro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBodokro",
-    "leader_bio": "M. / Mme KOUASSI KOUADIO JEAN-MARC, élu(e) à la tête de la Mairie de Bodokro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ATSE AKISSI ALICE (chef d'entreprise), élu(e) à la tête de la Mairie de Bodokro pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2493,7 +2493,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bondoukou.",
     "website": "https://mairie-mairiedebondoukou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBondoukou",
-    "leader_bio": "M. / Mme OUATTARA ANZOUMANA, élu(e) à la tête de la Mairie de Bondoukou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OUATTARA ANZOUMANA (ingenieur en transport logistique), élu(e) à la tête de la Mairie de Bondoukou pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2555,7 +2555,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bongouanou.",
     "website": "https://mairie-mairiedebongouanou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBongouanou",
-    "leader_bio": "M. / Mme ASSOUGBA JACOB AMOIN, élu(e) à la tête de la Mairie de Bongouanou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ASSOUGBA JACOB AMOIN (depute), élu(e) à la tête de la Mairie de Bongouanou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2609,7 +2609,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 428992782,
     "total_budget_fcfa": 540146217,
     "is_tax_quota_commune": false,
-    "leader_name": "OUATTARA  PEMIGNAN  OLIVIER",
+    "leader_name": "OUATTARA PEMIGNAN OLIVIER",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -2617,7 +2617,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bonieredougou.",
     "website": "https://mairie-mairiedebonieredougou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBonieredougou",
-    "leader_bio": "M. / Mme OUATTARA  PEMIGNAN  OLIVIER, élu(e) à la tête de la Mairie de Bonieredougou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OUATTARA PEMIGNAN OLIVIER (cadre de securite sociale), élu(e) à la tête de la Mairie de Bonieredougou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2679,7 +2679,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bonon.",
     "website": "https://mairie-mairiedebonon.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBonon",
-    "leader_bio": "M. / Mme YACOUBA KONE, élu(e) à la tête de la Mairie de Bonon, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme YACOUBA KONE (chef d'entreprise), élu(e) à la tête de la Mairie de Bonon pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2733,7 +2733,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 624069956,
     "total_budget_fcfa": 783443365,
     "is_tax_quota_commune": false,
-    "leader_name": "YAO KOUADIO ROLAND",
+    "leader_name": "AMETHIER KOUA JEAN PAUL",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "PDCI-RDA",
@@ -2741,7 +2741,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bonoua.",
     "website": "https://mairie-mairiedebonoua.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBonoua",
-    "leader_bio": "M. / Mme YAO KOUADIO ROLAND, élu(e) à la tête de la Mairie de Bonoua, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme AMETHIER KOUA JEAN PAUL (maire), élu(e) à la tête de la Mairie de Bonoua pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2803,7 +2803,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Booko.",
     "website": "https://mairie-mairiedebooko.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBooko",
-    "leader_bio": "M. / Mme FOFANA SALIF, élu(e) à la tête de la Mairie de Booko, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme FOFANA SALIF (agent commercial), élu(e) à la tête de la Mairie de Booko pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2865,7 +2865,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Borotou.",
     "website": "https://mairie-mairiedeborotou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBorotou",
-    "leader_bio": "M. / Mme DIOMANDE ADAMA, élu(e) à la tête de la Mairie de Borotou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DIOMANDE ADAMA (juriste), élu(e) à la tête de la Mairie de Borotou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2919,7 +2919,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 449244748,
     "total_budget_fcfa": 568973972,
     "is_tax_quota_commune": false,
-    "leader_name": "N'GUESSAN  N'GORAN",
+    "leader_name": "N'GUESSAN N'GORAN",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "PDCI-RDA",
@@ -2927,7 +2927,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Botro.",
     "website": "https://mairie-mairiedebotro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBotro",
-    "leader_bio": "M. / Mme N'GUESSAN  N'GORAN, élu(e) à la tête de la Mairie de Botro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme N'GUESSAN N'GORAN (transitaire), élu(e) à la tête de la Mairie de Botro pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -2989,7 +2989,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bouafle.",
     "website": "https://mairie-mairiedebouafle.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBouafle",
-    "leader_bio": "M. / Mme YAO ETIENNE, élu(e) à la tête de la Mairie de Bouafle, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme YAO ETIENNE (administrateur civil), élu(e) à la tête de la Mairie de Bouafle pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -3043,7 +3043,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 1799373777,
     "total_budget_fcfa": 2395314509,
     "is_tax_quota_commune": false,
-    "leader_name": "KONE  AMADOU",
+    "leader_name": "KONE AMADOU",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "https://viepublique.ci/public/Gouvernement/amadou_kone.jpg",
     "political_party": "RHDP",
@@ -3051,7 +3051,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bouake.",
     "website": "https://mairiebouake.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBouake",
-    "leader_bio": "M. Amadou Koné est le Ministre des Transports et le Maire de la Commune de Bouaké (deuxième métropole de Côte d'Ivoire). Ingénieur géographe et aménagiste de formation, il pilote la renaissance économique et urbaine de Bouaké : reconstruction du Grand Marché couvert, déploiement du réseau d'autobus SOTRA, réhabilitation des grands axes routiers, et valorisation de l'héritage des infrastructures de la CAN 2023.",
+    "leader_bio": "M. / Mme KONE AMADOU (geographe), élu(e) à la tête de la Mairie de Bouake pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme d'Ingénieur Géographe et Aménagiste du Territoire",
       "Certificat Supérieur en Économie des Transports et des Villes"
@@ -3108,7 +3108,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 553539895,
     "total_budget_fcfa": 679672780,
     "is_tax_quota_commune": false,
-    "leader_name": "OUATTARA  BOURAIMA",
+    "leader_name": "OUATTARA BOURAIMA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -3116,7 +3116,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bouna.",
     "website": "https://mairie-mairiedebouna.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBouna",
-    "leader_bio": "M. / Mme OUATTARA  BOURAIMA, élu(e) à la tête de la Mairie de Bouna, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OUATTARA BOURAIMA (maire), élu(e) à la tête de la Mairie de Bouna pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -3178,7 +3178,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Boundiali.",
     "website": "https://mairie-mairiedeboundiali.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBoundiali",
-    "leader_bio": "M. / Mme KONE MARIATOU, élu(e) à la tête de la Mairie de Boundiali, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KONE MARIATOU (professeur d'universite), élu(e) à la tête de la Mairie de Boundiali pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -3232,7 +3232,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 430628011,
     "total_budget_fcfa": 543790822,
     "is_tax_quota_commune": false,
-    "leader_name": "KONE  AMADOU",
+    "leader_name": "KOUAKOU-HABONOUAN LOUIS",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -3240,7 +3240,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Brobo.",
     "website": "https://mairie-mairiedebrobo.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBrobo",
-    "leader_bio": "M. / Mme KONE  AMADOU, élu(e) à la tête de la Mairie de Brobo, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOUAKOU-HABONOUAN LOUIS (planteur, pca de l'onep), élu(e) à la tête de la Mairie de Brobo pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -3302,7 +3302,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Buyo.",
     "website": "https://mairie-mairiedebuyo.ci",
     "facebook_url": "https://www.facebook.com/MairiedeBuyo",
-    "leader_bio": "M. / Mme YAO YAO LAZARE, élu(e) à la tête de la Mairie de Buyo, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme YAO YAO LAZARE (ingenieur commercial), élu(e) à la tête de la Mairie de Buyo pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -3356,7 +3356,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 458649572,
     "total_budget_fcfa": 580263418,
     "is_tax_quota_commune": false,
-    "leader_name": "COULIBALY  ADAMA",
+    "leader_name": "COULIBALY ADAMA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "INDEPENDANT",
@@ -3364,7 +3364,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Dabakala.",
     "website": "https://mairie-mairiededabakala.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDabakala",
-    "leader_bio": "M. / Mme COULIBALY  ADAMA, élu(e) à la tête de la Mairie de Dabakala, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme COULIBALY ADAMA (chef d'entreprise), élu(e) à la tête de la Mairie de Dabakala pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -3426,7 +3426,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Dabou.",
     "website": "https://mairie-mairiededabou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDabou",
-    "leader_bio": "M. / Mme YEDE NIANGNE JEAN CLAUDE, élu(e) à la tête de la Mairie de Dabou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme YEDE NIANGNE JEAN CLAUDE (maire), élu(e) à la tête de la Mairie de Dabou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -3480,7 +3480,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 1032207151,
     "total_budget_fcfa": 1353647270,
     "is_tax_quota_commune": false,
-    "leader_name": "GBEULY  STEPHANE AUGUSTE",
+    "leader_name": "GBEULY STEPHANE AUGUSTE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -3488,7 +3488,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Daloa.",
     "website": "https://mairie-mairiededaloa.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDaloa",
-    "leader_bio": "M. / Mme GBEULY  STEPHANE AUGUSTE, élu(e) à la tête de la Mairie de Daloa, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme GBEULY STEPHANE AUGUSTE (ingenieur commercial), élu(e) à la tête de la Mairie de Daloa pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -3542,7 +3542,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 592293903,
     "total_budget_fcfa": 757612483,
     "is_tax_quota_commune": false,
-    "leader_name": "KALIFA LANCINE  DIABATE",
+    "leader_name": "KALIFA LANCINE DIABATE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "INDEPENDANT",
@@ -3550,7 +3550,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Danane.",
     "website": "https://mairie-mairiededanane.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDanane",
-    "leader_bio": "M. / Mme KALIFA LANCINE  DIABATE, élu(e) à la tête de la Mairie de Danane, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KALIFA LANCINE DIABATE (chef d'entreprise), élu(e) à la tête de la Mairie de Danane pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -3612,7 +3612,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Daoukro.",
     "website": "https://mairie-mairiededaoukro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDaoukro",
-    "leader_bio": "M. / Mme DJE KOFFI, élu(e) à la tête de la Mairie de Daoukro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DJE KOFFI (professeur), élu(e) à la tête de la Mairie de Daoukro pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -3666,15 +3666,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 442605275,
     "total_budget_fcfa": 559992654,
     "is_tax_quota_commune": false,
-    "leader_name": "N'GUESSAN  N'GORAN",
+    "leader_name": "DIETO KOUAME MARCEL",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "PDCI-RDA",
+    "political_party": "INDEPENDANT",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Diabo.",
     "website": "https://mairie-mairiedediabo.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDiabo",
-    "leader_bio": "M. / Mme N'GUESSAN  N'GORAN, élu(e) à la tête de la Mairie de Diabo, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DIETO KOUAME MARCEL (entrepreneur), élu(e) à la tête de la Mairie de Diabo pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -3736,7 +3736,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Dianra.",
     "website": "https://mairie-mairiededianra.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDianra",
-    "leader_bio": "M. / Mme KONE AMOURLAYE, élu(e) à la tête de la Mairie de Dianra, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KONE AMOURLAYE (chef d'entreprise), élu(e) à la tête de la Mairie de Dianra pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -3790,7 +3790,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 544771275,
     "total_budget_fcfa": 670261388,
     "is_tax_quota_commune": false,
-    "leader_name": "OUATTARA  MAMADOU",
+    "leader_name": "OUATTARA MAMADOU",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -3798,7 +3798,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Diawala.",
     "website": "https://mairie-mairiedediawala.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDiawala",
-    "leader_bio": "M. / Mme OUATTARA  MAMADOU, élu(e) à la tête de la Mairie de Diawala, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OUATTARA MAMADOU (ingenieur logisticien), élu(e) à la tête de la Mairie de Diawala pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -3852,7 +3852,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 427821783,
     "total_budget_fcfa": 538789035,
     "is_tax_quota_commune": false,
-    "leader_name": "KOUASSI  KOUAME  BRICE",
+    "leader_name": "KOUASSI KOUAME BRICE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -3860,7 +3860,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Didievi.",
     "website": "https://mairie-mairiededidievi.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDidievi",
-    "leader_bio": "M. / Mme KOUASSI  KOUAME  BRICE, élu(e) à la tête de la Mairie de Didievi, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOUASSI KOUAME BRICE (enseignant), élu(e) à la tête de la Mairie de Didievi pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -3914,7 +3914,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 495593276,
     "total_budget_fcfa": 627558610,
     "is_tax_quota_commune": false,
-    "leader_name": "BAGROU  GOLI",
+    "leader_name": "BAGROU GOLI",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "PDCI-RDA",
@@ -3922,7 +3922,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Diegonefla.",
     "website": "https://mairie-mairiedediegonefla.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDiegonefla",
-    "leader_bio": "M. / Mme BAGROU  GOLI, élu(e) à la tête de la Mairie de Diegonefla, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BAGROU GOLI (ingenieur genie rural), élu(e) à la tête de la Mairie de Diegonefla pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -3984,7 +3984,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Dikodougou.",
     "website": "https://mairie-mairiededikodougou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDikodougou",
-    "leader_bio": "M. / Mme SORO ABOU DRAMANE, élu(e) à la tête de la Mairie de Dikodougou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme SORO ABOU DRAMANE (chef d'entreprise), élu(e) à la tête de la Mairie de Dikodougou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4038,7 +4038,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 527383232,
     "total_budget_fcfa": 669648759,
     "is_tax_quota_commune": false,
-    "leader_name": "COULIBALY  ADAMA",
+    "leader_name": "COULIBALY ADAMA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "https://viepublique.ci/public/Gouvernement/adama_coulibaly.jpg",
     "political_party": "RHDP",
@@ -4046,7 +4046,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Dimbokro.",
     "website": "https://mairie-mairiededimbokro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDimbokro",
-    "leader_bio": "M. / Mme COULIBALY  ADAMA, élu(e) à la tête de la Mairie de Dimbokro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme COULIBALY ADAMA (economiste), élu(e) à la tête de la Mairie de Dimbokro pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4108,7 +4108,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Dioulatiedougou.",
     "website": "https://mairie-mairiededioulatiedougou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDioulatiedougou",
-    "leader_bio": "M. / Mme DIARRA CEDRIC TIDIANE, élu(e) à la tête de la Mairie de Dioulatiedougou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DIARRA CEDRIC TIDIANE (conseiller special), élu(e) à la tête de la Mairie de Dioulatiedougou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4162,7 +4162,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 827643663,
     "total_budget_fcfa": 1076416919,
     "is_tax_quota_commune": false,
-    "leader_name": "TOURE ALI  AMADOU",
+    "leader_name": "TOURE ALI AMADOU",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -4170,7 +4170,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Divo.",
     "website": "https://mairie-mairiededivo.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDivo",
-    "leader_bio": "M. / Mme TOURE ALI  AMADOU, élu(e) à la tête de la Mairie de Divo, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme TOURE ALI AMADOU (agent commercial), élu(e) à la tête de la Mairie de Divo pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4224,15 +4224,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 449731307,
     "total_budget_fcfa": 569632148,
     "is_tax_quota_commune": false,
-    "leader_name": "KONE  AMADOU",
-    "leader_title": "Maire de la Commune",
+    "leader_name": "YAO KOUADIO ROLAND",
+    "leader_title": "Député-Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "RHDP",
+    "political_party": "PDCI-RDA",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Djebonoua.",
     "website": "https://mairie-mairiededjebonoua.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDjebonoua",
-    "leader_bio": "M. / Mme KONE  AMADOU, élu(e) à la tête de la Mairie de Djebonoua, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme YAO KOUADIO ROLAND (logisticien cadre supérieur), élu(e) à la tête de la Mairie de Djebonoua pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4294,7 +4294,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Djekanou.",
     "website": "https://mairie-mairiededjekanou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDjekanou",
-    "leader_bio": "M. / Mme DIALLO IBRAHIMAN ERNEST, élu(e) à la tête de la Mairie de Djekanou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DIALLO IBRAHIMAN ERNEST (directeur de societe), élu(e) à la tête de la Mairie de Djekanou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4348,7 +4348,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 422548373,
     "total_budget_fcfa": 527956118,
     "is_tax_quota_commune": false,
-    "leader_name": "DIOMANDE  SALIMATA",
+    "leader_name": "DIOMANDE SALIMATA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -4356,7 +4356,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Djibrosso.",
     "website": "https://mairie-mairiededjibrosso.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDjibrosso",
-    "leader_bio": "M. / Mme DIOMANDE  SALIMATA, élu(e) à la tête de la Mairie de Djibrosso, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DIOMANDE SALIMATA (chef d'entreprise), élu(e) à la tête de la Mairie de Djibrosso pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4418,7 +4418,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Doropo.",
     "website": "https://mairie-mairiededoropo.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDoropo",
-    "leader_bio": "M. / Mme OUATTARA SIAKA, élu(e) à la tête de la Mairie de Doropo, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OUATTARA SIAKA (chef d'entreprise), élu(e) à la tête de la Mairie de Doropo pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4472,7 +4472,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 412161854,
     "total_budget_fcfa": 513906112,
     "is_tax_quota_commune": false,
-    "leader_name": "DIOMANDE  INZA",
+    "leader_name": "DIOMANDE INZA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -4480,7 +4480,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Dualla.",
     "website": "https://mairie-mairiededualla.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDualla",
-    "leader_bio": "M. / Mme DIOMANDE  INZA, élu(e) à la tête de la Mairie de Dualla, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DIOMANDE INZA (banquier), élu(e) à la tête de la Mairie de Dualla pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4534,7 +4534,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 756167809,
     "total_budget_fcfa": 981099586,
     "is_tax_quota_commune": false,
-    "leader_name": "FLANIZARA  TOURE",
+    "leader_name": "FLANIZARA TOURE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "INDEPENDANT",
@@ -4542,7 +4542,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Duekoue.",
     "website": "https://mairie-mairiededuekoue.ci",
     "facebook_url": "https://www.facebook.com/MairiedeDuekoue",
-    "leader_bio": "M. / Mme FLANIZARA  TOURE, élu(e) à la tête de la Mairie de Duekoue, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme FLANIZARA TOURE (comptable), élu(e) à la tête de la Mairie de Duekoue pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4596,7 +4596,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 419656867,
     "total_budget_fcfa": 525872669,
     "is_tax_quota_commune": false,
-    "leader_name": "DJE KOFFI",
+    "leader_name": "KOUAME ISSOUF",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "PDCI-RDA",
@@ -4604,7 +4604,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Ettrokro.",
     "website": "https://mairie-mairiedeettrokro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeEttrokro",
-    "leader_bio": "M. / Mme DJE KOFFI, élu(e) à la tête de la Mairie de Ettrokro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOUAME ISSOUF (comptable), élu(e) à la tête de la Mairie de Ettrokro pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4666,7 +4666,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Facobly.",
     "website": "https://mairie-mairiedefacobly.ci",
     "facebook_url": "https://www.facebook.com/MairiedeFacobly",
-    "leader_bio": "M. / Mme MOISE GNAMKE, élu(e) à la tête de la Mairie de Facobly, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme MOISE GNAMKE, élu(e) à la tête de la Mairie de Facobly pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4728,7 +4728,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Ferkessedougou.",
     "website": "https://mairie-mairiedeferkessedougou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeFerkessedougou",
-    "leader_bio": "M. / Mme OUATTARA KAWELI, élu(e) à la tête de la Mairie de Ferkessedougou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OUATTARA KAWELI (agent de bureau), élu(e) à la tête de la Mairie de Ferkessedougou pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4782,7 +4782,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 428213569,
     "total_budget_fcfa": 539092163,
     "is_tax_quota_commune": false,
-    "leader_name": "COULIBALY  ADAMA",
+    "leader_name": "COULIBALY KELETIENNABELE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "INDEPENDANT",
@@ -4790,7 +4790,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Foumbolo.",
     "website": "https://mairie-mairiedefoumbolo.ci",
     "facebook_url": "https://www.facebook.com/MairiedeFoumbolo",
-    "leader_bio": "M. / Mme COULIBALY  ADAMA, élu(e) à la tête de la Mairie de Foumbolo, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme COULIBALY KELETIENNABELE (ferronnier), élu(e) à la tête de la Mairie de Foumbolo pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4852,7 +4852,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Fresco.",
     "website": "https://mairie-mairiedefresco.ci",
     "facebook_url": "https://www.facebook.com/MairiedeFresco",
-    "leader_bio": "M. / Mme BEUGREFOH TCHEKRE FULBERT, élu(e) à la tête de la Mairie de Fresco, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BEUGREFOH TCHEKRE FULBERT (criminologue), élu(e) à la tête de la Mairie de Fresco pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4906,7 +4906,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 453678047,
     "total_budget_fcfa": 573538359,
     "is_tax_quota_commune": false,
-    "leader_name": "COULIBALY  KINAPARA ANGE THIERRY",
+    "leader_name": "COULIBALY KINAPARA ANGE THIERRY",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -4914,7 +4914,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Fronan.",
     "website": "https://mairie-mairiedefronan.ci",
     "facebook_url": "https://www.facebook.com/MairiedeFronan",
-    "leader_bio": "M. / Mme COULIBALY  KINAPARA ANGE THIERRY, élu(e) à la tête de la Mairie de Fronan, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme COULIBALY KINAPARA ANGE THIERRY (ingenieur), élu(e) à la tête de la Mairie de Fronan pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -4968,7 +4968,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 797459466,
     "total_budget_fcfa": 1035897700,
     "is_tax_quota_commune": false,
-    "leader_name": "YSSOUF  DIABATE",
+    "leader_name": "YSSOUF DIABATE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -4976,7 +4976,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Gagnoa.",
     "website": "https://mairie-mairiedegagnoa.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGagnoa",
-    "leader_bio": "M. / Mme YSSOUF  DIABATE, élu(e) à la tête de la Mairie de Gagnoa, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme YSSOUF DIABATE (operateur commercial), élu(e) à la tête de la Mairie de Gagnoa pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -5038,7 +5038,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Gbeleban.",
     "website": "https://mairie-mairiedegbeleban.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGbeleban",
-    "leader_bio": "M. / Mme OUATTARA AISSIATA, élu(e) à la tête de la Mairie de Gbeleban, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OUATTARA AISSIATA (administrateur de societe), élu(e) à la tête de la Mairie de Gbeleban pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -5092,7 +5092,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 445389447,
     "total_budget_fcfa": 559849836,
     "is_tax_quota_commune": false,
-    "leader_name": "GBEULY  STEPHANE AUGUSTE",
+    "leader_name": "OUATTARA BAKARY",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -5100,7 +5100,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Gboguhe.",
     "website": "https://mairie-mairiedegboguhe.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGboguhe",
-    "leader_bio": "M. / Mme GBEULY  STEPHANE AUGUSTE, élu(e) à la tête de la Mairie de Gboguhe, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OUATTARA BAKARY (professeur), élu(e) à la tête de la Mairie de Gboguhe pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -5162,7 +5162,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Gbon.",
     "website": "https://mairie-mairiedegbon.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGbon",
-    "leader_bio": "M. / Mme TOURE ALPHA YAYA, élu(e) à la tête de la Mairie de Gbon, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme TOURE ALPHA YAYA (agent commercial), élu(e) à la tête de la Mairie de Gbon pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -5216,7 +5216,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 430106202,
     "total_budget_fcfa": 538218658,
     "is_tax_quota_commune": false,
-    "leader_name": "TOURE ALPHA YAYA",
+    "leader_name": "KESSE FEH LAMBERT",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "INDEPENDANT",
@@ -5224,7 +5224,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Gbonne.",
     "website": "https://mairie-mairiedegbonne.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGbonne",
-    "leader_bio": "M. / Mme TOURE ALPHA YAYA, élu(e) à la tête de la Mairie de Gbonne, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KESSE FEH LAMBERT (juriste), élu(e) à la tête de la Mairie de Gbonne pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -5286,7 +5286,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Gohitafla.",
     "website": "https://mairie-mairiedegohitafla.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGohitafla",
-    "leader_bio": "M. / Mme ZAMBLE NAYA NAOMI JARVIS, élu(e) à la tête de la Mairie de Gohitafla, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ZAMBLE NAYA NAOMI JARVIS (depute), élu(e) à la tête de la Mairie de Gohitafla pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -5348,7 +5348,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Goulia.",
     "website": "https://mairie-mairiedegoulia.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGoulia",
-    "leader_bio": "M. / Mme KONE DJAKARIDJA, élu(e) à la tête de la Mairie de Goulia, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KONE DJAKARIDJA (comptable), élu(e) à la tête de la Mairie de Goulia pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -5410,7 +5410,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Grabo.",
     "website": "https://mairie-mairiedegrabo.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGrabo",
-    "leader_bio": "M. / Mme COULIBALY YAYA, élu(e) à la tête de la Mairie de Grabo, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme COULIBALY YAYA (planteur), élu(e) à la tête de la Mairie de Grabo pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -5472,7 +5472,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Grand-bassam.",
     "website": "https://mairiegrandbassam.ci",
     "facebook_url": "https://www.facebook.com/MairieGrandBassamOfficiel",
-    "leader_bio": "M. Jean-Louis Moulot est un économiste et aménagiste urbain diplômé de l'Université de Montréal (Canada). Maire de la Ville Historique de Grand-Bassam depuis 2018 et Ministre Délégué à l'Enseignement Technique, il conduit la mise en valeur du patrimoine mondial classé par l'UNESCO, l'aménagement du front de mer balnéaire, le soutien aux artisans d'art et le renforcement des équipements scolaires et sanitaires communaux.",
+    "leader_bio": "M. / Mme MOULOT MOISE JEAN LOUIS COFFI (urbaniste), élu(e) à la tête de la Mairie de Grand-bassam pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "DESS en Urbanisme et Aménagement Régional - Université de Montréal (Canada)",
       "Maîtrise en Sciences Économiques"
@@ -5537,7 +5537,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Grand-bereby.",
     "website": "https://mairie-mairiedegrandbereby.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGrandbereby",
-    "leader_bio": "M. / Mme ????? KOUAME ARMAND, élu(e) à la tête de la Mairie de Grand-bereby, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ????? KOUAME ARMAND (ingenieur agronome), élu(e) à la tête de la Mairie de Grand-bereby pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -5599,7 +5599,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Grand-lahou.",
     "website": "https://mairie-mairiedegrandlahou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGrandlahou",
-    "leader_bio": "M. / Mme ALI SISSOKO, élu(e) à la tête de la Mairie de Grand-lahou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ALI SISSOKO (administrateur financier), élu(e) à la tête de la Mairie de Grand-lahou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -5661,7 +5661,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Grand-zattry.",
     "website": "https://mairie-mairiedegrandzattry.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGrandzattry",
-    "leader_bio": "M. / Mme SERI HORTENSE EMMA, élu(e) à la tête de la Mairie de Grand-zattry, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme SERI HORTENSE EMMA (responsable communication), élu(e) à la tête de la Mairie de Grand-zattry pour la mandature 2023-2028 sous la bannière PDCI-RDA / PPA-CI, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -5715,7 +5715,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 446042772,
     "total_budget_fcfa": 561802638,
     "is_tax_quota_commune": false,
-    "leader_name": "BONI TANO  N'GUESSAN  NOELLE  MARIE",
+    "leader_name": "BONI TANO N'GUESSAN NOELLE MARIE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "INDEPENDANT",
@@ -5723,7 +5723,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Gueyo.",
     "website": "https://mairie-mairiedegueyo.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGueyo",
-    "leader_bio": "M. / Mme BONI TANO  N'GUESSAN  NOELLE  MARIE, élu(e) à la tête de la Mairie de Gueyo, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BONI TANO N'GUESSAN NOELLE MARIE (commercant), élu(e) à la tête de la Mairie de Gueyo pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -5777,7 +5777,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 477299716,
     "total_budget_fcfa": 602812626,
     "is_tax_quota_commune": false,
-    "leader_name": "YSSOUF  DIABATE",
+    "leader_name": "ZEZE SOUASSOU NICOLE PRINCESSE GOHOUROU",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -5785,7 +5785,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Guiberoua.",
     "website": "https://mairie-mairiedeguiberoua.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGuiberoua",
-    "leader_bio": "M. / Mme YSSOUF  DIABATE, élu(e) à la tête de la Mairie de Guiberoua, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ZEZE SOUASSOU NICOLE PRINCESSE GOHOUROU (infirmier), élu(e) à la tête de la Mairie de Guiberoua pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -5839,7 +5839,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 418332378,
     "total_budget_fcfa": 522057515,
     "is_tax_quota_commune": false,
-    "leader_name": "SORO ABOU DRAMANE",
+    "leader_name": "YEO KOLO",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -5847,7 +5847,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Guiembe.",
     "website": "https://mairie-mairiedeguiembe.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGuiembe",
-    "leader_bio": "M. / Mme SORO ABOU DRAMANE, élu(e) à la tête de la Mairie de Guiembe, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme YEO KOLO (administrateur), élu(e) à la tête de la Mairie de Guiembe pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -5909,7 +5909,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Guiglo.",
     "website": "https://mairie-mairiedeguiglo.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGuiglo",
-    "leader_bio": "M. / Mme BAILLET BENOIT SEVERIN, élu(e) à la tête de la Mairie de Guiglo, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BAILLET BENOIT SEVERIN (cadre de la fonction publique), élu(e) à la tête de la Mairie de Guiglo pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -5971,7 +5971,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Guinteguela.",
     "website": "https://mairie-mairiedeguinteguela.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGuinteguela",
-    "leader_bio": "M. / Mme DOSSO NAMORY, élu(e) à la tête de la Mairie de Guinteguela, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DOSSO NAMORY (planteur), élu(e) à la tête de la Mairie de Guinteguela pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6033,7 +6033,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Guitry.",
     "website": "https://mairie-mairiedeguitry.ci",
     "facebook_url": "https://www.facebook.com/MairiedeGuitry",
-    "leader_bio": "M. / Mme KOKO PATRICIA SYLVIE EPSE YAO, élu(e) à la tête de la Mairie de Guitry, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOKO PATRICIA SYLVIE EPSE YAO (administrateur civil), élu(e) à la tête de la Mairie de Guitry pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6087,7 +6087,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 542561083,
     "total_budget_fcfa": 690781280,
     "is_tax_quota_commune": false,
-    "leader_name": "TOURE ALI  AMADOU",
+    "leader_name": "KACOU GILBERT FRANCIS",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -6095,7 +6095,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Hire.",
     "website": "https://mairie-mairiedehire.ci",
     "facebook_url": "https://www.facebook.com/MairiedeHire",
-    "leader_bio": "M. / Mme TOURE ALI  AMADOU, élu(e) à la tête de la Mairie de Hire, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KACOU GILBERT FRANCIS (directeur de société), élu(e) à la tête de la Mairie de Hire pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6157,7 +6157,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Issia.",
     "website": "https://mairie-mairiedeissia.ci",
     "facebook_url": "https://www.facebook.com/MairiedeIssia",
-    "leader_bio": "M. / Mme FANY KARIM, élu(e) à la tête de la Mairie de Issia, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme FANY KARIM (enseignant), élu(e) à la tête de la Mairie de Issia pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6219,7 +6219,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Jacqueville.",
     "website": "https://mairie-mairiedejacqueville.ci",
     "facebook_url": "https://www.facebook.com/MairiedeJacqueville",
-    "leader_bio": "M. / Mme BEUGRE JOACHIM, élu(e) à la tête de la Mairie de Jacqueville, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BEUGRE JOACHIM (cadre de societe), élu(e) à la tête de la Mairie de Jacqueville pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6273,7 +6273,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 526785522,
     "total_budget_fcfa": 644919530,
     "is_tax_quota_commune": false,
-    "leader_name": "KONE SAFANA  NAMBAHA",
+    "leader_name": "KONE SAFANA NAMBAHA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "INDEPENDANT",
@@ -6281,7 +6281,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Kanakono.",
     "website": "https://mairie-mairiedekanakono.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKanakono",
-    "leader_bio": "M. / Mme KONE SAFANA  NAMBAHA, élu(e) à la tête de la Mairie de Kanakono, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KONE SAFANA NAMBAHA (enseignant), élu(e) à la tête de la Mairie de Kanakono pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6335,15 +6335,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 451210499,
     "total_budget_fcfa": 566727821,
     "is_tax_quota_commune": false,
-    "leader_name": "DIARRASSOUBA ANZOUMANA ALMAMY",
+    "leader_name": "MEITE YAYA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "INDEPENDANT",
+    "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Kani.",
     "website": "https://mairie-mairiedekani.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKani",
-    "leader_bio": "M. / Mme DIARRASSOUBA ANZOUMANA ALMAMY, élu(e) à la tête de la Mairie de Kani, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme MEITE YAYA (maire), élu(e) à la tête de la Mairie de Kani pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6405,7 +6405,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Kaniasso.",
     "website": "https://mairie-mairiedekaniasso.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKaniasso",
-    "leader_bio": "M. / Mme DIARRASSOUBA ANZOUMANA ALMAMY, élu(e) à la tête de la Mairie de Kaniasso, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DIARRASSOUBA ANZOUMANA ALMAMY (cadre commercial), élu(e) à la tête de la Mairie de Kaniasso pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6459,15 +6459,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 426749319,
     "total_budget_fcfa": 533443242,
     "is_tax_quota_commune": false,
-    "leader_name": "BAKAYOKO ABDOUL DRAMANE",
+    "leader_name": "TUO TIEBA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "RHDP",
+    "political_party": "INDEPENDANT",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Karakoro.",
     "website": "https://mairie-mairiedekarakoro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKarakoro",
-    "leader_bio": "M. / Mme BAKAYOKO ABDOUL DRAMANE, élu(e) à la tête de la Mairie de Karakoro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme TUO TIEBA (professeur de cafop), élu(e) à la tête de la Mairie de Karakoro pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6521,7 +6521,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 501868648,
     "total_budget_fcfa": 611214087,
     "is_tax_quota_commune": false,
-    "leader_name": "KONE MARIATOU",
+    "leader_name": "OUATTARA GUIBESSONGUI ISSA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -6529,7 +6529,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Kassere.",
     "website": "https://mairie-mairiedekassere.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKassere",
-    "leader_bio": "M. / Mme KONE MARIATOU, élu(e) à la tête de la Mairie de Kassere, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OUATTARA GUIBESSONGUI ISSA (ingenieur informaticien), élu(e) à la tête de la Mairie de Kassere pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6583,7 +6583,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 556528828,
     "total_budget_fcfa": 712666210,
     "is_tax_quota_commune": false,
-    "leader_name": "CAMARA  POGABAHA THOMAS",
+    "leader_name": "CAMARA POGABAHA THOMAS",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -6591,7 +6591,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Katiola.",
     "website": "https://mairie-mairiedekatiola.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKatiola",
-    "leader_bio": "M. / Mme CAMARA  POGABAHA THOMAS, élu(e) à la tête de la Mairie de Katiola, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme CAMARA POGABAHA THOMAS (retraite), élu(e) à la tête de la Mairie de Katiola pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6645,15 +6645,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 436263860,
     "total_budget_fcfa": 550208764,
     "is_tax_quota_commune": false,
-    "leader_name": "KONE  IDRISSA",
+    "leader_name": "KOUAME NOEL FAUSTIN",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "PDCI-RDA",
+    "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Kokumbo.",
     "website": "https://mairie-mairiedekokumbo.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKokumbo",
-    "leader_bio": "M. / Mme KONE  IDRISSA, élu(e) à la tête de la Mairie de Kokumbo, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOUAME NOEL FAUSTIN (administrateur), élu(e) à la tête de la Mairie de Kokumbo pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6715,7 +6715,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Kolia.",
     "website": "https://mairie-mairiedekolia.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKolia",
-    "leader_bio": "M. / Mme KONE KARIM DOTIEME, élu(e) à la tête de la Mairie de Kolia, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KONE KARIM DOTIEME (administrateur), élu(e) à la tête de la Mairie de Kolia pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6777,7 +6777,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Komborodougou.",
     "website": "https://mairie-mairiedekomborodougou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKomborodougou",
-    "leader_bio": "M. / Mme SORO GONA ALI, élu(e) à la tête de la Mairie de Komborodougou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme SORO GONA ALI (inspecteur de douane), élu(e) à la tête de la Mairie de Komborodougou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6831,7 +6831,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 509498403,
     "total_budget_fcfa": 622547225,
     "is_tax_quota_commune": false,
-    "leader_name": "BAMBA ABOU",
+    "leader_name": "BERTE ABDRAMANE TIEMOKO",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -6839,7 +6839,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Kong.",
     "website": "https://mairie-mairiedekong.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKong",
-    "leader_bio": "M. / Mme BAMBA ABOU, élu(e) à la tête de la Mairie de Kong, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BERTE ABDRAMANE TIEMOKO (administrateur), élu(e) à la tête de la Mairie de Kong pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6901,7 +6901,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Kongasso.",
     "website": "https://mairie-mairiedekongasso.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKongasso",
-    "leader_bio": "M. / Mme BAMBA ABOU, élu(e) à la tête de la Mairie de Kongasso, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BAMBA ABOU (urbaniste), élu(e) à la tête de la Mairie de Kongasso pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -6963,7 +6963,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Koonan.",
     "website": "https://mairie-mairiedekoonan.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKoonan",
-    "leader_bio": "M. / Mme BAMBA ABOU, élu(e) à la tête de la Mairie de Koonan, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BAMBA ABOU (informaticien), élu(e) à la tête de la Mairie de Koonan pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7017,7 +7017,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 1127118523,
     "total_budget_fcfa": 1480843556,
     "is_tax_quota_commune": false,
-    "leader_name": "OUATTARA  LACINA",
+    "leader_name": "OUATTARA LACINA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -7025,7 +7025,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Korhogo.",
     "website": "https://mairie-mairiedekorhogo.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKorhogo",
-    "leader_bio": "M. / Mme OUATTARA  LACINA, élu(e) à la tête de la Mairie de Korhogo, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OUATTARA LACINA (chef d'entreprise), élu(e) à la tête de la Mairie de Korhogo pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7087,7 +7087,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Koro.",
     "website": "https://mairie-mairiedekoro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKoro",
-    "leader_bio": "M. / Mme BAKAYOKO ABDOUL DRAMANE, élu(e) à la tête de la Mairie de Koro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BAKAYOKO ABDOUL DRAMANE (ingenieur genie civil), élu(e) à la tête de la Mairie de Koro pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7149,7 +7149,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Kouassi-datekro.",
     "website": "https://mairie-mairiedekouassidatekro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKouassidatekro",
-    "leader_bio": "M. / Mme SINAN BAKARI, élu(e) à la tête de la Mairie de Kouassi-datekro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme SINAN BAKARI (ingenieur informaticien), élu(e) à la tête de la Mairie de Kouassi-datekro pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7211,7 +7211,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Kouassi-kouassikro.",
     "website": "https://mairie-mairiedekouassikouassikro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKouassikouassikro",
-    "leader_bio": "M. / Mme KOUAKOU KOUADIO JOSEPH, élu(e) à la tête de la Mairie de Kouassi-kouassikro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOUAKOU KOUADIO JOSEPH (planteur), élu(e) à la tête de la Mairie de Kouassi-kouassikro pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7265,7 +7265,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 467447703,
     "total_budget_fcfa": 590543409,
     "is_tax_quota_commune": false,
-    "leader_name": "ZAE GNONDJOUOWI  ALEXIS",
+    "leader_name": "ZAE GNONDJOUOWI ALEXIS",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -7273,7 +7273,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Kouibly.",
     "website": "https://mairie-mairiedekouibly.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKouibly",
-    "leader_bio": "M. / Mme ZAE GNONDJOUOWI  ALEXIS, élu(e) à la tête de la Mairie de Kouibly, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ZAE GNONDJOUOWI ALEXIS (cadre financier), élu(e) à la tête de la Mairie de Kouibly pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7327,15 +7327,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 416365675,
     "total_budget_fcfa": 517728069,
     "is_tax_quota_commune": false,
-    "leader_name": "OUATTARA KAWELI",
+    "leader_name": "TENEYOUMON COULIBALY",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "INDEPENDANT",
+    "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Koumbala.",
     "website": "https://mairie-mairiedekoumbala.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKoumbala",
-    "leader_bio": "M. / Mme OUATTARA KAWELI, élu(e) à la tête de la Mairie de Koumbala, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme TENEYOUMON COULIBALY (chef d'entreprise), élu(e) à la tête de la Mairie de Koumbala pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7397,7 +7397,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Koun-fao.",
     "website": "https://mairie-mairiedekounfao.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKounfao",
-    "leader_bio": "M. / Mme YAO KOUAME NOEL, élu(e) à la tête de la Mairie de Koun-fao, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme YAO KOUAME NOEL (cadre de la fonction publique), élu(e) à la tête de la Mairie de Koun-fao pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7459,7 +7459,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Kounahiri.",
     "website": "https://mairie-mairiedekounahiri.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKounahiri",
-    "leader_bio": "M. / Mme BISSA AUGUSTIN, élu(e) à la tête de la Mairie de Kounahiri, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BISSA AUGUSTIN (manager), élu(e) à la tête de la Mairie de Kounahiri pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7521,7 +7521,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Kouto.",
     "website": "https://mairie-mairiedekouto.ci",
     "facebook_url": "https://www.facebook.com/MairiedeKouto",
-    "leader_bio": "M. / Mme KONE DOMIA, élu(e) à la tête de la Mairie de Kouto, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KONE DOMIA (retraite), élu(e) à la tête de la Mairie de Kouto pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7575,7 +7575,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 554437803,
     "total_budget_fcfa": 706847104,
     "is_tax_quota_commune": false,
-    "leader_name": "DALLI  ARTHUR PRINCE - RICHARD",
+    "leader_name": "DALLI ARTHUR PRINCE - RICHARD",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "PDCI-RDA / PPA-CI",
@@ -7583,7 +7583,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Lakota.",
     "website": "https://mairie-mairiedelakota.ci",
     "facebook_url": "https://www.facebook.com/MairiedeLakota",
-    "leader_bio": "M. / Mme DALLI  ARTHUR PRINCE - RICHARD, élu(e) à la tête de la Mairie de Lakota, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DALLI ARTHUR PRINCE - RICHARD (consultant financier), élu(e) à la tête de la Mairie de Lakota pour la mandature 2023-2028 sous la bannière PDCI-RDA / PPA-CI, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7645,7 +7645,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Logouale.",
     "website": "https://mairie-mairiedelogouale.ci",
     "facebook_url": "https://www.facebook.com/MairiedeLogouale",
-    "leader_bio": "M. / Mme OUEHI FEH BIAYO GISELE EPSE KOFFI, élu(e) à la tête de la Mairie de Logouale, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OUEHI FEH BIAYO GISELE EPSE KOFFI (commercant), élu(e) à la tête de la Mairie de Logouale pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7707,7 +7707,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de M'bahiakro.",
     "website": "https://mairie-mairiedembahiakro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeMbahiakro",
-    "leader_bio": "M. / Mme DIAMALA KOUASSI RAPHAEL, élu(e) à la tête de la Mairie de M'bahiakro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DIAMALA KOUASSI RAPHAEL (financier), élu(e) à la tête de la Mairie de M'bahiakro pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7769,7 +7769,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de M'batto.",
     "website": "https://mairie-mairiedembatto.ci",
     "facebook_url": "https://www.facebook.com/MairiedeMbatto",
-    "leader_bio": "M. / Mme KANGA KACOU ANTOINE, élu(e) à la tête de la Mairie de M'batto, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KANGA KACOU ANTOINE (chef d'entreprise), élu(e) à la tête de la Mairie de M'batto pour la mandature 2023-2028 sous la bannière PPA-CI, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7823,7 +7823,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 508129211,
     "total_budget_fcfa": 622364154,
     "is_tax_quota_commune": false,
-    "leader_name": "COULIBALY  ALI KADER",
+    "leader_name": "COULIBALY ALI KADER",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -7831,7 +7831,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de M'bengue.",
     "website": "https://mairie-mairiedembengue.ci",
     "facebook_url": "https://www.facebook.com/MairiedeMbengue",
-    "leader_bio": "M. / Mme COULIBALY  ALI KADER, élu(e) à la tête de la Mairie de M'bengue, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme COULIBALY ALI KADER (administrateur financier), élu(e) à la tête de la Mairie de M'bengue pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7893,7 +7893,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Madinani.",
     "website": "https://mairie-mairiedemadinani.ci",
     "facebook_url": "https://www.facebook.com/MairiedeMadinani",
-    "leader_bio": "M. / Mme KONATE LADJI, élu(e) à la tête de la Mairie de Madinani, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KONATE LADJI (chef d'entreprise), élu(e) à la tête de la Mairie de Madinani pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -7947,15 +7947,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 504864670,
     "total_budget_fcfa": 622192521,
     "is_tax_quota_commune": false,
-    "leader_name": "N'GOUAN JEREMIE ALFRED",
+    "leader_name": "ELIDJE ANGORA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "PDCI-RDA / PPA-CI",
+    "political_party": "INDEPENDANT",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Mafere.",
     "website": "https://mairie-mairiedemafere.ci",
     "facebook_url": "https://www.facebook.com/MairiedeMafere",
-    "leader_bio": "M. / Mme N'GOUAN JEREMIE ALFRED, élu(e) à la tête de la Mairie de Mafere, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ELIDJE ANGORA (cadre administratif), élu(e) à la tête de la Mairie de Mafere pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8009,15 +8009,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 801992076,
     "total_budget_fcfa": 1041274463,
     "is_tax_quota_commune": false,
-    "leader_name": "VAGBAMA  TAMBLA",
+    "leader_name": "FOFANA ABOUBAKAR SIDIKI",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "INDEPENDANT",
+    "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Man.",
     "website": "https://mairie-mairiedeman.ci",
     "facebook_url": "https://www.facebook.com/MairiedeMan",
-    "leader_bio": "M. / Mme VAGBAMA  TAMBLA, élu(e) à la tête de la Mairie de Man, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme FOFANA ABOUBAKAR SIDIKI (chef d'entreprise), élu(e) à la tête de la Mairie de Man pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8071,7 +8071,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 483738159,
     "total_budget_fcfa": 611138858,
     "is_tax_quota_commune": false,
-    "leader_name": "VAGBAMA  TAMBLA",
+    "leader_name": "VAGBAMA TAMBLA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "INDEPENDANT",
@@ -8079,7 +8079,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Mankono.",
     "website": "https://mairie-mairiedemankono.ci",
     "facebook_url": "https://www.facebook.com/MairiedeMankono",
-    "leader_bio": "M. / Mme VAGBAMA  TAMBLA, élu(e) à la tête de la Mairie de Mankono, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme VAGBAMA TAMBLA (administrateur financier), élu(e) à la tête de la Mairie de Mankono pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8133,7 +8133,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 426773003,
     "total_budget_fcfa": 533670840,
     "is_tax_quota_commune": false,
-    "leader_name": "BAMBA  MAFERIMA  FOUETE  EPSE  M'BAHIA",
+    "leader_name": "TRAORE KARAMOKO",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -8141,7 +8141,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Massala.",
     "website": "https://mairie-mairiedemassala.ci",
     "facebook_url": "https://www.facebook.com/MairiedeMassala",
-    "leader_bio": "M. / Mme BAMBA  MAFERIMA  FOUETE  EPSE  M'BAHIA, élu(e) à la tête de la Mairie de Massala, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme TRAORE KARAMOKO (cadre d'administration), élu(e) à la tête de la Mairie de Massala pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8203,7 +8203,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Mayo.",
     "website": "https://mairie-mairiedemayo.ci",
     "facebook_url": "https://www.facebook.com/MairiedeMayo",
-    "leader_bio": "M. / Mme BAFLAN LAURE EPSE DONWAHI, élu(e) à la tête de la Mairie de Mayo, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BAFLAN LAURE EPSE DONWAHI (gerant de societe), élu(e) à la tête de la Mairie de Mayo pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8265,7 +8265,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Meagui.",
     "website": "https://mairie-mairiedemeagui.ci",
     "facebook_url": "https://www.facebook.com/MairiedeMeagui",
-    "leader_bio": "M. / Mme YEPI GNONKOTHE SENGHOR, élu(e) à la tête de la Mairie de Meagui, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme YEPI GNONKOTHE SENGHOR (agent de mairie), élu(e) à la tête de la Mairie de Meagui pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8319,7 +8319,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 494984472,
     "total_budget_fcfa": 600984327,
     "is_tax_quota_commune": false,
-    "leader_name": "DIAKITE EL  HADJ MORY",
+    "leader_name": "DIAKITE EL HADJ MORY",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -8327,7 +8327,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Minignan.",
     "website": "https://mairie-mairiedeminignan.ci",
     "facebook_url": "https://www.facebook.com/MairiedeMinignan",
-    "leader_bio": "M. / Mme DIAKITE EL  HADJ MORY, élu(e) à la tête de la Mairie de Minignan, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DIAKITE EL HADJ MORY (technicien frigoriste), élu(e) à la tête de la Mairie de Minignan pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8381,7 +8381,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 422598645,
     "total_budget_fcfa": 528024121,
     "is_tax_quota_commune": false,
-    "leader_name": "MEITE YAYA",
+    "leader_name": "TRAORE MOUSSA KOUDOUGOU",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -8389,7 +8389,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Morondo.",
     "website": "https://mairie-mairiedemorondo.ci",
     "facebook_url": "https://www.facebook.com/MairiedeMorondo",
-    "leader_bio": "M. / Mme MEITE YAYA, élu(e) à la tête de la Mairie de Morondo, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme TRAORE MOUSSA KOUDOUGOU (biologiste), élu(e) à la tête de la Mairie de Morondo pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8451,7 +8451,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de N'douci.",
     "website": "https://mairie-mairiedendouci.ci",
     "facebook_url": "https://www.facebook.com/MairiedeNdouci",
-    "leader_bio": "M. / Mme OBOUMOU GOLE MARCELIN, élu(e) à la tête de la Mairie de N'douci, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OBOUMOU GOLE MARCELIN (avocat), élu(e) à la tête de la Mairie de N'douci pour la mandature 2023-2028 sous la bannière PDCI-RDA / PPA-CI, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8505,7 +8505,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 443331842,
     "total_budget_fcfa": 555874679,
     "is_tax_quota_commune": false,
-    "leader_name": "OUATTARA  LACINA",
+    "leader_name": "DIARRASSOUBA NAGAKY",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -8513,7 +8513,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Napie.",
     "website": "https://mairie-mairiedenapie.ci",
     "facebook_url": "https://www.facebook.com/MairiedeNapie",
-    "leader_bio": "M. / Mme OUATTARA  LACINA, élu(e) à la tête de la Mairie de Napie, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DIARRASSOUBA NAGAKY (ingenieur), élu(e) à la tête de la Mairie de Napie pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8575,7 +8575,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Nassian.",
     "website": "https://mairie-mairiedenassian.ci",
     "facebook_url": "https://www.facebook.com/MairiedeNassian",
-    "leader_bio": "M. / Mme KOUADIO DEGLEGUI EDMOND, élu(e) à la tête de la Mairie de Nassian, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOUADIO DEGLEGUI EDMOND (chef d'entreprise), élu(e) à la tête de la Mairie de Nassian pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8629,15 +8629,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 453650117,
     "total_budget_fcfa": 569801979,
     "is_tax_quota_commune": false,
-    "leader_name": "ADOM HERVE PATRICK",
+    "leader_name": "MESSOU BOUADOU EDOUARD",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "RHDP",
+    "political_party": "PDCI-RDA",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Niable.",
     "website": "https://mairie-mairiedeniable.ci",
     "facebook_url": "https://www.facebook.com/MairiedeNiable",
-    "leader_bio": "M. / Mme ADOM HERVE PATRICK, élu(e) à la tête de la Mairie de Niable, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme MESSOU BOUADOU EDOUARD (expert comptable), élu(e) à la tête de la Mairie de Niable pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8699,7 +8699,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Niakaramadougou.",
     "website": "https://mairie-mairiedeniakaramadougou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeNiakaramadougou",
-    "leader_bio": "M. / Mme KONE PIERRE, élu(e) à la tête de la Mairie de Niakaramadougou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KONE PIERRE (enseignant), élu(e) à la tête de la Mairie de Niakaramadougou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8753,7 +8753,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 538304163,
     "total_budget_fcfa": 661513225,
     "is_tax_quota_commune": false,
-    "leader_name": "OUATTARA  ALASSANE",
+    "leader_name": "OUATTARA ALASSANE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -8761,7 +8761,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Nielle.",
     "website": "https://mairie-mairiedenielle.ci",
     "facebook_url": "https://www.facebook.com/MairiedeNielle",
-    "leader_bio": "M. / Mme OUATTARA  ALASSANE, élu(e) à la tête de la Mairie de Nielle, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OUATTARA ALASSANE (ingenieur mecanicien), élu(e) à la tête de la Mairie de Nielle pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8815,7 +8815,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 418775847,
     "total_budget_fcfa": 522657403,
     "is_tax_quota_commune": false,
-    "leader_name": "OUATTARA  LACINA",
+    "leader_name": "SORO FOBEH",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -8823,7 +8823,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Niofoin.",
     "website": "https://mairie-mairiedeniofoin.ci",
     "facebook_url": "https://www.facebook.com/MairiedeNiofoin",
-    "leader_bio": "M. / Mme OUATTARA  LACINA, élu(e) à la tête de la Mairie de Niofoin, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme SORO FOBEH (ingenieur des transports), élu(e) à la tête de la Mairie de Niofoin pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8877,7 +8877,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 550332943,
     "total_budget_fcfa": 699602474,
     "is_tax_quota_commune": false,
-    "leader_name": "TOURE  NASSENEBA",
+    "leader_name": "TOURE NASSENEBA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "https://viepublique.ci/public/Gouvernement/nasseneba_toure.jpg",
     "political_party": "RHDP",
@@ -8885,7 +8885,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Odienne.",
     "website": "https://mairie-mairiedeodienne.ci",
     "facebook_url": "https://www.facebook.com/MairiedeOdienne",
-    "leader_bio": "M. / Mme TOURE  NASSENEBA, élu(e) à la tête de la Mairie de Odienne, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme TOURE NASSENEBA (administrateur civil), élu(e) à la tête de la Mairie de Odienne pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -8939,7 +8939,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 580800019,
     "total_budget_fcfa": 718998030,
     "is_tax_quota_commune": false,
-    "leader_name": "TOUNGARA  MOUSSA",
+    "leader_name": "TOUNGARA MOUSSA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -8947,7 +8947,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Ouangolodougou.",
     "website": "https://mairie-mairiedeouangolodougou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeOuangolodougou",
-    "leader_bio": "M. / Mme TOUNGARA  MOUSSA, élu(e) à la tête de la Mairie de Ouangolodougou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme TOUNGARA MOUSSA (commercant), élu(e) à la tête de la Mairie de Ouangolodougou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9009,7 +9009,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Ouaninou.",
     "website": "https://mairie-mairiedeouaninou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeOuaninou",
-    "leader_bio": "M. / Mme DIOMANDE ABDOUL AHMARA, élu(e) à la tête de la Mairie de Ouaninou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DIOMANDE ABDOUL AHMARA (juriste), élu(e) à la tête de la Mairie de Ouaninou pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9071,7 +9071,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Ouelle.",
     "website": "https://mairie-mairiedeouelle.ci",
     "facebook_url": "https://www.facebook.com/MairiedeOuelle",
-    "leader_bio": "M. / Mme YA KOMENAN RAPHAEL, élu(e) à la tête de la Mairie de Ouelle, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme YA KOMENAN RAPHAEL (professeur), élu(e) à la tête de la Mairie de Ouelle pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9133,7 +9133,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Oume.",
     "website": "https://mairie-mairiedeoume.ci",
     "facebook_url": "https://www.facebook.com/MairiedeOume",
-    "leader_bio": "M. / Mme LAGUI KOUASSI JOACHIM, élu(e) à la tête de la Mairie de Oume, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme LAGUI KOUASSI JOACHIM (proprietaire immobilier), élu(e) à la tête de la Mairie de Oume pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9187,15 +9187,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 476960381,
     "total_budget_fcfa": 602353603,
     "is_tax_quota_commune": false,
-    "leader_name": "YSSOUF  DIABATE",
+    "leader_name": "DACOURY-TABLEY PIERRE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "RHDP",
+    "political_party": "PPA-CI",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Ouragahio.",
     "website": "https://mairie-mairiedeouragahio.ci",
     "facebook_url": "https://www.facebook.com/MairiedeOuragahio",
-    "leader_bio": "M. / Mme YSSOUF  DIABATE, élu(e) à la tête de la Mairie de Ouragahio, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DACOURY-TABLEY PIERRE (pharmacien), élu(e) à la tête de la Mairie de Ouragahio pour la mandature 2023-2028 sous la bannière PPA-CI, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9249,7 +9249,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 440336544,
     "total_budget_fcfa": 553846389,
     "is_tax_quota_commune": false,
-    "leader_name": "ADI  KOUAME  ISAC",
+    "leader_name": "ADI KOUAME ISAC",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "PDCI-RDA",
@@ -9257,7 +9257,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Prikro.",
     "website": "https://mairie-mairiedeprikro.ci",
     "facebook_url": "https://www.facebook.com/MairiedePrikro",
-    "leader_bio": "M. / Mme ADI  KOUAME  ISAC, élu(e) à la tête de la Mairie de Prikro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ADI KOUAME ISAC (ingenieur agronome), élu(e) à la tête de la Mairie de Prikro pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9311,7 +9311,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 437471395,
     "total_budget_fcfa": 546601521,
     "is_tax_quota_commune": false,
-    "leader_name": "N'CHO ACHO ALBERT",
+    "leader_name": "KOUASSI MARIE VIRGINIE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -9319,7 +9319,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Rubino.",
     "website": "https://mairie-mairiederubino.ci",
     "facebook_url": "https://www.facebook.com/MairiedeRubino",
-    "leader_bio": "M. / Mme N'CHO ACHO ALBERT, élu(e) à la tête de la Mairie de Rubino, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOUASSI MARIE VIRGINIE (retraite), élu(e) à la tête de la Mairie de Rubino pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9373,7 +9373,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 530740244,
     "total_budget_fcfa": 675305186,
     "is_tax_quota_commune": false,
-    "leader_name": "FANY KARIM",
+    "leader_name": "LOPKO BRAHIMA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -9381,7 +9381,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Saioua.",
     "website": "https://mairie-mairiedesaioua.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSaioua",
-    "leader_bio": "M. / Mme FANY KARIM, élu(e) à la tête de la Mairie de Saioua, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme LOPKO BRAHIMA (professeur), élu(e) à la tête de la Mairie de Saioua pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9435,7 +9435,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 476120428,
     "total_budget_fcfa": 605329122,
     "is_tax_quota_commune": false,
-    "leader_name": "KOFFI KOUAME  EUGENE",
+    "leader_name": "KOFFI KOUAME EUGENE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "PDCI-RDA",
@@ -9443,7 +9443,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Sakassou.",
     "website": "https://mairie-mairiedesakassou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSakassou",
-    "leader_bio": "M. / Mme KOFFI KOUAME  EUGENE, élu(e) à la tête de la Mairie de Sakassou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOFFI KOUAME EUGENE (retraite), élu(e) à la tête de la Mairie de Sakassou pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9505,7 +9505,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Samatiguila.",
     "website": "https://mairie-mairiedesamatiguila.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSamatiguila",
-    "leader_bio": "M. / Mme DIABY LANCINE, élu(e) à la tête de la Mairie de Samatiguila, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DIABY LANCINE (chef d'entreprise), élu(e) à la tête de la Mairie de Samatiguila pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9567,7 +9567,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de San-pedro.",
     "website": "https://mairie-mairiedesanpedro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSanpedro",
-    "leader_bio": "M. / Mme KEITA EPSE CISSE NAKARIDJA, élu(e) à la tête de la Mairie de San-pedro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KEITA EPSE CISSE NAKARIDJA (sage femme), élu(e) à la tête de la Mairie de San-pedro pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9629,7 +9629,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Sandegue.",
     "website": "https://mairie-mairiedesandegue.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSandegue",
-    "leader_bio": "M. / Mme OUATTARA DAOUDA, élu(e) à la tête de la Mairie de Sandegue, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OUATTARA DAOUDA (greffier), élu(e) à la tête de la Mairie de Sandegue pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9683,7 +9683,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 478530544,
     "total_budget_fcfa": 603723018,
     "is_tax_quota_commune": false,
-    "leader_name": "FOFANA  ABOUBAKAR  SIDIKI",
+    "leader_name": "DION REMI",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -9691,7 +9691,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Sangouine.",
     "website": "https://mairie-mairiedesangouine.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSangouine",
-    "leader_bio": "M. / Mme FOFANA  ABOUBAKAR  SIDIKI, élu(e) à la tête de la Mairie de Sangouine, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DION REMI (agriculteur), élu(e) à la tête de la Mairie de Sangouine pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9745,7 +9745,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 431202300,
     "total_budget_fcfa": 540072784,
     "is_tax_quota_commune": false,
-    "leader_name": "VAGBAMA  TAMBLA",
+    "leader_name": "KANATE MAMADOU",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "INDEPENDANT",
@@ -9753,7 +9753,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Sarhala.",
     "website": "https://mairie-mairiedesarhala.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSarhala",
-    "leader_bio": "M. / Mme VAGBAMA  TAMBLA, élu(e) à la tête de la Mairie de Sarhala, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KANATE MAMADOU (opérateur économique), élu(e) à la tête de la Mairie de Sarhala pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9807,7 +9807,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 567977447,
     "total_budget_fcfa": 704187613,
     "is_tax_quota_commune": false,
-    "leader_name": "KACOU  MEA  D'ASSIE JUSTIN  KEVIN",
+    "leader_name": "KACOU MEA D'ASSIE JUSTIN KEVIN",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "INDEPENDANT",
@@ -9815,7 +9815,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Sassandra.",
     "website": "https://mairie-mairiedesassandra.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSassandra",
-    "leader_bio": "M. / Mme KACOU  MEA  D'ASSIE JUSTIN  KEVIN, élu(e) à la tête de la Mairie de Sassandra, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KACOU MEA D'ASSIE JUSTIN KEVIN (comptable), élu(e) à la tête de la Mairie de Sassandra pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9869,15 +9869,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 408616531,
     "total_budget_fcfa": 512582945,
     "is_tax_quota_commune": false,
-    "leader_name": "BAKAYOKO ABDOUL DRAMANE",
+    "leader_name": "FOFANA ALIMATA EPSE COULIBALY",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "RHDP",
+    "political_party": "INDEPENDANT",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Satama-sokoro.",
     "website": "https://mairie-mairiedesatamasokoro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSatamasokoro",
-    "leader_bio": "M. / Mme BAKAYOKO ABDOUL DRAMANE, élu(e) à la tête de la Mairie de Satama-sokoro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme FOFANA ALIMATA EPSE COULIBALY (inspecteur principal), élu(e) à la tête de la Mairie de Satama-sokoro pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9931,15 +9931,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 405095708,
     "total_budget_fcfa": 507820273,
     "is_tax_quota_commune": false,
-    "leader_name": "COULIBALY  ADAMA",
+    "leader_name": "FOFANA BASSATIGUI",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "INDEPENDANT",
+    "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Satama-sokoura.",
     "website": "https://mairie-mairiedesatamasokoura.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSatamasokoura",
-    "leader_bio": "M. / Mme COULIBALY  ADAMA, élu(e) à la tête de la Mairie de Satama-sokoura, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme FOFANA BASSATIGUI (professeur), élu(e) à la tête de la Mairie de Satama-sokoura pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -9993,7 +9993,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 536476912,
     "total_budget_fcfa": 682069024,
     "is_tax_quota_commune": false,
-    "leader_name": "BAMBA  MAFERIMA  FOUETE  EPSE  M'BAHIA",
+    "leader_name": "BAMBA MAFERIMA FOUETE EPSE M'BAHIA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -10001,7 +10001,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Seguela.",
     "website": "https://mairie-mairiedeseguela.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSeguela",
-    "leader_bio": "M. / Mme BAMBA  MAFERIMA  FOUETE  EPSE  M'BAHIA, élu(e) à la tête de la Mairie de Seguela, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BAMBA MAFERIMA FOUETE EPSE M'BAHIA (administrateur financier), élu(e) à la tête de la Mairie de Seguela pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10063,7 +10063,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Seguelon.",
     "website": "https://mairie-mairiedeseguelon.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSeguelon",
-    "leader_bio": "M. / Mme KONE MATOGOMA, élu(e) à la tête de la Mairie de Seguelon, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KONE MATOGOMA (comptable), élu(e) à la tête de la Mairie de Seguelon pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10117,15 +10117,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 479970902,
     "total_budget_fcfa": 583259714,
     "is_tax_quota_commune": false,
-    "leader_name": "OUATTARA AISSIATA",
+    "leader_name": "VAKABA FOFANA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "RHDP",
+    "political_party": "URD",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Seydougou.",
     "website": "https://mairie-mairiedeseydougou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSeydougou",
-    "leader_bio": "M. / Mme OUATTARA AISSIATA, élu(e) à la tête de la Mairie de Seydougou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme VAKABA FOFANA (entrepreneur), élu(e) à la tête de la Mairie de Seydougou pour la mandature 2023-2028 sous la bannière URD, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10179,7 +10179,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 450977094,
     "total_budget_fcfa": 566412091,
     "is_tax_quota_commune": false,
-    "leader_name": "BAMBA  MAFERIMA  FOUETE  EPSE  M'BAHIA",
+    "leader_name": "ZOUMANA ANLYOU MEITE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -10187,7 +10187,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Sifie.",
     "website": "https://mairie-mairiedesifie.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSifie",
-    "leader_bio": "M. / Mme BAMBA  MAFERIMA  FOUETE  EPSE  M'BAHIA, élu(e) à la tête de la Mairie de Sifie, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ZOUMANA ANLYOU MEITE (docteur veterinaire), élu(e) à la tête de la Mairie de Sifie pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10249,7 +10249,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Sikensi.",
     "website": "https://mairie-mairiedesikensi.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSikensi",
-    "leader_bio": "M. / Mme N'GATA BRIE JOSEPH, élu(e) à la tête de la Mairie de Sikensi, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme N'GATA BRIE JOSEPH (gerant de societe), élu(e) à la tête de la Mairie de Sikensi pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10311,7 +10311,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Sinematiali.",
     "website": "https://mairie-mairiedesinematiali.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSinematiali",
-    "leader_bio": "M. / Mme DONASSO ABOU COULIBALY, élu(e) à la tête de la Mairie de Sinematiali, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DONASSO ABOU COULIBALY (chef d'entreprise), élu(e) à la tête de la Mairie de Sinematiali pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10373,7 +10373,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Sinfra.",
     "website": "https://mairie-mairiedesinfra.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSinfra",
-    "leader_bio": "M. / Mme MEITE SOUALIHO, élu(e) à la tête de la Mairie de Sinfra, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme MEITE SOUALIHO (chef de societe), élu(e) à la tête de la Mairie de Sinfra pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10435,7 +10435,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Sipilou.",
     "website": "https://mairie-mairiedesipilou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSipilou",
-    "leader_bio": "M. / Mme DIOMANDE MANGA, élu(e) à la tête de la Mairie de Sipilou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DIOMANDE MANGA (medecin), élu(e) à la tête de la Mairie de Sipilou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10489,15 +10489,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 422350534,
     "total_budget_fcfa": 527492937,
     "is_tax_quota_commune": false,
-    "leader_name": "OUATTARA  LACINA",
+    "leader_name": "SIRIKI SEKONGO PELEGNON",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "RHDP",
+    "political_party": "INDEPENDANT",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Sirasso.",
     "website": "https://mairie-mairiedesirasso.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSirasso",
-    "leader_bio": "M. / Mme OUATTARA  LACINA, élu(e) à la tête de la Mairie de Sirasso, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme SIRIKI SEKONGO PELEGNON (educateur), élu(e) à la tête de la Mairie de Sirasso pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10560,7 +10560,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Songon.",
     "website": "https://mairie-mairiedesongon.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSongon",
-    "leader_bio": "M. / Mme GBROU ALOBOUE, élu(e) à la tête de la Mairie de Songon, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme GBROU ALOBOUE (retraite), élu(e) à la tête de la Mairie de Songon pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10622,7 +10622,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Soubre.",
     "website": "https://mairie-mairiedesoubre.ci",
     "facebook_url": "https://www.facebook.com/MairiedeSoubre",
-    "leader_bio": "M. / Mme TRAORE LASSINA, élu(e) à la tête de la Mairie de Soubre, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme TRAORE LASSINA (educateur), élu(e) à la tête de la Mairie de Soubre pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10684,7 +10684,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Taabo.",
     "website": "https://mairie-mairiedetaabo.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTaabo",
-    "leader_bio": "M. / Mme KOUADIO BEUGRE BERNARD, élu(e) à la tête de la Mairie de Taabo, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOUADIO BEUGRE BERNARD (agriculteur), élu(e) à la tête de la Mairie de Taabo pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10746,7 +10746,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tabou.",
     "website": "https://mairie-mairiedetabou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTabou",
-    "leader_bio": "M. / Mme OUALLO JEAN LUC, élu(e) à la tête de la Mairie de Tabou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme OUALLO JEAN LUC (fonctionnaire), élu(e) à la tête de la Mairie de Tabou pour la mandature 2023-2028 sous la bannière PDCI-RDA / PPA-CI, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10800,7 +10800,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 445133631,
     "total_budget_fcfa": 561980194,
     "is_tax_quota_commune": false,
-    "leader_name": "KONE PIERRE",
+    "leader_name": "COULIBALY SOUNKALO",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -10808,7 +10808,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tafire.",
     "website": "https://mairie-mairiedetafire.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTafire",
-    "leader_bio": "M. / Mme KONE PIERRE, élu(e) à la tête de la Mairie de Tafire, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme COULIBALY SOUNKALO (maire), élu(e) à la tête de la Mairie de Tafire pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10870,7 +10870,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tai.",
     "website": "https://mairie-mairiedetai.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTai",
-    "leader_bio": "M. / Mme BAYALLAI KOUYE MAYA HIPPOLYTE, élu(e) à la tête de la Mairie de Tai, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BAYALLAI KOUYE MAYA HIPPOLYTE (chef d'entreprise), élu(e) à la tête de la Mairie de Tai pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10932,7 +10932,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tanda.",
     "website": "https://mairie-mairiedetanda.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTanda",
-    "leader_bio": "M. / Mme KONE AMADOU, élu(e) à la tête de la Mairie de Tanda, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KONE AMADOU (ingenieur), élu(e) à la tête de la Mairie de Tanda pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -10994,7 +10994,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tehini.",
     "website": "https://mairie-mairiedetehini.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTehini",
-    "leader_bio": "M. / Mme PALE SANSAN, élu(e) à la tête de la Mairie de Tehini, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme PALE SANSAN (agriculteur), élu(e) à la tête de la Mairie de Tehini pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11048,7 +11048,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 585334252,
     "total_budget_fcfa": 724119308,
     "is_tax_quota_commune": false,
-    "leader_name": "DIARRASSOUBA  SOUMAILA",
+    "leader_name": "DIARRASSOUBA SOUMAILA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "INDEPENDANT",
@@ -11056,7 +11056,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tengrela.",
     "website": "https://mairie-mairiedetengrela.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTengrela",
-    "leader_bio": "M. / Mme DIARRASSOUBA  SOUMAILA, élu(e) à la tête de la Mairie de Tengrela, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DIARRASSOUBA SOUMAILA (entrepreneur industriel), élu(e) à la tête de la Mairie de Tengrela pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11118,7 +11118,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tiapoum.",
     "website": "https://mairie-mairiedetiapoum.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTiapoum",
-    "leader_bio": "M. / Mme N'SEREBE EBILY PASCAL, élu(e) à la tête de la Mairie de Tiapoum, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme N'SEREBE EBILY PASCAL (chef d'entreprise), élu(e) à la tête de la Mairie de Tiapoum pour la mandature 2023-2028 sous la bannière PDCI-RDA / PPA-CI, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11172,7 +11172,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 490698492,
     "total_budget_fcfa": 618602643,
     "is_tax_quota_commune": false,
-    "leader_name": "ASSALE TIEMOKO  ANTOINE",
+    "leader_name": "ASSALE TIEMOKO ANTOINE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "INDEPENDANT",
@@ -11180,7 +11180,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tiassale.",
     "website": "https://mairie-mairiedetiassale.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTiassale",
-    "leader_bio": "M. / Mme ASSALE TIEMOKO  ANTOINE, élu(e) à la tête de la Mairie de Tiassale, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ASSALE TIEMOKO ANTOINE (journaliste), élu(e) à la tête de la Mairie de Tiassale pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11234,7 +11234,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 411808409,
     "total_budget_fcfa": 517127495,
     "is_tax_quota_commune": false,
-    "leader_name": "KOUASSI  KOUAME  BRICE",
+    "leader_name": "YAO-BHOREY KOUAKOU CASIMIR",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -11242,7 +11242,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tie-n'diekro.",
     "website": "https://mairie-mairiedetiendiekro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTiendiekro",
-    "leader_bio": "M. / Mme KOUASSI  KOUAME  BRICE, élu(e) à la tête de la Mairie de Tie-n'diekro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme YAO-BHOREY KOUAKOU CASIMIR (retraite), élu(e) à la tête de la Mairie de Tie-n'diekro pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11304,7 +11304,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tiebissou.",
     "website": "https://mairie-mairiedetiebissou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTiebissou",
-    "leader_bio": "M. / Mme BROU N'GAURAN VINCENT, élu(e) à la tête de la Mairie de Tiebissou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BROU N'GAURAN VINCENT (inspecteur des affaires administratives), élu(e) à la tête de la Mairie de Tiebissou pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11358,7 +11358,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 427971305,
     "total_budget_fcfa": 534081983,
     "is_tax_quota_commune": false,
-    "leader_name": "TOURE  NASSENEBA",
+    "leader_name": "SYLLA OUSMANE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -11366,7 +11366,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tieme.",
     "website": "https://mairie-mairiedetieme.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTieme",
-    "leader_bio": "M. / Mme TOURE  NASSENEBA, élu(e) à la tête de la Mairie de Tieme, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme SYLLA OUSMANE (commercant), élu(e) à la tête de la Mairie de Tieme pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11420,7 +11420,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 422541222,
     "total_budget_fcfa": 532468639,
     "is_tax_quota_commune": false,
-    "leader_name": "SYLLA OUSMANE",
+    "leader_name": "KOUADIO KENDRICHE TANIA SAMIRA EMMANUELLA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -11428,7 +11428,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tiemelekro.",
     "website": "https://mairie-mairiedetiemelekro.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTiemelekro",
-    "leader_bio": "M. / Mme SYLLA OUSMANE, élu(e) à la tête de la Mairie de Tiemelekro, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KOUADIO KENDRICHE TANIA SAMIRA EMMANUELLA (medecin), élu(e) à la tête de la Mairie de Tiemelekro pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11482,15 +11482,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 437464734,
     "total_budget_fcfa": 548544076,
     "is_tax_quota_commune": false,
-    "leader_name": "VAGBAMA  TAMBLA",
+    "leader_name": "HAMADOU KAMAGATE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "INDEPENDANT",
+    "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tieningboue.",
     "website": "https://mairie-mairiedetieningboue.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTieningboue",
-    "leader_bio": "M. / Mme VAGBAMA  TAMBLA, élu(e) à la tête de la Mairie de Tieningboue, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme HAMADOU KAMAGATE (inspecteur d'enseignement), élu(e) à la tête de la Mairie de Tieningboue pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11544,7 +11544,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 496199974,
     "total_budget_fcfa": 602628556,
     "is_tax_quota_commune": false,
-    "leader_name": "DIAKITE EL  HADJ MORY",
+    "leader_name": "DOUMBIA YACOUBA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -11552,7 +11552,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tienko.",
     "website": "https://mairie-mairiedetienko.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTienko",
-    "leader_bio": "M. / Mme DIAKITE EL  HADJ MORY, élu(e) à la tête de la Mairie de Tienko, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DOUMBIA YACOUBA (retraite), élu(e) à la tête de la Mairie de Tienko pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11606,7 +11606,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 431991953,
     "total_budget_fcfa": 540535035,
     "is_tax_quota_commune": false,
-    "leader_name": "OUATTARA  LACINA",
+    "leader_name": "SILUE SEKOU",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -11614,7 +11614,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tioroniaradougou.",
     "website": "https://mairie-mairiedetioroniaradougou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTioroniaradougou",
-    "leader_bio": "M. / Mme OUATTARA  LACINA, élu(e) à la tête de la Mairie de Tioroniaradougou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme SILUE SEKOU (cultivateur), élu(e) à la tête de la Mairie de Tioroniaradougou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11668,7 +11668,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 435535302,
     "total_budget_fcfa": 548996385,
     "is_tax_quota_commune": false,
-    "leader_name": "KONE PIERRE",
+    "leader_name": "BLAISE KINAMPINAN COULIBALY",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -11676,7 +11676,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tortiya.",
     "website": "https://mairie-mairiedetortiya.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTortiya",
-    "leader_bio": "M. / Mme KONE PIERRE, élu(e) à la tête de la Mairie de Tortiya, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BLAISE KINAMPINAN COULIBALY (chef d'entreprise), élu(e) à la tête de la Mairie de Tortiya pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11738,7 +11738,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Touba.",
     "website": "https://mairie-mairiedetouba.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTouba",
-    "leader_bio": "M. / Mme SANOGO MOUSSA, élu(e) à la tête de la Mairie de Touba, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme SANOGO MOUSSA (cadre de banque), élu(e) à la tête de la Mairie de Touba pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11800,7 +11800,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Toulepleu.",
     "website": "https://mairie-mairiedetoulepleu.ci",
     "facebook_url": "https://www.facebook.com/MairiedeToulepleu",
-    "leader_bio": "M. / Mme ZION KAH DENIS, élu(e) à la tête de la Mairie de Toulepleu, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ZION KAH DENIS (journaliste), élu(e) à la tête de la Mairie de Toulepleu pour la mandature 2023-2028 sous la bannière PDCI-RDA / PPA-CI, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11854,7 +11854,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 528677850,
     "total_budget_fcfa": 675218606,
     "is_tax_quota_commune": false,
-    "leader_name": "KONE  IDRISSA",
+    "leader_name": "KONE IDRISSA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "PDCI-RDA",
@@ -11862,7 +11862,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Toumodi.",
     "website": "https://mairie-mairiedetoumodi.ci",
     "facebook_url": "https://www.facebook.com/MairiedeToumodi",
-    "leader_bio": "M. / Mme KONE  IDRISSA, élu(e) à la tête de la Mairie de Toumodi, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KONE IDRISSA (administrateur services sante), élu(e) à la tête de la Mairie de Toumodi pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11916,7 +11916,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 462907685,
     "total_budget_fcfa": 583832529,
     "is_tax_quota_commune": false,
-    "leader_name": "TANO  KOUABENAN  ISAAC",
+    "leader_name": "TANO KOUABENAN ISAAC",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "INDEPENDANT",
@@ -11924,7 +11924,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Transua.",
     "website": "https://mairie-mairiedetransua.ci",
     "facebook_url": "https://www.facebook.com/MairiedeTransua",
-    "leader_bio": "M. / Mme TANO  KOUABENAN  ISAAC, élu(e) à la tête de la Mairie de Transua, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme TANO KOUABENAN ISAAC (charge de mission), élu(e) à la tête de la Mairie de Transua pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -11978,7 +11978,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 577178849,
     "total_budget_fcfa": 738123409,
     "is_tax_quota_commune": false,
-    "leader_name": "KALOU  BONAVENTURE",
+    "leader_name": "KALOU BONAVENTURE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -11986,7 +11986,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Vavoua.",
     "website": "https://mairie-mairiedevavoua.ci",
     "facebook_url": "https://www.facebook.com/MairiedeVavoua",
-    "leader_bio": "M. / Mme KALOU  BONAVENTURE, élu(e) à la tête de la Mairie de Vavoua, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme KALOU BONAVENTURE (chef d'entreprise), élu(e) à la tête de la Mairie de Vavoua pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -12040,7 +12040,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 428218318,
     "total_budget_fcfa": 535625940,
     "is_tax_quota_commune": false,
-    "leader_name": "BAMBA  MAFERIMA  FOUETE  EPSE  M'BAHIA",
+    "leader_name": "BAMBA BOUAKE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -12048,7 +12048,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Worofla.",
     "website": "https://mairie-mairiedeworofla.ci",
     "facebook_url": "https://www.facebook.com/MairiedeWorofla",
-    "leader_bio": "M. / Mme BAMBA  MAFERIMA  FOUETE  EPSE  M'BAHIA, élu(e) à la tête de la Mairie de Worofla, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme BAMBA BOUAKE (enseignant chercheur), élu(e) à la tête de la Mairie de Worofla pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -12110,7 +12110,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Yakasse-attobrou.",
     "website": "https://mairie-mairiedeyakasseattobrou.ci",
     "facebook_url": "https://www.facebook.com/MairiedeYakasseattobrou",
-    "leader_bio": "M. / Mme ASSI N'DIN THEODORE, élu(e) à la tête de la Mairie de Yakasse-attobrou, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ASSI N'DIN THEODORE (administrateur financier), élu(e) à la tête de la Mairie de Yakasse-attobrou pour la mandature 2023-2028 sous la bannière PDCI-RDA / PPA-CI, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -12164,7 +12164,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 996910448,
     "total_budget_fcfa": 1996910448,
     "is_tax_quota_commune": false,
-    "leader_name": "KOUASSI  KOUAME  PATRICE",
+    "leader_name": "KOUASSI KOUAME PATRICE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "PDCI-RDA",
@@ -12172,7 +12172,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Yamoussoukro.",
     "website": "https://mairieyamoussoukro.ci",
     "facebook_url": "https://www.facebook.com/MairieDeYamoussoukroOfficiel",
-    "leader_bio": "Me Kouassi Kouamé Patrice (KKP) est un avocat émérite au Barreau de Côte d'Ivoire, député de la Nation et Maire de la Commune de Yamoussoukro depuis 2023. Il conduit des projets d'assainissement et d'embellissement de la capitale politique et administrative, la modernisation des marchés et des équipements socio-éducatifs communaux.",
+    "leader_bio": "M. / Mme KOUASSI KOUAME PATRICE (avocat), élu(e) à la tête de la Mairie de Yamoussoukro pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Certificat d'Aptitude à la Profession d'Avocat (CAPA)",
       "Maîtrise en Droit Privé - Université Félix Houphouët-Boigny"
@@ -12226,15 +12226,15 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 423546113,
     "total_budget_fcfa": 529787879,
     "is_tax_quota_commune": false,
-    "leader_name": "DALLI  ARTHUR PRINCE - RICHARD",
+    "leader_name": "ABADI MIEZAN CHARLES",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
-    "political_party": "PDCI-RDA / PPA-CI",
+    "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Zikisso.",
     "website": "https://mairie-mairiedezikisso.ci",
     "facebook_url": "https://www.facebook.com/MairiedeZikisso",
-    "leader_bio": "M. / Mme DALLI  ARTHUR PRINCE - RICHARD, élu(e) à la tête de la Mairie de Zikisso, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme ABADI MIEZAN CHARLES (entrepreneur), élu(e) à la tête de la Mairie de Zikisso pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -12288,7 +12288,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 535183307,
     "total_budget_fcfa": 680358092,
     "is_tax_quota_commune": false,
-    "leader_name": "MEDARD  DEHOUDO  DOHO",
+    "leader_name": "MEDARD DEHOUDO DOHO",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "INDEPENDANT",
@@ -12296,7 +12296,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Zouan-hounien.",
     "website": "https://mairie-mairiedezouanhounien.ci",
     "facebook_url": "https://www.facebook.com/MairiedeZouanhounien",
-    "leader_bio": "M. / Mme MEDARD  DEHOUDO  DOHO, élu(e) à la tête de la Mairie de Zouan-hounien, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme MEDARD DEHOUDO DOHO (logisticien), élu(e) à la tête de la Mairie de Zouan-hounien pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -12358,7 +12358,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Zoukougbeu.",
     "website": "https://mairie-mairiedezoukougbeu.ci",
     "facebook_url": "https://www.facebook.com/MairiedeZoukougbeu",
-    "leader_bio": "M. / Mme DEABO POKA MAURICE, élu(e) à la tête de la Mairie de Zoukougbeu, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme DEABO POKA MAURICE (enseignant), élu(e) à la tête de la Mairie de Zoukougbeu pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
@@ -12412,7 +12412,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_investment_fcfa": 491836092,
     "total_budget_fcfa": 621413985,
     "is_tax_quota_commune": false,
-    "leader_name": "SOULEYMANE  KONE",
+    "leader_name": "SOULEYMANE KONE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "",
     "political_party": "RHDP",
@@ -12420,7 +12420,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Zuenoula.",
     "website": "https://mairie-mairiedezuenoula.ci",
     "facebook_url": "https://www.facebook.com/MairiedeZuenoula",
-    "leader_bio": "M. / Mme SOULEYMANE  KONE, élu(e) à la tête de la Mairie de Zuenoula, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit les programmes d'investissements de proximité, la gestion des services d'état civil, la voirie communale, l'entretien des écoles primaires et l'action sociale au service direct des administrés.",
+    "leader_bio": "M. / Mme SOULEYMANE KONE (inspecteur  d'enseignement), élu(e) à la tête de la Mairie de Zuenoula pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
       "Formation en Management des Collectivités Locales"
