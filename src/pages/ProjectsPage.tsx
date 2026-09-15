@@ -195,9 +195,9 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
       {/* ========================================================================= */}
       {/* 1. YOUTH CITIZEN ENGAGEMENT BANNER                                        */}
       {/* ========================================================================= */}
-      <div className="bg-gradient-to-r from-slate-900 via-brand-blue to-slate-900 text-white rounded-3xl p-5 sm:p-7 mb-8 shadow-lg relative overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-900 via-brand-blue to-slate-900 text-white rounded-3xl p-4 sm:p-7 mb-4 sm:mb-6 shadow-lg relative overflow-hidden">
         <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-white/5 skew-x-12 pointer-events-none"></div>
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-5">
           <div>
             <div className="inline-flex items-center px-3 py-1 rounded-full bg-brand-orange text-white text-xs font-black uppercase tracking-wider mb-2 shadow-2xs">
               <span>Investissements Publics 2026</span>
@@ -211,7 +211,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
           </div>
 
           {/* Quick Metrics */}
-          <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/20 flex-shrink-0">
+          <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl border border-white/20 flex-shrink-0 w-full sm:w-auto justify-around sm:justify-start">
             <div>
               <span className="text-[10px] text-slate-300 block font-bold uppercase tracking-wider">Chantiers Actifs</span>
               <span className="text-lg sm:text-2xl font-black text-white">{filteredProjects.length.toLocaleString('fr-FR')}</span>
@@ -228,81 +228,84 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
       {/* ========================================================================= */}
       {/* 2. OPTIMIZED SEARCH & SMART FILTER BAR (CLEAN & MODERN)                   */}
       {/* ========================================================================= */}
-      <div className="bg-white rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm mb-6 space-y-4">
+      <div className="bg-white rounded-3xl p-3.5 sm:p-6 border border-slate-200 shadow-sm mb-6 space-y-4">
         
         {/* TOP LEVEL: Primary Scope Switcher + Real Projects + View Modes + Export */}
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           
-          {/* Scope Segmented Control (Clean without icons & without redundant amounts) */}
-          <div className="flex flex-1 items-center p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/70 gap-1 overflow-x-auto no-scrollbar">
+          {/* Scope Segmented Control: 3 equal tabs, 100% visible on mobile, zero truncation */}
+          <div className="grid grid-cols-3 p-1 sm:p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/70 gap-1 w-full lg:flex-1">
+            {/* 1. TOUS */}
+            <button
+              onClick={() => {
+                setSelectedScope('ALL');
+                setCurrentPage(1);
+              }}
+              className={`flex items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 sm:px-3 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer ${
+                selectedScope === 'ALL'
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/70'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>Tous</span>
+              <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black ${
+                selectedScope === 'ALL' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
+              }`}>
+                {activePool.length.toLocaleString('fr-FR')}
+              </span>
+            </button>
+
+            {/* 2. LOCAUX */}
             <button
               onClick={() => {
                 setSelectedScope('LOCAL');
                 setCurrentPage(1);
               }}
-              className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2 px-3.5 rounded-xl text-xs sm:text-sm font-black transition-all ${
+              className={`flex items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 sm:px-3 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer ${
                 selectedScope === 'LOCAL'
                   ? 'bg-white text-slate-900 shadow-sm border border-slate-200/70'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <span>Projets Locaux</span>
-              <span className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
+              <span><span className="hidden sm:inline">Projets </span>Locaux</span>
+              <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black ${
                 selectedScope === 'LOCAL' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
               }`}>
                 {localProjectsTotal.length.toLocaleString('fr-FR')}
               </span>
             </button>
 
+            {/* 3. GRANDS CHANTIERS */}
             <button
               onClick={() => {
                 setSelectedScope('NATIONAL');
                 setCurrentPage(1);
               }}
-              className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2 px-3.5 rounded-xl text-xs sm:text-sm font-black transition-all ${
+              className={`flex items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 sm:px-3 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer ${
                 selectedScope === 'NATIONAL'
                   ? 'bg-white text-slate-900 shadow-sm border border-slate-200/70'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <span>Grands Chantiers</span>
-              <span className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
+              <span><span className="hidden sm:inline">Grands </span>Chantiers</span>
+              <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black ${
                 selectedScope === 'NATIONAL' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
               }`}>
                 {nationalProjectsTotal.length.toLocaleString('fr-FR')}
               </span>
             </button>
-
-            <button
-              onClick={() => {
-                setSelectedScope('ALL');
-                setCurrentPage(1);
-              }}
-              className={`flex items-center justify-center gap-1.5 py-2 px-3.5 rounded-xl text-xs font-black transition-all ${
-                selectedScope === 'ALL'
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/70'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <span>Tous les Projets</span>
-              <span className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
-                selectedScope === 'ALL' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
-              }`}>
-                {activePool.length.toLocaleString('fr-FR')}
-              </span>
-            </button>
           </div>
 
-          {/* Right Controls: Type Switcher + View Mode Switcher + Export */}
-          <div className="flex items-center gap-2 justify-end flex-wrap sm:flex-nowrap">
-            {/* Real Projects Filter */}
-            <div className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200/70 text-xs">
+          {/* Secondary Controls: Physical Filter + View Mode Switcher + Export CSV */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between lg:justify-end gap-2.5 w-full lg:w-auto">
+            {/* Real Projects Filter: 50/50 symmetric grid on mobile, inline on sm+ */}
+            <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-2xl border border-slate-200/70 text-xs w-full sm:w-auto">
               <button
                 onClick={() => {
                   setOnlyPhysical(true);
                   setCurrentPage(1);
                 }}
-                className={`px-3 py-2 rounded-xl font-extrabold transition-all ${
+                className={`py-2 px-3 text-center rounded-xl font-extrabold transition-all cursor-pointer ${
                   onlyPhysical
                     ? 'bg-slate-900 text-white shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -316,7 +319,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                   setOnlyPhysical(false);
                   setCurrentPage(1);
                 }}
-                className={`px-3 py-2 rounded-xl font-extrabold transition-all ${
+                className={`py-2 px-3 text-center rounded-xl font-extrabold transition-all cursor-pointer ${
                   !onlyPhysical
                     ? 'bg-slate-900 text-white shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -327,40 +330,44 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
               </button>
             </div>
 
-            {/* View Mode (Grid vs Table) */}
-            <div className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200/70 text-xs">
+            {/* View Mode & Export CSV: Balanced row on mobile */}
+            <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+              {/* View Mode (Grid vs Table) */}
+              <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-2xl border border-slate-200/70 text-xs flex-1 sm:flex-initial">
+                <button
+                  onClick={() => setViewMode('GRID')}
+                  className={`px-3 py-2 text-center rounded-xl font-extrabold transition-all cursor-pointer ${
+                    viewMode === 'GRID'
+                      ? 'bg-white text-slate-900 shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                  title="Affichage en Grille de Cartes"
+                >
+                  Grille
+                </button>
+                <button
+                  onClick={() => setViewMode('TABLE')}
+                  className={`px-3 py-2 text-center rounded-xl font-extrabold transition-all cursor-pointer ${
+                    viewMode === 'TABLE'
+                      ? 'bg-white text-slate-900 shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                  title="Affichage en Tableau Détaillé"
+                >
+                  Tableau
+                </button>
+              </div>
+
+              {/* Export CSV Button */}
               <button
-                onClick={() => setViewMode('GRID')}
-                className={`px-3 py-2 rounded-xl font-extrabold transition-all ${
-                  viewMode === 'GRID'
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-900'
-                }`}
-                title="Affichage en Grille de Cartes"
+                onClick={handleExportCSV}
+                className="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 rounded-2xl transition-all border border-slate-200 text-xs font-black flex-1 sm:flex-initial cursor-pointer"
+                title="Exporter les résultats filtrés en fichier CSV pour Excel"
               >
-                Grille
-              </button>
-              <button
-                onClick={() => setViewMode('TABLE')}
-                className={`px-3 py-2 rounded-xl font-extrabold transition-all ${
-                  viewMode === 'TABLE'
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-900'
-                }`}
-                title="Affichage en Tableau Détaillé"
-              >
-                Tableau
+                <Download className="w-3.5 h-3.5 text-slate-500" />
+                <span>Export CSV</span>
               </button>
             </div>
-
-            {/* Export CSV Button */}
-            <button
-              onClick={handleExportCSV}
-              className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 rounded-2xl transition-all border border-slate-200 text-xs font-black"
-              title="Exporter les résultats filtrés en fichier CSV pour Excel"
-            >
-              Export CSV
-            </button>
           </div>
         </div>
 
