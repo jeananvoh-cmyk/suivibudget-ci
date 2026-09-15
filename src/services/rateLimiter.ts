@@ -1,5 +1,5 @@
 // =========================================================================
-// CIVICDATA CI - RATE LIMITING & ANTI-ABUSE DEFENSE SERVICE
+// SUIVI BUDGET CI - RATE LIMITING & ANTI-ABUSE DEFENSE SERVICE
 // Protection contre le spamming automatisé, attaques par rejeu et saturation.
 // =========================================================================
 

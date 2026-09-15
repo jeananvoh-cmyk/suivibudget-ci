@@ -103,7 +103,7 @@ describe('Cybersecurity & Defensive Engineering Test Suite', () => {
   describe('Cryptographic Session Integrity (AuthSecurityService)', () => {
     it('creates a signed session token and validates it successfully', () => {
       const user = {
-        email: 'admin@civicdata.ci',
+        email: 'admin@suivibudget.ci',
         fullName: 'Administrateur National',
         role: 'ADMIN' as const,
       };
@@ -115,14 +115,14 @@ describe('Cybersecurity & Defensive Engineering Test Suite', () => {
 
       const validation = AuthSecurityService.validateCurrentSession();
       expect(validation.isAuthenticated).toBe(true);
-      expect(validation.user?.email).toBe('admin@civicdata.ci');
+      expect(validation.user?.email).toBe('admin@suivibudget.ci');
       expect(validation.user?.role).toBe('ADMIN');
     });
 
     it('instantly rejects and purges tampered session tokens', () => {
       // 1. Create legitimate token
       const token = AuthSecurityService.createSignedSession({
-        email: 'moderateur@civicdata.ci',
+        email: 'moderateur@suivibudget.ci',
         fullName: 'Modérateur Terrain',
         role: 'MODERATOR' as const,
       });
@@ -137,7 +137,7 @@ describe('Cybersecurity & Defensive Engineering Test Suite', () => {
 
     it('clears session upon logout', () => {
       AuthSecurityService.createSignedSession({
-        email: 'admin@civicdata.ci',
+        email: 'admin@suivibudget.ci',
         fullName: 'Admin',
         role: 'ADMIN' as const,
       });

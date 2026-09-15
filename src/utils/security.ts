@@ -1,5 +1,5 @@
 // =========================================================================
-// CIVICDATA CI - SECURITY & DATA SANITIZATION DEFENSE MODULE
+// SUIVI BUDGET CI - SECURITY & DATA SANITIZATION DEFENSE MODULE
 // Protection contre : Injections XSS, Injections CSV/Excel, Faux binaires médias,
 // et Fuite de données personnelles de géolocalisation (Privacy by Design).
 // =========================================================================

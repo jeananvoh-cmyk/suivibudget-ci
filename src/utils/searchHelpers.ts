@@ -1,5 +1,5 @@
 // =========================================================================
-// CIVICDATA CI - MOTEUR DE RECHERCHE ET FILTRAGE INTELLIGENT (SMART SEARCH)
+// SUIVI BUDGET CI - MOTEUR DE RECHERCHE ET FILTRAGE INTELLIGENT (SMART SEARCH)
 // Évite les faux positifs (ex: "Agou" qui matchait "Bagoué"),
 // gère les accents, les tirets, les apostrophes et le multi-mots.
 // =========================================================================

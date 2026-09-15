@@ -74,7 +74,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
           setError(null);
         } else {
           dataStore.login(
-            res.email || identifier || 'admin@civicdata.ci', 
+            res.email || identifier || 'admin@suivibudget.ci', 
             res.fullName || 'Administrateur', 
             res.role || 'ADMIN'
           );
@@ -112,7 +112,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
 
       if (result.success) {
         setSuccessMessage(" Mot de passe administrateur sécurisé et enregistré avec succès !");
-        dataStore.login(identifier || 'admin@civicdata.ci', 'Administrateur National', 'ADMIN');
+        dataStore.login(identifier || 'admin@suivibudget.ci', 'Administrateur National', 'ADMIN');
         setTimeout(() => {
           onLoginSuccess();
         }, 1200);
@@ -209,7 +209,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
                   disabled={lockoutSecs > 0}
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="admin ou admin@civicdata.ci"
+                  placeholder="admin ou admin@suivibudget.ci"
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-2xl text-xs sm:text-sm text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all disabled:opacity-50"
                 />
               </div>

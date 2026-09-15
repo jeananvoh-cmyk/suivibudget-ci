@@ -162,7 +162,7 @@ export const SpotlightSearchModal: React.FC<SpotlightSearchModalProps> = ({
                 <Sparkles className="w-6 h-6" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-sm font-black text-slate-900">Recherche Universelle CivicData CI</h4>
+                <h4 className="text-sm font-black text-slate-900">Recherche Universelle Suivi Budget CI</h4>
                 <p className="text-xs text-slate-500 max-w-md mx-auto">
                   Accédez instantanément aux 201 communes, 33 régions, membres du gouvernement et 4 586 chantiers publics de Côte d'Ivoire.
                 </p>

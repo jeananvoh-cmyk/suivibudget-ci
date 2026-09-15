@@ -14,7 +14,7 @@ interface SeoMetadata {
 export function updateDocumentSeo({
   title,
   description = "Plateforme citoyenne de suivi budgétaire, des investissements publics et annuaire des responsables en Côte d'Ivoire.",
-  image = "/images/civicdata-banner.png",
+  image = "/images/facebook_cover_suivibudget.jpg",
   url = typeof window !== 'undefined' ? window.location.href : '',
   type = "website",
 }: SeoMetadata): void {

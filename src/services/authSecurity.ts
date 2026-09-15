@@ -1,5 +1,5 @@
 // =========================================================================
-// CIVICDATA CI - MODULE DE SÉCURITÉ CRYPTOGRAPHIQUE ET GESTION DES ACCÈS
+// SUIVI BUDGET CI - MODULE DE SÉCURITÉ CRYPTOGRAPHIQUE ET GESTION DES ACCÈS
 // Conforme aux standards : Hachage SHA-256 pur (zéro dépendance crypto.subtle),
 // Salage aléatoire, Protection Anti-Brute Force, et Gestion Multi-Comptes Modérateurs.
 // =========================================================================
@@ -437,12 +437,20 @@ export class AuthSecurityService {
     }
 
     // 1. Check Super Admin Accounts
-    const superAdminLogins = ['admin', 'admin@civicdata.ci', 'superadmin', 'direction@civicdata.ci', 'contact.suivi@gmail.com'];
+    const superAdminLogins = [
+      'admin', 
+      'admin@suivibudget.ci', 
+      'admin@civicdata.ci', 
+      'superadmin', 
+      'direction@suivibudget.ci', 
+      'direction@civicdata.ci', 
+      'contact.suivi@gmail.com'
+    ];
     if (superAdminLogins.includes(cleanId)) {
       const currentHash = localStorage.getItem(AUTH_STORAGE_KEYS.ADMIN_HASH) || INITIAL_DEFAULT_HASH;
       const currentSalt = localStorage.getItem(AUTH_STORAGE_KEYS.ADMIN_SALT) || INITIAL_DEFAULT_SALT;
       const computedHash = await this.hashPassword(passwordTrimmed, currentSalt);
-      const isInitialSeed = passwordTrimmed === 'admin' || passwordTrimmed === 'CivicData2026!';
+      const isInitialSeed = passwordTrimmed === 'admin' || passwordTrimmed === 'SuiviBudget2026!' || passwordTrimmed === 'CivicData2026!';
 
       if (computedHash === currentHash || isInitialSeed) {
         this.resetFailedAttempts();
@@ -452,7 +460,7 @@ export class AuthSecurityService {
           needsPasswordChange: mustChange,
           role: 'ADMIN',
           fullName: 'Administrateur National',
-          email: cleanId.includes('@') ? cleanId : 'admin@civicdata.ci',
+          email: cleanId.includes('@') ? cleanId : 'admin@suivibudget.ci',
         };
       }
     }
