@@ -1,8 +1,12 @@
 import { Institution } from '../types';
 import { NATIONAL_INSTITUTIONS_DATA } from './nationalBudgetData';
-import { ALL_COMMUNES_DATA, ALL_REGIONS_DATA } from './officialDataFromCsv';
+import { ALL_COMMUNES_DATA as RAW_COMMUNES_DATA, ALL_REGIONS_DATA as RAW_REGIONS_DATA } from './officialDataFromCsv';
 import { GOVERNMENT_OFFICIALS } from './governmentData';
 import { REGULATORY_AUTHORITIES_DATA } from './regulatoryAuthoritiesData';
+import { enrichWithOfficialWebDirectory } from './officialWebDirectory';
+
+export const ALL_COMMUNES_DATA: Institution[] = enrichWithOfficialWebDirectory(RAW_COMMUNES_DATA);
+export const ALL_REGIONS_DATA: Institution[] = enrichWithOfficialWebDirectory(RAW_REGIONS_DATA);
 
 export const ALL_MINISTRIES_DATA: Institution[] = GOVERNMENT_OFFICIALS.map(official => ({
   id: official.id,
@@ -32,7 +36,7 @@ export const ALL_MINISTRIES_DATA: Institution[] = GOVERNMENT_OFFICIALS.map(offic
   total_budget_fcfa: official.budget_fcfa || 32500000000,
 }));
 
-export { ALL_COMMUNES_DATA, ALL_REGIONS_DATA, NATIONAL_INSTITUTIONS_DATA, REGULATORY_AUTHORITIES_DATA };
+export { NATIONAL_INSTITUTIONS_DATA, REGULATORY_AUTHORITIES_DATA };
 
 export const INSTITUTIONS_DATA: Institution[] = [
   ...ALL_MINISTRIES_DATA,

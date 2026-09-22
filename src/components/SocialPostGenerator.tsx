@@ -3,7 +3,6 @@ import { BudgetProject } from '../types';
 import { dataStore } from '../services/dataStore';
 import { formatFCFA, formatAmountInWords, getProjectEntityInfo } from '../utils/formatters';
 import { 
-  Sparkles, 
   Copy, 
   Check, 
   Share2, 
@@ -81,7 +80,7 @@ export const SocialPostGenerator: React.FC<SocialPostGeneratorProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-orange to-amber-400 text-white flex items-center justify-center shadow-md">
-            <Sparkles className="w-6 h-6" />
+            <Share2 className="w-6 h-6" />
           </div>
           <div>
             <h3 className="text-lg sm:text-xl font-black text-slate-900">

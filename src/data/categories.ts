@@ -67,7 +67,7 @@ export const CATEGORIES: CategoryOption[] = [
     id: 'Développement Local',
     name: 'Développement Local',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    iconName: 'Sparkles',
+    iconName: 'TrendingUp',
     description: 'Provisions pour investissements communaux et régionaux, appui au développement',
   },
   {

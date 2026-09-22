@@ -139,12 +139,12 @@ export const BudgetReportsView: React.FC = () => {
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
             {[
-              { id: 'GLOBAL', label: ' Bilan Global 2026' },
-              { id: 'LOCAL', label: ' Mairies & Régions' },
-              { id: 'INFRASTRUCTURE', label: '️ Infrastructures' },
-              { id: 'SANTE', label: ' Santé Publique' },
-              { id: 'EDUCATION', label: ' Éducation' },
-              { id: 'EAU_POTABLE', label: ' Eau Potable' },
+              { id: 'GLOBAL', label: 'Bilan Global 2026' },
+              { id: 'LOCAL', label: 'Mairies & Régions' },
+              { id: 'INFRASTRUCTURE', label: 'Infrastructures' },
+              { id: 'SANTE', label: 'Santé Publique' },
+              { id: 'EDUCATION', label: 'Éducation' },
+              { id: 'EAU_POTABLE', label: 'Eau Potable' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -253,7 +253,10 @@ export const BudgetReportsView: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="p-6 rounded-2xl bg-blue-50/50 border border-blue-200 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-black text-brand-blue uppercase">️ Grands Chantiers de l'État</span>
+                <span className="text-xs font-black text-brand-blue uppercase flex items-center gap-1.5">
+                  <Building className="w-3.5 h-3.5 text-brand-blue" />
+                  <span>Grands Chantiers de l'État</span>
+                </span>
                 <span className="text-xs font-black text-slate-800">
                   {stats.totalAmount > 0 ? ((stats.nationalAmount / stats.totalAmount) * 100).toFixed(1) : '0'} %
                 </span>
@@ -268,7 +271,10 @@ export const BudgetReportsView: React.FC = () => {
 
             <div className="p-6 rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-black text-emerald-800 uppercase"> Investissements Locaux & Communaux</span>
+                <span className="text-xs font-black text-emerald-800 uppercase flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>Investissements Locaux & Communaux</span>
+                </span>
                 <span className="text-xs font-black text-slate-800">
                   {stats.totalAmount > 0 ? ((stats.localAmount / stats.totalAmount) * 100).toFixed(1) : '0'} %
                 </span>

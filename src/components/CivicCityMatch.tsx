@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { dataStore } from '../services/dataStore';
 import { formatCompactFCFA } from '../utils/formatters';
-import { Flame, Trophy, MapPin, Camera, ArrowRight, ShieldCheck, TrendingUp, Sparkles } from 'lucide-react';
+import { Flame, Trophy, MapPin, Camera, ArrowRight, ShieldCheck, TrendingUp } from 'lucide-react';
 
 interface CivicCityMatchProps {
   onSelectCommune: (communeName: string) => void;
@@ -17,9 +17,9 @@ export const CivicCityMatch: React.FC<CivicCityMatchProps> = ({
 
   // Top 8 Dynamic Communes Ranking
   const topCities = [
-    { name: 'Korhogo', region: 'Poro', score: 92, proofsCount: 8, rank: 1, badge: ' 1er National' },
-    { name: 'Bouaké', region: 'Gbêkê', score: 88, proofsCount: 6, rank: 2, badge: ' 2e National' },
-    { name: 'Cocody', region: 'Abidjan', score: 84, proofsCount: 5, rank: 3, badge: ' 3e National' },
+    { name: 'Korhogo', region: 'Poro', score: 92, proofsCount: 8, rank: 1, badge: '1er National' },
+    { name: 'Bouaké', region: 'Gbêkê', score: 88, proofsCount: 6, rank: 2, badge: '2e National' },
+    { name: 'Cocody', region: 'Abidjan', score: 84, proofsCount: 5, rank: 3, badge: '3e National' },
     { name: 'San-Pédro', region: 'San-Pédro', score: 79, proofsCount: 4, rank: 4, badge: '4e' },
     { name: 'Yopougon', region: 'Abidjan', score: 75, proofsCount: 4, rank: 5, badge: '5e' },
     { name: 'Man', region: 'Tonkpi', score: 71, proofsCount: 3, rank: 6, badge: '6e' },
@@ -38,7 +38,7 @@ export const CivicCityMatch: React.FC<CivicCityMatchProps> = ({
             <span>Gamification Collective • Fierté Territoriale</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-sans">
-            ️ Le Match des Villes : Baromètre de Vigilance Citoyenne
+            Le Match des Villes : Baromètre de Vigilance Citoyenne
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl font-medium">
             Quelle commune de Côte d'Ivoire contrôle le mieux ses investissements ? Chaque photo envoyée fait progresser votre ville au classement national !

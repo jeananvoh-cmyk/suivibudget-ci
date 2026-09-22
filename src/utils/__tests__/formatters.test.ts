@@ -43,7 +43,7 @@ describe('Formatters Unit Tests', () => {
   it('returns valid status config', () => {
     const notStarted = getStatusConfig('NOT_STARTED');
     expect(notStarted.label).toBe('Voté au Budget');
-    expect(notStarted.icon).toBe('️');
+    expect(notStarted.icon).toBe('');
 
     const inProgress = getStatusConfig('IN_PROGRESS');
     expect(inProgress.label).toBe('En cours');

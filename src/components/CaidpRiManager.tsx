@@ -218,15 +218,15 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast }) =
   const getCategoryBadge = (cat: EntityPublicCategory) => {
     switch (cat) {
       case 'MINISTERE':
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-100 text-sky-800 border border-sky-200"> Ministère</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-100 text-sky-800 border border-sky-200">Ministère</span>;
       case 'INSTITUTION':
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">️ Institution</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">Institution</span>;
       case 'SOCIETE_ETAT':
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-100 text-purple-800 border border-purple-200">️ Société d'État / Agence</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-100 text-purple-800 border border-purple-200">Société d'État / Agence</span>;
       case 'MAIRIE':
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200"> Mairie / Commune</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">Mairie / Commune</span>;
       case 'REGION':
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-800 border border-indigo-200">️ Conseil Régional</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-800 border border-indigo-200">Conseil Régional</span>;
       default:
         return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700">Organisme</span>;
     }
@@ -238,7 +238,9 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast }) =
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-amber-50 text-amber-600 font-bold text-xl">️</span>
+            <span className="p-2 rounded-xl bg-amber-50 text-amber-600 font-bold">
+              <Building2 className="w-6 h-6 text-amber-600" />
+            </span>
             <div>
               <h3 className="text-xl font-extrabold text-navy-900 flex items-center gap-2">
                 Répertoire CAIDP & Contacts des Responsables de l'Information (RI)
@@ -430,7 +432,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast }) =
                 : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
             }`}
           >
-            ️ Grandes Institutions ({directory.filter(d => d.category === 'INSTITUTION').length})
+            Grandes Institutions ({directory.filter(d => d.category === 'INSTITUTION').length})
           </button>
           <button
             onClick={() => { setCategoryFilter('SOCIETE_ETAT'); setCurrentPage(1); }}
@@ -440,7 +442,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast }) =
                 : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
             }`}
           >
-            ️ Sociétés d'État & Agences ({directory.filter(d => d.category === 'SOCIETE_ETAT').length})
+            Sociétés d'État & Agences ({directory.filter(d => d.category === 'SOCIETE_ETAT').length})
           </button>
           <button
             onClick={() => { setCategoryFilter('MAIRIE'); setCurrentPage(1); }}
@@ -450,7 +452,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast }) =
                 : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
             }`}
           >
-             Mairies ({directory.filter(d => d.category === 'MAIRIE').length})
+            Mairies ({directory.filter(d => d.category === 'MAIRIE').length})
           </button>
           <button
             onClick={() => { setCategoryFilter('REGION'); setCurrentPage(1); }}
@@ -460,7 +462,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast }) =
                 : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
             }`}
           >
-            ️ Conseils Régionaux ({directory.filter(d => d.category === 'REGION').length})
+            Conseils Régionaux ({directory.filter(d => d.category === 'REGION').length})
           </button>
         </div>
       </div>
@@ -655,7 +657,9 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast }) =
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <span className="p-2 rounded-xl bg-blue-50 text-brand-blue font-bold text-base">️</span>
+                <span className="p-2 rounded-xl bg-blue-50 text-brand-blue font-bold text-base">
+                  <Building2 className="w-5 h-5 text-brand-blue" />
+                </span>
                 <h4 className="font-extrabold text-slate-900 text-base">
                   {editingItem ? "Modifier le Responsable de l'Information" : "+ Ajouter un Organisme Public"}
                 </h4>
@@ -691,11 +695,11 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast }) =
                     onChange={(e) => setEditForm({ ...editForm, category: e.target.value as EntityPublicCategory })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue"
                   >
-                    <option value="MINISTERE"> Ministère</option>
-                    <option value="INSTITUTION">️ Grande Institution</option>
-                    <option value="SOCIETE_ETAT">️ Société d'État / Agence</option>
-                    <option value="MAIRIE"> Mairie / Commune</option>
-                    <option value="REGION">️ Conseil Régional</option>
+                    <option value="MINISTERE">Ministère</option>
+                    <option value="INSTITUTION">Grande Institution</option>
+                    <option value="SOCIETE_ETAT">Société d'État / Agence</option>
+                    <option value="MAIRIE">Mairie / Commune</option>
+                    <option value="REGION">Conseil Régional</option>
                   </select>
                 </div>
                 <div>

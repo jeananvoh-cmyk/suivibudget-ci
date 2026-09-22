@@ -1,4 +1,5 @@
 import { Institution } from '../types';
+import { getOfficialWebInfo } from './officialWebDirectory';
 
 interface RawCommune {
   name: string;
@@ -318,7 +319,9 @@ function buildCommuneInstitution(c: RawCommune, index: number): Institution {
     address: c.address || `Hôtel de Ville de ${c.name}, Région ${c.region}`,
     contact_email: `contact@mairie-${idSlug}.ci`,
     contact_phone: `+225 27 ${String(20 + (index % 15)).padStart(2, '0')} ${String(30 + (index % 50)).padStart(2, '0')} 00`,
-    website: `https://${idSlug}.ci`,
+    website: getOfficialWebInfo({ type: 'MAIRIE', name: fullName, region: c.region, district: c.district }).url || undefined,
+    web_status: getOfficialWebInfo({ type: 'MAIRIE', name: fullName, region: c.region, district: c.district }).statutWeb,
+    web_observations: getOfficialWebInfo({ type: 'MAIRIE', name: fullName, region: c.region, district: c.district }).observations,
     info_officer_name: c.riName || `M. KOUASSI ${c.name.split(' ')[0]}`,
     info_officer_email: c.riEmail || `ri.${idSlug}@transparence.gouv.ci`,
     info_officer_phone: c.riPhone || `+225 07 ${String(10 + (index % 80)).padStart(2, '0')} ${String(20 + (index % 70)).padStart(2, '0')} ${String(30 + (index % 60)).padStart(2, '0')}`,

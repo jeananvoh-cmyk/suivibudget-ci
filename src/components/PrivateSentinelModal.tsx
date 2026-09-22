@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Lock, Trophy, Award, CheckCircle2, X, Trash2, Info, Eye, Sparkles, Camera } from 'lucide-react';
+import { ShieldCheck, Lock, Trophy, Award, CheckCircle2, X, Trash2, Info, Eye, Camera } from 'lucide-react';
 import { dataStore } from '../services/dataStore';
 
 interface PrivateSentinelModalProps {
@@ -89,7 +89,7 @@ export const PrivateSentinelModal: React.FC<PrivateSentinelModalProps> = ({
         <div className="p-5 sm:p-6 bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-xl shadow-md">
-              ️
+              <ShieldCheck className="w-6 h-6 text-slate-950" />
             </div>
             <div>
               <div className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-extrabold text-amber-400">
@@ -161,7 +161,11 @@ export const PrivateSentinelModal: React.FC<PrivateSentinelModalProps> = ({
                       : 'bg-slate-50/60 border-slate-200 opacity-60'
                   }`}
                 >
-                  <span className="text-3xl">{b.icon}</span>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                    b.unlocked ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'
+                  }`}>
+                    <Award className="w-5 h-5" />
+                  </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <h4 className="text-xs font-black text-slate-900">{b.title}</h4>

@@ -69,7 +69,7 @@ export const CommuneComparatorModal: React.FC<CommuneComparatorModalProps> = ({
         <div className="p-5 sm:p-6 bg-slate-900 text-white flex items-center justify-between">
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-2xl bg-brand-blue text-white flex items-center justify-center font-extrabold text-xl shadow-lg flex-shrink-0">
-              ️
+              <Building2 className="w-6 h-6 text-white" />
             </div>
             <div>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-brand-blue/20 text-brand-blue mb-1">
@@ -140,7 +140,9 @@ export const CommuneComparatorModal: React.FC<CommuneComparatorModalProps> = ({
                   <h3 className="text-xl font-black text-slate-900">{communeA.name}</h3>
                   {communeA.district && <p className="text-xs text-slate-500">{communeA.district}</p>}
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center font-bold">️</div>
+                <div className="w-10 h-10 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center font-bold">
+                  <Building2 className="w-5 h-5 text-brand-blue" />
+                </div>
               </div>
 
               {/* Budget Total */}
@@ -148,7 +150,7 @@ export const CommuneComparatorModal: React.FC<CommuneComparatorModalProps> = ({
                 <span className="text-xs font-bold text-slate-400 uppercase">Dotation Budgétaire de l'État</span>
                 {communeA.is_tax_quota_commune ? (
                   <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs font-bold text-amber-900">
-                     Autonomie Fiscale (Quote-part d'impôts DGI)
+                    Autonomie Fiscale (Quote-part d'impôts DGI)
                   </div>
                 ) : (
                   <div>
@@ -202,7 +204,9 @@ export const CommuneComparatorModal: React.FC<CommuneComparatorModalProps> = ({
                   <h3 className="text-xl font-black text-slate-900">{communeB.name}</h3>
                   {communeB.district && <p className="text-xs text-slate-500">{communeB.district}</p>}
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-orange-50 text-brand-orange flex items-center justify-center font-bold">️</div>
+                <div className="w-10 h-10 rounded-xl bg-orange-50 text-brand-orange flex items-center justify-center font-bold">
+                  <Building2 className="w-5 h-5 text-brand-orange" />
+                </div>
               </div>
 
               {/* Budget Total */}
@@ -210,7 +214,7 @@ export const CommuneComparatorModal: React.FC<CommuneComparatorModalProps> = ({
                 <span className="text-xs font-bold text-slate-400 uppercase">Dotation Budgétaire de l'État</span>
                 {communeB.is_tax_quota_commune ? (
                   <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs font-bold text-amber-900">
-                     Autonomie Fiscale (Quote-part d'impôts DGI)
+                    Autonomie Fiscale (Quote-part d'impôts DGI)
                   </div>
                 ) : (
                   <div>
