@@ -50,9 +50,9 @@ describe('Audit & Répertoire Officiel des Sites Web des Collectivités', () => 
     expect(ALL_REGIONS_DATA.length).toBe(33);
   });
 
-  it('doit identifier 7 conseils régionaux et districts avec site fonctionnel', () => {
+  it('doit identifier 8 conseils régionaux et districts avec site fonctionnel', () => {
     const fonctionnels = ALL_REGIONS_DATA.filter(r => r.web_status === 'FONCTIONNEL');
-    expect(fonctionnels.length).toBe(7);
+    expect(fonctionnels.length).toBe(8);
 
     const names = fonctionnels.map(r => r.name);
     expect(names.some(n => n.includes('Gontougo'))).toBe(true);
@@ -62,11 +62,12 @@ describe('Audit & Répertoire Officiel des Sites Web des Collectivités', () => 
     expect(names.some(n => n.includes('Moronou'))).toBe(true);
     expect(names.some(n => n.includes('Gbêkê'))).toBe(true);
     expect(names.some(n => n.includes('District Autonome d\'Abidjan'))).toBe(true);
+    expect(names.some(n => n.includes('District Autonome de Yamoussoukro'))).toBe(true);
   });
 
-  it('doit identifier 7 conseils régionaux et districts avec site inactif / maintenance', () => {
+  it('doit identifier 6 conseils régionaux avec site inactif / maintenance', () => {
     const inactifs = ALL_REGIONS_DATA.filter(r => r.web_status === 'INACTIF');
-    expect(inactifs.length).toBe(7);
+    expect(inactifs.length).toBe(6);
 
     const names = inactifs.map(r => r.name);
     expect(names.some(n => n.includes('Tonkpi'))).toBe(true);
@@ -75,7 +76,6 @@ describe('Audit & Répertoire Officiel des Sites Web des Collectivités', () => 
     expect(names.some(n => n.includes('San Pedro') || n.includes('San-Pédro'))).toBe(true);
     expect(names.some(n => n.includes('Nawa'))).toBe(true);
     expect(names.some(n => n.includes('Indenié') || n.includes('Indénié'))).toBe(true);
-    expect(names.some(n => n.includes('District Autonome de Yamoussoukro'))).toBe(true);
   });
 
   it('doit identifier 19 conseils régionaux sans aucun site web officiel', () => {
