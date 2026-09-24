@@ -100,7 +100,11 @@
 1. **Optimisation pour réseaux mobiles 3G/4G instables** :
    - Le passage du premier chargement à **225 Ko** (60 Ko compressé) garantit un affichage en moins de 1,5 seconde sur un smartphone d'entrée de gamme connecté en Edge/3G à Abidjan ou à l'intérieur du pays.
    - Poursuivre la compression systématique WebP/AVIF pour toutes les photos de maires et présidents de région téléversées.
-2. **Ergonomie du bouton CAIDP sur smartphone** :
-   - L'action « Partager sur WhatsApp » est le canal citoyen le plus naturel en Côte d'Ivoire. Le modèle de message pré-formaté avec le lien du chantier et les articles de loi 2013-867 est un atout majeur de viralité.
+2. **Traçabilité Juridique & Valeur Probante des Saisines CAIDP** :
+   - Conformément aux exigences probatoires de la Commission d'Accès à l'Information d'Intérêt Public (CAIDP), les demandes de documents doivent impérativement laisser une trace légale incontestable en cas de silence ou de refus de l'administration (délai légal de 30 jours pour saisir la CAIDP).
+   - L'application privilégie exclusivement deux canaux officiels juridiquement opposables :
+     * **Le courrier physique déchargé** (généré et imprimable en PDF conforme, prêt à recevoir le cachet dateur du bureau d'ordre de la mairie ou du ministère).
+     * **Le courriel officiel tracé** (adressé au Responsable de l'Information ou au secrétariat officiel).
+   - Les canaux informels (WhatsApp) sont délibérément écartés pour les démarches formelles afin d'empêcher l'administration de prétendre qu'elle n'a jamais été saisie.
 3. **Pérennité des données Supabase** :
    - Le script `supabase_schema.sql` étant désormais sécurisé par Row Level Security (RLS) et complété par le déclencheur d'utilisateurs automatiques, vous pouvez l'exécuter dans le SQL Editor de Supabase en toute sérénité.

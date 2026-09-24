@@ -30,8 +30,7 @@ import {
   Filter,
   Layers,
   FileCheck,
-  Scale,
-  MessageCircle
+  Scale
 } from 'lucide-react';
 import { Institution, BudgetProject } from '../types';
 import { formatFCFA, formatDateFR } from '../utils/formatters';
@@ -352,35 +351,6 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
     navigator.clipboard.writeText(fullText);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 3000);
-  };
-
-  const handleShareWhatsApp = () => {
-    const selectedItems = availableDocs.filter(d => selectedDocIds.includes(d.id));
-    dataStore.logCaidpRequest({
-      action_type: 'COPIED',
-      entity_type: resolvedEntityType,
-      entity_name: targetEntityName,
-      has_ri: hasNominatedRi,
-      document_titles: selectedItems.map(d => d.title),
-      document_categories: Array.from(new Set(selectedItems.map(d => d.category))),
-      user_status: userStatus,
-      commune: caidpMatch?.commune || project?.commune_name || institution?.departement,
-    });
-
-    const docTitles = selectedItems.map(d => `• ${d.title}`).join('\n');
-    const projectUrl = typeof window !== 'undefined' ? window.location.href : 'https://suivibudget.vercel.app/';
-
-    const waText = 
-      `🏛️ *DEMANDE OFFICIELLE DE DOCUMENTS (Loi CAIDP n° 2013-867)*\n\n` +
-      `📍 *Organisme concerné :* ${targetEntityName}\n` +
-      (project ? `🏗️ *Projet :* ${project.title} (${project.commune_name || project.region_name || 'Côte d\'Ivoire'})\n` : '') +
-      `📋 *Documents sollicités :*\n${docTitles || '• ' + documentSubject}\n\n` +
-      `⚖️ *Cadre légal :* En vertu de la Loi ivoirienne n° 2013-867 relative à l'accès à l'information d'intérêt public, tout citoyen a le droit légal d'obtenir ces pièces administratives.\n\n` +
-      `🔗 *Consulter et suivre sur SuiviBudget CI :*\n${projectUrl}\n\n` +
-      `#TransparenceBudgetaire #CivicDataCI #CAIDP #CIV225`;
-
-    const encoded = encodeURIComponent(waText);
-    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
   };
 
   const handleSendEmail = () => {
@@ -1104,16 +1074,6 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
                 >
                   {isCopied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{isCopied ? 'Copié !' : 'Copier'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleShareWhatsApp}
-                  className="px-3.5 py-2.5 sm:py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-98 min-h-[40px]"
-                  title="Partager la demande officielle via WhatsApp"
-                >
-                  <MessageCircle className="w-3.5 h-3.5" />
-                  <span>WhatsApp</span>
                 </button>
 
                 <button
