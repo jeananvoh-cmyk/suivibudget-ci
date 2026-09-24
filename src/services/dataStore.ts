@@ -693,7 +693,7 @@ class DataStore {
       try {
         const { data: remoteInsts, error: instError } = await supabase
           .from('institutions')
-          .select('id, website, facebook_url, contact_email, contact_phone, leader_name');
+          .select('id, website, facebook_url, contact_email, contact_phone, leader_name, leader_photo_url, political_party');
         if (!instError && Array.isArray(remoteInsts) && remoteInsts.length > 0) {
           const remoteMap = new Map(remoteInsts.map((ri: any) => [ri.id, ri]));
           this.institutions = this.institutions.map(inst => {
@@ -705,6 +705,9 @@ class DataStore {
                 facebook_url: remote.facebook_url !== undefined && remote.facebook_url !== '' ? remote.facebook_url : inst.facebook_url,
                 contact_email: remote.contact_email !== undefined && remote.contact_email !== '' ? remote.contact_email : inst.contact_email,
                 contact_phone: remote.contact_phone !== undefined && remote.contact_phone !== '' ? remote.contact_phone : inst.contact_phone,
+                leader_name: remote.leader_name !== undefined && remote.leader_name !== '' ? remote.leader_name : inst.leader_name,
+                leader_photo_url: remote.leader_photo_url !== undefined && remote.leader_photo_url !== '' ? remote.leader_photo_url : inst.leader_photo_url,
+                political_party: remote.political_party !== undefined && remote.political_party !== '' ? remote.political_party : inst.political_party,
               };
             }
             return inst;
@@ -1155,11 +1158,14 @@ class DataStore {
           id: updatedInst.id,
           name: updatedInst.name,
           type: updatedInst.type,
+          region: updatedInst.region || 'National',
           website: updatedInst.website,
           facebook_url: updatedInst.facebook_url,
           contact_email: updatedInst.contact_email,
           contact_phone: updatedInst.contact_phone,
           leader_name: updatedInst.leader_name,
+          leader_photo_url: updatedInst.leader_photo_url,
+          political_party: updatedInst.political_party,
           updated_at: new Date().toISOString()
         }),
         'Sync updated institution to Supabase'

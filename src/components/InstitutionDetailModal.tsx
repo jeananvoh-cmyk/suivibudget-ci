@@ -141,15 +141,29 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   const [selectedProjectCategory, setSelectedProjectCategory] = useState('ALL');
   const [selectedTier, setSelectedTier] = useState<'ALL' | 'MUNICIPAL' | 'STATE' | 'REGIONAL'>('ALL');
 
-  // Dynamic async budget lines loader (Lazy bundle splitting to save 31MB initial download)
+  // Dynamic async budget lines loader (Lazy bundle splitting to save initial download)
   const [entityBudgetLines, setEntityBudgetLines] = useState<BudgetLineItem[]>([]);
   const [isLoadingLines, setIsLoadingLines] = useState(false);
+  const [loadedEntityId, setLoadedEntityId] = useState<string | null>(null);
 
+  // Reset lines when modal is closed or institution changes
   useEffect(() => {
     if (!isOpen || !institution) {
       setEntityBudgetLines([]);
+      setLoadedEntityId(null);
+    }
+  }, [isOpen, institution?.id]);
+
+  // Load budget lines strictly on-demand when FINANCES tab is active
+  useEffect(() => {
+    if (!isOpen || !institution || activeTab !== 'FINANCES') {
       return;
     }
+    // Avoid re-fetching if already loaded for this institution
+    if (loadedEntityId === institution.id) {
+      return;
+    }
+
     let isMounted = true;
     setIsLoadingLines(true);
     import('../data/budgetLinesData')
@@ -162,6 +176,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
             institution.id
           );
           setEntityBudgetLines(lines);
+          setLoadedEntityId(institution.id);
           setIsLoadingLines(false);
         }
       })
@@ -173,7 +188,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [isOpen, institution?.id, institution?.name, institution?.type, institution?.leader_title, institution?.leader_name]);
+  }, [isOpen, activeTab, institution?.id, institution?.name, institution?.type, institution?.leader_title, institution?.leader_name, loadedEntityId]);
 
   if (!isOpen || !institution) return null;
 

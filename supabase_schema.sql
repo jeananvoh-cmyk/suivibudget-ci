@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- CIVICDATA CI / SUIVIBUDGET CI - SCHEMA SUPABASE SQL COMPLET & IDEMPOTENT
 -- Standard de Securite : Row Level Security (RLS) active sur 100% des tables
--- Compatible avec les identifiants TEXT ('gov-001', 'nat-proj-...', 'proof-...')
+-- Compatible avec les identifiants TEXT ('gov-001', 'nat-proj-...', 'proof-...', etc.)
 -- ==============================================================================
 
 -- 1. EXTENSIONS & CONFIGURATION
@@ -24,7 +24,7 @@ DO $$ BEGIN
 END $$;
 
 -- ==============================================================================
--- 3. TABLES DU SYSTEME
+-- 3. TABLES DU SYSTEME & MIGRATIONS PROGRESSIVES
 -- ==============================================================================
 
 -- 3.1 TABLE DES PROFILS UTILISATEURS (Liee a auth.users de Supabase)
@@ -34,22 +34,53 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     full_name TEXT,
     role user_role DEFAULT 'CITIZEN',
     commune_interest TEXT,
+    is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 3.2 TABLE DES INSTITUTIONS PUBLIQUES (Identifiant TEXT supportant 'gov-001', 'commune-abobo', etc.)
+-- Trigger automatique pour creer le profil des nouvel utilisateur auth.users
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, full_name, role)
+  VALUES (
+    new.id, 
+    new.email, 
+    COALESCE(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
+    'CITIZEN'
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    updated_at = timezone('utc'::text, now());
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- 3.2 TABLE DES INSTITUTIONS PUBLIQUES
 CREATE TABLE IF NOT EXISTS public.institutions (
     id TEXT PRIMARY KEY DEFAULT ('inst-' || uuid_generate_v4()::text),
     name TEXT NOT NULL,
     type TEXT NOT NULL,
-    region TEXT NOT NULL,
+    region TEXT DEFAULT 'National',
     district TEXT,
     departement TEXT,
     address TEXT,
     contact_email TEXT,
     contact_phone TEXT,
     website TEXT,
+    facebook_url TEXT,
+    leader_name TEXT,
+    leader_title TEXT,
+    leader_photo_url TEXT,
+    political_party TEXT,
+    web_status TEXT DEFAULT 'FONCTIONNEL',
+    web_observations TEXT,
     -- Responsable de l'Information (RI) - Loi d'acces a l'information publique
     info_officer_name TEXT,
     info_officer_email TEXT,
@@ -64,7 +95,18 @@ CREATE TABLE IF NOT EXISTS public.institutions (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 3.3 TABLE DES PROJETS BUDGETAIRES (institution_id de type TEXT pour correspondre a institutions.id)
+-- Ajout idempotent de colonnes si la table existait deja
+ALTER TABLE public.institutions ADD COLUMN IF NOT EXISTS facebook_url TEXT;
+ALTER TABLE public.institutions ADD COLUMN IF NOT EXISTS leader_name TEXT;
+ALTER TABLE public.institutions ADD COLUMN IF NOT EXISTS leader_title TEXT;
+ALTER TABLE public.institutions ADD COLUMN IF NOT EXISTS leader_photo_url TEXT;
+ALTER TABLE public.institutions ADD COLUMN IF NOT EXISTS political_party TEXT;
+ALTER TABLE public.institutions ADD COLUMN IF NOT EXISTS web_status TEXT DEFAULT 'FONCTIONNEL';
+ALTER TABLE public.institutions ADD COLUMN IF NOT EXISTS web_observations TEXT;
+ALTER TABLE public.institutions ALTER COLUMN region SET DEFAULT 'National';
+ALTER TABLE public.institutions ALTER COLUMN region DROP NOT NULL;
+
+-- 3.3 TABLE DES PROJETS BUDGETAIRES
 CREATE TABLE IF NOT EXISTS public.budget_projects (
     id TEXT PRIMARY KEY DEFAULT ('proj-' || uuid_generate_v4()::text),
     institution_id TEXT REFERENCES public.institutions(id) ON DELETE SET NULL,
@@ -79,25 +121,49 @@ CREATE TABLE IF NOT EXISTS public.budget_projects (
     details TEXT,
     budget_amount_fcfa NUMERIC(15, 2) NOT NULL,
     fiscal_year INTEGER NOT NULL DEFAULT 2026,
+    fiscal_year_label TEXT,
     current_status TEXT DEFAULT 'IN_PROGRESS',
     progress_percentage INTEGER DEFAULT 0 CHECK (progress_percentage >= 0 AND progress_percentage <= 100),
     contractor_name TEXT,
     target_delivery_date DATE,
+    start_date DATE,
     locality_village_neighborhood TEXT,
+    source TEXT,
+    scope_level TEXT DEFAULT 'LOCAL',
+    ministry_name TEXT,
+    program_name TEXT,
+    service_name TEXT,
+    partner_or_donor TEXT,
+    master_builder TEXT,
+    project_tier TEXT DEFAULT 'MUNICIPAL',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 3.4 TABLE DES PREUVES & SIGNALEMENTS CITOYENS (Module 3 - Observatoire Terrain)
+ALTER TABLE public.budget_projects ADD COLUMN IF NOT EXISTS fiscal_year_label TEXT;
+ALTER TABLE public.budget_projects ADD COLUMN IF NOT EXISTS start_date DATE;
+ALTER TABLE public.budget_projects ADD COLUMN IF NOT EXISTS scope_level TEXT DEFAULT 'LOCAL';
+ALTER TABLE public.budget_projects ADD COLUMN IF NOT EXISTS ministry_name TEXT;
+ALTER TABLE public.budget_projects ADD COLUMN IF NOT EXISTS program_name TEXT;
+ALTER TABLE public.budget_projects ADD COLUMN IF NOT EXISTS service_name TEXT;
+ALTER TABLE public.budget_projects ADD COLUMN IF NOT EXISTS partner_or_donor TEXT;
+ALTER TABLE public.budget_projects ADD COLUMN IF NOT EXISTS master_builder TEXT;
+ALTER TABLE public.budget_projects ADD COLUMN IF NOT EXISTS project_tier TEXT DEFAULT 'MUNICIPAL';
+
+-- 3.4 TABLE DES PREUVES & SIGNALEMENTS CITOYENS (Module Observatoire Terrain)
 CREATE TABLE IF NOT EXISTS public.citizen_proofs (
     id TEXT PRIMARY KEY DEFAULT ('proof-' || uuid_generate_v4()::text),
     project_id TEXT NOT NULL,
     citizen_user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    tracking_code TEXT,
     project_title TEXT,
     commune_name TEXT,
     region_name TEXT,
     citizen_name TEXT DEFAULT 'Citoyen Observateur',
+    citizen_whatsapp TEXT,
+    signboard_status TEXT DEFAULT 'UNSPECIFIED',
     image_url TEXT NOT NULL,
+    secondary_image_url TEXT,
     video_url TEXT,
     media_type TEXT DEFAULT 'IMAGE',
     citizen_status_claim TEXT NOT NULL DEFAULT 'IN_PROGRESS',
@@ -109,10 +175,25 @@ CREATE TABLE IF NOT EXISTS public.citizen_proofs (
     moderator_notes TEXT,
     moderated_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     moderated_at TIMESTAMP WITH TIME ZONE,
-    confirmations_count INTEGER DEFAULT 0,
+    verified_at TIMESTAMP WITH TIME ZONE,
+    verified_by TEXT,
+    source_url TEXT,
+    source_credit TEXT,
+    additional_photos TEXT[] DEFAULT ARRAY[]::TEXT[],
+    confirmations_count INTEGER DEFAULT 1,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+ALTER TABLE public.citizen_proofs ADD COLUMN IF NOT EXISTS tracking_code TEXT;
+ALTER TABLE public.citizen_proofs ADD COLUMN IF NOT EXISTS citizen_whatsapp TEXT;
+ALTER TABLE public.citizen_proofs ADD COLUMN IF NOT EXISTS signboard_status TEXT DEFAULT 'UNSPECIFIED';
+ALTER TABLE public.citizen_proofs ADD COLUMN IF NOT EXISTS secondary_image_url TEXT;
+ALTER TABLE public.citizen_proofs ADD COLUMN IF NOT EXISTS verified_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE public.citizen_proofs ADD COLUMN IF NOT EXISTS verified_by TEXT;
+ALTER TABLE public.citizen_proofs ADD COLUMN IF NOT EXISTS source_url TEXT;
+ALTER TABLE public.citizen_proofs ADD COLUMN IF NOT EXISTS source_credit TEXT;
+ALTER TABLE public.citizen_proofs ADD COLUMN IF NOT EXISTS additional_photos TEXT[] DEFAULT ARRAY[]::TEXT[];
 
 -- 3.5 TABLE DES CONFIRMATIONS / UPVOTES CITOYENS
 CREATE TABLE IF NOT EXISTS public.proof_confirmations (
@@ -151,6 +232,20 @@ CREATE TABLE IF NOT EXISTS public.newsletter_subscribers (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 3.8 TABLE DES LOGS STATISTIQUES REQUETES CAIDP (Loi d'Acces a l'Information)
+CREATE TABLE IF NOT EXISTS public.caidp_document_requests_log (
+    id TEXT PRIMARY KEY DEFAULT ('caidp-req-' || uuid_generate_v4()::text),
+    action_type TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_name TEXT NOT NULL,
+    has_ri BOOLEAN DEFAULT false,
+    document_titles TEXT[] DEFAULT ARRAY[]::TEXT[],
+    document_categories TEXT[] DEFAULT ARRAY[]::TEXT[],
+    user_status TEXT,
+    commune TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- ==============================================================================
 -- 4. INDEX POUR PERFORMANCES OPTIMALES
 -- ==============================================================================
@@ -162,12 +257,13 @@ CREATE INDEX IF NOT EXISTS idx_citizen_proofs_project ON public.citizen_proofs(p
 CREATE INDEX IF NOT EXISTS idx_citizen_proofs_verification ON public.citizen_proofs(verification_status);
 CREATE INDEX IF NOT EXISTS idx_institutions_type ON public.institutions(type);
 CREATE INDEX IF NOT EXISTS idx_public_documents_category ON public.public_documents(category);
+CREATE INDEX IF NOT EXISTS idx_caidp_requests_entity ON public.caidp_document_requests_log(entity_name);
 
 -- ==============================================================================
 -- 5. ROW LEVEL SECURITY (RLS) POLICIES
 -- ==============================================================================
 
--- Activation du RLS sur toutes les tables
+-- Activation du RLS sur 100% des tables
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.institutions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.budget_projects ENABLE ROW LEVEL SECURITY;
@@ -175,6 +271,7 @@ ALTER TABLE public.citizen_proofs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.proof_confirmations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.public_documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.newsletter_subscribers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.caidp_document_requests_log ENABLE ROW LEVEL SECURITY;
 
 -- Helper function to check admin/moderator role
 CREATE OR REPLACE FUNCTION public.is_admin_or_moderator()
@@ -182,7 +279,7 @@ RETURNS BOOLEAN AS $$
 BEGIN
     RETURN EXISTS (
         SELECT 1 FROM public.profiles
-        WHERE id = auth.uid() AND role IN ('ADMIN', 'MODERATOR', 'DATA_MANAGER')
+        WHERE id = auth.uid() AND role IN ('ADMIN', 'MODERATOR', 'DATA_MANAGER') AND is_active = true
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -198,7 +295,7 @@ CREATE POLICY "Users can insert their own profile."
 
 DROP POLICY IF EXISTS "Users can update own profile." ON public.profiles;
 CREATE POLICY "Users can update own profile."
-    ON public.profiles FOR UPDATE USING (auth.uid() = id);
+    ON public.profiles FOR UPDATE USING (auth.uid() = id OR is_admin_or_moderator());
 
 -- 5.2 POLICIES POUR INSTITUTIONS
 DROP POLICY IF EXISTS "Institutions are viewable by everyone." ON public.institutions;
@@ -284,9 +381,21 @@ CREATE POLICY "Only admins can view subscribers"
     ON public.newsletter_subscribers FOR SELECT
     USING (is_admin_or_moderator());
 
+-- 5.8 POLICIES POUR CAIDP_DOCUMENT_REQUESTS_LOG
+DROP POLICY IF EXISTS "Anyone can log a caidp request event." ON public.caidp_document_requests_log;
+CREATE POLICY "Anyone can log a caidp request event."
+    ON public.caidp_document_requests_log FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Admins and Data Managers can view caidp request events." ON public.caidp_document_requests_log;
+CREATE POLICY "Admins and Data Managers can view caidp request events."
+    ON public.caidp_document_requests_log FOR SELECT
+    USING (is_admin_or_moderator());
+
 -- ==============================================================================
--- 6. STORAGE BUCKET CONFIGURATION (Photos & Videos Citoyennes)
+-- 6. STORAGE BUCKETS CONFIGURATION (Photos & Documents)
 -- ==============================================================================
+
+-- 6.1 Bucket photos & videos citoyennes
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types) 
 VALUES (
     'citizen_photos', 
@@ -296,6 +405,7 @@ VALUES (
     ARRAY['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime']
 )
 ON CONFLICT (id) DO UPDATE SET
+    public = true,
     file_size_limit = 26214400,
     allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime'];
 
@@ -316,11 +426,38 @@ CREATE POLICY "Strict citizen media upload only"
         AND ((metadata->>'size')::bigint <= 26214400)
     );
 
--- Seuls les administrateurs et moderateurs peuvent supprimer des medias citoyens
+-- Suppression securisee : administrateurs et moderateurs uniquement
 DROP POLICY IF EXISTS "Admins and Moderators can delete citizen media" ON storage.objects;
 CREATE POLICY "Admins and Moderators can delete citizen media"
     ON storage.objects FOR DELETE
     USING (
         bucket_id = 'citizen_photos' 
+        AND is_admin_or_moderator()
+    );
+
+-- 6.2 Bucket documents publics & rapports officiels
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'public_documents',
+    'public_documents',
+    true,
+    52428800,
+    ARRAY['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv']
+)
+ON CONFLICT (id) DO UPDATE SET
+    public = true,
+    file_size_limit = 52428800,
+    allowed_mime_types = ARRAY['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'];
+
+DROP POLICY IF EXISTS "Public documents are publicly accessible" ON storage.objects;
+CREATE POLICY "Public documents are publicly accessible"
+    ON storage.objects FOR SELECT
+    USING (bucket_id = 'public_documents');
+
+DROP POLICY IF EXISTS "Admins can upload public documents" ON storage.objects;
+CREATE POLICY "Admins can upload public documents"
+    ON storage.objects FOR INSERT
+    WITH CHECK (
+        bucket_id = 'public_documents'
         AND is_admin_or_moderator()
     );
