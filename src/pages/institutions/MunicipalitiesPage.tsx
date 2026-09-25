@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Search, Building2, ChevronDown, ArrowRight, FileText, ArrowRightLeft, Globe, ExternalLink, Info, Eye, EyeOff } from 'lucide-react';
 import { Institution, BudgetProject } from '../../types';
 import { formatFCFA, formatAmountInWords, getInstitutionLeaderGender } from '../../utils/formatters';
+import { getProjectsForInstitution } from '../../utils/institutionProjects';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
 import { CommuneComparatorModal } from '../../components/CommuneComparatorModal';
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
@@ -415,13 +416,7 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
             : 0;
           const investmentPct = inst.total_budget_fcfa > 0 ? (100 - functioningPct) : 0;
           const cleanName = getCleanCommuneName(inst.name);
-          const relatedProjects = allProjects.filter(p => {
-            const normPCommune = normalizeSearchText(p.commune_name);
-            const normCName = normalizeSearchText(cleanName);
-            return normPCommune === normCName || 
-                   normPCommune.split(' ').includes(normCName) || 
-                   normCName.split(' ').includes(normPCommune);
-          });
+          const relatedProjects = getProjectsForInstitution(inst, allProjects);
           const relatedProjectsCount = relatedProjects.length;
 
           return (

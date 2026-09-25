@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Search, MapPin, ChevronDown, ArrowRight, FileText, Globe, ExternalLink, Info, Eye, EyeOff } from 'lucide-react';
 import { Institution, BudgetProject } from '../../types';
 import { formatFCFA, formatAmountInWords, getInstitutionLeaderGender } from '../../utils/formatters';
+import { getProjectsForInstitution } from '../../utils/institutionProjects';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
 import { LeaderPortrait } from '../../components/LeaderPortrait';
@@ -216,9 +217,8 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
             ? Math.round((inst.budget_functioning_fcfa / inst.total_budget_fcfa) * 100) 
             : 0;
           const investmentPct = inst.total_budget_fcfa > 0 ? (100 - functioningPct) : 0;
-          const relatedProjectsCount = allProjects.filter(p => 
-            p.region_name.toLowerCase() === inst.region.toLowerCase()
-          ).length;
+          const relatedProjects = getProjectsForInstitution(inst, allProjects);
+          const relatedProjectsCount = relatedProjects.length;
 
           return (
             <div key={inst.id} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-brand-blue/50 transition-all flex flex-col justify-between group">

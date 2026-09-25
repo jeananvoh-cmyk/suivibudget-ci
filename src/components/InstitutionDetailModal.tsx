@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Institution, BudgetProject, BudgetLineItem } from '../types';
 import { formatFCFA, formatAmountInWords, getProjectTier, getProjectTierBadge, ProjectTier } from '../utils/formatters';
+import { getProjectsForInstitution } from '../utils/institutionProjects';
 import { 
   X, 
   Globe, 
@@ -263,83 +264,8 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
     .replace(/^Ministère Délégué chargé du\s+/i, '')
     .trim();
 
-  // Smart matching for ministries and local authorities
-  const relatedProjects = allProjects.filter(p => {
-    if (institution.type === 'MAIRIE') {
-      return p.commune_name.toLowerCase().includes(cleanName.toLowerCase()) ||
-             p.title.toLowerCase().includes(cleanName.toLowerCase());
-    }
-    if (institution.type === 'REGION' || institution.type === 'DISTRICT') {
-      return p.region_name.toLowerCase().includes(institution.region.toLowerCase()) ||
-             (institution.district && p.district_name && p.district_name.toLowerCase().includes(institution.district.toLowerCase())) ||
-             p.title.toLowerCase().includes(cleanName.toLowerCase());
-    }
-
-    const instName = institution.name.toLowerCase();
-    const instTitle = (institution.leader_title || '').toLowerCase();
-    const pMin = (p.ministry_name || '').toLowerCase();
-    const pServ = (p.service_name || '').toLowerCase();
-    const pInst = (p.institution_name || '').toLowerCase();
-    const pTitle = p.title.toLowerCase();
-
-    if (pMin && (pMin.includes(cleanName.toLowerCase()) || instName.includes(pMin))) return true;
-    if (pServ && (pServ.includes(cleanName.toLowerCase()) || instName.includes(pServ))) return true;
-    if (pInst && (pInst.includes(cleanName.toLowerCase()) || instName.includes(pInst))) return true;
-
-    if (instName.includes('santé') || instTitle.includes('santé')) {
-      return p.category === 'SANTE' || pTitle.includes('santé') || pTitle.includes('chu') || pTitle.includes('chr') || pTitle.includes('hôpital') || pTitle.includes('dispensaire') || pTitle.includes('médic') || pTitle.includes('cmu');
-    }
-    if (instName.includes('éducation') || instName.includes('enseignement') || instTitle.includes('éducation')) {
-      return p.category === 'EDUCATION' || pTitle.includes('école') || pTitle.includes('collège') || pTitle.includes('lycée') || pTitle.includes('classe') || pTitle.includes('formation professionnelle');
-    }
-    if (instName.includes('hydraulique') || instName.includes('assainissement') || instName.includes('salubrité')) {
-      return p.category === 'EAU' || p.category === 'ASSAINISSEMENT' || pTitle.includes('eau') || pTitle.includes('forage') || pTitle.includes('château') || pTitle.includes('adduction') || pTitle.includes('drainage') || pTitle.includes('canivaux');
-    }
-    if (instName.includes('infrastructure') || instName.includes('équipement') || instName.includes('routier')) {
-      return p.category === 'INFRASTRUCTURE' || p.category === 'TRANSPORT' || pTitle.includes('route') || pTitle.includes('pont') || pTitle.includes('bitumage') || pTitle.includes('voirie') || pTitle.includes('échangeur') || pTitle.includes('autoroute');
-    }
-    if (instName.includes('transport') || instTitle.includes('transport')) {
-      return p.category === 'TRANSPORT' || pTitle.includes('sotra') || pTitle.includes('gare') || pTitle.includes('port') || pTitle.includes('aéroport') || pTitle.includes('métro') || pTitle.includes('brt');
-    }
-    if (instName.includes('énergie') || instName.includes('mines') || instName.includes('pétrole')) {
-      return p.category === 'ENERGIE' || pTitle.includes('électrif') || pTitle.includes('solaire') || pTitle.includes('centrale') || pTitle.includes('lumière') || pTitle.includes('baleine');
-    }
-    if (instName.includes('agriculture') || instName.includes('vivrier') || instName.includes('rural')) {
-      return p.category === 'AGRICULTURE' || pTitle.includes('agricol') || pTitle.includes('riz') || pTitle.includes('vivrier') || pTitle.includes('plantation') || pTitle.includes('barrage hydro');
-    }
-    if (instName.includes('urbanisme') || instName.includes('logement') || instName.includes('cadre de vie') || instName.includes('construction')) {
-      return pTitle.includes('logement') || pTitle.includes('habitat') || pTitle.includes('urbanisme') || pTitle.includes('cité') || pTitle.includes('foncier');
-    }
-    if (instName.includes('jeunesse') || instName.includes('insertion') || instName.includes('service civique')) {
-      return pTitle.includes('jeun') || pTitle.includes('emploi') || pTitle.includes('insertion') || pTitle.includes('service civique') || pTitle.includes('apprentissage');
-    }
-    if (instName.includes('sécurité') || instName.includes('intérieur')) {
-      return p.category === 'SECURITE' || pTitle.includes('police') || pTitle.includes('commissariat') || pTitle.includes('gendarmerie') || pTitle.includes('pompier') || pTitle.includes('sécurité');
-    }
-    if (instName.includes('défense')) {
-      return p.category === 'SECURITE' || pTitle.includes('militaire') || pTitle.includes('caserne') || pTitle.includes('armé') || pTitle.includes('défense');
-    }
-    if (instName.includes('justice')) {
-      return pTitle.includes('justice') || pTitle.includes('tribunal') || pTitle.includes('prison') || pTitle.includes('pénitentiaire') || pTitle.includes('palais de justice');
-    }
-    if (instName.includes('sport')) {
-      return p.category === 'SPORT' || pTitle.includes('stade') || pTitle.includes('agora') || pTitle.includes('sport') || pTitle.includes('olympique');
-    }
-    if (instName.includes('culture') || instName.includes('tourisme')) {
-      return p.category === 'CULTURE' || pTitle.includes('culture') || pTitle.includes('musée') || pTitle.includes('touris') || pTitle.includes('patrimoine') || pTitle.includes('hôtel');
-    }
-    if (instName.includes('environnement') || instName.includes('transition écologique') || instName.includes('eaux et forêts')) {
-      return p.category === 'ENVIRONNEMENT' || pTitle.includes('forêt') || pTitle.includes('climat') || pTitle.includes('côtière') || pTitle.includes('parc') || pTitle.includes('reboisement');
-    }
-    if (instName.includes('numérique') || instName.includes('digitalisation')) {
-      return pTitle.includes('numérique') || pTitle.includes('fibre') || pTitle.includes('data center') || pTitle.includes('digital') || pTitle.includes('informatique');
-    }
-    if (instName.includes('solidarité') || instName.includes('pauvreté') || instName.includes('cohésion')) {
-      return p.category === 'SOCIAL' || pTitle.includes('filets sociaux') || pTitle.includes('vulnérable') || pTitle.includes('solidarité') || pTitle.includes('pauvreté');
-    }
-
-    return pTitle.includes(cleanName.toLowerCase());
-  });
+  // Strict, canonical anti-contamination matching for all institutions (Mairies, Conseils Régionaux, Ministères)
+  const relatedProjects = getProjectsForInstitution(institution, allProjects);
 
   // Project tier counters for contextual local segmentation
   const municipalProjectsCount = relatedProjects.filter(p => getProjectTier(p) === 'MUNICIPAL').length;
@@ -860,6 +786,26 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     );
                   })}
                 </div>
+              ) : relatedProjects.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-2xl border border-slate-200 p-6 space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+                    <FolderOpen className="w-6 h-6" />
+                  </div>
+                  <h5 className="text-base font-black text-slate-800">
+                    {institution.type === 'MAIRIE'
+                      ? "Aucun chantier d'investissement direct de l'État recensé"
+                      : institution.type === 'REGION'
+                      ? "Aucun projet d'investissement régional recensé"
+                      : "Aucun projet d'investissement direct recensé"}
+                  </h5>
+                  <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
+                    {institution.type === 'MAIRIE' && institution.is_tax_quota_commune
+                      ? "Cette collectivité municipale fonctionne sous le régime fiscal autonome. Ses investissements de proximité sont financés directement par son Budget Primitif Communal autonome (recettes fiscales locales) et ne font pas l'objet de dotations d'investissements directs dans le tableau central de l'État."
+                      : institution.type === 'MAIRIE'
+                      ? "Les investissements de cette commune sont gérés dans le cadre de son budget municipal décentralisé ou via les programmes sectoriels des ministères."
+                      : "Aucun projet d'investissement public spécifique n'est individualisé pour cette entité dans la Loi de Finances 2026."}
+                  </p>
+                </div>
               ) : (
                 <div className="text-center py-10 bg-white rounded-2xl border border-slate-200 p-6 space-y-2">
                   <div className="flex justify-center"><Search className="w-7 h-7 text-slate-300" /></div>
@@ -871,6 +817,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     onClick={() => {
                       setProjectSearch('');
                       setSelectedProjectCategory('ALL');
+                      setSelectedTier('ALL');
                     }}
                     className="px-3.5 py-1.5 bg-brand-blue text-white rounded-xl text-xs font-bold hover:bg-sky-700 transition-colors"
                   >
