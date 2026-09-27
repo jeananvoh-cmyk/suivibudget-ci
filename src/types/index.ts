@@ -27,13 +27,15 @@ export interface Institution {
   info_officer_phone?: string;
   info_officer_title?: string;
   green_line_number?: string;
-  // Budget annuel
+  // Budget annuel (Dotation État / Loi de Finances)
   budget_functioning_fcfa: number;
   budget_investment_fcfa: number;
   total_budget_fcfa: number;
   budget_not_published?: boolean;
   is_tax_quota_commune?: boolean;
   tax_quota_note?: string;
+  // Budget Primitif Municipal Voté (Délibération Conseil Municipal / Source Officielle)
+  primitive_budget?: PrimitiveBudgetInfo;
   // Premier Responsable & Présence Numérique
   leader_name?: string;
   leader_gender?: 'M' | 'F';
@@ -50,6 +52,17 @@ export interface Institution {
   leader_education?: string[];
   official_programs?: string[];
   budget_lines?: BudgetLineItem[];
+}
+
+export interface PrimitiveBudgetInfo {
+  total_voted_fcfa: number;
+  investment_voted_fcfa: number;
+  functioning_voted_fcfa: number;
+  voted_date: string;
+  source: string;
+  source_url?: string;
+  projects_count?: number;
+  session_notes?: string;
 }
 
 export interface BudgetLineItem {

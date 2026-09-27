@@ -474,7 +474,45 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                   </div>
                 </div>
 
-                {inst.is_tax_quota_commune ? (
+                {inst.primitive_budget ? (
+                  (() => {
+                    const prim = inst.primitive_budget;
+                    const primTotal = prim.total_voted_fcfa;
+                    const stateTotal = inst.total_budget_fcfa;
+                    const localRev = Math.max(0, primTotal - stateTotal);
+                    const statePct = primTotal > 0 ? Math.round((stateTotal / primTotal) * 100) : 0;
+                    const localPct = 100 - statePct;
+
+                    return (
+                      <div className="space-y-2 pt-2 mt-2">
+                        <div className="flex justify-between items-center text-xs">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-slate-800 font-black uppercase text-[10px] tracking-wider">Budget Primitif Voté</span>
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              Conseil Municipal (AIP)
+                            </span>
+                          </div>
+                          <span className="font-black text-slate-900 text-sm">
+                            {formatFCFA(primTotal)}
+                          </span>
+                        </div>
+                        {/* Jauge Bicolore État vs Effort Local */}
+                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden flex">
+                          <div className="bg-sky-500 h-full" style={{ width: `${statePct}%` }} title={`Dotation État: ${statePct}%`}></div>
+                          <div className="bg-emerald-500 h-full" style={{ width: `${localPct}%` }} title={`Effort Propre & Fiscalité: ${localPct}%`}></div>
+                        </div>
+                        <div className="flex justify-between text-[10px] font-semibold text-slate-600 gap-1 pt-0.5">
+                          <span className="text-sky-700">
+                            État (LFI) : <strong>{statePct}%</strong> ({formatAmountInWords(stateTotal)})
+                          </span>
+                          <span className="text-emerald-700">
+                            Régie & DGI : <strong>{localPct}%</strong> ({formatAmountInWords(localRev)})
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })()
+                ) : inst.is_tax_quota_commune ? (
                   <div className="p-3.5 bg-amber-50/90 border border-amber-200/80 rounded-2xl space-y-1.5 mt-3">
                     <div className="flex items-center gap-1.5 text-xs font-black text-amber-900">
                       <span> Autonomie Fiscale (Quote-part d'impôts)</span>
@@ -486,7 +524,7 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                 ) : (
                   <div className="space-y-2 pt-2 mt-2">
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-500 font-bold uppercase">Dotation Budgétaire de l'État</span>
+                      <span className="text-slate-500 font-bold uppercase">Dotation de l'État (LFI 2026)</span>
                       <span className="font-black text-slate-900">
                         {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold">({formatAmountInWords(inst.total_budget_fcfa)})</span>
                       </span>

@@ -18,10 +18,11 @@ import { CAIDP_MASTER_DIRECTORY, CaidpEntity } from '../data/caidpRiData';
 import { AuthSecurityService } from './authSecurity';
 import { sanitizeCsvCell } from '../utils/security';
 import { supabase, isSupabaseConfigured } from './supabase';
+import { enrichWithPrimitiveBudgets } from '../data/officialPrimitiveBudgets';
 
 const STORAGE_KEYS = {
   PROJECTS: 'civicdata_projects_v2026_clean_v4',
-  INSTITUTIONS: 'civicdata_institutions_v14',
+  INSTITUTIONS: 'civicdata_institutions_v15',
   INSTITUTION_OVERRIDES: 'civicdata_institutions_overrides_v1',
   PROOFS: 'civicdata_proofs_v12',
   ARTICLES: 'civicdata_articles_v10',
@@ -528,6 +529,9 @@ class DataStore {
           });
         }
       }
+
+      // Always re-apply official primitive budgets so they are never lost even with cached data
+      this.institutions = enrichWithPrimitiveBudgets(this.institutions);
     } catch (e) {
       console.warn("Could not read institutions from localStorage", e);
     }

@@ -897,11 +897,219 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     </button>
                   </div>
                 </div>
+              ) : institution.primitive_budget ? (
+                (() => {
+                  const prim = institution.primitive_budget;
+                  const primTotal = prim.total_voted_fcfa;
+                  const stateTotal = institution.total_budget_fcfa;
+                  const localRev = Math.max(0, primTotal - stateTotal);
+                  const statePct = primTotal > 0 ? Math.round((stateTotal / primTotal) * 100) : 0;
+                  const localPct = 100 - statePct;
+                  const primInvPct = primTotal > 0 ? Math.round((prim.investment_voted_fcfa / primTotal) * 100) : 0;
+                  const primFonctPct = 100 - primInvPct;
+
+                  return (
+                    <div className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-emerald-300 shadow-sm space-y-5">
+                      {/* En-tête officiel du vote */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1.5 shadow-2xs">
+                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                              Budget Primitif Officiel Voté en Conseil Municipal
+                            </span>
+                            <span className="text-[11px] font-bold text-slate-500">
+                              Exercice 2026
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                              Montant Total Équilibré Voté
+                            </span>
+                            <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                              {formatFCFA(primTotal)}
+                            </h3>
+                            <p className="text-xs text-brand-blue font-bold">
+                              {formatAmountInWords(primTotal)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="sm:text-right bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-xl sm:rounded-none border sm:border-0 border-slate-200 text-xs text-slate-600 space-y-1">
+                          <div>
+                            <span className="text-slate-400 font-medium">Session de vote : </span>
+                            <strong className="text-slate-800">{prim.voted_date}</strong>
+                          </div>
+                          <div className="flex sm:justify-end items-center gap-1 text-[11px] text-slate-500">
+                            <span>Source : {prim.source}</span>
+                            {prim.source_url && (
+                              <a
+                                href={prim.source_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-brand-blue hover:underline inline-flex items-center gap-0.5 ml-1 font-bold"
+                                title="Consulter la dépêche officielle AIP"
+                              >
+                                AIP <ExternalLink className="w-3 h-3 inline" />
+                              </a>
+                            )}
+                          </div>
+                          {prim.session_notes && (
+                            <p className="text-[11px] text-slate-500 italic max-w-xs sm:ml-auto">
+                              « {prim.session_notes} »
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* DOUBLE LECTURE : STRUCTURE & ORIGINE DES RECETTES */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                            <Layers className="w-4 h-4 text-brand-blue" />
+                            Origine des Ressources Budgétaires (D'où vient l'argent ?)
+                          </span>
+                          <span className="text-[11px] font-bold text-slate-500">
+                            Solidarité Nationale vs Économie Municipale
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* Volet 1 : Subventions de l'État (LFI 2026 - DGBF) */}
+                          <div className="p-4 bg-sky-50/90 rounded-2xl border border-sky-200 space-y-2.5">
+                            <div className="flex items-center justify-between">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-sky-200 text-sky-900 border border-sky-300">
+                                1. Concours & Subventions de l'État
+                              </span>
+                              <span className="text-xs font-black text-sky-950 bg-white px-2.5 py-0.5 rounded-full border border-sky-200 shadow-2xs">
+                                {statePct}% du total
+                              </span>
+                            </div>
+
+                            <div>
+                              <span className="text-xl sm:text-2xl font-black text-slate-900 block">
+                                {formatFCFA(stateTotal)}
+                              </span>
+                              <span className="text-[11px] font-bold text-sky-900 block">
+                                ({formatAmountInWords(stateTotal)})
+                              </span>
+                            </div>
+
+                            <div className="p-2.5 bg-white/90 rounded-xl border border-sky-200/80 text-xs space-y-1">
+                              <div className="flex justify-between text-[11px]">
+                                <span className="text-slate-600">• Dotation Fonctionnement (DGF) :</span>
+                                <strong className="text-slate-900">{formatFCFA(institution.budget_functioning_fcfa)}</strong>
+                              </div>
+                              <div className="flex justify-between text-[11px]">
+                                <span className="text-slate-600">• Dotation Équipement (DGE) :</span>
+                                <strong className="text-slate-900">{formatFCFA(institution.budget_investment_fcfa)}</strong>
+                              </div>
+                            </div>
+
+                            <p className="text-[11px] text-sky-900 font-semibold flex items-center gap-1.5 pt-0.5">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-sky-600 flex-shrink-0" />
+                              <span>{relatedProjects.length} projets d'investissements publics inscrits au Budget National (listés ci-dessous)</span>
+                            </p>
+                          </div>
+
+                          {/* Volet 2 : Ressources Propres & Fiscalité Partagée */}
+                          <div className="p-4 bg-emerald-50/90 rounded-2xl border border-emerald-200 space-y-2.5">
+                            <div className="flex items-center justify-between">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-emerald-200 text-emerald-900 border border-emerald-300">
+                                2. Fiscalité Locale & Ressources Propres
+                              </span>
+                              <span className="text-xs font-black text-emerald-950 bg-white px-2.5 py-0.5 rounded-full border border-emerald-200 shadow-2xs">
+                                {localPct}% du total
+                              </span>
+                            </div>
+
+                            <div>
+                              <span className="text-xl sm:text-2xl font-black text-slate-900 block">
+                                {formatFCFA(localRev)}
+                              </span>
+                              <span className="text-[11px] font-bold text-emerald-900 block">
+                                ({formatAmountInWords(localRev)})
+                              </span>
+                            </div>
+
+                            <div className="p-2.5 bg-white/90 rounded-xl border border-emerald-200/80 text-[11px] text-slate-700 space-y-1">
+                              <p className="leading-snug">
+                                • <strong>Fiscalité partagée DGI</strong> : Patentes des commerces & usines, impôt foncier bâti, impôt synthétique.
+                              </p>
+                              <p className="leading-snug">
+                                • <strong>Recettes de régie</strong> : Taxes de marché, gares routières, état civil, redevances d'occupation du domaine public.
+                              </p>
+                            </div>
+
+                            <div className="p-2 bg-amber-50 rounded-xl border border-amber-200/80 text-[11px] text-amber-900 flex items-start gap-1.5">
+                              <Info className="w-3.5 h-3.5 text-amber-600 flex-shrink-0 mt-0.5" />
+                              <span className="leading-snug">
+                                Le grand livre comptable détaillé poste par poste des recettes propres est en cours de transmission officielle via notre demande CAIDP.
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Jauge Bicolore Origine des Fonds */}
+                        <div className="space-y-1 pt-1">
+                          <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden flex shadow-inner">
+                            <div className="bg-sky-600 h-full transition-all" style={{ width: `${statePct}%` }} title={`Part État: ${statePct}%`}></div>
+                            <div className="bg-emerald-600 h-full transition-all" style={{ width: `${localPct}%` }} title={`Effort Propre: ${localPct}%`}></div>
+                          </div>
+                          <div className="flex justify-between text-[11px] font-bold">
+                            <span className="text-sky-700">■ Part État : {statePct}% ({formatFCFA(stateTotal)})</span>
+                            <span className="text-emerald-700">■ Part Locale : {localPct}% ({formatFCFA(localRev)})</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ORIENTATION DES DÉPENSES DU CONSEIL MUNICIPAL */}
+                      <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                            <TrendingUp className="w-4 h-4 text-emerald-600" />
+                            Répartition des Dépenses Votées par la Commune
+                          </span>
+                          {prim.projects_count && (
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              {prim.projects_count} opérations programmées
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="p-3.5 bg-white rounded-xl border border-slate-200 space-y-1">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 block">Dépenses d'Investissement Votées</span>
+                            <span className="text-lg font-black text-slate-900 block">{formatFCFA(prim.investment_voted_fcfa)}</span>
+                            <span className="text-xs font-bold text-emerald-800 block">({primInvPct}% du budget total)</span>
+                            <span className="text-[10px] font-medium text-slate-500 block">
+                              Infrastructures socio-économiques, écoles, santé, voirie, éclairage
+                            </span>
+                          </div>
+
+                          <div className="p-3.5 bg-white rounded-xl border border-slate-200 space-y-1">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-sky-700 block">Dépenses de Fonctionnement Votées</span>
+                            <span className="text-lg font-black text-slate-900 block">{formatFCFA(prim.functioning_voted_fcfa)}</span>
+                            <span className="text-xs font-bold text-sky-800 block">({primFonctPct}% du budget total)</span>
+                            <span className="text-[10px] font-medium text-slate-500 block">
+                              Salaires des agents municipaux, carburant, charges administratives
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden flex">
+                          <div className="bg-emerald-600 h-full" style={{ width: `${primInvPct}%` }} title={`Investissement: ${primInvPct}%`}></div>
+                          <div className="bg-sky-600 h-full" style={{ width: `${primFonctPct}%` }} title={`Fonctionnement: ${primFonctPct}%`}></div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()
               ) : (
                 <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                     <div>
-                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Dotation Globale (Loi de Finances 2026)</span>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Dotation Globale Allouée par l'État (Loi de Finances 2026)</span>
                       <h3 className="text-xl sm:text-2xl font-black text-slate-900">
                         {formatFCFA(institution.total_budget_fcfa)}
                       </h3>
@@ -918,16 +1126,16 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   {/* Blocs Fonctionnement vs Investissement */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="p-3.5 bg-sky-50 rounded-xl border border-sky-200 space-y-1">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-sky-700 block">Dépenses de Fonctionnement</span>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-sky-700 block">Dépenses de Fonctionnement (DGF)</span>
                       <span className="text-lg font-black text-slate-900 block">{formatFCFA(institution.budget_functioning_fcfa)}</span>
-                      <span className="text-xs font-bold text-sky-800 block">({functioningPct}% du budget total)</span>
+                      <span className="text-xs font-bold text-sky-800 block">({functioningPct}% de la dotation)</span>
                       <span className="text-[10px] font-semibold text-sky-900 block">({formatAmountInWords(institution.budget_functioning_fcfa)})</span>
                     </div>
 
                     <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 space-y-1">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 block">Dépenses d'Investissement Public</span>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 block">Dépenses d'Investissement Public (DGE)</span>
                       <span className="text-lg font-black text-slate-900 block">{formatFCFA(institution.budget_investment_fcfa)}</span>
-                      <span className="text-xs font-bold text-emerald-800 block">({investmentPct}% du budget total)</span>
+                      <span className="text-xs font-bold text-emerald-800 block">({investmentPct}% de la dotation)</span>
                       <span className="text-[10px] font-semibold text-emerald-900 block">({formatAmountInWords(institution.budget_investment_fcfa)})</span>
                       {investmentBudget === 0 && (
                         <span className="text-[10px] text-slate-500 block pt-0.5 italic">
@@ -946,6 +1154,19 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                       <div className="bg-emerald-500 h-full transition-all duration-500" style={{ width: `${investmentPct}%` }} title={`Investissement: ${investmentPct}%`}></div>
                     )}
                   </div>
+
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <Info className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                      <span>Ce montant correspond aux concours directs de l'État (DGF + DGE). Le budget primitif consolidé intégrant les impôts locaux propres est en cours de centralisation.</span>
+                    </div>
+                    <button
+                      onClick={() => setDocModalOpen(true)}
+                      className="text-brand-blue font-bold hover:underline whitespace-nowrap text-left sm:text-right"
+                    >
+                      Demande CAIDP →
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -963,7 +1184,15 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                         </h4>
                       </div>
                       <p className="text-xs text-emerald-800 font-medium">
-                        Projets et opérations d'équipements votés à la Loi de Finances 2026 pour <strong>{institution.name}</strong>.
+                        {institution.primitive_budget ? (
+                          <>
+                            Tranche financée par la <strong>Dotation Globale d'Équipement (DGE) de l'État</strong> ({formatFCFA(institution.budget_investment_fcfa)}). Les opérations complémentaires votées par le Conseil Municipal sont financées sur fonds propres communaux.
+                          </>
+                        ) : (
+                          <>
+                            Projets et opérations d'équipements votés à la Loi de Finances 2026 pour <strong>{institution.name}</strong>.
+                          </>
+                        )}
                       </p>
                     </div>
 

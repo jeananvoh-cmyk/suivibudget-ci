@@ -4,8 +4,9 @@ import { ALL_COMMUNES_DATA as RAW_COMMUNES_DATA, ALL_REGIONS_DATA as RAW_REGIONS
 import { GOVERNMENT_OFFICIALS } from './governmentData';
 import { REGULATORY_AUTHORITIES_DATA } from './regulatoryAuthoritiesData';
 import { enrichWithOfficialWebDirectory } from './officialWebDirectory';
+import { enrichWithPrimitiveBudgets } from './officialPrimitiveBudgets';
 
-export const ALL_COMMUNES_DATA: Institution[] = enrichWithOfficialWebDirectory(RAW_COMMUNES_DATA);
+export const ALL_COMMUNES_DATA: Institution[] = enrichWithPrimitiveBudgets(enrichWithOfficialWebDirectory(RAW_COMMUNES_DATA));
 export const ALL_REGIONS_DATA: Institution[] = enrichWithOfficialWebDirectory(RAW_REGIONS_DATA);
 
 export const ALL_MINISTRIES_DATA: Institution[] = GOVERNMENT_OFFICIALS.map(official => ({
