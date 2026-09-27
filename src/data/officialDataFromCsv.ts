@@ -23,7 +23,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, assainissement, voirie, éducation de proximité et développement urbain de la Commune d'Abobo (Budget municipal autonome financé sur ressources propres et taxes locales).",
-    "website": "https://mairieabobo.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme KAMISSOKO KANDIA (professeur de lycee), élu(e) à la tête de la Mairie de Abobo pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -86,7 +86,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Gestion du pôle commercial et des marchés d'Adjamé, régulation du transport urbain, voirie et services aux administrés (Régime fiscal communal propre).",
-    "website": "http://mairieadjame.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. SOUMAHORO FARIKOU, élu à la tête de la Mairie d'Adjamé pour la mandature 2023-2028 sous la bannière RHDP et Député à l'Assemblée Nationale, préside également la Fédération Nationale des Acteurs du Commerce de Côte d'Ivoire (FENACCI). Il conduit la régulation du pôle commercial stratégique d'Adjamé, la réhabilitation des marchés et l'amélioration du cadre de vie communal.",
     "leader_education": [
@@ -146,7 +146,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Aménagement des berges lagunaires, préservation environnementale, cohésion sociale et infrastructures de proximité à Attécoubé.",
-    "website": "https://mairieattecoube.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme DANHO PAULIN CLAUDE (ingenieur electronicien), élu(e) à la tête de la Mairie d'Attécoubé pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -206,7 +206,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "PDCI-RDA",
     "mandature": "2023-2028",
     "mission_summary": "Cadre de vie, modernisation des services municipaux, digitalisation de l'état civil, espaces verts et voirie résidentielle de Cocody.",
-    "website": "https://mairiecocody.com",
+    "website": "https://mairiecocody.com/",
     "facebook_url": "",
     "leader_bio": "M. / Mme YACE JEAN-MARC (administrateur de societe), élu(e) à la tête de la Mairie de Cocody pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -269,7 +269,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Salubrité publique, embellissement urbain, modernisation des infrastructures marchandes et sécurité de proximité à Koumassi.",
-    "website": "https://mairiekoumassi.ci",
+    "website": "https://www.mairie-koumassi.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme IBRAHIMA CISSE (directeur général), élu(e) à la tête de la Mairie de Koumassi pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -329,8 +329,8 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "PDCI-RDA / PPA-CI",
     "mandature": "2023-2028",
     "mission_summary": "Développement économique local, appui aux artisans et commerçants, voirie et actions sociales de proximité à Marcory.",
-    "website": "http://marcory.ci",
-    "facebook_url": "",
+    "website": "https://www.marcory.ci/",
+    "facebook_url": "https://www.facebook.com/MairiedeMarcoryOfficiel/",
     "leader_bio": "M. / Mme ABY AKROBOU RAOUL MODESTE (ingenieur), élu(e) à la tête de la Mairie de Marcory pour la mandature 2023-2028 sous la bannière PDCI-RDA / PPA-CI, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme Supérieur en Administration et Gestion Territoriale",
@@ -389,7 +389,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "PDCI-RDA",
     "mandature": "2023-2028",
     "mission_summary": "Gestion du centre des affaires de la nation, stationnement urbain, transition écologique et services administratifs de pointe au Plateau.",
-    "website": "https://www.mairieplateau.ci",
+    "website": "https://mairieplateau.net/",
     "facebook_url": "",
     "leader_bio": "M. / Mme EHOUO JACQUES GABRIEL (biochimiste ingenieur), élu(e) à la tête de la Mairie de Le Plateau pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -449,7 +449,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "PDCI-RDA",
     "mandature": "2023-2028",
     "mission_summary": "Hub aéroportuaire et maritime, soutien à la pêche artisanale, voirie côtière et programmes de santé communautaire à Port-Bouët.",
-    "website": "https://www.port-bouet.ci",
+    "website": "https://www.port-bouet.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme EMMOU ACKAH GEORGES SYLVESTRE (medecin), élu(e) à la tête de la Mairie de Port-Bouët pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -509,7 +509,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Commune historique et culturelle, animation du grand marché, infrastructures sportives et promotion du vivre-ensemble à Treichville.",
-    "website": "https://www.mairietreichville.com",
+    "website": "https://mairiedetreichville.com/",
     "facebook_url": "",
     "leader_bio": "M. / Mme AMICHIA FRANCOIS ALBERT (enseignant chercheur), élu(e) à la tête de la Mairie de Treichville pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -573,7 +573,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Plus grande commune de Côte d'Ivoire : modernisation des grands axes, insertion des jeunes, centres sociaux et dynamisme économique à Yopougon.",
-    "website": "https://portail.yopougon.ci",
+    "website": "https://portail.yopougon.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme ADAMA BICTOGO (president directeur), élu(e) à la tête de la Mairie de Yopougon pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -639,7 +639,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Abengourou.",
-    "website": "https://mairieabengourou.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme ADOM HERVE PATRICK (cadre financier), élu(e) à la tête de la Mairie de Abengourou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -763,7 +763,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Adiake.",
-    "website": "https://mairieadiake.org",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme SIE HIEN (ingenieur genie civil), élu(e) à la tête de la Mairie de Adiake pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -887,7 +887,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "INDEPENDANT",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Affery.",
-    "website": "",
+    "website": "https://www.commune-affery.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme BEDA ASSI CELAIRE (directeur general d'entreprise), élu(e) à la tête de la Mairie de Affery pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -1446,7 +1446,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Assinie-mafia.",
-    "website": "https://assinie.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme MAGNE WOELFFELL PIERRE RENE (administrateur de societe), élu(e) à la tête de la Mairie de Assinie-mafia pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -2377,7 +2377,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bocanda.",
-    "website": "https://bocanda.ci",
+    "website": "https://bocanda.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme KRAMO KOUASSI (administrateur de societe), élu(e) à la tête de la Mairie de Bocanda pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -2563,7 +2563,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bongouanou.",
-    "website": "https://bongouanou.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme ASSOUGBA JACOB AMOIN (depute), élu(e) à la tête de la Mairie de Bongouanou pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -2749,7 +2749,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "PDCI-RDA",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bonoua.",
-    "website": "https://mairiebonoua.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme AMETHIER KOUA JEAN PAUL (maire), élu(e) à la tête de la Mairie de Bonoua pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -3060,7 +3060,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Bouake.",
     "website": "https://www.mairiedebouake.ci/",
-    "facebook_url": "",
+    "facebook_url": "https://www.facebook.com/100081441624124",
     "leader_bio": "M. / Mme KONE AMADOU (geographe), élu(e) à la tête de la Mairie de Bouake pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
       "Diplôme d'Ingénieur Géographe et Aménagiste du Territoire",
@@ -3186,7 +3186,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Boundiali.",
-    "website": "",
+    "website": "https://www.mairieboundiali.com/",
     "facebook_url": "",
     "leader_bio": "M. / Mme KONE MARIATOU (professeur d'universite), élu(e) à la tête de la Mairie de Boundiali pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -3310,7 +3310,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "PDCI-RDA",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Buyo.",
-    "website": "https://buyo.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme YAO YAO LAZARE (ingenieur commercial), élu(e) à la tête de la Mairie de Buyo pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -4240,7 +4240,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "PDCI-RDA",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Djebonoua.",
-    "website": "http://www.mairiedjebonoua.ci",
+    "website": "https://www.mairiededjebonoua.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme YAO KOUADIO ROLAND (logisticien cadre supérieur), élu(e) à la tête de la Mairie de Djebonoua pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -5046,7 +5046,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Gbeleban.",
-    "website": "https://mairie-gbeleban.ci",
+    "website": "https://mairie-gbeleban.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme OUATTARA AISSIATA (administrateur de societe), élu(e) à la tête de la Mairie de Gbeleban pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -5232,7 +5232,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "INDEPENDANT",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Gbonne.",
-    "website": "https://gbonne.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme KESSE FEH LAMBERT (juriste), élu(e) à la tête de la Mairie de Gbonne pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -5480,7 +5480,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Grand-bassam.",
-    "website": "https://mairiegrandbassam.ci",
+    "website": "https://villedegrandbassam.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme MOULOT MOISE JEAN LOUIS COFFI (urbaniste), élu(e) à la tête de la Mairie de Grand-bassam pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -5545,7 +5545,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "INDEPENDANT",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Grand-bereby.",
-    "website": "",
+    "website": "https://www.grandbereby.com/",
     "facebook_url": "",
     "leader_bio": "M. / Mme ????? KOUAME ARMAND (ingenieur agronome), élu(e) à la tête de la Mairie de Grand-bereby pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -5669,7 +5669,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "PDCI-RDA / PPA-CI",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Grand-zattry.",
-    "website": "https://mairiegrandzattry.com",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme SERI HORTENSE EMMA (responsable communication), élu(e) à la tête de la Mairie de Grand-zattry pour la mandature 2023-2028 sous la bannière PDCI-RDA / PPA-CI, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -5793,7 +5793,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Guiberoua.",
-    "website": "https://mairieguiberoua.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme ZEZE SOUASSOU NICOLE PRINCESSE GOHOUROU (infirmier), élu(e) à la tête de la Mairie de Guiberoua pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -6165,7 +6165,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Issia.",
-    "website": "https://mairie-issia.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme FANY KARIM (enseignant), élu(e) à la tête de la Mairie de Issia pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -6227,7 +6227,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Jacqueville.",
-    "website": "https://mairiejacqueville.ci",
+    "website": "https://mairiejacqueville.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme BEUGRE JOACHIM (cadre de societe), élu(e) à la tête de la Mairie de Jacqueville pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -6723,7 +6723,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Kolia.",
-    "website": "https://mairiekolia.com",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme KONE KARIM DOTIEME (administrateur), élu(e) à la tête de la Mairie de Kolia pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -7033,7 +7033,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Korhogo.",
-    "website": "https://mairiekorhogo.com",
+    "website": "https://mairiekorhogo.com/",
     "facebook_url": "",
     "leader_bio": "M. / Mme OUATTARA LACINA (chef d'entreprise), élu(e) à la tête de la Mairie de Korhogo pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -7095,7 +7095,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Koro.",
-    "website": "https://koro.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme BAKAYOKO ABDOUL DRAMANE (ingenieur genie civil), élu(e) à la tête de la Mairie de Koro pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -9141,7 +9141,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "PDCI-RDA",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Oume.",
-    "website": "https://mairieoume.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme LAGUI KOUASSI JOACHIM (proprietaire immobilier), élu(e) à la tête de la Mairie de Oume pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -9823,7 +9823,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "INDEPENDANT",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Sassandra.",
-    "website": "https://sassandra.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme KACOU MEA D'ASSIE JUSTIN KEVIN (comptable), élu(e) à la tête de la Mairie de Sassandra pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -9885,7 +9885,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "INDEPENDANT",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Satama-sokoro.",
-    "website": "https://www.mairiesatamasokoro.ci",
+    "website": "https://www.mairiesatamasokoro.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme FOFANA ALIMATA EPSE COULIBALY (inspecteur principal), élu(e) à la tête de la Mairie de Satama-sokoro pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -10009,7 +10009,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Seguela.",
-    "website": "https://mairieseguela.com",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme BAMBA MAFERIMA FOUETE EPSE M'BAHIA (administrateur financier), élu(e) à la tête de la Mairie de Seguela pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -10630,7 +10630,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Soubre.",
-    "website": "https://mairiesoubre.com",
+    "website": "https://mairiesoubre.net/",
     "facebook_url": "",
     "leader_bio": "M. / Mme TRAORE LASSINA (educateur), élu(e) à la tête de la Mairie de Soubre pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -10816,7 +10816,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tafire.",
-    "website": "https://tafire.ci",
+    "website": "https://tafire.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme COULIBALY SOUNKALO (maire), élu(e) à la tête de la Mairie de Tafire pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -11188,7 +11188,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "INDEPENDANT",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Tiassale.",
-    "website": "",
+    "website": "https://mairiedetiassale.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme ASSALE TIEMOKO ANTOINE (journaliste), élu(e) à la tête de la Mairie de Tiassale pour la mandature 2023-2028 sous la bannière INDEPENDANT, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -11746,7 +11746,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Touba.",
-    "website": "https://mairietouba.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme SANOGO MOUSSA (cadre de banque), élu(e) à la tête de la Mairie de Touba pour la mandature 2023-2028 sous la bannière RHDP, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -12180,7 +12180,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "political_party": "PDCI-RDA",
     "mandature": "2023-2028",
     "mission_summary": "Administration municipale, état civil, voirie, gestion des écoles primaires, centres de santé de proximité et développement local de la Commune de Yamoussoukro.",
-    "website": "http://mairieyamoussoukro.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme KOUASSI KOUAME PATRICE (avocat), élu(e) à la tête de la Mairie de Yamoussoukro pour la mandature 2023-2028 sous la bannière PDCI-RDA, assume la direction de l'exécutif municipal et la représentation de la commune conformément aux lois régissant la décentralisation en République de Côte d'Ivoire.",
     "leader_education": [
@@ -12492,7 +12492,7 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023-2028",
     "mission_summary": "Le Conseil Régional du AGNEBY-TIASSA est chargé de promouvoir le développement économique, éducatif, sanitaire et social, d'aménager le territoire régional et de valoriser le potentiel de ses populations.",
-    "website": "",
+    "website": "https://agnebytiassa.com/",
     "facebook_url": "",
     "leader_bio": "M. Pierre N'Gou Dimba est le Président du Conseil Régional de l'Agnéby-Tiassa depuis 2018 et Ministre de la Santé. Il conduit des projets majeurs de développement régional : construction de l'Hôpital Général et du CHR d'Agboville, reprofilage lourd des pistes agricoles, électrification rurale et hydraulique villageoise améliorée.",
     "leader_education": [
@@ -12675,7 +12675,7 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023 - 2028",
     "mission_summary": "Le Conseil Régional du BAGOUE est chargé de promouvoir le développement économique, éducatif, sanitaire et social, d'aménager le territoire régional et de valoriser le potentiel de ses populations.",
-    "website": "http://regionbagoue.ci",
+    "website": "https://regionbagoue.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme KONE  NABAGNE BRUNO, Président(e) du Conseil Régional de la Bagoué, préside l'organe exécutif régional conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit la planification stratégique du développement socio-économique, la construction des collèges et lycées régionaux, le reprofilage des pistes rurales pour l'écoulement des récoltes agricoles et la promotion des investissements durables.",
     "leader_education": [
@@ -12859,7 +12859,7 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "political_party": "PPA-CI / PDCI-RDA",
     "mandature": "2023 - 2028",
     "mission_summary": "Le Conseil Régional du NAWA est chargé de promouvoir le développement économique, éducatif, sanitaire et social, d'aménager le territoire régional et de valoriser le potentiel de ses populations.",
-    "website": "",
+    "website": "https://www.regiondelanawa.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme NETRO TAGBO RENE, Président(e) du Conseil Régional de la Nawa, préside l'organe exécutif régional conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit la planification stratégique du développement socio-économique, la construction des collèges et lycées régionaux, le reprofilage des pistes rurales pour l'écoulement des récoltes agricoles et la promotion des investissements durables.",
     "leader_education": [
@@ -12981,7 +12981,7 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023 - 2028",
     "mission_summary": "Le Conseil Régional du GRANDS PONTS est chargé de promouvoir le développement économique, éducatif, sanitaire et social, d'aménager le territoire régional et de valoriser le potentiel de ses populations.",
-    "website": "https://regiongrandsponts.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme ESSIS ESMEL  DE EMMANUEL, Président(e) du Conseil Régional des Grands Ponts, préside l'organe exécutif régional conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit la planification stratégique du développement socio-économique, la construction des collèges et lycées régionaux, le reprofilage des pistes rurales pour l'écoulement des récoltes agricoles et la promotion des investissements durables.",
     "leader_education": [
@@ -13103,7 +13103,7 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "political_party": "PDCI-RDA",
     "mandature": "2023 - 2028",
     "mission_summary": "Le Conseil Régional du Bélier est chargé de promouvoir le développement économique, éducatif, sanitaire et social, d'aménager le territoire régional et de valoriser le potentiel de ses populations.",
-    "website": "http://regionbelier.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. KONAN KOUAKOU RAYMOND, Président du Conseil Régional du Bélier, préside l'organe exécutif régional conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit la planification stratégique du développement socio-économique, la construction des collèges et lycées régionaux, le reprofilage des pistes rurales pour l'écoulement des récoltes agricoles et la promotion des investissements durables.",
     "leader_education": [
@@ -13408,7 +13408,7 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023 - 2028",
     "mission_summary": "Le Conseil Régional du GBEKE est chargé de promouvoir le développement économique, éducatif, sanitaire et social, d'aménager le territoire régional et de valoriser le potentiel de ses populations.",
-    "website": "https://www.conseilregionalgbeke.com",
+    "website": "https://conseilregionalgbeke.com/",
     "facebook_url": "",
     "leader_bio": "M. Jacques Assahoré Konan est le Président du Conseil Régional du Gbêkê depuis 2023 et Ministre des Eaux et Forêts. Il pilote la modernisation des infrastructures rurales du Gbêkê (Bouaké, Béoumi, Sakassou, Botro), l'adduction en eau potable et l'aménagement hydro-agricole des bas-fonds.",
     "leader_education": [
@@ -13470,7 +13470,7 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "political_party": "INDEPENDANT",
     "mandature": "2023 - 2028",
     "mission_summary": "Le Conseil Régional du GBOKLE est chargé de promouvoir le développement économique, éducatif, sanitaire et social, d'aménager le territoire régional et de valoriser le potentiel de ses populations.",
-    "website": "https://crgbokle.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme KEBE MAHAMADOU, Président(e) du Conseil Régional du Gbôklè, préside l'organe exécutif régional conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit la planification stratégique du développement socio-économique, la construction des collèges et lycées régionaux, le reprofilage des pistes rurales pour l'écoulement des récoltes agricoles et la promotion des investissements durables.",
     "leader_education": [
@@ -13592,7 +13592,7 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023 - 2028",
     "mission_summary": "Le Conseil Régional du GONTOUGO est chargé de promouvoir le développement économique, éducatif, sanitaire et social, d'aménager le territoire régional et de valoriser le potentiel de ses populations.",
-    "website": "",
+    "website": "https://www.regiondugontougo.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme KOBENAN KOUASSI ADJOUMANI, Président(e) du Conseil Régional du Gontougo, préside l'organe exécutif régional conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit la planification stratégique du développement socio-économique, la construction des collèges et lycées régionaux, le reprofilage des pistes rurales pour l'écoulement des récoltes agricoles et la promotion des investissements durables.",
     "leader_education": [
@@ -13775,7 +13775,7 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023 - 2028",
     "mission_summary": "Le Conseil Régional du HAUT SASSANDRA est chargé de promouvoir le développement économique, éducatif, sanitaire et social, d'aménager le territoire régional et de valoriser le potentiel de ses populations.",
-    "website": "https://hautsassandra.ci",
+    "website": "https://www.regionhautsassandra.ci/",
     "facebook_url": "",
     "leader_bio": "M. Mamadou Touré est le Président du Conseil Régional du Haut-Sassandra depuis 2023 et Ministre de la Promotion de la Jeunesse. Il accélère les investissements dans les 4 départements de la région (Daloa, Issia, Vavoua, Zoukougbeu) : électrification villageoise, réhabilitation des pistes cacaoyères et centres de formation technique pour les jeunes.",
     "leader_education": [
@@ -13958,7 +13958,7 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "political_party": "PDCI-RDA",
     "mandature": "2023 - 2028",
     "mission_summary": "Le Conseil Régional du MORONOU est chargé de promouvoir le développement économique, éducatif, sanitaire et social, d'aménager le territoire régional et de valoriser le potentiel de ses populations.",
-    "website": "https://region-moronou.ci",
+    "website": "",
     "facebook_url": "",
     "leader_bio": "M. / Mme AKA AMANAN VERONIQUE, Président(e) du Conseil Régional du Moronou, préside l'organe exécutif régional conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit la planification stratégique du développement socio-économique, la construction des collèges et lycées régionaux, le reprofilage des pistes rurales pour l'écoulement des récoltes agricoles et la promotion des investissements durables.",
     "leader_education": [
@@ -14202,7 +14202,7 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023 - 2028",
     "mission_summary": "Le Conseil Régional du TCHOLOGO est chargé de promouvoir le développement économique, éducatif, sanitaire et social, d'aménager le territoire régional et de valoriser le potentiel de ses populations.",
-    "website": "https://regiontchologo.ci",
+    "website": "https://regiontchologo.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme OUATTARA TENE BIRAHIMA, Président(e) du Conseil Régional du Tchologo, préside l'organe exécutif régional conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit la planification stratégique du développement socio-économique, la construction des collèges et lycées régionaux, le reprofilage des pistes rurales pour l'écoulement des récoltes agricoles et la promotion des investissements durables.",
     "leader_education": [
@@ -14263,7 +14263,7 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "political_party": "RHDP",
     "mandature": "2023 - 2028",
     "mission_summary": "Le Conseil Régional du TONKPI est chargé de promouvoir le développement économique, éducatif, sanitaire et social, d'aménager le territoire régional et de valoriser le potentiel de ses populations.",
-    "website": "",
+    "website": "https://regiondutonkpi.ci/",
     "facebook_url": "",
     "leader_bio": "M. / Mme MABRI TOIKEUSSE ALBERT ABDALLAH, Président(e) du Conseil Régional du Tonkpi, préside l'organe exécutif régional conformément aux lois régissant la décentralisation en République de Côte d'Ivoire. Il/Elle conduit la planification stratégique du développement socio-économique, la construction des collèges et lycées régionaux, le reprofilage des pistes rurales pour l'écoulement des récoltes agricoles et la promotion des investissements durables.",
     "leader_education": [
@@ -14389,16 +14389,16 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "facebook_url": "",
     "leader_bio": "M. Cissé Ibrahima Bacongo, Ministre-Gouverneur du District Autonome d'Abidjan (nommé en décembre 2023), est docteur en droit et homme d'État ivoirien. Ancien Ministre de l'Enseignement Supérieur, ancien Ministre de la Fonction Publique et Maire de Koumassi, il impulse la modernisation des grandes infrastructures urbaines, la fluidité des transports et l'assainissement de la métropole d'Abidjan.",
     "leader_education": [
-          "Doctorat d'État en Droit privé - Université Paris 1 Panthéon-Sorbonne",
-          "Diplôme de l'École Nationale d'Administration (ENA)",
-          "Maîtrise en Droit des Affaires"
+      "Doctorat d'État en Droit privé - Université Paris 1 Panthéon-Sorbonne",
+      "Diplôme de l'École Nationale d'Administration (ENA)",
+      "Maîtrise en Droit des Affaires"
     ],
     "leader_experience": [
-          "Ministre-Gouverneur du District Autonome d'Abidjan (2023 - Présent)",
-          "Ministre auprès du Président de la République chargé des Affaires Politiques (2020 - 2023)",
-          "Maire de la Commune de Koumassi (2018 - 2024)",
-          "Ministre de la Fonction Publique et de la Réforme Administrative (2012 - 2016)",
-          "Ministre de l'Enseignement Supérieur et de la Recherche Scientifique (2005 - 2012)"
+      "Ministre-Gouverneur du District Autonome d'Abidjan (2023 - Présent)",
+      "Ministre auprès du Président de la République chargé des Affaires Politiques (2020 - 2023)",
+      "Maire de la Commune de Koumassi (2018 - 2024)",
+      "Ministre de la Fonction Publique et de la Réforme Administrative (2012 - 2016)",
+      "Ministre de l'Enseignement Supérieur et de la Recherche Scientifique (2005 - 2012)"
     ],
     "organigramme_summary": [
       "Cabinet du Président du Conseil Régional",
@@ -14454,15 +14454,15 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "facebook_url": "",
     "leader_bio": "Dr. Augustin Thiam, Ministre-Gouverneur du District Autonome de Yamoussoukro (en fonction depuis 2011 et reconduit en 2021), est médecin de formation, chef traditionnel (Gouverneur et chef du canton Akouè) et homme politique ivoirien. Il veille à la préservation du statut de capitale politique de Yamoussoukro, à la valorisation touristique et au rayonnement des grands édifices de la cité.",
     "leader_education": [
-          "Doctorat d'État en Médecine - Faculté de Médecine d'Abidjan",
-          "Spécialisation en Gestion Hospitalière et Santé Publique",
-          "Formation des Cadres Dirigeants Territoriaux"
+      "Doctorat d'État en Médecine - Faculté de Médecine d'Abidjan",
+      "Spécialisation en Gestion Hospitalière et Santé Publique",
+      "Formation des Cadres Dirigeants Territoriaux"
     ],
     "leader_experience": [
-          "Ministre-Gouverneur du District Autonome de Yamoussoukro (2011 - Présent)",
-          "Gouverneur du District de Yamoussoukro (2011 - 2021)",
-          "Chef traditionnel du Canton Akouè de Yamoussoukro",
-          "Praticien hospitalier et consultant en santé publique"
+      "Ministre-Gouverneur du District Autonome de Yamoussoukro (2011 - Présent)",
+      "Gouverneur du District de Yamoussoukro (2011 - 2021)",
+      "Chef traditionnel du Canton Akouè de Yamoussoukro",
+      "Praticien hospitalier et consultant en santé publique"
     ],
     "organigramme_summary": [
       "Cabinet du Président du Conseil Régional",

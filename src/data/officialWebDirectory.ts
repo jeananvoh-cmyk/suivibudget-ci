@@ -1,6 +1,7 @@
 /**
- * RÉFÉRENTIEL OFFICIEL DES SITES WEB DES COLLECTIVITÉS TERRITORIALES DE CÔTE D'IVOIRE
- * Conforme à l'audit national des portails web (201 communes, 31 régions, 2 districts)
+ * RÉFÉRENTIEL OFFICIEL DES SITES WEB & RÉSEAUX DES COLLECTIVITÉS TERRITORIALES DE CÔTE D'IVOIRE
+ * Conforme à l'audit national certifié (201 communes, 31 régions, 2 districts autonomes - Contrôle du 27/09/2026)
+ * Règle stricte : 0% de spéculation, 100% de vérifiabilité documentaire.
  */
 
 import { Institution } from '../types';
@@ -12,74 +13,67 @@ export interface OfficialWebEntry {
   statutWeb: 'FONCTIONNEL' | 'INACTIF' | 'AUCUN';
   url: string;
   observations: string;
+  facebookUrl?: string;
+  facebookStatus?: string;
+  fraicheur?: string;
+  confiance?: 'Élevée' | 'Moyenne';
 }
 
-// Normalisation pour recherche sans accent ni ponctuation
-function normalizeKey(str: string): string {
+// Normalisation robuste pour recherche sans accent, ponctuation ni articles
+export function normalizeKey(str: string): string {
   return (str || '')
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/^conseil\s+regional\s+(de\s+la\s+|du\s+|des\s+|d['’]\s*|de\s+)?/i, '')
+    .replace(/^conseil\s+regional\s+(de\s+la\s+|du\s+|des\s+|de\s+l['’]\s*|d['’]\s*|de\s+)?/i, '')
     .replace(/^district\s+autonome\s+(d['’]\s*|de\s+)?/i, '')
-    .replace(/^mairie\s+(du\s+|de\s+la\s+|des\s+|d['’]\s*|de\s+)?/i, '')
+    .replace(/^mairie\s+(du\s+|de\s+la\s+|des\s+|de\s+l['’]\s*|d['’]\s*|de\s+)?/i, '')
     .replace(/^le\s+/i, '')
     .replace(/^la\s+/i, '')
     .replace(/[^a-z0-9]/g, '')
     .trim();
 }
 
+// =========================================================================
 // 1. CONSEILS RÉGIONAUX (31) & DISTRICTS AUTONOMES (2)
+// =========================================================================
 export const OFFICIAL_REGIONS_WEB_DATA: Record<string, Omit<OfficialWebEntry, 'type'>> = {
-  // --- Fonctionnels (6 régions + 1 district) ---
-  'gontougo': {
-    nom: 'Conseil Régional du Gontougo',
-    chefLieu: 'Bondoukou',
+  // --- Fonctionnels / À jour 2026 ---
+  'agnebytiassa': {
+    nom: "Conseil Régional de l'Agnéby-Tiassa",
+    chefLieu: 'Agboville',
     statutWeb: 'FONCTIONNEL',
-    url: 'https://www.regiondugontougo.ci',
-    observations: 'Fonctionnel, actualités régulières et projets régionaux',
-  },
-  'hautsassandra': {
-    nom: 'Conseil Régional du Haut-Sassandra',
-    chefLieu: 'Daloa',
-    statutWeb: 'FONCTIONNEL',
-    url: 'https://hautsassandra.ci',
-    observations: 'Fonctionnel, projets régionaux et délibérations',
-  },
-  'lame': {
-    nom: 'Conseil Régional de La Mé',
-    chefLieu: 'Adzopé',
-    statutWeb: 'FONCTIONNEL',
-    url: 'https://regiondelame.ci',
-    observations: 'Fonctionnel, actualités du conseil et actions sociales',
-  },
-  'me': {
-    nom: 'Conseil Régional de La Mé',
-    chefLieu: 'Adzopé',
-    statutWeb: 'FONCTIONNEL',
-    url: 'https://regiondelame.ci',
-    observations: 'Fonctionnel, actualités du conseil et actions sociales',
-  },
-  'grandsponts': {
-    nom: 'Conseil Régional des Grands-Ponts',
-    chefLieu: 'Dabou',
-    statutWeb: 'FONCTIONNEL',
-    url: 'https://regiongrandsponts.ci',
-    observations: 'Actif, actualités et projets structurants',
-  },
-  'moronou': {
-    nom: 'Conseil Régional du Moronou',
-    chefLieu: 'Bongouanou',
-    statutWeb: 'FONCTIONNEL',
-    url: 'https://region-moronou.ci',
-    observations: 'Fonctionnel, portail régional et tourisme',
+    url: 'https://agnebytiassa.com/',
+    observations: 'Site officiel répond; actualités récentes datées août 2026',
+    fraicheur: '2026',
+    confiance: 'Élevée',
   },
   'gbeke': {
     nom: 'Conseil Régional du Gbêkê',
     chefLieu: 'Bouaké',
     statutWeb: 'FONCTIONNEL',
-    url: 'https://www.conseilregionalgbeke.com',
-    observations: 'Portail de proximité actif et services',
+    url: 'https://conseilregionalgbeke.com/',
+    observations: 'Site officiel répond; contient des références d\'actualités 2026',
+    fraicheur: '2026',
+    confiance: 'Élevée',
+  },
+  'tchologo': {
+    nom: 'Conseil Régional du Tchologo',
+    chefLieu: 'Ferkessédougou',
+    statutWeb: 'FONCTIONNEL',
+    url: 'https://regiontchologo.ci/',
+    observations: 'Site officiel répond; nombreuses actualités jusqu\'en juillet 2026',
+    fraicheur: '2026',
+    confiance: 'Élevée',
+  },
+  'yamoussoukro': {
+    nom: 'District Autonome de Yamoussoukro',
+    chefLieu: 'Yamoussoukro',
+    statutWeb: 'FONCTIONNEL',
+    url: 'https://www.districtyakro.ci/',
+    observations: 'Portail officiel du District Autonome répond; actualités août 2026',
+    fraicheur: '2026',
+    confiance: 'Élevée',
   },
   'abidjan': {
     nom: "District Autonome d'Abidjan",
@@ -87,204 +81,282 @@ export const OFFICIAL_REGIONS_WEB_DATA: Record<string, Omit<OfficialWebEntry, 't
     statutWeb: 'FONCTIONNEL',
     url: 'https://abidjan.district.ci/index.php',
     observations: 'Portail institutionnel métropolitain actif',
-  },
-  'yamoussoukro': {
-    nom: 'District Autonome de Yamoussoukro',
-    chefLieu: 'Yamoussoukro',
-    statutWeb: 'FONCTIONNEL',
-    url: 'https://www.districtyakro.ci/',
-    observations: 'Portail officiel du District Autonome de Yamoussoukro',
+    fraicheur: '2026',
+    confiance: 'Élevée',
   },
 
-  // --- Site officiel existant mais inactif / maintenance / expiré (6 régions) ---
-  'tonkpi': {
-    nom: 'Conseil Régional du Tonkpi',
-    chefLieu: 'Man',
+  // --- Existants mais non mis à jour / maintenance / inactifs ---
+  'bagoue': {
+    nom: 'Conseil Régional de la Bagoué',
+    chefLieu: 'Boundiali',
     statutWeb: 'INACTIF',
-    url: 'http://regiontonkpi.ci',
-    observations: 'Nom de domaine expiré / inaccessible',
+    url: 'https://regionbagoue.ci/',
+    observations: 'Site officiel en maintenance / construction (35%), ouverture annoncée',
+    fraicheur: 'Sans objet',
+    confiance: 'Élevée',
   },
-  'poro': {
-    nom: 'Conseil Régional du Poro',
-    chefLieu: 'Korhogo',
+  'gontougo': {
+    nom: 'Conseil Régional du Gontougo',
+    chefLieu: 'Bondoukou',
     statutWeb: 'INACTIF',
-    url: 'http://regionporo.ci',
-    observations: 'Domaine inaccessible / serveur éteint',
+    url: 'https://www.regiondugontougo.ci/',
+    observations: 'Site répond; dernières actualités datées octobre 2025',
+    fraicheur: 'Ancien / non démontré en 2026',
+    confiance: 'Élevée',
   },
-  'belier': {
-    nom: 'Conseil Régional du Bélier',
-    chefLieu: 'Toumodi',
+  'hautsassandra': {
+    nom: 'Conseil Régional du Haut-Sassandra',
+    chefLieu: 'Daloa',
     statutWeb: 'INACTIF',
-    url: 'http://regionbelier.ci',
-    observations: 'Serveur inaccessible / erreur DNS',
-  },
-  'sanpedro': {
-    nom: 'Conseil Régional de San-Pédro',
-    chefLieu: 'San-Pédro',
-    statutWeb: 'INACTIF',
-    url: 'http://regionsanpedro.ci',
-    observations: 'Inaccessible / en panne technique',
+    url: 'https://www.regionhautsassandra.ci/',
+    observations: 'Site institutionnel répond; pas d\'actualités 2026 démontrées',
+    fraicheur: 'Ancien / non démontré en 2026',
+    confiance: 'Élevée',
   },
   'nawa': {
     nom: 'Conseil Régional de la Nawa',
     chefLieu: 'Soubré',
     statutWeb: 'INACTIF',
-    url: 'http://regionnawa.ci',
-    observations: 'Serveur non configuré / page d\'attente',
+    url: 'https://www.regiondelanawa.ci/',
+    observations: 'Site répond; actualités visibles antérieures (janvier 2024)',
+    fraicheur: 'Ancien / non démontré en 2026',
+    confiance: 'Élevée',
   },
-  'indeniedjuablin': {
-    nom: "Conseil Régional de l'Indénié-Djuablin",
-    chefLieu: 'Abengourou',
+  'tonkpi': {
+    nom: 'Conseil Régional du Tonkpi',
+    chefLieu: 'Man',
     statutWeb: 'INACTIF',
-    url: 'http://regionindeniedjuablin.ci',
-    observations: 'Domaine non renouvelé',
+    url: 'https://regiondutonkpi.ci/',
+    observations: 'Site charge mais contenu institutionnel défaillant (textes de test/gabarits factices)',
+    fraicheur: 'Sans objet',
+    confiance: 'Élevée',
   },
-
-  // --- Aucun site web officiel (20 régions) ---
-  'bafing': { nom: 'Conseil Régional du Bafing', chefLieu: 'Touba', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'marahoue': { nom: 'Conseil Régional de la Marahoué', chefLieu: 'Bouaflé', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'bere': { nom: 'Conseil Régional du Béré', chefLieu: 'Mankono', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'cavally': { nom: 'Conseil Régional du Cavally', chefLieu: 'Guiglo', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'guemon': { nom: 'Conseil Régional du Guémon', chefLieu: 'Duékoué', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'iffou': { nom: "Conseil Régional de l'Iffou", chefLieu: 'Daoukro', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'bagoue': { nom: 'Conseil Régional de la Bagoué', chefLieu: 'Boundiali', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'agnebytiassa': { nom: "Conseil Régional de l'Agnéby-Tiassa", chefLieu: 'Agboville', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'gbokle': { nom: 'Conseil Régional du Gbôklé', chefLieu: 'Sassandra', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'kabadougou': { nom: 'Conseil Régional du Kabadougou', chefLieu: 'Odienné', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'sudcomoe': { nom: 'Conseil Régional du Sud-Comoé', chefLieu: 'Aboisso', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'lohdjiboua': { nom: 'Conseil Régional du Lôh-Djiboua', chefLieu: 'Divo', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'goh': { nom: 'Conseil Régional du Gôh', chefLieu: 'Gagnoa', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'tchologo': { nom: 'Conseil Régional du Tchologo', chefLieu: 'Ferkessédougou', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'bounkani': { nom: 'Conseil Régional du Bounkani', chefLieu: 'Bouna', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'hambol': { nom: 'Conseil Régional du Hambol', chefLieu: 'Katiola', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'folon': { nom: 'Conseil Régional du Folon', chefLieu: 'Minignan', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'worodougou': { nom: 'Conseil Régional du Worodougou', chefLieu: 'Séguéla', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
-  'nzi': { nom: "Conseil Régional du N'Zi", chefLieu: 'Dimbokro', statutWeb: 'AUCUN', url: '', observations: 'Communication sur Facebook uniquement' },
+  // --- Aucun site officiel identifié après tests (23 régions / districts) ---
+  'lame': { nom: 'Conseil Régional de La Mé', chefLieu: 'Adzopé', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'me': { nom: 'Conseil Régional de La Mé', chefLieu: 'Adzopé', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'grandsponts': { nom: 'Conseil Régional des Grands-Ponts', chefLieu: 'Dabou', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'moronou': { nom: 'Conseil Régional du Moronou', chefLieu: 'Bongouanou', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'bafing': { nom: 'Conseil Régional du Bafing', chefLieu: 'Touba', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'belier': { nom: 'Conseil Régional du Bélier', chefLieu: 'Toumodi', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'bere': { nom: 'Conseil Régional du Béré', chefLieu: 'Mankono', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'bounkani': { nom: 'Conseil Régional du Bounkani', chefLieu: 'Bouna', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'cavally': { nom: 'Conseil Régional du Cavally', chefLieu: 'Guiglo', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'folon': { nom: 'Conseil Régional du Folon', chefLieu: 'Minignan', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'gbokle': { nom: 'Conseil Régional du Gbôklé', chefLieu: 'Sassandra', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'goh': { nom: 'Conseil Régional du Gôh', chefLieu: 'Gagnoa', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'guemon': { nom: 'Conseil Régional du Guémon', chefLieu: 'Duékoué', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'hambol': { nom: 'Conseil Régional du Hambol', chefLieu: 'Katiola', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'iffou': { nom: "Conseil Régional de l'Iffou", chefLieu: 'Daoukro', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'indeniedjuablin': { nom: "Conseil Régional de l'Indénié-Djuablin", chefLieu: 'Abengourou', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'kabadougou': { nom: 'Conseil Régional du Kabadougou', chefLieu: 'Odienné', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'lohdjiboua': { nom: 'Conseil Régional du Lôh-Djiboua', chefLieu: 'Divo', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'marahoue': { nom: 'Conseil Régional de la Marahoué', chefLieu: 'Bouaflé', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'nzi': { nom: "Conseil Régional du N'Zi", chefLieu: 'Dimbokro', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'poro': { nom: 'Conseil Régional du Poro', chefLieu: 'Korhogo', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'sanpedro': { nom: 'Conseil Régional de San-Pédro', chefLieu: 'San-Pédro', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'sudcomoe': { nom: 'Conseil Régional du Sud-Comoé', chefLieu: 'Aboisso', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
+  'worodougou': { nom: 'Conseil Régional du Worodougou', chefLieu: 'Séguéla', statutWeb: 'AUCUN', url: '', observations: 'Aucun site officiel identifié après tests nominatifs' },
 };
 
-// 2. MAIRIES AVEC SITE WEB (7 FONCTIONNELLES + 10 INACTIVES)
+// =========================================================================
+// 2. MAIRIES AVEC SITE WEB OU FACEBOOK OFFICIEL VÉRIFIÉ (21 COMMUNES)
+// =========================================================================
 export const OFFICIAL_COMMUNES_WEB_DATA: Record<string, Omit<OfficialWebEntry, 'type'>> = {
-  // --- Fonctionnelles (7 mairies) ---
-  'plateau': {
-    nom: 'Mairie du Plateau',
-    chefLieu: 'Abidjan',
+  // --- Fonctionnelles / À jour 2026 (12 mairies) ---
+  'bocanda': {
+    nom: 'Mairie de Bocanda',
+    chefLieu: 'N\'Zi',
     statutWeb: 'FONCTIONNEL',
-    url: 'https://www.mairieplateau.ci',
-    observations: 'Portail e-services, état civil et démarches en ligne',
-  },
-  'cocody': {
-    nom: 'Mairie de Cocody',
-    chefLieu: 'Abidjan',
-    statutWeb: 'FONCTIONNEL',
-    url: 'https://cocody.ci',
-    observations: 'Portail citoyen interactif et e-administration',
+    url: 'https://bocanda.ci/',
+    observations: 'Site officiel répond; actualités récentes datées mars 2026',
+    fraicheur: '2026',
+    confiance: 'Élevée',
   },
   'bouake': {
     nom: 'Mairie de Bouaké',
     chefLieu: 'Bouaké',
     statutWeb: 'FONCTIONNEL',
     url: 'https://www.mairiedebouake.ci/',
-    observations: 'Portail municipal officiel actif',
+    facebookUrl: 'https://www.facebook.com/100081441624124',
+    facebookStatus: 'Page Facebook officielle vérifiée',
+    observations: 'Portail municipal officiel actif; publications août 2026',
+    fraicheur: '2026',
+    confiance: 'Élevée',
+  },
+  'cocody': {
+    nom: 'Mairie de Cocody',
+    chefLieu: 'Abidjan',
+    statutWeb: 'FONCTIONNEL',
+    url: 'https://mairiecocody.com/',
+    observations: 'Portail citoyen officiel répond; actualités septembre 2026',
+    fraicheur: '2026',
+    confiance: 'Élevée',
+  },
+  'djebonoua': {
+    nom: 'Mairie de Djébonoua',
+    chefLieu: 'Gbêkê',
+    statutWeb: 'FONCTIONNEL',
+    url: 'https://www.mairiededjebonoua.ci/',
+    observations: 'Site officiel répond; édition 2026 active',
+    fraicheur: '2026',
+    confiance: 'Élevée',
+  },
+  'gbeleban': {
+    nom: 'Mairie de Gbéléban',
+    chefLieu: 'Kabadougou',
+    statutWeb: 'FONCTIONNEL',
+    url: 'https://mairie-gbeleban.ci/',
+    observations: 'Site officiel indexé et actif; contenus et projets 2026',
+    fraicheur: '2026',
+    confiance: 'Élevée',
+  },
+  'grandbassam': {
+    nom: 'Mairie de Grand-Bassam',
+    chefLieu: 'Sud-Comoé',
+    statutWeb: 'FONCTIONNEL',
+    url: 'https://villedegrandbassam.ci/',
+    observations: 'Site communal répond; actualités datées avril 2026',
+    fraicheur: '2026',
+    confiance: 'Élevée',
+  },
+  'grandbereby': {
+    nom: 'Mairie de Grand-Béréby',
+    chefLieu: 'San-Pédro',
+    statutWeb: 'FONCTIONNEL',
+    url: 'https://www.grandbereby.com/',
+    observations: 'Site officiel répond; actualités août 2026 intégrées',
+    fraicheur: '2026',
+    confiance: 'Élevée',
+  },
+  'marcory': {
+    nom: 'Mairie de Marcory',
+    chefLieu: 'Abidjan',
+    statutWeb: 'FONCTIONNEL',
+    url: 'https://www.marcory.ci/',
+    facebookUrl: 'https://www.facebook.com/MairiedeMarcoryOfficiel/',
+    facebookStatus: 'Page Facebook officielle vérifiée',
+    observations: 'Site officiel répond; actualités mai 2026',
+    fraicheur: '2026',
+    confiance: 'Élevée',
   },
   'portbouet': {
     nom: 'Mairie de Port-Bouët',
     chefLieu: 'Abidjan',
     statutWeb: 'FONCTIONNEL',
-    url: 'https://www.port-bouet.ci',
-    observations: 'Portail officiel d\'actualités et démarches administratives',
+    url: 'https://www.port-bouet.ci/',
+    observations: 'Site officiel actif; publications septembre 2026',
+    fraicheur: '2026',
+    confiance: 'Élevée',
   },
-  'treichville': {
-    nom: 'Mairie de Treichville',
-    chefLieu: 'Abidjan',
+  'satamasokoro': {
+    nom: 'Mairie de Satama-Sokoro',
+    chefLieu: 'Dabakala',
     statutWeb: 'FONCTIONNEL',
-    url: 'https://www.mairietreichville.com',
-    observations: 'Informations municipales, état civil et projets',
+    url: 'https://www.mairiesatamasokoro.ci/',
+    observations: 'Site officiel répond; documents 2026 dont Budget Primitif 2026',
+    fraicheur: '2026',
+    confiance: 'Élevée',
   },
-  'koumassi': {
-    nom: 'Mairie de Koumassi',
-    chefLieu: 'Abidjan',
+  'tafire': {
+    nom: 'Mairie de Tafiré',
+    chefLieu: 'Hambol',
     statutWeb: 'FONCTIONNEL',
-    url: 'https://mairiekoumassi.ci',
-    observations: 'Modernisation urbaine et démarches en ligne',
+    url: 'https://tafire.ci/',
+    observations: 'Site officiel répond; actualité municipale février 2026 (Aucune page Facebook officielle)',
+    fraicheur: '2026',
+    confiance: 'Élevée',
   },
-  'sanpedro': {
-    nom: 'Mairie de San-Pédro',
-    chefLieu: 'San-Pédro',
-    statutWeb: 'FONCTIONNEL',
-    url: 'https://mairiesanpedro.ci',
-    observations: 'Portail d\'information et suivi des projets communaux',
-  },
-
-  // --- Site officiel existant mais inactif / maintenance / expiré (10 mairies) ---
   'yopougon': {
     nom: 'Mairie de Yopougon',
     chefLieu: 'Abidjan',
-    statutWeb: 'INACTIF',
-    url: 'http://yopougon.ci',
-    observations: 'Domaine inactif / non accessible',
+    statutWeb: 'FONCTIONNEL',
+    url: 'https://portail.yopougon.ci/',
+    observations: 'Portail officiel de téléservices municipaux et état civil actif',
+    fraicheur: '2026',
+    confiance: 'Élevée',
   },
-  'abobo': {
-    nom: 'Mairie de Abobo',
-    chefLieu: 'Abidjan',
+
+  // --- Existants mais non mis à jour / maintenance / inactifs (9 mairies) ---
+  'affery': {
+    nom: 'Mairie d\'Afféry',
+    chefLieu: 'La Mé',
     statutWeb: 'INACTIF',
-    url: 'http://mairieabobo.ci',
-    observations: 'Erreur serveur / page inaccessible',
+    url: 'https://www.commune-affery.ci/',
+    observations: 'Site répond; actualités datées antérieures (2019-2020)',
+    fraicheur: 'Ancien / non démontré en 2026',
+    confiance: 'Élevée',
   },
-  'marcory': {
-    nom: 'Mairie de Marcory',
-    chefLieu: 'Abidjan',
+  'boundiali': {
+    nom: 'Mairie de Boundiali',
+    chefLieu: 'Bagoué',
     statutWeb: 'INACTIF',
-    url: 'http://marcory.ci',
-    observations: 'Site inaccessible',
+    url: 'https://www.mairieboundiali.com/',
+    observations: 'Site répond; dernières actualités visibles en décembre 2022',
+    fraicheur: 'Ancien / non démontré en 2026',
+    confiance: 'Élevée',
   },
-  'grandbassam': {
-    nom: 'Mairie de Grand-Bassam',
-    chefLieu: 'Sud-Comoé',
+  'jacqueville': {
+    nom: 'Mairie de Jacqueville',
+    chefLieu: 'Grands-Ponts',
     statutWeb: 'INACTIF',
-    url: 'http://mairiegrandbassam.ci',
-    observations: 'Page inaccessible / erreur d\'hébergement',
-  },
-  'daloa': {
-    nom: 'Mairie de Daloa',
-    chefLieu: 'Haut-Sassandra',
-    statutWeb: 'INACTIF',
-    url: 'http://mairiedaloa.ci',
-    observations: 'Site vitrine non maintenu / non sécurisé',
+    url: 'https://mairiejacqueville.ci/',
+    observations: 'Site répond; aucun contenu récent 2026 retrouvé',
+    fraicheur: 'Ancien / non démontré en 2026',
+    confiance: 'Élevée',
   },
   'korhogo': {
     nom: 'Mairie de Korhogo',
     chefLieu: 'Poro',
     statutWeb: 'INACTIF',
-    url: 'http://mairiekorhogo.ci',
-    observations: 'Domaine inaccessible',
+    url: 'https://mairiekorhogo.com/',
+    observations: 'Site répond; dernière publication septembre 2025 (contenus de gabarit)',
+    fraicheur: 'Ancien / non démontré en 2026',
+    confiance: 'Élevée',
   },
-  'yamoussoukro': {
-    nom: 'Mairie de Yamoussoukro',
-    chefLieu: 'Bélier',
-    statutWeb: 'INACTIF',
-    url: 'http://mairieyamoussoukro.ci',
-    observations: 'Non fonctionnel / page en erreur',
-  },
-  'adjame': {
-    nom: 'Mairie de Adjamé',
+  'koumassi': {
+    nom: 'Mairie de Koumassi',
     chefLieu: 'Abidjan',
     statutWeb: 'INACTIF',
-    url: 'http://mairieadjame.ci',
-    observations: 'Inaccessible / certificat SSL expiré',
+    url: 'https://www.mairie-koumassi.ci/',
+    observations: 'Domaine identifié comme site officiel, mais échec d\'accès lors du contrôle',
+    fraicheur: 'Sans objet',
+    confiance: 'Élevée',
   },
-  'attecoube': {
-    nom: "Mairie d'Attécoubé",
+  'plateau': {
+    nom: 'Mairie du Plateau',
     chefLieu: 'Abidjan',
     statutWeb: 'INACTIF',
-    url: 'http://mairieattecoube.ci',
-    observations: 'Domaine non configuré',
+    url: 'https://mairieplateau.net/',
+    observations: 'Site répond; actualités visibles principalement datées 2020',
+    fraicheur: 'Ancien / non démontré en 2026',
+    confiance: 'Élevée',
   },
-  'bingerville': {
-    nom: 'Mairie de Bingerville',
+  'soubre': {
+    nom: 'Mairie de Soubré',
+    chefLieu: 'Nawa',
+    statutWeb: 'INACTIF',
+    url: 'https://mairiesoubre.net/',
+    observations: 'Site répond; dernière actualité datée mai 2025',
+    fraicheur: 'Ancien / non démontré en 2026',
+    confiance: 'Élevée',
+  },
+  'tiassale': {
+    nom: 'Mairie de Tiassalé',
+    chefLieu: 'Agnéby-Tiassa',
+    statutWeb: 'INACTIF',
+    url: 'https://mairiedetiassale.ci/',
+    observations: 'Site répond et propose des services; aucune actualité 2026 clairement vérifiée',
+    fraicheur: 'Ancien / non démontré en 2026',
+    confiance: 'Élevée',
+  },
+  'treichville': {
+    nom: 'Mairie de Treichville',
     chefLieu: 'Abidjan',
     statutWeb: 'INACTIF',
-    url: 'http://mairiebingerville.ci',
-    observations: 'Maintenance / page blanche',
+    url: 'https://mairiedetreichville.com/',
+    observations: 'En maintenance / refonte : « Nous construisons votre futur portail »',
+    fraicheur: 'Sans objet',
+    confiance: 'Élevée',
   },
 };
 
@@ -301,6 +373,10 @@ export function getOfficialWebInfo(inst: {
   url: string;
   observations: string;
   chefLieu: string;
+  facebookUrl?: string;
+  facebookStatus?: string;
+  fraicheur?: string;
+  confiance?: string;
 } {
   const key = normalizeKey(inst.name);
   const isRegionOrDistrict = inst.type === 'REGION' || inst.type === 'DISTRICT';
@@ -317,7 +393,7 @@ export function getOfficialWebInfo(inst: {
     return {
       statutWeb: 'AUCUN',
       url: '',
-      observations: 'Communication sur Facebook uniquement',
+      observations: 'Aucun site officiel identifié après tests nominatifs',
       chefLieu: inst.region || '—',
     };
   }
@@ -327,17 +403,17 @@ export function getOfficialWebInfo(inst: {
     return OFFICIAL_COMMUNES_WEB_DATA[key];
   }
 
-  // Toutes les 184 autres mairies de Côte d'Ivoire
+  // Les 180 autres mairies de Côte d'Ivoire auditées sans site officiel identifié
   return {
     statutWeb: 'AUCUN',
     url: '',
-    observations: 'Présence numérique (Facebook...)',
+    observations: 'Aucun site officiel identifié après tests nominatifs',
     chefLieu: inst.region || (inst as any).departement || '—',
   };
 }
 
 /**
- * Enrichit une liste d'institutions avec les données officielles du répertoire web
+ * Enrichit une liste d'institutions avec les données officielles du répertoire web et réseaux sociaux vérifiés
  */
 export function enrichWithOfficialWebDirectory(institutions: Institution[]): Institution[] {
   return institutions.map(inst => {
@@ -351,12 +427,15 @@ export function enrichWithOfficialWebDirectory(institutions: Institution[]): Ins
     }
 
     const official = getOfficialWebInfo(inst);
+    // Priorité à l'URL vérifiée de l'annuaire officiel, ou à une éventuelle saisie manuelle préalable
     const resolvedWebsite = official.url || inst.website || undefined;
+    const resolvedFacebook = official.facebookUrl || (inst.facebook_url ? inst.facebook_url : undefined);
     const resolvedStatus = resolvedWebsite ? (official.statutWeb === 'AUCUN' ? 'FONCTIONNEL' : official.statutWeb) : 'AUCUN';
+
     return {
       ...inst,
       website: resolvedWebsite,
-      facebook_url: inst.facebook_url ? inst.facebook_url : undefined,
+      facebook_url: resolvedFacebook,
       web_status: resolvedStatus,
       web_observations: inst.web_observations || official.observations,
     };

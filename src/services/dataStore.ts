@@ -22,7 +22,7 @@ import { enrichWithPrimitiveBudgets } from '../data/officialPrimitiveBudgets';
 
 const STORAGE_KEYS = {
   PROJECTS: 'civicdata_projects_v2026_clean_v4',
-  INSTITUTIONS: 'civicdata_institutions_v16',
+  INSTITUTIONS: 'civicdata_institutions_v17',
   INSTITUTION_OVERRIDES: 'civicdata_institutions_overrides_v1',
   PROOFS: 'civicdata_proofs_v12',
   ARTICLES: 'civicdata_articles_v10',
