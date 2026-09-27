@@ -575,6 +575,9 @@ class DataStore {
         localStorage.setItem(STORAGE_KEYS.INSTITUTION_OVERRIDES, JSON.stringify(overridesMap));
       }
 
+      // Always re-apply official primitive budgets as base
+      this.institutions = enrichWithPrimitiveBudgets(this.institutions);
+
       // Apply overrides with priority over base data
       if (Object.keys(overridesMap).length > 0) {
         this.institutions = this.institutions.map(inst => {
@@ -583,15 +586,13 @@ class DataStore {
             return {
               ...inst,
               ...override,
+              primitive_budget: override.primitive_budget !== undefined ? override.primitive_budget : inst.primitive_budget,
               web_status: override.website ? (override.web_status || 'FONCTIONNEL') : (override.web_status || inst.web_status || 'AUCUN'),
             };
           }
           return inst;
         });
       }
-
-      // Always re-apply official primitive budgets so they are never lost even with cached data
-      this.institutions = enrichWithPrimitiveBudgets(this.institutions);
     } catch (e) {
       console.warn("Could not read institutions from localStorage", e);
     }
@@ -1208,10 +1209,21 @@ class DataStore {
         contact_email: updatedInst.contact_email,
         contact_phone: updatedInst.contact_phone,
         leader_name: updatedInst.leader_name,
+        leader_title: updatedInst.leader_title,
         leader_photo_url: updatedInst.leader_photo_url,
         political_party: updatedInst.political_party,
         web_status: updatedInst.web_status || (updatedInst.website ? 'FONCTIONNEL' : 'AUCUN'),
         web_observations: updatedInst.web_observations || '',
+        primitive_budget: updatedInst.primitive_budget,
+        total_budget_fcfa: updatedInst.total_budget_fcfa,
+        budget_functioning_fcfa: updatedInst.budget_functioning_fcfa,
+        budget_investment_fcfa: updatedInst.budget_investment_fcfa,
+        address: updatedInst.address,
+        departement: updatedInst.departement,
+        mission_summary: updatedInst.mission_summary,
+        info_officer_title: updatedInst.info_officer_title,
+        info_officer_email: updatedInst.info_officer_email,
+        info_officer_phone: updatedInst.info_officer_phone,
       };
       localStorage.setItem(STORAGE_KEYS.INSTITUTION_OVERRIDES, JSON.stringify(overridesMap));
     } catch (e) {
@@ -1236,6 +1248,61 @@ class DataStore {
         }),
         'Sync updated institution to Supabase'
       );
+    }
+
+    this.notify();
+  }
+
+  public updateMultipleInstitutions(updatedList: Institution[]) {
+    if (!updatedList || updatedList.length === 0) return;
+
+    let overridesMap: Record<string, any> = {};
+    try {
+      const storedOverrides = localStorage.getItem(STORAGE_KEYS.INSTITUTION_OVERRIDES);
+      if (storedOverrides) overridesMap = JSON.parse(storedOverrides);
+    } catch (e) {
+      // ignore
+    }
+
+    for (const updatedInst of updatedList) {
+      const idx = this.institutions.findIndex(inst => inst.id === updatedInst.id);
+      if (idx !== -1) {
+        this.institutions[idx] = { ...this.institutions[idx], ...updatedInst };
+      } else {
+        this.institutions.unshift(updatedInst);
+      }
+
+      overridesMap[updatedInst.id] = {
+        ...(overridesMap[updatedInst.id] || {}),
+        website: updatedInst.website,
+        facebook_url: updatedInst.facebook_url,
+        contact_email: updatedInst.contact_email,
+        contact_phone: updatedInst.contact_phone,
+        leader_name: updatedInst.leader_name,
+        leader_title: updatedInst.leader_title,
+        leader_photo_url: updatedInst.leader_photo_url,
+        political_party: updatedInst.political_party,
+        web_status: updatedInst.web_status || (updatedInst.website ? 'FONCTIONNEL' : 'AUCUN'),
+        web_observations: updatedInst.web_observations || '',
+        primitive_budget: updatedInst.primitive_budget,
+        total_budget_fcfa: updatedInst.total_budget_fcfa,
+        budget_functioning_fcfa: updatedInst.budget_functioning_fcfa,
+        budget_investment_fcfa: updatedInst.budget_investment_fcfa,
+        address: updatedInst.address,
+        departement: updatedInst.departement,
+        mission_summary: updatedInst.mission_summary,
+        info_officer_title: updatedInst.info_officer_title,
+        info_officer_email: updatedInst.info_officer_email,
+        info_officer_phone: updatedInst.info_officer_phone,
+      };
+    }
+
+    this.saveInstitutions();
+
+    try {
+      localStorage.setItem(STORAGE_KEYS.INSTITUTION_OVERRIDES, JSON.stringify(overridesMap));
+    } catch (e) {
+      console.warn("Could not save bulk institution overrides", e);
     }
 
     this.notify();

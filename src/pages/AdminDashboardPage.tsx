@@ -1,7 +1,7 @@
 import { matchesSmartSearch, normalizeSearchText } from '../utils/searchHelpers';
 import { AuthSecurityService } from '../services/authSecurity';
 import React, { useState, useMemo, useEffect } from 'react';
-import { BudgetProject, ProjectStatus, Institution, NewsArticle, SiteSettings, CitizenProof } from '../types';
+import { BudgetProject, ProjectStatus, Institution, NewsArticle, SiteSettings, CitizenProof, PrimitiveBudgetInfo } from '../types';
 import { dataStore } from '../services/dataStore';
 import { formatFCFA, formatDateFR, getStatusConfig, formatAmountInWords, calculateContractualElapsedPercentage } from '../utils/formatters';
 import { processLeaderPhotoFile } from '../utils/imageHelpers';
@@ -10,6 +10,7 @@ import { CaidpRiManager } from '../components/CaidpRiManager';
 import { ModeratorManager } from '../components/ModeratorManager';
 import { DocumentManager } from '../components/DocumentManager';
 import { CaidpAnalyticsManager } from '../components/CaidpAnalyticsManager';
+import { PrimitiveBudgetImporterModal } from '../components/PrimitiveBudgetImporterModal';
 import { 
   ShieldCheck, 
   CheckCircle2, 
@@ -49,7 +50,11 @@ import {
   Layers,
   LogOut,
   BarChart3,
-  MessageCircle
+  MessageCircle,
+  Receipt,
+  Coins,
+  Sparkles,
+  Phone
 } from 'lucide-react';
 
 interface AdminDashboardPageProps {
@@ -338,11 +343,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   // ==========================================
   const [instSearch, setInstSearch] = useState('');
   const [instTypeFilter, setInstTypeFilter] = useState<'ALL' | 'MAIRIE' | 'REGION' | 'INSTITUTION' | 'MINISTERE' | 'AUTORITE_REGULATION'>('ALL');
-  const [instStatusFilter, setInstStatusFilter] = useState<'ALL' | 'NO_PHOTO' | 'NO_WEBSITE' | 'WITH_WEBSITE' | 'NO_FACEBOOK' | 'NO_DIGITAL'>('ALL');
+  const [instStatusFilter, setInstStatusFilter] = useState<'ALL' | 'NO_PHOTO' | 'NO_WEBSITE' | 'WITH_WEBSITE' | 'NO_FACEBOOK' | 'WITH_FACEBOOK' | 'WITH_PRIMITIVE' | 'NO_PRIMITIVE' | 'NO_DIGITAL'>('ALL');
   const [instPage, setInstPage] = useState(1);
   const [instPageSize, setInstPageSize] = useState(12);
   const [isEditInstModalOpen, setIsEditInstModalOpen] = useState(false);
   const [isCreateInstModalOpen, setIsCreateInstModalOpen] = useState(false);
+  const [isPrimitiveBudgetImporterOpen, setIsPrimitiveBudgetImporterOpen] = useState(false);
   const [editingInst, setEditingInst] = useState<Institution | null>(null);
   const [instForm, setInstForm] = useState({
     name: '',
@@ -363,6 +369,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     budget_functioning_fcfa: 0,
     budget_investment_fcfa: 0,
     total_budget_fcfa: 0,
+    primitive_total_fcfa: 0,
+    primitive_investment_fcfa: 0,
+    primitive_functioning_fcfa: 0,
+    primitive_voted_date: '',
+    primitive_source: '',
+    primitive_source_url: '',
+    primitive_session_notes: '',
   });
 
   const isSyntheticWeb = (url?: string) => !url || url.trim() === '' || url.includes('mairie-mairie') || url.includes('example');
@@ -375,6 +388,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     const withoutWeb = allInstitutions.filter(i => isSyntheticWeb(i.website));
     const withoutFb = allInstitutions.filter(i => isSyntheticFb(i.facebook_url));
     const withoutDigital = allInstitutions.filter(i => isSyntheticWeb(i.website) && isSyntheticFb(i.facebook_url));
+    const withPrimitive = allInstitutions.filter(i => Boolean(i.primitive_budget && i.primitive_budget.total_voted_fcfa > 0));
+    const withPrimitiveUrl = allInstitutions.filter(i => Boolean(i.primitive_budget?.source_url));
+    const withFullDigital = allInstitutions.filter(i => !isSyntheticWeb(i.website) && !isSyntheticFb(i.facebook_url));
 
     return {
       total,
@@ -385,6 +401,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       withPhotoCount: total - withoutPhoto.length,
       withWebCount: total - withoutWeb.length,
       withFbCount: total - withoutFb.length,
+      withPrimitiveCount: withPrimitive.length,
+      withPrimitiveUrlCount: withPrimitiveUrl.length,
+      withoutPrimitiveCount: total - withPrimitive.length,
+      withFullDigitalCount: withFullDigital.length,
     };
   }, [allInstitutions]);
 
@@ -398,6 +418,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       if (instStatusFilter === 'NO_WEBSITE' && !isSyntheticWeb(inst.website)) return false;
       if (instStatusFilter === 'WITH_WEBSITE' && isSyntheticWeb(inst.website)) return false;
       if (instStatusFilter === 'NO_FACEBOOK' && !isSyntheticFb(inst.facebook_url)) return false;
+      if (instStatusFilter === 'WITH_FACEBOOK' && isSyntheticFb(inst.facebook_url)) return false;
+      if (instStatusFilter === 'WITH_PRIMITIVE' && (!inst.primitive_budget || inst.primitive_budget.total_voted_fcfa <= 0)) return false;
+      if (instStatusFilter === 'NO_PRIMITIVE' && (inst.primitive_budget && inst.primitive_budget.total_voted_fcfa > 0)) return false;
       if (instStatusFilter === 'NO_DIGITAL' && (!isSyntheticWeb(inst.website) || !isSyntheticFb(inst.facebook_url))) return false;
 
       // Search Query
@@ -552,6 +575,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   // ==========================================
   const [isQuickWebModalOpen, setIsQuickWebModalOpen] = useState(false);
   const [quickWebInst, setQuickWebInst] = useState<Institution | null>(null);
+  const [quickWebTab, setQuickWebTab] = useState<'DIGITAL' | 'PRIMITIVE' | 'CONTACT'>('DIGITAL');
   const [quickWebForm, setQuickWebForm] = useState<{
     website: string;
     facebook_url: string;
@@ -559,6 +583,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     contact_email: string;
     web_status: 'FONCTIONNEL' | 'INACTIF' | 'AUCUN';
     web_observations: string;
+    primitive_total_fcfa: number;
+    primitive_investment_fcfa: number;
+    primitive_functioning_fcfa: number;
+    primitive_voted_date: string;
+    primitive_source: string;
+    primitive_source_url: string;
+    primitive_session_notes: string;
   }>({
     website: '',
     facebook_url: '',
@@ -566,10 +597,19 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     contact_email: '',
     web_status: 'AUCUN',
     web_observations: '',
+    primitive_total_fcfa: 0,
+    primitive_investment_fcfa: 0,
+    primitive_functioning_fcfa: 0,
+    primitive_voted_date: '',
+    primitive_source: '',
+    primitive_source_url: '',
+    primitive_session_notes: '',
   });
 
-  const handleOpenQuickWebEdit = (inst: Institution) => {
+  const handleOpenQuickWebEdit = (inst: Institution, tab: 'DIGITAL' | 'PRIMITIVE' | 'CONTACT' = 'DIGITAL') => {
     setQuickWebInst(inst);
+    setQuickWebTab(tab);
+    const prim = inst.primitive_budget;
     setQuickWebForm({
       website: inst.website || '',
       facebook_url: inst.facebook_url || '',
@@ -577,6 +617,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       contact_email: inst.contact_email || inst.info_officer_email || '',
       web_status: inst.web_status || (inst.website ? 'FONCTIONNEL' : 'AUCUN'),
       web_observations: inst.web_observations || '',
+      primitive_total_fcfa: prim?.total_voted_fcfa || 0,
+      primitive_investment_fcfa: prim?.investment_voted_fcfa || 0,
+      primitive_functioning_fcfa: prim?.functioning_voted_fcfa || 0,
+      primitive_voted_date: prim?.voted_date || '',
+      primitive_source: prim?.source || '',
+      primitive_source_url: prim?.source_url || '',
+      primitive_session_notes: prim?.session_notes || '',
     });
     setIsQuickWebModalOpen(true);
   };
@@ -595,6 +642,30 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       cleanFacebook = `https://${cleanFacebook}`;
     }
 
+    let cleanSourceUrl = quickWebForm.primitive_source_url.trim();
+    if (cleanSourceUrl && !cleanSourceUrl.startsWith('http://') && !cleanSourceUrl.startsWith('https://')) {
+      cleanSourceUrl = `https://${cleanSourceUrl}`;
+    }
+
+    let primitive: PrimitiveBudgetInfo | undefined = quickWebInst.primitive_budget;
+    if (quickWebForm.primitive_total_fcfa > 0 || cleanSourceUrl) {
+      let inv = quickWebForm.primitive_investment_fcfa;
+      let func = quickWebForm.primitive_functioning_fcfa;
+      if (quickWebForm.primitive_total_fcfa > 0 && inv === 0 && func === 0) {
+        inv = Math.round(quickWebForm.primitive_total_fcfa * 0.55);
+        func = quickWebForm.primitive_total_fcfa - inv;
+      }
+      primitive = {
+        total_voted_fcfa: quickWebForm.primitive_total_fcfa,
+        investment_voted_fcfa: inv,
+        functioning_voted_fcfa: func,
+        voted_date: quickWebForm.primitive_voted_date || new Date().toLocaleDateString('fr-FR'),
+        source: quickWebForm.primitive_source || 'Conseil Municipal / Délibération officielle',
+        source_url: cleanSourceUrl || undefined,
+        session_notes: quickWebForm.primitive_session_notes.trim() || undefined,
+      };
+    }
+
     const updated: Institution = {
       ...quickWebInst,
       website: cleanWebsite,
@@ -603,16 +674,18 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       contact_email: quickWebForm.contact_email.trim(),
       web_status: cleanWebsite ? (quickWebForm.web_status === 'AUCUN' ? 'FONCTIONNEL' : quickWebForm.web_status) : 'AUCUN',
       web_observations: quickWebForm.web_observations.trim(),
+      primitive_budget: primitive,
     };
 
     dataStore.updateInstitution(updated);
-    showToast(`Portail web de "${updated.name}" enregistré et publié ! Immédiatement visible pour les citoyens.`);
+    showToast(`Fiche de "${updated.name}" mise à jour et publiée instantanément !`);
     setIsQuickWebModalOpen(false);
     setQuickWebInst(null);
   };
 
   const handleOpenEditInst = (inst: Institution) => {
     setEditingInst(inst);
+    const prim = inst.primitive_budget;
     setInstForm({
       name: inst.name,
       type: inst.type,
@@ -632,6 +705,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       budget_functioning_fcfa: inst.budget_functioning_fcfa || 0,
       budget_investment_fcfa: inst.budget_investment_fcfa || 0,
       total_budget_fcfa: inst.total_budget_fcfa || 0,
+      primitive_total_fcfa: prim?.total_voted_fcfa || 0,
+      primitive_investment_fcfa: prim?.investment_voted_fcfa || 0,
+      primitive_functioning_fcfa: prim?.functioning_voted_fcfa || 0,
+      primitive_voted_date: prim?.voted_date || '',
+      primitive_source: prim?.source || '',
+      primitive_source_url: prim?.source_url || '',
+      primitive_session_notes: prim?.session_notes || '',
     });
     setIsEditInstModalOpen(true);
   };
@@ -657,6 +737,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       budget_functioning_fcfa: 0,
       budget_investment_fcfa: 0,
       total_budget_fcfa: 0,
+      primitive_total_fcfa: 0,
+      primitive_investment_fcfa: 0,
+      primitive_functioning_fcfa: 0,
+      primitive_voted_date: '',
+      primitive_source: '',
+      primitive_source_url: '',
+      primitive_session_notes: '',
     });
     setIsCreateInstModalOpen(true);
   };
@@ -664,20 +751,60 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const handleSaveInstitution = (e: React.FormEvent) => {
     e.preventDefault();
     const total = (instForm.budget_functioning_fcfa || 0) + (instForm.budget_investment_fcfa || 0);
+
+    let cleanWebsite = instForm.website.trim();
+    if (cleanWebsite && !cleanWebsite.startsWith('http://') && !cleanWebsite.startsWith('https://')) {
+      cleanWebsite = `https://${cleanWebsite}`;
+    }
+
+    let cleanFacebook = instForm.facebook_url.trim();
+    if (cleanFacebook && !cleanFacebook.startsWith('http://') && !cleanFacebook.startsWith('https://')) {
+      cleanFacebook = `https://${cleanFacebook}`;
+    }
+
+    let cleanSourceUrl = instForm.primitive_source_url.trim();
+    if (cleanSourceUrl && !cleanSourceUrl.startsWith('http://') && !cleanSourceUrl.startsWith('https://')) {
+      cleanSourceUrl = `https://${cleanSourceUrl}`;
+    }
+
+    let primitive: PrimitiveBudgetInfo | undefined = editingInst?.primitive_budget;
+    if (instForm.primitive_total_fcfa > 0 || cleanSourceUrl) {
+      let inv = instForm.primitive_investment_fcfa;
+      let func = instForm.primitive_functioning_fcfa;
+      if (instForm.primitive_total_fcfa > 0 && inv === 0 && func === 0) {
+        inv = Math.round(instForm.primitive_total_fcfa * 0.55);
+        func = instForm.primitive_total_fcfa - inv;
+      }
+      primitive = {
+        total_voted_fcfa: instForm.primitive_total_fcfa,
+        investment_voted_fcfa: inv,
+        functioning_voted_fcfa: func,
+        voted_date: instForm.primitive_voted_date || new Date().toLocaleDateString('fr-FR'),
+        source: instForm.primitive_source || 'Conseil Municipal / Délibération officielle',
+        source_url: cleanSourceUrl || undefined,
+        session_notes: instForm.primitive_session_notes.trim() || undefined,
+      };
+    }
     
     if (editingInst) {
       const updated: Institution = {
         ...editingInst,
         ...instForm,
+        website: cleanWebsite,
+        facebook_url: cleanFacebook,
+        primitive_budget: primitive,
         total_budget_fcfa: total > 0 ? total : (instForm.total_budget_fcfa || editingInst.total_budget_fcfa),
       };
       dataStore.updateInstitution(updated);
-      showToast('Informations et photo de l\'entité mises à jour !');
+      showToast('Informations de l\'entité mises à jour avec succès !');
       setIsEditInstModalOpen(false);
       setEditingInst(null);
     } else {
       dataStore.addInstitution({
         ...instForm,
+        website: cleanWebsite,
+        facebook_url: cleanFacebook,
+        primitive_budget: primitive,
         total_budget_fcfa: total > 0 ? total : instForm.total_budget_fcfa,
       });
       showToast('Nouvelle entité ajoutée avec succès !');
@@ -1166,109 +1293,141 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
             <div className="flex items-center gap-2 flex-wrap">
               <button
+                onClick={() => setIsPrimitiveBudgetImporterOpen(true)}
+                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                title="Importer des budgets primitifs votés par fichier CSV pour les mairies et régions"
+              >
+                <FileSpreadsheet className="w-4 h-4" />
+                <span>+ Importer Budgets Primitifs</span>
+              </button>
+
+              <button
                 onClick={handleOpenCreateInst}
-                className="px-4 py-2.5 bg-navy-900 hover:bg-navy-800 text-white rounded-2xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2.5 bg-navy-900 hover:bg-navy-800 text-white rounded-2xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
               >
                 <Plus className="w-4 h-4" />
-                <span>+ Nouvelle Entité / Institution</span>
+                <span>+ Nouvelle Entité</span>
               </button>
             </div>
           </div>
 
           {/* ========================================== */}
-          {/* KPI METRIC CARDS : AUDIT & COMPLÉTUDE DATA */}
+          {/* KPI METRIC CARDS : AUDIT, SOCIAL & BUDGETS */}
           {/* ========================================== */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             
-            {/* Card 1: Photos à ajouter */}
+            {/* Card 1: Photos */}
             <div 
               onClick={() => { setInstStatusFilter(instStatusFilter === 'NO_PHOTO' ? 'ALL' : 'NO_PHOTO'); setInstPage(1); }}
-              className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
                 instStatusFilter === 'NO_PHOTO' 
                   ? 'bg-amber-500 text-white border-amber-500 shadow-md ring-2 ring-amber-300' 
                   : 'bg-amber-50/70 hover:bg-amber-100/70 border-amber-200 text-amber-900'
               }`}
             >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-black uppercase tracking-wider">Photos à ajouter</span>
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[10px] font-black uppercase tracking-wider">Photos Élus</span>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${instStatusFilter === 'NO_PHOTO' ? 'bg-white text-amber-900' : 'bg-amber-200/80 text-amber-900'}`}>
-                  {Math.round((instStats.withoutPhotoCount / instStats.total) * 100)}% manquantes
+                  {instStats.withoutPhotoCount} manq.
                 </span>
               </div>
-              <div className="text-2xl font-black mt-2">
-                {instStats.withoutPhotoCount} <span className="text-xs font-medium opacity-80">/ {instStats.total}</span>
+              <div className="text-xl font-black mt-1.5">
+                {instStats.withPhotoCount} <span className="text-xs font-medium opacity-80">/ {instStats.total}</span>
               </div>
-              <p className={`text-[11px] mt-1 font-medium ${instStatusFilter === 'NO_PHOTO' ? 'text-amber-100' : 'text-amber-700'}`}>
-                {instStats.withPhotoCount} photos officielles en ligne
+              <p className={`text-[10px] mt-0.5 font-medium truncate ${instStatusFilter === 'NO_PHOTO' ? 'text-amber-100' : 'text-amber-700'}`}>
+                {Math.round((instStats.withPhotoCount / instStats.total) * 100)}% de couverture
               </p>
             </div>
 
-            {/* Card 2: Sans Site Web */}
+            {/* Card 2: Sites Web */}
             <div 
               onClick={() => { setInstStatusFilter(instStatusFilter === 'NO_WEBSITE' ? 'ALL' : 'NO_WEBSITE'); setInstPage(1); }}
-              className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
                 instStatusFilter === 'NO_WEBSITE' 
                   ? 'bg-sky-600 text-white border-sky-600 shadow-md ring-2 ring-sky-300' 
                   : 'bg-sky-50/70 hover:bg-sky-100/70 border-sky-200 text-sky-900'
               }`}
             >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-black uppercase tracking-wider">Sans Site Web</span>
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[10px] font-black uppercase tracking-wider">Sites Web</span>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${instStatusFilter === 'NO_WEBSITE' ? 'bg-white text-sky-900' : 'bg-sky-200/80 text-sky-900'}`}>
-                  {instStats.withoutWebCount} à créer
+                  {instStats.withoutWebCount} sans site
                 </span>
               </div>
-              <div className="text-2xl font-black mt-2">
-                {instStats.withoutWebCount} <span className="text-xs font-medium opacity-80">/ {instStats.total}</span>
+              <div className="text-xl font-black mt-1.5">
+                {instStats.withWebCount} <span className="text-xs font-medium opacity-80">/ {instStats.total}</span>
               </div>
-              <p className={`text-[11px] mt-1 font-medium ${instStatusFilter === 'NO_WEBSITE' ? 'text-sky-100' : 'text-sky-700'}`}>
-                {instStats.withWebCount} sites officiels réels actifs
+              <p className={`text-[10px] mt-0.5 font-medium truncate ${instStatusFilter === 'NO_WEBSITE' ? 'text-sky-100' : 'text-sky-700'}`}>
+                Portails officiels en ligne
               </p>
             </div>
 
-            {/* Card 3: Sans Page Facebook */}
+            {/* Card 3: Pages Facebook */}
             <div 
               onClick={() => { setInstStatusFilter(instStatusFilter === 'NO_FACEBOOK' ? 'ALL' : 'NO_FACEBOOK'); setInstPage(1); }}
-              className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
                 instStatusFilter === 'NO_FACEBOOK' 
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-md ring-2 ring-blue-300' 
+                  ? 'bg-[#1877F2] text-white border-[#1877F2] shadow-md ring-2 ring-blue-300' 
                   : 'bg-blue-50/70 hover:bg-blue-100/70 border-blue-200 text-blue-900'
               }`}
             >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-black uppercase tracking-wider">Sans Page Facebook</span>
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[10px] font-black uppercase tracking-wider">Pages Facebook</span>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${instStatusFilter === 'NO_FACEBOOK' ? 'bg-white text-blue-900' : 'bg-blue-200/80 text-blue-900'}`}>
-                  {instStats.withoutFbCount} manquantes
+                  {instStats.withoutFbCount} manq.
                 </span>
               </div>
-              <div className="text-2xl font-black mt-2">
-                {instStats.withoutFbCount} <span className="text-xs font-medium opacity-80">/ {instStats.total}</span>
+              <div className="text-xl font-black mt-1.5">
+                {instStats.withFbCount} <span className="text-xs font-medium opacity-80">/ {instStats.total}</span>
               </div>
-              <p className={`text-[11px] mt-1 font-medium ${instStatusFilter === 'NO_FACEBOOK' ? 'text-blue-100' : 'text-blue-700'}`}>
-                {instStats.withFbCount} pages Facebook répertoriées
+              <p className={`text-[10px] mt-0.5 font-medium truncate ${instStatusFilter === 'NO_FACEBOOK' ? 'text-blue-100' : 'text-blue-700'}`}>
+                Pages officielles certifiées
               </p>
             </div>
 
-            {/* Card 4: Sans Présence Numérique */}
+            {/* Card 4: Budgets Primitifs Votés */}
             <div 
-              onClick={() => { setInstStatusFilter(instStatusFilter === 'NO_DIGITAL' ? 'ALL' : 'NO_DIGITAL'); setInstPage(1); }}
-              className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                instStatusFilter === 'NO_DIGITAL' 
-                  ? 'bg-rose-600 text-white border-rose-600 shadow-md ring-2 ring-rose-300' 
-                  : 'bg-rose-50/70 hover:bg-rose-100/70 border-rose-200 text-rose-900'
+              onClick={() => { setInstStatusFilter(instStatusFilter === 'WITH_PRIMITIVE' ? 'ALL' : 'WITH_PRIMITIVE'); setInstPage(1); }}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                instStatusFilter === 'WITH_PRIMITIVE' 
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-300' 
+                  : 'bg-emerald-50/70 hover:bg-emerald-100/70 border-emerald-200 text-emerald-900'
               }`}
             >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-black uppercase tracking-wider">Sans Web ni Facebook</span>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${instStatusFilter === 'NO_DIGITAL' ? 'bg-white text-rose-900' : 'bg-rose-200/80 text-rose-900'}`}>
-                  Priorité
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[10px] font-black uppercase tracking-wider">Budgets Primitifs</span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${instStatusFilter === 'WITH_PRIMITIVE' ? 'bg-white text-emerald-900' : 'bg-emerald-200/80 text-emerald-900'}`}>
+                  {instStats.withPrimitiveUrlCount} prouvés
                 </span>
               </div>
-              <div className="text-2xl font-black mt-2">
-                {instStats.withoutDigitalCount} <span className="text-xs font-medium opacity-80">organes</span>
+              <div className="text-xl font-black mt-1.5">
+                {instStats.withPrimitiveCount} <span className="text-xs font-medium opacity-80">votés</span>
               </div>
-              <p className={`text-[11px] mt-1 font-medium ${instStatusFilter === 'NO_DIGITAL' ? 'text-rose-100' : 'text-rose-700'}`}>
-                Aucune présence en ligne trouvée
+              <p className={`text-[10px] mt-0.5 font-medium truncate ${instStatusFilter === 'WITH_PRIMITIVE' ? 'text-emerald-100' : 'text-emerald-700'}`}>
+                {instStats.withoutPrimitiveCount} en attente de vote
+              </p>
+            </div>
+
+            {/* Card 5: 100% Numérique (Web + FB) */}
+            <div 
+              onClick={() => { setInstStatusFilter(instStatusFilter === 'NO_DIGITAL' ? 'ALL' : 'NO_DIGITAL'); setInstPage(1); }}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                instStatusFilter === 'NO_DIGITAL' 
+                  ? 'bg-purple-600 text-white border-purple-600 shadow-md ring-2 ring-purple-300' 
+                  : 'bg-purple-50/70 hover:bg-purple-100/70 border-purple-200 text-purple-900'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[10px] font-black uppercase tracking-wider">Web + Facebook</span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${instStatusFilter === 'NO_DIGITAL' ? 'bg-white text-purple-900' : 'bg-purple-200/80 text-purple-900'}`}>
+                  {instStats.withFullDigitalCount} complets
+                </span>
+              </div>
+              <div className="text-xl font-black mt-1.5">
+                {instStats.withoutDigitalCount} <span className="text-xs font-medium opacity-80">sans rien</span>
+              </div>
+              <p className={`text-[10px] mt-0.5 font-medium truncate ${instStatusFilter === 'NO_DIGITAL' ? 'text-purple-100' : 'text-purple-700'}`}>
+                Priorité de numérisation
               </p>
             </div>
 
@@ -1322,16 +1481,19 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               ))}
             </div>
 
-            {/* Row 2: Filter by Digital / Photo Status */}
+            {/* Row 2: Filter by Digital / Photo / Budget Status */}
             <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-200/60">
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 mr-1">Statut :</span>
               {[
                 { id: 'ALL', label: 'Tous les statuts' },
-                { id: 'NO_PHOTO', label: `Photos manquantes (${instStats.withoutPhotoCount})` },
-                { id: 'NO_WEBSITE', label: `Sans site web officiel (${instStats.withoutWebCount})` },
-                { id: 'WITH_WEBSITE', label: `Avec site web officiel (${instStats.withWebCount})` },
                 { id: 'NO_FACEBOOK', label: `Sans page Facebook (${instStats.withoutFbCount})` },
-                { id: 'NO_DIGITAL', label: `Sans présence en ligne (${instStats.withoutDigitalCount})` },
+                { id: 'WITH_FACEBOOK', label: `Avec page Facebook (${instStats.withFbCount})` },
+                { id: 'NO_WEBSITE', label: `Sans site web (${instStats.withoutWebCount})` },
+                { id: 'WITH_WEBSITE', label: `Avec site web (${instStats.withWebCount})` },
+                { id: 'WITH_PRIMITIVE', label: `Avec Budget Primitif (${instStats.withPrimitiveCount})` },
+                { id: 'NO_PRIMITIVE', label: `Sans Budget Primitif (${instStats.withoutPrimitiveCount})` },
+                { id: 'NO_PHOTO', label: `Photos manquantes (${instStats.withoutPhotoCount})` },
+                { id: 'NO_DIGITAL', label: `Sans présence numérique (${instStats.withoutDigitalCount})` },
               ].map(status => (
                 <button
                   key={status.id}
@@ -1434,69 +1596,141 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       </div>
                     </div>
 
-                    {/* Metadata & Links */}
-                    <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-600">
-                      <div>
-                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Dotation Votée</span>
-                        <span className="font-black text-slate-900 text-xs">
-                          {inst.total_budget_fcfa > 0 ? `${formatFCFA(inst.total_budget_fcfa)} (${formatAmountInWords(inst.total_budget_fcfa)})` : 'Non publié'}
-                        </span>
-                      </div>
+                    {/* Metadata & Budgets */}
+                    <div className="pt-2.5 border-t border-slate-200/60 space-y-2 text-xs">
+                      {/* Budget Display */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                            {inst.primitive_budget?.total_voted_fcfa ? 'Budget Primitif Voté' : 'Dotation Budgétaire'}
+                          </span>
+                          {inst.primitive_budget?.total_voted_fcfa ? (
+                            <div>
+                              <span className="font-black text-emerald-800 text-xs sm:text-sm block">
+                                {formatFCFA(inst.primitive_budget.total_voted_fcfa)}
+                              </span>
+                              <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-slate-500 pt-0.5">
+                                <span>Voté le {inst.primitive_budget.voted_date || '2024'}</span>
+                                {inst.primitive_budget.source_url && (
+                                  <>
+                                    <span>•</span>
+                                    <a
+                                      href={inst.primitive_budget.source_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="font-bold text-brand-blue hover:text-navy-900 inline-flex items-center gap-0.5 underline"
+                                      title={`Consulter la délibération officielle (${inst.primitive_budget.source || 'AIP / Journal'})`}
+                                    >
+                                      Preuve ↗
+                                    </a>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          ) : inst.total_budget_fcfa > 0 ? (
+                            <span className="font-bold text-slate-900 text-xs">
+                              {formatFCFA(inst.total_budget_fcfa)}
+                            </span>
+                          ) : (
+                            <span className="text-[11px] text-amber-600 font-semibold italic">
+                              Budget primitif non renseigné
+                            </span>
+                          )}
+                        </div>
 
-                      <div className="flex items-center gap-1.5">
-                        {inst.website && (
-                          <a 
-                            href={inst.website} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-brand-blue hover:text-white text-slate-600 transition-colors"
-                            title="Visiter le site web officiel"
-                          >
-                            <Globe className="w-3.5 h-3.5" />
-                          </a>
-                        )}
-                        {inst.facebook_url && (
-                          <a 
-                            href={inst.facebook_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-600 transition-colors font-bold text-xs"
-                            title="Page Facebook officielle"
-                          >
-                            f
-                          </a>
-                        )}
+                        {/* Digital Presence Badges */}
+                        <div className="flex items-center gap-1 shrink-0">
+                          {inst.website ? (
+                            <a 
+                              href={inst.website} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 border border-emerald-200 transition-colors"
+                              title={`Visiter le site web officiel : ${inst.website}`}
+                            >
+                              <Globe className="w-3.5 h-3.5" />
+                            </a>
+                          ) : (
+                            <span className="p-1.5 rounded-lg bg-slate-100 text-slate-300" title="Aucun site web renseigné">
+                              <Globe className="w-3.5 h-3.5" />
+                            </span>
+                          )}
+                          {inst.facebook_url ? (
+                            <a 
+                              href={inst.facebook_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="p-1.5 rounded-lg bg-blue-50 hover:bg-[#1877F2] hover:text-white text-[#1877F2] border border-blue-200 transition-colors font-bold text-xs"
+                              title={`Visiter la page Facebook officielle : ${inst.facebook_url}`}
+                            >
+                              f
+                            </a>
+                          ) : (
+                            <span className="p-1.5 rounded-lg bg-slate-100 text-slate-300 font-bold text-xs" title="Aucune page Facebook renseignée">
+                              f
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="pt-3 mt-3 border-t border-slate-200/60 flex items-center gap-2">
+                  {/* Actions Bar: Direct Quick-Edit for Site, Facebook, Budget & Full Edit */}
+                  <div className="pt-3 mt-3 border-t border-slate-200/60 grid grid-cols-4 gap-1.5">
+                    {/* Site Button */}
                     <button
-                      onClick={() => handleOpenQuickWebEdit(inst)}
-                      className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs ${
+                      type="button"
+                      onClick={() => handleOpenQuickWebEdit(inst, 'DIGITAL')}
+                      className={`py-1.5 px-1.5 rounded-xl border text-[11px] font-bold transition-all flex items-center justify-center gap-1 shadow-2xs ${
                         inst.website 
                           ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
-                          : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                          : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                       }`}
                       title={inst.website ? `Modifier le site web (${inst.website})` : 'Ajouter un site web officiel'}
                     >
-                      <Globe className="w-3.5 h-3.5" />
-                      <span>{inst.website ? 'Site Web' : '+ Site'}</span>
+                      <Globe className="w-3 h-3 shrink-0" />
+                      <span className="truncate">{inst.website ? 'Site' : '+ Site'}</span>
                     </button>
+
+                    {/* Facebook Button (Clearly Visible) */}
                     <button
+                      type="button"
+                      onClick={() => handleOpenQuickWebEdit(inst, 'DIGITAL')}
+                      className={`py-1.5 px-1.5 rounded-xl border text-[11px] font-bold transition-all flex items-center justify-center gap-1 shadow-2xs ${
+                        inst.facebook_url 
+                          ? 'bg-blue-50 text-[#1877F2] border-blue-200 hover:bg-blue-100' 
+                          : 'bg-blue-50/50 text-[#1877F2] border-dashed border-blue-300 hover:bg-blue-100 font-black'
+                      }`}
+                      title={inst.facebook_url ? `Modifier la page Facebook (${inst.facebook_url})` : 'Ajouter la page Facebook officielle'}
+                    >
+                      <span className="font-black text-xs">f</span>
+                      <span className="truncate">{inst.facebook_url ? 'Page FB' : '+ FB'}</span>
+                    </button>
+
+                    {/* Budget Primitif Quick Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenQuickWebEdit(inst, 'PRIMITIVE')}
+                      className={`py-1.5 px-1.5 rounded-xl border text-[11px] font-bold transition-all flex items-center justify-center gap-1 shadow-2xs ${
+                        inst.primitive_budget?.total_voted_fcfa
+                          ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
+                          : 'bg-amber-50/40 text-amber-700 border-dashed border-amber-300 hover:bg-amber-100'
+                      }`}
+                      title={inst.primitive_budget?.total_voted_fcfa ? `Modifier le budget primitif voté (${formatFCFA(inst.primitive_budget.total_voted_fcfa)})` : 'Ajouter le budget primitif voté et le lien de preuve'}
+                    >
+                      <Receipt className="w-3 h-3 shrink-0 text-amber-600" />
+                      <span className="truncate">{inst.primitive_budget?.total_voted_fcfa ? 'Budget' : '+ Budget'}</span>
+                    </button>
+
+                    {/* Edit Full Record Button */}
+                    <button
+                      type="button"
                       onClick={() => handleOpenEditInst(inst)}
-                      className="flex-1 py-2 px-3 bg-white hover:bg-brand-blue hover:text-white border border-slate-200 hover:border-brand-blue rounded-xl text-xs font-bold text-slate-700 transition-all flex items-center justify-center gap-1.5 shadow-2xs"
+                      className="py-1.5 px-1.5 bg-white hover:bg-navy-900 hover:text-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-all flex items-center justify-center gap-1 shadow-2xs"
+                      title="Modifier l'intégralité de la fiche"
                     >
-                      <Edit className="w-3.5 h-3.5" />
-                      <span>{hasPhoto ? 'Modifier Fiche' : '+ Fiche Complète'}</span>
-                    </button>
-                    <button
-                      onClick={() => handleDeleteInstitution(inst.id, inst.name)}
-                      className="p-2 bg-white hover:bg-red-50 text-slate-400 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-xl transition-colors"
-                      title="Supprimer cette entité"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Edit className="w-3 h-3 shrink-0" />
+                      <span className="truncate">Fiche</span>
                     </button>
                   </div>
                 </div>
@@ -3302,49 +3536,223 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               </div>
 
               {/* Web & Social Links */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Site Web Officiel</label>
-                  <input
-                    type="url"
-                    value={instForm.website}
-                    onChange={(e) => setInstForm({ ...instForm, website: e.target.value })}
-                    placeholder="https://..."
-                    className="w-full p-2.5 border border-slate-300 rounded-xl"
-                  />
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-black text-slate-800 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-brand-blue" />
+                    Présence Numérique & Réseaux Sociaux
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-semibold">Publication instantanée</span>
                 </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="font-bold text-slate-700">Site Web Officiel</label>
+                      {instForm.website && (
+                        <a
+                          href={instForm.website.startsWith('http') ? instForm.website : `https://${instForm.website}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] text-emerald-700 font-bold hover:underline"
+                        >
+                          Tester ↗
+                        </a>
+                      )}
+                    </div>
+                    <input
+                      type="url"
+                      value={instForm.website}
+                      onChange={(e) => setInstForm({ ...instForm, website: e.target.value })}
+                      placeholder="https://www.mairie.ci"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="font-bold text-slate-700 flex items-center gap-1">
+                        <span className="text-[#1877F2] font-black">f</span>
+                        <span>Page Facebook Officielle</span>
+                      </label>
+                      {instForm.facebook_url && (
+                        <a
+                          href={instForm.facebook_url.startsWith('http') ? instForm.facebook_url : `https://${instForm.facebook_url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] text-[#1877F2] font-bold hover:underline"
+                        >
+                          Tester ↗
+                        </a>
+                      )}
+                    </div>
+                    <input
+                      type="url"
+                      value={instForm.facebook_url}
+                      onChange={(e) => setInstForm({ ...instForm, facebook_url: e.target.value })}
+                      placeholder="https://facebook.com/mairieofficielle"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl bg-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION: Budget Primitif Voté & Délibération Officielle */}
+              <div className="p-4 bg-amber-50/60 border border-amber-200/80 rounded-2xl space-y-3.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1.5 rounded-lg bg-amber-100 text-amber-800">
+                      <Receipt className="w-4 h-4" />
+                    </span>
+                    <div>
+                      <h5 className="font-black text-amber-950 text-xs sm:text-sm">
+                        Budget Primitif Voté (Délibération Municipale / Régionale)
+                      </h5>
+                      <p className="text-[10px] text-amber-800 font-medium">
+                        Renseignez le budget voté en conseil et le lien public officiel attestant du vote.
+                      </p>
+                    </div>
+                  </div>
+                  {instForm.primitive_total_fcfa > 0 && (
+                    <span className="px-2 py-0.5 rounded-md bg-amber-200 text-amber-900 font-black text-[10px]">
+                      {formatFCFA(instForm.primitive_total_fcfa)}
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-800 mb-1">Budget Total Voté (FCFA)</label>
+                    <input
+                      type="number"
+                      value={instForm.primitive_total_fcfa || ''}
+                      onChange={(e) => {
+                        const total = Number(e.target.value);
+                        setInstForm(prev => {
+                          // Auto split 55% invest / 45% func if both are 0
+                          const shouldAutoSplit = prev.primitive_investment_fcfa === 0 && prev.primitive_functioning_fcfa === 0;
+                          return {
+                            ...prev,
+                            primitive_total_fcfa: total,
+                            primitive_investment_fcfa: shouldAutoSplit ? Math.round(total * 0.55) : prev.primitive_investment_fcfa,
+                            primitive_functioning_fcfa: shouldAutoSplit ? Math.round(total * 0.45) : prev.primitive_functioning_fcfa,
+                          };
+                        });
+                      }}
+                      placeholder="Ex: 1450000000"
+                      className="w-full p-2.5 border border-amber-300 rounded-xl bg-white font-bold text-slate-900 focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-800 mb-1">Part Investissement (FCFA)</label>
+                    <input
+                      type="number"
+                      value={instForm.primitive_investment_fcfa || ''}
+                      onChange={(e) => setInstForm({ ...instForm, primitive_investment_fcfa: Number(e.target.value) })}
+                      placeholder="Ex: 797500000"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl bg-white text-slate-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-800 mb-1">Part Fonctionnement (FCFA)</label>
+                    <input
+                      type="number"
+                      value={instForm.primitive_functioning_fcfa || ''}
+                      onChange={(e) => setInstForm({ ...instForm, primitive_functioning_fcfa: Number(e.target.value) })}
+                      placeholder="Ex: 652500000"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl bg-white text-slate-900"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-800 mb-1">Date du Vote / Session</label>
+                    <input
+                      type="text"
+                      value={instForm.primitive_voted_date}
+                      onChange={(e) => setInstForm({ ...instForm, primitive_voted_date: e.target.value })}
+                      placeholder="Ex: 15 mars 2024 ou 2024-03-15"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl bg-white text-slate-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-800 mb-1">Organe Délibérant / Source</label>
+                    <input
+                      type="text"
+                      value={instForm.primitive_source}
+                      onChange={(e) => setInstForm({ ...instForm, primitive_source: e.target.value })}
+                      placeholder="Ex: Conseil Municipal - 1ère session ordinaire (AIP)"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl bg-white text-slate-900"
+                    />
+                  </div>
+                </div>
+
+                {/* Lien public de confirmation / Preuve URL */}
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Page Facebook Officielle</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Lien public de confirmation du budget (Article AIP, publication officielle, délibération)</span>
+                    </label>
+                    {instForm.primitive_source_url && (
+                      <a
+                        href={instForm.primitive_source_url.startsWith('http') ? instForm.primitive_source_url : `https://${instForm.primitive_source_url}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-brand-blue font-bold hover:underline inline-flex items-center gap-0.5"
+                      >
+                        Tester le lien preuve ↗
+                      </a>
+                    )}
+                  </div>
                   <input
                     type="url"
-                    value={instForm.facebook_url}
-                    onChange={(e) => setInstForm({ ...instForm, facebook_url: e.target.value })}
-                    placeholder="https://facebook.com/..."
-                    className="w-full p-2.5 border border-slate-300 rounded-xl"
+                    value={instForm.primitive_source_url}
+                    onChange={(e) => setInstForm({ ...instForm, primitive_source_url: e.target.value })}
+                    placeholder="https://www.aip.ci/cote-divoire-la-mairie-de-...-adopte-son-budget-primitif/ ou page facebook de délibération"
+                    className="w-full p-2.5 border border-amber-300 rounded-xl bg-white font-mono text-[11px] focus:ring-2 focus:ring-amber-500"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">
+                    Ce lien sera affiché sur la fiche publique de la collectivité pour permettre aux citoyens et journalistes de vérifier la délibération.
+                  </p>
+                </div>
+
+                {/* Notes de session */}
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">Synthèse des priorités votées / Notes de séance</label>
+                  <input
+                    type="text"
+                    value={instForm.primitive_session_notes}
+                    onChange={(e) => setInstForm({ ...instForm, primitive_session_notes: e.target.value })}
+                    placeholder="Ex: Priorité accordée à l'assainissement, à l'éclairage public et à la réhabilitation des marchés."
+                    className="w-full p-2.5 border border-slate-300 rounded-xl bg-white text-slate-900"
                   />
                 </div>
               </div>
 
-              {/* Budgets */}
+              {/* Budgets & Dotations complémentaires */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Dotation Fonctionnement (FCFA)</label>
+                  <label className="block font-bold text-slate-700 mb-1">Dotation Fonctionnement Annuelle (FCFA)</label>
                   <input
                     type="number"
                     value={instForm.budget_functioning_fcfa}
                     onChange={(e) => setInstForm({ ...instForm, budget_functioning_fcfa: Number(e.target.value) })}
-                    className="w-full p-2.5 border border-slate-300 rounded-xl"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl bg-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Dotation Investissement (FCFA)</label>
+                  <label className="block font-bold text-slate-700 mb-1">Dotation Investissement Annuelle (FCFA)</label>
                   <input
                     type="number"
                     value={instForm.budget_investment_fcfa}
                     onChange={(e) => setInstForm({ ...instForm, budget_investment_fcfa: Number(e.target.value) })}
-                    className="w-full p-2.5 border border-slate-300 rounded-xl"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl bg-white"
                   />
                 </div>
               </div>
@@ -3353,11 +3761,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Missions & Compétences Clés</label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   value={instForm.mission_summary}
                   onChange={(e) => setInstForm({ ...instForm, mission_summary: e.target.value })}
                   placeholder="Décrivez brièvement les missions et projets prioritaires de cette entité..."
-                  className="w-full p-2.5 border border-slate-300 rounded-xl"
+                  className="w-full p-2.5 border border-slate-300 rounded-xl bg-white"
                 />
               </div>
 
@@ -3872,22 +4280,22 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL: QUICK WEBSITE & CONTACT DETAILS */}
+      {/* MODAL: QUICK WEBSITE, SOCIAL MEDIA & PRIMITIVE BUDGET */}
       {/* ========================================================================= */}
       {isQuickWebModalOpen && quickWebInst && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/75 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-xl shadow-2xl p-6 sm:p-7 space-y-5 border border-slate-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
-                <span className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-700 font-bold">
-                  <Globe className="w-5 h-5 text-emerald-600" />
+                <span className="p-2.5 rounded-2xl bg-brand-blue/10 text-brand-blue font-bold">
+                  <Globe className="w-5 h-5" />
                 </span>
                 <div>
                   <h4 className="text-lg font-black text-navy-900">
-                    Portail Web & Coordonnées Officielles
+                    Présence Numérique & Budget Voté
                   </h4>
                   <p className="text-xs text-slate-500 font-medium">
-                    Ajoutez ou modifiez le site web officiel avec publication immédiate sur la plateforme.
+                    Ajoutez ou modifiez immédiatement les liens web, la page Facebook et le budget primitif officiel.
                   </p>
                 </div>
               </div>
@@ -3916,16 +4324,16 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 value={quickWebInst.id}
                 onChange={(e) => {
                   const target = allInstitutions.find(i => i.id === e.target.value);
-                  if (target) handleOpenQuickWebEdit(target);
+                  if (target) handleOpenQuickWebEdit(target, quickWebTab);
                 }}
-                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-brand-blue"
               >
                 {allInstitutions
                   .slice()
                   .sort((a, b) => a.name.localeCompare(b.name, 'fr'))
                   .map(inst => (
                     <option key={inst.id} value={inst.id}>
-                      {inst.type === 'REGION' ? '[Région]' : '[Mairie]'} {inst.name} {inst.website ? '✓ (Site renseigné)' : '(Sans site)'}
+                      {inst.type === 'REGION' ? '[Région]' : '[Mairie]'} {inst.name} {inst.website ? '• 🌐' : ''} {inst.facebook_url ? '• 📘' : ''} {inst.primitive_budget?.total_voted_fcfa ? '• 🧾' : ''}
                     </option>
                   ))}
               </select>
@@ -3938,106 +4346,342 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               )}
             </div>
 
+            {/* Navigation Tabs */}
+            <div className="flex border-b border-slate-200 gap-2">
+              <button
+                type="button"
+                onClick={() => setQuickWebTab('DIGITAL')}
+                className={`pb-2.5 px-3 text-xs font-black transition-all border-b-2 flex items-center gap-1.5 ${
+                  quickWebTab === 'DIGITAL'
+                    ? 'border-brand-blue text-brand-blue'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <Globe className="w-4 h-4" />
+                <span>🌐 Web & Facebook</span>
+                {(quickWebForm.website || quickWebForm.facebook_url) && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setQuickWebTab('PRIMITIVE')}
+                className={`pb-2.5 px-3 text-xs font-black transition-all border-b-2 flex items-center gap-1.5 ${
+                  quickWebTab === 'PRIMITIVE'
+                    ? 'border-amber-600 text-amber-700'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <Receipt className="w-4 h-4" />
+                <span>🧾 Budget Primitif</span>
+                {quickWebForm.primitive_total_fcfa > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 text-[9px] font-bold">
+                    Voté
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setQuickWebTab('CONTACT')}
+                className={`pb-2.5 px-3 text-xs font-black transition-all border-b-2 flex items-center gap-1.5 ${
+                  quickWebTab === 'CONTACT'
+                    ? 'border-slate-800 text-slate-900'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <Phone className="w-4 h-4" />
+                <span>📞 Coordonnées</span>
+              </button>
+            </div>
+
             <form onSubmit={handleSaveQuickWeb} className="space-y-4">
-              {/* Site Web Officiel */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-700">
-                  Site Web Officiel de la Collectivité *
-                </label>
-                <div className="relative">
-                  <Globe className="w-4 h-4 text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={quickWebForm.website}
-                    onChange={(e) => setQuickWebForm(prev => ({ ...prev, website: e.target.value }))}
-                    placeholder="https://www.mairiedebouake.ci/ ou mairiedebouake.ci"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
-                  />
-                </div>
-                <p className="text-[11px] text-slate-500 font-medium">
-                  Le préfixe <code className="text-emerald-700 font-bold">https://</code> sera automatiquement ajouté s'il n'est pas saisi.
-                </p>
-              </div>
+              {/* TAB 1: DIGITAL (WEB & FACEBOOK) */}
+              {quickWebTab === 'DIGITAL' && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  {/* Site Web Officiel */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-black uppercase tracking-wider text-slate-700">
+                        Site Web Officiel de la Collectivité
+                      </label>
+                      {quickWebForm.website && (
+                        <a
+                          href={quickWebForm.website.startsWith('http') ? quickWebForm.website : `https://${quickWebForm.website}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] font-bold text-emerald-700 hover:underline inline-flex items-center gap-1"
+                        >
+                          Tester le site ↗
+                        </a>
+                      )}
+                    </div>
+                    <div className="relative">
+                      <Globe className="w-4 h-4 text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={quickWebForm.website}
+                        onChange={(e) => setQuickWebForm(prev => ({ ...prev, website: e.target.value }))}
+                        placeholder="https://www.mairiedebouake.ci/ ou mairiedebouake.ci"
+                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-medium">
+                      Le préfixe <code className="text-emerald-700 font-bold">https://</code> sera automatiquement ajouté s'il n'est pas saisi.
+                    </p>
+                  </div>
 
-              {/* Page Facebook Officielle */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-700">
-                  Page Facebook Officielle
-                </label>
-                <input
-                  type="text"
-                  value={quickWebForm.facebook_url}
-                  onChange={(e) => setQuickWebForm(prev => ({ ...prev, facebook_url: e.target.value }))}
-                  placeholder="https://www.facebook.com/mairiedebouake"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
-                />
-              </div>
-
-              {/* Contact direct */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                <div className="space-y-1.5">
-                  <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700">
-                    Téléphone Officiel
-                  </label>
-                  <input
-                    type="text"
-                    value={quickWebForm.contact_phone}
-                    onChange={(e) => setQuickWebForm(prev => ({ ...prev, contact_phone: e.target.value }))}
-                    placeholder="+225 27 XX XX XX XX"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-400"
-                  />
+                  {/* Page Facebook Officielle */}
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-black uppercase tracking-wider text-[#1877F2] flex items-center gap-1.5">
+                        <span className="w-4 h-4 rounded-full bg-[#1877F2] text-white flex items-center justify-center font-bold text-[10px]">f</span>
+                        Page Facebook Officielle
+                      </label>
+                      {quickWebForm.facebook_url && (
+                        <a
+                          href={quickWebForm.facebook_url.startsWith('http') ? quickWebForm.facebook_url : `https://${quickWebForm.facebook_url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] font-bold text-[#1877F2] hover:underline inline-flex items-center gap-1"
+                        >
+                          Tester la page Facebook ↗
+                        </a>
+                      )}
+                    </div>
+                    <div className="relative">
+                      <span className="w-4 h-4 text-[#1877F2] font-black absolute left-3.5 top-1/2 -translate-y-1/2 text-sm">f</span>
+                      <input
+                        type="text"
+                        value={quickWebForm.facebook_url}
+                        onChange={(e) => setQuickWebForm(prev => ({ ...prev, facebook_url: e.target.value }))}
+                        placeholder="https://www.facebook.com/mairiedebouake ou mairiedebouake"
+                        className="w-full pl-10 pr-4 py-2.5 bg-blue-50/30 border border-blue-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-medium">
+                      Permet aux citoyens d'accéder au fil d'actualité et aux annonces directes de la mairie sur Facebook.
+                    </p>
+                  </div>
                 </div>
+              )}
 
-                <div className="space-y-1.5">
-                  <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700">
-                    Email Officiel
-                  </label>
-                  <input
-                    type="email"
-                    value={quickWebForm.contact_email}
-                    onChange={(e) => setQuickWebForm(prev => ({ ...prev, contact_email: e.target.value }))}
-                    placeholder="contact@mairie.ci"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-400"
-                  />
-                </div>
-              </div>
+              {/* TAB 2: PRIMITIVE BUDGET */}
+              {quickWebTab === 'PRIMITIVE' && (
+                <div className="space-y-3.5 animate-in fade-in duration-200">
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl">
+                    <div className="flex items-center gap-2 text-amber-900 font-bold text-xs mb-1">
+                      <Receipt className="w-4 h-4 text-amber-700" />
+                      <span>Budget Primitif Voté par le Conseil</span>
+                    </div>
+                    <p className="text-[11px] text-amber-800">
+                      Renseignez le montant voté et l'URL publique de confirmation (article de presse AIP, procès-verbal ou annonce officielle).
+                    </p>
+                  </div>
 
-              {/* Statut d'audit et Observations */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                <div className="space-y-1.5">
-                  <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700">
-                    Statut Audit Web
-                  </label>
-                  <select
-                    value={quickWebForm.web_status}
-                    onChange={(e) => setQuickWebForm(prev => ({ ...prev, web_status: e.target.value as any }))}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30"
-                  >
-                    <option value="FONCTIONNEL">Fonctionnel / Actif</option>
-                    <option value="INACTIF">Inactif / Suspendu / En travaux</option>
-                    <option value="AUCUN">Aucun site web officiel</option>
-                  </select>
-                </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-black uppercase tracking-wider text-slate-700">
+                        Budget Total Voté (FCFA) *
+                      </label>
+                      {quickWebForm.primitive_total_fcfa > 0 && (
+                        <span className="text-[11px] font-black text-amber-800">
+                          {formatFCFA(quickWebForm.primitive_total_fcfa)}
+                        </span>
+                      )}
+                    </div>
+                    <input
+                      type="number"
+                      value={quickWebForm.primitive_total_fcfa || ''}
+                      onChange={(e) => {
+                        const total = Number(e.target.value);
+                        setQuickWebForm(prev => {
+                          const autoSplit = prev.primitive_investment_fcfa === 0 && prev.primitive_functioning_fcfa === 0;
+                          return {
+                            ...prev,
+                            primitive_total_fcfa: total,
+                            primitive_investment_fcfa: autoSplit ? Math.round(total * 0.55) : prev.primitive_investment_fcfa,
+                            primitive_functioning_fcfa: autoSplit ? Math.round(total * 0.45) : prev.primitive_functioning_fcfa,
+                          };
+                        });
+                      }}
+                      placeholder="Ex: 1450000000"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-bold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700">
-                    Observations de l'Audit
-                  </label>
-                  <input
-                    type="text"
-                    value={quickWebForm.web_observations}
-                    onChange={(e) => setQuickWebForm(prev => ({ ...prev, web_observations: e.target.value }))}
-                    placeholder="ex: Erreur 404, page d'attente OVH, refonte en cours..."
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30"
-                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700 mb-1">
+                        Investissement (FCFA)
+                      </label>
+                      <input
+                        type="number"
+                        value={quickWebForm.primitive_investment_fcfa || ''}
+                        onChange={(e) => setQuickWebForm(prev => ({ ...prev, primitive_investment_fcfa: Number(e.target.value) }))}
+                        placeholder="Ex: 797500000"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700 mb-1">
+                        Fonctionnement (FCFA)
+                      </label>
+                      <input
+                        type="number"
+                        value={quickWebForm.primitive_functioning_fcfa || ''}
+                        onChange={(e) => setQuickWebForm(prev => ({ ...prev, primitive_functioning_fcfa: Number(e.target.value) }))}
+                        placeholder="Ex: 652500000"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700 mb-1">
+                        Date du Vote / Session
+                      </label>
+                      <input
+                        type="text"
+                        value={quickWebForm.primitive_voted_date}
+                        onChange={(e) => setQuickWebForm(prev => ({ ...prev, primitive_voted_date: e.target.value }))}
+                        placeholder="Ex: 15 mars 2024 ou 2024-03-15"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700 mb-1">
+                        Organe Délibérant / Source
+                      </label>
+                      <input
+                        type="text"
+                        value={quickWebForm.primitive_source}
+                        onChange={(e) => setQuickWebForm(prev => ({ ...prev, primitive_source: e.target.value }))}
+                        placeholder="Ex: Conseil Municipal (Session ordinaire)"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Public confirmation / proof link URL */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700 flex items-center gap-1">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                        Lien Public de Confirmation / Preuve Délibération
+                      </label>
+                      {quickWebForm.primitive_source_url && (
+                        <a
+                          href={quickWebForm.primitive_source_url.startsWith('http') ? quickWebForm.primitive_source_url : `https://${quickWebForm.primitive_source_url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] font-bold text-brand-blue hover:underline inline-flex items-center gap-1"
+                        >
+                          Tester le lien ↗
+                        </a>
+                      )}
+                    </div>
+                    <input
+                      type="url"
+                      value={quickWebForm.primitive_source_url}
+                      onChange={(e) => setQuickWebForm(prev => ({ ...prev, primitive_source_url: e.target.value }))}
+                      placeholder="https://www.aip.ci/... ou lien vers délibération municipale"
+                      className="w-full px-3 py-2 bg-amber-50/40 border border-amber-300 rounded-xl text-xs font-mono text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">
+                      URL cliquable affichée sur la fiche publique comme preuve documentaire vérifiable.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700 mb-1">
+                      Notes ou résolutions de la délibération
+                    </label>
+                    <input
+                      type="text"
+                      value={quickWebForm.primitive_session_notes}
+                      onChange={(e) => setQuickWebForm(prev => ({ ...prev, primitive_session_notes: e.target.value }))}
+                      placeholder="Ex: Vote à l'unanimité des conseillers municipaux."
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* TAB 3: CONTACT & AUDIT */}
+              {quickWebTab === 'CONTACT' && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  {/* Contact direct */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700">
+                        Téléphone Officiel
+                      </label>
+                      <input
+                        type="text"
+                        value={quickWebForm.contact_phone}
+                        onChange={(e) => setQuickWebForm(prev => ({ ...prev, contact_phone: e.target.value }))}
+                        placeholder="+225 27 XX XX XX XX"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-400"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700">
+                        Email Officiel
+                      </label>
+                      <input
+                        type="email"
+                        value={quickWebForm.contact_email}
+                        onChange={(e) => setQuickWebForm(prev => ({ ...prev, contact_email: e.target.value }))}
+                        placeholder="contact@mairie.ci"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-400"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Statut d'audit et Observations */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div className="space-y-1.5">
+                      <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700">
+                        Statut Audit Web
+                      </label>
+                      <select
+                        value={quickWebForm.web_status}
+                        onChange={(e) => setQuickWebForm(prev => ({ ...prev, web_status: e.target.value as any }))}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30"
+                      >
+                        <option value="FONCTIONNEL">Fonctionnel / Actif</option>
+                        <option value="INACTIF">Inactif / Suspendu / En travaux</option>
+                        <option value="AUCUN">Aucun site web officiel</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700">
+                        Observations de l'Audit
+                      </label>
+                      <input
+                        type="text"
+                        value={quickWebForm.web_observations}
+                        onChange={(e) => setQuickWebForm(prev => ({ ...prev, web_observations: e.target.value }))}
+                        placeholder="ex: Erreur 404, page d'attente OVH, refonte en cours..."
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Notice publication instantanée */}
               <div className="p-3.5 bg-emerald-50/80 border border-emerald-200 rounded-2xl flex items-start gap-2.5 text-xs text-emerald-900 font-medium">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Publication instantanée :</strong> dès l'enregistrement, le lien officiel et ces coordonnées sont immédiatement actifs et visibles pour tous les citoyens (Annuaire, Cartographie, Observatoire et Fiche de la collectivité).
+                  <strong>Publication instantanée :</strong> dès l'enregistrement, ces informations sont immédiatement prises en compte dans les <strong>décomptes globaux</strong> et affichées sur l'Annuaire, la Fiche et la Cartographie.
                 </span>
               </div>
 
@@ -4062,6 +4706,18 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: PRIMITIVE BUDGET CSV / EXCEL IMPORTER */}
+      {/* ========================================================================= */}
+      <PrimitiveBudgetImporterModal
+        isOpen={isPrimitiveBudgetImporterOpen}
+        onClose={() => setIsPrimitiveBudgetImporterOpen(false)}
+        allInstitutions={allInstitutions}
+        onImportSuccess={(count) => {
+          showToast(`${count} budgets primitifs importés et synchronisés avec succès !`);
+        }}
+      />
 
       {/* ========================================================================= */}
       {/* MODAL: RESTORE BACKUP JSON */}
