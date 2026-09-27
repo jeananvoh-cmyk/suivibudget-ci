@@ -351,12 +351,14 @@ export function enrichWithOfficialWebDirectory(institutions: Institution[]): Ins
     }
 
     const official = getOfficialWebInfo(inst);
+    const resolvedWebsite = official.url || inst.website || undefined;
+    const resolvedStatus = resolvedWebsite ? (official.statutWeb === 'AUCUN' ? 'FONCTIONNEL' : official.statutWeb) : 'AUCUN';
     return {
       ...inst,
-      website: official.url || undefined,
+      website: resolvedWebsite,
       facebook_url: inst.facebook_url ? inst.facebook_url : undefined,
-      web_status: official.statutWeb,
-      web_observations: official.observations,
+      web_status: resolvedStatus,
+      web_observations: inst.web_observations || official.observations,
     };
   });
 }

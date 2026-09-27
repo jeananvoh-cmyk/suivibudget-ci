@@ -517,17 +517,77 @@ class DataStore {
       }
 
       // Always apply custom admin overrides (websites, facebook, contacts) on top of base data
+      let overridesMap: Record<string, Partial<Institution>> = {};
       const storedOverrides = localStorage.getItem(STORAGE_KEYS.INSTITUTION_OVERRIDES);
       if (storedOverrides) {
-        const overridesMap = JSON.parse(storedOverrides);
-        if (overridesMap && typeof overridesMap === 'object') {
-          this.institutions = this.institutions.map(inst => {
-            if (overridesMap[inst.id]) {
-              return { ...inst, ...overridesMap[inst.id] };
-            }
-            return inst;
-          });
+        try {
+          const parsed = JSON.parse(storedOverrides);
+          if (parsed && typeof parsed === 'object') {
+            overridesMap = parsed;
+          }
+        } catch (e) {
+          console.warn("Could not parse institution overrides", e);
         }
+      }
+
+      // Auto-migration: check if older localStorage keys (e.g. v15, v14, v13) contain custom manual updates
+      const previousKeys = [
+        'civicdata_institutions_v15',
+        'civicdata_institutions_v14',
+        'civicdata_institutions_v13',
+        'civicdata_institutions_v12'
+      ];
+      let didMigrate = false;
+      for (const prevKey of previousKeys) {
+        const prevJson = localStorage.getItem(prevKey);
+        if (prevJson) {
+          try {
+            const prevArr = JSON.parse(prevJson);
+            if (Array.isArray(prevArr)) {
+              for (const prevItem of prevArr) {
+                if (prevItem && prevItem.id) {
+                  // Detect real manual additions
+                  const hasCustomWeb = prevItem.website && !prevItem.website.includes('mairie-mairie') && !prevItem.website.includes('example');
+                  const hasCustomFb = prevItem.facebook_url && !prevItem.facebook_url.includes('example') && !prevItem.facebook_url.startsWith('https://www.facebook.com/Mairiede');
+                  if (hasCustomWeb || hasCustomFb) {
+                    if (!overridesMap[prevItem.id]) {
+                      overridesMap[prevItem.id] = {};
+                    }
+                    if (hasCustomWeb && !overridesMap[prevItem.id].website) {
+                      overridesMap[prevItem.id].website = prevItem.website;
+                      overridesMap[prevItem.id].web_status = prevItem.web_status || 'FONCTIONNEL';
+                      didMigrate = true;
+                    }
+                    if (hasCustomFb && !overridesMap[prevItem.id].facebook_url) {
+                      overridesMap[prevItem.id].facebook_url = prevItem.facebook_url;
+                      didMigrate = true;
+                    }
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
+      if (didMigrate) {
+        localStorage.setItem(STORAGE_KEYS.INSTITUTION_OVERRIDES, JSON.stringify(overridesMap));
+      }
+
+      // Apply overrides with priority over base data
+      if (Object.keys(overridesMap).length > 0) {
+        this.institutions = this.institutions.map(inst => {
+          if (overridesMap[inst.id]) {
+            const override = overridesMap[inst.id];
+            return {
+              ...inst,
+              ...override,
+              web_status: override.website ? (override.web_status || 'FONCTIONNEL') : (override.web_status || inst.web_status || 'AUCUN'),
+            };
+          }
+          return inst;
+        });
       }
 
       // Always re-apply official primitive budgets so they are never lost even with cached data
@@ -1150,6 +1210,8 @@ class DataStore {
         leader_name: updatedInst.leader_name,
         leader_photo_url: updatedInst.leader_photo_url,
         political_party: updatedInst.political_party,
+        web_status: updatedInst.web_status || (updatedInst.website ? 'FONCTIONNEL' : 'AUCUN'),
+        web_observations: updatedInst.web_observations || '',
       };
       localStorage.setItem(STORAGE_KEYS.INSTITUTION_OVERRIDES, JSON.stringify(overridesMap));
     } catch (e) {
