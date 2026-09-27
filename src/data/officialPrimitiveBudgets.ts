@@ -16,7 +16,7 @@ export const OFFICIAL_PRIMITIVE_BUDGETS: Record<string, PrimitiveBudgetInfo> = {
     functioning_voted_fcfa: 686400000,  // 39%
     voted_date: '07 novembre 2025',
     source: 'Conseil Municipal de Tiassalé (Session ordinaire du 07/11/2025) & AIP',
-    source_url: 'https://www.facebook.com/MairiedeTiassale',
+    source_url: 'https://aip.ci',
     projects_count: 54,
     session_notes: 'Adopté à l\'unanimité lors de la 4ème session ordinaire sous la présidence du député-maire Antoine Assalé Tiémoko. 54 opérations programmées avec 61% des ressources allouées à l\'investissement socio-économique.'
   },
@@ -28,7 +28,7 @@ export const OFFICIAL_PRIMITIVE_BUDGETS: Record<string, PrimitiveBudgetInfo> = {
     functioning_voted_fcfa: 254000000,  // 30,8%
     voted_date: '14 février 2026',
     source: 'Conseil Municipal de Tafiré (Session ordinaire du 14/02/2026) & AIP',
-    source_url: 'https://www.facebook.com/MairiedeTafire',
+    source_url: 'https://aip.ci',
     projects_count: 36,
     session_notes: 'Adopté lors de la 1ère session ordinaire sous la présidence du maire Coulibaly Sounkalo (dit Charles Sanga) en présence du sous-préfet Marcel Brou N\'Dépo. Près de 70% alloué aux investissements (36 projets).'
   },

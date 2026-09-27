@@ -354,6 +354,7 @@ export function enrichWithOfficialWebDirectory(institutions: Institution[]): Ins
     return {
       ...inst,
       website: official.url || undefined,
+      facebook_url: inst.facebook_url ? inst.facebook_url : undefined,
       web_status: official.statutWeb,
       web_observations: official.observations,
     };

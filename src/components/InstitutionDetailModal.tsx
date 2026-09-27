@@ -1181,26 +1181,26 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
               )}
 
               {/* ========================================================================= */}
-              {/* FOCUS : LISTE OFFICIELLE DES DÉPENSES D'INVESTISSEMENT PUBLIC (LFI 2026) */}
+              {/* SYNTHÈSE D'ORIENTATION : INVESTISSEMENT PUBLIC (LFI 2026) */}
               {/* ========================================================================= */}
               {relatedProjects.length > 0 ? (
-                <div className="bg-emerald-50/80 border-2 border-emerald-300/80 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-sm">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-200 pb-3">
-                    <div className="space-y-0.5">
+                <div className="bg-emerald-50/90 border border-emerald-300 rounded-2xl p-4 sm:p-5 shadow-2xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
+                    <div className="space-y-1 flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse" />
                         <h4 className="text-xs sm:text-sm font-black text-emerald-950 uppercase tracking-wider">
-                          Dépenses d'Investissement Public : Projets & Chantiers Inscrits ({relatedProjects.length})
+                          Dépenses d'Investissement Public : {relatedProjects.length} Projets & Chantiers Inscrits
                         </h4>
                       </div>
-                      <p className="text-xs text-emerald-800 font-medium">
+                      <p className="text-xs text-emerald-900 leading-relaxed font-medium">
                         {institution.primitive_budget ? (
                           <>
-                            Tranche financée par la <strong>Dotation Globale d'Équipement (DGE) de l'État</strong> ({formatFCFA(institution.budget_investment_fcfa)}). Les opérations complémentaires votées par le Conseil Municipal sont financées sur fonds propres communaux.
+                            Tranche financée par la <strong>Dotation Globale d'Équipement (DGE) de l'État</strong> à hauteur de <strong>{formatFCFA(institution.budget_investment_fcfa)}</strong> ({formatAmountInWords(institution.budget_investment_fcfa)}). Les {relatedProjects.length} chantiers physiques correspondants sont détaillés dans l'onglet dédié.
                           </>
                         ) : (
                           <>
-                            Projets et opérations d'équipements votés à la Loi de Finances 2026 pour <strong>{institution.name}</strong>.
+                            Enveloppe d'investissement de <strong>{formatFCFA(institution.budget_investment_fcfa)}</strong> ({formatAmountInWords(institution.budget_investment_fcfa)}) finançant <strong>{relatedProjects.length} opérations d'équipements prioritaires</strong> inscrites à la Loi de Finances 2026 pour <strong>{institution.name}</strong>.
                           </>
                         )}
                       </p>
@@ -1208,54 +1208,11 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
 
                     <button
                       onClick={() => setActiveTab('PROJECTS')}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer flex-shrink-0"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap flex-shrink-0"
                     >
-                      <span>Onglet Chantiers</span>
+                      <span>Consulter les {relatedProjects.length} chantiers</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {relatedProjects.map((proj) => (
-                      <div 
-                        key={proj.id} 
-                        className="bg-white rounded-xl p-3.5 sm:p-4 border border-emerald-200 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-emerald-400 hover:shadow-xs transition-all"
-                      >
-                        <div className="space-y-1.5 flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
-                              {proj.category || 'INVESTISSEMENT'}
-                            </span>
-                            <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-slate-100 text-slate-700">
-                              Exercice 2026
-                            </span>
-                            <span className="text-[11px] text-slate-500 font-semibold truncate">
-                              {proj.program_name || 'Programme d\'Investissement Public'}
-                            </span>
-                          </div>
-
-                          <h5 className="text-xs sm:text-sm font-black text-slate-900 leading-snug">
-                            {proj.title}
-                          </h5>
-
-                          {proj.details && (
-                            <p className="text-[11px] text-slate-500 line-clamp-1 font-medium">
-                              {proj.details}
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="text-left sm:text-right bg-emerald-50/60 sm:bg-transparent p-2.5 sm:p-0 rounded-xl sm:border-l sm:border-slate-100 sm:pl-4 flex-shrink-0">
-                          <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">Crédit Voté (LFI)</span>
-                          <span className="text-base sm:text-lg font-black text-emerald-800 block whitespace-nowrap">
-                            {formatFCFA(proj.budget_amount_fcfa)}
-                          </span>
-                          <span className="text-[10px] font-bold text-emerald-600 block whitespace-nowrap">
-                            ({formatAmountInWords(proj.budget_amount_fcfa)})
-                          </span>
-                        </div>
-                      </div>
-                    ))}
                   </div>
                 </div>
               ) : institution.budget_investment_fcfa > 0 ? (
