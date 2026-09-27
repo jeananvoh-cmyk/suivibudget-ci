@@ -485,28 +485,31 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
 
                     return (
                       <div className="space-y-2 pt-2 mt-2">
-                        <div className="flex justify-between items-center text-xs">
+                        <div className="flex justify-between items-baseline text-xs">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-slate-800 font-black uppercase text-[10px] tracking-wider">Budget Primitif Voté</span>
+                            <span className="text-slate-800 font-black uppercase text-[10px] tracking-wider">Budget Voté</span>
                             <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
-                              Conseil Municipal (AIP)
+                              Conseil Municipal
                             </span>
                           </div>
                           <span className="font-black text-slate-900 text-sm">
-                            {formatFCFA(primTotal)}
+                            {formatFCFA(primTotal)}{' '}
+                            <span className="text-brand-blue font-bold text-xs">
+                              ({formatAmountInWords(primTotal)})
+                            </span>
                           </span>
                         </div>
                         {/* Jauge Bicolore État vs Effort Local */}
                         <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden flex">
-                          <div className="bg-sky-500 h-full" style={{ width: `${statePct}%` }} title={`Dotation État: ${statePct}%`}></div>
-                          <div className="bg-emerald-500 h-full" style={{ width: `${localPct}%` }} title={`Effort Propre & Fiscalité: ${localPct}%`}></div>
+                          <div className="bg-sky-500 h-full" style={{ width: `${statePct}%` }} title={`Subvention de l'État: ${statePct}%`}></div>
+                          <div className="bg-emerald-500 h-full" style={{ width: `${localPct}%` }} title={`Recettes propres de la Mairie: ${localPct}%`}></div>
                         </div>
-                        <div className="flex justify-between text-[10px] font-semibold text-slate-600 gap-1 pt-0.5">
+                        <div className="flex flex-col sm:flex-row sm:justify-between text-[10px] font-semibold text-slate-600 gap-1 pt-0.5">
                           <span className="text-sky-700">
-                            État (LFI) : <strong>{statePct}%</strong> ({formatAmountInWords(stateTotal)})
+                            Subvention de l'État : <strong>{statePct}%</strong> ({formatAmountInWords(stateTotal)})
                           </span>
                           <span className="text-emerald-700">
-                            Régie & DGI : <strong>{localPct}%</strong> ({formatAmountInWords(localRev)})
+                            Recettes propres Mairie : <strong>{localPct}%</strong> ({formatAmountInWords(localRev)})
                           </span>
                         </div>
                       </div>
