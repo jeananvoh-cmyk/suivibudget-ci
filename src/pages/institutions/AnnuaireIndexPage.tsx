@@ -239,7 +239,7 @@ export const AnnuaireIndexPage: React.FC<AnnuaireIndexPageProps> = ({
                 Territoires
               </span>
               <h3 className="text-base font-black text-slate-900 group-hover:text-brand-blue transition-colors">
-                Conseils Régionaux
+                Conseils Régionaux & Districts
               </h3>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Les 31 régions et 2 districts autonomes de la République.

@@ -216,7 +216,16 @@ export const SpotlightSearchModal: React.FC<SpotlightSearchModalProps> = ({
                           {m.name}
                         </div>
                         <div className="text-[11px] text-slate-500">
-                          Région {m.region} • {m.is_tax_quota_commune ? "Autonomie fiscale DGI" : `Dotation : ${formatFCFA(m.total_budget_fcfa)} (${formatAmountInWords(m.total_budget_fcfa)})`}
+                          {(() => {
+                            const isDistrictAutonome = (m.district && m.district.toLowerCase().includes('autonome')) ||
+                              (m.region && (m.region.toLowerCase().includes('abidjan') || m.region.toLowerCase().includes('yamoussoukro')));
+                            const locLabel = isDistrictAutonome
+                              ? (m.region?.toLowerCase().includes('yamoussoukro') || m.district?.toLowerCase().includes('yamoussoukro')
+                                  ? "District de Yamoussoukro"
+                                  : "District d'Abidjan")
+                              : `Région ${m.region}`;
+                            return `${locLabel} • ${m.is_tax_quota_commune ? "Autonomie fiscale DGI" : `Dotation : ${formatFCFA(m.total_budget_fcfa)} (${formatAmountInWords(m.total_budget_fcfa)})`}`;
+                          })()}
                         </div>
                       </div>
                     </div>

@@ -52,6 +52,8 @@ export interface Institution {
   leader_education?: string[];
   official_programs?: string[];
   budget_lines?: BudgetLineItem[];
+  // Référentiel Historique & Multi-Exercices des Budgets Locaux
+  local_budgets?: import('./localBudget').LocalBudget[];
 }
 
 export interface PrimitiveBudgetInfo {
@@ -63,6 +65,8 @@ export interface PrimitiveBudgetInfo {
   source_url?: string;
   projects_count?: number;
   session_notes?: string;
+  precision?: 'EXACT' | 'APPROXIMATE' | 'LOWER_BOUND' | 'UPPER_BOUND' | 'UNKNOWN';
+  editor_source?: string;
 }
 
 export interface BudgetLineItem {
@@ -215,3 +219,9 @@ export interface PublicDocument {
 }
 
 export type ActiveTab = 'home' | 'institutions' | 'projects' | 'observatory' | 'documents' | 'admin';
+
+// Exportation du domaine Référentiel des Budgets Locaux
+export * from './localBudget';
+
+// Exportation du domaine Comptes Administratifs (CA) & Exécution
+export * from './administrativeAccount';

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Search, ChevronDown, ArrowRight, Globe, FileText } from 'lucide-react';
 import { GOVERNMENT_OFFICIALS, OfficialLeader } from '../../data/governmentData';
+import { dataStore } from '../../services/dataStore';
 import { BudgetProject, Institution } from '../../types';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
@@ -48,19 +49,44 @@ interface MinistriesPageProps {
   onBack: () => void;
   onNavigateToProjects: (ministryQuery: string) => void;
   allProjects?: BudgetProject[];
+  institutions?: Institution[];
 }
 
 export const MinistriesPage: React.FC<MinistriesPageProps> = ({
   onBack,
   onNavigateToProjects,
   allProjects = [],
+  institutions = [],
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGender, setSelectedGender] = useState<'ALL' | 'M' | 'F'>('ALL');
   const [selectedInstForDetail, setSelectedInstForDetail] = useState<Institution | null>(null);
   const [selectedInstForDoc, setSelectedInstForDoc] = useState<Institution | null>(null);
 
-  const filteredOfficials = GOVERNMENT_OFFICIALS.filter((official: OfficialLeader) => {
+  const [storeTick, setStoreTick] = useState(0);
+  React.useEffect(() => {
+    return dataStore.subscribe(() => setStoreTick(t => t + 1));
+  }, []);
+
+  const baseOfficials = React.useMemo(() => {
+    const list = (institutions && institutions.length > 0) ? institutions : dataStore.getInstitutions();
+    const storeMap = new Map(list.map(i => [i.id, i]));
+    return GOVERNMENT_OFFICIALS.map((official: OfficialLeader) => {
+      const fromStore = storeMap.get(official.id);
+      if (!fromStore) return official;
+      return {
+        ...official,
+        name: fromStore.leader_name || official.name,
+        role_title: fromStore.leader_title || official.role_title,
+        photo_url: fromStore.leader_photo_url || official.photo_url,
+        website_url: fromStore.website || official.website_url,
+        facebook_url: fromStore.facebook_url || official.facebook_url,
+        budget_fcfa: fromStore.total_budget_fcfa || official.budget_fcfa,
+      };
+    });
+  }, [institutions, storeTick]);
+
+  const filteredOfficials = baseOfficials.filter((official: OfficialLeader) => {
     if (selectedGender !== 'ALL' && official.gender !== selectedGender) {
       return false;
     }

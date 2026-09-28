@@ -1561,9 +1561,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                           <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
                             inst.type === 'REGION' ? 'bg-indigo-100 text-indigo-800' :
                             inst.type === 'INSTITUTION' ? 'bg-amber-100 text-amber-800' :
-                            inst.type === 'MINISTERE' ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'
+                            inst.type === 'MINISTERE' ? 'bg-sky-100 text-sky-800' :
+                            inst.type === 'AUTORITE_REGULATION' ? 'bg-violet-100 text-violet-800' : 'bg-emerald-100 text-emerald-800'
                           }`}>
-                            {inst.type === 'REGION' ? 'Région' : inst.type === 'INSTITUTION' ? 'Grande Institution' : inst.type === 'MINISTERE' ? 'Ministère' : 'Mairie'}
+                            {inst.type === 'REGION' ? 'Région' : inst.type === 'INSTITUTION' ? 'Grande Institution' : inst.type === 'MINISTERE' ? 'Ministère' : inst.type === 'AUTORITE_REGULATION' ? 'Régulateur' : 'Mairie'}
                           </span>
                           {inst.political_party && (
                             <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-brand-blue/10 text-brand-blue">
@@ -1599,7 +1600,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     {/* Metadata & Budgets */}
                     <div className="pt-2.5 border-t border-slate-200/60 space-y-2 text-xs">
                       {/* Budget Display */}
-                      <div className="flex items-start justify-between gap-2">
+                      <div>
                         <div className="flex-1 min-w-0">
                           <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
                             {inst.primitive_budget?.total_voted_fcfa ? 'Budget Primitif Voté' : 'Dotation Budgétaire'}
@@ -1634,40 +1635,6 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                           ) : (
                             <span className="text-[11px] text-amber-600 font-semibold italic">
                               Budget primitif non renseigné
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Digital Presence Badges */}
-                        <div className="flex items-center gap-1 shrink-0">
-                          {inst.website ? (
-                            <a 
-                              href={inst.website} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 border border-emerald-200 transition-colors"
-                              title={`Visiter le site web officiel : ${inst.website}`}
-                            >
-                              <Globe className="w-3.5 h-3.5" />
-                            </a>
-                          ) : (
-                            <span className="p-1.5 rounded-lg bg-slate-100 text-slate-300" title="Aucun site web renseigné">
-                              <Globe className="w-3.5 h-3.5" />
-                            </span>
-                          )}
-                          {inst.facebook_url ? (
-                            <a 
-                              href={inst.facebook_url} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="p-1.5 rounded-lg bg-blue-50 hover:bg-[#1877F2] hover:text-white text-[#1877F2] border border-blue-200 transition-colors font-bold text-xs"
-                              title={`Visiter la page Facebook officielle : ${inst.facebook_url}`}
-                            >
-                              f
-                            </a>
-                          ) : (
-                            <span className="p-1.5 rounded-lg bg-slate-100 text-slate-300 font-bold text-xs" title="Aucune page Facebook renseignée">
-                              f
                             </span>
                           )}
                         </div>
@@ -4333,7 +4300,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   .sort((a, b) => a.name.localeCompare(b.name, 'fr'))
                   .map(inst => (
                     <option key={inst.id} value={inst.id}>
-                      {inst.type === 'REGION' ? '[Région]' : '[Mairie]'} {inst.name} {inst.website ? '• 🌐' : ''} {inst.facebook_url ? '• 📘' : ''} {inst.primitive_budget?.total_voted_fcfa ? '• 🧾' : ''}
+                      {inst.type === 'DISTRICT' ? '[District]' : inst.type === 'REGION' ? '[Région]' : inst.type === 'AUTORITE_REGULATION' ? '[Régulateur]' : inst.type === 'MINISTERE' ? '[Ministère]' : '[Mairie]'} {inst.name} {inst.website ? '• 🌐' : ''} {inst.facebook_url ? '• 📘' : ''} {inst.primitive_budget?.total_voted_fcfa ? '• 🧾' : ''}
                     </option>
                   ))}
               </select>

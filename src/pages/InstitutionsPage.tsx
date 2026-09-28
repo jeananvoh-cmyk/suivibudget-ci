@@ -95,7 +95,7 @@ export const InstitutionsPage: React.FC<InstitutionsPageProps> = ({
     { id: 'INSTITUTIONS' as AnnuaireView, label: 'Institutions', count: institutionsCount },
     { id: 'REGULATORS' as AnnuaireView, label: 'Régulateurs', count: regulatorsCount },
     { id: 'MUNICIPAL' as AnnuaireView, label: 'Mairies', count: mairiesCount },
-    { id: 'REGIONAL' as AnnuaireView, label: 'Régions', count: regionsCount },
+    { id: 'REGIONAL' as AnnuaireView, label: 'Régions & Districts', count: regionsCount },
   ];
 
   return (
@@ -144,6 +144,7 @@ export const InstitutionsPage: React.FC<InstitutionsPageProps> = ({
         {currentView === 'MINISTRIES' && (
           <MinistriesPage
             onBack={() => handleNavigateToSection('INDEX')}
+            institutions={institutions}
             allProjects={allProjects}
             onNavigateToProjects={onNavigateToProjects}
           />
@@ -153,6 +154,7 @@ export const InstitutionsPage: React.FC<InstitutionsPageProps> = ({
         {currentView === 'INSTITUTIONS' && (
           <NationalInstitutionsPage
             onBack={() => handleNavigateToSection('INDEX')}
+            institutions={institutions}
             allProjects={allProjects}
             onNavigateToProjects={onNavigateToProjects}
           />
@@ -162,6 +164,7 @@ export const InstitutionsPage: React.FC<InstitutionsPageProps> = ({
         {currentView === 'REGULATORS' && (
           <RegulatoryAuthoritiesPage
             onBack={() => handleNavigateToSection('INDEX')}
+            institutions={institutions}
             allProjects={allProjects}
             onNavigateToProjects={onNavigateToProjects}
           />

@@ -52,6 +52,7 @@ export const LeaderPortrait: React.FC<LeaderPortraitProps> = ({
         src={photoUrl}
         alt=""
         aria-hidden="true"
+        referrerPolicy="no-referrer"
         className="absolute inset-0 w-full h-full object-cover object-center filter blur-md scale-125 opacity-35 pointer-events-none"
       />
 
@@ -69,6 +70,7 @@ export const LeaderPortrait: React.FC<LeaderPortraitProps> = ({
         alt={title ? `${title} : ${name}` : name}
         onError={() => setHasError(true)}
         loading="lazy"
+        referrerPolicy="no-referrer"
         className="relative z-0 w-full h-full object-cover object-[50%_15%] filter contrast-[1.03] brightness-[0.98] transition-transform duration-300 ease-out group-hover/photo:scale-115"
       />
 

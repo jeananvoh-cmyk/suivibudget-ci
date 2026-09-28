@@ -140,6 +140,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "total_budget_fcfa": 0,
     "budget_not_published": true,
     "is_tax_quota_commune": true,
+    "tax_quota_note": "Commune urbaine d'Abidjan à autonomie fiscale DGI, bénéficiaire de 200 000 000 FCFA d'opérations prioritaires d'urgence de l'État pour 6 chantiers d'écoles et de santé.",
     "leader_name": "DANHO PAULIN CLAUDE",
     "leader_title": "Maire de la Commune & Président de l'UVICOCI (Ancien Ministre)",
     "leader_photo_url": "https://salondescollectivites-ci.com/uploads/1787913041_9119ec6d182827ebe2ab.png",
@@ -198,7 +199,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_functioning_fcfa": 0,
     "budget_investment_fcfa": 0,
     "total_budget_fcfa": 0,
-    "budget_not_published": true,
+    "budget_not_published": false,
     "is_tax_quota_commune": true,
     "leader_name": "YACE JEAN-MARC",
     "leader_title": "Maire de la Commune",
@@ -565,7 +566,7 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_functioning_fcfa": 0,
     "budget_investment_fcfa": 0,
     "total_budget_fcfa": 0,
-    "budget_not_published": true,
+    "budget_not_published": false,
     "is_tax_quota_commune": true,
     "leader_name": "ADAMA BICTOGO",
     "leader_title": "Maire de la Commune & Président de l'Assemblée Nationale",
@@ -1314,8 +1315,8 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_functioning_fcfa": 318173061,
     "budget_investment_fcfa": 1060152157,
     "total_budget_fcfa": 1378325218,
-    "is_tax_quota_commune": true,
-    "tax_quota_note": "Non bénéficiaire des dotations directes de l'État (Financement assuré par la quote-part des impôts reversée directement)",
+    "is_tax_quota_commune": false,
+    "tax_quota_note": "Commune périphérique du District Autonome d'Abidjan bénéficiant d'une Dotation Globale d'Équipement (DGE) de 1 060 152 157 FCFA finançant 14 chantiers physiques de l'État.",
     "leader_name": "BAMBA FATIMA",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "https://salondescollectivites-ci.com/uploads/1787911328_8b9a8106c4970138d093.jpg",
@@ -2245,8 +2246,8 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_functioning_fcfa": 224163617,
     "budget_investment_fcfa": 793621679,
     "total_budget_fcfa": 1017785296,
-    "is_tax_quota_commune": true,
-    "tax_quota_note": "Non bénéficiaire des dotations directes de l'État (Financement assuré par la quote-part des impôts reversée directement)",
+    "is_tax_quota_commune": false,
+    "tax_quota_note": "Commune périphérique du District Autonome d'Abidjan bénéficiant d'une Dotation Globale d'Équipement (DGE) de 793 621 679 FCFA (28 chantiers de l'État) en complément de son budget primitif voté de 4,05 Md FCFA.",
     "leader_name": "DOUMBIA ISSOUF",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "https://salondescollectivites-ci.com/uploads/1787928077_0c9b938e195ad8a91de3.jpg",
@@ -10560,8 +10561,8 @@ export const ALL_COMMUNES_DATA: Institution[] = [
     "budget_functioning_fcfa": 149054851,
     "budget_investment_fcfa": 580677382,
     "total_budget_fcfa": 729732233,
-    "is_tax_quota_commune": true,
-    "tax_quota_note": "Non bénéficiaire des dotations directes de l'État (Financement assuré par la quote-part des impôts reversée directement)",
+    "is_tax_quota_commune": false,
+    "tax_quota_note": "Commune périphérique du District Autonome d'Abidjan bénéficiant d'une Dotation Globale d'Équipement (DGE) de 580 677 382 FCFA finançant 15 chantiers physiques de l'État.",
     "leader_name": "GBROU ALOBOUE",
     "leader_title": "Maire de la Commune",
     "leader_photo_url": "https://salondescollectivites-ci.com/uploads/1788258778_27b6fee55b31ea20e838.jpeg",
@@ -14375,7 +14376,7 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "info_officer_name": "",
     "info_officer_email": "",
     "info_officer_phone": "",
-    "info_officer_title": "Secrétariat Général du Conseil Régional (Loi n°2013-867 / CAIDP)",
+    "info_officer_title": "Secrétariat Général du District Autonome (Loi n°2013-867 / CAIDP)",
     "budget_functioning_fcfa": 3400000000,
     "budget_investment_fcfa": 0,
     "total_budget_fcfa": 3400000000,
@@ -14401,28 +14402,28 @@ export const ALL_REGIONS_DATA: Institution[] = [
       "Ministre de l'Enseignement Supérieur et de la Recherche Scientifique (2005 - 2012)"
     ],
     "organigramme_summary": [
-      "Cabinet du Président du Conseil Régional",
-      "Bureau et Commissions Spécialisées du Conseil Régional",
-      "Secrétariat Général du Conseil Régional",
-      "Direction de la Planification et du Développement Régional",
-      "Direction des Infrastructures, de l'Équipement et des Pistes Rurales",
-      "Direction des Affaires Économiques, Agricoles et de l'Emploi"
+      "Cabinet du Ministre-Gouverneur du District Autonome",
+      "Conseil du District Autonome & Commissions Spécialisées",
+      "Secrétariat Général du District Autonome",
+      "Direction Générale des Services Techniques (DGST)",
+      "Direction de l'Aménagement Urbain, de l'Environnement et de la Salubrité",
+      "Direction des Affaires Financières et du Budget du District"
     ],
     "organigramme_details": [
       {
-        "title": "Exécutif Régional & Planification",
+        "title": "Exécutif du District & Planification Métropolitaine",
         "items": [
-          "Président et Vice-Présidents du Conseil Régional",
-          "Secrétariat Général du Conseil Régional",
-          "Direction de la Planification et du Schéma Régional d'Aménagement"
+          "Ministre-Gouverneur et Vice-Gouverneurs du District Autonome",
+          "Secrétariat Général du District Autonome",
+          "Direction de la Planification Métropolitaine et des Grands Travaux"
         ]
       },
       {
-        "title": "Infrastructures & Développement Économique",
+        "title": "Infrastructures Urbaines & Cadre de Vie",
         "items": [
-          "Direction des Travaux et Pistes Rurales (Désenclavement agricole)",
-          "Direction de l'Éducation Régionale (Collèges et Lycées de proximité)",
-          "Direction des Affaires Financières et des Budgets Régionaux"
+          "Direction de l'Assainissement, de la Salubrité et du Cadre de Vie",
+          "Direction de la Mobilité Urbaine et des Transports",
+          "Direction des Affaires Financières et du Budget du District"
         ]
       }
     ]
@@ -14440,8 +14441,8 @@ export const ALL_REGIONS_DATA: Institution[] = [
     "info_officer_name": "",
     "info_officer_email": "",
     "info_officer_phone": "",
-    "info_officer_title": "Secrétariat Général du Conseil Régional (Loi n°2013-867 / CAIDP)",
-    "budget_functioning_fcfa": 1585000000,
+    "info_officer_title": "Secrétariat Général du District Autonome (Loi n°2013-867 / CAIDP)",
+    "budget_functioning_fcfa": 2070316543,
     "budget_investment_fcfa": 1500000000,
     "total_budget_fcfa": 3570316543,
     "leader_name": "DR. AUGUSTIN THIAM",
@@ -14465,28 +14466,28 @@ export const ALL_REGIONS_DATA: Institution[] = [
       "Praticien hospitalier et consultant en santé publique"
     ],
     "organigramme_summary": [
-      "Cabinet du Président du Conseil Régional",
-      "Bureau et Commissions Spécialisées du Conseil Régional",
-      "Secrétariat Général du Conseil Régional",
-      "Direction de la Planification et du Développement Régional",
-      "Direction des Infrastructures, de l'Équipement et des Pistes Rurales",
-      "Direction des Affaires Économiques, Agricoles et de l'Emploi"
+      "Cabinet du Ministre-Gouverneur du District Autonome",
+      "Conseil du District Autonome & Commissions Spécialisées",
+      "Secrétariat Général du District Autonome",
+      "Direction des Services Techniques et du Patrimoine",
+      "Direction de l'Aménagement Urbain et de l'Environnement",
+      "Direction des Affaires Financières et du Budget du District"
     ],
     "organigramme_details": [
       {
-        "title": "Exécutif Régional & Planification",
+        "title": "Exécutif du District & Planification",
         "items": [
-          "Président et Vice-Présidents du Conseil Régional",
-          "Secrétariat Général du Conseil Régional",
-          "Direction de la Planification et du Schéma Régional d'Aménagement"
+          "Ministre-Gouverneur et Vice-Gouverneurs du District Autonome",
+          "Secrétariat Général du District Autonome",
+          "Direction de la Planification Urbaine et du Développement Économique"
         ]
       },
       {
-        "title": "Infrastructures & Développement Économique",
+        "title": "Infrastructures & Préservation du Patrimoine",
         "items": [
-          "Direction des Travaux et Pistes Rurales (Désenclavement agricole)",
-          "Direction de l'Éducation Régionale (Collèges et Lycées de proximité)",
-          "Direction des Affaires Financières et des Budgets Régionaux"
+          "Direction des Travaux Publics et des Pistes du District",
+          "Direction de la Salubrité et de la Préservation du Patrimoine",
+          "Direction des Affaires Financières et du Budget du District"
         ]
       }
     ]

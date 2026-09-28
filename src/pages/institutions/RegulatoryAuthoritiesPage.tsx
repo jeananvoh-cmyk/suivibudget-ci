@@ -12,13 +12,56 @@ import { Institution, BudgetProject } from '../../types';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
 import { matchesSmartSearch, normalizeSearchText } from '../../utils/searchHelpers';
 import { REGULATORY_AUTHORITIES_DATA } from '../../data/regulatoryAuthoritiesData';
+import { dataStore } from '../../services/dataStore';
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
+
+const RegulatorLeaderAvatar: React.FC<{
+  photoUrl?: string;
+  name?: string;
+}> = ({ photoUrl, name = 'Dirigeant' }) => {
+  const [hasError, setHasError] = useState(false);
+
+  const cleanInitials = (name || '')
+    .replace(/^(M\.|Mme|Dr|S\.E\.M\.|Nanan|Le Maire|Président)\s+/i, '')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(p => p[0])
+    .join('')
+    .toUpperCase() || 'CI';
+
+  if (!photoUrl || hasError) {
+    return (
+      <div 
+        className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-2xs bg-slate-100 flex flex-col items-center justify-center flex-shrink-0"
+        title={name}
+      >
+        <span className="font-black text-slate-500 text-xs tracking-wider">{cleanInitials}</span>
+        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">Élu</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-2xs bg-slate-50 flex-shrink-0">
+      <img
+        src={photoUrl}
+        alt={name}
+        onError={() => setHasError(true)}
+        className="w-full h-full object-cover object-top transition-transform duration-300 hover:scale-105"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+    </div>
+  );
+};
 
 interface RegulatoryAuthoritiesPageProps {
   onBack: () => void;
   onNavigateToProjects: (query: string) => void;
   allProjects?: BudgetProject[];
+  institutions?: Institution[];
 }
 
 type RegulatorCategory = 'ALL' | 'MEDIA_TELECOM' | 'TRANSPARENCY_PROCUREMENT' | 'ENERGY_HEALTH_RIGHTS';
@@ -27,15 +70,42 @@ export const RegulatoryAuthoritiesPage: React.FC<RegulatoryAuthoritiesPageProps>
   onBack,
   allProjects = [],
   onNavigateToProjects,
+  institutions = [],
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<RegulatorCategory>('ALL');
   const [selectedInstForDetail, setSelectedInstForDetail] = useState<Institution | null>(null);
   const [selectedInstForDoc, setSelectedInstForDoc] = useState<Institution | null>(null);
 
+  const [storeTick, setStoreTick] = useState(0);
+  React.useEffect(() => {
+    return dataStore.subscribe(() => setStoreTick(t => t + 1));
+  }, []);
+
+  // Fusionner les données de base avec les mises à jour administratives du store
+  const baseAuthorities = useMemo(() => {
+    const list = (institutions && institutions.length > 0) ? institutions : dataStore.getInstitutions();
+    const storeMap = new Map(list.map(i => [i.id, i]));
+    return REGULATORY_AUTHORITIES_DATA.map(item => {
+      const fromStore = storeMap.get(item.id);
+      if (!fromStore) return item;
+
+      // Conserver une photo uploadée en studio base64 dans le store si présente, sinon privilégier l'image locale fiable
+      const leader_photo_url = (fromStore.leader_photo_url && fromStore.leader_photo_url.startsWith('data:image/'))
+        ? fromStore.leader_photo_url
+        : (item.leader_photo_url || fromStore.leader_photo_url);
+
+      return { 
+        ...item, 
+        ...fromStore,
+        leader_photo_url
+      };
+    });
+  }, [institutions, storeTick]);
+
   // Filter authorities by search and sector category
   const filteredAuthorities = useMemo(() => {
-    return REGULATORY_AUTHORITIES_DATA.filter((item) => {
+    return baseAuthorities.filter((item) => {
       // 1. Search Query Filter
       if (searchQuery.trim()) {
         const query = normalizeSearchText(searchQuery);
@@ -133,19 +203,11 @@ export const RegulatoryAuthoritiesPage: React.FC<RegulatoryAuthoritiesPageProps>
                   </div>
                 </div>
 
-                {/* Only display portrait if official photo URL exists, never display placeholder initials like MN, MA, MC */}
-                {item.leader_photo_url ? (
-                  <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-2xs bg-slate-50 flex-shrink-0">
-                    <img
-                      src={item.leader_photo_url}
-                      alt={item.leader_name}
-                      className="w-full h-full object-cover object-top"
-                      onError={(e) => {
-                        (e.target as HTMLElement).style.display = 'none';
-                      }}
-                    />
-                  </div>
-                ) : null}
+                {/* Official Leader Portrait */}
+                <RegulatorLeaderAvatar
+                  photoUrl={item.leader_photo_url}
+                  name={item.leader_name}
+                />
               </div>
 
               {/* Mission Summary */}

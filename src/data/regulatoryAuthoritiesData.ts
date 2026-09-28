@@ -13,7 +13,7 @@ export const REGULATORY_AUTHORITIES_DATA: Institution[] = [
     facebook_url: "https://www.facebook.com/HACA.CotedIvoire",
     leader_name: "M. RENE BOURGOIN",
     leader_title: "Président de la HACA",
-    leader_photo_url: "https://www.gouv.ci/uploads/institutions/rene_bourgoin.jpg",
+    leader_photo_url: "/images/regulator_haca_rene_bourgoin.jpg",
     leader_bio: "M. René Bourgoin est un juriste émérite et régulateur de référence dans le secteur de la communication audiovisuelle en Afrique. Titulaire d'une Maîtrise en Droit et d'un DESS en Droit des Médias, il a occupé pendant plus de quinze ans les fonctions de Directeur Général de la Haute Autorité de la Communication Audiovisuelle (HACA). Nommé Président de la HACA, il conduit avec succès la régulation du paysage audiovisuel ivoirien, la transition vers la Télévision Numérique Terrestre (TNT), l'attribution transparente des fréquences radio et télévision privées, et la régulation des contenus diffusés sur les plateformes numériques et réseaux sociaux.",
     leader_education: [
       "DESS en Droit de la Communication Audiovisuelle et des Médias",
@@ -66,7 +66,7 @@ export const REGULATORY_AUTHORITIES_DATA: Institution[] = [
     facebook_url: "https://www.facebook.com/caidp.ci",
     leader_name: "Mme ANNE-MARIE KONAN PAYNE",
     leader_title: "Présidente de la CAIDP",
-    leader_photo_url: "https://www.caidp.ci/om_caidp/static/src/img/AMKP.jpg",
+    leader_photo_url: "/images/regulator_caidp_anne_marie_konan_payne.jpg",
     leader_bio: "Mme Anne-Marie Konan Payne est une haute dirigeante publique, pionnière de la communication gouvernementale et de la transformation numérique de l'administration ivoirienne. Titulaire d'un Master en Communication et Politiques Publiques, elle a été la fondatrice et Directrice Générale du Centre d'Information et de Communication Gouvernementale (CICG) pendant plus d'une décennie, puis Secrétaire Générale adjointe du Gouvernement. Nommée Présidente de la CAIDP, elle conduit avec détermination la modernisation de l'accès aux documents publics, la généralisation du réseau des Responsables de l'Information (RI) au sein des ministères et collectivités territoriales, et la promotion active de la culture de transparence et de redevabilité publique.",
     leader_education: [
       "Master en Communication Stratégique et Politiques Publiques",
@@ -118,7 +118,7 @@ export const REGULATORY_AUTHORITIES_DATA: Institution[] = [
     facebook_url: "https://www.facebook.com/ARCOPCI",
     leader_name: "Mme MASSANFI BAMBA épouse DIOMANDE",
     leader_title: "Présidente du Conseil de Régulation de l'ARCOP",
-    leader_photo_url: "https://arcop.ci/wp-content/uploads/2025/10/BAMBA-Massanfi-epouse-DIOMANDE-Presidente-du-Conseil-de-Regulation-1-1024x671.webp",
+    leader_photo_url: "/images/regulator_arcop_massanfi_bamba.webp",
     leader_bio: "Mme Massanfi Bamba épouse Diomandé est une haute dirigeante et économiste de référence dans le secteur des finances publiques et de la commande publique. Présidente du Conseil de Régulation de l'Autorité de Régulation de la Commande Publique (ARCOP, ex-ANRMP), elle conduit avec rigueur la régulation des marchés publics, l'instruction des recours des soumissionnaires, la prévention des conflits d'intérêts et les audits indépendants de la commande publique en Côte d'Ivoire.",
     leader_education: [
       "Master Spécialisé en Gestion Financière et Économie Publique",
@@ -170,7 +170,7 @@ export const REGULATORY_AUTHORITIES_DATA: Institution[] = [
     facebook_url: "https://www.facebook.com/ARTCIOfficiel",
     leader_name: "M. LAKOUN OUATTARA",
     leader_title: "Directeur Général de l'ARTCI",
-    leader_photo_url: "",
+    leader_photo_url: "/images/regulator_artci_lakoun_ouattara.jpg",
     leader_bio: "M. Lakoun Ouattara est un haut cadre et dirigeant spécialiste des télécommunications, de l'économie numérique et de la régulation sectorielle. Directeur Général de l'Autorité de Régulation des Télécommunications/TIC de Côte d'Ivoire (ARTCI), il pilote la régulation des opérateurs télécoms, le dialogue institutionnel avec le secteur privé, la plateforme CERTINUM de dématérialisation et protection des données à caractère personnel, ainsi que le renforcement de la confiance numérique nationale.",
     leader_education: [
       "Diplôme Supérieur en Télécommunications et Gestion des Réseaux",
@@ -223,7 +223,7 @@ export const REGULATORY_AUTHORITIES_DATA: Institution[] = [
     facebook_url: "https://www.facebook.com/AnareCiOfficiel",
     leader_name: "M. AMIDOU TRAORE",
     leader_title: "Directeur Général de l'ANARE-CI",
-    leader_photo_url: "https://anare.ci/wp-content/uploads/2023/02/DG-scaled.jpg",
+    leader_photo_url: "/images/regulator_anare_amidou_traore.jpg",
     leader_bio: "M. Amidou Traoré est un ingénieur électricien émérite et dirigeant de premier plan du secteur énergétique ivoirien. Diplômé de l'École Supérieure d'Ingénieurs de Marseille et de l'ESIE (Paris), il a été Directeur Général de Côte d'Ivoire Énergies (CI-ÉNERGIES), où il a conduit les grands projets de renforcement du mix énergétique national (barrages hydroélectriques de Soubré et Singrobo, centrales thermiques). Nommé Directeur Général de l'ANARE-CI, il veille au respect des contrats de concession du service public de l'électricité, à l'équilibre économique de la filière et au traitement rigoureux des réclamations des usagers et consommateurs d'énergie.",
     leader_education: [
       "Diplôme d'Ingénieur en Électrotechnique et Systèmes Énergétiques - Marseille",
@@ -275,7 +275,7 @@ export const REGULATORY_AUTHORITIES_DATA: Institution[] = [
     facebook_url: "https://www.facebook.com/cndhciv",
     leader_name: "Mme NAMIZATA SANGARE",
     leader_title: "Présidente du CNDH",
-    leader_photo_url: "",
+    leader_photo_url: "/images/regulator_cndh_namizata_sangare.webp",
     leader_bio: "Mme Namizata Sangaré est une juriste, universitaire et militante de premier plan des droits humains en Côte d'Ivoire. Titulaire d'un DESS en Droits de l'Homme et Droit Humanitaire et d'un Doctorat en Sciences de l'Information et de la Communication, elle préside le Conseil National des Droits de l'Homme (CNDH) avec une autorité et une indépendance reconnues internationalement. Élue Présidente du Réseau des Institutions Nationales des Droits de l'Homme d'Afrique de l'Ouest (RINDAO), elle veille au monitoring des libertés publiques, à la défense des droits des femmes et des minorités et aux visites des lieux de détention sur l'ensemble du territoire ivoirien.",
     leader_education: [
       "Doctorat en Sciences de l'Information et de la Communication",
@@ -327,7 +327,7 @@ export const REGULATORY_AUTHORITIES_DATA: Institution[] = [
     facebook_url: "https://www.facebook.com/AIRPOfficiel",
     leader_name: "Dr ASSANE COULIBALY",
     leader_title: "Directeur Général de l'AIRP",
-    leader_photo_url: "https://api.airpdigital.com/storage/abouts/cca0811440c832a9abf086d8d3c0b348.jpg",
+    leader_photo_url: "/images/regulator_airp_assane_coulibaly.jpg",
     leader_bio: "Le Dr Assane Coulibaly est docteur d'État en pharmacie et expert en santé publique et réglementation du médicament. Nommé Directeur Général de l'Autorité Ivoirienne de Régulation Pharmaceutique (AIRP), il pilote la politique nationale de promotion de la santé publique, l'homologation des médicaments et vaccins, l'octroi des Autorisations de Mise sur le Marché (AMM), la démarche de certification ISO 9001 et l'alignement sur le Global Benchmarking Tool (GBT) de l'OMS.",
     leader_education: [
       "Doctorat d'État en Pharmacie - Faculté de Pharmacie d'Abidjan",

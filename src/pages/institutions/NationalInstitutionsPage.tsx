@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Search, Landmark, ArrowRight, FileText, Globe, ExternalLink, Info, ShieldCheck } from 'lucide-react';
 import { NATIONAL_INSTITUTIONS_DATA } from '../../data/nationalBudgetData';
+import { dataStore } from '../../services/dataStore';
 import { Institution, BudgetProject } from '../../types';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
@@ -10,6 +11,7 @@ interface NationalInstitutionsPageProps {
   onBack: () => void;
   onNavigateToProjects: (query: string) => void;
   allProjects?: BudgetProject[];
+  institutions?: Institution[];
 }
 
 const InstitutionPhoto: React.FC<{
@@ -51,13 +53,29 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
   onBack,
   onNavigateToProjects,
   allProjects = [],
+  institutions = [],
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'ALL' | 'PARLEMENT' | 'CONSTITUTIONNEL' | 'CONTROLE'>('ALL');
   const [selectedInstForDoc, setSelectedInstForDoc] = useState<Institution | null>(null);
   const [selectedInstForDetail, setSelectedInstForDetail] = useState<Institution | null>(null);
 
-  const filteredInstitutions = NATIONAL_INSTITUTIONS_DATA.filter((inst: any) => {
+  const [storeTick, setStoreTick] = useState(0);
+  React.useEffect(() => {
+    return dataStore.subscribe(() => setStoreTick(t => t + 1));
+  }, []);
+
+  // Fusionner les données de base avec les mises à jour administratives du store
+  const baseInstitutions = React.useMemo(() => {
+    const list = (institutions && institutions.length > 0) ? institutions : dataStore.getInstitutions();
+    const storeMap = new Map(list.map(i => [i.id, i]));
+    return NATIONAL_INSTITUTIONS_DATA.map(item => {
+      const fromStore = storeMap.get(item.id);
+      return fromStore ? { ...item, ...fromStore } : item;
+    });
+  }, [institutions, storeTick]);
+
+  const filteredInstitutions = baseInstitutions.filter((inst: any) => {
     // Strictly exclude ministries from Grandes Institutions page
     const nameLower = (inst.name || '').toLowerCase();
     if (nameLower.startsWith('ministère') || nameLower.startsWith('ministere') || nameLower.includes('délégué')) {

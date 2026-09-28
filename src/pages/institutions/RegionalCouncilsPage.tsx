@@ -7,6 +7,8 @@ import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModa
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
 import { LeaderPortrait } from '../../components/LeaderPortrait';
 import { PaginationBar } from '../../components/PaginationBar';
+import { getLatestAvailableCA } from '../../data/administrativeAccountsData';
+import { OFFICIAL_PRIMITIVE_BUDGETS } from '../../data/officialPrimitiveBudgets';
 
 interface RegionalCouncilsPageProps {
   onBack: () => void;
@@ -38,6 +40,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
 
   const [selectedInstForDoc, setSelectedInstForDoc] = useState<Institution | null>(null);
   const [selectedInstForDetail, setSelectedInstForDetail] = useState<Institution | null>(null);
+  const [detailInitialSubTab, setDetailInitialSubTab] = useState<'BUDGET_2026' | 'EXECUTION' | 'HISTORY'>('BUDGET_2026');
 
   const normalize = (s: string) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
@@ -85,10 +88,10 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-sans">
-            Conseils Régionaux & Districts (33)
+            Conseils Régionaux & Districts Autonomes (33)
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl font-medium">
-            Les 31 régions et 2 districts autonomes de Côte d'Ivoire, leurs dotations budgétaires, présidents et contacts officiels.
+            Les 31 conseils régionaux et 2 districts autonomes de Côte d'Ivoire, leurs dotations budgétaires, ministres-gouverneurs, présidents et contacts officiels.
           </p>
         </div>
       </div>
@@ -174,13 +177,13 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
 
           <div>
             <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1 ml-1">
-              Recherche Région / Chef-lieu
+              Recherche Région / District / Chef-lieu
             </label>
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Région, chef-lieu (ex: Gbêkê, San Pedro)..."
+                placeholder="Région, district, chef-lieu (ex: Abidjan, Yamoussoukro, San Pedro)..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -234,7 +237,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                   <div className="space-y-1 flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap mb-1">
                       <span className="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700">
-                        {inst.district ? `District ${inst.district}` : 'Collectivité Territoriale'}
+                        {inst.type === 'DISTRICT' ? 'District Autonome' : (inst.district ? `District ${inst.district}` : 'Collectivité Territoriale')}
                       </span>
                       {inst.political_party && (
                         <button
@@ -269,32 +272,113 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                     </h3>
                     {inst.leader_name && (
                       <div className="text-xs text-slate-600 font-bold mt-0.5">
-                        {inst.leader_title || 'Président'} : <span className="text-brand-blue">{inst.leader_name}</span>
+                        {inst.leader_title || (inst.type === 'DISTRICT' ? 'Ministre-Gouverneur' : 'Président')} : <span className="text-brand-blue">{inst.leader_name}</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="space-y-2 pt-2 mt-3">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-500 font-bold uppercase">Dotation Budgétaire Régionale</span>
-                    <span className="font-black text-slate-900">
-                      {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold">({formatAmountInWords(inst.total_budget_fcfa)})</span>
-                    </span>
+                {(inst.primitive_budget || OFFICIAL_PRIMITIVE_BUDGETS[inst.id]) ? (
+                  (() => {
+                    const prim = (inst.primitive_budget || OFFICIAL_PRIMITIVE_BUDGETS[inst.id])!;
+                    const primTotal = prim.total_voted_fcfa;
+                    const stateTotal = inst.total_budget_fcfa;
+                    const localRev = Math.max(0, primTotal - stateTotal);
+                    const statePct = primTotal > 0 ? Math.round((stateTotal / primTotal) * 100) : 0;
+                    const localPct = 100 - statePct;
+
+                    return (
+                      <div className="space-y-2 pt-2 mt-2">
+                        <div className="flex justify-between items-baseline text-xs">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-slate-800 font-black uppercase text-[10px] tracking-wider">Budget Voté</span>
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              {inst.type === 'DISTRICT' ? 'District Autonome' : 'Conseil Régional'}
+                            </span>
+                            {prim.precision === 'APPROXIMATE' && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                ≈ Arrondi
+                              </span>
+                            )}
+                            {prim.precision === 'LOWER_BOUND' && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                                Plus de
+                              </span>
+                            )}
+                          </div>
+                          <span className="font-black text-slate-900 text-sm">
+                            {formatFCFA(primTotal)}{' '}
+                            <span className="text-brand-blue font-bold text-xs">
+                              ({formatAmountInWords(primTotal)})
+                            </span>
+                          </span>
+                        </div>
+                        {/* Jauge Bicolore État vs Effort Régional */}
+                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden flex">
+                          <div className="bg-sky-500 h-full" style={{ width: `${statePct}%` }} title={`Concours de l'État: ${statePct}%`}></div>
+                          <div className="bg-emerald-500 h-full" style={{ width: `${localPct}%` }} title={`Ressources propres: ${localPct}%`}></div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:justify-between text-[10px] font-semibold text-slate-600 gap-1 pt-0.5">
+                          <span className="text-sky-700">
+                            Dotation État : <strong>{statePct}%</strong> ({formatAmountInWords(stateTotal)})
+                          </span>
+                          <span className="text-emerald-700">
+                            {inst.type === 'DISTRICT' ? 'Ressources District :' : 'Ressources Région :'} <strong>{localPct}%</strong> ({formatAmountInWords(localRev)})
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })()
+                ) : (
+                  <div className="space-y-2 pt-2 mt-3">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-slate-500 font-bold uppercase text-[10px]">
+                        {inst.type === 'DISTRICT' ? 'Dotation du District Autonome (Loi de Finances)' : 'Dotation Budgétaire Régionale (Loi de Finances)'}
+                      </span>
+                      <span className="font-black text-slate-900">
+                        {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold">({formatAmountInWords(inst.total_budget_fcfa)})</span>
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden flex">
+                      <div className="bg-brand-blue h-full" style={{ width: `${functioningPct}%` }}></div>
+                      <div className="bg-emerald-500 h-full" style={{ width: `${investmentPct}%` }}></div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-semibold text-slate-600 gap-1 pt-1">
+                      <span className="text-brand-blue">
+                        Fonct. : <strong className="font-bold">{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
+                      </span>
+                      <span className="text-emerald-700">
+                        Invest. : <strong className="font-bold">{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
+                      </span>
+                    </div>
                   </div>
-                  <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden flex">
-                    <div className="bg-brand-blue h-full" style={{ width: `${functioningPct}%` }}></div>
-                    <div className="bg-emerald-500 h-full" style={{ width: `${investmentPct}%` }}></div>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-semibold text-slate-600 gap-1 pt-1">
-                    <span className="text-brand-blue">
-                      Fonct. : <strong className="font-bold">{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
-                    </span>
-                    <span className="text-emerald-700">
-                      Invest. : <strong className="font-bold">{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
-                    </span>
-                  </div>
-                </div>
+                )}
+
+                {/* Indicateur discret Compte Administratif d'exécution disponible */}
+                {(() => {
+                  const latestCA = getLatestAvailableCA(inst.id) || getLatestAvailableCA(inst.name);
+                  if (!latestCA) return null;
+                  return (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDetailInitialSubTab('EXECUTION');
+                        setSelectedInstForDetail(inst);
+                      }}
+                      className="w-full mt-3 px-3 py-1.5 rounded-xl bg-emerald-50/90 hover:bg-emerald-100 text-emerald-900 border border-emerald-200/80 text-[11px] font-bold flex items-center justify-between transition-all group/ca cursor-pointer shadow-2xs"
+                      title={`Consulter le Compte Administratif officiel certifié de l'exercice ${latestCA.fiscal_year}`}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span>Dernière exécution disponible : <strong>Exercice {latestCA.fiscal_year}</strong></span>
+                      </div>
+                      <span className="text-emerald-700 font-black group-hover/ca:translate-x-0.5 transition-transform flex items-center gap-1">
+                        Voir l'exécution →
+                      </span>
+                    </button>
+                  );
+                })()}
               </div>
 
               <div className="pt-4 mt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
@@ -336,18 +420,22 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                   </button>
 
                   <button
-                    onClick={() => setSelectedInstForDetail(inst)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDetailInitialSubTab('BUDGET_2026');
+                      setSelectedInstForDetail(inst);
+                    }}
                     className="px-2.5 py-1.5 bg-brand-blue/10 hover:bg-brand-blue hover:text-white text-brand-blue rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 flex-shrink-0 cursor-pointer"
-                    title="Consulter la fiche détaillée du Conseil Régional"
+                    title={inst.type === 'DISTRICT' ? "Consulter la fiche détaillée du District Autonome" : "Consulter la fiche détaillée du Conseil Régional"}
                   >
                     <Info className="w-3 h-3" />
-                    <span className="whitespace-nowrap">Fiche Région</span>
+                    <span className="whitespace-nowrap">{inst.type === 'DISTRICT' ? 'Fiche District' : 'Fiche Région'}</span>
                   </button>
                 </div>
 
                 <div className="flex-shrink-0 w-full sm:w-auto">
                   <button
-                    onClick={() => onNavigateToProjects(inst.region)}
+                    onClick={() => onNavigateToProjects(inst.type === 'DISTRICT' ? inst.name : inst.region)}
                     className="w-full sm:w-auto px-4 py-2 bg-brand-blue hover:bg-brand-blue-dark active:scale-95 text-white text-xs font-bold rounded-xl sm:rounded-full transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                   >
                     <span>Voir les projets ({relatedProjectsCount})</span>
@@ -382,10 +470,14 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
       {/* Modal Fiche Détaillée Région */}
       <InstitutionDetailModal
         isOpen={!!selectedInstForDetail}
-        onClose={() => setSelectedInstForDetail(null)}
+        onClose={() => {
+          setSelectedInstForDetail(null);
+          setDetailInitialSubTab('BUDGET_2026');
+        }}
         institution={selectedInstForDetail}
         allProjects={allProjects}
         onNavigateToProjects={onNavigateToProjects}
+        initialFinanceSubTab={detailInitialSubTab}
       />
 
     </div>

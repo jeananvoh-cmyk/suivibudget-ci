@@ -1,0 +1,253 @@
+import { describe, it, expect } from 'vitest';
+import { 
+  calculateExecutionRate, 
+  getExecutionRateBadgeColor, 
+  getExecutionStatusLabel 
+} from '../budgetCalculations';
+import { 
+  getLatestAvailableCA, 
+  hasCA, 
+  getAdministrativeAccountsForInstitution,
+  getAvailableCAYears 
+} from '../../data/administrativeAccountsData';
+import { 
+  getGlossaryTerm, 
+  searchGlossary, 
+  BUDGET_GLOSSARY 
+} from '../../data/budgetGlossary';
+import { validateLocalBudget } from '../budgetValidation';
+import { LocalBudget } from '../../types/localBudget';
+
+describe('1. Moteur Dynamique des Calculs d\'Exécution Budgétaire', () => {
+  it('calcule exactement 99,95% pour 9 995 000 FCFA réalisés sur 10 000 000 FCFA prévus', () => {
+    const result = calculateExecutionRate(9995000, 10000000);
+    expect(result.rate).toBe(99.95);
+    expect(result.formatted).toBe('99,95 %');
+    expect(result.status).toBe('NORMAL');
+    expect(result.isOverBudget).toBe(false);
+  });
+
+  it('calcule dynamiquement 80% si le montant réalisé est modifié à 8 000 000 FCFA', () => {
+    const result = calculateExecutionRate(8000000, 10000000);
+    expect(result.rate).toBe(80);
+    expect(result.formatted).toBe('80 %');
+    expect(result.status).toBe('NORMAL');
+    expect(result.isOverBudget).toBe(false);
+  });
+
+  it('protège rigoureusement contre la division par zéro lorsque le montant prévu est 0', () => {
+    const zeroResult = calculateExecutionRate(0, 0);
+    expect(zeroResult.rate).toBe(0);
+    expect(zeroResult.status).toBe('ZERO_PLANNED');
+    expect(Number.isFinite(zeroResult.rate)).toBe(true);
+    expect(Number.isNaN(zeroResult.rate)).toBe(false);
+
+    const nonBudgeted = calculateExecutionRate(5000000, 0);
+    expect(nonBudgeted.status).toBe('OVER_EXECUTED');
+    expect(nonBudgeted.isOverBudget).toBe(true);
+    expect(nonBudgeted.formatted).toBe('Non budgétisé');
+  });
+
+  it('gère correctement une réalisation nulle (0 FCFA dépensé)', () => {
+    const result = calculateExecutionRate(0, 50000000);
+    expect(result.rate).toBe(0);
+    expect(result.formatted).toBe('0,00 %');
+    expect(result.status).toBe('ZERO_EXECUTED');
+    expect(result.isOverBudget).toBe(false);
+  });
+
+  it('déclenche le statut OVER_EXECUTED si les dépenses réalisées dépassent les crédits votés', () => {
+    const result = calculateExecutionRate(12000000, 10000000);
+    expect(result.rate).toBe(120);
+    expect(result.isOverBudget).toBe(true);
+    expect(result.status).toBe('OVER_EXECUTED');
+    expect(result.statusLabel).toContain('À vérifier : Réalisé supérieur');
+  });
+
+  it('fournit des badges et libellés adaptés aux seuils républicains', () => {
+    expect(getExecutionStatusLabel('NORMAL')).toBe('Exécution conforme');
+    expect(getExecutionStatusLabel('OVER_EXECUTED')).toContain('À vérifier');
+    expect(getExecutionRateBadgeColor('NORMAL', 85)).toContain('emerald');
+    expect(getExecutionRateBadgeColor('NORMAL', 60)).toContain('blue');
+    expect(getExecutionRateBadgeColor('NORMAL', 30)).toContain('amber');
+    expect(getExecutionRateBadgeColor('OVER_EXECUTED', 120)).toContain('purple');
+  });
+});
+
+describe('2. Résolution Intelligente & Smart Fallback des Comptes Administratifs', () => {
+  it('résout Tiassalé vers son dernier compte administratif disponible (Exercice 2024)', () => {
+    const ca = getLatestAvailableCA('inst-com-tiassale');
+    expect(ca).toBeDefined();
+    expect(ca?.fiscal_year).toBe(2024);
+    expect(ca?.institution_name).toBe('Mairie de Tiassalé');
+    expect(ca?.total_planned).toBe(1450000000);
+    expect(ca?.total_realized).toBe(1316280450);
+    expect(ca?.surplus_or_deficit).toBe(133719550);
+  });
+
+  it('retrouve également Tiassalé par son nom normalisé', () => {
+    const ca = getLatestAvailableCA('Tiassalé');
+    expect(ca).toBeDefined();
+    expect(ca?.fiscal_year).toBe(2024);
+  });
+
+  it('confirme que Tiassalé possède hasCA === true et liste les années disponibles', () => {
+    expect(hasCA('inst-com-tiassale')).toBe(true);
+    const years = getAvailableCAYears('inst-com-tiassale');
+    expect(years).toContain(2024);
+  });
+
+  it('retourne undefined pour une collectivité sans compte administratif publié', () => {
+    expect(hasCA('inst-com-inconnue-xyz')).toBe(false);
+    expect(getLatestAvailableCA('inst-com-inconnue-xyz')).toBeUndefined();
+    expect(getAdministrativeAccountsForInstitution('inst-com-inconnue-xyz')).toEqual([]);
+  });
+
+  it('comporte au moins 5 opérations d\'investissement réelles pour Tiassalé avec rapprochements DGMP', () => {
+    const ca = getLatestAvailableCA('inst-com-tiassale');
+    expect(ca?.operations.length).toBe(5);
+
+    // Vérification opération 1 (CSU)
+    const opCSU = ca?.operations.find(o => o.title.includes('Centre de Santé'));
+    expect(opCSU).toBeDefined();
+    expect(opCSU?.procurement_match?.match_level).toBe('STRONG');
+    expect(opCSU?.procurement_match?.tender_number).toBe('AOO N°03/MT/2024');
+
+    // Vérification opération marché central (Régie municipale - NONE)
+    const opMarche = ca?.operations.find(o => o.title.includes('Marché Central'));
+    expect(opMarche).toBeDefined();
+    expect(opMarche?.procurement_match?.match_level).toBe('NONE');
+    expect(opMarche?.procurement_match?.verification_status).toBe('Non retrouvé');
+  });
+
+  it('inclut un droit de réponse officiel structuré pour la Mairie de Tiassalé', () => {
+    const ca = getLatestAvailableCA('inst-com-tiassale');
+    expect(ca?.institution_response).toBeDefined();
+    expect(ca?.institution_response?.author_title).toBe('Mairie de Tiassalé');
+    expect(ca?.institution_response?.response_status).toBe('PUBLISHED');
+  });
+});
+
+describe('3. Glossaire Citoyen des Finances Locales & Vulgarisation', () => {
+  it('contient au moins 40 termes de vulgarisation citoyenne', () => {
+    expect(BUDGET_GLOSSARY.length).toBeGreaterThanOrEqual(40);
+  });
+
+  it('recherche avec succès le terme "compte-administratif" avec sa mise en garde républicaine', () => {
+    const term = getGlossaryTerm('compte-administratif');
+    expect(term).toBeDefined();
+    expect(term?.term).toBe('Compte administratif');
+    expect(term?.category).toBe('EXECUTION');
+    expect(term?.warning).toContain('Le compte administratif n\'est pas un budget primitif');
+  });
+
+  it('résout par les alias officiels (CA, BP, DGMP, AOO)', () => {
+    const caAlias = getGlossaryTerm('CA');
+    expect(caAlias?.id).toBe('compte-administratif');
+
+    const bpAlias = getGlossaryTerm('BP');
+    expect(bpAlias?.id).toBe('budget-primitif');
+
+    const dgmpAlias = getGlossaryTerm('DGMP');
+    expect(dgmpAlias?.id).toBe('dgmp');
+
+    const aooAlias = getGlossaryTerm('AOO');
+    expect(aooAlias?.id).toBe('aoo');
+  });
+
+  it('permet la recherche floue dans les explications citoyennes', () => {
+    const results = searchGlossary('ordonnateur');
+    expect(results.length).toBeGreaterThan(0);
+    expect(results.some(r => r.term.toLowerCase().includes('ordonnateur'))).toBe(true);
+  });
+});
+
+describe('4. Moteur de Cohérence Budgétaire & Cas Bingerville Multi-Versions', () => {
+  it('valide un budget primitif cohérent sans lever d\'erreur bloquante', () => {
+    const validBudget: LocalBudget = {
+      id: 'test-budget-1',
+      institution_id: 'inst-test',
+      institution_type: 'COMMUNE',
+      institution_name: 'Mairie Test',
+      fiscal_year: 2026,
+      budget_type: 'PRIMITIF_ADOPTE',
+      status: 'VERIFIED',
+      is_current_version: true,
+      version_number: 1,
+      total_amount: 1000000000,
+      operating_amount: 600000000,
+      investment_amount: 400000000,
+      operating_percentage: 60,
+      investment_percentage: 40,
+      amount_precision: 'EXACT',
+      adoption_date: '2025-12-20',
+      verification_status: 'AIP_VERIFIED',
+      confidence_level: 'HIGH',
+      sources: [],
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-01T00:00:00Z'
+    };
+
+    const issues = validateLocalBudget(validBudget);
+    const errors = issues.filter(i => i.severity === 'ERROR');
+    expect(errors.length).toBe(0);
+  });
+
+  it('détecte une incohérence de somme (Fonctionnement + Investissement !== Total)', () => {
+    const invalidBudget: LocalBudget = {
+      id: 'test-budget-bad-sum',
+      institution_id: 'inst-test',
+      institution_type: 'COMMUNE',
+      institution_name: 'Mairie Test',
+      fiscal_year: 2026,
+      budget_type: 'PRIMITIF_ADOPTE',
+      status: 'DRAFT',
+      is_current_version: true,
+      version_number: 1,
+      total_amount: 1000000000,
+      operating_amount: 700000000,
+      investment_amount: 500000000, // 700M + 500M = 1.2Mrd !== 1.0Mrd
+      operating_percentage: 70,
+      investment_percentage: 50,
+      amount_precision: 'EXACT',
+      verification_status: 'SECONDARY_TO_CORROBORATE',
+      confidence_level: 'LOW',
+      sources: [],
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-01T00:00:00Z'
+    };
+
+    const issues = validateLocalBudget(invalidBudget);
+    const sumError = issues.find(i => i.code === 'WARN_SUM_MISMATCH');
+    expect(sumError).toBeDefined();
+    expect(sumError?.severity).toBe('REVIEW');
+  });
+
+  it('interdit un montant budgétaire négatif', () => {
+    const negativeBudget: LocalBudget = {
+      id: 'test-budget-neg',
+      institution_id: 'inst-test',
+      institution_type: 'COMMUNE',
+      institution_name: 'Mairie Test',
+      fiscal_year: 2026,
+      budget_type: 'PRIMITIF_ADOPTE',
+      status: 'DRAFT',
+      is_current_version: true,
+      version_number: 1,
+      total_amount: -5000000,
+      operating_amount: 0,
+      investment_amount: 0,
+      operating_percentage: 0,
+      investment_percentage: 0,
+      amount_precision: 'EXACT',
+      verification_status: 'SECONDARY_TO_CORROBORATE',
+      confidence_level: 'LOW',
+      sources: [],
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-01T00:00:00Z'
+    };
+
+    const issues = validateLocalBudget(negativeBudget);
+    expect(issues.some(i => i.code === 'ERR_TOTAL_NEGATIVE')).toBe(true);
+  });
+});

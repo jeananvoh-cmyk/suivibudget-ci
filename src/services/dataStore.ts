@@ -18,12 +18,25 @@ import { CAIDP_MASTER_DIRECTORY, CaidpEntity } from '../data/caidpRiData';
 import { AuthSecurityService } from './authSecurity';
 import { sanitizeCsvCell } from '../utils/security';
 import { supabase, isSupabaseConfigured } from './supabase';
-import { enrichWithPrimitiveBudgets } from '../data/officialPrimitiveBudgets';
+import { enrichWithPrimitiveBudgets, OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
+import { 
+  LocalBudget, 
+  BudgetCoherenceIssue 
+} from '../types/localBudget';
+import { 
+  LOCAL_BUDGETS_REFERENTIAL, 
+  getLocalBudgetsForInstitution, 
+  getCurrentLocalBudget, 
+  exportLocalBudgetsToCsv, 
+  exportLocalBudgetsToJson 
+} from '../data/localBudgetsReferential';
+import { validateAllLocalBudgets } from '../utils/budgetValidation';
 
 const STORAGE_KEYS = {
   PROJECTS: 'civicdata_projects_v2026_clean_v4',
-  INSTITUTIONS: 'civicdata_institutions_v17',
+  INSTITUTIONS: 'civicdata_institutions_v20',
   INSTITUTION_OVERRIDES: 'civicdata_institutions_overrides_v1',
+  LOCAL_BUDGETS: 'suivibudget_local_budgets_referential_v3',
   PROOFS: 'civicdata_proofs_v12',
   ARTICLES: 'civicdata_articles_v10',
   SETTINGS: 'civicdata_settings_v7',
@@ -469,6 +482,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
 class DataStore {
   private projects: BudgetProject[] = [];
   private institutions: Institution[] = [];
+  private localBudgets: LocalBudget[] = [];
   private proofs: CitizenProof[] = [];
   private articles: NewsArticle[] = [];
   private documents: PublicDocument[] = [];
@@ -593,9 +607,69 @@ class DataStore {
           return inst;
         });
       }
+
+      // Reconcile and guarantee local media assets from INSTITUTIONS_DATA (HACA, ARTCI, CNDH, etc.)
+      const baseMap = new Map(INSTITUTIONS_DATA.map(i => [i.id, i]));
+      this.institutions = this.institutions.map(inst => {
+        const base = baseMap.get(inst.id);
+        if (base && base.leader_photo_url && base.leader_photo_url.startsWith('/images/')) {
+          // If stored photo is not a custom uploaded base64 data URL, ensure the clean local /images/ asset is used
+          if (!inst.leader_photo_url || !inst.leader_photo_url.startsWith('data:image/')) {
+            return { ...inst, leader_photo_url: base.leader_photo_url };
+          }
+        }
+        return inst;
+      });
+
+      // Ensure any missing institution from INSTITUTIONS_DATA is present in memory
+      const currentIds = new Set(this.institutions.map(i => i.id));
+      for (const base of INSTITUTIONS_DATA) {
+        if (!currentIds.has(base.id)) {
+          this.institutions.push(base);
+        }
+      }
     } catch (e) {
       console.warn("Could not read institutions from localStorage", e);
     }
+
+    // 2.b Local Budgets Referential (Multi-exercices, multi-versions)
+    this.localBudgets = [...LOCAL_BUDGETS_REFERENTIAL];
+    try {
+      const storedBudgets = localStorage.getItem(STORAGE_KEYS.LOCAL_BUDGETS);
+      if (storedBudgets) {
+        const parsed = JSON.parse(storedBudgets);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const map = new Map(this.localBudgets.map(b => [b.id, b]));
+          parsed.forEach((item: LocalBudget) => {
+            map.set(item.id, item);
+          });
+          this.localBudgets = Array.from(map.values());
+        }
+      }
+    } catch (e) {
+      console.warn("Could not read localBudgets from localStorage", e);
+    }
+
+    // Enrich institutions with multi-exercices local budgets referential
+    this.institutions = this.institutions.map(inst => {
+      const budgets = this.getLocalBudgets(inst.id);
+      const current = budgets.find(b => b.fiscal_year === 2026 && b.is_current_version) || budgets.find(b => b.fiscal_year === 2026);
+      return {
+        ...inst,
+        local_budgets: budgets,
+        primitive_budget: current ? {
+          total_voted_fcfa: current.total_amount,
+          investment_voted_fcfa: current.investment_amount,
+          functioning_voted_fcfa: current.operating_amount,
+          voted_date: current.adoption_date || '2026',
+          source: current.primary_source_label || 'SuiviBudget',
+          source_url: current.primary_source_url,
+          precision: current.amount_precision,
+          session_notes: current.session_notes || current.notes,
+          projects_count: current.projects_count,
+        } : (OFFICIAL_PRIMITIVE_BUDGETS[inst.id] || inst.primitive_budget)
+      };
+    });
 
     // 3. Proofs
     this.proofs = [...INITIAL_CITIZEN_PROOFS];
@@ -766,13 +840,13 @@ class DataStore {
             if (remote) {
               return {
                 ...inst,
-                website: remote.website !== undefined && remote.website !== '' ? remote.website : inst.website,
-                facebook_url: remote.facebook_url !== undefined && remote.facebook_url !== '' ? remote.facebook_url : inst.facebook_url,
-                contact_email: remote.contact_email !== undefined && remote.contact_email !== '' ? remote.contact_email : inst.contact_email,
-                contact_phone: remote.contact_phone !== undefined && remote.contact_phone !== '' ? remote.contact_phone : inst.contact_phone,
-                leader_name: remote.leader_name !== undefined && remote.leader_name !== '' ? remote.leader_name : inst.leader_name,
-                leader_photo_url: remote.leader_photo_url !== undefined && remote.leader_photo_url !== '' ? remote.leader_photo_url : inst.leader_photo_url,
-                political_party: remote.political_party !== undefined && remote.political_party !== '' ? remote.political_party : inst.political_party,
+                website: (remote.website && String(remote.website).trim()) ? remote.website : inst.website,
+                facebook_url: (remote.facebook_url && String(remote.facebook_url).trim()) ? remote.facebook_url : inst.facebook_url,
+                contact_email: (remote.contact_email && String(remote.contact_email).trim()) ? remote.contact_email : inst.contact_email,
+                contact_phone: (remote.contact_phone && String(remote.contact_phone).trim()) ? remote.contact_phone : inst.contact_phone,
+                leader_name: (remote.leader_name && String(remote.leader_name).trim()) ? remote.leader_name : inst.leader_name,
+                leader_photo_url: (remote.leader_photo_url && String(remote.leader_photo_url).trim()) ? remote.leader_photo_url : inst.leader_photo_url,
+                political_party: (remote.political_party && String(remote.political_party).trim()) ? remote.political_party : inst.political_party,
               };
             }
             return inst;
@@ -835,6 +909,102 @@ class DataStore {
 
   public getInstitutions(): Institution[] {
     return this.institutions;
+  }
+
+  // --- RÉFÉRENTIEL DES BUDGETS LOCAUX (MULTI-EXERCICES & MULTI-VERSIONS) ---
+  public getLocalBudgets(institutionId?: string): LocalBudget[] {
+    if (institutionId) {
+      return this.localBudgets.filter(b => b.institution_id === institutionId)
+        .sort((a, b) => b.fiscal_year - a.fiscal_year || b.version_number - a.version_number);
+    }
+    return this.localBudgets;
+  }
+
+  public getLocalBudgetById(id: string): LocalBudget | undefined {
+    return this.localBudgets.find(b => b.id === id);
+  }
+
+  public getCurrentLocalBudget(institutionId: string, fiscalYear: number = 2026): LocalBudget | undefined {
+    const list = this.getLocalBudgets(institutionId);
+    return list.find(b => b.fiscal_year === fiscalYear && b.is_current_version) ||
+           list.find(b => b.fiscal_year === fiscalYear);
+  }
+
+  public async saveLocalBudget(budget: LocalBudget, changedBy: string = 'ADMIN', reason: string = 'Mise à jour du référentiel'): Promise<void> {
+    const existingIndex = this.localBudgets.findIndex(b => b.id === budget.id);
+    const updated: LocalBudget = {
+      ...budget,
+      updated_at: new Date().toISOString()
+    };
+
+    if (existingIndex >= 0) {
+      const old = this.localBudgets[existingIndex];
+      const revision = {
+        id: `rev-${Date.now()}`,
+        budget_id: budget.id,
+        old_value: old.total_amount,
+        new_value: budget.total_amount,
+        reason,
+        changed_by: changedBy,
+        changed_at: new Date().toISOString()
+      };
+      updated.revision_history = [...(old.revision_history || []), revision];
+      this.localBudgets[existingIndex] = updated;
+    } else {
+      this.localBudgets.push(updated);
+    }
+
+    try {
+      localStorage.setItem(STORAGE_KEYS.LOCAL_BUDGETS, JSON.stringify(this.localBudgets));
+    } catch (e) {
+      console.warn("Could not save local budgets to localStorage", e);
+    }
+
+    // Synchronisation Supabase si configuré
+    if (isSupabaseConfigured()) {
+      safeSupabaseExec(
+        supabase.from('local_budgets').upsert({
+          id: updated.id,
+          institution_id: updated.institution_id,
+          institution_type: updated.institution_type,
+          institution_name: updated.institution_name,
+          fiscal_year: updated.fiscal_year,
+          budget_type: updated.budget_type,
+          status: updated.status,
+          is_current_version: updated.is_current_version,
+          version_number: updated.version_number,
+          total_amount: updated.total_amount,
+          operating_amount: updated.operating_amount,
+          investment_amount: updated.investment_amount,
+          amount_precision: updated.amount_precision,
+          adoption_date: updated.adoption_date,
+          tutelle_approval_date: updated.tutelle_approval_date,
+          execution_authorization_date: updated.execution_authorization_date,
+          verification_status: updated.verification_status,
+          confidence_level: updated.confidence_level,
+          notes: updated.notes,
+          session_notes: updated.session_notes,
+          projects_count: updated.projects_count,
+          document_url: updated.document_url,
+          document_name: updated.document_name,
+          updated_at: updated.updated_at
+        }),
+        `saveLocalBudget (${updated.id})`
+      );
+    }
+
+    this.notify();
+  }
+
+  public validateLocalBudgets(): BudgetCoherenceIssue[] {
+    return validateAllLocalBudgets(this.localBudgets);
+  }
+
+  public exportLocalBudgets(format: 'CSV' | 'JSON' = 'CSV'): string {
+    if (format === 'JSON') {
+      return exportLocalBudgetsToJson(this.localBudgets);
+    }
+    return exportLocalBudgetsToCsv(this.localBudgets);
   }
 
   public getApprovedProofs(): CitizenProof[] {
@@ -1197,9 +1367,7 @@ class DataStore {
     } else {
       this.institutions.unshift(updatedInst);
     }
-    this.saveInstitutions();
-
-    // Persist override so it survives future app versions or reloads
+    // 1. Persist override FIRST so it always survives even if large array exceeds quota
     try {
       const storedOverrides = localStorage.getItem(STORAGE_KEYS.INSTITUTION_OVERRIDES);
       const overridesMap = storedOverrides ? JSON.parse(storedOverrides) : {};
@@ -1229,6 +1397,9 @@ class DataStore {
     } catch (e) {
       console.warn("Could not save institution override", e);
     }
+
+    // 2. Save full array
+    this.saveInstitutions();
 
     if (isSupabaseConfigured()) {
       safeSupabaseExec(

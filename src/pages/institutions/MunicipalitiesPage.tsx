@@ -1,6 +1,6 @@
 import { normalizeSearchText } from '../../utils/searchHelpers';
 import React, { useState } from 'react';
-import { ArrowLeft, Search, Building2, ChevronDown, ArrowRight, FileText, ArrowRightLeft, Globe, ExternalLink, Info, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Search, Building2, ChevronDown, ArrowRight, FileText, ArrowRightLeft, Globe, ExternalLink, Info, Eye, EyeOff, Scale } from 'lucide-react';
 import { Institution, BudgetProject } from '../../types';
 import { formatFCFA, formatAmountInWords, getInstitutionLeaderGender } from '../../utils/formatters';
 import { getProjectsForInstitution } from '../../utils/institutionProjects';
@@ -9,6 +9,8 @@ import { CommuneComparatorModal } from '../../components/CommuneComparatorModal'
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
 import { LeaderPortrait } from '../../components/LeaderPortrait';
 import { PaginationBar } from '../../components/PaginationBar';
+import { getLatestAvailableCA } from '../../data/administrativeAccountsData';
+import { OFFICIAL_PRIMITIVE_BUDGETS } from '../../data/officialPrimitiveBudgets';
 
 interface MunicipalitiesPageProps {
   onBack: () => void;
@@ -44,6 +46,7 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
   // Modal states
   const [selectedInstForDoc, setSelectedInstForDoc] = useState<Institution | null>(null);
   const [selectedInstForDetail, setSelectedInstForDetail] = useState<Institution | null>(null);
+  const [detailInitialSubTab, setDetailInitialSubTab] = useState<'BUDGET_2026' | 'EXECUTION' | 'HISTORY'>('BUDGET_2026');
   const [comparatorOpen, setComparatorOpen] = useState(false);
   const [compareCommuneA, setCompareCommuneA] = useState<Institution | null>(null);
 
@@ -132,9 +135,13 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
     } else if (sortBy === 'NAME_DESC') {
       return nameB.localeCompare(nameA, 'fr', { sensitivity: 'base' });
     } else if (sortBy === 'BUDGET_DESC') {
-      return b.total_budget_fcfa - a.total_budget_fcfa;
+      const budgetA = a.primitive_budget?.total_voted_fcfa || OFFICIAL_PRIMITIVE_BUDGETS[a.id]?.total_voted_fcfa || a.total_budget_fcfa || 0;
+      const budgetB = b.primitive_budget?.total_voted_fcfa || OFFICIAL_PRIMITIVE_BUDGETS[b.id]?.total_voted_fcfa || b.total_budget_fcfa || 0;
+      return budgetB - budgetA;
     } else if (sortBy === 'BUDGET_ASC') {
-      return a.total_budget_fcfa - b.total_budget_fcfa;
+      const budgetA = a.primitive_budget?.total_voted_fcfa || OFFICIAL_PRIMITIVE_BUDGETS[a.id]?.total_voted_fcfa || a.total_budget_fcfa || 0;
+      const budgetB = b.primitive_budget?.total_voted_fcfa || OFFICIAL_PRIMITIVE_BUDGETS[b.id]?.total_voted_fcfa || b.total_budget_fcfa || 0;
+      return budgetA - budgetB;
     }
     return nameA.localeCompare(nameB, 'fr', { sensitivity: 'base' });
   });
@@ -155,8 +162,8 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-sans">
             Mairies (201)
           </h1>
-          <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl font-medium">
-            Dotations budgétaires de l'État (191 communes de l'intérieur) et budgets municipaux autonomes (10 communes d'Abidjan).
+          <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-3xl font-medium">
+            Dotations budgétaires de l'État (LFI 2026 : communes de l'intérieur et communes périphériques d'Abidjan) et budgets municipaux votés (autonomie fiscale DGI).
           </p>
         </div>
       </div>
@@ -419,6 +426,22 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
           const relatedProjects = getProjectsForInstitution(inst, allProjects);
           const relatedProjectsCount = relatedProjects.length;
 
+          const isDistrictAutonome = (inst.district && inst.district.toLowerCase().includes('autonome')) ||
+            (inst.region && (inst.region.toLowerCase().includes('abidjan') || inst.region.toLowerCase().includes('yamoussoukro')));
+
+          const territorialLabel = isDistrictAutonome
+            ? (inst.region?.toLowerCase().includes('yamoussoukro') || inst.district?.toLowerCase().includes('yamoussoukro')
+                ? "District Autonome de Yamoussoukro"
+                : "District Autonome d'Abidjan")
+            : `Région ${inst.region}`;
+
+          const isGrandAbidjan = (inst.district?.toLowerCase().includes('abidjan') || inst.region?.toLowerCase().includes('abidjan') || ['abobo', 'adjamé', 'attécoubé', 'koumassi', 'marcory', 'plateau', 'port-bouët', 'treichville', 'anyama', 'bingerville', 'songon'].some(name => inst.name.toLowerCase().includes(name)));
+
+          const isPeripheralAbidjan = ['inst-com-anyama', 'inst-com-bingerville', 'inst-com-songon'].includes(inst.id) ||
+            ['anyama', 'bingerville', 'songon'].some(name => inst.name.toLowerCase().includes(name));
+
+          const isAttecoube = inst.id === 'inst-com-attecoube' || inst.name.toLowerCase().includes('attécoubé');
+
           return (
             <div key={inst.id} className="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-sm hover:shadow-md hover:border-brand-blue/50 transition-all flex flex-col justify-between group">
               <div>
@@ -433,8 +456,18 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                   <div className="space-y-1 flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap mb-1">
                       <span className="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-brand-blue/10 text-brand-blue">
-                        Région {inst.region}
+                        {territorialLabel}
                       </span>
+                      {isPeripheralAbidjan && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
+                          Grand Abidjan • Commune Périphérique (DGE)
+                        </span>
+                      )}
+                      {isAttecoube && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-200">
+                          Grand Abidjan • 6 Chantiers Prioritaires (200 M)
+                        </span>
+                      )}
                       {inst.political_party && (
                         <button
                           type="button"
@@ -474,9 +507,9 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                   </div>
                 </div>
 
-                {inst.primitive_budget ? (
-                  (() => {
-                    const prim = inst.primitive_budget;
+                {(() => {
+                  const prim = inst.primitive_budget || OFFICIAL_PRIMITIVE_BUDGETS[inst.id];
+                  if (prim) {
                     const primTotal = prim.total_voted_fcfa;
                     const stateTotal = inst.total_budget_fcfa;
                     const localRev = Math.max(0, primTotal - stateTotal);
@@ -491,6 +524,16 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                             <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
                               Conseil Municipal
                             </span>
+                            {prim.precision === 'APPROXIMATE' && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                ≈ Arrondi
+                              </span>
+                            )}
+                            {prim.precision === 'LOWER_BOUND' && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                                Plus de
+                              </span>
+                            )}
                           </div>
                           <span className="font-black text-slate-900 text-sm">
                             {formatFCFA(primTotal)}{' '}
@@ -506,7 +549,11 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                         </div>
                         <div className="flex flex-col sm:flex-row sm:justify-between text-[10px] font-semibold text-slate-600 gap-1 pt-0.5">
                           <span className="text-sky-700">
-                            Subvention de l'État : <strong>{statePct}%</strong> ({formatAmountInWords(stateTotal)})
+                            {stateTotal > 0 ? (
+                              <>Subvention État : <strong>{statePct}%</strong> ({formatAmountInWords(stateTotal)})</>
+                            ) : (
+                              <>Autonomie fiscale locale intégrale (100% DGI & Taxes)</>
+                            )}
                           </span>
                           <span className="text-emerald-700">
                             Recettes propres Mairie : <strong>{localPct}%</strong> ({formatAmountInWords(localRev)})
@@ -514,38 +561,88 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                         </div>
                       </div>
                     );
-                  })()
-                ) : inst.is_tax_quota_commune ? (
-                  <div className="p-3.5 bg-amber-50/90 border border-amber-200/80 rounded-2xl space-y-1.5 mt-3">
-                    <div className="flex items-center gap-1.5 text-xs font-black text-amber-900">
-                      <span> Autonomie Fiscale (Quote-part d'impôts)</span>
+                  }
+
+                  if (inst.is_tax_quota_commune) {
+                    return (
+                      <div className="p-3.5 bg-gradient-to-r from-amber-50 to-orange-50/50 border border-amber-200/80 rounded-2xl space-y-1.5 mt-3">
+                        <div className="flex items-center justify-between gap-1 text-xs font-black text-amber-950">
+                          <span className="flex items-center gap-1.5">
+                            <Scale className="w-3.5 h-3.5 text-amber-700" />
+                            Autonomie Fiscale & Recettes DGI
+                          </span>
+                          {isAttecoube ? (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-100 text-amber-900 border border-amber-300">
+                              6 Projets État (200 M FCFA)
+                            </span>
+                          ) : isGrandAbidjan && (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-blue-100 text-brand-blue border border-blue-200">
+                              Grand Abidjan • Prêt pour BP
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-amber-900 leading-snug font-medium">
+                          {isAttecoube
+                            ? "Commune urbaine d'Abidjan à autonomie fiscale directe (DGI), complétée par 200 000 000 FCFA d'opérations d'urgence de l'État pour 6 chantiers d'écoles et de santé de proximité."
+                            : isGrandAbidjan
+                            ? "Commune du Grand Abidjan à forte assiette fiscale. Fiche calibrée pour la double lecture dès transmission officielle de la délibération du Conseil Municipal 2026."
+                            : "Non bénéficiaire des dotations directes de l'État en raison de l'importance des quotes-parts d'impôts directes reversées par la DGI."}
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-2 pt-2 mt-2">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-slate-500 font-bold uppercase">
+                          {isPeripheralAbidjan ? "Dotation de l'État — DGE & DGF (LFI 2026)" : "Dotation de l'État (LFI 2026)"}
+                        </span>
+                        <span className="font-black text-slate-900">
+                          {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold">({formatAmountInWords(inst.total_budget_fcfa)})</span>
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden flex">
+                        <div className="bg-brand-blue h-full" style={{ width: `${functioningPct}%` }}></div>
+                        <div className="bg-emerald-500 h-full" style={{ width: `${investmentPct}%` }}></div>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-semibold text-slate-600 gap-1 pt-1">
+                        <span className="text-brand-blue">
+                          Fonctionnement (DGF) : <strong>{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
+                        </span>
+                        <span className="text-emerald-700">
+                          Investissement (DGE) : <strong>{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-[11px] text-amber-800 leading-snug font-medium">
-                      Non bénéficiaire des dotations directes de l'État en raison de l'importance des quotes-parts d'impôts directes reversées par la DGI.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-2 pt-2 mt-2">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-500 font-bold uppercase">Dotation de l'État (LFI 2026)</span>
-                      <span className="font-black text-slate-900">
-                        {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold">({formatAmountInWords(inst.total_budget_fcfa)})</span>
+                  );
+                })()}
+
+                {/* Indicateur discret Compte Administratif d'exécution disponible */}
+                {(() => {
+                  const latestCA = getLatestAvailableCA(inst.id) || getLatestAvailableCA(inst.name);
+                  if (!latestCA) return null;
+                  return (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDetailInitialSubTab('EXECUTION');
+                        setSelectedInstForDetail(inst);
+                      }}
+                      className="w-full mt-3 px-3 py-1.5 rounded-xl bg-emerald-50/90 hover:bg-emerald-100 text-emerald-900 border border-emerald-200/80 text-[11px] font-bold flex items-center justify-between transition-all group/ca cursor-pointer shadow-2xs"
+                      title={`Consulter le Compte Administratif officiel certifié de l'exercice ${latestCA.fiscal_year}`}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span>Dernière exécution disponible : <strong>Exercice {latestCA.fiscal_year}</strong></span>
+                      </div>
+                      <span className="text-emerald-700 font-black group-hover/ca:translate-x-0.5 transition-transform flex items-center gap-1">
+                        Voir l'exécution →
                       </span>
-                    </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden flex">
-                      <div className="bg-brand-blue h-full" style={{ width: `${functioningPct}%` }}></div>
-                      <div className="bg-emerald-500 h-full" style={{ width: `${investmentPct}%` }}></div>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-semibold text-slate-600 gap-1 pt-1">
-                      <span className="text-brand-blue">
-                        Transferts fonct. : <strong className="font-bold">{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
-                      </span>
-                      <span className="text-emerald-700">
-                        Invest. : <strong className="font-bold">{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
-                      </span>
-                    </div>
-                  </div>
-                )}
+                    </button>
+                  );
+                })()}
               </div>
 
               <div className="pt-4 mt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
@@ -600,7 +697,11 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                   </button>
 
                   <button
-                    onClick={(e) => setSelectedInstForDetail(inst)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDetailInitialSubTab('BUDGET_2026');
+                      setSelectedInstForDetail(inst);
+                    }}
                     className="px-2 py-1.5 bg-brand-blue/10 hover:bg-brand-blue hover:text-white text-brand-blue rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 flex-shrink-0 cursor-pointer"
                     title="Voir la fiche détaillée de la commune"
                   >
@@ -673,10 +774,14 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
 
       <InstitutionDetailModal
         isOpen={!!selectedInstForDetail}
-        onClose={() => setSelectedInstForDetail(null)}
+        onClose={() => {
+          setSelectedInstForDetail(null);
+          setDetailInitialSubTab('BUDGET_2026');
+        }}
         institution={selectedInstForDetail}
         allProjects={allProjects}
         onNavigateToProjects={onNavigateToProjects}
+        initialFinanceSubTab={detailInitialSubTab}
       />
 
     </div>
