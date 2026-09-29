@@ -1570,7 +1570,17 @@ class DataStore {
           published_at: newDoc.published_at,
           downloads_count: newDoc.downloads_count,
           is_official: newDoc.is_official,
-          tags: newDoc.tags || []
+          tags: newDoc.tags || [],
+          institution_id: newDoc.institution_id || null,
+          fiscal_year: newDoc.fiscal_year || newDoc.year,
+          document_type: newDoc.document_type || newDoc.category,
+          storage_path: newDoc.storage_path || null,
+          source_name: newDoc.source_name || null,
+          source_url: newDoc.source_url || null,
+          status: newDoc.status || 'TO_VERIFY',
+          verification_status: newDoc.verification_status || 'TO_VERIFY',
+          checksum_sha256: newDoc.checksum_sha256 || null,
+          version: newDoc.version || 1
         }]),
         'Adding public document'
       );
