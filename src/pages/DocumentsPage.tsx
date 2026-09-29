@@ -10,6 +10,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { dataStore } from '../services/dataStore';
+import { supabase, isSupabaseConfigured } from '../services/supabase';
 import { PublicDocument, DocumentCategory } from '../types';
 import { matchesSmartSearch } from '../utils/searchHelpers';
 
@@ -24,7 +25,6 @@ const CATEGORY_LABELS: Record<DocumentCategory, string> = {
   LOI_CAIDP: "Textes CAIDP & Lois",
   ETUDE_TECHNIQUE: "Études Techniques",
   GUIDE_CITOYEN: "Guides Citoyens",
-  COMPTE_ADMINISTRATIF: "Comptes Administratifs (CA)",
 };
 
 export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp }) => {
@@ -32,22 +32,26 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedYear, setSelectedYear] = useState<string>('ALL');
 
-  const [rawDocuments, setRawDocuments] = useState<PublicDocument[]>(() => dataStore.getDocuments());
+  const [documents, setDocuments] = useState<PublicDocument[]>(() => dataStore.getDocuments());
 
   useEffect(() => {
-    return dataStore.subscribe(() => {
-      setRawDocuments(dataStore.getDocuments());
-    });
+    const unsubscribe = dataStore.subscribe(() => setDocuments(dataStore.getDocuments()));
+    if (isSupabaseConfigured()) {
+      void supabase
+        .from('public_documents')
+        .select('*')
+        .eq('status', 'PUBLISHED')
+        .order('published_at', { ascending: false })
+        .then(({ data, error }) => {
+          if (!error && data) setDocuments(data as PublicDocument[]);
+        });
+    }
+    return unsubscribe;
   }, []);
-
-  // Filter only published and active documents for citizen viewing
-  const documents = useMemo(() => {
-    return rawDocuments.filter(doc => doc.is_public !== false && doc.document_status !== 'ARCHIVED');
-  }, [rawDocuments]);
 
   // Extract unique years
   const availableYears = useMemo(() => {
-    const years = Array.from(new Set(documents.map(d => d.year || d.fiscal_year || 2026))).sort((a, b) => b - a);
+    const years = Array.from(new Set(documents.map(d => d.year))).sort((a, b) => b - a);
     return years;
   }, [documents]);
 
@@ -70,6 +74,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
   // Filtered documents
   const filteredDocuments = useMemo(() => {
     return documents.filter(doc => {
+      if (doc.status && doc.status !== 'PUBLISHED') return false;
       // Category filter
       if (selectedCategory !== 'ALL' && doc.category !== selectedCategory) {
         return false;
@@ -89,9 +94,18 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
     });
   }, [documents, selectedCategory, selectedYear, searchQuery]);
 
-  const handleDownload = (doc: PublicDocument) => {
+  const handleDownload = async (doc: PublicDocument) => {
+    let targetUrl = doc.file_url;
+    if (doc.storage_path && isSupabaseConfigured()) {
+      const { data, error } = await supabase.functions.invoke('public-document-url', {
+        body: { document_id: doc.id },
+      });
+      if (error || !data?.url) return;
+      targetUrl = data.url;
+    }
+    if (!targetUrl) return;
+    window.open(targetUrl, '_blank', 'noopener,noreferrer');
     dataStore.incrementDocumentDownloads(doc.id);
-    window.open(doc.file_url, '_blank', 'noopener,noreferrer');
   };
 
   const handleResetFilters = () => {
