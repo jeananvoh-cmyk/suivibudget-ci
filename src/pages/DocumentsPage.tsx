@@ -10,6 +10,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { dataStore } from '../services/dataStore';
+import { supabase, isSupabaseConfigured } from '../services/supabase';
 import { PublicDocument, DocumentCategory } from '../types';
 import { matchesSmartSearch } from '../utils/searchHelpers';
 
@@ -34,9 +35,18 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
   const [documents, setDocuments] = useState<PublicDocument[]>(() => dataStore.getDocuments());
 
   useEffect(() => {
-    return dataStore.subscribe(() => {
-      setDocuments(dataStore.getDocuments());
-    });
+    const unsubscribe = dataStore.subscribe(() => setDocuments(dataStore.getDocuments()));
+    if (isSupabaseConfigured()) {
+      void supabase
+        .from('public_documents')
+        .select('*')
+        .eq('status', 'PUBLISHED')
+        .order('published_at', { ascending: false })
+        .then(({ data, error }) => {
+          if (!error && data) setDocuments(data as PublicDocument[]);
+        });
+    }
+    return unsubscribe;
   }, []);
 
   // Extract unique years
@@ -64,6 +74,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
   // Filtered documents
   const filteredDocuments = useMemo(() => {
     return documents.filter(doc => {
+      if (doc.status && doc.status !== 'PUBLISHED') return false;
       // Category filter
       if (selectedCategory !== 'ALL' && doc.category !== selectedCategory) {
         return false;
@@ -83,9 +94,18 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
     });
   }, [documents, selectedCategory, selectedYear, searchQuery]);
 
-  const handleDownload = (doc: PublicDocument) => {
+  const handleDownload = async (doc: PublicDocument) => {
+    let targetUrl = doc.file_url;
+    if (doc.storage_path && isSupabaseConfigured()) {
+      const { data, error } = await supabase.functions.invoke('public-document-url', {
+        body: { document_id: doc.id },
+      });
+      if (error || !data?.url) return;
+      targetUrl = data.url;
+    }
+    if (!targetUrl) return;
+    window.open(targetUrl, '_blank', 'noopener,noreferrer');
     dataStore.incrementDocumentDownloads(doc.id);
-    window.open(doc.file_url, '_blank', 'noopener,noreferrer');
   };
 
   const handleResetFilters = () => {
