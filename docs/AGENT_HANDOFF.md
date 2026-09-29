@@ -4,7 +4,7 @@
 - **LAST_UPDATED**: 2026-09-29T13:40:00Z
 - **LAST_AGENT**: Antigravity (Relay after Codex quota reached)
 - **CURRENT_BRANCH**: `security-ca-final-20260929`
-- **HEAD_SHA**: `8e1654cb0d234d22bf7662467b1b544d61dfa83e`
+- **HEAD_SHA**: `0279be38324aba090c8bf62032e96d1d956a0b59`
 - **PR**: #3 ("Final: security hardening + verified CA foundation")
 - **SUPABASE_PROJECT**: `cdesuvcozcetdtvibgqs` (eu-west-1, PostgreSQL 17.6)
 - **CURRENT_MILESTONE**: P0/P1 Security Hardening, Document Versioning, CA Workflow & UX/UI Responsive Foundation
@@ -128,11 +128,11 @@
 ---
 
 ## NEXT EXECUTABLE TASK & PRIORITIES
-- **NEXT_EXECUTABLE_TASK**: Stage and commit current validated security, storage, and CA test fixes on branch `security-ca-final-20260929` with clear message referencing PR #3 and verification proofs.
+- **NEXT_EXECUTABLE_TASK**: Execute responsive and visual inspection across critical citizen pages (HomePage, InstitutionsPage, DocumentsPage) using browser testing on 375px (mobile) and 1440px (desktop), verifying progressive disclosure, no horizontal overflow, and WCAG AA touch targets.
 - **NEXT_3_TASKS**:
-  1. Verify schema drift on remote Supabase `cdesuvcozcetdtvibgqs` for migrations `20260929121225_publication_boundaries.sql` and `20260929121408_document_metadata_versions.sql`.
-  2. Implement browser visual testing for critical citizen pages (`HomePage`, `InstitutionsPage`, `DocumentsPage`) on 375px mobile and 1440px desktop viewports to ensure zero horizontal overflow and WCAG AA touch targets.
-  3. Validate anonymous and authenticated signed URL token generation via Edge Functions for published administrative accounts.
+  1. Inspect remote schema drift on Supabase `cdesuvcozcetdtvibgqs` for migrations `20260929121225_publication_boundaries.sql` and `20260929121408_document_metadata_versions.sql` before application.
+  2. Validate anonymous and authenticated signed URL generation via Edge Function `public-document-url` v2 for published accounts.
+  3. Expand Project Accountability Passport links from investment operations to citizen proofs and public tenders.
 
 ---
 
