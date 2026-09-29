@@ -55,6 +55,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
     file_format: DocumentFormat;
     tags: string;
     is_official: boolean;
+    checksum_sha256: string;
   }>({
     title: '',
     category: 'RAPPORT_AUDIT',
@@ -67,6 +68,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
     file_format: 'PDF',
     tags: '',
     is_official: false,
+    checksum_sha256: '',
   });
 
   const [documents, setDocuments] = useState<PublicDocument[]>(() => dataStore.getDocuments());
@@ -105,6 +107,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
       file_format: 'PDF',
       tags: '',
       is_official: false,
+      checksum_sha256: '',
     });
     setIsAddModalOpen(true);
   };
@@ -123,6 +126,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
       file_format: doc.file_format,
       tags: (doc.tags || []).join(', '),
       is_official: doc.is_official,
+      checksum_sha256: doc.checksum_sha256 || '',
     });
     setIsAddModalOpen(true);
   };
@@ -139,6 +143,13 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
 
     const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
     const sizeStr = Number(sizeMb) >= 1 ? `${sizeMb} Mo` : `${Math.round(file.size / 1024)} Ko`;
+    const hashBuffer = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
+    const checksum = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    const { data: duplicate } = await supabase.from('public_documents').select('id,title').eq('checksum_sha256', checksum).maybeSingle();
+    if (duplicate) {
+      onShowToast(`Doublon détecté : ce fichier existe déjà sous « ${duplicate.title} ».`, 'error');
+      return;
+    }
     const safeName = file.name.normalize('NFKD').replace(/[^a-zA-Z0-9._-]+/g, '-');
     const path = `staging/${formData.year}/${crypto.randomUUID()}-${safeName}`;
 
@@ -160,6 +171,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
       file_format: format,
       title: prev.title || file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' '),
       is_official: false,
+      checksum_sha256: checksum,
     }));
     onShowToast(`Fichier "${file.name}" envoyé en zone de vérification.`, 'success');
   };
@@ -195,6 +207,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
         verification_status: formData.is_official ? 'VERIFIED' : 'TO_VERIFY',
         fiscal_year: formData.year,
         document_type: formData.category,
+        checksum_sha256: formData.checksum_sha256 || null,
       });
       onShowToast('Document public mis à jour avec succès.');
     } else {
@@ -215,6 +228,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
         verification_status: 'TO_VERIFY',
         fiscal_year: formData.year,
         document_type: formData.category,
+        checksum_sha256: formData.checksum_sha256 || null,
       });
       onShowToast('Document enregistré en attente de vérification.');
     }
