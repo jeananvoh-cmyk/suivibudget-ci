@@ -1542,111 +1542,75 @@ class DataStore {
     return this.documents.find(d => d.id === id);
   }
 
-  public addDocument(docData: Omit<PublicDocument, 'id' | 'downloads_count' | 'published_at'> & { published_at?: string }): PublicDocument {
-    const newDoc: PublicDocument = {
-      ...docData,
-      id: `doc-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
-      downloads_count: 0,
-      published_at: docData.published_at || new Date().toISOString().split('T')[0],
-      is_official: docData.is_official ?? true,
-    };
-    this.documents.unshift(newDoc);
+  public async refreshDocumentsFromSupabase(includeUnpublished = false): Promise<PublicDocument[]> {
+    if (!isSupabaseConfigured()) return this.getDocuments();
+    let query = supabase.from('public_documents').select('*').order('published_at', { ascending: false });
+    if (!includeUnpublished) query = query.eq('status', 'PUBLISHED');
+    const { data, error } = await query;
+    if (error) throw error;
+    this.documents = (data || []) as PublicDocument[];
     this.saveDocuments();
     this.notify();
-
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').insert([{
-          id: newDoc.id,
-          title: newDoc.title,
-          category: newDoc.category,
-          institution_name: newDoc.institution_name,
-          year: newDoc.year,
-          description: newDoc.description,
-          file_url: newDoc.file_url,
-          file_name: newDoc.file_name,
-          file_size: newDoc.file_size || '1.0 Mo',
-          file_format: newDoc.file_format,
-          published_at: newDoc.published_at,
-          downloads_count: newDoc.downloads_count,
-          is_official: newDoc.is_official,
-          tags: newDoc.tags || [],
-          institution_id: newDoc.institution_id || null,
-          fiscal_year: newDoc.fiscal_year || newDoc.year,
-          document_type: newDoc.document_type || newDoc.category,
-          storage_path: newDoc.storage_path || null,
-          source_name: newDoc.source_name || null,
-          source_url: newDoc.source_url || null,
-          status: newDoc.status || 'TO_VERIFY',
-          verification_status: newDoc.verification_status || 'TO_VERIFY',
-          checksum_sha256: newDoc.checksum_sha256 || null,
-          version: newDoc.version || 1
-        }]),
-        'Adding public document'
-      );
-    }
-
-    return newDoc;
+    return this.getDocuments();
   }
 
-  public updateDocument(id: string, updates: Partial<PublicDocument>): boolean {
-    const idx = this.documents.findIndex(d => d.id === id);
-    if (idx === -1) return false;
-    this.documents[idx] = { ...this.documents[idx], ...updates };
-    this.saveDocuments();
-    this.notify();
+  public async addDocument(docData: Omit<PublicDocument, 'id' | 'downloads_count' | 'published_at'> & { published_at?: string }): Promise<PublicDocument> {
+    const newDoc: PublicDocument = {
+      ...docData,
+      id: `doc-${crypto.randomUUID()}`,
+      downloads_count: 0,
+      published_at: docData.published_at || new Date().toISOString(),
+      is_official: docData.is_official ?? false,
+      status: docData.status || 'TO_VERIFY',
+      verification_status: docData.verification_status || 'TO_VERIFY',
+      version: docData.version || 1,
+    };
 
     if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').update(updates).eq('id', id),
-        'Updating public document'
-      );
+      const { data, error } = await supabase.from('public_documents').insert([newDoc]).select('*').single();
+      if (error) throw error;
+      this.documents.unshift(data as PublicDocument);
+    } else {
+      this.documents.unshift(newDoc);
     }
+    this.saveDocuments();
+    this.notify();
+    return this.documents[0];
+  }
+
+  public async updateDocument(id: string, updates: Partial<PublicDocument>): Promise<boolean> {
+    if (isSupabaseConfigured()) {
+      const { data, error } = await supabase.from('public_documents').update(updates).eq('id', id).select('*').single();
+      if (error) throw error;
+      const idx = this.documents.findIndex(d => d.id === id);
+      if (idx >= 0) this.documents[idx] = data as PublicDocument;
+      else this.documents.unshift(data as PublicDocument);
+    } else {
+      const idx = this.documents.findIndex(d => d.id === id);
+      if (idx === -1) return false;
+      this.documents[idx] = { ...this.documents[idx], ...updates };
+    }
+    this.saveDocuments();
+    this.notify();
     return true;
   }
 
-  public deleteDocument(id: string): boolean {
-    const idx = this.documents.findIndex(d => d.id === id);
-    if (idx === -1) return false;
+  public async deleteDocument(id: string): Promise<boolean> {
+    if (isSupabaseConfigured()) {
+      const { error } = await supabase.from('public_documents').delete().eq('id', id);
+      if (error) throw error;
+    }
     this.documents = this.documents.filter(d => d.id !== id);
     this.saveDocuments();
     this.notify();
-
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').delete().eq('id', id),
-        'Deleting public document'
-      );
-    }
     return true;
   }
 
   public incrementDocumentDownloads(id: string): void {
     const doc = this.documents.find(d => d.id === id);
-    if (doc) {
-      doc.downloads_count = (doc.downloads_count || 0) + 1;
-
-      // 1. Persistent dedicated lightweight counter (<1KB map, completely immune to localStorage quota)
-      try {
-        const storedDownloads = localStorage.getItem(STORAGE_KEYS.DOCUMENT_DOWNLOADS);
-        const countsMap: Record<string, number> = storedDownloads ? JSON.parse(storedDownloads) : {};
-        countsMap[id] = doc.downloads_count;
-        localStorage.setItem(STORAGE_KEYS.DOCUMENT_DOWNLOADS, JSON.stringify(countsMap));
-      } catch (err) {
-        console.warn("Could not save download count to lightweight key", err);
-      }
-
-      // 2. Full documents array save
-      this.saveDocuments();
-      this.notify();
-
-      if (isSupabaseConfigured()) {
-        safeSupabaseExec(
-          supabase.from('public_documents').update({ downloads_count: doc.downloads_count }).eq('id', id),
-          'Incrementing document downloads'
-        );
-      }
-    }
+    if (!doc) return;
+    doc.downloads_count = (doc.downloads_count || 0) + 1;
+    this.notify();
   }
 
   // --- SITE SETTINGS ---
