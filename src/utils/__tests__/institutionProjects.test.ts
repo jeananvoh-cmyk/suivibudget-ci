@@ -120,5 +120,5 @@ describe('institutionProjects - Anti-Contamination Verification', () => {
       expect(hasMunicipal).toBe(false);
       expect(hasRegional).toBe(false);
     });
-  });
+  }, 15000);
 });

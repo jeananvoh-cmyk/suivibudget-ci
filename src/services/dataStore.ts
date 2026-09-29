@@ -7,7 +7,12 @@ import {
   UserRole,
   NewsArticle,
   SiteSettings,
-  PublicDocument
+  PublicDocument,
+  CollectiviteCaStatus,
+  CollectivitesCaMatrixSummary,
+  DocumentLifecycleStatus,
+  OfficialDocumentSource,
+  OfficialDocumentType
 } from '../types';
 import { RAW_BUDGET_PROJECTS } from '../data/budgetData';
 import { INSTITUTIONS_DATA } from '../data/institutionsData';
@@ -1639,6 +1644,282 @@ class DataStore {
     }
   }
 
+  // ==========================================
+  // COMPTES ADMINISTRATIFS (CA) & MATRICE 232
+  // ==========================================
+
+  public getCollectivitesCaMatrix(fiscalYear: number = 2025): { summary: CollectivitesCaMatrixSummary; matrix: CollectiviteCaStatus[] } {
+    // 201 communes (type === 'MAIRIE') + 31 conseils régionaux (type === 'REGION')
+    const targetInstitutions = this.institutions.filter(
+      inst => inst.type === 'MAIRIE' || (inst.type === 'REGION' && !inst.id.startsWith('dist-'))
+    );
+
+    // Group relevant CA documents by institution_id for this fiscalYear
+    const caDocs = this.documents.filter(d => 
+      (d.document_type === 'COMPTE_ADMINISTRATIF' || d.category === 'COMPTE_ADMINISTRATIF') &&
+      ((d.fiscal_year && d.fiscal_year === fiscalYear) || (d.year && d.year === fiscalYear))
+    );
+
+    const docMap = new Map<string, PublicDocument>();
+    const docNameMap = new Map<string, PublicDocument>();
+    for (const doc of caDocs) {
+      if (doc.institution_id) {
+        const existing = docMap.get(doc.institution_id);
+        if (!existing || (doc.version || 1) >= (existing.version || 1)) {
+          docMap.set(doc.institution_id, doc);
+        }
+      }
+      if (doc.institution_name) {
+        docNameMap.set(doc.institution_name.toLowerCase().trim(), doc);
+      }
+    }
+
+    let communesCount = 0;
+    let regionsCount = 0;
+    let communesReceived = 0;
+    let communesPublished = 0;
+    let regionsReceived = 0;
+    let regionsPublished = 0;
+
+    let toVerifyCount = 0;
+    let verifiedCount = 0;
+    let publishedCount = 0;
+    let missingCount = 0;
+
+    const matrix: CollectiviteCaStatus[] = targetInstitutions.map(inst => {
+      const isCommune = inst.type === 'MAIRIE';
+      if (isCommune) communesCount++;
+      else regionsCount++;
+
+      const doc = docMap.get(inst.id) || docNameMap.get(inst.name.toLowerCase().trim());
+      
+      let status: 'PUBLISHED' | 'VERIFIED' | 'TO_VERIFY' | 'MISSING' | 'ARCHIVED' = 'MISSING';
+      let versionsCount = 0;
+
+      if (doc) {
+        versionsCount = (doc.previous_versions ? doc.previous_versions.length : 0) + 1;
+        if (doc.document_status === 'PUBLISHED' || doc.is_public) {
+          status = 'PUBLISHED';
+          publishedCount++;
+          if (isCommune) communesPublished++;
+          else regionsPublished++;
+        } else if (doc.document_status === 'VERIFIED') {
+          status = 'VERIFIED';
+          verifiedCount++;
+        } else if (doc.document_status === 'ARCHIVED') {
+          status = 'ARCHIVED';
+        } else {
+          status = 'TO_VERIFY';
+          toVerifyCount++;
+        }
+
+        if (isCommune) communesReceived++;
+        else regionsReceived++;
+      } else {
+        missingCount++;
+      }
+
+      return {
+        institution_id: inst.id,
+        institution_name: inst.name,
+        institution_type: isCommune ? 'MAIRIE' : 'REGION',
+        region_name: inst.region || '',
+        district_name: inst.district,
+        fiscal_year: fiscalYear,
+        status,
+        document: doc,
+        versions_count: versionsCount,
+        last_updated: doc?.updated_at || doc?.published_at || undefined,
+      };
+    });
+
+    const totalExpected = targetInstitutions.length; // 232 (201 communes + 31 conseils régionaux)
+    const receivedCount = toVerifyCount + verifiedCount + publishedCount;
+    const globalCoveragePct = totalExpected > 0 ? Math.round((publishedCount / totalExpected) * 100) : 0;
+
+    const summary: CollectivitesCaMatrixSummary = {
+      fiscal_year: fiscalYear,
+      totalExpected,
+      totalCommunes: communesCount,
+      totalRegions: regionsCount,
+      receivedCount,
+      verifiedCount,
+      publishedCount,
+      toVerifyCount,
+      missingCount,
+      communesReceivedCount: communesReceived,
+      communesPublishedCount: communesPublished,
+      regionsReceivedCount: regionsReceived,
+      regionsPublishedCount: regionsPublished,
+      globalCoveragePct,
+    };
+
+    return { summary, matrix };
+  }
+
+  public getCAForInstitution(institutionId: string, fiscalYear?: number): PublicDocument | undefined {
+    const inst = this.institutions.find(i => i.id === institutionId);
+    return this.documents.find(d => {
+      const matchType = d.document_type === 'COMPTE_ADMINISTRATIF' || d.category === 'COMPTE_ADMINISTRATIF';
+      if (!matchType) return false;
+      const matchInst = d.institution_id === institutionId || (inst && d.institution_name?.toLowerCase().trim() === inst.name.toLowerCase().trim());
+      if (!matchInst) return false;
+      if (fiscalYear !== undefined) {
+        return d.fiscal_year === fiscalYear || d.year === fiscalYear;
+      }
+      return true;
+    });
+  }
+
+  public findDocumentByChecksum(checksum: string): PublicDocument | undefined {
+    if (!checksum) return undefined;
+    return this.documents.find(d => d.checksum_sha256 === checksum);
+  }
+
+  public saveCADocument(docData: Partial<PublicDocument>, asNewVersion: boolean = false): PublicDocument {
+    const instId = docData.institution_id;
+    const fiscalYear = docData.fiscal_year || docData.year || 2025;
+    
+    // Check if an existing document for this institution + fiscalYear exists
+    const existingIdx = this.documents.findIndex(d => 
+      (d.document_type === 'COMPTE_ADMINISTRATIF' || d.category === 'COMPTE_ADMINISTRATIF') &&
+      ((d.fiscal_year && d.fiscal_year === fiscalYear) || (d.year && d.year === fiscalYear)) &&
+      (d.institution_id === instId || (d.id === docData.id))
+    );
+
+    let finalDoc: PublicDocument;
+
+    if (existingIdx !== -1 && (asNewVersion || (docData.version && docData.version > (this.documents[existingIdx].version || 1)))) {
+      const oldDoc = this.documents[existingIdx];
+      const newVersion = (oldDoc.version || 1) + 1;
+      
+      const archivedVersion = {
+        version: oldDoc.version || 1,
+        file_url: oldDoc.file_url,
+        file_name: oldDoc.file_name,
+        checksum_sha256: oldDoc.checksum_sha256,
+        archived_at: new Date().toISOString(),
+        archived_by: this.authState.fullName || 'Admin',
+      };
+
+      finalDoc = {
+        ...oldDoc,
+        ...docData,
+        id: docData.id && docData.id !== oldDoc.id ? docData.id : oldDoc.id,
+        version: newVersion,
+        document_type: 'COMPTE_ADMINISTRATIF',
+        category: 'COMPTE_ADMINISTRATIF',
+        document_status: 'TO_VERIFY',
+        verification_status: 'TO_VERIFY',
+        is_public: false, // New version must be verified by staff before publication
+        updated_at: new Date().toISOString(),
+        previous_versions: [...(oldDoc.previous_versions || []), archivedVersion],
+      };
+
+      this.documents[existingIdx] = finalDoc;
+    } else if (existingIdx !== -1 && !asNewVersion) {
+      finalDoc = {
+        ...this.documents[existingIdx],
+        ...docData,
+        updated_at: new Date().toISOString(),
+      };
+      this.documents[existingIdx] = finalDoc;
+    } else {
+      const newId = docData.id || `doc-ca-${instId || 'collec'}-${fiscalYear}-${Date.now()}`;
+      finalDoc = {
+        id: newId,
+        title: docData.title || `Compte Administratif ${fiscalYear} - ${docData.institution_name || 'Collectivité'}`,
+        category: 'COMPTE_ADMINISTRATIF',
+        document_type: 'COMPTE_ADMINISTRATIF',
+        institution_name: docData.institution_name || 'Collectivité',
+        institution_id: instId,
+        institution_type: docData.institution_type || 'MAIRIE',
+        year: fiscalYear,
+        fiscal_year: fiscalYear,
+        description: docData.description || `Compte administratif officiel de l'exercice budgétaire ${fiscalYear}.`,
+        file_url: docData.file_url || '',
+        file_name: docData.file_name || `compte-administratif-${fiscalYear}.pdf`,
+        file_size: docData.file_size || '0 Mo',
+        file_format: docData.file_format || 'PDF',
+        published_at: docData.published_at || new Date().toISOString().split('T')[0],
+        downloads_count: 0,
+        is_official: true,
+        document_status: docData.document_status || 'TO_VERIFY',
+        verification_status: docData.verification_status || 'TO_VERIFY',
+        is_public: docData.is_public ?? false,
+        version: 1,
+        checksum_sha256: docData.checksum_sha256,
+        source_name: docData.source_name || 'COLLECTIVITE',
+        source_url: docData.source_url,
+        adoption_date: docData.adoption_date,
+        approval_date: docData.approval_date,
+        approval_reference: docData.approval_reference,
+        created_by: this.authState.fullName || 'Admin',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        tags: docData.tags || ['Compte Administratif', 'Exécution Budgétaire', `${fiscalYear}`],
+      };
+      this.documents.unshift(finalDoc);
+    }
+
+    this.saveDocuments();
+    this.notify();
+
+    if (isSupabaseConfigured()) {
+      safeSupabaseExec(
+        supabase.from('public_documents').upsert([finalDoc]),
+        'Sauvegarde Compte Administratif'
+      );
+    }
+
+    return finalDoc;
+  }
+
+  public updateDocumentLifecycleStatus(id: string, status: DocumentLifecycleStatus, reviewerName?: string): boolean {
+    const idx = this.documents.findIndex(d => d.id === id);
+    if (idx === -1) return false;
+    const doc = this.documents[idx];
+    const now = new Date().toISOString();
+
+    const updates: Partial<PublicDocument> = {
+      document_status: status,
+      updated_at: now,
+    };
+
+    if (status === 'VERIFIED') {
+      updates.verification_status = 'VERIFIED';
+      updates.verified_by = reviewerName || this.authState.fullName || 'Administrateur';
+      updates.verified_at = now;
+      // CRITICAL: Validation is decoupled from publication!
+      // is_public remains unchanged or false until explicit publication!
+    } else if (status === 'PUBLISHED') {
+      updates.is_public = true;
+      updates.document_status = 'PUBLISHED';
+      if (!doc.published_at) {
+        updates.published_at = now.split('T')[0];
+      }
+    } else if (status === 'ARCHIVED') {
+      updates.is_public = false;
+      updates.document_status = 'ARCHIVED';
+    } else if (status === 'TO_VERIFY') {
+      updates.is_public = false;
+      updates.verification_status = 'TO_VERIFY';
+    }
+
+    this.documents[idx] = { ...doc, ...updates };
+    this.saveDocuments();
+    this.notify();
+
+    if (isSupabaseConfigured()) {
+      safeSupabaseExec(
+        supabase.from('public_documents').update(updates).eq('id', id),
+        `Mise à jour statut document ${id} -> ${status}`
+      );
+    }
+
+    return true;
+  }
+
   // --- SITE SETTINGS ---
   public updateSettings(newSettings: Partial<SiteSettings>) {
     this.settings = { ...this.settings, ...newSettings };
@@ -2007,7 +2288,9 @@ class DataStore {
 
   private saveDocuments() {
     try {
-      localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(this.documents));
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(this.documents));
+      }
     } catch (e) {
       console.warn("Storage quota exceeded for public documents", e);
     }

@@ -14,6 +14,7 @@ import { PrimitiveBudgetImporterModal } from '../components/PrimitiveBudgetImpor
 import { AdminActionHeader } from '../components/admin/AdminActionHeader';
 import { AdminWorkQueue } from '../components/admin/AdminWorkQueue';
 import { AdminGlobalSearchModal } from '../components/admin/AdminGlobalSearchModal';
+import { AdministrativeAccountsAdminManager } from '../components/admin/AdministrativeAccountsAdminManager';
 import { adminTaskService } from '../services/adminTaskService';
 import { 
   ShieldCheck, 
@@ -71,7 +72,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   onOpenShare,
 }) => {
   const auth = dataStore.getAuth();
-  const [adminTab, setAdminTab] = useState<'work_queue' | 'caidp_manager' | 'caidp_analytics' | 'documents_manager' | 'moderation' | 'budget_table' | 'institutions_manager' | 'news_manager' | 'social_generator' | 'site_settings' | 'digital_opportunities' | 'team_moderators'>(
+  const [adminTab, setAdminTab] = useState<'work_queue' | 'caidp_manager' | 'caidp_analytics' | 'documents_manager' | 'comptes_administratifs' | 'moderation' | 'budget_table' | 'institutions_manager' | 'news_manager' | 'social_generator' | 'site_settings' | 'digital_opportunities' | 'team_moderators'>(
     auth.role === 'MODERATOR' ? 'work_queue' : 'caidp_manager'
   );
   
@@ -86,6 +87,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const allInstitutions = useMemo(() => dataStore.getInstitutions(), [storeTick]);
   const allArticles = useMemo(() => dataStore.getArticles(), [storeTick]);
   const siteSettings = useMemo(() => dataStore.getSettings(), [storeTick]);
+  const caMatrixSummary = useMemo(() => dataStore.getCollectivitesCaMatrix(2025).summary, [storeTick]);
 
   // Notification Toast State
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
@@ -147,6 +149,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       setAdminTab('work_queue');
     } else if (target === 'institutions_manager') {
       setAdminTab('institutions_manager');
+    } else if (target === 'comptes_administratifs') {
+      setAdminTab('comptes_administratifs');
     }
   };
 
@@ -156,7 +160,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     } else if (item.type === 'INSTITUTION') {
       setAdminTab('institutions_manager');
     } else if (item.type === 'DOCUMENT') {
-      setAdminTab('documents_manager');
+      if (item.category === 'COMPTE_ADMINISTRATIF' || item.document_type === 'COMPTE_ADMINISTRATIF') {
+        setAdminTab('comptes_administratifs');
+      } else {
+        setAdminTab('documents_manager');
+      }
     } else if (item.type === 'PROJECT') {
       setAdminTab('budget_table');
     } else if (item.type === 'PROOF') {
@@ -1276,6 +1284,27 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           </button>
 
           <button
+            onClick={() => setAdminTab('comptes_administratifs')}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              adminTab === 'comptes_administratifs'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            <span>Comptes Administratifs (CA 232)</span>
+            {caMatrixSummary.toVerifyCount > 0 ? (
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-white animate-pulse">
+                {caMatrixSummary.toVerifyCount} à valider
+              </span>
+            ) : (
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
+                {caMatrixSummary.publishedCount}/232
+              </span>
+            )}
+          </button>
+
+          <button
             onClick={() => setAdminTab('institutions_manager')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               adminTab === 'institutions_manager'
@@ -1438,6 +1467,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       {/* ========================================================================= */}
       {adminTab === 'documents_manager' && (
         <DocumentManager onShowToast={showToast} />
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 0.6: COMPTES ADMINISTRATIFS (CA 232) & PILOTAGE */}
+      {/* ========================================================================= */}
+      {adminTab === 'comptes_administratifs' && (
+        <AdministrativeAccountsAdminManager onShowToast={showToast} />
       )}
 
       {/* ========================================================================= */}

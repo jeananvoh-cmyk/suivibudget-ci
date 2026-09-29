@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Institution, 
   AdministrativeAccount, 
-  CAInvestmentOperation 
+  CAInvestmentOperation,
+  PublicDocument
 } from '../types';
+import { dataStore } from '../services/dataStore';
 import { 
   getAdministrativeAccountsForInstitution, 
   getLatestAvailableCA 
@@ -146,64 +148,146 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
     downloadAnchor.remove();
   };
 
+  // Retrieve published CA document from dataStore if uploaded
+  const publishedCADoc = useMemo(() => {
+    const doc = dataStore.getCAForInstitution(institution.id, selectedYear);
+    if (doc && (doc.is_public || doc.document_status === 'PUBLISHED')) {
+      return doc;
+    }
+    const anyDoc = dataStore.getCAForInstitution(institution.id);
+    if (anyDoc && (anyDoc.is_public || anyDoc.document_status === 'PUBLISHED')) {
+      return anyDoc;
+    }
+    return undefined;
+  }, [institution.id, selectedYear]);
+
+  const handleDownloadPublishedCA = (doc: PublicDocument) => {
+    dataStore.incrementDocumentDownloads(doc.id);
+    window.open(doc.file_url, '_blank', 'noopener,noreferrer');
+  };
+
   // If no account exists for this entity
   if (!currentCA) {
     return (
       <div className="space-y-5 animate-in fade-in duration-200">
-        <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200 shadow-2xs space-y-5">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center flex-shrink-0">
-              <Scale className="w-6 h-6" />
-            </div>
-            <div className="space-y-1.5 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300">
-                  Compte Administratif en attente de publication
-                </span>
-                <span className="text-xs font-bold text-slate-500">
-                  Exercice 2024 / 2025
-                </span>
+        {publishedCADoc ? (
+          /* Official Published Document Card when structured data not yet compiled */
+          <div className="bg-white rounded-2xl p-6 sm:p-7 border border-emerald-200 shadow-xs space-y-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div className="space-y-1.5 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      Compte Administratif Officiel Certifié
+                    </span>
+                    <span className="text-xs font-bold text-slate-500">
+                      Exercice {publishedCADoc.fiscal_year || publishedCADoc.year} • Version {publishedCADoc.version || 1}
+                    </span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-black text-slate-900">
+                    {publishedCADoc.title}
+                  </h3>
+                  <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
+                    Le document officiel complet du Compte Administratif a été transmis et vérifié. Vous pouvez consulter ou télécharger la pièce originale au format PDF.
+                  </p>
+                </div>
               </div>
-              <h3 className="text-lg sm:text-xl font-black text-slate-900">
-                Compte Administratif non encore transmis pour {institution.name}
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
-                Le Compte Administratif (CA) retrace <strong>l'exécution financière réelle et définitive</strong> de l'exercice clos (recettes recouvrées et dépenses ordonnancées). Il est arrêté par le Maire ou le Président et voté par le Conseil avant d'être transmis à la tutelle (Direction Générale de la Décentralisation et du Développement Local — DGDDL).
+
+              <button
+                onClick={() => handleDownloadPublishedCA(publishedCADoc)}
+                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-xs transition-all flex items-center gap-2 flex-shrink-0 cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                <span>Télécharger le PDF ({publishedCADoc.file_size || 'PDF'})</span>
+              </button>
+            </div>
+
+            {/* Document Metadata */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+              <div>
+                <span className="text-[10px] font-bold uppercase text-slate-400 block">Fichier & Taille</span>
+                <strong className="text-slate-800 font-mono text-[11px] truncate block" title={publishedCADoc.file_name}>
+                  {publishedCADoc.file_name} ({publishedCADoc.file_size})
+                </strong>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase text-slate-400 block">Source Officielle</span>
+                <strong className="text-slate-800">{publishedCADoc.source_name || 'DGDDL / Collectivité'}</strong>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase text-slate-400 block">Arrêté / Visa Tutelle</span>
+                <strong className="text-slate-800">{publishedCADoc.approval_reference || 'Certifié conforme'}</strong>
+              </div>
+            </div>
+
+            {publishedCADoc.checksum_sha256 && (
+              <div className="text-[10px] text-slate-400 font-mono flex items-center gap-1.5 truncate">
+                <span className="font-semibold text-slate-500">Empreinte SHA-256 :</span>
+                <span className="truncate select-all">{publishedCADoc.checksum_sha256}</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Missing CA prompt with CAIDP trigger */
+          <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200 shadow-2xs space-y-5">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center flex-shrink-0">
+                <Scale className="w-6 h-6" />
+              </div>
+              <div className="space-y-1.5 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300">
+                    Compte Administratif en attente de publication
+                  </span>
+                  <span className="text-xs font-bold text-slate-500">
+                    Exercice 2024 / 2025
+                  </span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-black text-slate-900">
+                  Compte Administratif non encore transmis pour {institution.name}
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
+                  Le Compte Administratif (CA) retrace <strong>l'exécution financière réelle et définitive</strong> de l'exercice clos (recettes recouvrées et dépenses ordonnancées). Il est arrêté par le Maire ou le Président et voté par le Conseil avant d'être transmis à la tutelle (Direction Générale de la Décentralisation et du Développement Local — DGDDL).
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
+              <div className="flex items-center gap-2 font-black text-slate-800 uppercase tracking-wider text-[11px]">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                <span>Engagement Républicain de Vérifiabilité & Open Data</span>
+              </div>
+              <p className="text-slate-600 leading-relaxed font-medium">
+                Conformément à notre charte de déontologie, <strong>aucun taux d'exécution approximatif ou non certifié n'est publié sans pièce justificative officielle</strong> (délibération du Conseil + visa du Trésor Public).
+              </p>
+              <p className="text-slate-500 text-[11px]">
+                Vous pouvez exercer votre droit citoyen d'accès à l'information publique (Loi n°2013-867 relative à la CAIDP) pour demander communication de la délibération du Compte Administratif.
               </p>
             </div>
-          </div>
 
-          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
-            <div className="flex items-center gap-2 font-black text-slate-800 uppercase tracking-wider text-[11px]">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-              <span>Engagement Républicain de Vérifiabilité & Open Data</span>
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <button
+                onClick={() => onOpenDocRequest(`Compte Administratif officiel de ${institution.name}`)}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black shadow-xs transition-all cursor-pointer"
+              >
+                <FileText className="w-3.5 h-3.5 text-amber-300" />
+                <span>Faire une demande de Compte Administratif (Loi CAIDP)</span>
+              </button>
+
+              <button
+                onClick={() => setIsExplainerOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                <HelpCircle className="w-3.5 h-3.5 text-brand-blue" />
+                <span>Qu'est-ce qu'un compte administratif ?</span>
+              </button>
             </div>
-            <p className="text-slate-600 leading-relaxed font-medium">
-              Conformément à notre charte de déontologie, <strong>aucun taux d'exécution approximatif ou non certifié n'est publié sans pièce justificative officielle</strong> (délibération du Conseil + visa du Trésor Public).
-            </p>
-            <p className="text-slate-500 text-[11px]">
-              Vous pouvez exercer votre droit citoyen d'accès à l'information publique (Loi n°2013-867 relative à la CAIDP) pour demander communication de la délibération du Compte Administratif.
-            </p>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3 pt-1">
-            <button
-              onClick={() => onOpenDocRequest(`Compte Administratif officiel de ${institution.name}`)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black shadow-xs transition-all cursor-pointer"
-            >
-              <FileText className="w-3.5 h-3.5 text-amber-300" />
-              <span>Faire une demande de Compte Administratif (Loi CAIDP)</span>
-            </button>
-
-            <button
-              onClick={() => setIsExplainerOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
-            >
-              <HelpCircle className="w-3.5 h-3.5 text-brand-blue" />
-              <span>Qu'est-ce qu'un compte administratif ?</span>
-            </button>
-          </div>
-        </div>
+        )}
 
         <CompteAdministratifExplainerModal 
           isOpen={isExplainerOpen}
@@ -312,6 +396,25 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </div>
           </div>
         </div>
+
+        {publishedCADoc && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-3 bg-emerald-50/80 rounded-xl border border-emerald-200 text-xs">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <div>
+                <span className="font-bold text-emerald-950">Pièce officielle certifiée :</span>{' '}
+                <span className="text-emerald-800 font-mono">{publishedCADoc.file_name} ({publishedCADoc.file_size})</span>
+              </div>
+            </div>
+            <button
+              onClick={() => handleDownloadPublishedCA(publishedCADoc)}
+              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer flex-shrink-0"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Télécharger le PDF officiel</span>
+            </button>
+          </div>
+        )}
 
         {currentCA.notes && (
           <p className="text-xs text-slate-600 italic bg-amber-50/60 p-3 rounded-xl border border-amber-200/60">

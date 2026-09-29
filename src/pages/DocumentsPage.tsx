@@ -24,6 +24,7 @@ const CATEGORY_LABELS: Record<DocumentCategory, string> = {
   LOI_CAIDP: "Textes CAIDP & Lois",
   ETUDE_TECHNIQUE: "Études Techniques",
   GUIDE_CITOYEN: "Guides Citoyens",
+  COMPTE_ADMINISTRATIF: "Comptes Administratifs (CA)",
 };
 
 export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp }) => {
@@ -31,17 +32,22 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedYear, setSelectedYear] = useState<string>('ALL');
 
-  const [documents, setDocuments] = useState<PublicDocument[]>(() => dataStore.getDocuments());
+  const [rawDocuments, setRawDocuments] = useState<PublicDocument[]>(() => dataStore.getDocuments());
 
   useEffect(() => {
     return dataStore.subscribe(() => {
-      setDocuments(dataStore.getDocuments());
+      setRawDocuments(dataStore.getDocuments());
     });
   }, []);
 
+  // Filter only published and active documents for citizen viewing
+  const documents = useMemo(() => {
+    return rawDocuments.filter(doc => doc.is_public !== false && doc.document_status !== 'ARCHIVED');
+  }, [rawDocuments]);
+
   // Extract unique years
   const availableYears = useMemo(() => {
-    const years = Array.from(new Set(documents.map(d => d.year))).sort((a, b) => b - a);
+    const years = Array.from(new Set(documents.map(d => d.year || d.fiscal_year || 2026))).sort((a, b) => b - a);
     return years;
   }, [documents]);
 
