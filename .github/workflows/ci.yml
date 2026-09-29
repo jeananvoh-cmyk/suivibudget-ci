@@ -2,7 +2,7 @@ name: Quality and CA security
 on:
   pull_request:
   push:
-    branches: [master]
+    branches: [master, security-ca-foundation-20260929]
 permissions:
   contents: read
 concurrency:
