@@ -115,8 +115,8 @@
 | **AdminLoginPage** | `/admin/login` | VALIDATED | 375, 768, 1440 | Fixed /admin/login routing in parseRoute, verified cybersecurity legal banner and responsive inputs | Playwright inspection, Build |
 | **AdminDashboardPage** | `/admin` | AUDITED | 375, 1024, 1440 | Multi-tab admin navigation (CAIDP, CA, Documents, Modération, Settings) | Code inspection, Build |
 | **ProjectDetailModal** | `handleSelectProject` | VALIDATED | 375, 768, 1440 | Modal full-width mobile container, print & close buttons (>=44px), financial vs physical execution breakdown | Playwright inspection, Build |
-| **SendProofModal** | `isSendProofOpen` | AUDITED | 375, 768, 1440 | File dropzone, geolocation input, mobile touch targets | Code inspection, Build |
-| **OfficialDocRequestModal**| `isDocRequestOpen` | AUDITED | 375, 768, 1440 | CAIDP formal request template generator, mailto / copy CTA | Code inspection, Build |
+| **SendProofModal** | `isSendProofOpen` | VALIDATED | 375, 768, 1440 | Mobile container width 351px, zero horizontal overflow, primary action button height 52px (>=44px), status cards and dropzone responsive | Playwright inspection, Build |
+| **OfficialDocRequestModal**| `isDocRequestOpen` | VALIDATED | 375, 768, 1440 | Mobile container width 355px, zero horizontal overflow, 3-step document pack selector, applicant form and letter generation verified | Playwright inspection, Build |
 | **ExamineCADocumentModal** | Admin CA review | AUDITED | 375, 1024, 1440 | Side-by-side OCR/Doc inspection, status approval buttons | Code inspection, Build |
 | **SingleCAUploadModal** | Admin CA upload | AUDITED | 375, 1024, 1440 | Drag-and-drop PDF, checksum computation, metadata form | Code inspection, Build |
 | **BatchCAImportModal** | Admin batch import | AUDITED | 375, 1024, 1440 | Multi-file queue, progress indicator, error handling | Code inspection, Build |
