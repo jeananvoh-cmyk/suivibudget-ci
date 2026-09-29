@@ -1086,8 +1086,8 @@ class DataStore {
   // --- STATS CALCULATION ---
   public getImpactStats(): ImpactStats {
     const totalCommunes = 201;
-    const totalRegions = 33;
-    const totalCollectivites = 234;
+    const totalRegions = 31;
+    const totalCollectivites = 232;
     const totalBudgetLines = this.projects.length > 0 ? this.projects.length : 4354;
     const totalInvestmentsFcfa = this.projects.reduce((sum, p) => sum + p.budget_amount_fcfa, 0);
     const verifiedProofs = this.proofs.filter(p => p.verification_status === 'APPROVED').length;
