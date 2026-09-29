@@ -44,6 +44,7 @@ const STORAGE_KEYS = {
   CAIDP_RI: 'civicdata_caidp_ri_v2',
   SUBSCRIBERS: 'suivibudget_subscribers_v1',
   DOCUMENTS: 'suivibudget_public_documents_v1',
+  DOCUMENT_DOWNLOADS: 'suivibudget_document_downloads_v1',
   CAIDP_LOGS: 'suivibudget_caidp_requests_log_v1',
 };
 
@@ -783,6 +784,16 @@ class DataStore {
       } else {
         localStorage.setItem('civicdata_real_downloads_reset_v1', 'true');
       }
+
+      // Re-hydrate persistent download counts from lightweight map (immune to storage quotas)
+      const storedDownloads = localStorage.getItem(STORAGE_KEYS.DOCUMENT_DOWNLOADS);
+      if (storedDownloads) {
+        const countsMap: Record<string, number> = JSON.parse(storedDownloads) || {};
+        this.documents = this.documents.map(d => ({
+          ...d,
+          downloads_count: Math.max(d.downloads_count || 0, countsMap[d.id] || 0),
+        }));
+      }
     } catch (e) {
       console.warn("Could not read documents from localStorage", e);
     }
@@ -820,7 +831,14 @@ class DataStore {
           .select('*')
           .order('published_at', { ascending: false });
         if (!docsError && Array.isArray(remoteDocs) && remoteDocs.length > 0) {
-          this.documents = remoteDocs;
+          // Merge preserving download counts and local additions
+          this.documents = remoteDocs.map(remoteDoc => {
+            const localDoc = this.documents.find(d => d.id === remoteDoc.id);
+            return {
+              ...remoteDoc,
+              downloads_count: Math.max(remoteDoc.downloads_count || 0, localDoc?.downloads_count || 0),
+            };
+          });
           this.saveDocuments();
           this.notify();
         }
@@ -1597,6 +1615,18 @@ class DataStore {
     const doc = this.documents.find(d => d.id === id);
     if (doc) {
       doc.downloads_count = (doc.downloads_count || 0) + 1;
+
+      // 1. Persistent dedicated lightweight counter (<1KB map, completely immune to localStorage quota)
+      try {
+        const storedDownloads = localStorage.getItem(STORAGE_KEYS.DOCUMENT_DOWNLOADS);
+        const countsMap: Record<string, number> = storedDownloads ? JSON.parse(storedDownloads) : {};
+        countsMap[id] = doc.downloads_count;
+        localStorage.setItem(STORAGE_KEYS.DOCUMENT_DOWNLOADS, JSON.stringify(countsMap));
+      } catch (err) {
+        console.warn("Could not save download count to lightweight key", err);
+      }
+
+      // 2. Full documents array save
       this.saveDocuments();
       this.notify();
 

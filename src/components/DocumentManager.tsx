@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   FileText, 
   Plus, 
@@ -68,7 +68,13 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
     is_official: true,
   });
 
-  const documents = dataStore.getDocuments();
+  const [documents, setDocuments] = useState<PublicDocument[]>(() => dataStore.getDocuments());
+
+  useEffect(() => {
+    return dataStore.subscribe(() => {
+      setDocuments(dataStore.getDocuments());
+    });
+  }, []);
 
   const filteredDocs = useMemo(() => {
     return documents.filter(doc => {
