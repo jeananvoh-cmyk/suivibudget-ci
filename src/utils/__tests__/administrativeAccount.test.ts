@@ -80,9 +80,10 @@ describe('2. Résolution Intelligente & Smart Fallback des Comptes Administratif
     expect(ca).toBeDefined();
     expect(ca?.fiscal_year).toBe(2024);
     expect(ca?.institution_name).toBe('Mairie de Tiassalé');
-    expect(ca?.total_planned).toBe(1450000000);
-    expect(ca?.total_realized).toBe(1316280450);
-    expect(ca?.surplus_or_deficit).toBe(133719550);
+    expect(ca?.total_planned).toBe(1007841000);
+    expect(ca?.total_realized).toBe(1059255758);
+    expect(ca?.arithmetic_difference).toBe(157080800);
+    expect(ca?.reconciliation_status).toBe('SOURCE_ANOMALY');
   });
 
   it('retrouve également Tiassalé par son nom normalisé', () => {
@@ -103,29 +104,17 @@ describe('2. Résolution Intelligente & Smart Fallback des Comptes Administratif
     expect(getAdministrativeAccountsForInstitution('inst-com-inconnue-xyz')).toEqual([]);
   });
 
-  it('comporte au moins 5 opérations d\'investissement réelles pour Tiassalé avec rapprochements DGMP', () => {
+  it('ne conserve que les rapprochements DGMP réellement documentés dans le pilote Tiassalé', () => {
     const ca = getLatestAvailableCA('inst-com-tiassale');
-    expect(ca?.operations.length).toBe(5);
-
-    // Vérification opération 1 (CSU)
-    const opCSU = ca?.operations.find(o => o.title.includes('Centre de Santé'));
-    expect(opCSU).toBeDefined();
-    expect(opCSU?.procurement_match?.match_level).toBe('STRONG');
-    expect(opCSU?.procurement_match?.tender_number).toBe('AOO N°03/MT/2024');
-
-    // Vérification opération marché central (Régie municipale - NONE)
-    const opMarche = ca?.operations.find(o => o.title.includes('Marché Central'));
-    expect(opMarche).toBeDefined();
-    expect(opMarche?.procurement_match?.match_level).toBe('NONE');
-    expect(opMarche?.procurement_match?.verification_status).toBe('Non retrouvé');
+    expect(ca?.operations.length).toBe(3);
+    const marche = ca?.operations.find(o => o.title.includes('vingt (20) magasins'));
+    expect(marche?.procurement_match?.tender_number).toBe('AOO24062605757');
+    const gardienkro = ca?.operations.find(o => o.title.includes('Gardienkro'));
+    expect(gardienkro?.executed_amount).toBe(0);
+    expect(gardienkro?.procurement_match?.award_amount).toBe(23725064);
   });
 
-  it('inclut un droit de réponse officiel structuré pour la Mairie de Tiassalé', () => {
-    const ca = getLatestAvailableCA('inst-com-tiassale');
-    expect(ca?.institution_response).toBeDefined();
-    expect(ca?.institution_response?.author_title).toBe('Mairie de Tiassalé');
-    expect(ca?.institution_response?.response_status).toBe('PUBLISHED');
-  });
+
 });
 
 describe('3. Glossaire Citoyen des Finances Locales & Vulgarisation', () => {
