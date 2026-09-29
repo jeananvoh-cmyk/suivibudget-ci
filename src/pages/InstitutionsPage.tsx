@@ -60,7 +60,7 @@ export const InstitutionsPage: React.FC<InstitutionsPageProps> = ({
   const allProjects = useMemo(() => dataStore.getProjects(), [storeTick]);
 
   const mairiesCount = institutions.filter(i => i.type === 'MAIRIE').length;
-  const regionsCount = institutions.filter(i => i.type === 'REGION' || i.type === 'DISTRICT').length;
+  const regionsCount = institutions.filter(i => i.type === 'REGION').length;
   const ministersCount = GOVERNMENT_OFFICIALS.length;
   const institutionsCount = NATIONAL_INSTITUTIONS_DATA.filter(
     i => !i.name.toLowerCase().startsWith('ministère') && !i.name.toLowerCase().startsWith('ministere') && !i.name.toLowerCase().includes('délégué')
