@@ -8,7 +8,7 @@ export async function fetchAdministrativeAccounts(institutionId: string): Promis
     .from('administrative_accounts')
     .select('*')
     .eq('institution_id', institutionId)
-    .in('status', ['VERIFIED', 'PUBLISHED'])
+    .eq('status', 'PUBLISHED')
     .order('fiscal_year', { ascending: false });
 
   if (error) throw error;

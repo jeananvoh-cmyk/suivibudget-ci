@@ -73,11 +73,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
           setStep('FORCE_CHANGE_PASSWORD');
           setError(null);
         } else {
-          dataStore.login(
-            res.email || identifier || 'admin@suivibudget.ci', 
-            res.fullName || 'Administrateur', 
-            res.role || 'ADMIN'
-          );
+          await dataStore.login();
           onLoginSuccess();
         }
       } else {
@@ -112,7 +108,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
 
       if (result.success) {
         setSuccessMessage(" Mot de passe administrateur sécurisé et enregistré avec succès !");
-        dataStore.login(identifier || 'admin@suivibudget.ci', 'Administrateur National', 'ADMIN');
+        await dataStore.login();
         setTimeout(() => {
           onLoginSuccess();
         }, 1200);

@@ -1190,7 +1190,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
           {/* Logout Button */}
           <button
-            onClick={() => dataStore.logout()}
+            onClick={() => { void dataStore.logout().catch(() => showToast('Déconnexion serveur non confirmée. Veuillez réessayer.', 'error')); }}
+            aria-label="Se déconnecter"
             className="px-3 py-2.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white rounded-xl text-xs font-bold transition-all border border-rose-500/30 flex items-center gap-1.5 cursor-pointer"
             title="Se déconnecter"
           >

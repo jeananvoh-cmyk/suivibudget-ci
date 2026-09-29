@@ -146,7 +146,7 @@ export const BatchCAImportModal: React.FC<BatchCAImportModalProps> = ({
 
   // Lancement de l'ingestion groupée
   const handleStartImport = async () => {
-    const validProposals = proposals.filter(p => p.matchedInstitutionId);
+    const validProposals = proposals.filter(p => p.matchedInstitutionId && !p.isDuplicate);
     if (validProposals.length === 0) {
       onShowToast('Aucun document assigné à une collectivité valide.', 'error');
       return;
@@ -170,11 +170,12 @@ export const BatchCAImportModal: React.FC<BatchCAImportModalProps> = ({
             institutionType: prop.matchedInstitutionType,
             fiscalYear: prop.detectedYear,
             documentType: 'COMPTE_ADMINISTRATIF',
-            version: prop.isNewVersion ? 2 : 1,
+            version: prop.isNewVersion ? (dataStore.getCAForInstitution(prop.matchedInstitutionId!, prop.detectedYear)?.version || 1) + 1 : 1,
           }
         );
 
-        dataStore.saveCADocument({
+        if (!uploadRes.success) throw new Error(uploadRes.error || 'Téléversement non confirmé.');
+        await dataStore.saveCADocument({
           title: `Compte Administratif ${prop.detectedYear} - ${prop.matchedInstitutionName}`,
           category: 'COMPTE_ADMINISTRATIF',
           document_type: 'COMPTE_ADMINISTRATIF',
@@ -192,9 +193,9 @@ export const BatchCAImportModal: React.FC<BatchCAImportModalProps> = ({
           storage_path: uploadRes.storagePath,
           checksum_sha256: uploadRes.checksumSha256 || prop.checksum_sha256,
           source_name: prop.sourceName,
-          document_status: 'TO_VERIFY',
+          status: 'TO_VERIFY',
           verification_status: 'TO_VERIFY',
-          is_public: false, // Strict audit: TO_VERIFY -> examen required before publishing!
+          replacement_reason: prop.isNewVersion ? 'Nouvelle version confirmée lors de l’import par lot.' : undefined,
         }, prop.isNewVersion);
 
         successCount++;

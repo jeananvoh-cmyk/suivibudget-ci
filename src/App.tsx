@@ -174,10 +174,14 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleLogout = () => {
-    dataStore.logout();
-    showToast('Déconnexion réussie.');
-    navigateTo('home');
+  const handleLogout = async () => {
+    try {
+      await dataStore.logout();
+      showToast('Déconnexion réussie.');
+      navigateTo('home');
+    } catch {
+      showToast('Déconnexion serveur non confirmée. Réessayez lorsque la connexion est disponible.');
+    }
   };
 
   return (

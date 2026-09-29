@@ -19,6 +19,7 @@ interface DocumentsPageProps {
 }
 
 const CATEGORY_LABELS: Record<DocumentCategory, string> = {
+  COMPTE_ADMINISTRATIF: 'Comptes administratifs',
   RAPPORT_AUDIT: "Rapports d'Audit",
   MARCHE_PUBLIC: "Marchés Publics",
   BUDGET_OFFICIEL: "Budgets de l'État",

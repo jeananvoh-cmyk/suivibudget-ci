@@ -1,3 +1,4 @@
+import type { CollectivitesCaMatrixSummary, CollectiviteCaStatus, DocumentLifecycleStatus } from '../types';
 import { 
   BudgetProject, 
   CitizenProof, 
@@ -772,43 +773,7 @@ class DataStore {
       this.authState = { isAuthenticated: false, email: '', fullName: '', role: 'CITIZEN' };
     }
 
-    // 8. Public Documents
-    this.documents = [...INITIAL_PUBLIC_DOCUMENTS];
-    try {
-      const storedDocs = localStorage.getItem(STORAGE_KEYS.DOCUMENTS);
-      const isCleaned = localStorage.getItem('civicdata_real_downloads_reset_v1');
-      if (storedDocs) {
-        let parsed = JSON.parse(storedDocs);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          // One-time sanitization of old mock download counts in user's browser
-          if (!isCleaned) {
-            parsed = parsed.map((d: any) => ({
-              ...d,
-              downloads_count: 0,
-            }));
-            localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(parsed));
-            localStorage.setItem('civicdata_real_downloads_reset_v1', 'true');
-          }
-          const existingIds = new Set(parsed.map((d: any) => d.id));
-          const missingDefaults = INITIAL_PUBLIC_DOCUMENTS.filter(d => !existingIds.has(d.id));
-          this.documents = [...parsed, ...missingDefaults];
-        }
-      } else {
-        localStorage.setItem('civicdata_real_downloads_reset_v1', 'true');
-      }
-
-      // Re-hydrate persistent download counts from lightweight map (immune to storage quotas)
-      const storedDownloads = localStorage.getItem(STORAGE_KEYS.DOCUMENT_DOWNLOADS);
-      if (storedDownloads) {
-        const countsMap: Record<string, number> = JSON.parse(storedDownloads) || {};
-        this.documents = this.documents.map(d => ({
-          ...d,
-          downloads_count: Math.max(d.downloads_count || 0, countsMap[d.id] || 0),
-        }));
-      }
-    } catch (e) {
-      console.warn("Could not read documents from localStorage", e);
-    }
+    this.documents = [];
 
     // 9. CAIDP Requests Log (Telemetry)
     this.caidpLogs = [];
@@ -851,8 +816,7 @@ class DataStore {
               downloads_count: Math.max(remoteDoc.downloads_count || 0, localDoc?.downloads_count || 0),
             };
           });
-          this.saveDocuments();
-          this.notify();
+                this.notify();
         }
       } catch (err) {
         // Table not present yet, silent fallback
@@ -1118,29 +1082,21 @@ class DataStore {
   }
 
   // --- AUTH MANAGEMENT ---
-  public login(email: string, fullName: string, role: UserRole) {
-    const assignedRole = (role === 'ADMIN' || role === 'MODERATOR' || role === 'DATA_MANAGER') ? role : 'MODERATOR';
-    const assignedName = fullName || (assignedRole === 'ADMIN' ? 'Administrateur National' : 'Modérateur Terrain');
-    const token = AuthSecurityService.createSignedSession({
-      email,
-      fullName: assignedName,
-      role: assignedRole,
-    });
+  public async login() {
+    const session = await AuthSecurityService.restoreSupabaseSession();
+    if (!session.isAuthenticated || !session.user) throw new Error('Session non autorisée.');
     this.authState = {
       isAuthenticated: true,
-      email: token.payload.email,
-      fullName: token.payload.fullName,
-      role: token.payload.role as UserRole,
-      expiresAt: token.payload.expiresAt,
+      email: session.user.email,
+      fullName: session.user.fullName,
+      role: session.user.role as UserRole,
+      expiresAt: session.user.expiresAt,
     };
     this.notify();
   }
 
-  public logout() {
-    AuthSecurityService.clearSession();
-    if (isSupabaseConfigured()) {
-      supabase.auth.signOut().catch(() => {});
-    }
+  public async logout() {
+    const signOut = AuthSecurityService.clearSession();
     this.authState = {
       isAuthenticated: false,
       email: '',
@@ -1149,6 +1105,7 @@ class DataStore {
       expiresAt: 0,
     };
     this.notify();
+    await signOut;
   }
 
   // --- CITIZEN PROOF SUBMISSION & MODERATION ---
@@ -1555,65 +1512,49 @@ class DataStore {
   }
 
   public async refreshDocumentsFromSupabase(includeUnpublished = false): Promise<PublicDocument[]> {
-    if (!isSupabaseConfigured()) return this.getDocuments();
+    if (!isSupabaseConfigured()) throw new Error('Service documentaire indisponible.');
     let query = supabase.from('public_documents').select('*').order('published_at', { ascending: false });
     if (!includeUnpublished) query = query.eq('status', 'PUBLISHED');
     const { data, error } = await query;
     if (error) throw error;
     this.documents = (data || []) as PublicDocument[];
-    this.saveDocuments();
     this.notify();
     return this.getDocuments();
   }
 
   public async addDocument(docData: Omit<PublicDocument, 'id' | 'downloads_count' | 'published_at'> & { published_at?: string }): Promise<PublicDocument> {
+    if (!isSupabaseConfigured()) throw new Error('Service documentaire indisponible.');
+    if (docData.status && docData.status !== 'TO_VERIFY' && docData.status !== 'UPLOADED') {
+      throw new Error('Tout nouveau document doit être vérifié avant publication.');
+    }
     const newDoc: PublicDocument = {
       ...docData,
       id: `doc-${crypto.randomUUID()}`,
       downloads_count: 0,
       published_at: docData.published_at || new Date().toISOString(),
       is_official: docData.is_official ?? false,
-      status: docData.status || 'TO_VERIFY',
-      verification_status: docData.verification_status || 'TO_VERIFY',
+      status: 'TO_VERIFY',
+      verification_status: 'TO_VERIFY',
       version: docData.version || 1,
     };
 
-    if (isSupabaseConfigured()) {
-      const { data, error } = await supabase.from('public_documents').insert([newDoc]).select('*').single();
-      if (error) throw error;
-      this.documents.unshift(data as PublicDocument);
-    } else {
-      this.documents.unshift(newDoc);
-    }
-    this.saveDocuments();
+    const { data, error } = await supabase.from('public_documents').insert([newDoc]).select('*').single();
+    if (error) throw error;
+    if (!data) throw new Error('Enregistrement non confirmé.');
+    this.documents.unshift(data as PublicDocument);
     this.notify();
     return this.documents[0];
   }
 
   public async updateDocument(id: string, updates: Partial<PublicDocument>): Promise<boolean> {
-    if (isSupabaseConfigured()) {
-      const { data, error } = await supabase.from('public_documents').update(updates).eq('id', id).select('*').single();
-      if (error) throw error;
-      const idx = this.documents.findIndex(d => d.id === id);
-      if (idx >= 0) this.documents[idx] = data as PublicDocument;
-      else this.documents.unshift(data as PublicDocument);
-    } else {
-      const idx = this.documents.findIndex(d => d.id === id);
-      if (idx === -1) return false;
-      this.documents[idx] = { ...this.documents[idx], ...updates };
-    }
-    this.saveDocuments();
-    this.notify();
-    return true;
-  }
-
-  public async deleteDocument(id: string): Promise<boolean> {
-    if (isSupabaseConfigured()) {
-      const { error } = await supabase.from('public_documents').delete().eq('id', id);
-      if (error) throw error;
-    }
-    this.documents = this.documents.filter(d => d.id !== id);
-    this.saveDocuments();
+    if (!isSupabaseConfigured()) throw new Error('Service documentaire indisponible.');
+    const current = this.documents.find(d => d.id === id);
+    if (!current?.updated_at) throw new Error('Rechargez le document avant de le modifier.');
+    const { data, error } = await supabase.from('public_documents').update(updates)
+      .eq('id', id).eq('updated_at', current.updated_at).select('*').single();
+    if (error) throw error;
+    if (!data) throw new Error('Document modifié par un autre agent. Rechargez la liste.');
+    this.documents = this.documents.map(d => d.id === id ? data as PublicDocument : d);
     this.notify();
     return true;
   }
@@ -1624,6 +1565,203 @@ class DataStore {
     doc.downloads_count = (doc.downloads_count || 0) + 1;
     this.notify();
   }
+
+  public getCollectivitesCaMatrix(fiscalYear: number = 2025): { summary: CollectivitesCaMatrixSummary; matrix: CollectiviteCaStatus[] } {
+    // 201 communes (type === 'MAIRIE') + 31 conseils régionaux (type === 'REGION')
+    const targetInstitutions = this.institutions.filter(
+      inst => inst.type === 'MAIRIE' || (inst.type === 'REGION' && !inst.id.startsWith('dist-'))
+    );
+
+    // Group relevant CA documents by institution_id for this fiscalYear
+    const caDocs = this.documents.filter(d => 
+      (d.document_type === 'COMPTE_ADMINISTRATIF' || d.category === 'COMPTE_ADMINISTRATIF') &&
+      ((d.fiscal_year && d.fiscal_year === fiscalYear) || (d.year && d.year === fiscalYear))
+    );
+
+    const docMap = new Map<string, PublicDocument>();
+    const docNameMap = new Map<string, PublicDocument>();
+    for (const doc of caDocs) {
+      if (doc.institution_id) {
+        const existing = docMap.get(doc.institution_id);
+        if (!existing || (doc.version || 1) >= (existing.version || 1)) {
+          docMap.set(doc.institution_id, doc);
+        }
+      }
+      if (doc.institution_name) {
+        docNameMap.set(doc.institution_name.toLowerCase().trim(), doc);
+      }
+    }
+
+    let communesCount = 0;
+    let regionsCount = 0;
+    let communesReceived = 0;
+    let communesPublished = 0;
+    let regionsReceived = 0;
+    let regionsPublished = 0;
+
+    let toVerifyCount = 0;
+    let verifiedCount = 0;
+    let publishedCount = 0;
+    let missingCount = 0;
+
+    const matrix: CollectiviteCaStatus[] = targetInstitutions.map(inst => {
+      const isCommune = inst.type === 'MAIRIE';
+      if (isCommune) communesCount++;
+      else regionsCount++;
+
+      const doc = docMap.get(inst.id) || docNameMap.get(inst.name.toLowerCase().trim());
+      
+      let status: 'PUBLISHED' | 'VERIFIED' | 'TO_VERIFY' | 'MISSING' | 'ARCHIVED' = 'MISSING';
+      let versionsCount = 0;
+
+      if (doc) {
+        versionsCount = caDocs.filter(d => d.institution_id === inst.id).length;
+        if (doc.status === 'PUBLISHED') {
+          status = 'PUBLISHED';
+          publishedCount++;
+          if (isCommune) communesPublished++;
+          else regionsPublished++;
+        } else if (doc.status === 'VERIFIED') {
+          status = 'VERIFIED';
+          verifiedCount++;
+        } else if (doc.status === 'ARCHIVED') {
+          status = 'ARCHIVED';
+        } else {
+          status = 'TO_VERIFY';
+          toVerifyCount++;
+        }
+
+        if (isCommune) communesReceived++;
+        else regionsReceived++;
+      } else {
+        missingCount++;
+      }
+
+      return {
+        institution_id: inst.id,
+        institution_name: inst.name,
+        institution_type: isCommune ? 'MAIRIE' : 'REGION',
+        region_name: inst.region || '',
+        district_name: inst.district,
+        fiscal_year: fiscalYear,
+        status,
+        document: doc,
+        versions_count: versionsCount,
+        last_updated: doc?.updated_at || doc?.published_at || undefined,
+      };
+    });
+
+    const totalExpected = targetInstitutions.length; // 232 (201 communes + 31 conseils régionaux)
+    const receivedCount = toVerifyCount + verifiedCount + publishedCount;
+    const globalCoveragePct = totalExpected > 0 ? Math.round((publishedCount / totalExpected) * 100) : 0;
+
+    const summary: CollectivitesCaMatrixSummary = {
+      fiscal_year: fiscalYear,
+      totalExpected,
+      totalCommunes: communesCount,
+      totalRegions: regionsCount,
+      receivedCount,
+      verifiedCount,
+      publishedCount,
+      toVerifyCount,
+      missingCount,
+      communesReceivedCount: communesReceived,
+      communesPublishedCount: communesPublished,
+      regionsReceivedCount: regionsReceived,
+      regionsPublishedCount: regionsPublished,
+      globalCoveragePct,
+    };
+
+    return { summary, matrix };
+  }
+
+  public getCAForInstitution(institutionId: string, fiscalYear?: number): PublicDocument | undefined {
+    const inst = this.institutions.find(i => i.id === institutionId);
+    return this.documents.find(d => {
+      const matchType = d.document_type === 'COMPTE_ADMINISTRATIF' || d.category === 'COMPTE_ADMINISTRATIF';
+      if (!matchType) return false;
+      const matchInst = d.institution_id === institutionId || (inst && d.institution_name?.toLowerCase().trim() === inst.name.toLowerCase().trim());
+      if (!matchInst) return false;
+      if (fiscalYear !== undefined) {
+        return d.fiscal_year === fiscalYear || d.year === fiscalYear;
+      }
+      return true;
+    });
+  }
+
+  public findDocumentByChecksum(checksum: string): PublicDocument | undefined {
+    if (!checksum) return undefined;
+    return this.documents.find(d => d.checksum_sha256 === checksum);
+  }
+
+  public getDocumentVersions(document: PublicDocument): PublicDocument[] {
+    return this.documents.filter(d => d.institution_id === document.institution_id
+      && d.fiscal_year === document.fiscal_year && d.document_type === document.document_type)
+      .sort((a, b) => (b.version || 1) - (a.version || 1));
+  }
+
+  public async saveCADocument(docData: Partial<PublicDocument>, asNewVersion = false): Promise<PublicDocument> {
+    if (!isSupabaseConfigured()) throw new Error('Service documentaire indisponible.');
+    const institution = this.institutions.find(i => i.id === docData.institution_id);
+    const fiscalYear = docData.fiscal_year ?? docData.year;
+    if (!institution || !fiscalYear || !Number.isInteger(fiscalYear) || fiscalYear < 1960 || fiscalYear > new Date().getFullYear()) {
+      throw new Error('Collectivité et exercice valides requis.');
+    }
+    if (!docData.storage_path || !/^[a-f0-9]{64}$/.test(docData.checksum_sha256 || '') || !docData.source_name?.trim()) {
+      throw new Error('Fichier privé, empreinte SHA-256 et source requis.');
+    }
+    const { data: versions, error } = await supabase.from('public_documents').select('*')
+      .eq('institution_id', institution.id).eq('fiscal_year', fiscalYear)
+      .eq('document_type', 'COMPTE_ADMINISTRATIF').order('version', { ascending: false });
+    if (error) throw error;
+    const latest = versions?.[0] as PublicDocument | undefined;
+    if (asNewVersion && (!latest || !docData.replacement_reason?.trim())) {
+      throw new Error('Version précédente et motif de remplacement requis.');
+    }
+    if (latest && !asNewVersion && docData.id !== latest.id) {
+      throw new Error('Un CA existe déjà : créez une nouvelle version.');
+    }
+    const metadata = {
+      title: docData.title || `Compte administratif ${fiscalYear} — ${institution.name}`,
+      institution_id: institution.id, institution_name: institution.name,
+      institution_type: institution.type as PublicDocument['institution_type'],
+      fiscal_year: fiscalYear, year: fiscalYear,
+      category: 'COMPTE_ADMINISTRATIF' as const, document_type: 'COMPTE_ADMINISTRATIF' as const,
+      description: docData.description || '', file_url: '',
+      file_name: docData.file_name || 'document.pdf', file_format: 'PDF' as const,
+      file_size: docData.file_size, file_size_bytes: docData.file_size_bytes,
+      storage_bucket: 'public_documents', storage_path: docData.storage_path,
+      checksum_sha256: docData.checksum_sha256, mime_type: 'application/pdf',
+      source_name: docData.source_name.trim(), source_url: docData.source_url,
+      adoption_date: docData.adoption_date, approval_date: docData.approval_date,
+      approval_reference: docData.approval_reference,
+    };
+    if (latest && !asNewVersion) {
+      if (latest.storage_path !== metadata.storage_path || latest.checksum_sha256 !== metadata.checksum_sha256) {
+        throw new Error('Le fichier original est immuable. Créez une nouvelle version.');
+      }
+      await this.updateDocument(latest.id, { ...metadata, status: 'TO_VERIFY', verification_status: 'TO_VERIFY' });
+      return this.getDocumentById(latest.id)!;
+    }
+    return this.addDocument({ ...metadata, is_official: false,
+      version: latest ? (latest.version || 1) + 1 : 1,
+      replaces_document_id: latest?.id,
+      replacement_reason: latest ? docData.replacement_reason?.trim() : undefined,
+      status: 'TO_VERIFY', verification_status: 'TO_VERIFY',
+    });
+  }
+
+  public async updateDocumentLifecycleStatus(id: string, status: DocumentLifecycleStatus): Promise<boolean> {
+    const document = this.getDocumentById(id);
+    if (!document) throw new Error('Document introuvable.');
+    if (status === 'PUBLISHED' && (document.status !== 'VERIFIED' || document.verification_status !== 'VERIFIED')) {
+      throw new Error('Vérifiez le document avant publication.');
+    }
+    await this.updateDocument(id, { status });
+    await this.refreshDocumentsFromSupabase(true);
+    return true;
+  }
+
 
   // --- SITE SETTINGS ---
   public updateSettings(newSettings: Partial<SiteSettings>) {
@@ -1988,14 +2126,6 @@ class DataStore {
       localStorage.setItem(STORAGE_KEYS.CAIDP_RI, JSON.stringify(this.caidpDirectory));
     } catch (e) {
       console.warn("Storage quota exceeded for caidp directory", e);
-    }
-  }
-
-  private saveDocuments() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(this.documents));
-    } catch (e) {
-      console.warn("Storage quota exceeded for public documents", e);
     }
   }
 

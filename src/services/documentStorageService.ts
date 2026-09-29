@@ -78,74 +78,34 @@ export class DocumentStorageService {
     const sizeMb = (fileSizeBytes / (1024 * 1024)).toFixed(1);
     const fileSizeFormatted = parseFloat(sizeMb) >= 1 ? `${sizeMb} Mo` : `${Math.round(fileSizeBytes / 1024)} Ko`;
 
-    // Calcul du hash SHA-256
-    let checksumSha256 = '';
-    try {
-      checksumSha256 = await calculateFileSha256(file);
-    } catch (e) {
-      console.warn("Impossible de calculer le checksum SHA-256", e);
-    }
-
-    // 1. Téléversement vers Supabase Storage si configuré
-    if (isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase.storage
-          .from(this.BUCKET_NAME)
-          .upload(storagePath, file, {
-            cacheControl: '3600',
-            upsert: true,
-            contentType: mimeType,
-          });
-
-        if (error) {
-          console.error("Erreur téléversement Supabase Storage :", error);
-        } else if (data) {
-          const { data: publicUrlData } = supabase.storage
-            .from(this.BUCKET_NAME)
-            .getPublicUrl(storagePath);
-
-          return {
-            success: true,
-            fileUrl: publicUrlData.publicUrl,
-            storageBucket: this.BUCKET_NAME,
-            storagePath,
-            checksumSha256,
-            fileSizeBytes,
-            fileSizeFormatted,
-            originalFileName: originalFilename,
-            mimeType,
-          };
-        }
-      } catch (err: any) {
-        console.warn("Exception lors du téléversement Supabase Storage :", err);
-      }
-    }
-
-    // 2. Mode local / hors ligne / réplicat client
-    let localUrl = '';
-    if (file instanceof File) {
-      try {
-        localUrl = URL.createObjectURL(file);
-      } catch {
-        localUrl = '';
-      }
-    }
-
-    // Si pas d'ObjectURL, on utilise un chemin d'archive public symbolique
-    if (!localUrl) {
-      localUrl = `https://documents.suivibudget.ci/${storagePath}`;
-    }
-
-    return {
-      success: true,
-      fileUrl: localUrl,
-      storageBucket: this.BUCKET_NAME,
-      storagePath,
-      checksumSha256,
-      fileSizeBytes,
-      fileSizeFormatted,
-      originalFileName: originalFilename,
-      mimeType,
+    const result = {
+      fileUrl: '', storageBucket: this.BUCKET_NAME, storagePath,
+      checksumSha256: '', fileSizeBytes, fileSizeFormatted,
+      originalFileName: originalFilename, mimeType,
     };
+    if (!isSupabaseConfigured()) {
+      return { ...result, success: false, error: 'Stockage documentaire indisponible.' };
+    }
+    if (fileSizeBytes === 0 || fileSizeBytes > 50 * 1024 * 1024) {
+      return { ...result, success: false, error: 'Le fichier doit contenir entre 1 octet et 50 Mo.' };
+    }
+    if (options.documentType === 'COMPTE_ADMINISTRATIF') {
+      const header = new TextDecoder().decode(await file.slice(0, 5).arrayBuffer());
+      if (mimeType !== 'application/pdf' || header !== '%PDF-') {
+        return { ...result, success: false, error: 'Un compte administratif doit être un fichier PDF valide.' };
+      }
+    }
+    try {
+      result.checksumSha256 = await calculateFileSha256(file);
+      const { data, error } = await supabase.storage
+        .from(this.BUCKET_NAME)
+        .upload(storagePath, file, { cacheControl: '300', upsert: false, contentType: mimeType });
+      if (error || !data) {
+        return { ...result, success: false, error: error?.message || 'Téléversement non confirmé.' };
+      }
+      return { ...result, success: true };
+    } catch (error) {
+      return { ...result, success: false, error: error instanceof Error ? error.message : 'Téléversement impossible.' };
+    }
   }
 }

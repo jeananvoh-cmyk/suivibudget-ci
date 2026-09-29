@@ -3,7 +3,7 @@
 // SuiviBudget Côte d'Ivoire - Architecture Multi-Exercices, Checksum & Ingestion
 // =========================================================================
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { 
   calculateFileSha256, 
   extractFiscalYearFromFileName, 
@@ -13,6 +13,60 @@ import {
 import { DocumentStorageService } from '../../services/documentStorageService';
 import { dataStore } from '../../services/dataStore';
 import { Institution, PublicDocument } from '../../types';
+
+const storageMock = vi.hoisted(() => ({ configured: vi.fn(() => false), upload: vi.fn(), query: vi.fn(), insert: vi.fn(), update: vi.fn() }));
+vi.mock('../../services/supabase', () => ({
+  isSupabaseConfigured: storageMock.configured,
+    supabase: {
+    storage: { from: () => ({ upload: storageMock.upload }) },
+    from: () => {
+      const builder = {
+        select: () => builder,
+        eq: () => builder,
+        insert: (value: unknown) => { storageMock.insert(value); return builder; },
+        update: (value: unknown) => { storageMock.update(value); return builder; },
+        order: () => storageMock.query(),
+        single: () => storageMock.query(),
+      };
+      return builder;
+    },
+  },
+}));
+
+describe('Stockage documentaire privé', () => {
+  const options = { institutionId: 'inst-com-test', fiscalYear: 2025, documentType: 'COMPTE_ADMINISTRATIF' as const };
+  beforeEach(() => {
+    storageMock.configured.mockReturnValue(true);
+    storageMock.upload.mockReset();
+  });
+  it('refuse un faux succès hors ligne', async () => {
+    storageMock.configured.mockReturnValue(false);
+    const result = await DocumentStorageService.uploadDocument(new Blob(['%PDF-test'], { type: 'application/pdf' }), 'test.pdf', options);
+    expect(result.success).toBe(false);
+    expect(result.fileUrl).toBe('');
+    expect(storageMock.upload).not.toHaveBeenCalled();
+  });
+  it('refuse un contenu non PDF même avec le bon MIME', async () => {
+    const result = await DocumentStorageService.uploadDocument(new Blob(['invalid'], { type: 'application/pdf' }), 'test.pdf', options);
+    expect(result.success).toBe(false);
+    expect(storageMock.upload).not.toHaveBeenCalled();
+  });
+  it('propage un refus Storage sans créer une URL fictive', async () => {
+    storageMock.upload.mockResolvedValue({ data: null, error: { message: 'Denied' } });
+    const result = await DocumentStorageService.uploadDocument(new Blob(['%PDF-test'], { type: 'application/pdf' }), 'test.pdf', options);
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Denied');
+    expect(result.fileUrl).toBe('');
+  });
+  it('conserve le checksum et interdit de remplacer une source', async () => {
+    storageMock.upload.mockResolvedValue({ data: { path: 'test.pdf' }, error: null });
+    const result = await DocumentStorageService.uploadDocument(new Blob(['%PDF-test'], { type: 'application/pdf' }), 'test.pdf', options);
+    expect(result.success).toBe(true);
+    expect(result.checksumSha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(result.fileUrl).toBe('');
+    expect(storageMock.upload).toHaveBeenCalledWith(expect.any(String), expect.any(Blob), expect.objectContaining({ upsert: false }));
+  });
+});
 
 describe('Comptes Administratifs — Matching, Checksum & Stockage Canonique', () => {
 
@@ -78,99 +132,99 @@ describe('Comptes Administratifs — Matching, Checksum & Stockage Canonique', (
 
 });
 
-describe('Comptes Administratifs — Matrice 232 & Découplage Validation/Publication', () => {
+describe('Comptes administratifs — persistance et publication', () => {
+  const institution = dataStore.getInstitutions().find(i => i.type === 'MAIRIE')!;
+  const draft = {
+    institution_id: institution.id, fiscal_year: 2025, source_name: 'DGDDL',
+    storage_path: 'test/ca-v1.pdf', checksum_sha256: 'a'.repeat(64), file_name: 'ca.pdf',
+  };
+  const row: PublicDocument = {
+    ...draft, id: 'test-ca-v1', title: 'CA de test isolé', category: 'COMPTE_ADMINISTRATIF',
+    document_type: 'COMPTE_ADMINISTRATIF', institution_name: institution.name,
+    year: 2025, description: '', file_url: '', file_format: 'PDF', published_at: '',
+    downloads_count: 0, is_official: false, status: 'TO_VERIFY', verification_status: 'TO_VERIFY',
+    version: 1, updated_at: '2026-09-29T12:00:00Z',
+  };
+  beforeEach(async () => {
+    storageMock.configured.mockReturnValue(true);
+    storageMock.query.mockReset();
+    storageMock.insert.mockReset();
+    storageMock.update.mockReset();
+    storageMock.query.mockResolvedValueOnce({ data: [], error: null });
+    await dataStore.refreshDocumentsFromSupabase(true);
+  });
 
-  it('calcule la matrice de couverture dynamique sur exactement 232 collectivités attendues', () => {
+  it('calcule 232 collectivités sans créer de documents manquants', () => {
     const { summary, matrix } = dataStore.getCollectivitesCaMatrix(2025);
-
     expect(summary.totalExpected).toBe(232);
     expect(summary.totalCommunes).toBe(201);
     expect(summary.totalRegions).toBe(31);
-    expect(matrix.length).toBe(232);
-
-    // Vérifie que les collectivités sans document sont marquées MISSING sans créer de faux enregistrements en base
-    const missingRows = matrix.filter(r => r.status === 'MISSING');
-    expect(missingRows.length).toBe(summary.missingCount);
+    expect(matrix).toHaveLength(232);
+    expect(matrix.every(item => item.status === 'MISSING')).toBe(true);
+    expect(storageMock.insert).not.toHaveBeenCalled();
   });
 
-  it('découple strictement la validation de la publication', () => {
-    // 1. Sauvegarde d'un document en statut TO_VERIFY
-    const doc = dataStore.saveCADocument({
-      institution_id: 'inst-com-test-decouple',
-      institution_name: 'Mairie Test Découplage',
-      institution_type: 'MAIRIE',
-      fiscal_year: 2025,
-      year: 2025,
-      title: 'Compte Administratif 2025 Test',
-      file_url: 'https://example.com/test.pdf',
-      file_name: 'test.pdf',
-      file_size: '1.2 Mo',
-      document_status: 'TO_VERIFY',
-      is_public: false,
-    });
-
-    expect(doc.document_status).toBe('TO_VERIFY');
-    expect(doc.is_public).toBe(false);
-
-    // 2. Validation par un agent : passe en VERIFIED
-    dataStore.updateDocumentLifecycleStatus(doc.id, 'VERIFIED', 'Modérateur Test');
-    const verifiedDoc = dataStore.getDocumentById(doc.id);
-
-    expect(verifiedDoc?.document_status).toBe('VERIFIED');
-    expect(verifiedDoc?.verification_status).toBe('VERIFIED');
-    expect(verifiedDoc?.verified_by).toBe('Modérateur Test');
-    // RÈGLE CARDINALE : is_public reste false après vérification !
-    expect(verifiedDoc?.is_public).toBe(false);
-
-    // 3. Publication explicite par l'administrateur
-    dataStore.updateDocumentLifecycleStatus(doc.id, 'PUBLISHED');
-    const publishedDoc = dataStore.getDocumentById(doc.id);
-
-    expect(publishedDoc?.document_status).toBe('PUBLISHED');
-    expect(publishedDoc?.is_public).toBe(true);
-    expect(publishedDoc?.published_at).toBeDefined();
-
-    // Nettoyage du document de test
-    dataStore.deleteDocument(doc.id);
+  it('attend la confirmation du serveur avant de remplir le cache', async () => {
+    storageMock.query.mockResolvedValueOnce({ data: [], error: null });
+    let resolveSave!: (value: unknown) => void;
+    storageMock.query.mockImplementationOnce(() => new Promise(resolve => { resolveSave = resolve; }));
+    const saving = dataStore.saveCADocument(draft);
+    await vi.waitFor(() => expect(storageMock.insert).toHaveBeenCalledOnce());
+    expect(dataStore.getDocuments()).toHaveLength(0);
+    resolveSave({ data: row, error: null });
+    expect((await saving).status).toBe('TO_VERIFY');
+    expect(dataStore.getDocuments()).toHaveLength(1);
   });
 
-  it('gère le versioning automatique en archivant l\'ancienne version et en requérant un nouvel examen', () => {
-    const testInstId = 'inst-com-test-versioning';
-    
-    // Version 1 publiée
-    const v1 = dataStore.saveCADocument({
-      institution_id: testInstId,
-      institution_name: 'Mairie Test Versioning',
-      fiscal_year: 2025,
-      year: 2025,
-      file_url: 'https://example.com/v1.pdf',
-      file_name: 'v1.pdf',
-      document_status: 'PUBLISHED',
-      is_public: true,
-      version: 1,
-    });
-
-    expect(v1.version).toBe(1);
-
-    // Version 2 déposée pour la même collectivité et la même année avec asNewVersion = true
-    const v2 = dataStore.saveCADocument({
-      institution_id: testInstId,
-      fiscal_year: 2025,
-      file_url: 'https://example.com/v2.pdf',
-      file_name: 'v2.pdf',
-      checksum_sha256: 'fakehash123',
-    }, true);
-
-    expect(v2.version).toBe(2);
-    // La nouvelle version DOIT repasser par l'examen avant publication
-    expect(v2.document_status).toBe('TO_VERIFY');
-    expect(v2.is_public).toBe(false);
-    expect(v2.previous_versions).toBeDefined();
-    expect(v2.previous_versions?.length).toBe(1);
-    expect(v2.previous_versions?.[0].version).toBe(1);
-
-    // Nettoyage
-    dataStore.deleteDocument(v2.id);
+  it('ne conserve aucun faux succès après une erreur serveur', async () => {
+    storageMock.query.mockResolvedValueOnce({ data: [], error: null });
+    storageMock.query.mockResolvedValueOnce({ data: null, error: new Error('RLS denied') });
+    await expect(dataStore.saveCADocument(draft)).rejects.toThrow('RLS denied');
+    expect(dataStore.getDocuments()).toHaveLength(0);
   });
 
+  it('sépare vérification et publication', async () => {
+    storageMock.query.mockResolvedValueOnce({ data: [row], error: null });
+    await dataStore.refreshDocumentsFromSupabase(true);
+    await expect(dataStore.updateDocumentLifecycleStatus(row.id, 'PUBLISHED')).rejects.toThrow('Vérifiez');
+    expect(storageMock.update).not.toHaveBeenCalled();
+    const verified = { ...row, status: 'VERIFIED', verification_status: 'VERIFIED', verified_by: 'reviewer-id' };
+    storageMock.query.mockResolvedValueOnce({ data: verified, error: null });
+    storageMock.query.mockResolvedValueOnce({ data: [verified], error: null });
+    await dataStore.updateDocumentLifecycleStatus(row.id, 'VERIFIED');
+    expect(dataStore.getDocumentById(row.id)?.status).toBe('VERIFIED');
+    const published = { ...verified, status: 'PUBLISHED' };
+    storageMock.query.mockResolvedValueOnce({ data: published, error: null });
+    storageMock.query.mockResolvedValueOnce({ data: [published], error: null });
+    await dataStore.updateDocumentLifecycleStatus(row.id, 'PUBLISHED');
+    expect(dataStore.getDocumentById(row.id)?.status).toBe('PUBLISHED');
+  });
+
+  it('conserve la source précédente et crée une version à vérifier', async () => {
+    const published = { ...row, status: 'PUBLISHED' as const };
+    storageMock.query.mockResolvedValueOnce({ data: [published], error: null });
+    await dataStore.refreshDocumentsFromSupabase(true);
+    storageMock.query.mockResolvedValueOnce({ data: [published], error: null });
+    const replacement = { ...row, id: 'test-ca-v2', version: 2, replaces_document_id: row.id };
+    storageMock.query.mockResolvedValueOnce({ data: replacement, error: null });
+    await dataStore.saveCADocument({ ...draft, storage_path: 'test/ca-v2.pdf', checksum_sha256: 'b'.repeat(64), replacement_reason: 'Scan complet' }, true);
+    expect(storageMock.insert).toHaveBeenCalledWith([expect.objectContaining({ version: 2, replaces_document_id: row.id, status: 'TO_VERIFY', replacement_reason: 'Scan complet' })]);
+    expect(dataStore.getDocumentById(row.id)?.status).toBe('PUBLISHED');
+    expect(dataStore.getDocuments()).toHaveLength(2);
+  });
+
+  it('refuse de modifier le cache après un conflit de mise à jour', async () => {
+    storageMock.query.mockResolvedValueOnce({ data: [row], error: null });
+    await dataStore.refreshDocumentsFromSupabase(true);
+    storageMock.query.mockResolvedValueOnce({ data: null, error: new Error('Concurrent edit') });
+    await expect(dataStore.updateDocument(row.id, { title: 'Changed' })).rejects.toThrow('Concurrent edit');
+    expect(dataStore.getDocumentById(row.id)?.title).toBe(row.title);
+  });
+
+  it('refuse une publication lors du dépôt et un enregistrement hors ligne', async () => {
+    await expect(dataStore.addDocument({ ...row, status: 'PUBLISHED' })).rejects.toThrow('vérifié');
+    storageMock.configured.mockReturnValue(false);
+    await expect(dataStore.saveCADocument(draft)).rejects.toThrow('indisponible');
+    expect(storageMock.insert).not.toHaveBeenCalled();
+  });
 });

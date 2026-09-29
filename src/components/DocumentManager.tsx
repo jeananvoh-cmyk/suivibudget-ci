@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { dataStore } from '../services/dataStore';
 import { supabase } from '../services/supabase';
-import { PublicDocument, DocumentCategory, DocumentFormat } from '../types';
+import { PublicDocument, DocumentCategory, DocumentFormat, OfficialDocumentType } from '../types';
 import { matchesSmartSearch } from '../utils/searchHelpers';
 
 interface DocumentManagerProps {
@@ -25,6 +25,7 @@ interface DocumentManagerProps {
 }
 
 const CATEGORIES: { value: DocumentCategory; label: string }[] = [
+  { value: 'COMPTE_ADMINISTRATIF', label: 'Compte administratif' },
   { value: 'RAPPORT_AUDIT', label: "Rapport d'Audit & Contrôle" },
   { value: 'MARCHE_PUBLIC', label: "Marché Public & Contrat" },
   { value: 'BUDGET_OFFICIEL', label: "Budget & Finances Publiques" },
@@ -34,6 +35,9 @@ const CATEGORIES: { value: DocumentCategory; label: string }[] = [
 ];
 
 export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast }) => {
+  const [documentType, setDocumentType] = useState<OfficialDocumentType>('AUTRE_DOCUMENT_OFFICIEL');
+  const [sourceName, setSourceName] = useState('');
+  const [sourceUrl, setSourceUrl] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   
@@ -94,6 +98,9 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
   }, [documents, selectedCategory, searchQuery]);
 
   const handleOpenAdd = () => {
+    setDocumentType('AUTRE_DOCUMENT_OFFICIEL');
+    setSourceName('');
+    setSourceUrl('');
     setEditingDoc(null);
     setFormData({
       title: '',
@@ -179,6 +186,8 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!sourceName.trim()) { onShowToast('Indiquez la source du document.', 'error'); return; }
+
     if (!formData.title.trim() || !formData.institution_name.trim() || !formData.file_url.trim()) {
       onShowToast('Veuillez renseigner au moins le titre, l\'institution et l\'URL/Fichier.', 'error');
       return;
@@ -189,6 +198,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
       .map(t => t.trim())
       .filter(t => t.length > 0);
 
+    try {
     if (editingDoc) {
       await dataStore.updateDocument(editingDoc.id, {
         title: formData.title.trim(),
@@ -203,10 +213,11 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
         tags: tagList,
         is_official: formData.is_official,
         storage_path: formData.file_url.startsWith('staging/') ? formData.file_url : null,
-        status: formData.is_official ? 'PUBLISHED' : 'TO_VERIFY',
-        verification_status: formData.is_official ? 'VERIFIED' : 'TO_VERIFY',
+        status: 'TO_VERIFY',
+        verification_status: 'TO_VERIFY',
         fiscal_year: formData.year,
-        document_type: formData.category,
+        document_type: documentType,
+        source_name: sourceName.trim(), source_url: sourceUrl.trim() || null,
         checksum_sha256: formData.checksum_sha256 || null,
       });
       onShowToast('Document public mis à jour avec succès.');
@@ -227,13 +238,17 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
         status: 'TO_VERIFY',
         verification_status: 'TO_VERIFY',
         fiscal_year: formData.year,
-        document_type: formData.category,
+        document_type: documentType,
+        source_name: sourceName.trim(), source_url: sourceUrl.trim() || null,
         checksum_sha256: formData.checksum_sha256 || null,
       });
       onShowToast('Document enregistré en attente de vérification.');
     }
 
     setIsAddModalOpen(false);
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Enregistrement impossible.', 'error');
+    }
   };
 
   const handleVerify = async (doc: PublicDocument) => {
@@ -509,6 +524,25 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+              <label className="block font-bold text-slate-700">Type de document
+                <select value={documentType} onChange={e => setDocumentType(e.target.value as OfficialDocumentType)} className="mt-1 w-full rounded-xl border border-slate-300 p-3 focus-visible:outline-brand-blue">
+                  <option value="BUDGET_PRIMITIF">Budget primitif</option>
+                  <option value="BUDGET_MODIFICATIF">Budget modificatif</option>
+                  <option value="COMPTE_ADMINISTRATIF">Compte administratif</option>
+                  <option value="DELIBERATION">Délibération</option>
+                  <option value="PROGRAMME_TRIENNAL">Programme triennal</option>
+                  <option value="MARCHE_PUBLIC">Marché public</option>
+                  <option value="ARRETE">Arrêté</option>
+                  <option value="RAPPORT_AUDIT">Rapport d’audit</option>
+                  <option value="AUTRE_DOCUMENT_OFFICIEL">Autre document officiel</option>
+                </select>
+              </label>
+              <label className="block font-bold text-slate-700">Source du document
+                <input required value={sourceName} onChange={e => setSourceName(e.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 p-3 focus-visible:outline-brand-blue" />
+              </label>
+              <label className="block font-bold text-slate-700">Lien de la source
+                <input type="url" value={sourceUrl} onChange={e => setSourceUrl(e.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 p-3 focus-visible:outline-brand-blue" />
+              </label>
               {/* Title */}
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Titre Officiel du Document *</label>

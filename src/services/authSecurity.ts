@@ -36,11 +36,6 @@ export interface SessionPayload {
   expiresAt: number;
 }
 
-export interface SignedSessionToken {
-  payload: SessionPayload;
-  signature: string;
-}
-
 let inMemorySession: SessionPayload | null = null;
 
 /**
@@ -164,25 +159,22 @@ export class AuthSecurityService {
     };
   }
 
-  public static createSignedSession(user: { email: string; fullName: string; role: 'ADMIN' | 'MODERATOR' | 'DATA_MANAGER' }): SignedSessionToken {
-    const now = Date.now();
-    inMemorySession = { ...user, issuedAt: now, expiresAt: now + 2 * 60 * 60 * 1000 };
-    return { payload: inMemorySession, signature: 'supabase-auth' };
-  }
-
   public static validateCurrentSession(): { isAuthenticated: boolean; user?: SessionPayload } {
     if (!inMemorySession || Date.now() >= inMemorySession.expiresAt) {
       inMemorySession = null;
       return { isAuthenticated: false };
     }
-    return { isAuthenticated: true, user: inMemorySession };
+    return { isAuthenticated: true, user: { ...inMemorySession } };
   }
 
   public static async restoreSupabaseSession(): Promise<{ isAuthenticated: boolean; user?: SessionPayload }> {
+    inMemorySession = null;
     if (!isSupabaseConfigured()) return { isAuthenticated: false };
-    const { data } = await supabase.auth.getSession();
-    const authUser = data.session?.user;
-    if (!authUser) return { isAuthenticated: false };
+    const { data, error } = await supabase.auth.getSession();
+    if (error || !data.session?.expires_at || data.session.expires_at * 1000 <= Date.now()) return { isAuthenticated: false };
+    const { data: verified, error: userError } = await supabase.auth.getUser();
+    const authUser = verified.user;
+    if (userError || !authUser) return { isAuthenticated: false };
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -196,18 +188,21 @@ export class AuthSecurityService {
       return { isAuthenticated: false };
     }
 
-    return {
-      isAuthenticated: true,
-      user: this.createSignedSession({
+    inMemorySession = {
         email: authUser.email || '',
         fullName: profile.full_name || authUser.email || 'Utilisateur',
         role: profile.role as 'ADMIN' | 'MODERATOR' | 'DATA_MANAGER',
-      }).payload,
+        issuedAt: Date.now(),
+        expiresAt: data.session.expires_at * 1000,
     };
+    return { isAuthenticated: true, user: { ...inMemorySession } };
   }
 
-  public static clearSession() {
+  public static async clearSession() {
     inMemorySession = null;
-    if (isSupabaseConfigured()) void supabase.auth.signOut();
+    if (isSupabaseConfigured()) {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    }
   }
 }
