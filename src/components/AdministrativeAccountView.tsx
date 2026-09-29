@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Institution, 
   AdministrativeAccount, 
@@ -40,6 +40,7 @@ import {
   Scale
 } from 'lucide-react';
 import { CompteAdministratifExplainerModal } from './CompteAdministratifExplainerModal';
+import { fetchAdministrativeAccounts } from '../services/administrativeAccountsService';
 
 interface AdministrativeAccountViewProps {
   institution: Institution;
@@ -57,19 +58,30 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
   const [copiedData, setCopiedData] = useState(false);
   const [fieldContributionMsg, setFieldContributionMsg] = useState<string | null>(null);
 
-  // Retrieve accounts for this institution (with resilient matching)
-  const accounts = getAdministrativeAccountsForInstitution(institution.id) || [];
-  
-  // If not found by ID directly, try with clean name
-  let effectiveAccounts = accounts;
-  if (effectiveAccounts.length === 0) {
-    effectiveAccounts = getAdministrativeAccountsForInstitution(institution.name);
-  }
+  const staticAccountsById = getAdministrativeAccountsForInstitution(institution.id) || [];
+  const staticAccounts = staticAccountsById.length
+    ? staticAccountsById
+    : getAdministrativeAccountsForInstitution(institution.name);
+  const [remoteAccounts, setRemoteAccounts] = useState<AdministrativeAccount[] | null>(null);
 
+  useEffect(() => {
+    let active = true;
+    setRemoteAccounts(null);
+    void fetchAdministrativeAccounts(institution.id)
+      .then(accounts => { if (active) setRemoteAccounts(accounts); })
+      .catch(() => { if (active) setRemoteAccounts([]); });
+    return () => { active = false; };
+  }, [institution.id]);
+
+  const effectiveAccounts = remoteAccounts && remoteAccounts.length > 0 ? remoteAccounts : staticAccounts;
   const availableYears = effectiveAccounts.map(a => a.fiscal_year);
-  const [selectedYear, setSelectedYear] = useState<number>(
-    availableYears.length > 0 ? availableYears[0] : 2024
-  );
+  const [selectedYear, setSelectedYear] = useState<number>(staticAccounts[0]?.fiscal_year || 2024);
+
+  useEffect(() => {
+    if (availableYears.length > 0 && !availableYears.includes(selectedYear)) {
+      setSelectedYear(availableYears[0]);
+    }
+  }, [availableYears.join(','), selectedYear]);
 
   const currentCA: AdministrativeAccount | undefined = effectiveAccounts.find(
     a => a.fiscal_year === selectedYear
