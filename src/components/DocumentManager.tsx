@@ -72,10 +72,12 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
   const [documents, setDocuments] = useState<PublicDocument[]>(() => dataStore.getDocuments());
 
   useEffect(() => {
-    return dataStore.subscribe(() => {
-      setDocuments(dataStore.getDocuments());
+    const unsubscribe = dataStore.subscribe(() => setDocuments(dataStore.getDocuments()));
+    void dataStore.refreshDocumentsFromSupabase(true).catch((error) => {
+      onShowToast(`Impossible de charger les documents : ${error.message}`, 'error');
     });
-  }, []);
+    return unsubscribe;
+  }, [onShowToast]);
 
   const filteredDocs = useMemo(() => {
     return documents.filter(doc => {
@@ -162,7 +164,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
     onShowToast(`Fichier "${file.name}" envoyé en zone de vérification.`, 'success');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.title.trim() || !formData.institution_name.trim() || !formData.file_url.trim()) {
@@ -176,7 +178,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
       .filter(t => t.length > 0);
 
     if (editingDoc) {
-      dataStore.updateDocument(editingDoc.id, {
+      await dataStore.updateDocument(editingDoc.id, {
         title: formData.title.trim(),
         category: formData.category,
         institution_name: formData.institution_name.trim(),
@@ -196,7 +198,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
       });
       onShowToast('Document public mis à jour avec succès.');
     } else {
-      dataStore.addDocument({
+      await dataStore.addDocument({
         title: formData.title.trim(),
         category: formData.category,
         institution_name: formData.institution_name.trim(),
@@ -220,10 +222,14 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
     setIsAddModalOpen(false);
   };
 
-  const handleDelete = (id: string) => {
-    dataStore.deleteDocument(id);
-    setDeleteConfirmId(null);
-    onShowToast('Document supprimé de la bibliothèque.');
+  const handleDelete = async (id: string) => {
+    try {
+      await dataStore.deleteDocument(id);
+      setDeleteConfirmId(null);
+      onShowToast('Document supprimé de la bibliothèque.');
+    } catch (error: any) {
+      onShowToast(`Suppression refusée : ${error.message}`, 'error');
+    }
   };
 
   return (
