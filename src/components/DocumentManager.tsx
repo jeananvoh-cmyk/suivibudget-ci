@@ -236,13 +236,55 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
     setIsAddModalOpen(false);
   };
 
+  const handleVerify = async (doc: PublicDocument) => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error('Session Supabase requise');
+      await dataStore.updateDocument(doc.id, {
+        status: 'VERIFIED',
+        verification_status: 'VERIFIED',
+        verified_by: userData.user.id,
+        verified_at: new Date().toISOString(),
+      });
+      onShowToast('Document vérifié. Il peut maintenant être publié.', 'success');
+    } catch (error: any) {
+      onShowToast(`Vérification refusée : ${error.message}`, 'error');
+    }
+  };
+
+  const handlePublish = async (doc: PublicDocument) => {
+    try {
+      if (doc.verification_status !== 'VERIFIED') {
+        onShowToast('Le document doit être vérifié avant publication.', 'error');
+        return;
+      }
+      await dataStore.updateDocument(doc.id, { status: 'PUBLISHED', is_official: true });
+      onShowToast('Document publié dans la bibliothèque citoyenne.', 'success');
+    } catch (error: any) {
+      onShowToast(`Publication refusée : ${error.message}`, 'error');
+    }
+  };
+
+  const handleAdminOpen = async (doc: PublicDocument) => {
+    if (doc.storage_path) {
+      const { data, error } = await supabase.storage.from('public_documents').createSignedUrl(doc.storage_path, 300);
+      if (error || !data?.signedUrl) {
+        onShowToast('Impossible de créer le lien temporaire.', 'error');
+        return;
+      }
+      window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    if (doc.file_url) window.open(doc.file_url, '_blank', 'noopener,noreferrer');
+  };
+
   const handleDelete = async (id: string) => {
     try {
-      await dataStore.deleteDocument(id);
+      await dataStore.updateDocument(id, { status: 'ARCHIVED', is_official: false });
       setDeleteConfirmId(null);
-      onShowToast('Document supprimé de la bibliothèque.');
+      onShowToast('Document archivé. Le fichier et sa traçabilité sont conservés.');
     } catch (error: any) {
-      onShowToast(`Suppression refusée : ${error.message}`, 'error');
+      onShowToast(`Archivage refusé : ${error.message}`, 'error');
     }
   };
 
@@ -318,6 +360,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
                 <th className="py-3.5 px-4">Catégorie</th>
                 <th className="py-3.5 px-4 text-center">Année</th>
                 <th className="py-3.5 px-4 text-center">Format & Taille</th>
+                <th className="py-3.5 px-4 text-center">Statut</th>
                 <th className="py-3.5 px-4 text-center">Téléchargements</th>
                 <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
@@ -325,7 +368,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
             <tbody className="divide-y divide-slate-100">
               {filteredDocs.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={8} className="py-12 text-center text-slate-400">
                     Aucun document ne correspond à vos critères.
                   </td>
                 </tr>
@@ -356,20 +399,41 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
                       </span>
                       <span className="text-slate-400 text-[10px] block mt-0.5">{doc.file_size || '1.5 Mo'}</span>
                     </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="px-2 py-1 rounded-lg text-[10px] font-black bg-slate-100 text-slate-700">
+                        {doc.status || 'PUBLISHED'}
+                      </span>
+                    </td>
                     <td className="py-3 px-4 text-center font-bold text-brand-orange">
                       {doc.downloads_count || 0}
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        <a
-                          href={doc.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={() => handleAdminOpen(doc)}
                           className="p-1.5 rounded-lg text-slate-500 hover:text-brand-blue hover:bg-slate-100"
-                          title="Télécharger / Voir"
+                          title="Consulter"
                         >
                           <ExternalLink className="w-4 h-4" />
-                        </a>
+                        </button>
+                        {doc.verification_status !== 'VERIFIED' && doc.status !== 'ARCHIVED' && (
+                          <button
+                            onClick={() => handleVerify(doc)}
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-emerald-700 hover:bg-emerald-50"
+                            title="Vérifier"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                          </button>
+                        )}
+                        {doc.verification_status === 'VERIFIED' && doc.status !== 'PUBLISHED' && doc.status !== 'ARCHIVED' && (
+                          <button
+                            onClick={() => handlePublish(doc)}
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-blue-50"
+                            title="Publier"
+                          >
+                            <FileCheck className="w-4 h-4" />
+                          </button>
+                        )}
                         <button
                           onClick={() => handleOpenEdit(doc)}
                           className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50"
@@ -380,7 +444,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
                         <button
                           onClick={() => setDeleteConfirmId(doc.id)}
                           className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50"
-                          title="Supprimer"
+                          title="Archiver"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -402,9 +466,9 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
               <AlertCircle className="w-6 h-6" />
             </div>
             <div className="text-center space-y-1">
-              <h3 className="text-base font-bold text-slate-900">Confirmer la suppression</h3>
+              <h3 className="text-base font-bold text-slate-900">Confirmer l’archivage</h3>
               <p className="text-xs text-slate-500">
-                Ce document sera définitivement retiré de la bibliothèque publique citoyenne.
+                Le document sera retiré de la bibliothèque publique, mais son fichier et sa traçabilité seront conservés.
               </p>
             </div>
             <div className="flex items-center gap-2 pt-2">
