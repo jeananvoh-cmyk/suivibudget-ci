@@ -4,7 +4,7 @@
 - **LAST_UPDATED**: 2026-09-29T15:15:00Z
 - **LAST_AGENT**: Antigravity
 - **CURRENT_BRANCH**: `security-ca-final-20260929`
-- **HEAD_SHA**: `94ba761189c469fd6d6e6f5b9fa2070432516e5f`
+- **HEAD_SHA**: `c24c912061e86aa7855f463b2fba8259837a28e3`
 - **PR**: #3 ("Final: security hardening + verified CA foundation")
 - **SUPABASE_PROJECT**: `cdesuvcozcetdtvibgqs` (eu-west-1, PostgreSQL 17.6)
 - **CURRENT_MILESTONE**: P0/P1 Security Hardening, Document Versioning, CA Workflow & UX/UI Responsive Foundation
