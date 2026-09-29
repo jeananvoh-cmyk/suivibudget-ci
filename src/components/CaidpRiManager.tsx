@@ -32,10 +32,20 @@ import {
 
 interface CaidpRiManagerProps {
   onShowToast: (message: string, type?: 'success' | 'error' | 'info') => void;
-  initialFilter?: 'ALL' | 'WITHOUT_EMAIL' | 'WITH_EMAIL' | 'WITH_PHONE' | 'INCOMPLETE' | 'UNVERIFIED';
+  initialFilter?: CompletionFilter;
 }
 
-type CompletionFilter = 'ALL' | 'INCOMPLETE' | 'WITHOUT_EMAIL' | 'WITHOUT_PHONE' | 'WITHOUT_RI' | 'COMPLETE' | 'UNVERIFIED';
+type CompletionFilter =
+  | 'ALL'
+  | 'INCOMPLETE'
+  | 'WITH_EMAIL'
+  | 'ONLY_EMAIL'
+  | 'WITHOUT_EMAIL'
+  | 'WITH_PHONE'
+  | 'WITHOUT_PHONE'
+  | 'WITHOUT_RI'
+  | 'COMPLETE'
+  | 'UNVERIFIED';
 
 export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, initialFilter = 'ALL' }) => {
   const auth = dataStore.getAuth();
@@ -53,7 +63,13 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
   // Filter & Search states
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<'ALL' | EntityPublicCategory>('ALL');
-  const [completionFilter, setCompletionFilter] = useState<CompletionFilter>(initialFilter as CompletionFilter);
+  const [completionFilter, setCompletionFilter] = useState<CompletionFilter>(initialFilter);
+
+  useEffect(() => {
+    if (initialFilter) {
+      setCompletionFilter(initialFilter);
+    }
+  }, [initialFilter]);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -97,6 +113,16 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
     const withoutEmail = total - withEmail;
     const withPhone = directory.filter(e => e.phone && e.phone !== "Pas de numéro" && e.phone.length > 5).length;
     const withoutPhone = total - withPhone;
+    const onlyEmail = directory.filter(e => {
+      const hasEmail = e.email && e.email !== "Pas d'email" && e.email.includes('@');
+      const hasPhone = e.phone && e.phone !== "Pas de numéro" && e.phone.length > 5;
+      return hasEmail && !hasPhone;
+    }).length;
+    const onlyPhone = directory.filter(e => {
+      const hasEmail = e.email && e.email !== "Pas d'email" && e.email.includes('@');
+      const hasPhone = e.phone && e.phone !== "Pas de numéro" && e.phone.length > 5;
+      return !hasEmail && hasPhone;
+    }).length;
     const designatedRi = directory.filter(e => e.ri_name && e.ri_name !== 'Non désigné' && e.ri_name.trim().length > 0).length;
     const withoutRi = total - designatedRi;
     const verified = directory.filter(e => e.verification_status === 'VERIFIED').length;
@@ -118,6 +144,8 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
       withoutEmail,
       withPhone,
       withoutPhone,
+      onlyEmail,
+      onlyPhone,
       designatedRi,
       withoutRi,
       verified,
@@ -142,7 +170,10 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
       const isVerified = item.verification_status === 'VERIFIED';
 
       if (completionFilter === 'INCOMPLETE' && hasEmail && hasPhone && hasRi) return false;
+      if (completionFilter === 'WITH_EMAIL' && !hasEmail) return false;
+      if (completionFilter === 'ONLY_EMAIL' && (!hasEmail || hasPhone)) return false;
       if (completionFilter === 'WITHOUT_EMAIL' && hasEmail) return false;
+      if (completionFilter === 'WITH_PHONE' && !hasPhone) return false;
       if (completionFilter === 'WITHOUT_PHONE' && hasPhone) return false;
       if (completionFilter === 'WITHOUT_RI' && hasRi) return false;
       if (completionFilter === 'COMPLETE' && (!hasEmail || !hasPhone || !hasRi)) return false;
@@ -593,18 +624,36 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                 <Mail className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Emails Directs</span>
               </span>
-              <span className="font-black text-slate-900">
+              <button
+                onClick={() => { setCompletionFilter('WITH_EMAIL'); setCurrentPage(1); }}
+                className="font-black text-slate-900 hover:text-emerald-700 hover:underline cursor-pointer"
+                title="Cliquer pour afficher les 29 organismes disposant d'un email"
+              >
                 {stats.withEmail} / {stats.total} ({stats.emailCoveragePercent}%)
-              </span>
+              </button>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+            <div 
+              className="w-full bg-slate-100 rounded-full h-2 overflow-hidden cursor-pointer"
+              onClick={() => { setCompletionFilter('WITH_EMAIL'); setCurrentPage(1); }}
+              title="Cliquer pour afficher les 29 organismes disposant d'un email"
+            >
               <div
-                className="bg-emerald-500 h-2 rounded-full transition-all duration-500"
+                className="bg-emerald-500 h-2 rounded-full transition-all duration-500 hover:bg-emerald-600"
                 style={{ width: `${stats.emailCoveragePercent}%` }}
               />
             </div>
-            <div className="text-[10px] text-slate-500 flex justify-between">
-              <span>{stats.withoutEmail} sans email</span>
+            <div className="text-[10px] text-slate-500 flex justify-between items-center">
+              <div className="flex items-center gap-1.5">
+                <span>{stats.withoutEmail} sans email</span>
+                <span className="text-slate-300">•</span>
+                <button
+                  onClick={() => { setCompletionFilter('ONLY_EMAIL'); setCurrentPage(1); }}
+                  className="text-indigo-600 font-bold hover:underline cursor-pointer"
+                  title="Afficher les 11 organismes avec email mais sans numéro de téléphone"
+                >
+                  {stats.onlyEmail} email seul
+                </button>
+              </div>
               <button
                 onClick={() => { setCompletionFilter('WITHOUT_EMAIL'); setCurrentPage(1); }}
                 className="text-brand-blue font-bold hover:underline cursor-pointer"
@@ -621,13 +670,21 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                 <Phone className="w-3.5 h-3.5 text-brand-blue" />
                 <span>Téléphones</span>
               </span>
-              <span className="font-black text-slate-900">
+              <button
+                onClick={() => { setCompletionFilter('WITH_PHONE'); setCurrentPage(1); }}
+                className="font-black text-slate-900 hover:text-brand-blue hover:underline cursor-pointer"
+                title="Cliquer pour afficher les 20 organismes disposant d'un numéro de téléphone"
+              >
                 {stats.withPhone} / {stats.total} ({stats.phoneCoveragePercent}%)
-              </span>
+              </button>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+            <div 
+              className="w-full bg-slate-100 rounded-full h-2 overflow-hidden cursor-pointer"
+              onClick={() => { setCompletionFilter('WITH_PHONE'); setCurrentPage(1); }}
+              title="Cliquer pour afficher les 20 organismes disposant d'un numéro de téléphone"
+            >
               <div
-                className="bg-brand-blue h-2 rounded-full transition-all duration-500"
+                className="bg-brand-blue h-2 rounded-full transition-all duration-500 hover:bg-brand-blue/90"
                 style={{ width: `${stats.phoneCoveragePercent}%` }}
               />
             </div>
@@ -719,6 +776,30 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
               <span>À compléter ({stats.incomplete})</span>
             </button>
             <button
+              onClick={() => { setCompletionFilter('WITH_EMAIL'); setCurrentPage(1); }}
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                completionFilter === 'WITH_EMAIL'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200'
+              }`}
+              title="Afficher tous les organismes avec un email officiel opérationnel"
+            >
+              <Mail className="w-3.5 h-3.5" />
+              <span>Avec email ({stats.withEmail})</span>
+            </button>
+            <button
+              onClick={() => { setCompletionFilter('ONLY_EMAIL'); setCurrentPage(1); }}
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                completionFilter === 'ONLY_EMAIL'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-indigo-50 text-indigo-800 hover:bg-indigo-100 border border-indigo-200'
+              }`}
+              title="Afficher les organismes disposant uniquement d'un email (sans téléphone direct)"
+            >
+              <Mail className="w-3.5 h-3.5" />
+              <span>Uniquement email ({stats.onlyEmail})</span>
+            </button>
+            <button
               onClick={() => { setCompletionFilter('WITHOUT_EMAIL'); setCurrentPage(1); }}
               className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
                 completionFilter === 'WITHOUT_EMAIL'
@@ -744,7 +825,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
               onClick={() => { setCompletionFilter('COMPLETE'); setCurrentPage(1); }}
               className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
                 completionFilter === 'COMPLETE'
-                  ? 'bg-emerald-600 text-white shadow-xs'
+                  ? 'bg-emerald-800 text-white shadow-xs'
                   : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
               }`}
             >

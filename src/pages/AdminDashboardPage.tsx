@@ -123,12 +123,21 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const [caidpInitialFilter, setCaidpInitialFilter] = useState<'ALL' | 'INCOMPLETE' | 'WITH_EMAIL' | 'ONLY_EMAIL' | 'WITHOUT_EMAIL' | 'WITH_PHONE' | 'WITHOUT_PHONE' | 'COMPLETE' | 'UNVERIFIED'>('ALL');
+
   const handleActionHeaderNavigate = (target: string, filter?: Record<string, string> | string) => {
     if (target === 'moderation') {
       setAdminTab('moderation');
     } else if (target === 'documents_manager') {
       setAdminTab('documents_manager');
     } else if (target === 'caidp_manager') {
+      if (filter) {
+        if (typeof filter === 'string') {
+          setCaidpInitialFilter(filter as any);
+        } else if (typeof filter === 'object' && filter.filter) {
+          setCaidpInitialFilter(filter.filter as any);
+        }
+      }
       setAdminTab('caidp_manager');
     } else if (target === 'caidp_analytics') {
       setAdminTab('caidp_analytics');
@@ -1414,7 +1423,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       {/* TAB 0: CAIDP RI & PUBLIC ENTITIES DIRECTORY MANAGER */}
       {/* ========================================================================= */}
       {adminTab === 'caidp_manager' && (
-        <CaidpRiManager onShowToast={showToast} />
+        <CaidpRiManager onShowToast={showToast} initialFilter={caidpInitialFilter} />
       )}
 
       {/* ========================================================================= */}
