@@ -216,6 +216,18 @@ export interface PublicDocument {
   downloads_count: number;
   is_official: boolean;
   tags?: string[];
+  institution_id?: string | null;
+  fiscal_year?: number | null;
+  document_type?: string | null;
+  storage_path?: string | null;
+  source_name?: string | null;
+  source_url?: string | null;
+  status?: 'UPLOADED' | 'TO_VERIFY' | 'VERIFIED' | 'PUBLISHED' | 'ARCHIVED';
+  verification_status?: 'TO_VERIFY' | 'VERIFIED' | 'REJECTED' | 'SOURCE_CONFLICT';
+  verified_by?: string | null;
+  verified_at?: string | null;
+  checksum_sha256?: string | null;
+  version?: number;
 }
 
 export type ActiveTab = 'home' | 'institutions' | 'projects' | 'observatory' | 'documents' | 'admin';
