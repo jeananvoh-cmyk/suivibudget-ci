@@ -16,6 +16,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { dataStore } from '../services/dataStore';
+import { supabase } from '../services/supabase';
 import { PublicDocument, DocumentCategory, DocumentFormat } from '../types';
 import { matchesSmartSearch } from '../utils/searchHelpers';
 
@@ -54,6 +55,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
     file_format: DocumentFormat;
     tags: string;
     is_official: boolean;
+    checksum_sha256: string;
   }>({
     title: '',
     category: 'RAPPORT_AUDIT',
@@ -65,15 +67,18 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
     file_size: '2.5 Mo',
     file_format: 'PDF',
     tags: '',
-    is_official: true,
+    is_official: false,
+    checksum_sha256: '',
   });
 
   const [documents, setDocuments] = useState<PublicDocument[]>(() => dataStore.getDocuments());
 
   useEffect(() => {
-    return dataStore.subscribe(() => {
-      setDocuments(dataStore.getDocuments());
+    const unsubscribe = dataStore.subscribe(() => setDocuments(dataStore.getDocuments()));
+    void dataStore.refreshDocumentsFromSupabase(true).catch((error) => {
+      onShowToast(`Impossible de charger les documents : ${error.message}`, 'error');
     });
+    return unsubscribe;
   }, []);
 
   const filteredDocs = useMemo(() => {
@@ -101,7 +106,8 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
       file_size: '2.5 Mo',
       file_format: 'PDF',
       tags: '',
-      is_official: true,
+      is_official: false,
+      checksum_sha256: '',
     });
     setIsAddModalOpen(true);
   };
@@ -120,42 +126,57 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
       file_format: doc.file_format,
       tags: (doc.tags || []).join(', '),
       is_official: doc.is_official,
+      checksum_sha256: doc.checksum_sha256 || '',
     });
     setIsAddModalOpen(true);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Determine format
-    const name = file.name;
+    const lower = file.name.toLowerCase();
     let format: DocumentFormat = 'PDF';
-    if (name.endsWith('.xlsx') || name.endsWith('.xls')) format = 'EXCEL';
-    else if (name.endsWith('.docx') || name.endsWith('.doc')) format = 'WORD';
-    else if (name.endsWith('.csv')) format = 'CSV';
+    if (lower.endsWith('.xlsx') || lower.endsWith('.xls')) format = 'EXCEL';
+    else if (lower.endsWith('.docx') || lower.endsWith('.doc')) format = 'WORD';
+    else if (lower.endsWith('.csv')) format = 'CSV';
 
-    // File size in Mo / Ko
     const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
-    const sizeStr = parseFloat(sizeMb) >= 1 ? `${sizeMb} Mo` : `${Math.round(file.size / 1024)} Ko`;
+    const sizeStr = Number(sizeMb) >= 1 ? `${sizeMb} Mo` : `${Math.round(file.size / 1024)} Ko`;
+    const hashBuffer = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
+    const checksum = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    const { data: duplicate } = await supabase.from('public_documents').select('id,title').eq('checksum_sha256', checksum).maybeSingle();
+    if (duplicate) {
+      onShowToast(`Doublon détecté : ce fichier existe déjà sous « ${duplicate.title} ».`, 'error');
+      return;
+    }
+    const safeName = file.name.normalize('NFKD').replace(/[^a-zA-Z0-9._-]+/g, '-');
+    const path = `staging/${formData.year}/${crypto.randomUUID()}-${safeName}`;
 
-    const reader = new FileReader();
-    reader.onload = (loadEvt) => {
-      const base64Data = loadEvt.target?.result as string;
-      setFormData(prev => ({
-        ...prev,
-        file_url: base64Data,
-        file_name: name,
-        file_size: sizeStr,
-        file_format: format,
-        title: prev.title || name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' '),
-      }));
-      onShowToast(`Fichier "${name}" prêt pour enregistrement.`);
-    };
-    reader.readAsDataURL(file);
+    const { error } = await supabase.storage.from('public_documents').upload(path, file, {
+      upsert: false,
+      contentType: file.type || undefined,
+      cacheControl: '3600',
+    });
+    if (error) {
+      onShowToast(`Échec de l’envoi sécurisé : ${error.message}`, 'error');
+      return;
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      file_url: path,
+      file_name: file.name,
+      file_size: sizeStr,
+      file_format: format,
+      title: prev.title || file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' '),
+      is_official: false,
+      checksum_sha256: checksum,
+    }));
+    onShowToast(`Fichier "${file.name}" envoyé en zone de vérification.`, 'success');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.title.trim() || !formData.institution_name.trim() || !formData.file_url.trim()) {
@@ -169,7 +190,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
       .filter(t => t.length > 0);
 
     if (editingDoc) {
-      dataStore.updateDocument(editingDoc.id, {
+      await dataStore.updateDocument(editingDoc.id, {
         title: formData.title.trim(),
         category: formData.category,
         institution_name: formData.institution_name.trim(),
@@ -181,10 +202,16 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
         file_format: formData.file_format,
         tags: tagList,
         is_official: formData.is_official,
+        storage_path: formData.file_url.startsWith('staging/') ? formData.file_url : null,
+        status: formData.is_official ? 'PUBLISHED' : 'TO_VERIFY',
+        verification_status: formData.is_official ? 'VERIFIED' : 'TO_VERIFY',
+        fiscal_year: formData.year,
+        document_type: formData.category,
+        checksum_sha256: formData.checksum_sha256 || null,
       });
       onShowToast('Document public mis à jour avec succès.');
     } else {
-      dataStore.addDocument({
+      await dataStore.addDocument({
         title: formData.title.trim(),
         category: formData.category,
         institution_name: formData.institution_name.trim(),
@@ -195,18 +222,70 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
         file_size: formData.file_size.trim(),
         file_format: formData.file_format,
         tags: tagList,
-        is_official: formData.is_official,
+        is_official: false,
+        storage_path: formData.file_url.startsWith('staging/') ? formData.file_url : null,
+        status: 'TO_VERIFY',
+        verification_status: 'TO_VERIFY',
+        fiscal_year: formData.year,
+        document_type: formData.category,
+        checksum_sha256: formData.checksum_sha256 || null,
       });
-      onShowToast('Nouveau document public ajouté à la bibliothèque.');
+      onShowToast('Document enregistré en attente de vérification.');
     }
 
     setIsAddModalOpen(false);
   };
 
-  const handleDelete = (id: string) => {
-    dataStore.deleteDocument(id);
-    setDeleteConfirmId(null);
-    onShowToast('Document supprimé de la bibliothèque.');
+  const handleVerify = async (doc: PublicDocument) => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error('Session Supabase requise');
+      await dataStore.updateDocument(doc.id, {
+        status: 'VERIFIED',
+        verification_status: 'VERIFIED',
+        verified_by: userData.user.id,
+        verified_at: new Date().toISOString(),
+      });
+      onShowToast('Document vérifié. Il peut maintenant être publié.', 'success');
+    } catch (error: any) {
+      onShowToast(`Vérification refusée : ${error.message}`, 'error');
+    }
+  };
+
+  const handlePublish = async (doc: PublicDocument) => {
+    try {
+      if (doc.verification_status !== 'VERIFIED') {
+        onShowToast('Le document doit être vérifié avant publication.', 'error');
+        return;
+      }
+      await dataStore.updateDocument(doc.id, { status: 'PUBLISHED', is_official: true });
+      onShowToast('Document publié dans la bibliothèque citoyenne.', 'success');
+    } catch (error: any) {
+      onShowToast(`Publication refusée : ${error.message}`, 'error');
+    }
+  };
+
+  const handleAdminOpen = async (doc: PublicDocument) => {
+    if (doc.storage_path) {
+      const { data, error } = await supabase.storage.from('public_documents').createSignedUrl(doc.storage_path, 300);
+      if (error || !data?.signedUrl) {
+        onShowToast('Impossible de créer le lien temporaire.', 'error');
+        return;
+      }
+      window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    if (doc.file_url) window.open(doc.file_url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await dataStore.updateDocument(id, { status: 'ARCHIVED', is_official: false });
+      setDeleteConfirmId(null);
+      onShowToast('Document archivé. Le fichier et sa traçabilité sont conservés.');
+    } catch (error: any) {
+      onShowToast(`Archivage refusé : ${error.message}`, 'error');
+    }
   };
 
   return (
@@ -281,6 +360,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
                 <th className="py-3.5 px-4">Catégorie</th>
                 <th className="py-3.5 px-4 text-center">Année</th>
                 <th className="py-3.5 px-4 text-center">Format & Taille</th>
+                <th className="py-3.5 px-4 text-center">Statut</th>
                 <th className="py-3.5 px-4 text-center">Téléchargements</th>
                 <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
@@ -288,7 +368,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
             <tbody className="divide-y divide-slate-100">
               {filteredDocs.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={8} className="py-12 text-center text-slate-400">
                     Aucun document ne correspond à vos critères.
                   </td>
                 </tr>
@@ -319,20 +399,41 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
                       </span>
                       <span className="text-slate-400 text-[10px] block mt-0.5">{doc.file_size || '1.5 Mo'}</span>
                     </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="px-2 py-1 rounded-lg text-[10px] font-black bg-slate-100 text-slate-700">
+                        {doc.status || 'PUBLISHED'}
+                      </span>
+                    </td>
                     <td className="py-3 px-4 text-center font-bold text-brand-orange">
                       {doc.downloads_count || 0}
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        <a
-                          href={doc.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={() => handleAdminOpen(doc)}
                           className="p-1.5 rounded-lg text-slate-500 hover:text-brand-blue hover:bg-slate-100"
-                          title="Télécharger / Voir"
+                          title="Consulter"
                         >
                           <ExternalLink className="w-4 h-4" />
-                        </a>
+                        </button>
+                        {doc.verification_status !== 'VERIFIED' && doc.status !== 'ARCHIVED' && (
+                          <button
+                            onClick={() => handleVerify(doc)}
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-emerald-700 hover:bg-emerald-50"
+                            title="Vérifier"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                          </button>
+                        )}
+                        {doc.verification_status === 'VERIFIED' && doc.status !== 'PUBLISHED' && doc.status !== 'ARCHIVED' && (
+                          <button
+                            onClick={() => handlePublish(doc)}
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-blue-50"
+                            title="Publier"
+                          >
+                            <FileCheck className="w-4 h-4" />
+                          </button>
+                        )}
                         <button
                           onClick={() => handleOpenEdit(doc)}
                           className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50"
@@ -343,7 +444,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
                         <button
                           onClick={() => setDeleteConfirmId(doc.id)}
                           className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50"
-                          title="Supprimer"
+                          title="Archiver"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -365,9 +466,9 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
               <AlertCircle className="w-6 h-6" />
             </div>
             <div className="text-center space-y-1">
-              <h3 className="text-base font-bold text-slate-900">Confirmer la suppression</h3>
+              <h3 className="text-base font-bold text-slate-900">Confirmer l’archivage</h3>
               <p className="text-xs text-slate-500">
-                Ce document sera définitivement retiré de la bibliothèque publique citoyenne.
+                Le document sera retiré de la bibliothèque publique, mais son fichier et sa traçabilité seront conservés.
               </p>
             </div>
             <div className="flex items-center gap-2 pt-2">
