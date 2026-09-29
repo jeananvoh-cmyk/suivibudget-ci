@@ -41,6 +41,8 @@ export interface SignedSessionToken {
   signature: string;
 }
 
+let inMemorySession: SessionPayload | null = null;
+
 /**
  * Production authentication is exclusively delegated to Supabase Auth.
  * No password hash, fallback password, moderator credential or signing secret
@@ -164,15 +166,48 @@ export class AuthSecurityService {
 
   public static createSignedSession(user: { email: string; fullName: string; role: 'ADMIN' | 'MODERATOR' | 'DATA_MANAGER' }): SignedSessionToken {
     const now = Date.now();
-    return { payload: { ...user, issuedAt: now, expiresAt: now + 2 * 60 * 60 * 1000 }, signature: 'supabase-auth' };
+    inMemorySession = { ...user, issuedAt: now, expiresAt: now + 2 * 60 * 60 * 1000 };
+    return { payload: inMemorySession, signature: 'supabase-auth' };
   }
 
   public static validateCurrentSession(): { isAuthenticated: boolean; user?: SessionPayload } {
-    // Synchronous compatibility shim only. Authorization is enforced by Supabase RLS.
-    return { isAuthenticated: false };
+    if (!inMemorySession || Date.now() >= inMemorySession.expiresAt) {
+      inMemorySession = null;
+      return { isAuthenticated: false };
+    }
+    return { isAuthenticated: true, user: inMemorySession };
+  }
+
+  public static async restoreSupabaseSession(): Promise<{ isAuthenticated: boolean; user?: SessionPayload }> {
+    if (!isSupabaseConfigured()) return { isAuthenticated: false };
+    const { data } = await supabase.auth.getSession();
+    const authUser = data.session?.user;
+    if (!authUser) return { isAuthenticated: false };
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name, role, is_active')
+      .eq('id', authUser.id)
+      .single();
+
+    const allowed = ['ADMIN', 'MODERATOR', 'DATA_MANAGER'];
+    if (!profile?.is_active || !allowed.includes(String(profile.role))) {
+      await supabase.auth.signOut();
+      return { isAuthenticated: false };
+    }
+
+    return {
+      isAuthenticated: true,
+      user: this.createSignedSession({
+        email: authUser.email || '',
+        fullName: profile.full_name || authUser.email || 'Utilisateur',
+        role: profile.role as 'ADMIN' | 'MODERATOR' | 'DATA_MANAGER',
+      }).payload,
+    };
   }
 
   public static clearSession() {
+    inMemorySession = null;
     if (isSupabaseConfigured()) void supabase.auth.signOut();
   }
 }
