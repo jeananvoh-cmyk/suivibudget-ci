@@ -7,12 +7,7 @@ import {
   UserRole,
   NewsArticle,
   SiteSettings,
-  PublicDocument,
-  CollectiviteCaStatus,
-  CollectivitesCaMatrixSummary,
-  DocumentLifecycleStatus,
-  OfficialDocumentSource,
-  OfficialDocumentType
+  PublicDocument
 } from '../types';
 import { RAW_BUDGET_PROJECTS } from '../data/budgetData';
 import { INSTITUTIONS_DATA } from '../data/institutionsData';
@@ -506,6 +501,18 @@ class DataStore {
 
   constructor() {
     this.init();
+    void AuthSecurityService.restoreSupabaseSession().then((session) => {
+      if (session.isAuthenticated && session.user) {
+        this.authState = {
+          isAuthenticated: true,
+          email: session.user.email,
+          fullName: session.user.fullName,
+          role: session.user.role as UserRole,
+          expiresAt: session.user.expiresAt,
+        };
+        this.notify();
+      }
+    }).catch(() => {});
   }
 
   private init() {
@@ -1091,8 +1098,8 @@ class DataStore {
   // --- STATS CALCULATION ---
   public getImpactStats(): ImpactStats {
     const totalCommunes = 201;
-    const totalRegions = 33;
-    const totalCollectivites = 234;
+    const totalRegions = 31;
+    const totalCollectivites = 232;
     const totalBudgetLines = this.projects.length > 0 ? this.projects.length : 4354;
     const totalInvestmentsFcfa = this.projects.reduce((sum, p) => sum + p.budget_amount_fcfa, 0);
     const verifiedProofs = this.proofs.filter(p => p.verification_status === 'APPROVED').length;
@@ -1547,377 +1554,75 @@ class DataStore {
     return this.documents.find(d => d.id === id);
   }
 
-  public addDocument(docData: Omit<PublicDocument, 'id' | 'downloads_count' | 'published_at'> & { published_at?: string }): PublicDocument {
-    const newDoc: PublicDocument = {
-      ...docData,
-      id: `doc-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
-      downloads_count: 0,
-      published_at: docData.published_at || new Date().toISOString().split('T')[0],
-      is_official: docData.is_official ?? true,
-    };
-    this.documents.unshift(newDoc);
+  public async refreshDocumentsFromSupabase(includeUnpublished = false): Promise<PublicDocument[]> {
+    if (!isSupabaseConfigured()) return this.getDocuments();
+    let query = supabase.from('public_documents').select('*').order('published_at', { ascending: false });
+    if (!includeUnpublished) query = query.eq('status', 'PUBLISHED');
+    const { data, error } = await query;
+    if (error) throw error;
+    this.documents = (data || []) as PublicDocument[];
     this.saveDocuments();
     this.notify();
-
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').insert([{
-          id: newDoc.id,
-          title: newDoc.title,
-          category: newDoc.category,
-          institution_name: newDoc.institution_name,
-          year: newDoc.year,
-          description: newDoc.description,
-          file_url: newDoc.file_url,
-          file_name: newDoc.file_name,
-          file_size: newDoc.file_size || '1.0 Mo',
-          file_format: newDoc.file_format,
-          published_at: newDoc.published_at,
-          downloads_count: newDoc.downloads_count,
-          is_official: newDoc.is_official,
-          tags: newDoc.tags || []
-        }]),
-        'Adding public document'
-      );
-    }
-
-    return newDoc;
+    return this.getDocuments();
   }
 
-  public updateDocument(id: string, updates: Partial<PublicDocument>): boolean {
-    const idx = this.documents.findIndex(d => d.id === id);
-    if (idx === -1) return false;
-    this.documents[idx] = { ...this.documents[idx], ...updates };
-    this.saveDocuments();
-    this.notify();
+  public async addDocument(docData: Omit<PublicDocument, 'id' | 'downloads_count' | 'published_at'> & { published_at?: string }): Promise<PublicDocument> {
+    const newDoc: PublicDocument = {
+      ...docData,
+      id: `doc-${crypto.randomUUID()}`,
+      downloads_count: 0,
+      published_at: docData.published_at || new Date().toISOString(),
+      is_official: docData.is_official ?? false,
+      status: docData.status || 'TO_VERIFY',
+      verification_status: docData.verification_status || 'TO_VERIFY',
+      version: docData.version || 1,
+    };
 
     if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').update(updates).eq('id', id),
-        'Updating public document'
-      );
+      const { data, error } = await supabase.from('public_documents').insert([newDoc]).select('*').single();
+      if (error) throw error;
+      this.documents.unshift(data as PublicDocument);
+    } else {
+      this.documents.unshift(newDoc);
     }
+    this.saveDocuments();
+    this.notify();
+    return this.documents[0];
+  }
+
+  public async updateDocument(id: string, updates: Partial<PublicDocument>): Promise<boolean> {
+    if (isSupabaseConfigured()) {
+      const { data, error } = await supabase.from('public_documents').update(updates).eq('id', id).select('*').single();
+      if (error) throw error;
+      const idx = this.documents.findIndex(d => d.id === id);
+      if (idx >= 0) this.documents[idx] = data as PublicDocument;
+      else this.documents.unshift(data as PublicDocument);
+    } else {
+      const idx = this.documents.findIndex(d => d.id === id);
+      if (idx === -1) return false;
+      this.documents[idx] = { ...this.documents[idx], ...updates };
+    }
+    this.saveDocuments();
+    this.notify();
     return true;
   }
 
-  public deleteDocument(id: string): boolean {
-    const idx = this.documents.findIndex(d => d.id === id);
-    if (idx === -1) return false;
+  public async deleteDocument(id: string): Promise<boolean> {
+    if (isSupabaseConfigured()) {
+      const { error } = await supabase.from('public_documents').delete().eq('id', id);
+      if (error) throw error;
+    }
     this.documents = this.documents.filter(d => d.id !== id);
     this.saveDocuments();
     this.notify();
-
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').delete().eq('id', id),
-        'Deleting public document'
-      );
-    }
     return true;
   }
 
   public incrementDocumentDownloads(id: string): void {
     const doc = this.documents.find(d => d.id === id);
-    if (doc) {
-      doc.downloads_count = (doc.downloads_count || 0) + 1;
-
-      // 1. Persistent dedicated lightweight counter (<1KB map, completely immune to localStorage quota)
-      try {
-        const storedDownloads = localStorage.getItem(STORAGE_KEYS.DOCUMENT_DOWNLOADS);
-        const countsMap: Record<string, number> = storedDownloads ? JSON.parse(storedDownloads) : {};
-        countsMap[id] = doc.downloads_count;
-        localStorage.setItem(STORAGE_KEYS.DOCUMENT_DOWNLOADS, JSON.stringify(countsMap));
-      } catch (err) {
-        console.warn("Could not save download count to lightweight key", err);
-      }
-
-      // 2. Full documents array save
-      this.saveDocuments();
-      this.notify();
-
-      if (isSupabaseConfigured()) {
-        safeSupabaseExec(
-          supabase.from('public_documents').update({ downloads_count: doc.downloads_count }).eq('id', id),
-          'Incrementing document downloads'
-        );
-      }
-    }
-  }
-
-  // ==========================================
-  // COMPTES ADMINISTRATIFS (CA) & MATRICE 232
-  // ==========================================
-
-  public getCollectivitesCaMatrix(fiscalYear: number = 2025): { summary: CollectivitesCaMatrixSummary; matrix: CollectiviteCaStatus[] } {
-    // 201 communes (type === 'MAIRIE') + 31 conseils régionaux (type === 'REGION')
-    const targetInstitutions = this.institutions.filter(
-      inst => inst.type === 'MAIRIE' || (inst.type === 'REGION' && !inst.id.startsWith('dist-'))
-    );
-
-    // Group relevant CA documents by institution_id for this fiscalYear
-    const caDocs = this.documents.filter(d => 
-      (d.document_type === 'COMPTE_ADMINISTRATIF' || d.category === 'COMPTE_ADMINISTRATIF') &&
-      ((d.fiscal_year && d.fiscal_year === fiscalYear) || (d.year && d.year === fiscalYear))
-    );
-
-    const docMap = new Map<string, PublicDocument>();
-    const docNameMap = new Map<string, PublicDocument>();
-    for (const doc of caDocs) {
-      if (doc.institution_id) {
-        const existing = docMap.get(doc.institution_id);
-        if (!existing || (doc.version || 1) >= (existing.version || 1)) {
-          docMap.set(doc.institution_id, doc);
-        }
-      }
-      if (doc.institution_name) {
-        docNameMap.set(doc.institution_name.toLowerCase().trim(), doc);
-      }
-    }
-
-    let communesCount = 0;
-    let regionsCount = 0;
-    let communesReceived = 0;
-    let communesPublished = 0;
-    let regionsReceived = 0;
-    let regionsPublished = 0;
-
-    let toVerifyCount = 0;
-    let verifiedCount = 0;
-    let publishedCount = 0;
-    let missingCount = 0;
-
-    const matrix: CollectiviteCaStatus[] = targetInstitutions.map(inst => {
-      const isCommune = inst.type === 'MAIRIE';
-      if (isCommune) communesCount++;
-      else regionsCount++;
-
-      const doc = docMap.get(inst.id) || docNameMap.get(inst.name.toLowerCase().trim());
-      
-      let status: 'PUBLISHED' | 'VERIFIED' | 'TO_VERIFY' | 'MISSING' | 'ARCHIVED' = 'MISSING';
-      let versionsCount = 0;
-
-      if (doc) {
-        versionsCount = (doc.previous_versions ? doc.previous_versions.length : 0) + 1;
-        if (doc.document_status === 'PUBLISHED' || doc.is_public) {
-          status = 'PUBLISHED';
-          publishedCount++;
-          if (isCommune) communesPublished++;
-          else regionsPublished++;
-        } else if (doc.document_status === 'VERIFIED') {
-          status = 'VERIFIED';
-          verifiedCount++;
-        } else if (doc.document_status === 'ARCHIVED') {
-          status = 'ARCHIVED';
-        } else {
-          status = 'TO_VERIFY';
-          toVerifyCount++;
-        }
-
-        if (isCommune) communesReceived++;
-        else regionsReceived++;
-      } else {
-        missingCount++;
-      }
-
-      return {
-        institution_id: inst.id,
-        institution_name: inst.name,
-        institution_type: isCommune ? 'MAIRIE' : 'REGION',
-        region_name: inst.region || '',
-        district_name: inst.district,
-        fiscal_year: fiscalYear,
-        status,
-        document: doc,
-        versions_count: versionsCount,
-        last_updated: doc?.updated_at || doc?.published_at || undefined,
-      };
-    });
-
-    const totalExpected = targetInstitutions.length; // 232 (201 communes + 31 conseils régionaux)
-    const receivedCount = toVerifyCount + verifiedCount + publishedCount;
-    const globalCoveragePct = totalExpected > 0 ? Math.round((publishedCount / totalExpected) * 100) : 0;
-
-    const summary: CollectivitesCaMatrixSummary = {
-      fiscal_year: fiscalYear,
-      totalExpected,
-      totalCommunes: communesCount,
-      totalRegions: regionsCount,
-      receivedCount,
-      verifiedCount,
-      publishedCount,
-      toVerifyCount,
-      missingCount,
-      communesReceivedCount: communesReceived,
-      communesPublishedCount: communesPublished,
-      regionsReceivedCount: regionsReceived,
-      regionsPublishedCount: regionsPublished,
-      globalCoveragePct,
-    };
-
-    return { summary, matrix };
-  }
-
-  public getCAForInstitution(institutionId: string, fiscalYear?: number): PublicDocument | undefined {
-    const inst = this.institutions.find(i => i.id === institutionId);
-    return this.documents.find(d => {
-      const matchType = d.document_type === 'COMPTE_ADMINISTRATIF' || d.category === 'COMPTE_ADMINISTRATIF';
-      if (!matchType) return false;
-      const matchInst = d.institution_id === institutionId || (inst && d.institution_name?.toLowerCase().trim() === inst.name.toLowerCase().trim());
-      if (!matchInst) return false;
-      if (fiscalYear !== undefined) {
-        return d.fiscal_year === fiscalYear || d.year === fiscalYear;
-      }
-      return true;
-    });
-  }
-
-  public findDocumentByChecksum(checksum: string): PublicDocument | undefined {
-    if (!checksum) return undefined;
-    return this.documents.find(d => d.checksum_sha256 === checksum);
-  }
-
-  public saveCADocument(docData: Partial<PublicDocument>, asNewVersion: boolean = false): PublicDocument {
-    const instId = docData.institution_id;
-    const fiscalYear = docData.fiscal_year || docData.year || 2025;
-    
-    // Check if an existing document for this institution + fiscalYear exists
-    const existingIdx = this.documents.findIndex(d => 
-      (d.document_type === 'COMPTE_ADMINISTRATIF' || d.category === 'COMPTE_ADMINISTRATIF') &&
-      ((d.fiscal_year && d.fiscal_year === fiscalYear) || (d.year && d.year === fiscalYear)) &&
-      (d.institution_id === instId || (d.id === docData.id))
-    );
-
-    let finalDoc: PublicDocument;
-
-    if (existingIdx !== -1 && (asNewVersion || (docData.version && docData.version > (this.documents[existingIdx].version || 1)))) {
-      const oldDoc = this.documents[existingIdx];
-      const newVersion = (oldDoc.version || 1) + 1;
-      
-      const archivedVersion = {
-        version: oldDoc.version || 1,
-        file_url: oldDoc.file_url,
-        file_name: oldDoc.file_name,
-        checksum_sha256: oldDoc.checksum_sha256,
-        archived_at: new Date().toISOString(),
-        archived_by: this.authState.fullName || 'Admin',
-      };
-
-      finalDoc = {
-        ...oldDoc,
-        ...docData,
-        id: docData.id && docData.id !== oldDoc.id ? docData.id : oldDoc.id,
-        version: newVersion,
-        document_type: 'COMPTE_ADMINISTRATIF',
-        category: 'COMPTE_ADMINISTRATIF',
-        document_status: 'TO_VERIFY',
-        verification_status: 'TO_VERIFY',
-        is_public: false, // New version must be verified by staff before publication
-        updated_at: new Date().toISOString(),
-        previous_versions: [...(oldDoc.previous_versions || []), archivedVersion],
-      };
-
-      this.documents[existingIdx] = finalDoc;
-    } else if (existingIdx !== -1 && !asNewVersion) {
-      finalDoc = {
-        ...this.documents[existingIdx],
-        ...docData,
-        updated_at: new Date().toISOString(),
-      };
-      this.documents[existingIdx] = finalDoc;
-    } else {
-      const newId = docData.id || `doc-ca-${instId || 'collec'}-${fiscalYear}-${Date.now()}`;
-      finalDoc = {
-        id: newId,
-        title: docData.title || `Compte Administratif ${fiscalYear} - ${docData.institution_name || 'Collectivité'}`,
-        category: 'COMPTE_ADMINISTRATIF',
-        document_type: 'COMPTE_ADMINISTRATIF',
-        institution_name: docData.institution_name || 'Collectivité',
-        institution_id: instId,
-        institution_type: docData.institution_type || 'MAIRIE',
-        year: fiscalYear,
-        fiscal_year: fiscalYear,
-        description: docData.description || `Compte administratif officiel de l'exercice budgétaire ${fiscalYear}.`,
-        file_url: docData.file_url || '',
-        file_name: docData.file_name || `compte-administratif-${fiscalYear}.pdf`,
-        file_size: docData.file_size || '0 Mo',
-        file_format: docData.file_format || 'PDF',
-        published_at: docData.published_at || new Date().toISOString().split('T')[0],
-        downloads_count: 0,
-        is_official: true,
-        document_status: docData.document_status || 'TO_VERIFY',
-        verification_status: docData.verification_status || 'TO_VERIFY',
-        is_public: docData.is_public ?? false,
-        version: 1,
-        checksum_sha256: docData.checksum_sha256,
-        source_name: docData.source_name || 'COLLECTIVITE',
-        source_url: docData.source_url,
-        adoption_date: docData.adoption_date,
-        approval_date: docData.approval_date,
-        approval_reference: docData.approval_reference,
-        created_by: this.authState.fullName || 'Admin',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        tags: docData.tags || ['Compte Administratif', 'Exécution Budgétaire', `${fiscalYear}`],
-      };
-      this.documents.unshift(finalDoc);
-    }
-
-    this.saveDocuments();
+    if (!doc) return;
+    doc.downloads_count = (doc.downloads_count || 0) + 1;
     this.notify();
-
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').upsert([finalDoc]),
-        'Sauvegarde Compte Administratif'
-      );
-    }
-
-    return finalDoc;
-  }
-
-  public updateDocumentLifecycleStatus(id: string, status: DocumentLifecycleStatus, reviewerName?: string): boolean {
-    const idx = this.documents.findIndex(d => d.id === id);
-    if (idx === -1) return false;
-    const doc = this.documents[idx];
-    const now = new Date().toISOString();
-
-    const updates: Partial<PublicDocument> = {
-      document_status: status,
-      updated_at: now,
-    };
-
-    if (status === 'VERIFIED') {
-      updates.verification_status = 'VERIFIED';
-      updates.verified_by = reviewerName || this.authState.fullName || 'Administrateur';
-      updates.verified_at = now;
-      // CRITICAL: Validation is decoupled from publication!
-      // is_public remains unchanged or false until explicit publication!
-    } else if (status === 'PUBLISHED') {
-      updates.is_public = true;
-      updates.document_status = 'PUBLISHED';
-      if (!doc.published_at) {
-        updates.published_at = now.split('T')[0];
-      }
-    } else if (status === 'ARCHIVED') {
-      updates.is_public = false;
-      updates.document_status = 'ARCHIVED';
-    } else if (status === 'TO_VERIFY') {
-      updates.is_public = false;
-      updates.verification_status = 'TO_VERIFY';
-    }
-
-    this.documents[idx] = { ...doc, ...updates };
-    this.saveDocuments();
-    this.notify();
-
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').update(updates).eq('id', id),
-        `Mise à jour statut document ${id} -> ${status}`
-      );
-    }
-
-    return true;
   }
 
   // --- SITE SETTINGS ---
@@ -2288,9 +1993,7 @@ class DataStore {
 
   private saveDocuments() {
     try {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(this.documents));
-      }
+      localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(this.documents));
     } catch (e) {
       console.warn("Storage quota exceeded for public documents", e);
     }
