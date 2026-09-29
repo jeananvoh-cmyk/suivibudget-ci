@@ -45,7 +45,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
   const normalize = (s: string) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
   // Dynamic Parity Stats for Regional Councils & Districts
-  const allRegions = institutions.filter(i => i.type === 'REGION' || i.type === 'DISTRICT');
+  const allRegions = institutions.filter(i => i.type === 'REGION');
   const totalRegionsCount = allRegions.length;
   const femaleRegionsCount = allRegions.filter(r => getInstitutionLeaderGender(r) === 'F').length;
   const maleRegionsCount = totalRegionsCount - femaleRegionsCount;
@@ -54,12 +54,12 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
 
   // Unique Districts
   const uniqueDistricts = Array.from(
-    new Set(institutions.filter(i => (i.type === 'REGION' || i.type === 'DISTRICT') && i.district).map(i => i.district))
+    new Set(institutions.filter(i => i.type === 'REGION' && i.district).map(i => i.district))
   ).filter(Boolean).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
   // Filtered Regions
   const filteredRegions = institutions.filter(i => {
-    if (i.type !== 'REGION' && i.type !== 'DISTRICT') return false;
+    if (i.type !== 'REGION') return false;
 
     const matchesGender = selectedGender === 'ALL' || getInstitutionLeaderGender(i) === selectedGender;
 
@@ -88,10 +88,10 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-sans">
-            Conseils Régionaux & Districts Autonomes (33)
+            Conseils Régionaux (31)
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl font-medium">
-            Les 31 conseils régionaux et 2 districts autonomes de Côte d'Ivoire, leurs dotations budgétaires, ministres-gouverneurs, présidents et contacts officiels.
+            Les 31 conseils régionaux de Côte d'Ivoire, leurs budgets, présidents, projets et contacts officiels. Les districts autonomes sont traités séparément.
           </p>
         </div>
       </div>
