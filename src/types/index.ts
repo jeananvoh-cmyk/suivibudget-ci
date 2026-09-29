@@ -191,10 +191,46 @@ export interface SiteSettings {
   announcement_banner_type?: 'info' | 'success' | 'warning';
 }
 
-export type ActiveTab = 'home' | 'institutions' | 'projects' | 'observatory' | 'documents' | 'admin';
+export type DocumentCategory = 
+  | 'RAPPORT_AUDIT' 
+  | 'MARCHE_PUBLIC' 
+  | 'BUDGET_OFFICIEL' 
+  | 'LOI_CAIDP' 
+  | 'ETUDE_TECHNIQUE' 
+  | 'GUIDE_CITOYEN';
 
-// Exportation du domaine Documents Publics & Comptes Administratifs
-export * from './publicDocument';
+export type DocumentFormat = 'PDF' | 'EXCEL' | 'WORD' | 'CSV';
+
+export interface PublicDocument {
+  id: string;
+  title: string;
+  category: DocumentCategory;
+  institution_name: string;
+  year: number;
+  description: string;
+  file_url: string;
+  file_name: string;
+  file_size?: string;
+  file_format: DocumentFormat;
+  published_at: string;
+  downloads_count: number;
+  is_official: boolean;
+  tags?: string[];
+  institution_id?: string | null;
+  fiscal_year?: number | null;
+  document_type?: string | null;
+  storage_path?: string | null;
+  source_name?: string | null;
+  source_url?: string | null;
+  status?: 'UPLOADED' | 'TO_VERIFY' | 'VERIFIED' | 'PUBLISHED' | 'ARCHIVED';
+  verification_status?: 'TO_VERIFY' | 'VERIFIED' | 'REJECTED' | 'SOURCE_CONFLICT';
+  verified_by?: string | null;
+  verified_at?: string | null;
+  checksum_sha256?: string | null;
+  version?: number;
+}
+
+export type ActiveTab = 'home' | 'institutions' | 'projects' | 'observatory' | 'documents' | 'admin';
 
 // Exportation du domaine Référentiel des Budgets Locaux
 export * from './localBudget';
