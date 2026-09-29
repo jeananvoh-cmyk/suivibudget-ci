@@ -25,9 +25,16 @@ GitHub : master distant `529db22012848e34afdf8b286983eebfc917b9f7`. Branche PR a
 
 ## UX/UI Responsive & Accessibilité
 - Intégration de l'Addendum UX/UI dans le Goal permanent et dans `AGENTS.md`.
-- Audit d'inventaire réalisé sur les 7 pages principales et 6 modales secondaires.
-- Objectifs : Mobile-first (360 à 430px), tablette (768 à 1024px), desktop (1280 à 1920px), progressive disclosure (Comprendre en <10s -> Explorer -> Vérifier la source), tableaux responsive (cartes expansibles) et touch targets conformes WCAG AA.
+- Audit d'inventaire et validation Playwright multi-viewports (375px mobile, 1440px desktop) :
+  - `HomePage` : Aligné sur 232 collectivités (201 communes + 31 régions) dans `StatImpactBanner.tsx`, bottom navigation tactile, zéro overflow.
+  - `InstitutionsPage` : Pannes et badges officiels vérifiés.
+  - `ProjectsPage` : Bascule grille / tableau réactif sans rétrécissement illisible, modal de détail projet `ProjectDetailModal` responsive avec boutons tactiles >= 44px.
+  - `ObservatoryPage` : Bilan réel vs voté et CTA dépot de constat.
+  - `DocumentsPage` : État vide informatif, CTA de demande CAIDP, recherche et filtres.
+  - `AdminLoginPage` : Route `/admin/login` rétablie dans `parseRoute` et sécurisée visuellement.
+- Suite de tests : **92/92 tests validés**, `npm run build` propre (0 erreur en 21.92s).
 
 ## Documents de Continuité Multi-Agents
 - `AGENTS.md` : Mis à jour avec le Goal permanent enrichi, les 16 principes non négociables et les garde-fous techniques.
-- `docs/AGENT_HANDOFF.md` : Créé selon le schéma strict pour assurer une transition immédiate et sans friction avec Codex.
+- `docs/AGENT_HANDOFF.md` : Maintenu avec la matrice complète `UX_UI_AUDIT_STATUS` et les prochaines tâches exécutables.
+

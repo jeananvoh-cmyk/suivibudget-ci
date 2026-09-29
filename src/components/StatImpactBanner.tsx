@@ -13,17 +13,17 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        {/* Card 1: Territoires (234 Collectivités) */}
+        {/* Card 1: Territoires (232 Collectivités) */}
         <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between">
           <div className="mb-4">
-            <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Territoires</span>
+            <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Collectivités Territoriales</span>
           </div>
           <div>
             <div className="text-3xl font-black text-slate-900 tracking-tight">
-              234
+              {stats.totalCollectivites || 232}
             </div>
             <p className="text-xs text-slate-600 font-semibold mt-1.5 leading-snug">
-              201 communes + 33 régions et districts
+              201 communes + 31 conseils régionaux
             </p>
           </div>
         </div>

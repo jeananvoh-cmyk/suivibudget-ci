@@ -92,6 +92,13 @@ describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
         projectId: null,
         needsCanonicalRedirect: false,
       });
+
+      expect(parseRoute('/admin/login', '')).toEqual({
+        tab: 'admin',
+        section: 'INDEX',
+        projectId: null,
+        needsCanonicalRedirect: false,
+      });
     });
 
     it('parses legacy ?tab= query params and flags them for canonical rewrite', () => {

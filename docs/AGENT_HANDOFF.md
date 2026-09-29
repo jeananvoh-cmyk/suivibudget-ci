@@ -87,15 +87,15 @@
 - **Test Command**: `npm test -- --run`
   - `src/utils/__tests__/caManagement.test.ts` (16 tests) — PASS
   - `src/utils/__tests__/security.test.ts` (25 tests) — PASS
-  - `src/utils/__tests__/navigation.test.ts` (7 tests) — PASS
+  - `src/utils/__tests__/navigation.test.ts` (8 tests) — PASS
   - `src/utils/__tests__/searchHelpers.test.ts` (2 tests) — PASS
   - `src/utils/__tests__/institutionProjects.test.ts` (8 tests) — PASS
   - `src/utils/__tests__/officialWebDirectory.test.ts` (13 tests) — PASS
   - `src/utils/__tests__/administrativeAccount.test.ts` (14 tests) — PASS
   - `src/utils/__tests__/formatters.test.ts` (6 tests) — PASS
-  - **TOTAL**: **8 test files passed (8), 91 tests passed (91)**.
+  - **TOTAL**: **8 test files passed (8), 92 tests passed (92)**.
 - **Build Command**: `npm run build` (`tsc && vite build`)
-  - Status: **PASSED (0 errors, 1721 modules transformed)** in 28.69s. Clean bundle in `dist/`.
+  - Status: **PASSED (0 errors, 1721 modules transformed)** in 21.92s. Clean bundle in `dist/`.
 
 ---
 
@@ -103,14 +103,14 @@
 
 | Page / Route | Path / Trigger | Status | Tested Viewports | Key Issues & Remediations | Validation Method |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **HomePage** | `/` (tab: `home`) | AUDITED | 375, 768, 1440 | Hero key figures, Quick actions, Budget timeline, Responsive spacing | Code inspection, Build |
-| **InstitutionsPage** | `/collectivites` | AUDITED | 375, 768, 1440 | Tabs (Régions, Mairies, Ministères), Search, 232 collectivity directory cards | Code inspection, Build |
-| **ProjectsPage** | `/projets` | AUDITED | 375, 768, 1440 | Filters by commune/region, project list cards, physical status badges | Code inspection, Build |
-| **ObservatoryPage** | `/observatoire` | AUDITED | 375, 768, 1440 | Citizen proofs feed, moderation status pills, community engagement | Code inspection, Build |
-| **DocumentsPage** | `/documents` | AUDITED | 375, 768, 1440 | Filter by collectivity, year, document type; signed URL download CTA | Code inspection, Build |
-| **AdminLoginPage** | `/admin/login` | AUDITED | 375, 768, 1440 | Centered login card, loading states, secure error alerts, no plaintext storage | Code inspection, Build |
+| **HomePage** | `/` (tab: `home`) | VALIDATED | 375, 768, 1440 | Aligned territory card to 232 collectivités (201 communes + 31 régions), verified bottom nav, CTA touch targets, no horizontal overflow | Playwright inspection, Build |
+| **InstitutionsPage** | `/institutions` | VALIDATED | 375, 768, 1440 | Horizontal scrollable category pills, official source badges, card layouts | Playwright inspection, Build |
+| **ProjectsPage** | `/projets` | VALIDATED | 375, 768, 1440 | Segmented pills, mobile table view prioritizing primary columns, GPS & filter modals | Playwright inspection, Build |
+| **ObservatoryPage** | `/observatoire` | VALIDATED | 375, 768, 1440 | Real vs voted cards, citizen proof deposit CTA, status pills | Playwright inspection, Build |
+| **DocumentsPage** | `/documents` | VALIDATED | 375, 768, 1440 | Empty state layout, CAIDP request template CTA, search and year dropdowns | Playwright inspection, Build |
+| **AdminLoginPage** | `/admin/login` | VALIDATED | 375, 768, 1440 | Fixed /admin/login routing in parseRoute, verified cybersecurity legal banner and responsive inputs | Playwright inspection, Build |
 | **AdminDashboardPage** | `/admin` | AUDITED | 375, 1024, 1440 | Multi-tab admin navigation (CAIDP, CA, Documents, Modération, Settings) | Code inspection, Build |
-| **ProjectDetailModal** | `handleSelectProject` | AUDITED | 375, 768, 1440 | Modal responsive container, financial vs physical execution breakdown | Code inspection, Build |
+| **ProjectDetailModal** | `handleSelectProject` | VALIDATED | 375, 768, 1440 | Modal full-width mobile container, print & close buttons (>=44px), financial vs physical execution breakdown | Playwright inspection, Build |
 | **SendProofModal** | `isSendProofOpen` | AUDITED | 375, 768, 1440 | File dropzone, geolocation input, mobile touch targets | Code inspection, Build |
 | **OfficialDocRequestModal**| `isDocRequestOpen` | AUDITED | 375, 768, 1440 | CAIDP formal request template generator, mailto / copy CTA | Code inspection, Build |
 | **ExamineCADocumentModal** | Admin CA review | AUDITED | 375, 1024, 1440 | Side-by-side OCR/Doc inspection, status approval buttons | Code inspection, Build |
@@ -128,11 +128,11 @@
 ---
 
 ## NEXT EXECUTABLE TASK & PRIORITIES
-- **NEXT_EXECUTABLE_TASK**: Execute responsive and visual inspection across critical citizen pages (HomePage, InstitutionsPage, DocumentsPage) using browser testing on 375px (mobile) and 1440px (desktop), verifying progressive disclosure, no horizontal overflow, and WCAG AA touch targets.
+- **NEXT_EXECUTABLE_TASK**: Inspect remote schema drift on Supabase `cdesuvcozcetdtvibgqs` for migrations `20260929121225_publication_boundaries.sql` and `20260929121408_document_metadata_versions.sql` before application.
 - **NEXT_3_TASKS**:
-  1. Inspect remote schema drift on Supabase `cdesuvcozcetdtvibgqs` for migrations `20260929121225_publication_boundaries.sql` and `20260929121408_document_metadata_versions.sql` before application.
-  2. Validate anonymous and authenticated signed URL generation via Edge Function `public-document-url` v2 for published accounts.
-  3. Expand Project Accountability Passport links from investment operations to citizen proofs and public tenders.
+  1. Validate anonymous and authenticated signed URL generation via Edge Function `public-document-url` v2 for published accounts.
+  2. Perform visual inspection on AdminDashboardPage tabs (CAIDP, CA, Documents, Modération) on desktop and tablet viewports.
+  3. Expand Project Accountability Passport links connecting investment operations to verified citizen proofs and tenders.
 
 ---
 
