@@ -501,6 +501,18 @@ class DataStore {
 
   constructor() {
     this.init();
+    void AuthSecurityService.restoreSupabaseSession().then((session) => {
+      if (session.isAuthenticated && session.user) {
+        this.authState = {
+          isAuthenticated: true,
+          email: session.user.email,
+          fullName: session.user.fullName,
+          role: session.user.role as UserRole,
+          expiresAt: session.user.expiresAt,
+        };
+        this.notify();
+      }
+    }).catch(() => {});
   }
 
   private init() {
