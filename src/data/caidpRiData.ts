@@ -4,6 +4,14 @@
 
 export type EntityPublicCategory = 'MINISTERE' | 'INSTITUTION' | 'MAIRIE' | 'REGION' | 'SOCIETE_ETAT';
 
+export interface CaidpEntityHistoryItem {
+  id: string;
+  action: string;
+  author: string;
+  date: string;
+  details: string;
+}
+
 export interface CaidpEntity {
   id: string;
   company_name: string;
@@ -15,7 +23,13 @@ export interface CaidpEntity {
   email: string;
   phone: string;
   source?: string;
+  source_url?: string;
+  verification_date?: string;
+  verified_by?: string;
+  verification_status?: 'VERIFIED' | 'TO_VERIFY' | 'OUTDATED' | 'UNKNOWN';
+  assigned_to?: string;
   notes?: string;
+  history?: CaidpEntityHistoryItem[];
 }
 
 export const CAIDP_MASTER_DIRECTORY: CaidpEntity[] = [

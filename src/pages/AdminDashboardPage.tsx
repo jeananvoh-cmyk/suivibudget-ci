@@ -11,6 +11,10 @@ import { ModeratorManager } from '../components/ModeratorManager';
 import { DocumentManager } from '../components/DocumentManager';
 import { CaidpAnalyticsManager } from '../components/CaidpAnalyticsManager';
 import { PrimitiveBudgetImporterModal } from '../components/PrimitiveBudgetImporterModal';
+import { AdminActionHeader } from '../components/admin/AdminActionHeader';
+import { AdminWorkQueue } from '../components/admin/AdminWorkQueue';
+import { AdminGlobalSearchModal } from '../components/admin/AdminGlobalSearchModal';
+import { adminTaskService } from '../services/adminTaskService';
 import { 
   ShieldCheck, 
   CheckCircle2, 
@@ -54,7 +58,8 @@ import {
   Receipt,
   Coins,
   Sparkles,
-  Phone
+  Phone,
+  ListTodo
 } from 'lucide-react';
 
 interface AdminDashboardPageProps {
@@ -66,8 +71,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   onOpenShare,
 }) => {
   const auth = dataStore.getAuth();
-  const [adminTab, setAdminTab] = useState<'caidp_manager' | 'caidp_analytics' | 'documents_manager' | 'moderation' | 'budget_table' | 'institutions_manager' | 'news_manager' | 'social_generator' | 'site_settings' | 'digital_opportunities' | 'team_moderators'>(
-    auth.role === 'MODERATOR' ? 'moderation' : 'caidp_manager'
+  const [adminTab, setAdminTab] = useState<'work_queue' | 'caidp_manager' | 'caidp_analytics' | 'documents_manager' | 'moderation' | 'budget_table' | 'institutions_manager' | 'news_manager' | 'social_generator' | 'site_settings' | 'digital_opportunities' | 'team_moderators'>(
+    auth.role === 'MODERATOR' ? 'work_queue' : 'caidp_manager'
   );
   
   // Data from store with automatic reactivity
@@ -88,6 +93,67 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const showToast = (text: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToastMessage({ text, type });
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // Operational KPIs and tasks reactivity
+  const operationalKpis = useMemo(() => adminTaskService.getOperationalKpis(), [storeTick]);
+
+  // Global Omnibox Search State
+  const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
+
+  // Moderation Rejection Modal State
+  const [rejectingProof, setRejectingProof] = useState<CitizenProof | null>(null);
+  const [rejectionReason, setRejectionReason] = useState<string>('Photo floue ou illisible');
+  const [rejectionCustomText, setRejectionCustomText] = useState<string>('');
+  const [rejectWithWhatsApp, setRejectWithWhatsApp] = useState<boolean>(false);
+
+  // Sensitive Factory Reset Confirmation Modal State
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [resetConfirmationInput, setResetConfirmationInput] = useState('');
+
+  // Global Ctrl+K shortcut listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsGlobalSearchOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleActionHeaderNavigate = (target: string, filter?: Record<string, string> | string) => {
+    if (target === 'moderation') {
+      setAdminTab('moderation');
+    } else if (target === 'documents_manager') {
+      setAdminTab('documents_manager');
+    } else if (target === 'caidp_manager') {
+      setAdminTab('caidp_manager');
+    } else if (target === 'caidp_analytics') {
+      setAdminTab('caidp_analytics');
+    } else if (target === 'budget_table') {
+      setAdminTab('budget_table');
+    } else if (target === 'work_queue') {
+      setAdminTab('work_queue');
+    } else if (target === 'institutions_manager') {
+      setAdminTab('institutions_manager');
+    }
+  };
+
+  const handleGlobalSearchSelect = (item: any) => {
+    if (item.type === 'ORGANISM') {
+      setAdminTab('caidp_manager');
+    } else if (item.type === 'INSTITUTION') {
+      setAdminTab('institutions_manager');
+    } else if (item.type === 'DOCUMENT') {
+      setAdminTab('documents_manager');
+    } else if (item.type === 'PROJECT') {
+      setAdminTab('budget_table');
+    } else if (item.type === 'PROOF') {
+      setAdminTab('moderation');
+    }
+    setIsGlobalSearchOpen(false);
   };
 
   // ==========================================
@@ -180,46 +246,72 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     reader.readAsText(file, 'UTF-8');
   };
 
-  // Moderation action
-  const handleModerate = (proofId: string, status: 'APPROVED' | 'REJECTED') => {
-    dataStore.moderateProof(proofId, status);
-    showToast(status === 'APPROVED' ? 'Preuve citoyenne validée et publiée !' : 'Preuve rejetée.', 'info');
-  };
+  // Moderation actions with audit trail and structured rejection
+  const handleApproveProof = (proof: CitizenProof, withWhatsApp = false) => {
+    dataStore.moderateProof(proof.id, 'APPROVED');
+    adminTaskService.logActivity({
+      action_type: 'PROOF_APPROVED',
+      description: `Validation preuve citoyenne : ${proof.project_title || proof.commune_name}`,
+      author: auth.fullName || 'Modérateur',
+      author_role: auth.role,
+      target_id: proof.id,
+      target_type: 'PROOF',
+    });
+    showToast('Preuve citoyenne validée et publiée avec succès !', 'success');
 
-  const handleModerateWithWhatsApp = (proof: CitizenProof, status: 'APPROVED' | 'REJECTED') => {
-    dataStore.moderateProof(proof.id, status);
-    showToast(
-      status === 'APPROVED' 
-        ? 'Preuve validée et publiée ! Lien WhatsApp prêt pour notification.' 
-        : 'Preuve rejetée. Lien WhatsApp prêt pour notification.', 
-      'info'
-    );
-
-    if (proof.citizen_whatsapp) {
+    if (withWhatsApp && proof.citizen_whatsapp) {
       let phone = proof.citizen_whatsapp.replace(/\D/g, '');
-      if (phone.length === 10) {
-        phone = '225' + phone;
-      }
-
+      if (phone.length === 10) phone = '225' + phone;
       const trackingCode = proof.tracking_code || proof.id.slice(0, 8).toUpperCase();
       const projectTitle = proof.project_title || 'Chantier public';
-
-      let message = '';
-      if (status === 'APPROVED') {
-        message = `Bonjour ${proof.citizen_name || 'cher citoyen'},\n\n` +
-          `✅ Votre constat citoyen [${trackingCode}] concernant le chantier "${projectTitle}" a été vérifié et VALIDÉ par l'équipe de modération de Suivi Budget CI.\n\n` +
-          `Votre observation et vos photos sont désormais publiées sur l'Observatoire Citoyen des Projets Publics. Merci pour votre vigilance civique ! 🇨🇮\n\n` +
-          `🔗 Suivre sur Suivi Budget CI : https://suivibudget.ci/observatory`;
-      } else {
-        message = `Bonjour ${proof.citizen_name || 'cher citoyen'},\n\n` +
-          `[Information] Votre constat citoyen [${trackingCode}] concernant le chantier "${projectTitle}" n'a pas pu être validé en l'état par l'équipe de modération.\n\n` +
-          `Motif : Les éléments photographiques transmis ne permettent pas d'attester avec certitude de l'état d'avancement des travaux ou de la localisation.\n\n` +
-          `Vous pouvez déposer un nouveau constat avec une photo plus nette ou un repère visible sur : https://suivibudget.ci/observatory\n\n` +
-          `Merci pour votre contribution citoyenne ! 🇨🇮`;
-      }
-
+      const message = `Bonjour ${proof.citizen_name || 'cher citoyen'},\n\n` +
+        `✅ Votre constat citoyen [${trackingCode}] concernant le chantier "${projectTitle}" a été vérifié et VALIDÉ par l'équipe de modération de Suivi Budget CI.\n\n` +
+        `Votre observation et vos photos sont désormais publiées sur l'Observatoire Citoyen des Projets Publics. Merci pour votre vigilance civique ! 🇨🇮\n\n` +
+        `🔗 Suivre sur Suivi Budget CI : https://suivibudget.ci/observatory`;
       window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
     }
+  };
+
+  const handleInitiateReject = (proof: CitizenProof, withWhatsApp = false) => {
+    setRejectingProof(proof);
+    setRejectWithWhatsApp(withWhatsApp);
+    setRejectionReason('Photo floue ou illisible');
+    setRejectionCustomText('');
+  };
+
+  const handleConfirmRejection = () => {
+    if (!rejectingProof) return;
+    const finalReason = rejectionReason === 'Autre raison'
+      ? (rejectionCustomText.trim() || 'Preuve non conforme')
+      : rejectionReason;
+
+    dataStore.moderateProof(rejectingProof.id, 'REJECTED');
+    adminTaskService.logActivity({
+      action_type: 'PROOF_REJECTED',
+      description: `Preuve citoyenne rejetée (${finalReason}) : ${rejectingProof.project_title || rejectingProof.commune_name}`,
+      author: auth.fullName || 'Modérateur',
+      author_role: auth.role,
+      target_id: rejectingProof.id,
+      target_type: 'PROOF',
+      metadata: { reason: finalReason }
+    });
+    showToast(`Preuve rejetée. Motif : "${finalReason}"`, 'info');
+
+    if (rejectWithWhatsApp && rejectingProof.citizen_whatsapp) {
+      let phone = rejectingProof.citizen_whatsapp.replace(/\D/g, '');
+      if (phone.length === 10) phone = '225' + phone;
+      const trackingCode = rejectingProof.tracking_code || rejectingProof.id.slice(0, 8).toUpperCase();
+      const projectTitle = rejectingProof.project_title || 'Chantier public';
+      const message = `Bonjour ${rejectingProof.citizen_name || 'cher citoyen'},\n\n` +
+        `[Information] Votre constat citoyen [${trackingCode}] concernant le chantier "${projectTitle}" n'a pas pu être validé en l'état par l'équipe de modération.\n\n` +
+        `Motif : ${finalReason}.\n\n` +
+        `Vous pouvez déposer un nouveau constat avec une photo plus nette ou un repère visible sur : https://suivibudget.ci/observatory\n\n` +
+        `Merci pour votre contribution citoyenne ! 🇨🇮`;
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+    }
+
+    setRejectingProof(null);
+    setRejectionCustomText('');
   };
 
   // Filter and sort for budget table
@@ -968,12 +1060,21 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     }
   };
 
-  const handleResetFactory = () => {
-    const confirmation = prompt('ATTENTION : Pour réinitialiser le site aux données officielles d\'origine, tapez "RESET" en majuscules :');
-    if (confirmation === 'RESET') {
-      dataStore.resetToFactoryDefaults();
-      showToast('Plateforme réinitialisée avec les données d\'origine.', 'info');
+  const handleConfirmResetFactory = () => {
+    if (resetConfirmationInput.trim() !== 'RESET') {
+      showToast('Veuillez taper "RESET" en majuscules pour confirmer.', 'error');
+      return;
     }
+    dataStore.resetToFactoryDefaults();
+    adminTaskService.logActivity({
+      action_type: 'FACTORY_RESET',
+      description: 'Réinitialisation complète de la base de données aux valeurs officielles d\'origine',
+      author: auth.fullName || 'Super Admin',
+      author_role: auth.role,
+    });
+    showToast('Plateforme réinitialisée avec les données officielles d\'origine.', 'info');
+    setIsResetModalOpen(false);
+    setResetConfirmationInput('');
   };
 
   const uniqueRegions = Array.from(new Set(allProjects.map(p => p.region_name))).sort();
@@ -1043,6 +1144,19 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             <span className="text-xs font-black text-white">{allProjects.length} projets</span>
           </button>
 
+          {/* Omnibox Search Trigger Button */}
+          <button
+            onClick={() => setIsGlobalSearchOpen(true)}
+            className="px-3.5 py-2 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700/80 transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
+            title="Recherche universelle rapide (Ctrl+K)"
+          >
+            <Search className="w-3.5 h-3.5 text-slate-400" />
+            <span className="text-xs font-bold hidden sm:inline">Rechercher...</span>
+            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[9px] font-mono bg-slate-950 text-slate-400 rounded border border-slate-700">
+              Ctrl K
+            </kbd>
+          </button>
+
           {/* Switch to Public Site */}
           <a
             href="/"
@@ -1069,10 +1183,43 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         </div>
       </div>
 
+      {/* 1.5 OPERATIONAL ACTION CARDS HEADER */}
+      <AdminActionHeader
+        userRole={auth.role}
+        userName={auth.fullName}
+        urgentTasksCount={operationalKpis.urgentCount}
+        onOpenWorkQueue={() => setAdminTab('work_queue')}
+        onNavigateToTab={(tab, filter) => handleActionHeaderNavigate(tab, filter)}
+      />
+
       {/* 2. CATEGORIZED NAVIGATION BAR */}
       <div className="bg-white p-2 rounded-2xl border border-slate-200/90 shadow-2xs">
         <div className="flex flex-wrap items-center gap-1.5">
           
+          {/* SECTION 0: ESPACE OPÉRATIONNEL & FILE D'ATTENTE */}
+          <button
+            onClick={() => setAdminTab('work_queue')}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              adminTab === 'work_queue'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <ListTodo className="w-4 h-4 text-emerald-500" />
+            <span>File de Travail</span>
+            {operationalKpis.urgentCount > 0 ? (
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white animate-pulse">
+                {operationalKpis.urgentCount} urgents
+              </span>
+            ) : operationalKpis.totalActionableTasks > 0 ? (
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-brand-blue">
+                {operationalKpis.totalActionableTasks}
+              </span>
+            ) : null}
+          </button>
+
+          <div className="h-5 w-px bg-slate-200 mx-1 hidden md:block"></div>
+
           {/* SECTION 1: DONNÉES & BUDGETS */}
           <button
             onClick={() => setAdminTab('caidp_manager')}
@@ -1249,6 +1396,19 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
         </div>
       </div>
+
+      {/* ========================================================================= */}
+      {/* TAB -1: OPERATIONAL WORK QUEUE */}
+      {/* ========================================================================= */}
+      {adminTab === 'work_queue' && (
+        <AdminWorkQueue
+          currentUserEmail={auth.email}
+          currentUserName={auth.fullName}
+          currentUserRole={auth.role}
+          onNavigateToTab={(tab, filter) => handleActionHeaderNavigate(tab, filter)}
+          onShowToast={showToast}
+        />
+      )}
 
       {/* ========================================================================= */}
       {/* TAB 0: CAIDP RI & PUBLIC ENTITIES DIRECTORY MANAGER */}
@@ -2344,7 +2504,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                         <>
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => handleModerateWithWhatsApp(proof, 'APPROVED')}
+                              onClick={() => handleApproveProof(proof, true)}
                               className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                               title="Valider la preuve et ouvrir WhatsApp avec le message pré-rempli"
                             >
@@ -2353,9 +2513,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                               <span>Valider & WhatsApp</span>
                             </button>
                             <button
-                              onClick={() => handleModerateWithWhatsApp(proof, 'REJECTED')}
+                              onClick={() => handleInitiateReject(proof, true)}
                               className="py-2.5 px-3 bg-white hover:bg-red-50 text-red-600 border border-slate-200 rounded-xl text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
-                              title="Rejeter et ouvrir WhatsApp avec le motif pré-rempli"
+                              title="Rejeter et ouvrir WhatsApp avec le motif structuré"
                             >
                               <X className="w-4 h-4" />
                               <MessageCircle className="w-3.5 h-3.5" />
@@ -2365,14 +2525,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                           <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
                             <button
                               type="button"
-                              onClick={() => handleModerate(proof.id, 'APPROVED')}
+                              onClick={() => handleApproveProof(proof, false)}
                               className="hover:text-emerald-700 underline cursor-pointer"
                             >
                               Valider sans WhatsApp
                             </button>
                             <button
                               type="button"
-                              onClick={() => handleModerate(proof.id, 'REJECTED')}
+                              onClick={() => handleInitiateReject(proof, false)}
                               className="hover:text-red-700 underline cursor-pointer"
                             >
                               Rejeter sans WhatsApp
@@ -2382,14 +2542,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       ) : (
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => handleModerate(proof.id, 'APPROVED')}
+                            onClick={() => handleApproveProof(proof, false)}
                             className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                           >
                             <Check className="w-4 h-4" />
                             <span>Valider & Publier</span>
                           </button>
                           <button
-                            onClick={() => handleModerate(proof.id, 'REJECTED')}
+                            onClick={() => handleInitiateReject(proof, false)}
                             className="py-2.5 px-3 bg-white hover:bg-red-50 text-red-600 border border-slate-200 rounded-xl text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
                           >
                             <X className="w-4 h-4" />
@@ -2682,8 +2842,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   </p>
                 </div>
                 <button
-                  onClick={handleResetFactory}
-                  className="w-full py-2.5 px-4 bg-white hover:bg-red-600 hover:text-white text-red-600 border border-red-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                  onClick={() => { setIsResetModalOpen(true); setResetConfirmationInput(''); }}
+                  className="w-full py-2.5 px-4 bg-white hover:bg-red-600 hover:text-white text-red-600 border border-red-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <AlertTriangle className="w-4 h-4" />
                   <span>Réinitialiser aux valeurs d'origine</span>
@@ -4730,6 +4890,177 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow"
               >
                 Rétablir la sauvegarde
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: UNIVERSAL CTRL+K OMNIBOX SEARCH */}
+      {/* ========================================================================= */}
+      <AdminGlobalSearchModal
+        isOpen={isGlobalSearchOpen}
+        onClose={() => setIsGlobalSearchOpen(false)}
+        onSelectResult={(tabId, filter) => handleActionHeaderNavigate(tabId, filter)}
+      />
+
+      {/* ========================================================================= */}
+      {/* MODAL: CITIZEN PROOF REJECTION REASON */}
+      {/* ========================================================================= */}
+      {rejectingProof && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/70 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="p-2 rounded-xl bg-red-50 text-red-600 font-bold">
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                </span>
+                <div>
+                  <h4 className="font-extrabold text-slate-900 text-sm">
+                    Motif de rejet du signalement citoyen
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    Projet : {rejectingProof.project_title || rejectingProof.commune_name}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setRejectingProof(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <label className="block font-bold text-slate-700">Sélectionnez le motif réglementaire :</label>
+              <div className="space-y-2">
+                {[
+                  'Photo floue ou illisible',
+                  'Chantier ou localisation non identifiable',
+                  'Signalement en doublon',
+                  'Panneau officiel manquant ou non conforme',
+                  'Preuve insuffisante pour attester l\'avancement',
+                  'Autre raison'
+                ].map(reason => (
+                  <label
+                    key={reason}
+                    className={`flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${
+                      rejectionReason === reason
+                        ? 'bg-red-50 border-red-300 text-red-900 font-bold'
+                        : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="rejectionReason"
+                      value={reason}
+                      checked={rejectionReason === reason}
+                      onChange={() => setRejectionReason(reason)}
+                      className="text-red-600 focus:ring-red-500"
+                    />
+                    <span>{reason}</span>
+                  </label>
+                ))}
+              </div>
+
+              {rejectionReason === 'Autre raison' && (
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Précisez le motif :</label>
+                  <textarea
+                    rows={2}
+                    value={rejectionCustomText}
+                    onChange={(e) => setRejectionCustomText(e.target.value)}
+                    placeholder="Détaillez la raison du rejet..."
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+                  />
+                </div>
+              )}
+
+              {rejectWithWhatsApp && rejectingProof.citizen_whatsapp && (
+                <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-800 text-[11px] flex items-center gap-1.5">
+                  <MessageCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Un message WhatsApp contenant ce motif sera automatiquement généré.</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 text-xs">
+              <button
+                type="button"
+                onClick={() => setRejectingProof(null)}
+                className="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 font-bold hover:bg-slate-50 cursor-pointer"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmRejection}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold shadow-xs cursor-pointer"
+              >
+                Confirmer le refus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: SENSITIVE FACTORY RESET CONFIRMATION */}
+      {/* ========================================================================= */}
+      {isResetModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/75 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-red-200 space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="p-3 rounded-2xl bg-red-100 text-red-600 font-bold shrink-0">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </span>
+              <div>
+                <h4 className="font-extrabold text-slate-900 text-base">
+                  Zone Critique : Réinitialisation Usine
+                </h4>
+                <p className="text-[11px] text-slate-500">
+                  Cette action réinitialisera toutes les données modifiées aux valeurs officielles d'origine.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3 bg-red-50 rounded-2xl border border-red-100 text-red-900 text-xs space-y-1">
+              <p className="font-bold">Attention, action irréversible :</p>
+              <p className="text-[11px] text-red-800">
+                Les projets personnalisés, ajouts récents et coordonnées modifiées seront remplacés par le jeu de données officiel initial. Pensez à exporter une sauvegarde JSON avant de procéder.
+              </p>
+            </div>
+
+            <div className="space-y-2 text-xs">
+              <label className="block font-bold text-slate-700">
+                Pour confirmer, veuillez taper le mot <strong className="text-red-600">RESET</strong> ci-dessous :
+              </label>
+              <input
+                type="text"
+                value={resetConfirmationInput}
+                onChange={(e) => setResetConfirmationInput(e.target.value)}
+                placeholder="Tapez RESET..."
+                className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono text-center uppercase tracking-widest font-black text-sm"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 text-xs">
+              <button
+                type="button"
+                onClick={() => { setIsResetModalOpen(false); setResetConfirmationInput(''); }}
+                className="px-4 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-xl font-bold text-slate-600 cursor-pointer"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                disabled={resetConfirmationInput.trim() !== 'RESET'}
+                onClick={handleConfirmResetFactory}
+                className="px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white rounded-xl font-black shadow-md cursor-pointer transition-all"
+              >
+                Réinitialiser définitivement
               </button>
             </div>
           </div>
