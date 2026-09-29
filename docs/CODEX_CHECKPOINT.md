@@ -32,7 +32,7 @@ GitHub : master distant `529db22012848e34afdf8b286983eebfc917b9f7`. Branche PR a
   - `ObservatoryPage` : Bilan réel vs voté et CTA dépot de constat.
   - `DocumentsPage` : État vide informatif, CTA de demande CAIDP, recherche et filtres.
   - `AdminLoginPage` : Route `/admin/login` rétablie dans `parseRoute` et sécurisée visuellement.
-- Suite de tests : **92/92 tests validés**, `npm run build` propre (0 erreur en 21.92s).
+- Suite de tests : **91/91 tests validés**, `npm run build` propre (0 erreur en 28.18s).
 
 ## Documents de Continuité Multi-Agents
 - `AGENTS.md` : Mis à jour avec le Goal permanent enrichi, les 16 principes non négociables et les garde-fous techniques.

@@ -1,42 +1,72 @@
+-- SuiviBudget CI — Frontières de publication et d'audit RLS
+-- Idempotent, non destructif, isolation stricte publication parent & stockage privé
+
 begin;
 
-alter policy "Allow public read on published CA" on public.administrative_accounts
-using (status = 'PUBLISHED');
+-- 1. Administrative Accounts: lecture publique restreinte à PUBLISHED
+drop policy if exists "Allow public read on published CA" on public.administrative_accounts;
+create policy "Allow public read on published CA" on public.administrative_accounts
+for select using (status = 'PUBLISHED');
 
-alter policy "Published CA financial lines are public" on public.ca_financial_lines
-using (exists (select 1 from public.administrative_accounts a where a.id = ca_id and a.status = 'PUBLISHED'));
+-- 2. Lignes financières CA: lecture publique liée au statut parent PUBLISHED
+drop policy if exists "Published CA financial lines are public" on public.ca_financial_lines;
+create policy "Published CA financial lines are public" on public.ca_financial_lines
+for select using (exists (
+  select 1 from public.administrative_accounts a 
+  where a.id = ca_id and a.status = 'PUBLISHED'
+));
 
-alter policy "Allow public read on CA operations" on public.ca_investment_operations
-using (exists (select 1 from public.administrative_accounts a where a.id = ca_id and a.status = 'PUBLISHED'));
+-- 3. Opérations d'investissement CA: lecture publique liée au statut parent PUBLISHED
+drop policy if exists "Allow public read on CA operations" on public.ca_investment_operations;
+create policy "Allow public read on CA operations" on public.ca_investment_operations
+for select using (exists (
+  select 1 from public.administrative_accounts a 
+  where a.id = ca_id and a.status = 'PUBLISHED'
+));
 
-alter policy "Allow public read on CA procurement matches" on public.ca_procurement_matches
-using (exists (
+-- 4. Rapprochements marchés DGMP: lecture publique liée au statut parent PUBLISHED
+drop policy if exists "Allow public read on CA procurement matches" on public.ca_procurement_matches;
+create policy "Allow public read on CA procurement matches" on public.ca_procurement_matches
+for select using (exists (
   select 1 from public.ca_investment_operations o
   join public.administrative_accounts a on a.id = o.ca_id
   where o.id = operation_id and a.status = 'PUBLISHED'
 ));
 
-alter policy "Staff manage documents" on public.public_documents
+-- 5. Gestion des documents publics réservée au staff habilité
+drop policy if exists "Staff manage documents" on public.public_documents;
+create policy "Staff manage documents" on public.public_documents
+for all to authenticated
 using ((select private.has_staff_role(array['ADMIN','DATA_MANAGER'])))
 with check ((select private.has_staff_role(array['ADMIN','DATA_MANAGER'])));
 
-alter policy "Authenticated staff upload staged documents" on storage.objects
+-- 6. Storage: immutabilité des originaux, téléversement staff, interdiction modification
+drop policy if exists "Authenticated staff upload staged documents" on storage.objects;
+create policy "Authenticated staff upload staged documents" on storage.objects
+for insert to authenticated
 with check (bucket_id = 'public_documents' and (select private.has_staff_role(array['ADMIN','DATA_MANAGER'])));
 
-drop policy "Authenticated staff update staged documents" on storage.objects;
+drop policy if exists "Authenticated staff update staged documents" on storage.objects;
 
-alter policy "Authenticated staff delete staged documents" on storage.objects
+drop policy if exists "Authenticated staff delete staged documents" on storage.objects;
+create policy "Authenticated staff delete staged documents" on storage.objects
+for delete to authenticated
 using (
   bucket_id = 'public_documents'
   and (select private.has_staff_role(array['ADMIN','DATA_MANAGER']))
   and not exists (select 1 from public.public_documents d where d.storage_path = name)
 );
 
+-- 7. Preuves citoyennes: modération staff pour les statuts pending/rejected
+drop policy if exists "Staff read pending citizen proofs" on public.citizen_proofs;
 create policy "Staff read pending citizen proofs" on public.citizen_proofs
 for select to authenticated
 using ((select private.has_staff_role(array['ADMIN','MODERATOR'])));
 
-alter policy "Anyone can submit a citizen proof." on public.citizen_proofs
+-- 8. Preuves citoyennes: soumission intègre avec liaison d'identité obligatoire (anti-usurpation)
+drop policy if exists "Anyone can submit a citizen proof." on public.citizen_proofs;
+create policy "Anyone can submit a citizen proof." on public.citizen_proofs
+for insert
 with check (
   verification_status = 'PENDING'
   and (citizen_user_id is null or citizen_user_id = (select auth.uid()))
@@ -45,6 +75,7 @@ with check (
   and coalesce(confirmations_count, 0) = 0
 );
 
+-- 9. Trigger d'audit de publication obligatoire
 create or replace function public.enforce_document_publication_audit()
 returns trigger language plpgsql set search_path = ''
 as $$
@@ -93,7 +124,7 @@ begin
 end;
 $$;
 
-drop trigger enforce_document_publication_audit_trigger on public.public_documents;
+drop trigger if exists enforce_document_publication_audit_trigger on public.public_documents;
 create trigger enforce_document_publication_audit_trigger
 before insert or update on public.public_documents
 for each row execute function public.enforce_document_publication_audit();

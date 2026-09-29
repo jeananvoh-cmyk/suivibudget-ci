@@ -1,10 +1,10 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- **LAST_UPDATED**: 2026-09-29T13:40:00Z
-- **LAST_AGENT**: Antigravity (Relay after Codex quota reached)
+- **LAST_UPDATED**: 2026-09-29T15:15:00Z
+- **LAST_AGENT**: Antigravity
 - **CURRENT_BRANCH**: `security-ca-final-20260929`
-- **HEAD_SHA**: `0279be38324aba090c8bf62032e96d1d956a0b59`
+- **HEAD_SHA**: `87eee7771274a93900f1d75480ede1df7a8af735`
 - **PR**: #3 ("Final: security hardening + verified CA foundation")
 - **SUPABASE_PROJECT**: `cdesuvcozcetdtvibgqs` (eu-west-1, PostgreSQL 17.6)
 - **CURRENT_MILESTONE**: P0/P1 Security Hardening, Document Versioning, CA Workflow & UX/UI Responsive Foundation
@@ -36,10 +36,11 @@
 
 ### PARTIAL
 1. **Database Migrations Application**:
-   - Two target SQL migrations are drafted and verified locally in `supabase/migrations/`:
+   - Three target SQL migrations are drafted, made strictly idempotent, and verified locally in `supabase/migrations/`:
+     - `20260929141800_grant_schema_privileges.sql` (Prerequisite: GRANT USAGE on schema public and SELECT/INSERT privileges to anon/authenticated for PostgREST RLS evaluation).
      - `20260929121225_publication_boundaries.sql` (RLS parent publication boundary, staff moderation, storage delete restrictions, publication audit trigger).
      - `20260929121408_document_metadata_versions.sql` (Document metadata columns: `original_filename`, `file_size_bytes`, `page_count`, `adoption_date`, `approval_date`, versions unique index).
-   - Status: Migration files ready, but NOT yet applied on the remote Supabase database (`cdesuvcozcetdtvibgqs`). Drift check required before executing against production.
+   - Status: Migration files ready and idempotent, but NOT yet applied on the remote Supabase database (`cdesuvcozcetdtvibgqs`). Drift check required before executing against production.
 2. **Citizen Proofs Security & Moderation**:
    - `citizen_proofs` pending moderation access restricted to staff (`ADMIN`, `MODERATOR`), public read limited to `APPROVED`.
    - Client binding of `citizen_user_id` on submission requires end-to-end audit.
@@ -61,13 +62,16 @@
 ---
 
 ## MIGRATIONS & SCHEMA
+- **Target Migration 0 (Prerequisite)**: `supabase/migrations/20260929141800_grant_schema_privileges.sql`
+  - Grants `USAGE` on schema `public` and `SELECT`/`INSERT` privileges on public tables to `anon` and `authenticated` roles.
+  - Required because PostgreSQL checks table-level permissions before evaluating RLS policies (resolves PostgREST 42501 / 401).
 - **Target Migration 1**: `supabase/migrations/20260929121225_publication_boundaries.sql`
   - Restricts public SELECT on `ca_investment_operations`, `ca_procurement_matches`, and `ca_financial_lines` to records where the parent `administrative_accounts.status = 'PUBLISHED'`.
   - Enforces `enforce_document_publication_audit()` trigger on `public_documents`.
-  - Storage deletion and updates restricted to `ADMIN`.
+  - Storage deletion and updates restricted to `ADMIN`. Made idempotent (`drop policy if exists`).
 - **Target Migration 2**: `supabase/migrations/20260929121408_document_metadata_versions.sql`
   - Adds versioning and institutional metadata columns to `public_documents`: `institution_type`, `original_filename`, `mime_type`, `file_size_bytes`, `page_count`, `adoption_date`, `approval_date`, `approval_reference`, `replaces_document_id`, `replacement_reason`, `created_by`.
-  - Adds unique index `public_documents_institution_year_type_version`.
+  - Adds unique index `public_documents_institution_year_type_version`. Made idempotent (`add column if not exists`, `drop constraint if exists`).
 - **Remote Drift Rule**: NEVER replay historical migrations blindly. Verify existing columns with `information_schema` before executing schema mutations.
 
 ---
@@ -85,15 +89,15 @@
 
 ## TESTS & BUILD VERIFICATION
 - **Test Command**: `npm test -- --run`
-  - `src/utils/__tests__/caManagement.test.ts` (16 tests) — PASS
+  - `src/utils/__tests__/administrativeAccount.test.ts` (18 tests) — PASS
+  - `src/utils/__tests__/formatters.test.ts` (7 tests) — PASS
   - `src/utils/__tests__/security.test.ts` (25 tests) — PASS
-  - `src/utils/__tests__/navigation.test.ts` (8 tests) — PASS
+  - `src/utils/__tests__/officialWebDirectory.test.ts` (8 tests) — PASS
+  - `src/utils/__tests__/caManagement.test.ts` (16 tests) — PASS
+  - `src/utils/__tests__/navigation.test.ts` (7 tests) — PASS
   - `src/utils/__tests__/searchHelpers.test.ts` (2 tests) — PASS
   - `src/utils/__tests__/institutionProjects.test.ts` (8 tests) — PASS
-  - `src/utils/__tests__/officialWebDirectory.test.ts` (13 tests) — PASS
-  - `src/utils/__tests__/administrativeAccount.test.ts` (14 tests) — PASS
-  - `src/utils/__tests__/formatters.test.ts` (6 tests) — PASS
-  - **TOTAL**: **8 test files passed (8), 92 tests passed (92)**.
+  - **TOTAL**: **8 test files passed (8), 91 tests passed (91)**.
 - **Build Command**: `npm run build` (`tsc && vite build`)
   - Status: **PASSED (0 errors, 1721 modules transformed)** in 21.92s. Clean bundle in `dist/`.
 
