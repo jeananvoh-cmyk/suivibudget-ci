@@ -77,7 +77,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
       onShowToast(`Impossible de charger les documents : ${error.message}`, 'error');
     });
     return unsubscribe;
-  }, [onShowToast]);
+  }, []);
 
   const filteredDocs = useMemo(() => {
     return documents.filter(doc => {
