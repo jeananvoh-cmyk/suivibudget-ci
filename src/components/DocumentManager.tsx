@@ -16,6 +16,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { dataStore } from '../services/dataStore';
+import { supabase } from '../services/supabase';
 import { PublicDocument, DocumentCategory, DocumentFormat } from '../types';
 import { matchesSmartSearch } from '../utils/searchHelpers';
 
@@ -65,7 +66,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
     file_size: '2.5 Mo',
     file_format: 'PDF',
     tags: '',
-    is_official: true,
+    is_official: false,
   });
 
   const [documents, setDocuments] = useState<PublicDocument[]>(() => dataStore.getDocuments());
@@ -101,7 +102,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
       file_size: '2.5 Mo',
       file_format: 'PDF',
       tags: '',
-      is_official: true,
+      is_official: false,
     });
     setIsAddModalOpen(true);
   };
@@ -124,35 +125,41 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
     setIsAddModalOpen(true);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Determine format
-    const name = file.name;
+    const lower = file.name.toLowerCase();
     let format: DocumentFormat = 'PDF';
-    if (name.endsWith('.xlsx') || name.endsWith('.xls')) format = 'EXCEL';
-    else if (name.endsWith('.docx') || name.endsWith('.doc')) format = 'WORD';
-    else if (name.endsWith('.csv')) format = 'CSV';
+    if (lower.endsWith('.xlsx') || lower.endsWith('.xls')) format = 'EXCEL';
+    else if (lower.endsWith('.docx') || lower.endsWith('.doc')) format = 'WORD';
+    else if (lower.endsWith('.csv')) format = 'CSV';
 
-    // File size in Mo / Ko
     const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
-    const sizeStr = parseFloat(sizeMb) >= 1 ? `${sizeMb} Mo` : `${Math.round(file.size / 1024)} Ko`;
+    const sizeStr = Number(sizeMb) >= 1 ? `${sizeMb} Mo` : `${Math.round(file.size / 1024)} Ko`;
+    const safeName = file.name.normalize('NFKD').replace(/[^a-zA-Z0-9._-]+/g, '-');
+    const path = `staging/${formData.year}/${crypto.randomUUID()}-${safeName}`;
 
-    const reader = new FileReader();
-    reader.onload = (loadEvt) => {
-      const base64Data = loadEvt.target?.result as string;
-      setFormData(prev => ({
-        ...prev,
-        file_url: base64Data,
-        file_name: name,
-        file_size: sizeStr,
-        file_format: format,
-        title: prev.title || name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' '),
-      }));
-      onShowToast(`Fichier "${name}" prêt pour enregistrement.`);
-    };
-    reader.readAsDataURL(file);
+    const { error } = await supabase.storage.from('public_documents').upload(path, file, {
+      upsert: false,
+      contentType: file.type || undefined,
+      cacheControl: '3600',
+    });
+    if (error) {
+      onShowToast(`Échec de l’envoi sécurisé : ${error.message}`, 'error');
+      return;
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      file_url: path,
+      file_name: file.name,
+      file_size: sizeStr,
+      file_format: format,
+      title: prev.title || file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' '),
+      is_official: false,
+    }));
+    onShowToast(`Fichier "${file.name}" envoyé en zone de vérification.`, 'success');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -181,6 +188,11 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
         file_format: formData.file_format,
         tags: tagList,
         is_official: formData.is_official,
+        storage_path: formData.file_url.startsWith('staging/') ? formData.file_url : null,
+        status: formData.is_official ? 'PUBLISHED' : 'TO_VERIFY',
+        verification_status: formData.is_official ? 'VERIFIED' : 'TO_VERIFY',
+        fiscal_year: formData.year,
+        document_type: formData.category,
       });
       onShowToast('Document public mis à jour avec succès.');
     } else {
@@ -195,9 +207,14 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
         file_size: formData.file_size.trim(),
         file_format: formData.file_format,
         tags: tagList,
-        is_official: formData.is_official,
+        is_official: false,
+        storage_path: formData.file_url.startsWith('staging/') ? formData.file_url : null,
+        status: 'TO_VERIFY',
+        verification_status: 'TO_VERIFY',
+        fiscal_year: formData.year,
+        document_type: formData.category,
       });
-      onShowToast('Nouveau document public ajouté à la bibliothèque.');
+      onShowToast('Document enregistré en attente de vérification.');
     }
 
     setIsAddModalOpen(false);
