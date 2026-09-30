@@ -90,20 +90,35 @@ export interface AdministrativeAccount {
   // Volet Fonctionnement
   operating_planned: number;     // Crédits de fonctionnement votés (FCFA)
   operating_realized: number;    // Dépenses de fonctionnement ordonnancées (FCFA)
-  operating_revenue_realized?: number; // Recettes de fonctionnement effectivement recouvrées
+  operating_revenue_realized?: number; // Champ historique : recettes effectivement recouvrées
+  operating_revenue_planned?: number;
+  operating_revenue_emitted?: number;
+  operating_revenue_collected?: number;
+  operating_expenditure_planned?: number;
+  operating_expenditure_engaged?: number;
   
   // Volet Investissement / Équipement
   investment_planned: number;    // Crédits d'équipement votés (FCFA)
   investment_realized: number;   // Dépenses d'équipement ordonnancées (FCFA)
-  investment_revenue_realized?: number; // Recettes d'investissement recouvrées
+  investment_revenue_realized?: number; // Champ historique : recettes d'investissement recouvrées
+  investment_revenue_planned?: number;
+  investment_revenue_emitted?: number;
+  investment_revenue_collected?: number;
+  investment_expenditure_planned?: number;
+  investment_expenditure_engaged?: number;
   
   // Totaux consolidés
   total_planned: number;         // Total prévu (Fonctionnement + Investissement)
   total_realized: number;        // Total exécuté
-  surplus_or_deficit?: number;   // Résultat de clôture (Excédent > 0 ou Déficit < 0)
+  surplus_or_deficit?: number;   // Uniquement si le document source qualifie explicitement ce montant ainsi
+  total_revenue_collected?: number;
+  total_expenditure_engaged?: number;
+  arithmetic_difference?: number; // Différence arithmétique, ne jamais présenter automatiquement comme bénéfice/excédent
+  reconciliation_status?: 'TO_VERIFY' | 'RECONCILED' | 'SOURCE_ANOMALY' | 'INCOMPLETE_SOURCE';
   
   // Traçabilité & Sources
   source_document: string;       // Titre du document officiel
+  source_document_id?: string;
   source_url?: string;           // Lien de consultation ou téléchargement
   source_page?: number;
   approval_date?: string;        // Date de délibération du Conseil
@@ -131,4 +146,27 @@ export interface ExecutionRateResult {
   isOverBudget: boolean;
   statusLabel: string;
   badgeClass: string;
+}
+
+
+export type CAFinancialSection = 'OPERATING' | 'INVESTMENT' | 'GLOBAL' | 'PATRIMONY' | 'OTHER';
+export type CAFinancialFlow = 'REVENUE' | 'EXPENDITURE' | 'RESULT' | 'PATRIMONY' | 'OTHER';
+export type CAFinancialMeasure = 'PLANNED' | 'EMITTED' | 'COLLECTED' | 'ENGAGED' | 'ORDERED' | 'PAID' | 'REALIZED' | 'BALANCE' | 'OTHER';
+
+export interface CAFinancialLine {
+  id: string;
+  ca_id: string;
+  institution_id: string;
+  fiscal_year: number;
+  section: CAFinancialSection;
+  flow_type: CAFinancialFlow;
+  exact_heading: string; // libellé du CA conservé sans normalisation silencieuse
+  account_code?: string;
+  measure_type: CAFinancialMeasure;
+  amount_fcfa: number;
+  source_document_id?: string;
+  source_page?: number;
+  source_reference?: string;
+  verification_status: 'TO_VERIFY' | 'VERIFIED' | 'SOURCE_ANOMALY';
+  notes?: string;
 }

@@ -1,7 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { sanitizeInput, isSafeUrl, sanitizeCsvCell, sanitizeCoordinates } from '../security';
 import { AuthSecurityService } from '../../services/authSecurity';
 import { RateLimiter } from '../../services/rateLimiter';
+
+const authMock = vi.hoisted(() => ({
+  configured: vi.fn(), getSession: vi.fn(), getUser: vi.fn(), signOut: vi.fn(),
+  signInWithPassword: vi.fn(), single: vi.fn(),
+}));
+vi.mock('../../services/supabase', () => ({
+  isSupabaseConfigured: authMock.configured,
+  supabase: {
+    auth: authMock,
+    from: () => ({ select: () => ({ eq: () => ({ single: authMock.single }) }) }),
+  },
+}));
 
 describe('Cybersecurity & Defensive Engineering Test Suite', () => {
   
@@ -97,54 +109,60 @@ describe('Cybersecurity & Defensive Engineering Test Suite', () => {
     });
   });
 
-  // =========================================================================
-  // 5. CRYPTOGRAPHIC SESSION INTEGRITY (Anti-Tampering HMAC)
-  // =========================================================================
-  describe('Cryptographic Session Integrity (AuthSecurityService)', () => {
-    it('creates a signed session token and validates it successfully', () => {
-      const user = {
-        email: 'admin@suivibudget.ci',
-        fullName: 'Administrateur National',
-        role: 'ADMIN' as const,
-      };
-
-      const token = AuthSecurityService.createSignedSession(user);
-      expect(token).toBeDefined();
-      expect(token.signature).toBeDefined();
-      expect(token.signature.length).toBe(64); // SHA-256 hex length
-
-      const validation = AuthSecurityService.validateCurrentSession();
-      expect(validation.isAuthenticated).toBe(true);
-      expect(validation.user?.email).toBe('admin@suivibudget.ci');
-      expect(validation.user?.role).toBe('ADMIN');
+  describe('Supabase staff sessions', () => {
+    beforeEach(async () => {
+      vi.resetAllMocks();
+      authMock.configured.mockReturnValue(false);
+      await AuthSecurityService.clearSession();
+      authMock.configured.mockReturnValue(true);
+      authMock.getSession.mockResolvedValue({ data: { session: { expires_at: Math.floor(Date.now() / 1000) + 3600 } }, error: null });
+      authMock.getUser.mockResolvedValue({ data: { user: { id: 'staff-id', email: 'staff@example.test', user_metadata: { role: 'ADMIN' } } }, error: null });
+      authMock.single.mockResolvedValue({ data: { role: 'ADMIN', is_active: true, full_name: 'Staff' }, error: null });
+      authMock.signOut.mockResolvedValue({ error: null });
     });
-
-    it('instantly rejects and purges tampered session tokens', () => {
-      // 1. Create legitimate token
-      const token = AuthSecurityService.createSignedSession({
-        email: 'moderateur@suivibudget.ci',
-        fullName: 'Modérateur Terrain',
-        role: 'MODERATOR' as const,
-      });
-
-      // 2. Validate legitimate token
+    it.each(['ADMIN', 'DATA_MANAGER', 'MODERATOR'])('restores the protected %s role', async role => {
+      authMock.single.mockResolvedValue({ data: { role, is_active: true }, error: null });
+      const restored = await AuthSecurityService.restoreSupabaseSession();
+      expect(restored.user?.role).toBe(role);
+      expect(authMock.getUser).toHaveBeenCalledOnce();
       expect(AuthSecurityService.validateCurrentSession().isAuthenticated).toBe(true);
-
-      // 3. Clear session and simulate tampered token by forging signature
-      AuthSecurityService.clearSession();
+    });
+    it.each([{ role: 'CITIZEN', is_active: true }, { role: 'ADMIN', is_active: false }, null])('denies unauthorized profile %j', async profile => {
+      authMock.single.mockResolvedValue({ data: profile, error: null });
+      expect((await AuthSecurityService.restoreSupabaseSession()).isAuthenticated).toBe(false);
+      expect(AuthSecurityService.validateCurrentSession().isAuthenticated).toBe(false);
+      expect(authMock.signOut).toHaveBeenCalledOnce();
+    });
+    it('rejects expired sessions', async () => {
+      authMock.getSession.mockResolvedValue({ data: { session: { expires_at: 1 } }, error: null });
+      expect((await AuthSecurityService.restoreSupabaseSession()).isAuthenticated).toBe(false);
+      expect(authMock.getUser).not.toHaveBeenCalled();
+    });
+    it('rejects a user the auth server cannot verify', async () => {
+      authMock.getUser.mockResolvedValue({ data: { user: null }, error: new Error('Expired') });
+      expect((await AuthSecurityService.restoreSupabaseSession()).isAuthenticated).toBe(false);
+    });
+    it('clears cached privileges when the server session disappears', async () => {
+      await AuthSecurityService.restoreSupabaseSession();
+      authMock.getSession.mockResolvedValue({ data: { session: null }, error: null });
+      await AuthSecurityService.restoreSupabaseSession();
       expect(AuthSecurityService.validateCurrentSession().isAuthenticated).toBe(false);
     });
-
-    it('clears session upon logout', () => {
-      AuthSecurityService.createSignedSession({
-        email: 'admin@suivibudget.ci',
-        fullName: 'Admin',
-        role: 'ADMIN' as const,
-      });
-
-      AuthSecurityService.clearSession();
-      const validation = AuthSecurityService.validateCurrentSession();
-      expect(validation.isAuthenticated).toBe(false);
+    it('does not allow callers to mutate cached privileges', async () => {
+      authMock.single.mockResolvedValue({ data: { role: 'MODERATOR', is_active: true }, error: null });
+      const restored = await AuthSecurityService.restoreSupabaseSession();
+      restored.user!.role = 'ADMIN';
+      expect(AuthSecurityService.validateCurrentSession().user?.role).toBe('MODERATOR');
+    });
+    it('awaits logout and clears privileges even when logout fails', async () => {
+      await AuthSecurityService.restoreSupabaseSession();
+      authMock.signOut.mockResolvedValue({ error: new Error('Network') });
+      await expect(AuthSecurityService.clearSession()).rejects.toThrow('Network');
+      expect(AuthSecurityService.validateCurrentSession().isAuthenticated).toBe(false);
+    });
+    it('rejects invalid credentials without a local fallback', async () => {
+      authMock.signInWithPassword.mockResolvedValue({ data: { user: null }, error: new Error('Invalid') });
+      expect((await AuthSecurityService.verifyCredentials('staff@example.test', 'invalid')).success).toBe(false);
     });
   });
 

@@ -1,0 +1,636 @@
+// =========================================================================
+// SUIVIBUDGET CÔTE D'IVOIRE — PROJECT ACCOUNTABILITY PASSPORT
+// Traçabilité intégrale : BESOIN → BUDGET → MARCHÉ → CA → PREUVE → REDDITION
+// Principes non-négociables :
+// - P1: Compréhension citoyenne
+// - P2: Provenance explicite par défaut
+// - P7: Financier != Physique (une dépense ne prouve pas une réalisation)
+// - P9: Absence de donnée != donnée d'absence (NOT_FOUND_PUBLICLY)
+// - P11: Neutralité politique absolue (pas de classement ni de note de gouvernance)
+// =========================================================================
+
+import { BudgetProject, CitizenProof } from '../types';
+import { CAInvestmentOperation, ProcurementMatch } from '../types/administrativeAccount';
+import { ADMINISTRATIVE_ACCOUNTS_DATA } from '../data/administrativeAccountsData';
+import { matchesSmartSearch, normalizeSearchText, extractWords } from './searchHelpers';
+import { formatFCFA } from './formatters';
+
+export type PassportStageStatus = 
+  | 'VERIFIED_OFFICIAL'     // Documenté avec source officielle vérifiable
+  | 'PROBABLE_MATCH'        // Rapprochement probable en attente de visa formel
+  | 'CITIZEN_DOCUMENTED'    // Documenté par observations citoyennes validées
+  | 'PENDING_DOCUMENTATION' // En attente de document ou constat
+  | 'ANOMALY_DETECTED'      // Écart factuel identifié nécessitant explication
+  | 'NOT_FOUND_PUBLICLY'    // Non retrouvé dans les sources publiques actuelles
+  | 'SOURCE_CONFLICT';      // Divergence identifiée entre sources documentaires
+
+export type DataProvenance = 
+  | 'OFFICIAL_SOURCE'          // Document officiel vérifié (Loi, CA, DGMP)
+  | 'SUIVIBUDGET_CALCULATION'  // Rapprochement ou calcul algorithmique SuiviBudget
+  | 'CITIZEN_OBSERVATION'      // Constat de terrain ou preuve citoyenne
+  | 'INSTITUTION_RESPONSE'     // Réponse institutionnelle ou droit de réponse
+  | 'UNVERIFIED_INPUT';        // Donnée déclarative ou non corroborée
+
+export type DataAvailability =
+  | 'AVAILABLE'
+  | 'NOT_FOUND_PUBLICLY'
+  | 'PENDING_COLLECTION'
+  | 'SOURCE_CONFLICT';
+
+export type MatchingConfidence = 'STRONG' | 'PROBABLE' | 'WEAK' | 'NONE' | 'TO_VERIFY';
+
+export interface CaOperationMatchResult {
+  operation?: CAInvestmentOperation;
+  confidence: MatchingConfidence;
+  matchingReason: string;
+  matchedFields: string[];
+  conflictingFields: string[];
+  temporalJustification?: string;
+}
+
+export interface PassportDataPoint {
+  label: string;
+  value: string;
+  provenance: DataProvenance;
+  availability?: DataAvailability;
+  sourceDetails?: string;
+  sourceUrl?: string;
+}
+
+export interface PassportStage {
+  id: 'NEED_PROGRAMMING' | 'BUDGET_VOTED' | 'PROCUREMENT_DGMP' | 'BUDGET_EXECUTION_CA' | 'PHYSICAL_REALIZATION' | 'AUDIT_ACCOUNTABILITY';
+  stepNumber: number;
+  label: string;
+  shortDescription: string;
+  status: PassportStageStatus;
+  statusLabel: string;
+  dataPoints: PassportDataPoint[];
+  alertMessage?: string;
+}
+
+export interface ProjectAccountabilityPassportData {
+  projectId: string;
+  projectTitle: string;
+  institutionName: string;
+  fiscalYear: number;
+  stages: PassportStage[];
+  /** Indice de complétude documentaire (0 à 100 %). Ne constitue en aucun cas une note politique ou de gouvernance. */
+  documentationCompletenessPct: number;
+  /** @deprecated Utiliser documentationCompletenessPct pour clarté sémantique */
+  overallAccountabilityScorePct: number;
+  hasMatchedCaOperation: boolean;
+  hasMatchedDgmpTender: boolean;
+  hasCitizenFieldProofs: boolean;
+  matchedOperation?: CAInvestmentOperation;
+  matchedProcurement?: ProcurementMatch;
+  matchResult?: CaOperationMatchResult;
+}
+
+/**
+ * Recherche et évalue le rapprochement d'une opération d'investissement CA avec un projet budgétaire.
+ * Applique une stratégie multi-critères stricte :
+ * - Institution/Commune
+ * - Exercice fiscal et compatibilité temporelle
+ * - Mots-clés distinctifs
+ * - Identifiants explicites
+ * - Justificatifs pluriannuels documentés
+ */
+export function findMatchingCaOperationResult(project: BudgetProject): CaOperationMatchResult {
+  if (!project) {
+    return {
+      confidence: 'NONE',
+      matchingReason: 'Projet non défini',
+      matchedFields: [],
+      conflictingFields: [],
+    };
+  }
+
+  const projectCommuneNorm = normalizeSearchText(project.commune_name || '');
+  const projectTitleNorm = normalizeSearchText(project.title || '');
+  const projectYear = Number(project.fiscal_year) || 2026;
+
+  let bestResult: CaOperationMatchResult = {
+    confidence: 'NONE',
+    matchingReason: 'Aucun compte administratif correspondant retrouvé dans les données auditées',
+    matchedFields: [],
+    conflictingFields: [],
+  };
+
+  for (const ca of ADMINISTRATIVE_ACCOUNTS_DATA) {
+    const caInstNorm = normalizeSearchText(ca.institution_name);
+    const matchesCommune = Boolean(
+      projectCommuneNorm && (caInstNorm.includes(projectCommuneNorm) || projectCommuneNorm.includes(caInstNorm))
+    );
+    const matchesInstId = Boolean(project.institution_id && ca.institution_id === project.institution_id);
+
+    // Si l'institution ne concorde pas, passer au CA suivant
+    if (!matchesCommune && !matchesInstId) continue;
+
+    for (const op of ca.operations || []) {
+      const opYear = Number(op.fiscal_year) || ca.fiscal_year;
+      const yearDiff = Math.abs(projectYear - opYear);
+      const isMultiYearDoc = Boolean(
+        op.operation_reference?.toUpperCase().includes('REPORT') ||
+        op.title.toLowerCase().includes('report') ||
+        project.title.toLowerCase().includes('tranche') ||
+        project.title.toLowerCase().includes('phase')
+      );
+
+      // 1. Liaison directe par identifiant officiel
+      if (op.linked_project_id && op.linked_project_id === project.id) {
+        if (yearDiff === 0) {
+          return {
+            operation: op,
+            confidence: 'STRONG',
+            matchingReason: 'Liaison directe par identifiant officiel de projet et exercice fiscal concordant',
+            matchedFields: ['linked_project_id', 'fiscal_year', 'institution'],
+            conflictingFields: [],
+          };
+        } else if (isMultiYearDoc) {
+          return {
+            operation: op,
+            confidence: 'STRONG',
+            matchingReason: 'Liaison directe par identifiant officiel avec justificatif de report/pluriannualité documenté',
+            matchedFields: ['linked_project_id', 'institution', 'pluriannual_trace'],
+            conflictingFields: [],
+            temporalJustification: `Exercice projet (${projectYear}) distinct de l'exercice CA (${opYear}), justifié par mention de report/pluriannualité.`,
+          };
+        } else {
+          return {
+            operation: op,
+            confidence: 'TO_VERIFY',
+            matchingReason: `Identifiant identique mais exercices fiscaux distants (${projectYear} vs ${opYear}) sans justificatif pluriannuel certifié`,
+            matchedFields: ['linked_project_id', 'institution'],
+            conflictingFields: ['fiscal_year'],
+            temporalJustification: `Écart de ${yearDiff} an(s) entre projet et CA : requiert vérification documentaire administrative.`,
+          };
+        }
+      }
+
+      // 2. Évaluation textuelle et sémantique
+      const opTitleNorm = normalizeSearchText(op.title);
+      const isExactTitle = opTitleNorm === projectTitleNorm || (opTitleNorm.length > 15 && projectTitleNorm.includes(opTitleNorm));
+      const isSmartSearchMatch = matchesSmartSearch([op.title], project.title) || matchesSmartSearch([project.title], op.title);
+
+      const stopwords = new Set([
+        'construction', 'rehabilitation', 'amenagement', 'batiment', 'salles', 'classe', 
+        'projet', 'travaux', 'commune', 'extension', 'nouveau', 'nouvelle', 'equipement', 'ecole', 'primaire', 'publique'
+      ]);
+      const opWords = extractWords(op.title).filter(w => w.length >= 4 && !stopwords.has(w));
+      const projWords = extractWords(project.title).filter(w => w.length >= 4 && !stopwords.has(w));
+      const commonDistinctiveWords = opWords.filter(w => projWords.includes(w));
+
+      const hasStrongKeywords = commonDistinctiveWords.length >= 2;
+      const hasLocalityMatch = Boolean(
+        project.locality_village_neighborhood && 
+        op.title.toLowerCase().includes(project.locality_village_neighborhood.toLowerCase())
+      );
+
+      const isTextuallyCorrelated = isExactTitle || isSmartSearchMatch || hasStrongKeywords || (hasLocalityMatch && commonDistinctiveWords.length >= 1);
+
+      if (isTextuallyCorrelated) {
+        // APPLICATION STRICTE DU FILTRE TEMPOREL (Section 5.1)
+        if (yearDiff === 0) {
+          // Année identique
+          const isStrong = isExactTitle || (hasStrongKeywords && commonDistinctiveWords.length >= 3);
+          return {
+            operation: op,
+            confidence: isStrong ? 'STRONG' : 'PROBABLE',
+            matchingReason: isStrong 
+              ? `Concordance institutionnelle, textuelle forte et exercice fiscal identique (${opYear})` 
+              : `Même institution et exercice fiscal (${opYear}) avec mots-clés concordants`,
+            matchedFields: ['institution', 'fiscal_year', 'title_distinctive_words'],
+            conflictingFields: [],
+          };
+        } else if (isMultiYearDoc) {
+          // Années différentes mais justification pluriannuelle explicite
+          return {
+            operation: op,
+            confidence: 'PROBABLE',
+            matchingReason: `Concordance institutionnelle et textuelle avec justification de report/pluriannualité documentée (${projectYear} vs CA ${opYear})`,
+            matchedFields: ['institution', 'title_distinctive_words', 'pluriannual_trace'],
+            conflictingFields: [],
+            temporalJustification: `Décalage temporel (${projectYear} vs CA ${opYear}) documenté par mention de report/tranche au compte administratif officiel.`,
+          };
+        } else {
+          // Années différentes sans justification pluriannuelle : INTERDICTION D'AFFIRMATION FORTE
+          const candidate: CaOperationMatchResult = {
+            operation: op,
+            confidence: yearDiff === 1 ? 'TO_VERIFY' : 'WEAK',
+            matchingReason: `Similitude textuelle mais exercices incompatibles (${projectYear} vs CA ${opYear}) sans preuve de pluriannualité`,
+            matchedFields: ['institution', 'title_distinctive_words'],
+            conflictingFields: ['fiscal_year'],
+            temporalJustification: `Écart de ${yearDiff} exercice(s) : une ressemblance d'intitulé ne prouve pas l'identité de l'opération (Principe 2).`,
+          };
+
+          // Ne pas écraser un meilleur résultat existant
+          if (bestResult.confidence === 'NONE' || (bestResult.confidence === 'WEAK' && candidate.confidence === 'TO_VERIFY')) {
+            bestResult = candidate;
+          }
+        }
+      }
+    }
+  }
+
+  return bestResult;
+}
+
+/**
+ * Recherche une opération d'investissement CA correspondant à un projet.
+ * Ne renvoie l'opération QUE si le rapprochement est qualifié en STRONG ou PROBABLE.
+ * Les rapprochements WEAK ou TO_VERIFY ne sont jamais exposés comme certitude administrative.
+ */
+export function findMatchingCaOperation(project: BudgetProject): CAInvestmentOperation | undefined {
+  const result = findMatchingCaOperationResult(project);
+  if (result.confidence === 'STRONG' || result.confidence === 'PROBABLE') {
+    return result.operation;
+  }
+  return undefined;
+}
+
+/**
+ * Recherche le marché DGMP correspondant via l'opération CA rapprochée
+ */
+export function findMatchingDgmpProcurement(project: BudgetProject): ProcurementMatch | undefined {
+  const matchResult = findMatchingCaOperationResult(project);
+  if (matchResult.confidence === 'STRONG' || matchResult.confidence === 'PROBABLE') {
+    return matchResult.operation?.procurement_match;
+  }
+  return undefined;
+}
+
+/**
+ * Construit le Passeport de Redevabilité complet pour un projet
+ */
+export function generateProjectPassport(
+  project: BudgetProject, 
+  citizenProofs: CitizenProof[] = []
+): ProjectAccountabilityPassportData {
+  const matchResult = findMatchingCaOperationResult(project);
+  const isAffirmativeMatch = matchResult.confidence === 'STRONG' || matchResult.confidence === 'PROBABLE';
+  const matchedOp = isAffirmativeMatch ? matchResult.operation : undefined;
+  const matchedProc = matchedOp?.procurement_match;
+  const approvedProofs = citizenProofs.filter(p => p.verification_status === 'APPROVED');
+
+  const stages: PassportStage[] = [];
+
+  // -------------------------------------------------------------------------
+  // ÉTAPE 1 : BESOIN & PROGRAMMATION
+  // RÈGLE CARDINALE (Section 7) : L'INSCRIPTION BUDGÉTAIRE NE PROUVE PAS LE BESOIN CITOYEN INITIAL
+  // -------------------------------------------------------------------------
+  const hasProgram = Boolean(project.program_name || project.details);
+  const citizenNeedOrigin = project.citizen_need_origin?.trim() || project.initiative_source?.trim();
+  const citizenNeedRecorded = Boolean(citizenNeedOrigin);
+
+  stages.push({
+    id: 'NEED_PROGRAMMING',
+    stepNumber: 1,
+    label: 'Besoin & Programmation',
+    shortDescription: 'Traçabilité du besoin citoyen d\'origine et inscription au programme d\'investissement',
+    status: hasProgram ? 'VERIFIED_OFFICIAL' : 'NOT_FOUND_PUBLICLY',
+    statusLabel: hasProgram ? 'Programmation Budgétaire Officielle' : 'Donnée non retrouvée publiquement',
+    dataPoints: [
+      {
+        label: 'Programmation budgétaire',
+        value: project.program_name || project.details || 'Ligne d\'investissement inscrite au budget',
+        provenance: 'OFFICIAL_SOURCE',
+        sourceDetails: project.source || 'Loi de Finances / Extrait budgétaire officiel',
+      },
+      {
+        label: 'Expression du besoin citoyen',
+        value: citizenNeedRecorded 
+          ? citizenNeedOrigin!
+          : 'Non documenté publiquement dans l\'extrait budgétaire',
+        provenance: citizenNeedRecorded ? 'CITIZEN_OBSERVATION' : 'SUIVIBUDGET_CALCULATION',
+        availability: citizenNeedRecorded ? 'AVAILABLE' : 'NOT_FOUND_PUBLICLY',
+        sourceDetails: citizenNeedRecorded
+          ? 'Processus participatif / APEC'
+          : 'L\'inscription budgétaire ne permet pas à elle seule de retracer la consultation citoyenne d\'origine (Principe 4).',
+      },
+      {
+        label: 'Niveau d\'action',
+        value: project.scope_level === 'NATIONAL' ? 'Projet d\'envergure nationale' : 'Projet local / communal',
+        provenance: 'OFFICIAL_SOURCE',
+      },
+      {
+        label: 'Secteur public',
+        value: project.category || 'Général',
+        provenance: 'OFFICIAL_SOURCE',
+      },
+    ],
+  });
+
+  // -------------------------------------------------------------------------
+  // ÉTAPE 2 : BUDGET VOTÉ
+  // -------------------------------------------------------------------------
+  stages.push({
+    id: 'BUDGET_VOTED',
+    stepNumber: 2,
+    label: 'Budget Voté (BP)',
+    shortDescription: 'Crédits votés par l\'autorité délibérante (Loi de Finances ou Conseil Municipal)',
+    status: project.budget_amount_fcfa > 0 ? 'VERIFIED_OFFICIAL' : 'PENDING_DOCUMENTATION',
+    statusLabel: project.budget_amount_fcfa > 0 ? 'Voté au Budget' : 'Montant non renseigné',
+    dataPoints: [
+      {
+        label: 'Exercice fiscal',
+        value: String(project.fiscal_year || 2026),
+        provenance: 'OFFICIAL_SOURCE',
+      },
+      {
+        label: 'Montant inscrit',
+        value: project.budget_amount_fcfa > 0 ? formatFCFA(project.budget_amount_fcfa) : 'Non renseigné',
+        provenance: 'OFFICIAL_SOURCE',
+        sourceDetails: project.source || 'Loi de Finances (DGBF)',
+      },
+      {
+        label: 'Nature de la dépense',
+        value: project.nature_expense || 'Investissements',
+        provenance: 'OFFICIAL_SOURCE',
+      },
+      {
+        label: 'Maîtrise d\'Ouvrage',
+        value: project.master_builder || project.commune_name || project.region_name || 'Collectivité / Ministère',
+        provenance: 'OFFICIAL_SOURCE',
+      },
+    ],
+  });
+
+  // -------------------------------------------------------------------------
+  // ÉTAPE 3 : COMMANDE PUBLIQUE & MARCHÉ (DGMP)
+  // RÈGLE : LA SIMPLE PRÉSENCE D'UN TITULAIRE DANS BUDGETPROJECT NE PROUVE PAS UN MARCHÉ DGMP
+  // -------------------------------------------------------------------------
+  if (matchedProc) {
+    const isProbable = matchResult.confidence === 'PROBABLE';
+    stages.push({
+      id: 'PROCUREMENT_DGMP',
+      stepNumber: 3,
+      label: 'Commande Publique & Attribution (DGMP)',
+      shortDescription: 'Attribution du marché public rapprochée des avis officiels de la DGMP',
+      status: isProbable ? 'PROBABLE_MATCH' : 'VERIFIED_OFFICIAL',
+      statusLabel: isProbable ? 'Marché Officiel Probable' : 'Marché Officiel Attribué',
+      alertMessage: matchResult.temporalJustification,
+      dataPoints: [
+        {
+          label: 'N° Appel d\'Offres',
+          value: matchedProc.tender_number || 'Non renseigné',
+          provenance: 'OFFICIAL_SOURCE',
+          sourceDetails: matchedProc.source,
+          sourceUrl: matchedProc.source_url,
+        },
+        {
+          label: 'Objet officiel du marché',
+          value: matchedProc.procurement_object,
+          provenance: 'OFFICIAL_SOURCE',
+        },
+        {
+          label: 'Entreprise adjudicataire',
+          value: matchedProc.contractor,
+          provenance: 'OFFICIAL_SOURCE',
+        },
+        {
+          label: 'Montant adjugé',
+          value: formatFCFA(matchedProc.award_amount),
+          provenance: 'OFFICIAL_SOURCE',
+        },
+        {
+          label: 'Date d\'attribution',
+          value: matchedProc.award_date || '2024',
+          provenance: 'OFFICIAL_SOURCE',
+        },
+      ],
+    });
+  } else if (project.contractor_name && !project.contractor_name.toLowerCase().includes('appel d\'offres')) {
+    // Présence d'un nom de titulaire non corroboré par avis DGMP
+    stages.push({
+      id: 'PROCUREMENT_DGMP',
+      stepNumber: 3,
+      label: 'Commande Publique & Entreprise',
+      shortDescription: 'Titulaire mentionné dans la fiche projet, en attente de référence officielle DGMP',
+      status: 'PENDING_DOCUMENTATION',
+      statusLabel: 'Titulaire Déclaré (non audité DGMP)',
+      dataPoints: [
+        {
+          label: 'Entreprise déclarée',
+          value: project.contractor_name,
+          provenance: 'UNVERIFIED_INPUT',
+          sourceDetails: 'Mention administrative déclarative non corroborée par un avis d\'attribution DGMP vérifié.',
+        },
+        {
+          label: 'Avis d\'attribution DGMP',
+          value: 'En attente de rapprochement avec le répertoire officiel des marchés',
+          provenance: 'SUIVIBUDGET_CALCULATION',
+          availability: 'PENDING_COLLECTION',
+        },
+      ],
+    });
+  } else {
+    stages.push({
+      id: 'PROCUREMENT_DGMP',
+      stepNumber: 3,
+      label: 'Commande Publique & Marché (DGMP)',
+      shortDescription: 'Recherche de l\'avis d\'attribution dans le répertoire de la Direction Générale des Marchés Publics',
+      status: 'NOT_FOUND_PUBLICLY',
+      statusLabel: 'Donnée non retrouvée publiquement',
+      dataPoints: [
+        {
+          label: 'Statut du marché',
+          value: 'Aucun avis d\'attribution rapproché pour le moment',
+          provenance: 'SUIVIBUDGET_CALCULATION',
+          availability: 'NOT_FOUND_PUBLICLY',
+          sourceDetails: 'Avis DGMP consultés : l\'absence de résultat ne prouve pas l\'absence d\'appel d\'offres (Principe 9).',
+        },
+      ],
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // ÉTAPE 4 : EXÉCUTION BUDGÉTAIRE (COMPTE ADMINISTRATIF)
+  // RÈGLE : STRICTEMENT NEUTRE, AUCUNE INTERPRÉTATION CAUSALE ("REPORT PROBABLE" INTERDIT)
+  // -------------------------------------------------------------------------
+  if (matchedOp) {
+    const isZeroExecuted = matchedOp.executed_amount === 0;
+    const isProbable = matchResult.confidence === 'PROBABLE';
+
+    // Formulation factuelle et neutre obligatoire (Section 5.3)
+    const alertMessage = isZeroExecuted 
+      ? 'Le Compte Administratif consulté indique 0 FCFA exécuté/ordonnancé pour cette opération sur l’exercice observé. La cause de cet écart n’est pas établie par les sources actuellement reliées.' 
+      : matchResult.temporalJustification;
+
+    stages.push({
+      id: 'BUDGET_EXECUTION_CA',
+      stepNumber: 4,
+      label: 'Exécution Budgétaire (Compte Administratif)',
+      shortDescription: 'Crédits mandatés et ordonnancés inscrits au Compte Administratif audité',
+      status: isZeroExecuted ? 'ANOMALY_DETECTED' : (isProbable ? 'PROBABLE_MATCH' : 'VERIFIED_OFFICIAL'),
+      statusLabel: isZeroExecuted ? 'Exécution financière à 0 FCFA' : (isProbable ? 'Opération CA Probable' : 'Mandaté au Compte Administratif'),
+      alertMessage,
+      dataPoints: [
+        {
+          label: 'Exercice CA',
+          value: String(matchedOp.fiscal_year),
+          provenance: 'OFFICIAL_SOURCE',
+        },
+        {
+          label: 'Ligne opération',
+          value: matchedOp.operation_reference || 'Ligne d\'investissement',
+          provenance: 'OFFICIAL_SOURCE',
+        },
+        {
+          label: 'Crédits prévus au CA',
+          value: formatFCFA(matchedOp.planned_amount),
+          provenance: 'OFFICIAL_SOURCE',
+        },
+        {
+          label: 'Montant effectivement ordonnancé',
+          value: formatFCFA(matchedOp.executed_amount),
+          provenance: 'OFFICIAL_SOURCE',
+          sourceDetails: `Page ${matchedOp.source_page || 'CA'} du Compte Administratif officiel`,
+        },
+      ],
+    });
+  } else if (matchResult.confidence === 'TO_VERIFY') {
+    // Écart temporel ou ambiguïté exigeant un contrôle humain
+    stages.push({
+      id: 'BUDGET_EXECUTION_CA',
+      stepNumber: 4,
+      label: 'Exécution Budgétaire (Compte Administratif)',
+      shortDescription: 'Rapprochement potentiel avec une opération sous réserve de contrôle temporel',
+      status: 'PENDING_DOCUMENTATION',
+      statusLabel: 'Rapprochement à vérifier (écart temporel)',
+      alertMessage: matchResult.temporalJustification || 'Un écart d\'exercice a été détecté entre la fiche projet et le compte administratif.',
+      dataPoints: [
+        {
+          label: 'Statut du contrôle',
+          value: 'Opération candidate identifiée mais non affirmée (écart d\'exercice)',
+          provenance: 'SUIVIBUDGET_CALCULATION',
+          availability: 'PENDING_COLLECTION',
+          sourceDetails: matchResult.matchingReason,
+        },
+      ],
+    });
+  } else {
+    stages.push({
+      id: 'BUDGET_EXECUTION_CA',
+      stepNumber: 4,
+      label: 'Exécution Budgétaire (Compte Administratif)',
+      shortDescription: 'Reddition de compte officielle de la collectivité pour cet exercice',
+      status: 'NOT_FOUND_PUBLICLY',
+      statusLabel: 'CA en attente de collecte / publication',
+      dataPoints: [
+        {
+          label: 'Compte Administratif',
+          value: 'En attente de réception ou de publication du document certifié',
+          provenance: 'SUIVIBUDGET_CALCULATION',
+          availability: 'NOT_FOUND_PUBLICLY',
+          sourceDetails: 'La publication officielle du CA relève de la collectivité locale.',
+        },
+      ],
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // ÉTAPE 5 : RÉALISATION PHYSIQUE & PREUVES TERRAIN
+  // RÈGLE CARDINALE : UNE DÉPENSE FINANCIÈRE NE PROUVE PAS UNE RÉALISATION PHYSIQUE (Principe 7)
+  // OBSERVATION CITOYENNE != VÉRITÉ ADMINISTRATIVE
+  // -------------------------------------------------------------------------
+  const hasOfficialRate = project.progress_percentage > 0;
+  const hasFieldProofs = approvedProofs.length > 0;
+
+  let physicalStatus: PassportStageStatus = 'PENDING_DOCUMENTATION';
+  let physicalLabel = 'En attente de constat terrain';
+
+  if (hasFieldProofs) {
+    physicalStatus = 'CITIZEN_DOCUMENTED';
+    physicalLabel = `${approvedProofs.length} observation(s) citoyenne(s) validée(s)`;
+  } else if (hasOfficialRate) {
+    // Un taux officiel déclaré reste une déclaration administrative en attente de constat citoyen
+    physicalStatus = 'PENDING_DOCUMENTATION';
+    physicalLabel = `Taux administratif déclaré : ${project.progress_percentage}%`;
+  }
+
+  stages.push({
+    id: 'PHYSICAL_REALIZATION',
+    stepNumber: 5,
+    label: 'Réalisation Physique & Terrain',
+    shortDescription: 'Double regard citoyen : déclaration administrative vs constat factuel sur le terrain',
+    status: physicalStatus,
+    statusLabel: physicalLabel,
+    alertMessage: 'Règle civique : Une dépense mandatée au budget ne constitue jamais une preuve d\'achèvement des travaux sur le terrain.',
+    dataPoints: [
+      {
+        label: 'Taux administratif déclaré',
+        value: hasOfficialRate ? `${project.progress_percentage}%` : 'Non communiqué par la maîtrise d\'ouvrage',
+        provenance: 'INSTITUTION_RESPONSE',
+        sourceDetails: project.official_progress_source || project.master_builder || 'Déclaration administrative non corroborée par constat indépendant (Principe 7).',
+      },
+      {
+        label: 'Constats citoyens vérifiés',
+        value: hasFieldProofs ? `${approvedProofs.length} constat(s) photo/vidéo approuvé(s)` : '0 constat pour l\'instant',
+        provenance: 'CITIZEN_OBSERVATION',
+      },
+      {
+        label: 'Dernier statut terrain observé',
+        value: hasFieldProofs 
+          ? (approvedProofs[0].citizen_status_claim === 'COMPLETED' ? 'Terminé sur le terrain' : approvedProofs[0].citizen_status_claim === 'IN_PROGRESS' ? 'En cours d\'exécution' : 'Non démarré')
+          : 'Non documenté sur place',
+        provenance: 'CITIZEN_OBSERVATION',
+      },
+    ],
+  });
+
+  // -------------------------------------------------------------------------
+  // ÉTAPE 6 : REDDITION DE COMPTES & AUDIT
+  // -------------------------------------------------------------------------
+  const isAuditVerified = matchedOp !== undefined;
+  stages.push({
+    id: 'AUDIT_ACCOUNTABILITY',
+    stepNumber: 6,
+    label: 'Reddition de Comptes & Droit de Réponse',
+    shortDescription: 'Audit citoyen contradictoire, traçabilité documentaire et droit de réponse institutionnel',
+    status: isAuditVerified ? 'VERIFIED_OFFICIAL' : 'PENDING_DOCUMENTATION',
+    statusLabel: isAuditVerified ? 'Données Rapprochées & Vérifiées' : 'Cycle Ouvert',
+    dataPoints: [
+      {
+        label: 'Contrôle contradictoire',
+        value: isAuditVerified ? 'Rapproché avec CA officiel et/ou DGMP' : 'En attente de documents complémentaires',
+        provenance: 'SUIVIBUDGET_CALCULATION',
+      },
+      {
+        label: 'Droit d\'accès à l\'information (CAIDP)',
+        value: 'Modèle de requête légale disponible sur la plateforme',
+        provenance: 'SUIVIBUDGET_CALCULATION',
+      },
+      {
+        label: 'Droit de réponse institutionnel',
+        value: 'Ouvert à la collectivité et aux services techniques',
+        provenance: 'INSTITUTION_RESPONSE',
+      },
+    ],
+  });
+
+  // -------------------------------------------------------------------------
+  // INDICE DE COMPLÉTUDE DOCUMENTAIRE (Section 9)
+  // Mesure exclusivement la complétude documentaire sur les 6 maillons civiques.
+  // Ne constitue JAMAIS une note politique ou de gouvernance locale.
+  // -------------------------------------------------------------------------
+  const documentedStagesCount = stages.filter(s => 
+    s.status === 'VERIFIED_OFFICIAL' || s.status === 'PROBABLE_MATCH' || s.status === 'CITIZEN_DOCUMENTED'
+  ).length;
+  const documentationCompletenessPct = Math.round((documentedStagesCount / stages.length) * 100);
+
+  return {
+    projectId: project.id,
+    projectTitle: project.title,
+    institutionName: project.commune_name || project.region_name || project.ministry_name || 'Collectivité',
+    fiscalYear: project.fiscal_year || 2026,
+    stages,
+    documentationCompletenessPct,
+    overallAccountabilityScorePct: documentationCompletenessPct,
+    hasMatchedCaOperation: Boolean(matchedOp),
+    hasMatchedDgmpTender: Boolean(matchedProc),
+    hasCitizenFieldProofs: approvedProofs.length > 0,
+    matchedOperation: matchedOp,
+    matchedProcurement: matchedProc,
+    matchResult,
+  };
+}

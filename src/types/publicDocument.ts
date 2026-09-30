@@ -23,7 +23,7 @@ export type OfficialDocumentType =
   | 'MARCHE_PUBLIC'
   | 'ARRETE'
   | 'RAPPORT_AUDIT'
-  | 'AUTRE';
+  | 'AUTRE_DOCUMENT_OFFICIEL';
 
 export type DocumentLifecycleStatus =
   | 'UPLOADED'
@@ -56,46 +56,38 @@ export interface PublicDocument {
   file_name: string;
   file_size?: string;
   file_format: DocumentFormat;
-  published_at: string;
+  published_at: string | null;
   downloads_count: number;
   is_official: boolean;
   tags?: string[];
 
   // Champs de gouvernance & liaison collectivité
-  institution_id?: string;
+  institution_id?: string | null;
   institution_type?: 'MAIRIE' | 'REGION' | 'DISTRICT' | 'MINISTERE' | 'AUTORITE_REGULATION';
-  document_type?: OfficialDocumentType;
+  document_type?: OfficialDocumentType | null;
   storage_bucket?: string;
-  storage_path?: string;
+  storage_path?: string | null;
   original_filename?: string;
   mime_type?: string;
   file_size_bytes?: number;
   page_count?: number;
-  source_name?: OfficialDocumentSource;
-  source_url?: string;
+  source_name?: string | null;
+  source_url?: string | null;
   adoption_date?: string;
   approval_date?: string;
   approval_reference?: string;
-  document_status?: DocumentLifecycleStatus;
-  verification_status?: DocumentLifecycleStatus;
+  status?: DocumentLifecycleStatus;
+  verification_status?: DocumentLifecycleStatus | 'REJECTED' | 'SOURCE_CONFLICT';
   version?: number;
-  checksum_sha256?: string;
-  is_public?: boolean;
+  checksum_sha256?: string | null;
+  replaces_document_id?: string | null;
+  replacement_reason?: string | null;
   created_by?: string;
-  verified_by?: string;
-  verified_at?: string;
+  verified_by?: string | null;
+  verified_at?: string | null;
   created_at?: string;
   updated_at?: string;
 
-  // Historique des versions
-  previous_versions?: {
-    version: number;
-    file_url: string;
-    file_name: string;
-    checksum_sha256?: string;
-    archived_at: string;
-    archived_by: string;
-  }[];
 }
 
 /**

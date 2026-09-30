@@ -18,7 +18,7 @@ import {
   Copy,
   Check
 } from 'lucide-react';
-import { Institution, PublicDocument, OfficialDocumentSource, DocumentLifecycleStatus } from '../../types';
+import { Institution, PublicDocument, OfficialDocumentSource } from '../../types';
 import { calculateFileSha256 } from '../../utils/caFileMatcher';
 import { DocumentStorageService } from '../../services/documentStorageService';
 import { dataStore } from '../../services/dataStore';
@@ -63,13 +63,13 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
   const [checksumSha256, setChecksumSha256] = useState<string>(existingDocument?.checksum_sha256 || '');
   
   // Official Metadata
-  const [sourceName, setSourceName] = useState<OfficialDocumentSource>(existingDocument?.source_name || 'DGDDL');
+  const [sourceName, setSourceName] = useState<string>(existingDocument?.source_name || 'DGDDL');
   const [sourceUrl, setSourceUrl] = useState<string>(existingDocument?.source_url || '');
   const [adoptionDate, setAdoptionDate] = useState<string>(existingDocument?.adoption_date || '');
   const [approvalDate, setApprovalDate] = useState<string>(existingDocument?.approval_date || '');
   const [approvalReference, setApprovalReference] = useState<string>(existingDocument?.approval_reference || '');
-  const [documentStatus, setDocumentStatus] = useState<DocumentLifecycleStatus>(existingDocument?.document_status || 'TO_VERIFY');
   const [isAsNewVersion, setIsAsNewVersion] = useState<boolean>(false);
+  const [replacementReason, setReplacementReason] = useState('');
   const [isCalculatingHash, setIsCalculatingHash] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
@@ -93,7 +93,6 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       setAdoptionDate(existingDocument.adoption_date || '');
       setApprovalDate(existingDocument.approval_date || '');
       setApprovalReference(existingDocument.approval_reference || '');
-      setDocumentStatus(existingDocument.document_status || 'TO_VERIFY');
     } else {
       setFiscalYear(selectedYear);
       setSelectedFile(null);
@@ -107,7 +106,6 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       setAdoptionDate('');
       setApprovalDate('');
       setApprovalReference('');
-      setDocumentStatus('TO_VERIFY');
       setIsAsNewVersion(false);
       setDuplicateWarning(null);
     }
@@ -164,7 +162,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       return;
     }
 
-    if (!selectedFile && !fileUrl) {
+    if (!selectedFile && !existingDocument?.storage_path) {
       onShowToast('Veuillez téléverser un fichier PDF officiel.', 'error');
       return;
     }
@@ -193,6 +191,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
           }
         );
 
+        if (!uploadRes.success) throw new Error(uploadRes.error || 'Téléversement non confirmé.');
         finalFileUrl = uploadRes.fileUrl;
         finalStorageBucket = uploadRes.storageBucket;
         finalStoragePath = uploadRes.storagePath;
@@ -201,7 +200,8 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
         finalSha256 = uploadRes.checksumSha256;
       }
 
-      const savedDoc = dataStore.saveCADocument({
+      const savedDoc = await dataStore.saveCADocument({
+        replacement_reason: replacementReason,
         id: existingDocument?.id,
         institution_id: institutionId,
         institution_name: currentInstitution?.name || 'Collectivité',
@@ -211,7 +211,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
         title: `Compte Administratif ${fiscalYear} - ${currentInstitution?.name}`,
         file_url: finalFileUrl,
         file_name: fileName || `compte-administratif-${fiscalYear}.pdf`,
-        file_size: finalSizeStr || '1.0 Mo',
+        file_size: finalSizeStr || undefined,
         file_size_bytes: finalSizeBytes,
         storage_bucket: finalStorageBucket,
         storage_path: finalStoragePath,
@@ -221,9 +221,6 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
         adoption_date: adoptionDate || undefined,
         approval_date: approvalDate || undefined,
         approval_reference: approvalReference || undefined,
-        document_status: documentStatus,
-        verification_status: documentStatus === 'PUBLISHED' || documentStatus === 'VERIFIED' ? 'VERIFIED' : 'TO_VERIFY',
-        is_public: documentStatus === 'PUBLISHED',
       }, isAsNewVersion);
 
       onSuccess(savedDoc);
@@ -264,7 +261,8 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            aria-label="Fermer la modal"
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -460,90 +458,27 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
             />
           </div>
 
-          {/* Workflow Status Selection */}
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-            <label className="block text-xs font-black text-slate-800">
-              Statut du Workflow de Validation
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <label className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col ${
-                documentStatus === 'TO_VERIFY' 
-                  ? 'border-amber-400 bg-amber-50 text-amber-900 font-bold' 
-                  : 'border-slate-200 bg-white text-slate-600'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs">À vérifier</span>
-                  <input 
-                    type="radio" 
-                    name="status" 
-                    value="TO_VERIFY" 
-                    checked={documentStatus === 'TO_VERIFY'} 
-                    onChange={() => setDocumentStatus('TO_VERIFY')}
-                    className="text-amber-500"
-                  />
-                </div>
-                <span className="text-[10px] text-slate-500 font-normal mt-1">
-                  En attente d'audit (Non public)
-                </span>
-              </label>
-
-              <label className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col ${
-                documentStatus === 'VERIFIED' 
-                  ? 'border-blue-400 bg-blue-50 text-brand-blue font-bold' 
-                  : 'border-slate-200 bg-white text-slate-600'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs">Vérifié</span>
-                  <input 
-                    type="radio" 
-                    name="status" 
-                    value="VERIFIED" 
-                    checked={documentStatus === 'VERIFIED'} 
-                    onChange={() => setDocumentStatus('VERIFIED')}
-                    className="text-brand-blue"
-                  />
-                </div>
-                <span className="text-[10px] text-slate-500 font-normal mt-1">
-                  Validé mais non publié
-                </span>
-              </label>
-
-              <label className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col ${
-                documentStatus === 'PUBLISHED' 
-                  ? 'border-emerald-400 bg-emerald-50 text-emerald-900 font-bold' 
-                  : 'border-slate-200 bg-white text-slate-600'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs">Publié</span>
-                  <input 
-                    type="radio" 
-                    name="status" 
-                    value="PUBLISHED" 
-                    checked={documentStatus === 'PUBLISHED'} 
-                    onChange={() => setDocumentStatus('PUBLISHED')}
-                    className="text-emerald-500"
-                  />
-                </div>
-                <span className="text-[10px] text-slate-500 font-normal mt-1">
-                  Visible par tous les citoyens
-                </span>
-              </label>
-            </div>
-          </div>
+          {isAsNewVersion && <label className="block text-sm font-semibold text-slate-700">
+            Motif du remplacement
+            <input required value={replacementReason} onChange={e => setReplacementReason(e.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 p-3 focus-visible:outline-brand-blue" />
+          </label>}
+          <p className="p-4 rounded-2xl bg-amber-50 text-amber-900 text-sm">
+            Le document sera enregistré à vérifier. La vérification et la publication s’effectuent ensuite depuis l’examen du document.
+          </p>
 
           {/* Footer Submit */}
           <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+              className="px-4 py-2.5 min-h-[44px] flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
             >
               Annuler
             </button>
             <button
               type="submit"
               disabled={isSubmitting || isCalculatingHash}
-              className="px-5 py-2.5 rounded-xl bg-brand-blue text-white text-xs font-black hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2"
+              className="px-5 py-2.5 min-h-[44px] rounded-xl bg-brand-blue text-white text-xs font-black hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2"
             >
               <ShieldCheck className="w-4 h-4" />
               <span>{isSubmitting ? 'Enregistrement...' : 'Enregistrer le Compte Administratif'}</span>

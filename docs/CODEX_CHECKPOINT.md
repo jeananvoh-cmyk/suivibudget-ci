@@ -1,0 +1,70 @@
+# Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
+
+## 30 septembre — fermeture HTTP et publication frontend
+
+197 tests HTTP réels et 2 contrôles des relations CA/opérations/marchés passent. Défauts corrigés : droits SELECT service_role manquants sur documents/preuves, metadata.size indisponible au contrôle INSERT Storage, médias privés non résolus côté client, CA VERIFIED embarqués dans le bundle public. Nouvelle migration locale 20260930033244 appliquée à distance sous 20260930144753 ; quatre migrations précédentes non rejouées. Edge documents v3 et preuves v2 avec verify_jwt=true. CA publics issus uniquement de PostgREST PUBLISHED ; sources pilotes déplacées en fixtures de tests, données distantes intactes.
+
+Nettoyage confirmé : 1 compte Auth, 3 CA, 0 document, 0 preuve, 0 objet Storage, 0 profil/journal temporaire. 121 tests et build réussis. Advisors finaux après nettoyage : seul WARN sécurité mot de passe compromis ; 31 index inutilisés et 16 policies permissives multiples conservés. Playwright Documents/Observatoire/Institutions : 375/768/1440, aucun débordement ni erreur JavaScript. Dépendance xlsx inutilisée retirée ; npm audit zéro vulnérabilité.
+
+Commits 454d62c (publication/HTTP) puis 3b502b1 (dépendance) poussés, CI verify et Vercel Preview Comments SUCCESS sur chacun. FOUNDATION_READY=TRUE sur 3b502b1223d304b12f904087430882ea8156f324. PR #3 ouverte, non mergée. Prochain bloc : consolidation Passport sur branche produit distincte, puis DGMP contrôlé, APEC ultérieurement. AGENT_HANDOFF.md est le relais courant ; les sections suivantes restent historiques.
+
+## 30 septembre — état courant Codex
+
+Commit fonctionnel b2b3b1f poussé, CI verify SUCCESS. Metadata, publication et grants appliqués individuellement, puis complément de projection publique : versions distantes 20260930030522, 20260930030614, 20260930030702, 20260930031058. Vérifications SQL distantes avec rollback, aucune fixture restante. 116 tests et build passent. Security advisor : uniquement Leaked Password Protection Disabled. FOUNDATION_READY reste FALSE : tests exhaustifs Storage/Edge/PostgREST encore nécessaires. AGENT_HANDOFF.md porte le relais opérationnel.
+
+## Mandat et état
+
+Poursuite sans interruption du backlog de sécurisation, RLS, gestion documentaire, CA et UX/UI responsive sur la branche `security-ca-final-20260929` (PR #3).
+
+GitHub : master distant `529db22012848e34afdf8b286983eebfc917b9f7`. Branche PR active `security-ca-final-20260929`, commit head de reprise `8e1654cb0d234d22bf7662467b1b544d61dfa83e`.
+
+## Résolution des Tests et du Build
+- **Tests unitaires** : Les 4 tests qui échouaient initialement (`caManagement.test.ts` et `security.test.ts`) ont été totalement corrigés et isolés via des mocks Supabase sécurisés.
+  - Résultat d'exécution : **8 fichiers de test validés (8/8), 91 tests réussis (91/91)** en 20.31s.
+  - Zéro régression sur la matrice des 232 collectivités, la sécurité RBAC, les formats financiers ou les projets d'investissement.
+- **Build de production** : `npm run build` (`tsc && vite build`) s'exécute avec succès avec **0 erreur** (1721 modules transformés).
+
+## État Supabase & Sécurité
+- Projet autorisé : `cdesuvcozcetdtvibgqs` (eu-west-1).
+- Authentification : Suppression intégrale de `createSignedSession` et des signatures locales factices. L'authentification passe exclusivement par `supabase.auth.getSession()` et `public.profiles`. Les rôles (`ADMIN`, `DATA_MANAGER`, `MODERATOR`) ne sont jamais attribués côté client ni lus depuis `user_metadata`.
+- Stockage privé : Buckets `public_documents` et `citizen_photos` privés. Pas de `getPublicUrl` non sécurisé. Téléversements avec `upsert: false`, contrôle SHA-256 et signature PDF.
+- Workflow CA : Découplage strict entre `VERIFIED` (audit de conformité) et `PUBLISHED` (visibilité citoyenne). La matrice dynamique des 232 collectivités calcule en temps réel les comptes manquants sans insertion de lignes factices.
+
+## Migrations Préparées (supabase/migrations/)
+- `20260929121225_publication_boundaries.sql` : RLS de publication parent pour les opérations financières, contrôle staff sur documents et modération des preuves, trigger `enforce_document_publication_audit()`.
+- `20260929121408_document_metadata_versions.sql` : Colonnes de métadonnées et versionnement documentaire avec contraintes d'unicité.
+- Prêtes pour validation et application après inspection de drift.
+
+## UX/UI Responsive & Accessibilité
+- Intégration de l'Addendum UX/UI dans le Goal permanent et dans `AGENTS.md`.
+- Audit d'inventaire et validation Playwright multi-viewports (375px mobile, 1440px desktop) :
+  - `HomePage` : Aligné sur 232 collectivités (201 communes + 31 régions) dans `StatImpactBanner.tsx`, bottom navigation tactile, zéro overflow.
+  - `InstitutionsPage` : Pannes et badges officiels vérifiés.
+  - `ProjectsPage` : Bascule grille / tableau réactif sans rétrécissement illisible, modal de détail projet `ProjectDetailModal` responsive avec boutons tactiles >= 44px.
+  - `ObservatoryPage` : Bilan réel vs voté et CTA dépot de constat.
+  - `DocumentsPage` : État vide informatif, CTA de demande CAIDP, recherche et filtres.
+  - `AdminLoginPage` : Route `/admin/login` rétablie dans `parseRoute` et sécurisée visuellement.
+  - `SendProofModal` : Largeur mobile 351px, zéro débordement horizontal, bouton CTA >= 44px (52px), validation des statuts de chantier et dropzone.
+  - `OfficialDocRequestModal` : Largeur mobile 355px, zéro débordement, parcours en 3 étapes (packs documentaires, demandeur, génération de lettre CAIDP).
+  - `AdminDashboardPage` : Navigation multi-onglets (CAIDP, CA 232, Documents, Modération, File de Travail) validée sur mobile (375px) et desktop (1440px), zéro overflow horizontal, boutons interactifs.
+  - `SingleCAUploadModal` : Formulaire de dépôt individuel validé (343px mobile, 672px desktop), 8 champs responsive, cibles tactiles >= 44px.
+  - `BatchCAImportModal` : Import par lot validé (343px mobile, 1024px desktop), glisser-déposer, proposition d'appariement, cibles tactiles >= 44px.
+  - `ExamineCADocumentModal` : Examen et cycle de vie découplé (`TO_VERIFY` → `VERIFIED` → `PUBLISHED`) validé (343px mobile, 672px desktop), checklist de conformité, cibles tactiles >= 44px.
+- Suite de tests : **106/106 tests validés (9/9 fichiers)**, `npm run build` propre (0 erreur en 25.78s). 100% des 13 vues et modales déclarées `VALIDATED`.
+
+## Documents de Continuité Multi-Agents
+- `AGENTS.md` : Mis à jour avec le Goal permanent enrichi, les 16 principes non négociables et les garde-fous techniques.
+- `docs/AGENT_HANDOFF.md` : Maintenu avec la matrice complète `UX_UI_AUDIT_STATUS` (13/13 VALIDATED), le Passeport de Redevabilité et les prochaines tâches exécutables.
+
+## Passeport de Redevabilité du Projet (Project Accountability Passport) — 30 septembre 2026
+- **Architecture & Cycle Civique** : Implémentation du cycle complet en 6 étapes (`NEED_PROGRAMMING` → `BUDGET_VOTED` → `PROCUREMENT_DGMP` → `BUDGET_EXECUTION_CA` → `PHYSICAL_REALIZATION` → `AUDIT_ACCOUNTABILITY`) dans `src/utils/projectPassport.ts`.
+- **Rapprochement Temporel & Multi-Critères** : Fonction `findMatchingCaOperationResult` avec vérification stricte des exercices budgétaires. Empêche toute hallucination d'appariement direct entre un projet 2026 et un CA 2024 (classé `WEAK` ou `TO_VERIFY`, `conflictingFields: ['fiscal_year']`) sauf justification documentaire explicite (`REPORT`, `TRANCHE`, référence pluriannuelle).
+- **Neutralité Politique & Formulation Factuelle (Principe 11)** : Élimination totale des spéculations (« report probable », « retard », « fraude ») pour les opérations à 0 FCFA ordonnancé (ex. école de Gardienkro). Formulation strictement neutre : *« Le Compte Administratif consulté indique 0 FCFA exécuté/ordonnancé pour cette opération sur l’exercice observé. La cause de cet écart n’est pas établie par les sources actuellement reliées. »*
+- **Typage Strict de la Provenance & Disponibilité** : Types explicites sans cast `as any` (`DataProvenance` : `OFFICIAL_SOURCE`, `SUIVIBUDGET_CALCULATION`, `CITIZEN_OBSERVATION`, `INSTITUTION_RESPONSE`, `UNVERIFIED_INPUT` ; `DataAvailability` : `AVAILABLE`, `NOT_FOUND_PUBLICLY`, `PENDING_COLLECTION`, `SOURCE_CONFLICT`).
+- **Besoin Initial vs Programmation** : Distinction formelle dès l'étape 1 entre le besoin citoyen initial et l'inscription budgétaire officielle.
+- **Score Global Neutre** : Jauge renommée « Complétude Documentaire » (`documentationCompletenessPct`) mesurant la présence de sources documentaires sans jugement politique ni notation subjective.
+- **Composant Visuel & UX** : Composant `ProjectAccountabilityPassport.tsx` avec cartes d'étapes expansibles, badges de provenance explicites, gestion du principe 9 (`NOT_FOUND_PUBLICLY`), et actions citoyennes directes (demande CAIDP, envoi de preuve terrain).
+- **Intégration & Accessibilité** : 3e onglet « Passeport Redevabilité » dans `ProjectDetailModal.tsx` avec pastille dynamique (« Lié DGMP/CA » ou « 6 étapes »), cibles tactiles WCAG AA (>= 44px).
+- **Validation** : 10 fichiers de test validés (**116/116 tests réussis**), `npm run build` propre (0 erreur, 1722 modules). Validation visuelle multi-viewports (375px mobile et 1440px desktop) avec zéro overflow horizontal.
+
+

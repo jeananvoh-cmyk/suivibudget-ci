@@ -24,6 +24,8 @@ import {
 } from 'lucide-react';
 import { PublicDocument, DocumentLifecycleStatus } from '../../types';
 import { dataStore } from '../../services/dataStore';
+import { supabase } from '../../services/supabase';
+import { isSafeUrl } from '../../utils/security';
 
 interface ExamineCADocumentModalProps {
   isOpen: boolean;
@@ -47,10 +49,10 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
 
   // Verification Checklist State
   const [checks, setChecks] = useState({
-    formatValid: true,
-    deliberationAttached: true,
+    formatValid: false,
+    deliberationAttached: false,
     tutelleApproved: Boolean(document?.approval_reference || document?.approval_date),
-    balancesCoherent: true,
+    balancesCoherent: false,
   });
 
   if (!isOpen || !document) return null;
@@ -63,10 +65,11 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
     onShowToast('Empreinte SHA-256 copiée dans le presse-papier.');
   };
 
-  const handleUpdateStatus = (newStatus: DocumentLifecycleStatus) => {
+  const handleUpdateStatus = async (newStatus: DocumentLifecycleStatus) => {
     setIsProcessing(true);
     try {
-      const ok = dataStore.updateDocumentLifecycleStatus(document.id, newStatus);
+      if (newStatus === 'VERIFIED' && !checks.formatValid) throw new Error('Confirmez la vérification du document source.');
+      const ok = await dataStore.updateDocumentLifecycleStatus(document.id, newStatus);
       if (ok) {
         onStatusChange(document.id, newStatus);
         if (newStatus === 'VERIFIED') {
@@ -78,16 +81,31 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
         } else if (newStatus === 'ARCHIVED') {
           onShowToast('Document archivé.');
         }
+        onClose();
       }
     } catch (e: any) {
       onShowToast(`Erreur : ${e.message}`, 'error');
     } finally {
       setIsProcessing(false);
-      onClose();
     }
   };
 
-  const currentStatus = document.document_status || (document.is_public ? 'PUBLISHED' : 'TO_VERIFY');
+  const currentStatus = document.status || 'TO_VERIFY';
+  const previousVersions = dataStore.getDocumentVersions(document).filter(d => (d.version || 1) < (document.version || 1));
+  const openSource = async (source: PublicDocument) => {
+    try {
+      let url = source.file_url;
+      if (source.storage_path) {
+        const { data, error } = await supabase.storage.from('public_documents').createSignedUrl(source.storage_path, 300);
+        if (error || !data) throw new Error('Lien temporaire indisponible.');
+        url = data.signedUrl;
+      }
+      if (!isSafeUrl(url)) throw new Error('Lien documentaire invalide.');
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Document inaccessible.', 'error');
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
@@ -114,7 +132,8 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            aria-label="Fermer la modal"
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -179,15 +198,13 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                 </div>
               </div>
 
-              <a
-                href={document.file_url}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button type="button"
+                onClick={() => void openSource(document)}
                 className="px-4 py-2 rounded-xl bg-brand-blue text-white text-xs font-bold hover:bg-blue-700 transition-colors shadow-xs flex items-center gap-1.5 flex-shrink-0"
               >
                 <ExternalLink className="w-4 h-4" />
                 <span>Ouvrir le PDF</span>
-              </a>
+              </button>
             </div>
 
             {/* Checksum SHA-256 */}
@@ -292,14 +309,14 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
           </div>
 
           {/* Historique des Versions */}
-          {document.previous_versions && document.previous_versions.length > 0 && (
+          {previousVersions.length > 0 && (
             <div className="space-y-2">
               <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5 text-slate-500" />
-                <span>Historique des versions archivées ({document.previous_versions.length})</span>
+                <span>Versions précédentes ({previousVersions.length})</span>
               </div>
               <div className="space-y-1.5">
-                {document.previous_versions.map((ver, idx) => (
+                {previousVersions.map((ver, idx) => (
                   <div key={idx} className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center justify-between">
                     <div>
                       <span className="font-bold text-slate-800">Version {ver.version}</span>
@@ -307,16 +324,14 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-slate-400">
-                        Archivé le {new Date(ver.archived_at).toLocaleDateString('fr-FR')}
+                        {ver.status === 'ARCHIVED' ? 'Archivée' : ver.status === 'PUBLISHED' ? 'Publiée' : 'Non publiée'}
                       </span>
-                      <a
-                        href={ver.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button type="button"
+                        onClick={() => void openSource(ver)}
                         className="text-brand-blue hover:underline text-[11px] font-bold"
                       >
                         Voir
-                      </a>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -333,7 +348,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                 type="button"
                 onClick={() => handleUpdateStatus('TO_VERIFY')}
                 disabled={isProcessing}
-                className="px-3.5 py-2 rounded-xl border border-amber-300 text-amber-800 bg-amber-50 text-xs font-bold hover:bg-amber-100 transition-colors"
+                className="px-3.5 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-amber-300 text-amber-800 bg-amber-50 text-xs font-bold hover:bg-amber-100 transition-colors"
               >
                 Dépublier (Renvoyer en examen)
               </button>
@@ -342,7 +357,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                 type="button"
                 onClick={() => handleUpdateStatus('ARCHIVED')}
                 disabled={isProcessing}
-                className="px-3.5 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-200 text-xs font-bold transition-colors"
+                className="px-3.5 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-200 text-xs font-bold transition-colors"
               >
                 Archiver
               </button>
@@ -355,7 +370,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                 type="button"
                 onClick={() => handleUpdateStatus('VERIFIED')}
                 disabled={isProcessing}
-                className="px-4 py-2.5 rounded-xl border border-brand-blue text-brand-blue hover:bg-blue-50 text-xs font-black transition-colors"
+                className="px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-brand-blue text-brand-blue hover:bg-blue-50 text-xs font-black transition-colors"
               >
                 Valider (Marquer VÉRIFIÉ)
               </button>
@@ -366,7 +381,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                 type="button"
                 onClick={() => handleUpdateStatus('PUBLISHED')}
                 disabled={isProcessing}
-                className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-black transition-colors shadow-sm flex items-center gap-2"
+                className="px-5 py-2.5 min-h-[44px] rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-black transition-colors shadow-sm flex items-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Publier sur la plateforme</span>
@@ -377,7 +392,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
+                className="px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
               >
                 Fermer
               </button>

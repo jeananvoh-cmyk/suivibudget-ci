@@ -83,6 +83,8 @@ export interface BudgetLineItem {
 }
 
 export interface BudgetProject {
+  citizen_need_origin?: string;
+  initiative_source?: string;
   id: string;
   institution_id?: string;
   institution_name?: string;
@@ -191,10 +193,9 @@ export interface SiteSettings {
   announcement_banner_type?: 'info' | 'success' | 'warning';
 }
 
-export type ActiveTab = 'home' | 'institutions' | 'projects' | 'observatory' | 'documents' | 'admin';
-
-// Exportation du domaine Documents Publics & Comptes Administratifs
 export * from './publicDocument';
+
+export type ActiveTab = 'home' | 'institutions' | 'projects' | 'observatory' | 'documents' | 'admin';
 
 // Exportation du domaine Référentiel des Budgets Locaux
 export * from './localBudget';

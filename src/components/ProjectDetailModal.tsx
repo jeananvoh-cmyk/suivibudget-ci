@@ -25,6 +25,8 @@ import {
   Landmark
 } from 'lucide-react';
 import { dataStore } from '../services/dataStore';
+import { ProjectAccountabilityPassport } from './ProjectAccountabilityPassport';
+import { findMatchingCaOperation, findMatchingDgmpProcurement } from '../utils/projectPassport';
 
 interface ProjectDetailModalProps {
   project: BudgetProject | null;
@@ -43,11 +45,13 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 }) => {
   if (!project) return null;
 
-  // 2-Tab Navigation: 'budget' (Données & Budget) | 'proofs' (Constats & Vidéos Citoyennes)
-  const [activeTab, setActiveTab] = useState<'budget' | 'proofs'>('budget');
+  // 3-Tab Navigation: 'budget' (Données & Budget) | 'passport' (Passeport de Redevabilité) | 'proofs' (Constats & Vidéos Citoyennes)
+  const [activeTab, setActiveTab] = useState<'budget' | 'passport' | 'proofs'>('budget');
 
   const proofs = dataStore.getProofsForProject(project.id);
   const verifiedProofs = proofs.filter(p => p.verification_status === 'APPROVED');
+  const matchedCa = findMatchingCaOperation(project);
+  const matchedDgmp = findMatchingDgmpProcurement(project);
   const entityInfo = getProjectEntityInfo(project.commune_name, project.region_name, project.ministry_name);
   const actionInfo = getProjectTypeActionInfo(project.title, project.category, project.scope_level);
   const tier = getProjectTier(project);
@@ -117,15 +121,17 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
           <div className="flex items-center gap-2 flex-shrink-0 print:hidden">
             <button
               onClick={handlePrint}
-              className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-colors"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-colors"
               title="Imprimer / Exporter la fiche officielle"
+              aria-label="Imprimer ou exporter la fiche officielle"
             >
               <Printer className="w-4 h-4" />
             </button>
             <button
               onClick={onClose}
-              className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-colors"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-colors"
               title="Fermer la fenêtre"
+              aria-label="Fermer la fenêtre"
             >
               <X className="w-5 h-5" />
             </button>
@@ -157,31 +163,52 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
         )}
 
         {/* ========================================================================= */}
-        {/* 2-TAB SWITCHER: DONNÉES & BUDGET vs CONSTATS & VIDÉOS TERRAIN             */}
+        {/* 3-TAB SWITCHER: DONNÉES & BUDGET vs PASSEPORT vs CONSTATS & VIDÉOS        */}
         {/* ========================================================================= */}
-        <div className="px-6 pt-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2 print:hidden">
+        <div className="px-4 sm:px-6 pt-3 bg-slate-50 border-b border-slate-200 flex items-center gap-1 sm:gap-2 overflow-x-auto print:hidden">
           
           <button
             onClick={() => setActiveTab('budget')}
-            className={`pb-3 px-4 font-bold text-xs sm:text-sm border-b-2 transition-all flex items-center gap-2 ${
+            className={`pb-3 px-3 sm:px-4 font-bold text-xs sm:text-sm border-b-2 transition-all flex items-center gap-1.5 sm:gap-2 shrink-0 ${
               activeTab === 'budget'
                 ? 'border-slate-900 text-slate-900'
                 : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
-            <Layers className="w-4 h-4" />
-            <span>Fiche & Budget Officiel</span>
+            <Layers className="w-4 h-4 shrink-0" />
+            <span>Fiche & Budget</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('passport')}
+            className={`pb-3 px-3 sm:px-4 font-bold text-xs sm:text-sm border-b-2 transition-all flex items-center gap-1.5 sm:gap-2 shrink-0 ${
+              activeTab === 'passport'
+                ? 'border-slate-900 text-slate-900'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <ShieldCheck className={`w-4 h-4 shrink-0 ${activeTab === 'passport' ? 'text-emerald-600' : ''}`} />
+            <span>Passeport Redevabilité</span>
+            {(matchedCa || matchedDgmp) ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                Lié DGMP/CA
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700">
+                6 étapes
+              </span>
+            )}
           </button>
 
           <button
             onClick={() => setActiveTab('proofs')}
-            className={`pb-3 px-4 font-bold text-xs sm:text-sm border-b-2 transition-all flex items-center gap-2 ${
+            className={`pb-3 px-3 sm:px-4 font-bold text-xs sm:text-sm border-b-2 transition-all flex items-center gap-1.5 sm:gap-2 shrink-0 ${
               activeTab === 'proofs'
                 ? 'border-slate-900 text-slate-900'
                 : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
-            <Camera className="w-4 h-4" />
+            <Camera className="w-4 h-4 shrink-0" />
             <span>Suivi Terrain & Vidéos</span>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700">
               {proofs.length}
@@ -436,7 +463,21 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
           )}
 
           {/* ===================================================================== */}
-          {/* ONGLET 2 : CONSTATS, PHOTOS & VIDÉOS CITOYENNES                        */}
+          {/* ONGLET 2 : PASSEPORT DE REDEVABILITÉ (CYCLE CIVIQUE INTÉGRAL)         */}
+          {/* ===================================================================== */}
+          {activeTab === 'passport' && (
+            <div className="animate-in fade-in duration-150">
+              <ProjectAccountabilityPassport 
+                project={project}
+                proofs={proofs}
+                onOpenSendProof={onOpenSendProof}
+                onOpenDocRequest={onOpenDocRequest}
+              />
+            </div>
+          )}
+
+          {/* ===================================================================== */}
+          {/* ONGLET 3 : CONSTATS, PHOTOS & VIDÉOS CITOYENNES                        */}
           {/* ===================================================================== */}
           {activeTab === 'proofs' && (
             <div className="space-y-6 animate-in fade-in duration-150">
@@ -578,7 +619,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-full text-xs font-bold transition-colors"
+            className="min-h-[44px] px-6 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-full text-xs font-bold transition-colors flex items-center justify-center"
           >
             Fermer
           </button>

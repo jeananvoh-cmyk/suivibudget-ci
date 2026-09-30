@@ -264,8 +264,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   };
 
   // Moderation actions with audit trail and structured rejection
-  const handleApproveProof = (proof: CitizenProof, withWhatsApp = false) => {
-    dataStore.moderateProof(proof.id, 'APPROVED');
+  const handleApproveProof = async (proof: CitizenProof, withWhatsApp = false) => {
+    try {
+      await dataStore.moderateProof(proof.id, 'APPROVED');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Validation non enregistrée.', 'error');
+      return;
+    }
     adminTaskService.logActivity({
       action_type: 'PROOF_APPROVED',
       description: `Validation preuve citoyenne : ${proof.project_title || proof.commune_name}`,
@@ -296,13 +301,18 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     setRejectionCustomText('');
   };
 
-  const handleConfirmRejection = () => {
+  const handleConfirmRejection = async () => {
     if (!rejectingProof) return;
     const finalReason = rejectionReason === 'Autre raison'
       ? (rejectionCustomText.trim() || 'Preuve non conforme')
       : rejectionReason;
 
-    dataStore.moderateProof(rejectingProof.id, 'REJECTED');
+    try {
+      await dataStore.moderateProof(rejectingProof.id, 'REJECTED', finalReason);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Rejet non enregistré.', 'error');
+      return;
+    }
     adminTaskService.logActivity({
       action_type: 'PROOF_REJECTED',
       description: `Preuve citoyenne rejetée (${finalReason}) : ${rejectingProof.project_title || rejectingProof.commune_name}`,
@@ -1190,7 +1200,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
           {/* Logout Button */}
           <button
-            onClick={() => dataStore.logout()}
+            onClick={() => { void dataStore.logout().catch(() => showToast('Déconnexion serveur non confirmée. Veuillez réessayer.', 'error')); }}
+            aria-label="Se déconnecter"
             className="px-3 py-2.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white rounded-xl text-xs font-bold transition-all border border-rose-500/30 flex items-center gap-1.5 cursor-pointer"
             title="Se déconnecter"
           >

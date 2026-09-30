@@ -69,6 +69,7 @@ export const AdministrativeAccountsAdminManager: React.FC<AdministrativeAccounts
   const [documents, setDocuments] = useState<PublicDocument[]>(() => dataStore.getDocuments());
 
   useEffect(() => {
+    void dataStore.refreshDocumentsFromSupabase(true).catch(error => onShowToast(`Chargement impossible : ${error.message}`, 'error'));
     return dataStore.subscribe(() => {
       setInstitutions(dataStore.getInstitutions());
       setDocuments(dataStore.getDocuments());

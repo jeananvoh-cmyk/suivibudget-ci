@@ -1,3 +1,4 @@
+import type { CollectivitesCaMatrixSummary, CollectiviteCaStatus, DocumentLifecycleStatus } from '../types';
 import { 
   BudgetProject, 
   CitizenProof, 
@@ -7,22 +8,18 @@ import {
   UserRole,
   NewsArticle,
   SiteSettings,
-  PublicDocument,
-  CollectiviteCaStatus,
-  CollectivitesCaMatrixSummary,
-  DocumentLifecycleStatus,
-  OfficialDocumentSource,
-  OfficialDocumentType
+  PublicDocument
 } from '../types';
 import { RAW_BUDGET_PROJECTS } from '../data/budgetData';
 import { INSTITUTIONS_DATA } from '../data/institutionsData';
-import { INITIAL_CITIZEN_PROOFS } from '../data/initialProofs';
+
 import { INITIAL_ARTICLES } from '../data/initialArticles';
 import { detectCategoryFromExpense } from '../data/categories';
 import { CAIDP_MASTER_DIRECTORY, CaidpEntity } from '../data/caidpRiData';
 import { AuthSecurityService } from './authSecurity';
 import { sanitizeCsvCell } from '../utils/security';
 import { supabase, isSupabaseConfigured } from './supabase';
+import { refreshPublishedAdministrativeAccounts } from '../data/administrativeAccountsData';
 import { enrichWithPrimitiveBudgets, OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
 import { 
   LocalBudget, 
@@ -490,6 +487,7 @@ class DataStore {
   private institutions: Institution[] = [];
   private localBudgets: LocalBudget[] = [];
   private proofs: CitizenProof[] = [];
+  private proofRefreshGeneration = 0;
   private articles: NewsArticle[] = [];
   private documents: PublicDocument[] = [];
   private caidpDirectory: CaidpEntity[] = [];
@@ -506,6 +504,18 @@ class DataStore {
 
   constructor() {
     this.init();
+    void AuthSecurityService.restoreSupabaseSession().then((session) => {
+      if (session.isAuthenticated && session.user) {
+        this.authState = {
+          isAuthenticated: true,
+          email: session.user.email,
+          fullName: session.user.fullName,
+          role: session.user.role as UserRole,
+          expiresAt: session.user.expiresAt,
+        };
+        this.notify();
+      }
+    }).catch(() => {});
   }
 
   private init() {
@@ -677,40 +687,11 @@ class DataStore {
       };
     });
 
-    // 3. Proofs
-    this.proofs = [...INITIAL_CITIZEN_PROOFS];
+    this.proofs = [];
     try {
-      const storedProofs = localStorage.getItem(STORAGE_KEYS.PROOFS);
-      if (storedProofs) {
-        const parsed = JSON.parse(storedProofs);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const defaultMap = new Map(INITIAL_CITIZEN_PROOFS.map(p => [p.id, p]));
-          const existingIds = new Set(parsed.map((p: any) => p.id));
-          const missingDefaults = INITIAL_CITIZEN_PROOFS.filter(p => !existingIds.has(p.id));
-          
-          // Merge while ensuring demo defaults have updated authentic photos and no fabricated elevated confirmations
-          this.proofs = [...parsed.map((p: any) => {
-            const def = defaultMap.get(p.id);
-            if (def && def.is_demo) {
-              return {
-                ...p,
-                image_url: def.image_url,
-                photo_url: def.photo_url,
-                confirmations_count: (p.confirmations_count && p.confirmations_count > 5) ? 0 : (p.confirmations_count || 0)
-              };
-            }
-            if (def && p.id === 'proof-real-seguela-touba-1' && p.confirmations_count > 5) {
-              return { ...p, confirmations_count: 0 };
-            }
-            return p;
-          }), ...missingDefaults];
-        }
-      }
-    } catch (e) {
-      console.warn("Could not read proofs from localStorage", e);
-    }
-    if (this.proofs.length === 0 && INITIAL_CITIZEN_PROOFS.length > 0) {
-      this.proofs = [...INITIAL_CITIZEN_PROOFS];
+      localStorage.removeItem(STORAGE_KEYS.PROOFS);
+    } catch {
+      // Storage may be disabled; private proofs are never restored from it.
     }
 
     // 4. Articles
@@ -765,43 +746,7 @@ class DataStore {
       this.authState = { isAuthenticated: false, email: '', fullName: '', role: 'CITIZEN' };
     }
 
-    // 8. Public Documents
-    this.documents = [...INITIAL_PUBLIC_DOCUMENTS];
-    try {
-      const storedDocs = localStorage.getItem(STORAGE_KEYS.DOCUMENTS);
-      const isCleaned = localStorage.getItem('civicdata_real_downloads_reset_v1');
-      if (storedDocs) {
-        let parsed = JSON.parse(storedDocs);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          // One-time sanitization of old mock download counts in user's browser
-          if (!isCleaned) {
-            parsed = parsed.map((d: any) => ({
-              ...d,
-              downloads_count: 0,
-            }));
-            localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(parsed));
-            localStorage.setItem('civicdata_real_downloads_reset_v1', 'true');
-          }
-          const existingIds = new Set(parsed.map((d: any) => d.id));
-          const missingDefaults = INITIAL_PUBLIC_DOCUMENTS.filter(d => !existingIds.has(d.id));
-          this.documents = [...parsed, ...missingDefaults];
-        }
-      } else {
-        localStorage.setItem('civicdata_real_downloads_reset_v1', 'true');
-      }
-
-      // Re-hydrate persistent download counts from lightweight map (immune to storage quotas)
-      const storedDownloads = localStorage.getItem(STORAGE_KEYS.DOCUMENT_DOWNLOADS);
-      if (storedDownloads) {
-        const countsMap: Record<string, number> = JSON.parse(storedDownloads) || {};
-        this.documents = this.documents.map(d => ({
-          ...d,
-          downloads_count: Math.max(d.downloads_count || 0, countsMap[d.id] || 0),
-        }));
-      }
-    } catch (e) {
-      console.warn("Could not read documents from localStorage", e);
-    }
+    this.documents = [];
 
     // 9. CAIDP Requests Log (Telemetry)
     this.caidpLogs = [];
@@ -824,16 +769,16 @@ class DataStore {
   private async initSupabaseSync() {
     if (!isSupabaseConfigured()) return;
     try {
-      const { data, error } = await supabase
-        .from('citizen_proofs')
-        .select('*')
-        .order('created_at', { ascending: false });
+      await refreshPublishedAdministrativeAccounts();
+      this.notify();
+      await this.refreshProofs();
 
       // Sync public documents from Supabase if table exists
       try {
         const { data: remoteDocs, error: docsError } = await supabase
           .from('public_documents')
           .select('*')
+          .eq('status', 'PUBLISHED')
           .order('published_at', { ascending: false });
         if (!docsError && Array.isArray(remoteDocs) && remoteDocs.length > 0) {
           // Merge preserving download counts and local additions
@@ -844,8 +789,7 @@ class DataStore {
               downloads_count: Math.max(remoteDoc.downloads_count || 0, localDoc?.downloads_count || 0),
             };
           });
-          this.saveDocuments();
-          this.notify();
+                this.notify();
         }
       } catch (err) {
         // Table not present yet, silent fallback
@@ -881,37 +825,59 @@ class DataStore {
         // Table not present yet, silent fallback
       }
 
-      if (!error && Array.isArray(data) && data.length > 0) {
-        const remoteProofs: CitizenProof[] = data.map(d => ({
-          id: d.id,
-          project_id: d.project_id,
-          project_title: d.project_title,
-          commune_name: d.commune_name,
-          region_name: d.region_name || '',
-          citizen_name: d.citizen_name || 'Sentinelle Citoyenne',
-          user_name: d.citizen_name || 'Sentinelle Citoyenne',
-          image_url: d.image_url,
-          photo_url: d.image_url,
-          video_url: d.video_url,
-          media_type: d.media_type || (d.video_url ? 'VIDEO' : 'IMAGE'),
-          citizen_status_claim: d.citizen_status_claim,
-          comment: d.comment,
-          locality_details: d.locality_details,
-          verification_status: d.verification_status,
-          moderator_notes: d.moderator_notes,
-          confirmations_count: d.confirmations_count || 1,
-          created_at: d.created_at,
-        }));
 
-        const existingMap = new Map(this.proofs.map(p => [p.id, p]));
-        remoteProofs.forEach(rp => existingMap.set(rp.id, rp));
-        this.proofs = Array.from(existingMap.values());
-        this.saveProofs();
-        this.notify();
-      }
     } catch (e) {
       console.warn("Supabase background sync silent catch:", e);
     }
+  }
+
+  public async refreshProofs(): Promise<void> {
+    const generation = ++this.proofRefreshGeneration;
+    if (!isSupabaseConfigured()) {
+      this.proofs = [];
+      this.notify();
+      return;
+    }
+    const { data: identity, error: identityError } = await supabase.auth.getUser();
+    if (identityError && identityError.name !== 'AuthSessionMissingError') throw identityError;
+    const { data: published, error: publicError } = await supabase.from('public_citizen_proofs')
+      .select('*').order('created_at', { ascending: false });
+    if (publicError) throw publicError;
+    let rows = published || [];
+    if (identity.user) {
+      const { data: accessible, error } = await supabase.from('citizen_proofs')
+        .select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      const byId = new Map(rows.map(row => [row.id, row]));
+      (accessible || []).forEach(row => byId.set(row.id, row));
+      rows = Array.from(byId.values());
+    }
+    const resolved = await Promise.all(rows.map(async row => {
+      const media = await Promise.all(['image', 'secondary_image', 'video'].map(async kind => {
+        const path = row[`${kind}_url`];
+        if (!path) return [kind, undefined];
+        if (row.verification_status === 'APPROVED') {
+          const { data, error } = await supabase.functions.invoke('citizen-proof-media-url', { body: { proof_id: row.id, media: kind } });
+          return [kind, !error && typeof data?.url === 'string' ? data.url : undefined];
+        }
+        if (!identity.user || /^https?:/i.test(path)) return [kind, undefined];
+        const { data, error } = await supabase.storage.from('citizen_photos').createSignedUrl(path, 300);
+        return [kind, !error ? data?.signedUrl : undefined];
+      }));
+      const urls = Object.fromEntries(media);
+      return {
+        ...row,
+        user_name: row.citizen_name || 'Citoyen Observateur',
+        image_url: urls.image,
+        photo_url: urls.image,
+        secondary_image_url: urls.secondary_image,
+        video_url: urls.video,
+        confirmations_count: row.confirmations_count ?? 0,
+      };
+    }));
+    if (generation !== this.proofRefreshGeneration) return;
+    this.proofs = resolved.sort((left, right) => right.created_at.localeCompare(left.created_at));
+    this.notify();
   }
 
   public subscribe(listener: () => void) {
@@ -1091,8 +1057,8 @@ class DataStore {
   // --- STATS CALCULATION ---
   public getImpactStats(): ImpactStats {
     const totalCommunes = 201;
-    const totalRegions = 33;
-    const totalCollectivites = 234;
+    const totalRegions = 31;
+    const totalCollectivites = 232;
     const totalBudgetLines = this.projects.length > 0 ? this.projects.length : 4354;
     const totalInvestmentsFcfa = this.projects.reduce((sum, p) => sum + p.budget_amount_fcfa, 0);
     const verifiedProofs = this.proofs.filter(p => p.verification_status === 'APPROVED').length;
@@ -1111,29 +1077,25 @@ class DataStore {
   }
 
   // --- AUTH MANAGEMENT ---
-  public login(email: string, fullName: string, role: UserRole) {
-    const assignedRole = (role === 'ADMIN' || role === 'MODERATOR' || role === 'DATA_MANAGER') ? role : 'MODERATOR';
-    const assignedName = fullName || (assignedRole === 'ADMIN' ? 'Administrateur National' : 'Modérateur Terrain');
-    const token = AuthSecurityService.createSignedSession({
-      email,
-      fullName: assignedName,
-      role: assignedRole,
-    });
+  public async login() {
+    const session = await AuthSecurityService.restoreSupabaseSession();
+    if (!session.isAuthenticated || !session.user) throw new Error('Session non autorisée.');
     this.authState = {
       isAuthenticated: true,
-      email: token.payload.email,
-      fullName: token.payload.fullName,
-      role: token.payload.role as UserRole,
-      expiresAt: token.payload.expiresAt,
+      email: session.user.email,
+      fullName: session.user.fullName,
+      role: session.user.role as UserRole,
+      expiresAt: session.user.expiresAt,
     };
+    await this.refreshProofs();
     this.notify();
   }
 
-  public logout() {
-    AuthSecurityService.clearSession();
-    if (isSupabaseConfigured()) {
-      supabase.auth.signOut().catch(() => {});
-    }
+  public async logout() {
+    const signOut = AuthSecurityService.clearSession();
+    this.proofRefreshGeneration++;
+    this.proofs = [];
+    this.documents = [];
     this.authState = {
       isAuthenticated: false,
       email: '',
@@ -1142,6 +1104,8 @@ class DataStore {
       expiresAt: 0,
     };
     this.notify();
+    await signOut;
+    await this.refreshProofs();
   }
 
   // --- CITIZEN PROOF SUBMISSION & MODERATION ---
@@ -1189,7 +1153,7 @@ class DataStore {
     return `${prefix}-${seqStr}`;
   }
 
-  public submitProof(proofData: {
+  public async submitProof(proofData: {
     project_id: string;
     image_url: string;
     secondary_image_url?: string;
@@ -1201,12 +1165,15 @@ class DataStore {
     citizen_name?: string;
     citizen_whatsapp?: string;
     signboard_status?: 'PRESENT' | 'ABSENT' | 'UNSPECIFIED';
-  }): CitizenProof {
+  }): Promise<CitizenProof> {
+    if (!isSupabaseConfigured()) throw new Error('Service de preuves indisponible.');
+    const { data: identity, error: identityError } = await supabase.auth.getUser();
+    if (identityError && identityError.name !== 'AuthSessionMissingError') throw identityError;
     const project = this.getProjectById(proofData.project_id);
     const trackingCode = this.generateTrackingCode(proofData.project_id, project?.title);
 
     const newProof: CitizenProof = {
-      id: `proof-${Date.now()}`,
+      id: `proof-${crypto.randomUUID()}`,
       tracking_code: trackingCode,
       project_id: proofData.project_id,
       project_title: project ? project.title : 'Projet d\'infrastructure locale',
@@ -1225,41 +1192,38 @@ class DataStore {
       comment: proofData.comment,
       locality_details: proofData.locality_details || (project ? project.locality_village_neighborhood : ''),
       verification_status: 'PENDING',
-      confirmations_count: 1,
+      confirmations_count: 0,
       is_demo: false,
       created_at: new Date().toISOString(),
     };
 
-    this.proofs.unshift(newProof);
-    this.saveProofs();
-    this.notify();
-
-    // Live Supabase Insert (if configured)
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('citizen_proofs').insert([{
-          id: newProof.id,
-          tracking_code: newProof.tracking_code,
-          project_id: newProof.project_id,
-          project_title: newProof.project_title,
-          commune_name: newProof.commune_name,
-          region_name: newProof.region_name,
-          citizen_name: newProof.citizen_name,
-          citizen_whatsapp: newProof.citizen_whatsapp,
-          signboard_status: newProof.signboard_status,
-          image_url: newProof.image_url,
-          secondary_image_url: newProof.secondary_image_url,
-          video_url: newProof.video_url,
-          media_type: newProof.media_type,
-          citizen_status_claim: newProof.citizen_status_claim,
-          comment: newProof.comment,
-          locality_details: newProof.locality_details,
-          verification_status: 'PENDING',
-        }]),
-        'Upload Preuve Citoyenne'
-      );
+    const { error } = await supabase.from('citizen_proofs').insert([{
+      id: newProof.id,
+      tracking_code: newProof.tracking_code,
+      project_id: newProof.project_id,
+      project_title: newProof.project_title,
+      commune_name: newProof.commune_name,
+      region_name: newProof.region_name,
+      citizen_user_id: identity.user?.id ?? null,
+      citizen_name: newProof.citizen_name,
+      citizen_whatsapp: newProof.citizen_whatsapp,
+      signboard_status: newProof.signboard_status,
+      image_url: newProof.image_url,
+      secondary_image_url: newProof.secondary_image_url,
+      video_url: newProof.video_url,
+      media_type: newProof.media_type,
+      citizen_status_claim: newProof.citizen_status_claim,
+      comment: newProof.comment,
+      locality_details: newProof.locality_details,
+      verification_status: 'PENDING',
+      confirmations_count: 0,
+      created_at: newProof.created_at,
+    }]);
+    if (error) throw error;
+    if (identity.user) {
+      this.proofs.unshift(newProof);
+      this.notify();
     }
-
     return newProof;
   }
 
@@ -1286,61 +1250,38 @@ class DataStore {
     } catch {}
   }
 
-  public confirmProof(proofId: string): { success: boolean; alreadyConfirmed?: boolean } {
-    if (this.hasUserConfirmed(proofId)) {
-      return { success: false, alreadyConfirmed: true };
-    }
-
-    const idx = this.proofs.findIndex(p => p.id === proofId);
-    if (idx !== -1) {
-      this.proofs[idx].confirmations_count = (this.proofs[idx].confirmations_count || 0) + 1;
-      this.recordLocalConfirmation(proofId);
-      this.saveProofs();
-      this.notify();
-      return { success: true };
-    }
-    return { success: false };
+  public confirmProof(proofId: string): { success: boolean; alreadyConfirmed?: boolean; message?: string } {
+    return {
+      success: false,
+      alreadyConfirmed: this.hasUserConfirmed(proofId),
+      message: 'Les confirmations citoyennes ne sont pas encore disponibles.',
+    };
+  }
+  public async moderateProof(proofId: string, status: 'APPROVED' | 'REJECTED', moderatorNotes?: string): Promise<void> {
+    if (!isSupabaseConfigured()) throw new Error('Service de preuves indisponible.');
+    const { data: identity, error: identityError } = await supabase.auth.getUser();
+    if (identityError) throw identityError;
+    if (!identity.user) throw new Error('Authentification requise.');
+    const { error } = await supabase.from('citizen_proofs').update({
+      verification_status: status,
+      moderator_notes: moderatorNotes || null,
+      verified_at: new Date().toISOString(),
+      verified_by: identity.user.id,
+    }).eq('id', proofId).select('*').single();
+    if (error) throw error;
+    await this.refreshProofs();
   }
 
-  public moderateProof(proofId: string, status: 'APPROVED' | 'REJECTED', moderatorNotes?: string) {
-    const idx = this.proofs.findIndex(p => p.id === proofId);
-    if (idx !== -1) {
-      this.proofs[idx].verification_status = status;
-      if (moderatorNotes) {
-        this.proofs[idx].moderator_notes = moderatorNotes;
-      }
-      this.saveProofs();
-      this.notify();
-
-      // Live Supabase Update (if configured)
-      if (isSupabaseConfigured()) {
-        safeSupabaseExec(
-          supabase.from('citizen_proofs').update({
-            verification_status: status,
-            moderator_notes: moderatorNotes || null,
-            verified_at: new Date().toISOString(),
-            verified_by: this.authState.fullName || 'Modérateur',
-          }).eq('id', proofId),
-          'Modération Preuve Citoyenne'
-        );
-      }
-    }
-  }
-
-  public deleteProof(proofId: string) {
-    this.proofs = this.proofs.filter(p => p.id !== proofId);
-    this.saveProofs();
+  public async deleteProof(proofId: string): Promise<void> {
+    if (!isSupabaseConfigured()) throw new Error('Service de preuves indisponible.');
+    const { data: identity, error: identityError } = await supabase.auth.getUser();
+    if (identityError) throw identityError;
+    if (!identity.user) throw new Error('Authentification requise.');
+    const { error } = await supabase.from('citizen_proofs').delete().eq('id', proofId).select('id').single();
+    if (error) throw error;
+    this.proofs = this.proofs.filter(proof => proof.id !== proofId);
     this.notify();
-
-    // Live Supabase Delete (if configured)
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('citizen_proofs').delete().eq('id', proofId),
-        'Suppression Preuve Citoyenne'
-      );
-    }
   }
-
   // --- PROJECT CRUD ---
   public addProject(project: Omit<BudgetProject, 'id' | 'created_at'>): BudgetProject {
     const newProject: BudgetProject = {
@@ -1547,106 +1488,60 @@ class DataStore {
     return this.documents.find(d => d.id === id);
   }
 
-  public addDocument(docData: Omit<PublicDocument, 'id' | 'downloads_count' | 'published_at'> & { published_at?: string }): PublicDocument {
+  public async refreshDocumentsFromSupabase(includeUnpublished = false): Promise<PublicDocument[]> {
+    if (!isSupabaseConfigured()) throw new Error('Service documentaire indisponible.');
+    let query = supabase.from('public_documents').select('*').order('published_at', { ascending: false });
+    if (!includeUnpublished) query = query.eq('status', 'PUBLISHED');
+    const { data, error } = await query;
+    if (error) throw error;
+    this.documents = (data || []) as PublicDocument[];
+    this.notify();
+    return this.getDocuments();
+  }
+
+  public async addDocument(docData: Omit<PublicDocument, 'id' | 'downloads_count' | 'published_at'> & { published_at?: string | null }): Promise<PublicDocument> {
+    if (!isSupabaseConfigured()) throw new Error('Service documentaire indisponible.');
+    if (docData.status && docData.status !== 'TO_VERIFY' && docData.status !== 'UPLOADED') {
+      throw new Error('Tout nouveau document doit être vérifié avant publication.');
+    }
     const newDoc: PublicDocument = {
       ...docData,
-      id: `doc-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+      id: `doc-${crypto.randomUUID()}`,
       downloads_count: 0,
-      published_at: docData.published_at || new Date().toISOString().split('T')[0],
-      is_official: docData.is_official ?? true,
+      published_at: null,
+      is_official: docData.is_official ?? false,
+      status: 'TO_VERIFY',
+      verification_status: 'TO_VERIFY',
+      version: docData.version || 1,
     };
-    this.documents.unshift(newDoc);
-    this.saveDocuments();
+
+    const { data, error } = await supabase.from('public_documents').insert([newDoc]).select('*').single();
+    if (error) throw error;
+    if (!data) throw new Error('Enregistrement non confirmé.');
+    this.documents.unshift(data as PublicDocument);
     this.notify();
-
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').insert([{
-          id: newDoc.id,
-          title: newDoc.title,
-          category: newDoc.category,
-          institution_name: newDoc.institution_name,
-          year: newDoc.year,
-          description: newDoc.description,
-          file_url: newDoc.file_url,
-          file_name: newDoc.file_name,
-          file_size: newDoc.file_size || '1.0 Mo',
-          file_format: newDoc.file_format,
-          published_at: newDoc.published_at,
-          downloads_count: newDoc.downloads_count,
-          is_official: newDoc.is_official,
-          tags: newDoc.tags || []
-        }]),
-        'Adding public document'
-      );
-    }
-
-    return newDoc;
+    return this.documents[0];
   }
 
-  public updateDocument(id: string, updates: Partial<PublicDocument>): boolean {
-    const idx = this.documents.findIndex(d => d.id === id);
-    if (idx === -1) return false;
-    this.documents[idx] = { ...this.documents[idx], ...updates };
-    this.saveDocuments();
+  public async updateDocument(id: string, updates: Partial<PublicDocument>): Promise<boolean> {
+    if (!isSupabaseConfigured()) throw new Error('Service documentaire indisponible.');
+    const current = this.documents.find(d => d.id === id);
+    if (!current?.updated_at) throw new Error('Rechargez le document avant de le modifier.');
+    const { data, error } = await supabase.from('public_documents').update(updates)
+      .eq('id', id).eq('updated_at', current.updated_at).select('*').single();
+    if (error) throw error;
+    if (!data) throw new Error('Document modifié par un autre agent. Rechargez la liste.');
+    this.documents = this.documents.map(d => d.id === id ? data as PublicDocument : d);
     this.notify();
-
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').update(updates).eq('id', id),
-        'Updating public document'
-      );
-    }
-    return true;
-  }
-
-  public deleteDocument(id: string): boolean {
-    const idx = this.documents.findIndex(d => d.id === id);
-    if (idx === -1) return false;
-    this.documents = this.documents.filter(d => d.id !== id);
-    this.saveDocuments();
-    this.notify();
-
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').delete().eq('id', id),
-        'Deleting public document'
-      );
-    }
     return true;
   }
 
   public incrementDocumentDownloads(id: string): void {
     const doc = this.documents.find(d => d.id === id);
-    if (doc) {
-      doc.downloads_count = (doc.downloads_count || 0) + 1;
-
-      // 1. Persistent dedicated lightweight counter (<1KB map, completely immune to localStorage quota)
-      try {
-        const storedDownloads = localStorage.getItem(STORAGE_KEYS.DOCUMENT_DOWNLOADS);
-        const countsMap: Record<string, number> = storedDownloads ? JSON.parse(storedDownloads) : {};
-        countsMap[id] = doc.downloads_count;
-        localStorage.setItem(STORAGE_KEYS.DOCUMENT_DOWNLOADS, JSON.stringify(countsMap));
-      } catch (err) {
-        console.warn("Could not save download count to lightweight key", err);
-      }
-
-      // 2. Full documents array save
-      this.saveDocuments();
-      this.notify();
-
-      if (isSupabaseConfigured()) {
-        safeSupabaseExec(
-          supabase.from('public_documents').update({ downloads_count: doc.downloads_count }).eq('id', id),
-          'Incrementing document downloads'
-        );
-      }
-    }
+    if (!doc) return;
+    doc.downloads_count = (doc.downloads_count || 0) + 1;
+    this.notify();
   }
-
-  // ==========================================
-  // COMPTES ADMINISTRATIFS (CA) & MATRICE 232
-  // ==========================================
 
   public getCollectivitesCaMatrix(fiscalYear: number = 2025): { summary: CollectivitesCaMatrixSummary; matrix: CollectiviteCaStatus[] } {
     // 201 communes (type === 'MAIRIE') + 31 conseils régionaux (type === 'REGION')
@@ -1697,16 +1592,16 @@ class DataStore {
       let versionsCount = 0;
 
       if (doc) {
-        versionsCount = (doc.previous_versions ? doc.previous_versions.length : 0) + 1;
-        if (doc.document_status === 'PUBLISHED' || doc.is_public) {
+        versionsCount = caDocs.filter(d => d.institution_id === inst.id).length;
+        if (doc.status === 'PUBLISHED') {
           status = 'PUBLISHED';
           publishedCount++;
           if (isCommune) communesPublished++;
           else regionsPublished++;
-        } else if (doc.document_status === 'VERIFIED') {
+        } else if (doc.status === 'VERIFIED') {
           status = 'VERIFIED';
           verifiedCount++;
-        } else if (doc.document_status === 'ARCHIVED') {
+        } else if (doc.status === 'ARCHIVED') {
           status = 'ARCHIVED';
         } else {
           status = 'TO_VERIFY';
@@ -1776,149 +1671,74 @@ class DataStore {
     return this.documents.find(d => d.checksum_sha256 === checksum);
   }
 
-  public saveCADocument(docData: Partial<PublicDocument>, asNewVersion: boolean = false): PublicDocument {
-    const instId = docData.institution_id;
-    const fiscalYear = docData.fiscal_year || docData.year || 2025;
-    
-    // Check if an existing document for this institution + fiscalYear exists
-    const existingIdx = this.documents.findIndex(d => 
-      (d.document_type === 'COMPTE_ADMINISTRATIF' || d.category === 'COMPTE_ADMINISTRATIF') &&
-      ((d.fiscal_year && d.fiscal_year === fiscalYear) || (d.year && d.year === fiscalYear)) &&
-      (d.institution_id === instId || (d.id === docData.id))
-    );
-
-    let finalDoc: PublicDocument;
-
-    if (existingIdx !== -1 && (asNewVersion || (docData.version && docData.version > (this.documents[existingIdx].version || 1)))) {
-      const oldDoc = this.documents[existingIdx];
-      const newVersion = (oldDoc.version || 1) + 1;
-      
-      const archivedVersion = {
-        version: oldDoc.version || 1,
-        file_url: oldDoc.file_url,
-        file_name: oldDoc.file_name,
-        checksum_sha256: oldDoc.checksum_sha256,
-        archived_at: new Date().toISOString(),
-        archived_by: this.authState.fullName || 'Admin',
-      };
-
-      finalDoc = {
-        ...oldDoc,
-        ...docData,
-        id: docData.id && docData.id !== oldDoc.id ? docData.id : oldDoc.id,
-        version: newVersion,
-        document_type: 'COMPTE_ADMINISTRATIF',
-        category: 'COMPTE_ADMINISTRATIF',
-        document_status: 'TO_VERIFY',
-        verification_status: 'TO_VERIFY',
-        is_public: false, // New version must be verified by staff before publication
-        updated_at: new Date().toISOString(),
-        previous_versions: [...(oldDoc.previous_versions || []), archivedVersion],
-      };
-
-      this.documents[existingIdx] = finalDoc;
-    } else if (existingIdx !== -1 && !asNewVersion) {
-      finalDoc = {
-        ...this.documents[existingIdx],
-        ...docData,
-        updated_at: new Date().toISOString(),
-      };
-      this.documents[existingIdx] = finalDoc;
-    } else {
-      const newId = docData.id || `doc-ca-${instId || 'collec'}-${fiscalYear}-${Date.now()}`;
-      finalDoc = {
-        id: newId,
-        title: docData.title || `Compte Administratif ${fiscalYear} - ${docData.institution_name || 'Collectivité'}`,
-        category: 'COMPTE_ADMINISTRATIF',
-        document_type: 'COMPTE_ADMINISTRATIF',
-        institution_name: docData.institution_name || 'Collectivité',
-        institution_id: instId,
-        institution_type: docData.institution_type || 'MAIRIE',
-        year: fiscalYear,
-        fiscal_year: fiscalYear,
-        description: docData.description || `Compte administratif officiel de l'exercice budgétaire ${fiscalYear}.`,
-        file_url: docData.file_url || '',
-        file_name: docData.file_name || `compte-administratif-${fiscalYear}.pdf`,
-        file_size: docData.file_size || '0 Mo',
-        file_format: docData.file_format || 'PDF',
-        published_at: docData.published_at || new Date().toISOString().split('T')[0],
-        downloads_count: 0,
-        is_official: true,
-        document_status: docData.document_status || 'TO_VERIFY',
-        verification_status: docData.verification_status || 'TO_VERIFY',
-        is_public: docData.is_public ?? false,
-        version: 1,
-        checksum_sha256: docData.checksum_sha256,
-        source_name: docData.source_name || 'COLLECTIVITE',
-        source_url: docData.source_url,
-        adoption_date: docData.adoption_date,
-        approval_date: docData.approval_date,
-        approval_reference: docData.approval_reference,
-        created_by: this.authState.fullName || 'Admin',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        tags: docData.tags || ['Compte Administratif', 'Exécution Budgétaire', `${fiscalYear}`],
-      };
-      this.documents.unshift(finalDoc);
-    }
-
-    this.saveDocuments();
-    this.notify();
-
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').upsert([finalDoc]),
-        'Sauvegarde Compte Administratif'
-      );
-    }
-
-    return finalDoc;
+  public getDocumentVersions(document: PublicDocument): PublicDocument[] {
+    return this.documents.filter(d => d.institution_id === document.institution_id
+      && d.fiscal_year === document.fiscal_year && d.document_type === document.document_type)
+      .sort((a, b) => (b.version || 1) - (a.version || 1));
   }
 
-  public updateDocumentLifecycleStatus(id: string, status: DocumentLifecycleStatus, reviewerName?: string): boolean {
-    const idx = this.documents.findIndex(d => d.id === id);
-    if (idx === -1) return false;
-    const doc = this.documents[idx];
-    const now = new Date().toISOString();
-
-    const updates: Partial<PublicDocument> = {
-      document_status: status,
-      updated_at: now,
+  public async saveCADocument(docData: Partial<PublicDocument>, asNewVersion = false): Promise<PublicDocument> {
+    if (!isSupabaseConfigured()) throw new Error('Service documentaire indisponible.');
+    const institution = this.institutions.find(i => i.id === docData.institution_id);
+    const fiscalYear = docData.fiscal_year ?? docData.year;
+    if (!institution || !fiscalYear || !Number.isInteger(fiscalYear) || fiscalYear < 1960 || fiscalYear > new Date().getFullYear()) {
+      throw new Error('Collectivité et exercice valides requis.');
+    }
+    if (!docData.storage_path || !/^[a-f0-9]{64}$/.test(docData.checksum_sha256 || '') || !docData.source_name?.trim()) {
+      throw new Error('Fichier privé, empreinte SHA-256 et source requis.');
+    }
+    const { data: versions, error } = await supabase.from('public_documents').select('*')
+      .eq('institution_id', institution.id).eq('fiscal_year', fiscalYear)
+      .eq('document_type', 'COMPTE_ADMINISTRATIF').order('version', { ascending: false });
+    if (error) throw error;
+    const latest = versions?.[0] as PublicDocument | undefined;
+    if (asNewVersion && (!latest || !docData.replacement_reason?.trim())) {
+      throw new Error('Version précédente et motif de remplacement requis.');
+    }
+    if (latest && !asNewVersion && docData.id !== latest.id) {
+      throw new Error('Un CA existe déjà : créez une nouvelle version.');
+    }
+    const metadata = {
+      title: docData.title || `Compte administratif ${fiscalYear} — ${institution.name}`,
+      institution_id: institution.id, institution_name: institution.name,
+      institution_type: institution.type as PublicDocument['institution_type'],
+      fiscal_year: fiscalYear, year: fiscalYear,
+      category: 'COMPTE_ADMINISTRATIF' as const, document_type: 'COMPTE_ADMINISTRATIF' as const,
+      description: docData.description || '', file_url: '',
+      file_name: docData.file_name || 'document.pdf', file_format: 'PDF' as const,
+      file_size: docData.file_size, file_size_bytes: docData.file_size_bytes,
+      storage_bucket: 'public_documents', storage_path: docData.storage_path,
+      checksum_sha256: docData.checksum_sha256, mime_type: 'application/pdf',
+      source_name: docData.source_name.trim(), source_url: docData.source_url,
+      adoption_date: docData.adoption_date, approval_date: docData.approval_date,
+      approval_reference: docData.approval_reference,
     };
-
-    if (status === 'VERIFIED') {
-      updates.verification_status = 'VERIFIED';
-      updates.verified_by = reviewerName || this.authState.fullName || 'Administrateur';
-      updates.verified_at = now;
-      // CRITICAL: Validation is decoupled from publication!
-      // is_public remains unchanged or false until explicit publication!
-    } else if (status === 'PUBLISHED') {
-      updates.is_public = true;
-      updates.document_status = 'PUBLISHED';
-      if (!doc.published_at) {
-        updates.published_at = now.split('T')[0];
+    if (latest && !asNewVersion) {
+      if (latest.storage_path !== metadata.storage_path || latest.checksum_sha256 !== metadata.checksum_sha256) {
+        throw new Error('Le fichier original est immuable. Créez une nouvelle version.');
       }
-    } else if (status === 'ARCHIVED') {
-      updates.is_public = false;
-      updates.document_status = 'ARCHIVED';
-    } else if (status === 'TO_VERIFY') {
-      updates.is_public = false;
-      updates.verification_status = 'TO_VERIFY';
+      await this.updateDocument(latest.id, { ...metadata, status: 'TO_VERIFY', verification_status: 'TO_VERIFY' });
+      return this.getDocumentById(latest.id)!;
     }
+    return this.addDocument({ ...metadata, is_official: false,
+      version: latest ? (latest.version || 1) + 1 : 1,
+      replaces_document_id: latest?.id,
+      replacement_reason: latest ? docData.replacement_reason?.trim() : undefined,
+      status: 'TO_VERIFY', verification_status: 'TO_VERIFY',
+    });
+  }
 
-    this.documents[idx] = { ...doc, ...updates };
-    this.saveDocuments();
-    this.notify();
-
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('public_documents').update(updates).eq('id', id),
-        `Mise à jour statut document ${id} -> ${status}`
-      );
+  public async updateDocumentLifecycleStatus(id: string, status: DocumentLifecycleStatus): Promise<boolean> {
+    const document = this.getDocumentById(id);
+    if (!document) throw new Error('Document introuvable.');
+    if (status === 'PUBLISHED' && (document.status !== 'VERIFIED' || document.verification_status !== 'VERIFIED')) {
+      throw new Error('Vérifiez le document avant publication.');
     }
-
+    await this.updateDocument(id, { status });
+    await this.refreshDocumentsFromSupabase(true);
     return true;
   }
+
 
   // --- SITE SETTINGS ---
   public updateSettings(newSettings: Partial<SiteSettings>) {
@@ -2079,13 +1899,13 @@ class DataStore {
       if (Array.isArray(data.projects)) this.projects = data.projects;
       if (Array.isArray(data.institutions)) this.institutions = data.institutions;
       if (Array.isArray(data.articles)) this.articles = data.articles;
-      if (Array.isArray(data.proofs)) this.proofs = data.proofs;
+
       if (data.settings && typeof data.settings === 'object') this.settings = { ...DEFAULT_SETTINGS, ...data.settings };
 
       this.saveProjects();
       this.saveInstitutions();
       this.saveArticles();
-      this.saveProofs();
+
       this.saveSettings();
       this.notify();
 
@@ -2101,14 +1921,14 @@ class DataStore {
   public resetToFactoryDefaults() {
     this.projects = [...RAW_BUDGET_PROJECTS];
     this.institutions = [...INSTITUTIONS_DATA];
-    this.proofs = [...INITIAL_CITIZEN_PROOFS];
+
     this.articles = [...INITIAL_ARTICLES];
     this.caidpDirectory = [...CAIDP_MASTER_DIRECTORY];
     this.settings = { ...DEFAULT_SETTINGS };
 
     this.saveProjects();
     this.saveInstitutions();
-    this.saveProofs();
+
     this.saveArticles();
     this.saveCaidpDirectory();
     this.saveSettings();
@@ -2262,14 +2082,6 @@ class DataStore {
     }
   }
 
-  private saveProofs() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.PROOFS, JSON.stringify(this.proofs));
-    } catch (e) {
-      console.warn("Storage quota exceeded for proofs", e);
-    }
-  }
-
   private saveArticles() {
     try {
       localStorage.setItem(STORAGE_KEYS.ARTICLES, JSON.stringify(this.articles));
@@ -2283,16 +2095,6 @@ class DataStore {
       localStorage.setItem(STORAGE_KEYS.CAIDP_RI, JSON.stringify(this.caidpDirectory));
     } catch (e) {
       console.warn("Storage quota exceeded for caidp directory", e);
-    }
-  }
-
-  private saveDocuments() {
-    try {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(this.documents));
-      }
-    } catch (e) {
-      console.warn("Storage quota exceeded for public documents", e);
     }
   }
 
@@ -2456,3 +2258,8 @@ class DataStore {
 }
 
 export const dataStore = new DataStore();
+
+if (typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+  (window as any).__suiviBudgetDataStore = dataStore;
+}
+

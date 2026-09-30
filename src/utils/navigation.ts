@@ -95,7 +95,7 @@ export function parseRoute(pathname: string, search: string): RouteState {
     tab = 'documents';
   } else if (normalizedPath === '/observatoire' || normalizedPath === '/observatory') {
     tab = 'observatory';
-  } else if (normalizedPath === '/admin') {
+  } else if (normalizedPath === '/admin' || normalizedPath.startsWith('/admin/')) {
     tab = 'admin';
   } else if (normalizedPath === '/' || normalizedPath === '/accueil' || normalizedPath === '/home') {
     tab = 'home';
