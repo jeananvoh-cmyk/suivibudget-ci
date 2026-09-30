@@ -10,7 +10,7 @@ Passport : vingt faits typés avec provenance et source, conflits et champs manq
 
 131/131 tests réussis (10 fichiers), dont 18 Passport et 13 base PostgreSQL PGlite. Un premier passage concurrent au build a dépassé le délai d’un test préexistant ; le passage isolé réussit sans augmenter le délai. Validation navigateur Playwright/Edge du composant réel : deux états (sources pilotes en aperçu local, public vide) × huit largeurs 360/375/390/430/768/1280/1440/1920 ; 16/16, zéro débordement et erreur JS. Captures 375/1440 inspectées. Advisors inchangés : protection des mots de passe compromis désactivée, 31 index inutilisés et 16 policies permissives multiples. Aucune optimisation mécanique.
 
-La clôture CI et le prochain travail exécutable sont consignés dans AGENT_HANDOFF.md. DGMP 2B et APEC 2C restent NOT_STARTED dans ce bloc.
+Commits poussés : 1771f67 (moindre privilège), ecfb1f789dfd31ecc636e2c1d002e437d634da0e (Passport). PR #4 créée avec la branche de PR #3 comme base, aucune fusion. Quality / verify et Vercel Preview Comments SUCCESS sur ecfb1f7. Build final 1722 modules réussi ; 18 tests Passport ciblés réussis après le dernier ajustement. Cette clôture documentaire sera également poussée et sa CI vérifiée sans boucle de commits de métadonnées. DGMP 2B et APEC 2C restent NOT_STARTED dans ce bloc ; tâche suivante précise dans AGENT_HANDOFF.md.
 
 ## 30 septembre — fermeture HTTP et publication frontend
 

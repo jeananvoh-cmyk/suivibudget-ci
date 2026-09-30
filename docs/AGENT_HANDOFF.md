@@ -1,14 +1,14 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- LAST_UPDATED : 2026-09-30T20:15:00Z
+- LAST_UPDATED : 2026-09-30T21:54:00Z
 - LAST_AGENT : Codex
 - CURRENT_BRANCH : `codex/passport-phase-2a`
 - HANDOFF_BASE_SHA : `9457f07aff174a63f4826b371296b93c2a54ced8` (fondation et clôture documentaire, CI SUCCESS recontrôlée)
-- CURRENT_HEAD : base `9457f07` avant les commits Phase 2A ; consulter Git pour le HEAD de cette branche. Ne pas créer de boucle de commits pour inscrire son propre hash.
-- PR : [#3](https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/3), ouverte, non mergée
+- CURRENT_HEAD : `ecfb1f789dfd31ecc636e2c1d002e437d634da0e`, dernier commit fonctionnel, CI SUCCESS. Le seul descendant prévu est cette clôture documentaire ; consulter Git pour son hash sans nouvelle boucle de commits.
+- PR : [#4 Phase 2A](https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/4), base security-ca-final-20260929 ; [#3 fondation](https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/3). Toutes deux ouvertes, non fusionnées.
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : fondation CLOSED ; Passport Phase 2A implémenté et validé localement, CI de la branche à confirmer après push
+- CURRENT_MILESTONE : fondation CLOSED ; Passport Phase 2A VALIDATED, revue PR #4 disponible
 - FOUNDATION_READY : TRUE, validé sur 3b502b1 après CI SUCCESS. Aucun P0/P1 connu ouvert dans la fondation.
 
 ## COMPLETED
@@ -20,6 +20,7 @@
 - Deux corrections SQL ciblées : retrait des droits techniques service_role et lecture citoyenne des budgets limitée à PUBLISHED. Matrice complète dans CA_SECURITY_STATUS_20260929.md.
 - 131/131 tests, dont 18 Passport et 13 PGlite ; 23/23 contrôles HTTP publics ; 16/16 scénarios navigateur sur 360/375/390/430/768/1280/1440/1920. Aucun débordement ni erreur JS. Inspection visuelle des captures 375 et 1440.
 - Build final TypeScript/Vite PASS (1722 modules), git diff --check PASS. Le seul avertissement build reste la taille des bundles de données existants.
+- Commits poussés : `1771f67` moindre privilège et `ecfb1f7` Passport. CI du HEAD fonctionnel exact SUCCESS : [Quality / verify](https://github.com/jeananvoh-cmyk/suivibudget-ci/actions/runs/36781974758/job/110114182806), Vercel Preview Comments SUCCESS. La CI du descendant documentaire sera contrôlée après push sans autre commit pour réinscrire son hash.
 - Le navigateur utilise le composant réel dans un aperçu local scratch avec les sources pilotes de tests, puis un état public vide. Ce contrôle ne prétend pas publier ces sources ni revalider toutes les pages.
 
 ### Fondation — validations antérieures conservées
@@ -68,7 +69,7 @@ Trois CA pilotes VERIFIED préservés : Abobo, Bingerville, Tiassalé 2024. Aucu
 
 ## PASSPORT_STATE
 PASS pour la fondation : 10 tests de rapprochement, séparation financier/physique, origine citoyenne non inventée, frontière de publication réelle. La requête imbriquée a retrouvé les trois CA, trois opérations et trois marchés sous le compte ADMIN temporaire ; zéro CA publié sous ANON.
-Consolidation Phase 2A VALIDATED localement : vingt champs et trois niveaux de lecture, 18 tests Passport, trois opérations réelles Tiassalé et deux synthèses sans opérations. La clôture GitHub dépend de la CI du HEAD de codex/passport-phase-2a. Les document_id manquants, localisations non renseignées et numéros de contrat absents restent explicitement inconnus ; l’identifiant d’appel d’offres n’est pas présenté comme numéro de contrat.
+Consolidation Phase 2A VALIDATED : vingt champs et trois niveaux de lecture, 18 tests Passport, trois opérations réelles Tiassalé et deux synthèses sans opérations, CI fonctionnelle SUCCESS sur ecfb1f7. Les document_id manquants, localisations non renseignées et numéros de contrat absents restent explicitement inconnus ; l’identifiant d’appel d’offres n’est pas présenté comme numéro de contrat.
 DGMP Phase 2B et APEC Phase 2C NOT_STARTED. Pas d’ingestion massive.
 
 ## ADVISORS / KNOWN_ANOMALIES
@@ -112,6 +113,6 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Contrôler le HEAD et la CI de codex/passport-phase-2a puis ouvrir/reprendre sa PR distincte, basée sur security-ca-final-20260929. Ne pas recréer le modèle ni rejouer les migrations déjà APPLIED ; ne fusionner aucune PR automatiquement.
-2. Après clôture Phase 2A, DGMP Phase 2B : comparer les candidats indépendamment de leur ordre, conserver les conflits et ambiguïtés, sur échantillon contrôlé avec STRONG/PROBABLE/WEAK/NONE/TO_VERIFY. Pas d’ingestion massive ni de modification des trois pilotes pour tester.
+1. Reprendre PR #4 et son HEAD réel, vérifier seulement les écarts depuis cette clôture. Ne pas recréer le modèle ni rejouer les migrations déjà APPLIED ; ne fusionner aucune PR automatiquement.
+2. DGMP Phase 2B : sur une branche distincte issue du HEAD validé Phase 2A, commencer par un test local de deux candidats intervertis et d’homonymes incompatibles, puis remplacer la sélection du premier candidat dans findCandidate par une comparaison déterministe explicitant les ambiguïtés. Conserver STRONG/PROBABLE/WEAK/NONE/TO_VERIFY et les trois marchés Tiassalé. Pas d’ingestion massive ni de modification des trois pilotes pour tester.
 3. APEC Phase 2C ensuite : modèle minimal cycle/besoin/rapprochement, contribution traçable et participation distincte de représentativité. Préserver PR #3 comme fondation ; aucun merge automatique effectué.
