@@ -4,7 +4,7 @@
 - **LAST_UPDATED**: 2026-09-30T03:12:00Z
 - **LAST_AGENT**: Codex
 - **CURRENT_BRANCH**: `security-ca-final-20260929`
-- **HANDOFF_BASE_SHA**: `079c163d65f1fe9ba1cf33efdb9e9212d5cdd5b6`
+- **HANDOFF_BASE_SHA**: `b2b3b1f`
 - **PR**: #3 ("Final: security hardening + verified CA foundation")
 - **SUPABASE_PROJECT**: `cdesuvcozcetdtvibgqs` (eu-west-1, PostgreSQL 17.6)
 - **CURRENT_MILESTONE**: P0/P1 Security Hardening, Document Versioning, CA Workflow & Project Accountability Passport
@@ -14,6 +14,8 @@
 ## EXECUTION SUMMARY & STATUS
 
 ### État de production vérifié le 30 septembre — prioritaire sur l'historique ci-dessous
+
+Complément : commit b2b3b1f poussé, CI verify et Vercel Preview Comments SUCCESS. Transactions distantes CITIZEN/MODERATOR/DATA_MANAGER/ADMIN réussies : visibilité CA selon rôle, insertion liée à auth.uid(), relecture propriétaire, refus usurpation, modération limitée ADMIN/MODERATOR. Après rollback : zéro compte test, zéro document, zéro preuve, trois CA. HTTP réel avec clé publique : corps vide → 400 sur les deux fonctions ; verify_jwt conservé. Prochaine action précise : tests Storage/Edge sur fichiers temporaires réels, signatures et expiration, puis nettoyage et vérification des comptages. FOUNDATION_READY reste FALSE. Les agents délégués ont atteint leur quota ; leurs travaux non livrés ne sont pas comptés comme validations.
 
 - **FOUNDATION_READY = FALSE** : matrice distante complète des cinq rôles, PostgREST, Storage et Edge encore à terminer. Aucune expansion DGMP/APEC et aucun merge PR #3.
 - **MIGRATIONS_REMOTE** : metadata `20260930030522`, publication `20260930030614`, grants `20260930030702`, projection publique `20260930031058` appliquées individuellement puis contrôlées. Les trois premiers correspondent aux fichiers locaux `20260929121408`, `20260929121225`, `20260929141800`; le complément correspond à `20260930030840`. L'outil distant attribue l'horodatage d'application : ne pas rejouer les fichiers uniquement parce que les préfixes diffèrent.

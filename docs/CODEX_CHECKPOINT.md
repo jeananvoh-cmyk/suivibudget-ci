@@ -1,5 +1,9 @@
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
+## 30 septembre — état courant Codex
+
+Commit fonctionnel b2b3b1f poussé, CI verify SUCCESS. Metadata, publication et grants appliqués individuellement, puis complément de projection publique : versions distantes 20260930030522, 20260930030614, 20260930030702, 20260930031058. Vérifications SQL distantes avec rollback, aucune fixture restante. 116 tests et build passent. Security advisor : uniquement Leaked Password Protection Disabled. FOUNDATION_READY reste FALSE : tests exhaustifs Storage/Edge/PostgREST encore nécessaires. AGENT_HANDOFF.md porte le relais opérationnel.
+
 ## Mandat et état
 
 Poursuite sans interruption du backlog de sécurisation, RLS, gestion documentaire, CA et UX/UI responsive sur la branche `security-ca-final-20260929` (PR #3).
