@@ -1,167 +1,82 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- **LAST_UPDATED**: 2026-09-30T03:12:00Z
-- **LAST_AGENT**: Codex
-- **CURRENT_BRANCH**: `security-ca-final-20260929`
-- **HANDOFF_BASE_SHA**: `b2b3b1f`
-- **PR**: #3 ("Final: security hardening + verified CA foundation")
-- **SUPABASE_PROJECT**: `cdesuvcozcetdtvibgqs` (eu-west-1, PostgreSQL 17.6)
-- **CURRENT_MILESTONE**: P0/P1 Security Hardening, Document Versioning, CA Workflow & Project Accountability Passport
+- LAST_UPDATED : 2026-09-30T15:10:00Z
+- LAST_AGENT : Codex
+- CURRENT_BRANCH : `security-ca-final-20260929`
+- HANDOFF_BASE_SHA : `97962e8e357a80e6d17b0ce43ed83c3e2474229e` (base avant ce bloc)
+- CURRENT_HEAD : à remplacer après commit fonctionnel ; ne pas inscrire un hash futur
+- PR : [#3](https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/3), ouverte, non mergée
+- SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
+- CURRENT_MILESTONE : fermeture de la fondation HTTP/Storage/Edge et de la frontière de publication frontend
+- FOUNDATION_READY : FALSE, uniquement en attente du commit et de sa CI
 
----
+## COMPLETED
+- 197 contrôles HTTP réels réussis avec ANON, ADMIN, DATA_MANAGER, MODERATOR, CITIZEN propriétaire et second CITIZEN ; 2 contrôles supplémentaires des relations CA/opérations/marchés réussis.
+- Sources documentaires : upload ADMIN/DATA_MANAGER, refus autres rôles, doublon et overwrite refusés, suppression staging permise, suppression source référencée refusée.
+- Cycle TO_VERIFY → VERIFIED → PUBLISHED réel, publication directe refusée, created_by/verified_by/verified_at/published_at serveur contrôlés. Tests SQL existants couvrent immutabilité, checksum et versionnement.
+- Documents non publiés et preuves PENDING/REJECTED : aucune URL délivrée, même au staff par le point d’accès public. APPROVED/PUBLISHED : signatures de 300 secondes fonctionnelles puis effectivement expirées.
+- Upload citoyen et anonyme réel, MIME interdit et fichier >25 MiB refusés, accès direct public aux deux buckets refusé.
+- Matrice PostgREST : visibilité des CA et enfants, documents selon statut/rôle, preuve privée propriétaire/staff, refus usurpation et modération hors ADMIN/MODERATOR, projection publique sans données privées, journal CAIDP INSERT sans lecture publique ni mutation.
+- Médias affichés via Edge pour APPROVED ; médias privés signés seulement si la RLS Storage l’autorise. Seconde photo prise en charge, renouvellement toutes les quatre minutes quand la page est visible ; pas de chemin privé utilisé comme URL d’image.
+- CA publics chargés par PostgREST avec filtre PUBLISHED et relations réelles. Les trois CA VERIFIED ont été retirés du bundle applicatif et conservés uniquement comme fixtures de tests. Vérification du bundle : aucun identifiant des trois pilotes ni de leurs marchés embarqué.
+- Page Documents filtrée PUBLISHED également lors des notifications du cache ; cache documentaire effacé à la déconnexion.
+- 121 tests / 10 fichiers PASS ; build TypeScript + Vite PASS (1722 modules).
+- Fixtures SQL, Auth, profils, objets Storage, journaux CAIDP et fichier local de mots de passe temporaires supprimés.
 
-## EXECUTION SUMMARY & STATUS
+## MIGRATIONS_REMOTE / REMOTE_SCHEMA_STATE
+| Fichier local | Version distante | État |
+| --- | --- | --- |
+| 20260929121408_document_metadata_versions.sql | 20260930030522 | APPLIED |
+| 20260929121225_publication_boundaries.sql | 20260930030614 | APPLIED |
+| 20260929141800_grant_schema_privileges.sql | 20260930030702 | APPLIED |
+| 20260930030840_public_proof_projection_boundary.sql | 20260930031058 | APPLIED |
+| 20260930033244_foundation_http_access.sql | 20260930144753 | APPLIED |
 
-### État de production vérifié le 30 septembre — prioritaire sur l'historique ci-dessous
+Les quatre premières migrations n’ont pas été rejouées. Les horodatages distants sont attribués par l’outil ; ne pas rejouer sur la seule différence de préfixe. Schéma metadata, vue publique, triggers, grants et RLS contrôlés.
 
-Complément : commit b2b3b1f poussé, CI verify et Vercel Preview Comments SUCCESS. Transactions distantes CITIZEN/MODERATOR/DATA_MANAGER/ADMIN réussies : visibilité CA selon rôle, insertion liée à auth.uid(), relecture propriétaire, refus usurpation, modération limitée ADMIN/MODERATOR. Après rollback : zéro compte test, zéro document, zéro preuve, trois CA. HTTP réel avec clé publique : corps vide → 400 sur les deux fonctions ; verify_jwt conservé. Prochaine action précise : tests Storage/Edge sur fichiers temporaires réels, signatures et expiration, puis nettoyage et vérification des comptages. FOUNDATION_READY reste FALSE. Les agents délégués ont atteint leur quota ; leurs travaux non livrés ne sont pas comptés comme validations.
+## RLS_STATE / GRANTS_STATE / POSTGREST_STATE
+PASS. Rôles issus de profiles protégés, aucune autorité user_metadata/client. La nouvelle migration accorde seulement SELECT sur public_documents et citizen_proofs à service_role : les fonctions Edge renvoyaient 404 car ces droits SQL manquaient. Aucun droit de mutation documentaire ajouté au service.
 
-- **FOUNDATION_READY = FALSE** : matrice distante complète des cinq rôles, PostgREST, Storage et Edge encore à terminer. Aucune expansion DGMP/APEC et aucun merge PR #3.
-- **MIGRATIONS_REMOTE** : metadata `20260930030522`, publication `20260930030614`, grants `20260930030702`, projection publique `20260930031058` appliquées individuellement puis contrôlées. Les trois premiers correspondent aux fichiers locaux `20260929121408`, `20260929121225`, `20260929141800`; le complément correspond à `20260930030840`. L'outil distant attribue l'horodatage d'application : ne pas rejouer les fichiers uniquement parce que les préfixes diffèrent.
-- **REMOTE_SCHEMA_STATE** : 12 colonnes metadata ajoutées ; FK text→documents et uuid→profiles compatibles ; published_at nullable ; vue publique et trigger INSERT/UPDATE présents.
-- **RLS_STATE / GRANTS_STATE** : tests distants en transactions annulées réussis pour l'absence d'accès anon aux CA VERIFIED et enfants, accès ADMIN aux trois CA, refus publication directe puis cycle TO_VERIFY→VERIFIED→PUBLISHED avec acteur/date serveur. Aucun TRUNCATE/TRIGGER/REFERENCES restant pour anon/authenticated dans public.
-- **CITIZEN_PROOFS_STATE** : fixture distante APPROVED/PENDING/REJECTED annulée ; anon lit uniquement APPROVED via projection sans identité privée/téléphone/notes/tracking ; insertion anonyme PENDING permise. Comptages après rollback : 3 CA, 0 documents, 0 preuves.
-- **Projection publique** : vue security_invoker + security_barrier sur fonction privée SQL stable SECURITY DEFINER sans paramètres, search_path vide, projection fixe et filtre APPROVED. Aucun SELECT anon sur table privée. Le privilège élevé est volontairement limité à cette projection ; security_barrier seul n'est pas une RLS. Documentation examinée : https://supabase.com/docs/guides/database/postgres/row-level-security.
-- **SECURITY_ADVISORS** : erreur security_definer_view apparue après la migration historique, corrigée par le complément ; seul WARN Leaked Password Protection Disabled subsiste.
-- **PERFORMANCE_ADVISORS** : inspection après trois migrations : 42 index inutilisés INFO conservés ; consolidation des policies reportée jusqu'à matrice complète, sans suppression mécanique.
-- **PASSPORT_STATE** : 10 tests existants passent ; casts as any sur origine du besoin supprimés au profit de champs optionnels typés ; valeur d'initiative conservée sans inventer une consultation.
-- **TESTS_EXECUTED / TEST_RESULTS** : npm test -- --run : 116/116, 10 fichiers, après complément SQL. **BUILD_STATUS** : PASS, 1722 modules, avertissement taille des bundles existant. **CI_STATUS** : à recontrôler au nouveau commit après push.
-- **STORAGE_STATE / EDGE_FUNCTIONS_STATE** : validations HTTP complètes encore requises ; aucune fonction redéployée pendant ce bloc, verify_jwt inchangé.
-- **NEXT_EXECUTABLE_TASK** : compléter les tests distants CITIZEN/MODERATOR/DATA_MANAGER, puis tester les deux fonctions Edge et Storage avec fixtures temporaires supprimées, sans modifier les CA pilotes.
-- **NEXT_3_TASKS** : matrice RLS distante ; tests Storage/Edge et corrections ; push et CI puis décision FOUNDATION_READY.
-- **MANUAL_ACTION_REQUIRED** : activer Leaked Password Protection dans Supabase Authentication → paramètres de sécurité des mots de passe, projet cdesuvcozcetdtvibgqs. Non activé par l'agent ; https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection.
-- Convention SHA : HANDOFF_BASE_SHA désigne le dernier commit fonctionnel couvert ; le commit documentaire peut être postérieur. Ne pas chercher à inscrire son propre hash futur.
+Projection publique : vue security_invoker + security_barrier sur fonction privée SQL stable SECURITY DEFINER sans paramètres, search_path vide, projection fixe APPROVED sans identité privée/contact/notes/tracking. Cette élévation limitée est volontaire ; le filtre est dans la fonction, pas seulement dans la vue.
 
-### Reprise Codex — contrôle de drift en cours, 29 septembre 2026
+## STORAGE_STATE / EDGE_FUNCTIONS_STATE
+- Buckets public_documents et citizen_photos privés. Limites : 50 MiB et 25 MiB.
+- Ancienne policy photo rejetait chaque upload car metadata.size n’existe pas encore lors du contrôle INSERT. Taille et MIME imposés par le bucket ; extensions autorisées conservées par RLS.
+- public-document-url v3 ACTIVE ; citizen-proof-media-url v2 ACTIVE ; verify_jwt=true conservé.
+- Appels publics avec la clé anon dans Authorization fonctionnent sans session citoyenne. Aucun besoin démontré de désactiver verify_jwt.
+- OPTIONS, POST, méthode interdite, identifiant invalide/absent, média absent, seconde image, URL réelle et expiration testés.
+- Suppression du compteur de téléchargements non fonctionnel dans l’Edge : générer une URL ne prouve pas un téléchargement et l’UPDATE service_role était refusé.
+- Une URL déjà émise pendant APPROVED reste valable jusqu’à sa limite de 300 secondes après un retrait. Aucun nouveau lien n’est émis après retrait ; le mécanisme ne promet pas une révocation instantanée.
 
-État réel contrôlé : HEAD local et PR #3 `6c47c8a`, PR ouverte, checks `verify` et `Vercel Preview Comments` réussis. Projet autorisé confirmé eu-west-1 ACTIVE_HEALTHY. Historique distant toujours limité aux neuf migrations jusqu'à `20260929112823`. Aucun document ni preuve en base ; trois CA 2024 VERIFIED préservés. Les corrections ci-dessous sont locales et **non appliquées** à ce stade. Les anciennes mentions « prêt/idempotent » ne constituent pas une validation SQL.
+## PRODUCTION_FIXTURES_AFTER_TESTS
+Contrôle SQL final : auth.users=1 ; administrative_accounts=3 ; public_documents=0 ; citizen_proofs=0 ; storage.objects des deux buckets=0 ; profils temporaires=0 ; journaux temporaires=0.
+Trois CA pilotes VERIFIED préservés : Abobo, Bingerville, Tiassalé 2024. Aucune donnée métier fabriquée. Aucun changement sur un autre projet Supabase ou Vercel Civic Signal.
 
-| OBJECT | REMOTE_STATE | TARGET_STATE | MIGRATION | ACTION | RISK | VERIFICATION |
-| --- | --- | --- | --- | --- | --- | --- |
-| caidp_requests | Table absente, aucun usage métier | Ne pas créer de faux modèle | grants | CONFLICT : retirer référence | Échec transaction initiale | Catalogue + recherche code |
-| caidp_document_requests_log | Journal PRINT_PDF/COPIED/EMAIL_SENT, INSERT public et SELECT staff RLS | INSERT public, SELECT staff, aucun SELECT anon | grants | NEEDS_ADAPTATION | Journal ≠ dossier citoyen, mailto ≠ envoi prouvé | INSERT sans RETURNING, matrice rôles |
-| Privilèges tables public | anon/authenticated ont TRUNCATE/TRIGGER/REFERENCES, aucun DML utile | Allowlist table par table | grants | NEEDS_ADAPTATION | TRUNCATE non protégé par RLS ; ne restaurer DML qu'après policies | Tests réels des rôles et has_table_privilege |
-| CA parent | VERIFIED ou PUBLISHED lisible selon policy | PUBLISHED seul au public | publication | NEEDS_ADAPTATION | VERIFIED ne signifie pas diffusion autorisée | SELECT anon/citoyen/staff |
-| ca_financial_lines | Parent VERIFIED/PUBLISHED | Parent PUBLISHED | publication | NEEDS_ADAPTATION | Fuite des lignes avant publication | CA de tous statuts en fixture |
-| ca_investment_operations / ca_procurement_matches | SELECT true | Parent PUBLISHED | publication | NEEDS_ADAPTATION | Exposition autonome des enfants | Tests des jointures RLS |
-| public_documents staff | ADMIN/DATA_MANAGER/MODERATOR ALL | ADMIN/DATA_MANAGER gestion, pas DELETE accordé | publication + grants | NEEDS_ADAPTATION | Conservation sources et rôles | Matrice DML |
-| storage documents | Update autorisé ; delete sans dépendance | Aucun update, suppression staging sans document référent | publication | NEEDS_ADAPTATION | Écrasement ou suppression source | Tests policies storage |
-| citizen_proofs | APPROVED/owner SELECT, PENDING INSERT sans liaison forte | Table owner/staff, vue publique approuvée sans PII | publication + grants | NEEDS_ADAPTATION | Téléphone, identité et notes ne doivent pas devenir publics | Projection + refus usurpation |
-| Trigger documents | UPDATE seulement, publication force VERIFIED | INSERT TO_VERIFY, vérification humaine puis publication, source immuable | publication | NEEDS_ADAPTATION | Publication directe et falsification audit | SQL insert/update réellement exécuté |
-| published_at | NOT NULL avec default now | NULL avant publication, date serveur | metadata + publication | NEEDS_ADAPTATION | Faux historique de publication | Workflow réel SQL |
-| Métadonnées additionnelles | 12 colonnes absentes | Colonnes typées, FK profils et document précédent | metadata | SAFE_TO_APPLY | Types FK text/uuid contrôlés | information_schema + fixture |
-| Contraintes statut/version | public_documents_status_check et version_check déjà présentes | Conserver existantes | metadata | ALREADY_PRESENT : retirer doublons proposés | Doublons inutiles | pg_constraint |
-| Page/taille/checksum/replacement constraints | Absentes ; table vide | Contraintes de domaine | metadata | SAFE_TO_APPLY | Rejet metadata invalides | Tests valeurs limites |
-| Index série/version + replaces + created_by | Absents ; checksum unique déjà présent | Ajouter seulement trois index nécessaires | metadata | SAFE_TO_APPLY | Conflits version ; couverture FK | pg_indexes, fixture |
+## PASSPORT_STATE
+PASS pour la fondation : 10 tests de rapprochement, séparation financier/physique, origine citoyenne non inventée, frontière de publication réelle. La requête imbriquée a retrouvé les trois CA, trois opérations et trois marchés sous le compte ADMIN temporaire ; zéro CA publié sous ANON.
+Consolidation Phase 2A encore PARTIAL : détailler institution/exercice/objet/localisation/montant/référence/source, champs concordants et contradictoires sur échantillon réel sans publier implicitement les pilotes.
+DGMP Phase 2B et APEC Phase 2C NOT_STARTED. Pas d’ingestion massive.
 
-Ordre d'application après tests : metadata → publication → grants. Les droits sont rétablis en dernier. Pas de rejeu de migration fondatrice. Les tests SQL locaux et corrections Edge sont en cours ; aucune nouvelle validation UX n'est déclarée. Point découvert : le dépôt de preuve utilisait des aperçus locaux et un succès anticipé ; correction du parcours réel requise malgré la validation visuelle antérieure.
+## ADVISORS / KNOWN_ANOMALIES
+- SECURITY_ADVISORS : seul WARN Leaked Password Protection Disabled ; aucun autre signal sécurité.
+- PERFORMANCE_ADVISORS : 38 unused indexes INFO et 16 multiple permissive policies WARN au contrôle 14:58 UTC. Pas de suppression ni consolidation mécanique, aucun gain mesuré ne justifie ce refactoring pour fermer la fondation.
+- Bundle volumineux préexistant (données budgétaires notamment) : avertissement build, pas une erreur.
+- KNOWN_FAILURES : aucune dans les validations terminées ; CI du nouveau commit encore à attendre.
+- BLOCKED : aucun blocage du travail local. Navigateur intégré indisponible (kernel assets) ; repli Playwright/Edge local utilisé.
+- MANUAL_ACTION_REQUIRED : activer [Leaked Password Protection](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) dans Authentication sur le seul projet autorisé. Non activée par l’agent ; ce WARN seul ne bloque pas FOUNDATION_READY.
+- Remédiations performance : [index inutilisés](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index), [policies permissives multiples](https://supabase.com/docs/guides/database/database-linter?lint=0006_multiple_permissive_policies).
 
-### COMPLETED
-1. **Supabase Auth & RBAC Consolidation**:
-   - Eliminated fake client-side session generation (`createSignedSession`) and dummy password hacks.
-   - Enforced authoritative PostgreSQL RLS grounded on `profiles.role` (`ADMIN`, `DATA_MANAGER`, `MODERATOR`). No role is read from `user_metadata` or client storage.
-   - Initial administrative user verified and promoted safely to `ADMIN`.
-2. **Private Storage & Immutability**:
-   - `public_documents` and `citizen_photos` buckets configured as private (50 Mio / 25 Mio limits).
-   - Direct `getPublicUrl` calls removed from frontend workflows; replaced by temporary signed URLs generated through server/edge control (`public-document-url` v2, `citizen-proof-media-url` v1).
-   - Document upload forbids overwrites (`upsert: false`), enforces SHA-256 integrity, file size checks, and PDF signatures.
-3. **CA Types & Lifecycle Decoupling**:
-   - Decoupled `VERIFIED` (human audit) from `PUBLISHED` (public display).
-   - Reunified public document types in `src/types/publicDocument.ts`.
-   - Restored dynamic 232 collectivités matrix computation (`getCollectivitesCaMatrix`) without inserting synthetic placeholder rows.
-4. **Unit Test Suite Resolution**:
-   - All 10 test suites passing (**116/116 tests green**, contrôle Codex du 30 septembre).
-   - Local database integration tests (`publicationDatabase.test.ts`) executed on PGlite validating unverified CA isolation, child operations RLS, citizen proof anti-usurpation, and privacy projections.
-5. **Production Build Validation**:
-   - `npm run build` (`tsc && vite build`) executes cleanly with **0 errors** in ~25.8s.
-6. **Permanent Charte & Rules**:
-   - Updated `AGENTS.md` with the full civic accountability cycle goal, 16 non-negotiable principles, immediate scope (232 collectivités), data guardrails, and UX/UI responsive standards.
-7. **UX/UI Responsive Audit & Accessibility (100% VALIDATED)**:
-   - Comprehensive multi-viewport testing (375px mobile, 768px tablet, 1440px desktop) executed across all 13 platform surfaces.
-   - Zero horizontal overflow across all views (`documentScrollWidth === 375px` on mobile).
-   - Interactive buttons and touch targets refined to meet or exceed WCAG AA guidelines (>= 44x44px).
-   - Full validation achieved for `AdminDashboardPage` (tabs CAIDP, CA 232, Documents, Modération, Work Queue) and administrative CA modals (`SingleCAUploadModal`, `BatchCAImportModal`, `ExamineCADocumentModal`).
-8. **Project Accountability Passport (Passeport de Redevabilité du Projet)**:
-   - Full 6-stage civic lifecycle implemented: `NEED_PROGRAMMING` → `BUDGET_VOTED` → `PROCUREMENT_DGMP` → `BUDGET_EXECUTION_CA` → `PHYSICAL_REALIZATION` → `AUDIT_ACCOUNTABILITY`.
-   - Core utility `src/utils/projectPassport.ts` with evidence-aware rapprochement (`findMatchingCaOperationResult`) against verified pilot operations in `src/data/administrativeAccountsData.ts`.
-   - Multi-criteria temporal matching preventing inter-fiscal year hallucinations (e.g. 2026 project vs 2024 CA flagged `WEAK` / `conflictingFields: ['fiscal_year']` unless multi-year trace exists).
-   - Strict political neutrality (Principle 11): 0 FCFA execution phrasing strictly factual (*"Le Compte Administratif consulté indique 0 FCFA exécuté/ordonnancé pour cette opération sur l’exercice observé. La cause de cet écart n’est pas établie par les sources actuellement reliées."*), with zero speculative allegations ("report probable", "fraude", "retard" eliminated).
-   - Clean typed Provenance (`DataProvenance`: `OFFICIAL_SOURCE`, `SUIVIBUDGET_CALCULATION`, `CITIZEN_OBSERVATION`, `INSTITUTION_RESPONSE`, `UNVERIFIED_INPUT`) and Availability (`AVAILABLE`, `NOT_FOUND_PUBLICLY`, `PENDING_COLLECTION`, `SOURCE_CONFLICT`) without `'as any'` casts.
-   - Initial citizen need distinguished from budget programming (Stage 1).
-   - Global score renamed to "Complétude Documentaire" (`documentationCompletenessPct`) to measure factual documentation presence without subjective governance grading.
-   - Visual responsive component `src/components/ProjectAccountabilityPassport.tsx` with expandable stage cards, status badges, alert callouts, and explicit provenance tags (Principle 2).
-   - Integrated into `src/components/ProjectDetailModal.tsx` as a 3rd tab with status pill ("Lié DGMP/CA" or "6 étapes") and direct civic actions (CAIDP document request, citizen field proof submission).
-   - Multi-viewport visual validation (Playwright at 375px mobile and 1440px desktop) confirmed zero horizontal overflow and flawless interaction.
+## TESTS_EXECUTED / TEST_RESULTS / BUILD_STATUS / CI_STATUS
+- `node scripts/verify-foundation-http.mjs <configuration-temporaire>` : 197/197 ; mode `ca` : 2/2 ; mode `cleanup` : deux buckets vides.
+- Configuration contient des comptes Auth éphémères ; ne jamais la committer. Nettoyer d’abord les lignes SQL strictement identifiées, ensuite Storage, puis les comptes Auth. Le script ne crée ni ne supprime les comptes.
+- Journaux locaux non sensibles : scratch/foundation-http-final.jsonl ; credentials supprimés.
+- `npm test -- --run` : 121/121 PASS ; `npm run build` : PASS ; `git diff --check` : PASS.
+- CI_STATUS : PENDING nouveau commit ; ancien HEAD 97962e8 confirmé sur PR #3.
+- Playwright/Edge : Documents, Observatoire, Institutions sur 375/768/1440 PASS, aucun débordement horizontal ni erreur JavaScript ; état documentaire vide conforme à la base. Captures Documents dans scratch/foundation-documents-*.png.
 
-### PARTIAL
-1. **Database Migrations Application**:
-   - Three target SQL migrations are audited, made strictly idempotent, and verified locally on PGlite in `supabase/migrations/`:
-     - `20260929141800_grant_schema_privileges.sql` (Prerequisite: schema usage and table grants for PostgREST RLS evaluation).
-     - `20260929121225_publication_boundaries.sql` (RLS parent publication boundary, staff moderation, storage delete restrictions, publication audit trigger).
-     - `20260929121408_document_metadata_versions.sql` (Document metadata columns: `original_filename`, `file_size_bytes`, `page_count`, `adoption_date`, `approval_date`, versions unique index).
-   - Status: Migration files ready and idempotent; remote application pending explicit execution against Supabase `cdesuvcozcetdtvibgqs`.
-2. **Citizen Proofs Security & Moderation**:
-   - `citizen_proofs` pending moderation access restricted to staff (`ADMIN`, `MODERATOR`), public read limited to `APPROVED` via `public_citizen_proofs` secure view.
-   - Client binding of `citizen_user_id` on submission verified and protected against user usurpation.
-
-### NOT_STARTED
-1. **DGMP Matching & Confidence Scoring Expansion**:
-   - Automated procurement matching to CA investment operations for the remaining collectivités beyond Tiassalé pilot.
-2. **APEC Trajectory & Three-Year Program Ingestion**:
-   - Need identification → three-year programs (`three_year_programs`, `program_operations`) deferred until financial/document foundation is completely secured.
-
-### BLOCKED
-- None. All dependencies, testing harnesses, and build tools are fully operational.
-
----
-
-## MIGRATIONS & SCHEMA
-- **Target Migration 0 (Prerequisite)**: `supabase/migrations/20260929141800_grant_schema_privileges.sql`
-  - Grants `USAGE` on schema `public` and `SELECT`/`INSERT` privileges on public tables to `anon` and `authenticated` roles.
-  - Required because PostgreSQL checks table-level permissions before evaluating RLS policies (resolves PostgREST 42501 / 401).
-- **Target Migration 1**: `supabase/migrations/20260929121225_publication_boundaries.sql`
-  - Restricts public SELECT on `ca_investment_operations`, `ca_procurement_matches`, and `ca_financial_lines` to records where the parent `administrative_accounts.status = 'PUBLISHED'`.
-  - Enforces `enforce_document_publication_audit()` trigger on `public_documents`.
-  - Storage deletion and updates restricted to `ADMIN`. Made idempotent (`drop policy if exists`).
-- **Target Migration 2**: `supabase/migrations/20260929121408_document_metadata_versions.sql`
-  - Adds versioning and institutional metadata columns to `public_documents`: `institution_type`, `original_filename`, `mime_type`, `file_size_bytes`, `page_count`, `adoption_date`, `approval_date`, `approval_reference`, `replaces_document_id`, `replacement_reason`, `created_by`.
-  - Adds unique index `public_documents_institution_year_type_version`. Made idempotent (`add column if not exists`, `drop constraint if exists`).
-- **Remote Drift Rule**: NEVER replay historical migrations blindly. Verify existing columns with `information_schema` before executing schema mutations.
-
----
-
-## SECURITY & DATA STATE
-- **Authorized Supabase Project**: `cdesuvcozcetdtvibgqs` (eu-west-1).
-- **Authentication**: Strict email/password with Supabase Auth. Passwords never hardcoded in client code.
-- **Profiles**: RLS strictly guards `public.profiles`. No privilege escalation possible via JWT `user_metadata`.
-- **CA Pilots in Production**: 3 verified pilot accounts (Abobo, Bingerville, Tiassalé 2024). Maintained as `VERIFIED` until explicit publication review.
-- **Primitive Budgets 2026**:
-  - Yopougon: Recorded as `LOWER_BOUND` 17 000 000 000 FCFA (source KOACI 30/12/2025).
-  - Abobo, Plateau, Treichville, Port-Bouët: Maintained as `UNKNOWN` / `NOT_FOUND_PUBLICLY` pending verified municipal council deliberations (no press approximations converted to exact amounts).
-
----
-
-## TESTS & BUILD VERIFICATION
-- **Test Command**: `npm test -- --run`
-  - `src/utils/__tests__/caManagement.test.ts` (21 tests) — PASS
-  - `src/utils/__tests__/administrativeAccount.test.ts` (18 tests) — PASS
-  - `src/utils/__tests__/projectPassport.test.ts` (10 tests) — PASS
-  - `src/utils/__tests__/formatters.test.ts` (7 tests) — PASS
-  - `src/utils/__tests__/institutionProjects.test.ts` (8 tests) — PASS
-  - `src/utils/__tests__/publicationDatabase.test.ts` (10 tests) — PASS
-  - `src/utils/__tests__/security.test.ts` (25 tests) — PASS
-  - `src/utils/__tests__/officialWebDirectory.test.ts` (8 tests) — PASS
-  - `src/utils/__tests__/navigation.test.ts` (7 tests) — PASS
-  - `src/utils/__tests__/searchHelpers.test.ts` (2 tests) — PASS
-  - **TOTAL**: **10 test files passed (10/10), 116 tests passed (116/116)**.
-- **Build Command**: `npm run build` (`tsc && vite build`)
-  - Status: **PASSED (0 errors, 1722 modules transformed)**. Clean production bundle in `dist/`.
-
----
-
-## UX/UI AUDIT STATUS (Page by Page)
-
+## UX/UI AUDIT STATUS — historique conservé
+Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce bloc porte sur les flux de publication ; il ne prétend pas refaire toutes les pages.
 | Page / Route | Path / Trigger | Status | Tested Viewports | Key Issues & Remediations | Validation Method |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **HomePage** | `/` (tab: `home`) | VALIDATED | 375, 768, 1440 | Aligned territory card to 232 collectivités (201 communes + 31 régions), verified bottom nav, CTA touch targets, no horizontal overflow | Playwright inspection, Build |
@@ -178,24 +93,12 @@ Ordre d'application après tests : metadata → publication → grants. Les droi
 | **SingleCAUploadModal** | Admin CA upload | VALIDATED | 375, 768, 1440 | Modal width 343px mobile / 672px desktop, zero horizontal overflow, 8 responsive inputs, buttons refined to min-h-[44px] >= 44px, checksum computation | Playwright inspection, Build |
 | **BatchCAImportModal** | Admin batch import | VALIDATED | 375, 768, 1440 | Modal width 343px mobile / 1024px desktop, zero horizontal overflow, drag-and-drop zone, proposal items, buttons refined to min-h-[44px] >= 44px, error handling | Playwright inspection, Build |
 
----
+## DECISIONS_MADE
+- Aucun merge PR #3 ; garder fondation et future expansion dans des PR distinctes.
+- L’absence de publication des trois pilotes entraîne un état public sans CA disponible, pas une publication implicite depuis des constantes.
+- Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
-## DECISIONS MADE
-1. **Strict Client-Side Role Isolation**: Client code never asserts its own role; all permissions are derived from `dataStore.currentUser.role` fetched directly from `public.profiles` verified by Supabase Auth session.
-2. **No Fake Storage Uploads**: If the network is offline or Supabase Storage returns an error, the upload immediately fails with a descriptive error rather than generating a synthetic success in localStorage.
-3. **Absence of Data Preservation**: Incomplete primitive budgets for Grand Abidjan communes (Abobo, Plateau, Port-Bouët, Treichville) are kept as `UNKNOWN` rather than filling them with unverified press approximations.
-4. **Non-destructive Migration Pattern**: Migration scripts use `IF NOT EXISTS`, add columns safely without dropping tables, and provide rollback comments.
-
----
-
-## NEXT EXECUTABLE TASK & PRIORITIES
-- **NEXT_EXECUTABLE_TASK**: Apply the 3 audited, idempotent migrations (`metadata` → `publication` → `grants`) to remote Supabase project `cdesuvcozcetdtvibgqs` (eu-west-1).
-- **NEXT_3_TASKS**:
-  1. Validate anonymous and authenticated signed URL generation via Edge Function `public-document-url` v2 for published accounts on remote Supabase.
-  2. Expand DGMP Matching & Confidence Scoring for collectivités beyond Tiassalé pilot.
-  3. Ingest three-year programs (`three_year_programs`, `program_operations`) connecting citizen needs to pluriannual investment plans.
-
----
-
-## MANUAL ACTION REQUIRED
-- None for local execution. Remote migration application to `cdesuvcozcetdtvibgqs` requires explicit Supabase credentials if CLI token is not linked to project `cdesuvcozcetdtvibgqs`.
+## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
+1. Commit/push de ce bloc, attendre CI du HEAD exact ; si SUCCESS, basculer FOUNDATION_READY à TRUE.
+2. Consolider Passport sur échantillon réel dans un bloc produit distinct, préserver les trois cas Tiassalé et expliciter la confiance et les conflits.
+3. Préparer ensuite DGMP Phase 2 limitée ; APEC seulement après stabilité. Ne pas étendre la PR de fondation par une ingestion massive.

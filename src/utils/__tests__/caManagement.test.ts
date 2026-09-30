@@ -14,12 +14,13 @@ import { DocumentStorageService } from '../../services/documentStorageService';
 import { dataStore } from '../../services/dataStore';
 import { Institution, PublicDocument } from '../../types';
 
-const storageMock = vi.hoisted(() => ({ configured: vi.fn(() => false), upload: vi.fn(), query: vi.fn(), insert: vi.fn(), update: vi.fn(), getUser: vi.fn(), remove: vi.fn() }));
+const storageMock = vi.hoisted(() => ({ configured: vi.fn(() => false), upload: vi.fn(), query: vi.fn(), insert: vi.fn(), update: vi.fn(), getUser: vi.fn(), remove: vi.fn(), invoke: vi.fn(), createSignedUrl: vi.fn() }));
 vi.mock('../../services/supabase', () => ({
   isSupabaseConfigured: storageMock.configured,
     supabase: {
     auth: { getUser: storageMock.getUser },
-    storage: { from: () => ({ upload: storageMock.upload }) },
+    storage: { from: () => ({ upload: storageMock.upload, createSignedUrl: storageMock.createSignedUrl }) },
+    functions: { invoke: storageMock.invoke },
     from: () => {
       const builder = {
         select: () => builder,
@@ -271,6 +272,24 @@ describe('Preuves citoyennes — persistance serveur', () => {
     storageMock.query.mockResolvedValue({ data: [], error: null });
     await dataStore.refreshProofs();
     expect(dataStore.getAllProofs()).toEqual([]);
+  });
+
+  it('affiche les médias approuvés via Edge sans rendre les chemins privés', async () => {
+    storageMock.query.mockResolvedValue({ data: [{ id: 'approved', verification_status: 'APPROVED', image_url: 'private/photo.png', secondary_image_url: 'private/second.png', created_at: '2026-09-30' }], error: null });
+    storageMock.invoke.mockResolvedValueOnce({ data: { url: 'https://signed.example/photo' }, error: null }).mockResolvedValueOnce({ data: null, error: new Error('Indisponible') });
+    await dataStore.refreshProofs();
+    expect(storageMock.invoke).toHaveBeenCalledWith('citizen-proof-media-url', { body: { proof_id: 'approved', media: 'secondary_image' } });
+    expect(dataStore.getAllProofs()[0]).toMatchObject({ image_url: 'https://signed.example/photo', photo_url: 'https://signed.example/photo' });
+    expect(dataStore.getAllProofs()[0].secondary_image_url).toBeUndefined();
+  });
+
+  it('soumet les médias privés à la RLS Storage et masque un accès refusé', async () => {
+    storageMock.getUser.mockResolvedValue({ data: { user: { id: 'owner' } }, error: null });
+    storageMock.query.mockResolvedValueOnce({ data: [], error: null }).mockResolvedValueOnce({ data: [{ id: 'pending', verification_status: 'PENDING', image_url: 'private/photo.png', created_at: '2026-09-30' }], error: null });
+    storageMock.createSignedUrl.mockResolvedValue({ data: null, error: new Error('Interdit') });
+    await dataStore.refreshProofs();
+    expect(storageMock.createSignedUrl).toHaveBeenCalledWith('private/photo.png', 300);
+    expect(dataStore.getAllProofs()[0].image_url).toBeUndefined();
   });
 
   it('préserve la preuve après refus de modération ou suppression', async () => {

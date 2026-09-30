@@ -33,10 +33,10 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedYear, setSelectedYear] = useState<string>('ALL');
 
-  const [documents, setDocuments] = useState<PublicDocument[]>(() => dataStore.getDocuments());
+  const [documents, setDocuments] = useState<PublicDocument[]>(() => dataStore.getDocuments().filter(document => document.status === 'PUBLISHED'));
 
   useEffect(() => {
-    const unsubscribe = dataStore.subscribe(() => setDocuments(dataStore.getDocuments()));
+    const unsubscribe = dataStore.subscribe(() => setDocuments(dataStore.getDocuments().filter(document => document.status === 'PUBLISHED')));
     if (isSupabaseConfigured()) {
       void supabase
         .from('public_documents')

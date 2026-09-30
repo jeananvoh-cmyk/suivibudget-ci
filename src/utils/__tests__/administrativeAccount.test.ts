@@ -1,4 +1,36 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ADMINISTRATIVE_ACCOUNTS_DATA, refreshPublishedAdministrativeAccounts } from '../../data/administrativeAccountsData';
+import { CA_PILOT_FIXTURES } from './caPilotFixtures';
+
+const remoteCA = vi.hoisted(() => ({ configured: vi.fn(() => false), eq: vi.fn() }));
+vi.mock('../../services/supabase', () => ({
+  isSupabaseConfigured: remoteCA.configured,
+  supabase: { from: () => ({ select: () => ({ eq: remoteCA.eq }) }) },
+}));
+
+beforeEach(() => {
+  remoteCA.configured.mockReturnValue(false);
+  ADMINISTRATIVE_ACCOUNTS_DATA.splice(0, Infinity, ...structuredClone(CA_PILOT_FIXTURES));
+});
+
+describe('CA publics — source distante uniquement', () => {
+  it('ne conserve aucune donnée pilote hors connexion', async () => {
+    await refreshPublishedAdministrativeAccounts();
+    expect(ADMINISTRATIVE_ACCOUNTS_DATA).toEqual([]);
+  });
+
+  it('restreint la requête à PUBLISHED et retire les anciennes données si la lecture échoue', async () => {
+    remoteCA.configured.mockReturnValue(true);
+    remoteCA.eq.mockResolvedValueOnce({ data: [], error: null });
+    await refreshPublishedAdministrativeAccounts();
+    expect(remoteCA.eq).toHaveBeenCalledWith('status', 'PUBLISHED');
+    expect(ADMINISTRATIVE_ACCOUNTS_DATA).toEqual([]);
+    ADMINISTRATIVE_ACCOUNTS_DATA.push(...CA_PILOT_FIXTURES);
+    remoteCA.eq.mockResolvedValueOnce({ data: null, error: new Error('Réseau indisponible') });
+    await expect(refreshPublishedAdministrativeAccounts()).rejects.toThrow('Réseau indisponible');
+    expect(ADMINISTRATIVE_ACCOUNTS_DATA).toEqual([]);
+  });
+});
 import { 
   calculateExecutionRate, 
   getExecutionRateBadgeColor, 

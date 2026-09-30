@@ -13,6 +13,7 @@ const migrationNames = [
   '20260929121225_publication_boundaries.sql',
   '20260929141800_grant_schema_privileges.sql',
   '20260930030840_public_proof_projection_boundary.sql',
+  '20260930033244_foundation_http_access.sql',
 ];
 const migrations = () => migrationNames.map(name => readFileSync(resolve('supabase/migrations', name), 'utf8'));
 
@@ -34,7 +35,7 @@ const insertDocument = (id = 'doc-test') => db.query(`insert into public.public_
 beforeAll(async () => {
   db = new PGlite();
   await db.exec(`
-    create role anon; create role authenticated;
+    create role anon; create role authenticated; create role service_role bypassrls;
     create schema auth; create schema private; create schema storage;
     create function auth.uid() returns uuid language sql stable as
       $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
@@ -51,6 +52,10 @@ beforeAll(async () => {
     create table public.ca_investment_operations(id text primary key,ca_id text references public.administrative_accounts);
     create table public.ca_procurement_matches(id text primary key,operation_id text references public.ca_investment_operations);
     create table storage.objects(id text primary key,bucket_id text,name text);
+    create table storage.buckets(id text primary key, file_size_limit bigint, allowed_mime_types text[]);
+    insert into storage.buckets(id) values ('citizen_photos');
+    create function storage.extension(name text) returns text language sql immutable as $$ select reverse(split_part(reverse(name), '.', 1)) $$;
+    create policy "Strict citizen media upload only" on storage.objects for insert with check(false);
     create table public.projects(id text primary key);
     create table public.institutions(id text primary key);
     create table public.news_articles(id text primary key);
@@ -100,6 +105,11 @@ beforeAll(async () => {
 afterAll(async () => { await db?.close(); });
 
 describe('Publication boundaries applied to PostgreSQL', () => {
+  it('allows the Edge service to read sources without granting document mutations', async () => {
+    expect((await db.query("select has_table_privilege('service_role','public.public_documents','SELECT') as docs, has_table_privilege('service_role','public.citizen_proofs','SELECT') as proofs, has_table_privilege('service_role','public.public_documents','UPDATE') as mutation")).rows).toEqual([{ docs: true, proofs: true, mutation: false }]);
+    expect((await db.query("select file_size_limit from storage.buckets where id='citizen_photos'")).rows).toEqual([{ file_size_limit: 26214400 }]);
+  });
+
   it('applies all migrations twice without drift errors', async () => {
     for (const sql of migrations()) await db.exec(sql);
   });

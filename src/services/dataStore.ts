@@ -19,6 +19,7 @@ import { CAIDP_MASTER_DIRECTORY, CaidpEntity } from '../data/caidpRiData';
 import { AuthSecurityService } from './authSecurity';
 import { sanitizeCsvCell } from '../utils/security';
 import { supabase, isSupabaseConfigured } from './supabase';
+import { refreshPublishedAdministrativeAccounts } from '../data/administrativeAccountsData';
 import { enrichWithPrimitiveBudgets, OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
 import { 
   LocalBudget, 
@@ -768,6 +769,8 @@ class DataStore {
   private async initSupabaseSync() {
     if (!isSupabaseConfigured()) return;
     try {
+      await refreshPublishedAdministrativeAccounts();
+      this.notify();
       await this.refreshProofs();
 
       // Sync public documents from Supabase if table exists
@@ -775,6 +778,7 @@ class DataStore {
         const { data: remoteDocs, error: docsError } = await supabase
           .from('public_documents')
           .select('*')
+          .eq('status', 'PUBLISHED')
           .order('published_at', { ascending: false });
         if (!docsError && Array.isArray(remoteDocs) && remoteDocs.length > 0) {
           // Merge preserving download counts and local additions
@@ -848,13 +852,31 @@ class DataStore {
       (accessible || []).forEach(row => byId.set(row.id, row));
       rows = Array.from(byId.values());
     }
+    const resolved = await Promise.all(rows.map(async row => {
+      const media = await Promise.all(['image', 'secondary_image', 'video'].map(async kind => {
+        const path = row[`${kind}_url`];
+        if (!path) return [kind, undefined];
+        if (row.verification_status === 'APPROVED') {
+          const { data, error } = await supabase.functions.invoke('citizen-proof-media-url', { body: { proof_id: row.id, media: kind } });
+          return [kind, !error && typeof data?.url === 'string' ? data.url : undefined];
+        }
+        if (!identity.user || /^https?:/i.test(path)) return [kind, undefined];
+        const { data, error } = await supabase.storage.from('citizen_photos').createSignedUrl(path, 300);
+        return [kind, !error ? data?.signedUrl : undefined];
+      }));
+      const urls = Object.fromEntries(media);
+      return {
+        ...row,
+        user_name: row.citizen_name || 'Citoyen Observateur',
+        image_url: urls.image,
+        photo_url: urls.image,
+        secondary_image_url: urls.secondary_image,
+        video_url: urls.video,
+        confirmations_count: row.confirmations_count ?? 0,
+      };
+    }));
     if (generation !== this.proofRefreshGeneration) return;
-    this.proofs = rows.map(row => ({
-      ...row,
-      user_name: row.citizen_name || 'Citoyen Observateur',
-      photo_url: row.image_url,
-      confirmations_count: row.confirmations_count ?? 0,
-    })).sort((left, right) => right.created_at.localeCompare(left.created_at));
+    this.proofs = resolved.sort((left, right) => right.created_at.localeCompare(left.created_at));
     this.notify();
   }
 
@@ -1073,6 +1095,7 @@ class DataStore {
     const signOut = AuthSecurityService.clearSession();
     this.proofRefreshGeneration++;
     this.proofs = [];
+    this.documents = [];
     this.authState = {
       isAuthenticated: false,
       email: '',
@@ -1239,15 +1262,14 @@ class DataStore {
     const { data: identity, error: identityError } = await supabase.auth.getUser();
     if (identityError) throw identityError;
     if (!identity.user) throw new Error('Authentification requise.');
-    const { data, error } = await supabase.from('citizen_proofs').update({
+    const { error } = await supabase.from('citizen_proofs').update({
       verification_status: status,
       moderator_notes: moderatorNotes || null,
       verified_at: new Date().toISOString(),
       verified_by: identity.user.id,
     }).eq('id', proofId).select('*').single();
     if (error) throw error;
-    this.proofs = this.proofs.map(proof => proof.id === proofId ? { ...proof, ...data } : proof);
-    this.notify();
+    await this.refreshProofs();
   }
 
   public async deleteProof(proofId: string): Promise<void> {

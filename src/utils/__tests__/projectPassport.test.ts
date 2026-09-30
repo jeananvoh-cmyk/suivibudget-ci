@@ -1,4 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { ADMINISTRATIVE_ACCOUNTS_DATA } from '../../data/administrativeAccountsData';
+import { CA_PILOT_FIXTURES } from './caPilotFixtures';
+
+beforeEach(() => {
+  ADMINISTRATIVE_ACCOUNTS_DATA.splice(0, Infinity, ...structuredClone(CA_PILOT_FIXTURES));
+});
 import { 
   generateProjectPassport, 
   findMatchingCaOperation, 

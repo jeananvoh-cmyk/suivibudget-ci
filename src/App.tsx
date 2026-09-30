@@ -138,7 +138,18 @@ export function App() {
     const unsubscribe = dataStore.subscribe(() => {
       setTick(t => t + 1);
     });
-    return unsubscribe;
+    const renewProofMedia = () => {
+      if (document.visibilityState === 'visible' && dataStore.getAllProofs().length > 0) {
+        void dataStore.refreshProofs().catch(() => console.warn('Actualisation des médias indisponible.'));
+      }
+    };
+    const renewal = window.setInterval(renewProofMedia, 240000);
+    document.addEventListener('visibilitychange', renewProofMedia);
+    return () => {
+      unsubscribe();
+      window.clearInterval(renewal);
+      document.removeEventListener('visibilitychange', renewProofMedia);
+    };
   }, []);
 
   const showToast = (message: string) => {
