@@ -1,5 +1,16 @@
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
+
+## 30 septembre — DGMP Phase 2B déterministe
+
+Branche `codex/dgmp-phase-2b-deterministic` créée depuis le HEAD de PR #4 `2657acbf63154730835c80d07edb0d94d337c61c`. PR #5 ouverte avec PR #4 comme base ; aucune fusion. Aucune migration rejouée et aucun pilote CA modifié.
+
+`findCandidate` compare désormais tous les candidats compatibles au lieu de retourner le premier résultat plausible. Classement déterministe par niveau de confiance, score de concordance puis clé stable. Les égalités réelles entre opérations distinctes sont déclassées en `TO_VERIFY` avec `ambiguous_candidates`. Les conflits institution, exercice et localisation restent explicites et un montant proche n’est pas utilisé pour compenser un objet/localisation incompatibles.
+
+Cinq tests Phase 2B ajoutés : ordre inversé de candidats, homonymes équivalents, mauvais exercice, montant proche mais objet/localisation incompatibles, et non-régression des trois rapprochements Tiassalé dans les deux ordres. CI Quality run `36785358174` SUCCESS sur `a7e71b5d91168bb9a63a2e54e17a6618a738f921` : **10 fichiers / 136 tests PASS**, `tsc && vite build` PASS, 1722 modules. Seul l’avertissement préexistant de taille de bundles demeure.
+
+Phase 2B est VALIDATED sans ingestion DGMP massive. Prochaine tâche : APEC Phase 2C, modèle minimal et tests contrôlés avant toute extension de données.
+
 ## 30 septembre — Passport Phase 2A et moindre privilège
 
 Branche `codex/passport-phase-2a` créée depuis `9457f07`, après confirmation de la CI de la fondation et inspection du diff de PR #3 contre master. PR #3 reste ouverte, non fusionnée. Les contrôles antérieurs HTTP/Storage/Edge ne sont pas rejoués intégralement.

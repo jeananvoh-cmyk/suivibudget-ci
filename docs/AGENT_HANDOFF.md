@@ -8,10 +8,20 @@
 - CURRENT_HEAD : `ecfb1f789dfd31ecc636e2c1d002e437d634da0e`, dernier commit fonctionnel, CI SUCCESS. Le seul descendant prévu est cette clôture documentaire ; consulter Git pour son hash sans nouvelle boucle de commits.
 - PR : [#4 Phase 2A](https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/4), base security-ca-final-20260929 ; [#3 fondation](https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/3). Toutes deux ouvertes, non fusionnées.
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : fondation CLOSED ; Passport Phase 2A VALIDATED, revue PR #4 disponible
+- CURRENT_MILESTONE : fondation CLOSED ; Passport Phase 2A VALIDATED ; DGMP Phase 2B deterministic matching VALIDATED, revue PR #5 disponible
 - FOUNDATION_READY : TRUE, validé sur 3b502b1 après CI SUCCESS. Aucun P0/P1 connu ouvert dans la fondation.
 
 ## COMPLETED
+### Bloc DGMP Phase 2B — 30 septembre, après Phase 2A
+- Branche `codex/dgmp-phase-2b-deterministic` créée depuis le HEAD réel de PR #4 `2657acbf63154730835c80d07edb0d94d337c61c`. PR #5 ouverte sur la branche Phase 2A ; aucune fusion.
+- `findCandidate` n’arrête plus la recherche au premier candidat plausible : tous les candidats compatibles sont évalués, classés avec un score déterministe puis départagés par une clé stable indépendante de l’ordre d’entrée.
+- Une égalité de niveau de confiance et de score entre opérations distinctes est explicitement déclassée en `TO_VERIFY` avec `ambiguous_candidates` ; aucune ambiguïté n’est publiée comme correspondance certaine.
+- Les niveaux `STRONG / PROBABLE / WEAK / NONE / TO_VERIFY`, les conflits institution/exercice/localisation, les champs manquants et les justifications temporelles sont conservés.
+- Tests ajoutés avant clôture : candidats plausibles intervertis, opérations homonymes équivalentes, bonne collectivité/mauvais exercice, montant proche avec objet/localisation incompatibles, et stabilité des trois rapprochements Tiassalé dans les deux ordres.
+- Les trois pilotes CA n’ont pas été modifiés ; aucune ingestion DGMP massive ; aucune migration Supabase ajoutée ou rejouée.
+- CI Quality run 36785358174 SUCCESS sur le commit fonctionnel `a7e71b5d91168bb9a63a2e54e17a6618a738f921` : 10 fichiers de tests, 136/136 tests PASS, TypeScript + Vite build PASS, 1722 modules. L’avertissement préexistant sur la taille des bundles demeure.
+- Prochain bloc fonctionnel : APEC Phase 2C. Ne pas étendre le rapprochement DGMP à une ingestion massive avant définition d’un pipeline de provenance et de validation.
+
 ### Bloc Phase 2A — 30 septembre, après 9457f07
 - Vingt champs factuels explicites : institution, exercice, objet, localisation, trois montants distincts, référence marché, attributaire, document/page/libellé source, états financier/physique, preuve, réponse, confiance, méthode et vérification. Valeurs absentes UNKNOWN/NOT_FOUND_PUBLICLY ; aucun exercice par défaut inventé.
 - Rapprochement : champs concordants, contradictoires et absents ; conflit d’identifiant institutionnel ou de localisation déclassé TO_VERIFY ; mention « phase » dans le projet insuffisante pour établir une pluriannualité.
@@ -70,7 +80,7 @@ Trois CA pilotes VERIFIED préservés : Abobo, Bingerville, Tiassalé 2024. Aucu
 ## PASSPORT_STATE
 PASS pour la fondation : 10 tests de rapprochement, séparation financier/physique, origine citoyenne non inventée, frontière de publication réelle. La requête imbriquée a retrouvé les trois CA, trois opérations et trois marchés sous le compte ADMIN temporaire ; zéro CA publié sous ANON.
 Consolidation Phase 2A VALIDATED : vingt champs et trois niveaux de lecture, 18 tests Passport, trois opérations réelles Tiassalé et deux synthèses sans opérations, CI fonctionnelle SUCCESS sur ecfb1f7. Les document_id manquants, localisations non renseignées et numéros de contrat absents restent explicitement inconnus ; l’identifiant d’appel d’offres n’est pas présenté comme numéro de contrat.
-DGMP Phase 2B et APEC Phase 2C NOT_STARTED. Pas d’ingestion massive.
+DGMP Phase 2B VALIDATED sur moteur déterministe et cas d’ambiguïté ; aucune ingestion massive. APEC Phase 2C NOT_STARTED.
 
 ## ADVISORS / KNOWN_ANOMALIES
 - SECURITY_ADVISORS : seul WARN Leaked Password Protection Disabled ; aucun autre signal sécurité.
@@ -113,6 +123,6 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Reprendre PR #4 et son HEAD réel, vérifier seulement les écarts depuis cette clôture. Ne pas recréer le modèle ni rejouer les migrations déjà APPLIED ; ne fusionner aucune PR automatiquement.
-2. DGMP Phase 2B : sur une branche distincte issue du HEAD validé Phase 2A, commencer par un test local de deux candidats intervertis et d’homonymes incompatibles, puis remplacer la sélection du premier candidat dans findCandidate par une comparaison déterministe explicitant les ambiguïtés. Conserver STRONG/PROBABLE/WEAK/NONE/TO_VERIFY et les trois marchés Tiassalé. Pas d’ingestion massive ni de modification des trois pilotes pour tester.
-3. APEC Phase 2C ensuite : modèle minimal cycle/besoin/rapprochement, contribution traçable et participation distincte de représentativité. Préserver PR #3 comme fondation ; aucun merge automatique effectué.
+1. Reprendre PR #5 et son HEAD réel, vérifier uniquement les écarts depuis la clôture DGMP Phase 2B. Ne pas recréer le moteur, ne pas rejouer les migrations APPLIED et ne fusionner aucune PR automatiquement.
+2. APEC Phase 2C : concevoir le modèle minimal cycle/besoin/rapprochement avec contribution traçable, source, date, statut de vérification et distinction stricte entre participation observée et représentativité. Commencer par tests/fixtures contrôlés, sans ingestion massive.
+3. Après validation APEC 2C, préparer seulement alors la stratégie d’ingestion DGMP/APEC à plus grande échelle avec provenance, déduplication, reprise sur erreur et validation humaine. Préserver PR #3 comme fondation, PR #4 comme Phase 2A et PR #5 comme Phase 2B ; aucun merge automatique.
