@@ -1,10 +1,10 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- **LAST_UPDATED**: 2026-09-30T02:35:00Z
-- **LAST_AGENT**: Antigravity
+- **LAST_UPDATED**: 2026-09-30T03:12:00Z
+- **LAST_AGENT**: Codex
 - **CURRENT_BRANCH**: `security-ca-final-20260929`
-- **HANDOFF_BASE_SHA**: `14bb861`
+- **HANDOFF_BASE_SHA**: `079c163d65f1fe9ba1cf33efdb9e9212d5cdd5b6`
 - **PR**: #3 ("Final: security hardening + verified CA foundation")
 - **SUPABASE_PROJECT**: `cdesuvcozcetdtvibgqs` (eu-west-1, PostgreSQL 17.6)
 - **CURRENT_MILESTONE**: P0/P1 Security Hardening, Document Versioning, CA Workflow & Project Accountability Passport
@@ -12,6 +12,24 @@
 ---
 
 ## EXECUTION SUMMARY & STATUS
+
+### État de production vérifié le 30 septembre — prioritaire sur l'historique ci-dessous
+
+- **FOUNDATION_READY = FALSE** : matrice distante complète des cinq rôles, PostgREST, Storage et Edge encore à terminer. Aucune expansion DGMP/APEC et aucun merge PR #3.
+- **MIGRATIONS_REMOTE** : metadata `20260930030522`, publication `20260930030614`, grants `20260930030702`, projection publique `20260930031058` appliquées individuellement puis contrôlées. Les trois premiers correspondent aux fichiers locaux `20260929121408`, `20260929121225`, `20260929141800`; le complément correspond à `20260930030840`. L'outil distant attribue l'horodatage d'application : ne pas rejouer les fichiers uniquement parce que les préfixes diffèrent.
+- **REMOTE_SCHEMA_STATE** : 12 colonnes metadata ajoutées ; FK text→documents et uuid→profiles compatibles ; published_at nullable ; vue publique et trigger INSERT/UPDATE présents.
+- **RLS_STATE / GRANTS_STATE** : tests distants en transactions annulées réussis pour l'absence d'accès anon aux CA VERIFIED et enfants, accès ADMIN aux trois CA, refus publication directe puis cycle TO_VERIFY→VERIFIED→PUBLISHED avec acteur/date serveur. Aucun TRUNCATE/TRIGGER/REFERENCES restant pour anon/authenticated dans public.
+- **CITIZEN_PROOFS_STATE** : fixture distante APPROVED/PENDING/REJECTED annulée ; anon lit uniquement APPROVED via projection sans identité privée/téléphone/notes/tracking ; insertion anonyme PENDING permise. Comptages après rollback : 3 CA, 0 documents, 0 preuves.
+- **Projection publique** : vue security_invoker + security_barrier sur fonction privée SQL stable SECURITY DEFINER sans paramètres, search_path vide, projection fixe et filtre APPROVED. Aucun SELECT anon sur table privée. Le privilège élevé est volontairement limité à cette projection ; security_barrier seul n'est pas une RLS. Documentation examinée : https://supabase.com/docs/guides/database/postgres/row-level-security.
+- **SECURITY_ADVISORS** : erreur security_definer_view apparue après la migration historique, corrigée par le complément ; seul WARN Leaked Password Protection Disabled subsiste.
+- **PERFORMANCE_ADVISORS** : inspection après trois migrations : 42 index inutilisés INFO conservés ; consolidation des policies reportée jusqu'à matrice complète, sans suppression mécanique.
+- **PASSPORT_STATE** : 10 tests existants passent ; casts as any sur origine du besoin supprimés au profit de champs optionnels typés ; valeur d'initiative conservée sans inventer une consultation.
+- **TESTS_EXECUTED / TEST_RESULTS** : npm test -- --run : 116/116, 10 fichiers, après complément SQL. **BUILD_STATUS** : PASS, 1722 modules, avertissement taille des bundles existant. **CI_STATUS** : à recontrôler au nouveau commit après push.
+- **STORAGE_STATE / EDGE_FUNCTIONS_STATE** : validations HTTP complètes encore requises ; aucune fonction redéployée pendant ce bloc, verify_jwt inchangé.
+- **NEXT_EXECUTABLE_TASK** : compléter les tests distants CITIZEN/MODERATOR/DATA_MANAGER, puis tester les deux fonctions Edge et Storage avec fixtures temporaires supprimées, sans modifier les CA pilotes.
+- **NEXT_3_TASKS** : matrice RLS distante ; tests Storage/Edge et corrections ; push et CI puis décision FOUNDATION_READY.
+- **MANUAL_ACTION_REQUIRED** : activer Leaked Password Protection dans Supabase Authentication → paramètres de sécurité des mots de passe, projet cdesuvcozcetdtvibgqs. Non activé par l'agent ; https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection.
+- Convention SHA : HANDOFF_BASE_SHA désigne le dernier commit fonctionnel couvert ; le commit documentaire peut être postérieur. Ne pas chercher à inscrire son propre hash futur.
 
 ### Reprise Codex — contrôle de drift en cours, 29 septembre 2026
 
@@ -51,7 +69,7 @@ Ordre d'application après tests : metadata → publication → grants. Les droi
    - Reunified public document types in `src/types/publicDocument.ts`.
    - Restored dynamic 232 collectivités matrix computation (`getCollectivitesCaMatrix`) without inserting synthetic placeholder rows.
 4. **Unit Test Suite Resolution**:
-   - All 9 test suites passing (**106/106 tests green** in ~12.7s).
+   - All 10 test suites passing (**116/116 tests green**, contrôle Codex du 30 septembre).
    - Local database integration tests (`publicationDatabase.test.ts`) executed on PGlite validating unverified CA isolation, child operations RLS, citizen proof anti-usurpation, and privacy projections.
 5. **Production Build Validation**:
    - `npm run build` (`tsc && vite build`) executes cleanly with **0 errors** in ~25.8s.

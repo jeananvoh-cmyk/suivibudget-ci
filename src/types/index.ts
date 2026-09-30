@@ -83,6 +83,8 @@ export interface BudgetLineItem {
 }
 
 export interface BudgetProject {
+  citizen_need_origin?: string;
+  initiative_source?: string;
   id: string;
   institution_id?: string;
   institution_name?: string;

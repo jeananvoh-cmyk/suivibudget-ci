@@ -279,7 +279,8 @@ export function generateProjectPassport(
   // RÈGLE CARDINALE (Section 7) : L'INSCRIPTION BUDGÉTAIRE NE PROUVE PAS LE BESOIN CITOYEN INITIAL
   // -------------------------------------------------------------------------
   const hasProgram = Boolean(project.program_name || project.details);
-  const citizenNeedRecorded = Boolean((project as any).citizen_need_origin || (project as any).initiative_source);
+  const citizenNeedOrigin = project.citizen_need_origin?.trim() || project.initiative_source?.trim();
+  const citizenNeedRecorded = Boolean(citizenNeedOrigin);
 
   stages.push({
     id: 'NEED_PROGRAMMING',
@@ -298,7 +299,7 @@ export function generateProjectPassport(
       {
         label: 'Expression du besoin citoyen',
         value: citizenNeedRecorded 
-          ? String((project as any).citizen_need_origin || 'Consultation locale documentée')
+          ? citizenNeedOrigin!
           : 'Non documenté publiquement dans l\'extrait budgétaire',
         provenance: citizenNeedRecorded ? 'CITIZEN_OBSERVATION' : 'SUIVIBUDGET_CALCULATION',
         availability: citizenNeedRecorded ? 'AVAILABLE' : 'NOT_FOUND_PUBLICLY',

@@ -9,9 +9,10 @@ const moderator = '00000000-0000-0000-0000-000000000003';
 const manager = '00000000-0000-0000-0000-000000000004';
 let db: PGlite;
 const migrationNames = [
-  '20260929121225_publication_boundaries.sql',
   '20260929121408_document_metadata_versions.sql',
+  '20260929121225_publication_boundaries.sql',
   '20260929141800_grant_schema_privileges.sql',
+  '20260930030840_public_proof_projection_boundary.sql',
 ];
 const migrations = () => migrationNames.map(name => readFileSync(resolve('supabase/migrations', name), 'utf8'));
 
