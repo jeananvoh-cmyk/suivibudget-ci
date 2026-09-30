@@ -4,7 +4,9 @@
 
 197 tests HTTP réels et 2 contrôles des relations CA/opérations/marchés passent. Défauts corrigés : droits SELECT service_role manquants sur documents/preuves, metadata.size indisponible au contrôle INSERT Storage, médias privés non résolus côté client, CA VERIFIED embarqués dans le bundle public. Nouvelle migration locale 20260930033244 appliquée à distance sous 20260930144753 ; quatre migrations précédentes non rejouées. Edge documents v3 et preuves v2 avec verify_jwt=true. CA publics issus uniquement de PostgREST PUBLISHED ; sources pilotes déplacées en fixtures de tests, données distantes intactes.
 
-Nettoyage confirmé : 1 compte Auth, 3 CA, 0 document, 0 preuve, 0 objet Storage, 0 profil/journal temporaire. 121 tests et build réussis. Advisors : seul WARN sécurité mot de passe compromis ; 38 index inutilisés et 16 policies permissives multiples conservés. FOUNDATION_READY attend uniquement commit/push et CI exacte ; AGENT_HANDOFF.md est le relais courant, les sections suivantes restent historiques.
+Nettoyage confirmé : 1 compte Auth, 3 CA, 0 document, 0 preuve, 0 objet Storage, 0 profil/journal temporaire. 121 tests et build réussis. Advisors finaux après nettoyage : seul WARN sécurité mot de passe compromis ; 31 index inutilisés et 16 policies permissives multiples conservés. Playwright Documents/Observatoire/Institutions : 375/768/1440, aucun débordement ni erreur JavaScript. Dépendance xlsx inutilisée retirée ; npm audit zéro vulnérabilité.
+
+Commits 454d62c (publication/HTTP) puis 3b502b1 (dépendance) poussés, CI verify et Vercel Preview Comments SUCCESS sur chacun. FOUNDATION_READY=TRUE sur 3b502b1223d304b12f904087430882ea8156f324. PR #3 ouverte, non mergée. Prochain bloc : consolidation Passport sur branche produit distincte, puis DGMP contrôlé, APEC ultérieurement. AGENT_HANDOFF.md est le relais courant ; les sections suivantes restent historiques.
 
 ## 30 septembre — état courant Codex
 

@@ -1,15 +1,15 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- LAST_UPDATED : 2026-09-30T15:10:00Z
+- LAST_UPDATED : 2026-09-30T15:24:00Z
 - LAST_AGENT : Codex
 - CURRENT_BRANCH : `security-ca-final-20260929`
-- HANDOFF_BASE_SHA : `97962e8e357a80e6d17b0ce43ed83c3e2474229e` (base avant ce bloc)
-- CURRENT_HEAD : à remplacer après commit fonctionnel ; ne pas inscrire un hash futur
+- HANDOFF_BASE_SHA : `3b502b1223d304b12f904087430882ea8156f324` (dernier commit fonctionnel validé, après 454d62c)
+- CURRENT_HEAD : `3b502b1223d304b12f904087430882ea8156f324` observé avant le commit documentaire de clôture. Le HEAD Git peut être ce descendant documentaire ; ne pas créer de boucle de commits pour inscrire son propre hash.
 - PR : [#3](https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/3), ouverte, non mergée
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : fermeture de la fondation HTTP/Storage/Edge et de la frontière de publication frontend
-- FOUNDATION_READY : FALSE, uniquement en attente du commit et de sa CI
+- CURRENT_MILESTONE : fondation HTTP/Storage/Edge et frontière de publication frontend CLOSED ; consolidation Passport suivante
+- FOUNDATION_READY : TRUE, validé sur 3b502b1 après CI SUCCESS. Aucun P0/P1 connu ouvert dans la fondation.
 
 ## COMPLETED
 - 197 contrôles HTTP réels réussis avec ANON, ADMIN, DATA_MANAGER, MODERATOR, CITIZEN propriétaire et second CITIZEN ; 2 contrôles supplémentaires des relations CA/opérations/marchés réussis.
@@ -23,6 +23,7 @@
 - Page Documents filtrée PUBLISHED également lors des notifications du cache ; cache documentaire effacé à la déconnexion.
 - 121 tests / 10 fichiers PASS ; build TypeScript + Vite PASS (1722 modules).
 - Fixtures SQL, Auth, profils, objets Storage, journaux CAIDP et fichier local de mots de passe temporaires supprimés.
+- Dépendance de développement xlsx inutilisée supprimée après alerte GitHub ; npm audit : zéro vulnérabilité. Le signal sur master peut rester ouvert tant que PR #3 n’est pas mergée.
 
 ## MIGRATIONS_REMOTE / REMOTE_SCHEMA_STATE
 | Fichier local | Version distante | État |
@@ -60,9 +61,9 @@ DGMP Phase 2B et APEC Phase 2C NOT_STARTED. Pas d’ingestion massive.
 
 ## ADVISORS / KNOWN_ANOMALIES
 - SECURITY_ADVISORS : seul WARN Leaked Password Protection Disabled ; aucun autre signal sécurité.
-- PERFORMANCE_ADVISORS : 38 unused indexes INFO et 16 multiple permissive policies WARN au contrôle 14:58 UTC. Pas de suppression ni consolidation mécanique, aucun gain mesuré ne justifie ce refactoring pour fermer la fondation.
+- PERFORMANCE_ADVISORS : 31 unused indexes INFO et 16 multiple permissive policies WARN au contrôle final après nettoyage (38 index à 14:58 UTC ; les tests ont exercé certains index). Pas de suppression ni consolidation mécanique, aucun gain mesuré ne justifie ce refactoring pour fermer la fondation.
 - Bundle volumineux préexistant (données budgétaires notamment) : avertissement build, pas une erreur.
-- KNOWN_FAILURES : aucune dans les validations terminées ; CI du nouveau commit encore à attendre.
+- KNOWN_FAILURES : aucune dans les validations terminées ; CI 454d62c et 3b502b1 SUCCESS.
 - BLOCKED : aucun blocage du travail local. Navigateur intégré indisponible (kernel assets) ; repli Playwright/Edge local utilisé.
 - MANUAL_ACTION_REQUIRED : activer [Leaked Password Protection](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) dans Authentication sur le seul projet autorisé. Non activée par l’agent ; ce WARN seul ne bloque pas FOUNDATION_READY.
 - Remédiations performance : [index inutilisés](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index), [policies permissives multiples](https://supabase.com/docs/guides/database/database-linter?lint=0006_multiple_permissive_policies).
@@ -72,7 +73,7 @@ DGMP Phase 2B et APEC Phase 2C NOT_STARTED. Pas d’ingestion massive.
 - Configuration contient des comptes Auth éphémères ; ne jamais la committer. Nettoyer d’abord les lignes SQL strictement identifiées, ensuite Storage, puis les comptes Auth. Le script ne crée ni ne supprime les comptes.
 - Journaux locaux non sensibles : scratch/foundation-http-final.jsonl ; credentials supprimés.
 - `npm test -- --run` : 121/121 PASS ; `npm run build` : PASS ; `git diff --check` : PASS.
-- CI_STATUS : PENDING nouveau commit ; ancien HEAD 97962e8 confirmé sur PR #3.
+- CI_STATUS : SUCCESS sur 3b502b1223d304b12f904087430882ea8156f324 : [Quality / verify](https://github.com/jeananvoh-cmyk/suivibudget-ci/actions/runs/36736286683/job/109958748296) et Vercel Preview Comments. La clôture documentaire est le seul changement ultérieur ; son contrôle GitHub sera vérifié après push sans autre commit de métadonnées.
 - Playwright/Edge : Documents, Observatoire, Institutions sur 375/768/1440 PASS, aucun débordement horizontal ni erreur JavaScript ; état documentaire vide conforme à la base. Captures Documents dans scratch/foundation-documents-*.png.
 
 ## UX/UI AUDIT STATUS — historique conservé
@@ -99,6 +100,6 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Commit/push de ce bloc, attendre CI du HEAD exact ; si SUCCESS, basculer FOUNDATION_READY à TRUE.
-2. Consolider Passport sur échantillon réel dans un bloc produit distinct, préserver les trois cas Tiassalé et expliciter la confiance et les conflits.
-3. Préparer ensuite DGMP Phase 2 limitée ; APEC seulement après stabilité. Ne pas étendre la PR de fondation par une ingestion massive.
+1. Phase 2A : créer une branche produit distincte depuis le dernier HEAD validé, puis consolider le Passport avec les trois opérations Tiassalé réelles accessibles au staff : 20 magasins, EPP François Kadjo, Gardienkro. Ne pas publier implicitement les CA VERIFIED ; compléter les explications institution/exercice/objet/localisation/montant/référence/source et les conflits.
+2. Après cette consolidation, DGMP Phase 2B sur échantillon contrôlé, moteur réutilisable avec niveaux STRONG/PROBABLE/WEAK/NONE/TO_VERIFY ; pas d’ingestion massive.
+3. APEC Phase 2C ensuite : modèle minimal cycle/besoin/rapprochement, contribution traçable et participation distincte de représentativité. Préserver PR #3 comme fondation ; aucun merge automatique effectué.
