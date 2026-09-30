@@ -4,8 +4,11 @@ import {
   generateProjectPassport, 
   PassportStage, 
   PassportStageStatus, 
+  PassportFact,
   ProjectAccountabilityPassportData 
 } from '../utils/projectPassport';
+import { formatFCFA } from '../utils/formatters';
+import { supabase } from '../services/supabase';
 import { 
   ShieldCheck, 
   CheckCircle2, 
@@ -39,10 +42,47 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
   onOpenDocRequest,
 }) => {
   const [expandedStageId, setExpandedStageId] = useState<string | null>(null);
+  const [sourceMessage, setSourceMessage] = useState('');
 
   const passport: ProjectAccountabilityPassportData = React.useMemo(() => {
     return generateProjectPassport(project, proofs);
   }, [project, proofs]);
+
+  const showFact = (fact: PassportFact) => {
+    if (fact.value == null) return 'Non documenté';
+    const labels: Record<string, string> = {
+      UNKNOWN: 'Non documenté', NOT_FOUND_PUBLICLY: 'Non retrouvé publiquement',
+      CA_REPORTED_ZERO: '0 FCFA indiqué au CA — cause non établie',
+      CA_REPORTED_EXECUTION: 'Exécution financière indiquée au CA',
+      CITIZEN_OBSERVATION: 'Constat citoyen disponible — pas une validation institutionnelle',
+      OFFICIAL_DECLARATION: 'Avancement déclaré par une source officielle',
+      APPROVED: 'Observation citoyenne approuvée', PUBLISHED: 'Publié', VERIFIED: 'Vérifié',
+      COMMUNE: 'Commune', REGIONAL_COUNCIL: 'Conseil régional',
+      NONE: 'Aucun rapprochement', TO_VERIFY: 'À vérifier', WEAK: 'Faible', PROBABLE: 'Probable', STRONG: 'Forte',
+      EXPLICIT_REFERENCE: 'Référence explicite', INSTITUTION_YEAR_OBJECT: 'Institution, exercice et objet',
+    };
+    return typeof fact.value === 'number' && fact.label.includes('FCFA') ? formatFCFA(fact.value) : labels[String(fact.value)] || String(fact.value);
+  };
+  const fieldsText = (fields: string[] | undefined, fallback: string) => {
+    const labels: Record<string, string> = {
+      institution: 'institution', institution_id: 'identifiant institutionnel', fiscal_year: 'exercice',
+      title_distinctive_words: 'objet de l’opération', linked_project_id: 'référence explicite du projet',
+      pluriannual_trace: 'justificatif pluriannuel', localisation: 'localisation', contract_number: 'numéro de contrat',
+      source_document_id: 'document source relié', source_page: 'page source', budget_amount_vs_ca_planned: 'montants prévus du projet et du CA',
+    };
+    return fields?.length ? fields.map(field => labels[field] || field).join(', ') : fallback;
+  };
+
+  const openSource = async (documentId: string) => {
+    setSourceMessage('Recherche du document publié…');
+    const { data, error } = await supabase.functions.invoke('public-document-url', { body: { document_id: documentId } });
+    if (error || typeof data?.url !== 'string' || !data.url.startsWith('https://')) {
+      setSourceMessage('Document non disponible publiquement. Vous pouvez demander sa communication.');
+      return;
+    }
+    setSourceMessage('');
+    window.open(data.url, '_blank', 'noopener,noreferrer');
+  };
 
   const toggleExpand = (stageId: string) => {
     setExpandedStageId(prev => (prev === stageId ? null : stageId));
@@ -149,6 +189,48 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
       aria-label="Passeport de Redevabilité du Projet"
       className="space-y-6"
     >
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4">
+        <h3 className="text-lg font-bold text-slate-900">Comprendre ce projet</h3>
+        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0">
+          <div className="min-w-0"><dt className="text-xs font-bold text-slate-500">Quoi ?</dt><dd className="break-words font-semibold">{project.title}</dd></div>
+          <div><dt className="text-xs font-bold text-slate-500">Combien ? Budget prévu</dt><dd className="font-semibold">{showFact(passport.facts.budget_amount)}</dd><dd className="text-xs text-slate-600">Exercice {showFact(passport.facts.fiscal_year)}</dd></div>
+          <div className="min-w-0"><dt className="text-xs font-bold text-slate-500">Qui ?</dt><dd className="break-words">{passport.institutionName}</dd><dd className="text-sm text-slate-600">Attributaire : {showFact(passport.facts.supplier)}</dd></div>
+          <div><dt className="text-xs font-bold text-slate-500">Où ?</dt><dd className="break-words">{showFact(passport.facts.localisation)}</dd></div>
+          <div className="rounded-xl bg-slate-50 p-3"><dt className="text-xs font-bold text-slate-500">Situation financière</dt><dd>{showFact(passport.facts.financial_status)}</dd><dd className="text-sm">{showFact(passport.facts.executed_amount)}</dd></div>
+          <div className="rounded-xl bg-sky-50 p-3"><dt className="text-xs font-bold text-slate-500">Réalisation physique</dt><dd>{showFact(passport.facts.physical_status)}</dd></div>
+        </dl>
+        <p className="text-xs text-slate-600">Un marché attribué ou une dépense ne prouve pas l’achèvement du chantier. L’absence de donnée ne prouve pas l’absence de réalisation.</p>
+        <p className="text-sm"><strong>Preuve terrain :</strong> {showFact(passport.facts.citizen_evidence_status)}</p>
+        <p className="text-sm"><strong>Réponse institutionnelle :</strong> {showFact(passport.facts.institution_response_status)}. Elle ne constitue pas une validation indépendante.</p>
+      </div>
+
+      <details className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+        <summary className="cursor-pointer font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">Explorer le rapprochement — confiance {showFact(passport.facts.matching_confidence).toLowerCase()}</summary>
+        <div className="mt-4 space-y-3 text-sm break-words">
+          <p>{passport.matchResult?.matchingReason}</p>
+          <p><strong>Méthode :</strong> {showFact(passport.facts.matching_method)}</p>
+          <p><strong>Champs concordants :</strong> {fieldsText(passport.matchResult?.matchedFields, 'Aucun')}</p>
+          <p><strong>Champs contradictoires :</strong> {fieldsText(passport.matchResult?.conflictingFields, 'Aucun identifié')}</p>
+          <p><strong>Champs absents :</strong> {fieldsText(passport.matchResult?.missingFields, 'Aucun identifié')}</p>
+          <p>Le budget prévu, le montant attribué et le montant exécuté sont des mesures différentes ; leur différence n’établit pas une irrégularité.</p>
+        </div>
+      </details>
+
+      <details className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+        <summary className="cursor-pointer font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">Vérifier les sources et les informations manquantes</summary>
+        <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {Object.entries(passport.facts).map(([key, fact]) => (
+            <div key={key} className="min-w-0 rounded-xl border border-slate-100 p-3 break-words">
+              <dt className="text-xs font-bold text-slate-500">{fact.label}</dt><dd className="text-sm font-medium">{showFact(fact)}</dd>
+              <dd className="mt-1 text-xs text-slate-600">{fact.provenance === 'OFFICIAL_SOURCE' ? 'Source officielle' : fact.provenance === 'SUIVIBUDGET_CALCULATION' ? 'Calcul / rapprochement SuiviBudget' : fact.provenance === 'CITIZEN_OBSERVATION' ? 'Observation citoyenne' : fact.provenance === 'INSTITUTION_RESPONSE' ? 'Réponse institutionnelle' : 'Information non corroborée'}</dd>
+              <dd className="text-xs text-slate-600">{fact.source_reference || 'Référence non disponible'}{fact.source_page != null ? ` — page ${fact.source_page}` : ''}</dd>
+              {fact.source_url?.startsWith('https://') && <dd><a className="text-sm text-blue-700 underline focus-visible:outline" href={fact.source_url} target="_blank" rel="noopener noreferrer">Consulter la source</a></dd>}
+              {fact.source_document_id && <dd><button type="button" className="min-h-[44px] text-sm text-blue-700 underline focus-visible:outline" onClick={() => void openSource(fact.source_document_id!)}>Ouvrir le document publié</button></dd>}
+            </div>
+          ))}
+        </dl>
+        <p role="status" className="mt-3 text-sm text-slate-600">{sourceMessage}</p>
+      </details>
       {/* ------------------------------------------------------------------ */}
       {/* PASSPORT HERO BANNER & SCORE                                       */}
       {/* ------------------------------------------------------------------ */}

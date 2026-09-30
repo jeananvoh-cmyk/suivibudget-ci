@@ -83,6 +83,10 @@ export interface BudgetLineItem {
 }
 
 export interface BudgetProject {
+  institution_type?: import('./localBudget').LocalInstitutionType;
+  source_document_id?: string;
+  source_page?: number;
+  source_url?: string;
   citizen_need_origin?: string;
   initiative_source?: string;
   id: string;

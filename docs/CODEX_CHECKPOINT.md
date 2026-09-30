@@ -1,5 +1,17 @@
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
+## 30 septembre — Passport Phase 2A et moindre privilège
+
+Branche `codex/passport-phase-2a` créée depuis `9457f07`, après confirmation de la CI de la fondation et inspection du diff de PR #3 contre master. PR #3 reste ouverte, non fusionnée. Les contrôles antérieurs HTTP/Storage/Edge ne sont pas rejoués intégralement.
+
+Migration locale `20260930153716_least_privilege_passport_boundary.sql` appliquée sous la version distante `20260930153938` : retrait TRUNCATE/REFERENCES/TRIGGER de service_role sur dix relations sensibles, et lecture citoyenne des local_budgets limitée à PUBLISHED. SELECT service_role sur documents/preuves préservé. Transactions SQL temporaires annulées pour ADMIN/DATA_MANAGER/MODERATOR/CITIZEN ; contrôle HTTP public 23/23. État final : 1 compte Auth, 3 CA VERIFIED, 0 document/preuve/objet Storage. Matrice explicite dans CA_SECURITY_STATUS_20260929.md.
+
+Passport : vingt faits typés avec provenance et source, conflits et champs manquants explicites, plus de défaut d’exercice 2026, preuves limitées au projet et hors démonstration, réponse institutionnelle publiée et liée à l’opération/CA. UI Comprendre / Explorer / Vérifier. Trois correspondances Tiassalé préservées, aucun détail inventé pour Abobo/Bingerville ; 0 FCFA ne devient ni retard ni abandon et aucune dépense ne prouve le physique.
+
+131/131 tests réussis (10 fichiers), dont 18 Passport et 13 base PostgreSQL PGlite. Un premier passage concurrent au build a dépassé le délai d’un test préexistant ; le passage isolé réussit sans augmenter le délai. Validation navigateur Playwright/Edge du composant réel : deux états (sources pilotes en aperçu local, public vide) × huit largeurs 360/375/390/430/768/1280/1440/1920 ; 16/16, zéro débordement et erreur JS. Captures 375/1440 inspectées. Advisors inchangés : protection des mots de passe compromis désactivée, 31 index inutilisés et 16 policies permissives multiples. Aucune optimisation mécanique.
+
+La clôture CI et le prochain travail exécutable sont consignés dans AGENT_HANDOFF.md. DGMP 2B et APEC 2C restent NOT_STARTED dans ce bloc.
+
 ## 30 septembre — fermeture HTTP et publication frontend
 
 197 tests HTTP réels et 2 contrôles des relations CA/opérations/marchés passent. Défauts corrigés : droits SELECT service_role manquants sur documents/preuves, metadata.size indisponible au contrôle INSERT Storage, médias privés non résolus côté client, CA VERIFIED embarqués dans le bundle public. Nouvelle migration locale 20260930033244 appliquée à distance sous 20260930144753 ; quatre migrations précédentes non rejouées. Edge documents v3 et preuves v2 avec verify_jwt=true. CA publics issus uniquement de PostgREST PUBLISHED ; sources pilotes déplacées en fixtures de tests, données distantes intactes.
