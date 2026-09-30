@@ -11,6 +11,7 @@ import {
   findMatchingCaOperationResult 
 } from '../projectPassport';
 import { BudgetProject, CitizenProof } from '../../types';
+import type { AdministrativeAccount, CAInvestmentOperation } from '../../types/administrativeAccount';
 
 describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
   it('conserve zéro, la page et la source sans inventer un état physique ou un document relié', () => {
@@ -312,4 +313,87 @@ describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
     expect(passport.documentationCompletenessPct).toBeLessThanOrEqual(100);
     expect(passport.overallAccountabilityScorePct).toBe(passport.documentationCompletenessPct);
   });
+
+  const makeAccount = (operations: CAInvestmentOperation[], fiscalYear = 2024): AdministrativeAccount => ({
+    ...structuredClone(CA_PILOT_FIXTURES.find(ca => ca.id === 'ca-tiassale-2024')!),
+    id: `ca-test-${fiscalYear}`,
+    fiscal_year: fiscalYear,
+    operations: operations.map(op => ({ ...op, ca_id: `ca-test-${fiscalYear}`, fiscal_year: op.fiscal_year || fiscalYear })),
+  });
+
+  const makeOperation = (id: string, title: string, overrides: Partial<CAInvestmentOperation> = {}): CAInvestmentOperation => ({
+    id,
+    ca_id: 'ca-test-2024',
+    institution_id: 'inst-com-tiassale',
+    institution_name: 'Mairie de Tiassalé',
+    fiscal_year: 2024,
+    title,
+    sector: 'Éducation',
+    planned_amount: 15000000,
+    executed_amount: 12000000,
+    ...overrides,
+  });
+
+  it('Phase 2B : choisit le même meilleur candidat même lorsque l’ordre des candidats est inversé', () => {
+    const exact = makeOperation('op-exact', mockTiassaleProject2024.title);
+    const plausible = makeOperation('op-plausible', 'Construction de magasins au marché central de Tiassalé');
+    const first = findMatchingCaOperationResult(mockTiassaleProject2024, [makeAccount([plausible, exact])]);
+    const reversed = findMatchingCaOperationResult(mockTiassaleProject2024, [makeAccount([exact, plausible])]);
+    expect(first.operation?.id).toBe('op-exact');
+    expect(reversed.operation?.id).toBe('op-exact');
+    expect(first.confidence).toBe('STRONG');
+    expect(reversed.confidence).toBe('STRONG');
+  });
+
+  it('Phase 2B : déclasse en TO_VERIFY deux opérations homonymes de force équivalente', () => {
+    const a = makeOperation('op-homonyme-a', mockTiassaleProject2024.title);
+    const b = makeOperation('op-homonyme-b', mockTiassaleProject2024.title);
+    const result = findMatchingCaOperationResult(mockTiassaleProject2024, [makeAccount([b, a])]);
+    expect(result.confidence).toBe('TO_VERIFY');
+    expect(result.conflictingFields).toContain('ambiguous_candidates');
+    expect(result.matchingReason).toContain('Ambiguïté');
+  });
+
+  it('Phase 2B : ne promeut pas un candidat de la bonne collectivité mais du mauvais exercice', () => {
+    const wrongYear = makeOperation('op-wrong-year', mockTiassaleProject2024.title, { fiscal_year: 2023 });
+    const result = findMatchingCaOperationResult(mockTiassaleProject2024, [makeAccount([wrongYear], 2023)]);
+    expect(result.confidence).toBe('TO_VERIFY');
+    expect(result.conflictingFields).toContain('fiscal_year');
+    expect(result.temporalJustification).toContain('Écart');
+  });
+
+  it('Phase 2B : un montant proche ne compense jamais un objet et une localisation incompatibles', () => {
+    const incompatible = makeOperation('op-near-amount', 'Réhabilitation du centre de santé de Niamoué', {
+      planned_amount: mockTiassaleProject2024.budget_amount_fcfa - 1000,
+      location: 'Niamoué',
+      sector: 'Santé',
+    });
+    const project = { ...mockTiassaleProject2024, locality_village_neighborhood: 'Marché de Tiassalé' };
+    const result = findMatchingCaOperationResult(project, [makeAccount([incompatible])]);
+    expect(result.confidence).toBe('NONE');
+    expect(result.operation).toBeUndefined();
+  });
+
+  it('Phase 2B : conserve les trois rapprochements Tiassalé validés avec le moteur déterministe', () => {
+    const account = CA_PILOT_FIXTURES.find(ca => ca.id === 'ca-tiassale-2024')!;
+    for (const operation of account.operations) {
+      const project = {
+        ...mockTiassaleProject2024,
+        id: operation.linked_project_id || `test-${operation.id}`,
+        title: operation.title,
+        budget_amount_fcfa: operation.planned_amount,
+      };
+      const normal = findMatchingCaOperationResult(project, CA_PILOT_FIXTURES);
+      const reversedAccount = { ...structuredClone(account), operations: [...structuredClone(account.operations)].reverse() };
+      const reversed = findMatchingCaOperationResult(project, [
+        ...CA_PILOT_FIXTURES.filter(ca => ca.id !== account.id),
+        reversedAccount,
+      ]);
+      expect(normal.operation?.id).toBe(operation.id);
+      expect(reversed.operation?.id).toBe(operation.id);
+      expect(normal.confidence).toBe('STRONG');
+      expect(reversed.confidence).toBe('STRONG');
+    }
+  });
+
 });
