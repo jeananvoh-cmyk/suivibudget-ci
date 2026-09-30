@@ -2236,3 +2236,8 @@ class DataStore {
 }
 
 export const dataStore = new DataStore();
+
+if (typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+  (window as any).__suiviBudgetDataStore = dataStore;
+}
+

@@ -34,9 +34,14 @@ GitHub : master distant `529db22012848e34afdf8b286983eebfc917b9f7`. Branche PR a
   - `AdminLoginPage` : Route `/admin/login` rétablie dans `parseRoute` et sécurisée visuellement.
   - `SendProofModal` : Largeur mobile 351px, zéro débordement horizontal, bouton CTA >= 44px (52px), validation des statuts de chantier et dropzone.
   - `OfficialDocRequestModal` : Largeur mobile 355px, zéro débordement, parcours en 3 étapes (packs documentaires, demandeur, génération de lettre CAIDP).
-- Suite de tests : **91/91 tests validés**, `npm run build` propre (0 erreur en 28.18s).
+  - `AdminDashboardPage` : Navigation multi-onglets (CAIDP, CA 232, Documents, Modération, File de Travail) validée sur mobile (375px) et desktop (1440px), zéro overflow horizontal, boutons interactifs.
+  - `SingleCAUploadModal` : Formulaire de dépôt individuel validé (343px mobile, 672px desktop), 8 champs responsive, cibles tactiles >= 44px.
+  - `BatchCAImportModal` : Import par lot validé (343px mobile, 1024px desktop), glisser-déposer, proposition d'appariement, cibles tactiles >= 44px.
+  - `ExamineCADocumentModal` : Examen et cycle de vie découplé (`TO_VERIFY` → `VERIFIED` → `PUBLISHED`) validé (343px mobile, 672px desktop), checklist de conformité, cibles tactiles >= 44px.
+- Suite de tests : **106/106 tests validés (9/9 fichiers)**, `npm run build` propre (0 erreur en 25.78s). 100% des 13 vues et modales déclarées `VALIDATED`.
 
 ## Documents de Continuité Multi-Agents
 - `AGENTS.md` : Mis à jour avec le Goal permanent enrichi, les 16 principes non négociables et les garde-fous techniques.
-- `docs/AGENT_HANDOFF.md` : Maintenu avec la matrice complète `UX_UI_AUDIT_STATUS` et les prochaines tâches exécutables.
+- `docs/AGENT_HANDOFF.md` : Maintenu avec la matrice complète `UX_UI_AUDIT_STATUS` (13/13 VALIDATED) et les prochaines tâches exécutables.
+
 

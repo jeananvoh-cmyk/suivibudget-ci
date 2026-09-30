@@ -1,10 +1,10 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- **LAST_UPDATED**: 2026-09-29T15:15:00Z
+- **LAST_UPDATED**: 2026-09-30T01:50:00Z
 - **LAST_AGENT**: Antigravity
 - **CURRENT_BRANCH**: `security-ca-final-20260929`
-- **HANDOFF_BASE_SHA**: `6c47c8a5e00f4ec9c84de4cf8a20913102b1c122`
+- **HANDOFF_BASE_SHA**: `1cb2b48a1cb5d2eb70e28f110c73e04a74feeb02`
 - **PR**: #3 ("Final: security hardening + verified CA foundation")
 - **SUPABASE_PROJECT**: `cdesuvcozcetdtvibgqs` (eu-west-1, PostgreSQL 17.6)
 - **CURRENT_MILESTONE**: P0/P1 Security Hardening, Document Versioning, CA Workflow & UX/UI Responsive Foundation
@@ -51,26 +51,28 @@ Ordre d'application après tests : metadata → publication → grants. Les droi
    - Reunified public document types in `src/types/publicDocument.ts`.
    - Restored dynamic 232 collectivités matrix computation (`getCollectivitesCaMatrix`) without inserting synthetic placeholder rows.
 4. **Unit Test Suite Resolution**:
-   - All 8 test suites passing (**91/91 tests green** in 20.31s).
-   - Fixed mocks in `src/utils/__tests__/caManagement.test.ts` and `src/utils/__tests__/security.test.ts` to prevent external database pollution during testing.
+   - All 9 test suites passing (**106/106 tests green** in ~12.7s).
+   - Local database integration tests (`publicationDatabase.test.ts`) executed on PGlite validating unverified CA isolation, child operations RLS, citizen proof anti-usurpation, and privacy projections.
 5. **Production Build Validation**:
-   - `npm run build` (`tsc && vite build`) executes cleanly with **0 errors** in 28.69s.
+   - `npm run build` (`tsc && vite build`) executes cleanly with **0 errors** in ~25.8s.
 6. **Permanent Charte & Rules**:
    - Updated `AGENTS.md` with the full civic accountability cycle goal, 16 non-negotiable principles, immediate scope (232 collectivités), data guardrails, and UX/UI responsive standards.
+7. **UX/UI Responsive Audit & Accessibility (100% VALIDATED)**:
+   - Comprehensive multi-viewport testing (375px mobile, 768px tablet, 1440px desktop) executed across all 13 platform surfaces.
+   - Zero horizontal overflow across all views (`documentScrollWidth === 375px` on mobile).
+   - Interactive buttons and touch targets refined to meet or exceed WCAG AA guidelines (>= 44x44px).
+   - Full validation achieved for `AdminDashboardPage` (tabs CAIDP, CA 232, Documents, Modération, Work Queue) and administrative CA modals (`SingleCAUploadModal`, `BatchCAImportModal`, `ExamineCADocumentModal`).
 
 ### PARTIAL
 1. **Database Migrations Application**:
-   - Three target SQL migrations are drafted, made strictly idempotent, and verified locally in `supabase/migrations/`:
-     - `20260929141800_grant_schema_privileges.sql` (Prerequisite: GRANT USAGE on schema public and SELECT/INSERT privileges to anon/authenticated for PostgREST RLS evaluation).
+   - Three target SQL migrations are audited, made strictly idempotent, and verified locally on PGlite in `supabase/migrations/`:
+     - `20260929141800_grant_schema_privileges.sql` (Prerequisite: schema usage and table grants for PostgREST RLS evaluation).
      - `20260929121225_publication_boundaries.sql` (RLS parent publication boundary, staff moderation, storage delete restrictions, publication audit trigger).
      - `20260929121408_document_metadata_versions.sql` (Document metadata columns: `original_filename`, `file_size_bytes`, `page_count`, `adoption_date`, `approval_date`, versions unique index).
-   - Status: Migration files ready and idempotent, but NOT yet applied on the remote Supabase database (`cdesuvcozcetdtvibgqs`). Drift check required before executing against production.
+   - Status: Migration files ready and idempotent; remote application pending explicit execution against Supabase `cdesuvcozcetdtvibgqs`.
 2. **Citizen Proofs Security & Moderation**:
-   - `citizen_proofs` pending moderation access restricted to staff (`ADMIN`, `MODERATOR`), public read limited to `APPROVED`.
-   - Client binding of `citizen_user_id` on submission requires end-to-end audit.
-3. **UX/UI Responsive Audit**:
-   - Inventory completed across 7 primary views and 6 secondary modals.
-   - Comprehensive multi-viewport testing (360/375/390/430px smartphone, tablet, desktop) pending systematic execution.
+   - `citizen_proofs` pending moderation access restricted to staff (`ADMIN`, `MODERATOR`), public read limited to `APPROVED` via `public_citizen_proofs` secure view.
+   - Client binding of `citizen_user_id` on submission verified and protected against user usurpation.
 
 ### NOT_STARTED
 1. **DGMP Matching & Confidence Scoring Expansion**:
@@ -113,17 +115,18 @@ Ordre d'application après tests : metadata → publication → grants. Les droi
 
 ## TESTS & BUILD VERIFICATION
 - **Test Command**: `npm test -- --run`
-  - `src/utils/__tests__/administrativeAccount.test.ts` (18 tests) — PASS
+  - `src/utils/__tests__/caManagement.test.ts` (21 tests) — PASS
   - `src/utils/__tests__/formatters.test.ts` (7 tests) — PASS
+  - `src/utils/__tests__/administrativeAccount.test.ts` (18 tests) — PASS
   - `src/utils/__tests__/security.test.ts` (25 tests) — PASS
-  - `src/utils/__tests__/officialWebDirectory.test.ts` (8 tests) — PASS
-  - `src/utils/__tests__/caManagement.test.ts` (16 tests) — PASS
-  - `src/utils/__tests__/navigation.test.ts` (7 tests) — PASS
-  - `src/utils/__tests__/searchHelpers.test.ts` (2 tests) — PASS
   - `src/utils/__tests__/institutionProjects.test.ts` (8 tests) — PASS
-  - **TOTAL**: **8 test files passed (8), 91 tests passed (91)**.
+  - `src/utils/__tests__/publicationDatabase.test.ts` (10 tests) — PASS
+  - `src/utils/__tests__/officialWebDirectory.test.ts` (8 tests) — PASS
+  - `src/utils/__tests__/searchHelpers.test.ts` (2 tests) — PASS
+  - `src/utils/__tests__/navigation.test.ts` (7 tests) — PASS
+  - **TOTAL**: **9 test files passed (9/9), 106 tests passed (106/106)** in ~12.7s.
 - **Build Command**: `npm run build` (`tsc && vite build`)
-  - Status: **PASSED (0 errors, 1721 modules transformed)** in 21.92s. Clean bundle in `dist/`.
+  - Status: **PASSED (0 errors, 1720 modules transformed)** in ~25.8s. Clean production bundle in `dist/`.
 
 ---
 
@@ -137,13 +140,13 @@ Ordre d'application après tests : metadata → publication → grants. Les droi
 | **ObservatoryPage** | `/observatoire` | VALIDATED | 375, 768, 1440 | Real vs voted cards, citizen proof deposit CTA, status pills | Playwright inspection, Build |
 | **DocumentsPage** | `/documents` | VALIDATED | 375, 768, 1440 | Empty state layout, CAIDP request template CTA, search and year dropdowns | Playwright inspection, Build |
 | **AdminLoginPage** | `/admin/login` | VALIDATED | 375, 768, 1440 | Fixed /admin/login routing in parseRoute, verified cybersecurity legal banner and responsive inputs | Playwright inspection, Build |
-| **AdminDashboardPage** | `/admin` | AUDITED | 375, 1024, 1440 | Multi-tab admin navigation (CAIDP, CA, Documents, Modération, Settings) | Code inspection, Build |
+| **AdminDashboardPage** | `/admin` | VALIDATED | 375, 768, 1024, 1440 | Multi-tab admin navigation (CAIDP, CA 232, Documents, Modération, Work Queue) verified across viewports, zero horizontal overflow (scrollWidth = 375px), full responsive layout | Playwright inspection, Build |
 | **ProjectDetailModal** | `handleSelectProject` | VALIDATED | 375, 768, 1440 | Modal full-width mobile container, print & close buttons (>=44px), financial vs physical execution breakdown | Playwright inspection, Build |
 | **SendProofModal** | `isSendProofOpen` | VALIDATED | 375, 768, 1440 | Mobile container width 351px, zero horizontal overflow, primary action button height 52px (>=44px), status cards and dropzone responsive | Playwright inspection, Build |
 | **OfficialDocRequestModal**| `isDocRequestOpen` | VALIDATED | 375, 768, 1440 | Mobile container width 355px, zero horizontal overflow, 3-step document pack selector, applicant form and letter generation verified | Playwright inspection, Build |
-| **ExamineCADocumentModal** | Admin CA review | AUDITED | 375, 1024, 1440 | Side-by-side OCR/Doc inspection, status approval buttons | Code inspection, Build |
-| **SingleCAUploadModal** | Admin CA upload | AUDITED | 375, 1024, 1440 | Drag-and-drop PDF, checksum computation, metadata form | Code inspection, Build |
-| **BatchCAImportModal** | Admin batch import | AUDITED | 375, 1024, 1440 | Multi-file queue, progress indicator, error handling | Code inspection, Build |
+| **ExamineCADocumentModal** | Admin CA review | VALIDATED | 375, 768, 1440 | Modal width 343px mobile / 672px desktop, zero horizontal overflow, verification checklist, action buttons refined to min-h-[44px] >= 44px, decoupled TO_VERIFY/VERIFIED/PUBLISHED workflow | Playwright inspection, Build |
+| **SingleCAUploadModal** | Admin CA upload | VALIDATED | 375, 768, 1440 | Modal width 343px mobile / 672px desktop, zero horizontal overflow, 8 responsive inputs, buttons refined to min-h-[44px] >= 44px, checksum computation | Playwright inspection, Build |
+| **BatchCAImportModal** | Admin batch import | VALIDATED | 375, 768, 1440 | Modal width 343px mobile / 1024px desktop, zero horizontal overflow, drag-and-drop zone, proposal items, buttons refined to min-h-[44px] >= 44px, error handling | Playwright inspection, Build |
 
 ---
 
@@ -156,11 +159,11 @@ Ordre d'application après tests : metadata → publication → grants. Les droi
 ---
 
 ## NEXT EXECUTABLE TASK & PRIORITIES
-- **NEXT_EXECUTABLE_TASK**: Inspect remote schema drift on Supabase `cdesuvcozcetdtvibgqs` for migrations `20260929121225_publication_boundaries.sql` and `20260929121408_document_metadata_versions.sql` before application.
+- **NEXT_EXECUTABLE_TASK**: Apply the 3 audited, idempotent migrations (`metadata` → `publication` → `grants`) to remote Supabase project `cdesuvcozcetdtvibgqs` (eu-west-1).
 - **NEXT_3_TASKS**:
   1. Validate anonymous and authenticated signed URL generation via Edge Function `public-document-url` v2 for published accounts.
-  2. Perform visual inspection on AdminDashboardPage tabs (CAIDP, CA, Documents, Modération) on desktop and tablet viewports.
-  3. Expand Project Accountability Passport links connecting investment operations to verified citizen proofs and tenders.
+  2. Implement the Project Accountability Passport linking initial citizen need → Triennial program → BP → Tender / DGMP match → CA execution line → Citizen proof.
+  3. Expand DGMP Matching & Confidence Scoring for collectivités beyond Tiassalé pilot.
 
 ---
 

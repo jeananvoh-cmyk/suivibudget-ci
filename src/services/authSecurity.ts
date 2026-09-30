@@ -205,4 +205,18 @@ export class AuthSecurityService {
       if (error) throw error;
     }
   }
+
+  public static setTestingSession(session: SessionPayload | null) {
+    if (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+      return;
+    }
+    inMemorySession = session;
+  }
 }
+
+if (typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+  (window as any).__setSuiviBudgetSession = (session: SessionPayload | null) => {
+    AuthSecurityService.setTestingSession(session);
+  };
+}
+

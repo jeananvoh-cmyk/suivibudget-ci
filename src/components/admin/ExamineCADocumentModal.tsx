@@ -132,7 +132,8 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            aria-label="Fermer la modal"
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -347,7 +348,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                 type="button"
                 onClick={() => handleUpdateStatus('TO_VERIFY')}
                 disabled={isProcessing}
-                className="px-3.5 py-2 rounded-xl border border-amber-300 text-amber-800 bg-amber-50 text-xs font-bold hover:bg-amber-100 transition-colors"
+                className="px-3.5 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-amber-300 text-amber-800 bg-amber-50 text-xs font-bold hover:bg-amber-100 transition-colors"
               >
                 Dépublier (Renvoyer en examen)
               </button>
@@ -356,7 +357,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                 type="button"
                 onClick={() => handleUpdateStatus('ARCHIVED')}
                 disabled={isProcessing}
-                className="px-3.5 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-200 text-xs font-bold transition-colors"
+                className="px-3.5 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-200 text-xs font-bold transition-colors"
               >
                 Archiver
               </button>
@@ -369,7 +370,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                 type="button"
                 onClick={() => handleUpdateStatus('VERIFIED')}
                 disabled={isProcessing}
-                className="px-4 py-2.5 rounded-xl border border-brand-blue text-brand-blue hover:bg-blue-50 text-xs font-black transition-colors"
+                className="px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-brand-blue text-brand-blue hover:bg-blue-50 text-xs font-black transition-colors"
               >
                 Valider (Marquer VÉRIFIÉ)
               </button>
@@ -380,7 +381,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                 type="button"
                 onClick={() => handleUpdateStatus('PUBLISHED')}
                 disabled={isProcessing}
-                className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-black transition-colors shadow-sm flex items-center gap-2"
+                className="px-5 py-2.5 min-h-[44px] rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-black transition-colors shadow-sm flex items-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Publier sur la plateforme</span>
@@ -391,7 +392,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
+                className="px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
               >
                 Fermer
               </button>
