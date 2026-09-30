@@ -17,8 +17,8 @@ alter table public.public_documents
   add column if not exists replacement_reason text,
   add column if not exists created_by uuid references public.profiles(id);
 
-alter table public.public_documents drop constraint if exists document_version_positive;
-alter table public.public_documents add constraint document_version_positive check (version >= 1);
+alter table public.public_documents alter column published_at drop not null;
+alter table public.public_documents alter column published_at drop default;
 
 alter table public.public_documents drop constraint if exists document_page_positive;
 alter table public.public_documents add constraint document_page_positive check (page_count is null or page_count > 0);
@@ -28,9 +28,6 @@ alter table public.public_documents add constraint document_size_valid check (fi
 
 alter table public.public_documents drop constraint if exists document_checksum_valid;
 alter table public.public_documents add constraint document_checksum_valid check (checksum_sha256 is null or checksum_sha256 ~ '^[a-f0-9]{64}$');
-
-alter table public.public_documents drop constraint if exists document_status_valid;
-alter table public.public_documents add constraint document_status_valid check (status in ('UPLOADED','TO_VERIFY','VERIFIED','PUBLISHED','ARCHIVED'));
 
 alter table public.public_documents drop constraint if exists document_replacement_reason;
 alter table public.public_documents add constraint document_replacement_reason check (replaces_document_id is null or nullif(btrim(replacement_reason),'') is not null);

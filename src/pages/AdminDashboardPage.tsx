@@ -264,8 +264,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   };
 
   // Moderation actions with audit trail and structured rejection
-  const handleApproveProof = (proof: CitizenProof, withWhatsApp = false) => {
-    dataStore.moderateProof(proof.id, 'APPROVED');
+  const handleApproveProof = async (proof: CitizenProof, withWhatsApp = false) => {
+    try {
+      await dataStore.moderateProof(proof.id, 'APPROVED');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Validation non enregistrée.', 'error');
+      return;
+    }
     adminTaskService.logActivity({
       action_type: 'PROOF_APPROVED',
       description: `Validation preuve citoyenne : ${proof.project_title || proof.commune_name}`,
@@ -296,13 +301,18 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     setRejectionCustomText('');
   };
 
-  const handleConfirmRejection = () => {
+  const handleConfirmRejection = async () => {
     if (!rejectingProof) return;
     const finalReason = rejectionReason === 'Autre raison'
       ? (rejectionCustomText.trim() || 'Preuve non conforme')
       : rejectionReason;
 
-    dataStore.moderateProof(rejectingProof.id, 'REJECTED');
+    try {
+      await dataStore.moderateProof(rejectingProof.id, 'REJECTED', finalReason);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Rejet non enregistré.', 'error');
+      return;
+    }
     adminTaskService.logActivity({
       action_type: 'PROOF_REJECTED',
       description: `Preuve citoyenne rejetée (${finalReason}) : ${rejectingProof.project_title || rejectingProof.commune_name}`,

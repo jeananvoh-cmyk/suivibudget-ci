@@ -12,7 +12,7 @@ import {
 } from '../types';
 import { RAW_BUDGET_PROJECTS } from '../data/budgetData';
 import { INSTITUTIONS_DATA } from '../data/institutionsData';
-import { INITIAL_CITIZEN_PROOFS } from '../data/initialProofs';
+
 import { INITIAL_ARTICLES } from '../data/initialArticles';
 import { detectCategoryFromExpense } from '../data/categories';
 import { CAIDP_MASTER_DIRECTORY, CaidpEntity } from '../data/caidpRiData';
@@ -486,6 +486,7 @@ class DataStore {
   private institutions: Institution[] = [];
   private localBudgets: LocalBudget[] = [];
   private proofs: CitizenProof[] = [];
+  private proofRefreshGeneration = 0;
   private articles: NewsArticle[] = [];
   private documents: PublicDocument[] = [];
   private caidpDirectory: CaidpEntity[] = [];
@@ -685,40 +686,11 @@ class DataStore {
       };
     });
 
-    // 3. Proofs
-    this.proofs = [...INITIAL_CITIZEN_PROOFS];
+    this.proofs = [];
     try {
-      const storedProofs = localStorage.getItem(STORAGE_KEYS.PROOFS);
-      if (storedProofs) {
-        const parsed = JSON.parse(storedProofs);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const defaultMap = new Map(INITIAL_CITIZEN_PROOFS.map(p => [p.id, p]));
-          const existingIds = new Set(parsed.map((p: any) => p.id));
-          const missingDefaults = INITIAL_CITIZEN_PROOFS.filter(p => !existingIds.has(p.id));
-          
-          // Merge while ensuring demo defaults have updated authentic photos and no fabricated elevated confirmations
-          this.proofs = [...parsed.map((p: any) => {
-            const def = defaultMap.get(p.id);
-            if (def && def.is_demo) {
-              return {
-                ...p,
-                image_url: def.image_url,
-                photo_url: def.photo_url,
-                confirmations_count: (p.confirmations_count && p.confirmations_count > 5) ? 0 : (p.confirmations_count || 0)
-              };
-            }
-            if (def && p.id === 'proof-real-seguela-touba-1' && p.confirmations_count > 5) {
-              return { ...p, confirmations_count: 0 };
-            }
-            return p;
-          }), ...missingDefaults];
-        }
-      }
-    } catch (e) {
-      console.warn("Could not read proofs from localStorage", e);
-    }
-    if (this.proofs.length === 0 && INITIAL_CITIZEN_PROOFS.length > 0) {
-      this.proofs = [...INITIAL_CITIZEN_PROOFS];
+      localStorage.removeItem(STORAGE_KEYS.PROOFS);
+    } catch {
+      // Storage may be disabled; private proofs are never restored from it.
     }
 
     // 4. Articles
@@ -796,10 +768,7 @@ class DataStore {
   private async initSupabaseSync() {
     if (!isSupabaseConfigured()) return;
     try {
-      const { data, error } = await supabase
-        .from('citizen_proofs')
-        .select('*')
-        .order('created_at', { ascending: false });
+      await this.refreshProofs();
 
       // Sync public documents from Supabase if table exists
       try {
@@ -852,37 +821,41 @@ class DataStore {
         // Table not present yet, silent fallback
       }
 
-      if (!error && Array.isArray(data) && data.length > 0) {
-        const remoteProofs: CitizenProof[] = data.map(d => ({
-          id: d.id,
-          project_id: d.project_id,
-          project_title: d.project_title,
-          commune_name: d.commune_name,
-          region_name: d.region_name || '',
-          citizen_name: d.citizen_name || 'Sentinelle Citoyenne',
-          user_name: d.citizen_name || 'Sentinelle Citoyenne',
-          image_url: d.image_url,
-          photo_url: d.image_url,
-          video_url: d.video_url,
-          media_type: d.media_type || (d.video_url ? 'VIDEO' : 'IMAGE'),
-          citizen_status_claim: d.citizen_status_claim,
-          comment: d.comment,
-          locality_details: d.locality_details,
-          verification_status: d.verification_status,
-          moderator_notes: d.moderator_notes,
-          confirmations_count: d.confirmations_count || 1,
-          created_at: d.created_at,
-        }));
 
-        const existingMap = new Map(this.proofs.map(p => [p.id, p]));
-        remoteProofs.forEach(rp => existingMap.set(rp.id, rp));
-        this.proofs = Array.from(existingMap.values());
-        this.saveProofs();
-        this.notify();
-      }
     } catch (e) {
       console.warn("Supabase background sync silent catch:", e);
     }
+  }
+
+  public async refreshProofs(): Promise<void> {
+    const generation = ++this.proofRefreshGeneration;
+    if (!isSupabaseConfigured()) {
+      this.proofs = [];
+      this.notify();
+      return;
+    }
+    const { data: identity, error: identityError } = await supabase.auth.getUser();
+    if (identityError && identityError.name !== 'AuthSessionMissingError') throw identityError;
+    const { data: published, error: publicError } = await supabase.from('public_citizen_proofs')
+      .select('*').order('created_at', { ascending: false });
+    if (publicError) throw publicError;
+    let rows = published || [];
+    if (identity.user) {
+      const { data: accessible, error } = await supabase.from('citizen_proofs')
+        .select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      const byId = new Map(rows.map(row => [row.id, row]));
+      (accessible || []).forEach(row => byId.set(row.id, row));
+      rows = Array.from(byId.values());
+    }
+    if (generation !== this.proofRefreshGeneration) return;
+    this.proofs = rows.map(row => ({
+      ...row,
+      user_name: row.citizen_name || 'Citoyen Observateur',
+      photo_url: row.image_url,
+      confirmations_count: row.confirmations_count ?? 0,
+    })).sort((left, right) => right.created_at.localeCompare(left.created_at));
+    this.notify();
   }
 
   public subscribe(listener: () => void) {
@@ -1092,11 +1065,14 @@ class DataStore {
       role: session.user.role as UserRole,
       expiresAt: session.user.expiresAt,
     };
+    await this.refreshProofs();
     this.notify();
   }
 
   public async logout() {
     const signOut = AuthSecurityService.clearSession();
+    this.proofRefreshGeneration++;
+    this.proofs = [];
     this.authState = {
       isAuthenticated: false,
       email: '',
@@ -1106,6 +1082,7 @@ class DataStore {
     };
     this.notify();
     await signOut;
+    await this.refreshProofs();
   }
 
   // --- CITIZEN PROOF SUBMISSION & MODERATION ---
@@ -1153,7 +1130,7 @@ class DataStore {
     return `${prefix}-${seqStr}`;
   }
 
-  public submitProof(proofData: {
+  public async submitProof(proofData: {
     project_id: string;
     image_url: string;
     secondary_image_url?: string;
@@ -1165,12 +1142,15 @@ class DataStore {
     citizen_name?: string;
     citizen_whatsapp?: string;
     signboard_status?: 'PRESENT' | 'ABSENT' | 'UNSPECIFIED';
-  }): CitizenProof {
+  }): Promise<CitizenProof> {
+    if (!isSupabaseConfigured()) throw new Error('Service de preuves indisponible.');
+    const { data: identity, error: identityError } = await supabase.auth.getUser();
+    if (identityError && identityError.name !== 'AuthSessionMissingError') throw identityError;
     const project = this.getProjectById(proofData.project_id);
     const trackingCode = this.generateTrackingCode(proofData.project_id, project?.title);
 
     const newProof: CitizenProof = {
-      id: `proof-${Date.now()}`,
+      id: `proof-${crypto.randomUUID()}`,
       tracking_code: trackingCode,
       project_id: proofData.project_id,
       project_title: project ? project.title : 'Projet d\'infrastructure locale',
@@ -1189,41 +1169,38 @@ class DataStore {
       comment: proofData.comment,
       locality_details: proofData.locality_details || (project ? project.locality_village_neighborhood : ''),
       verification_status: 'PENDING',
-      confirmations_count: 1,
+      confirmations_count: 0,
       is_demo: false,
       created_at: new Date().toISOString(),
     };
 
-    this.proofs.unshift(newProof);
-    this.saveProofs();
-    this.notify();
-
-    // Live Supabase Insert (if configured)
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('citizen_proofs').insert([{
-          id: newProof.id,
-          tracking_code: newProof.tracking_code,
-          project_id: newProof.project_id,
-          project_title: newProof.project_title,
-          commune_name: newProof.commune_name,
-          region_name: newProof.region_name,
-          citizen_name: newProof.citizen_name,
-          citizen_whatsapp: newProof.citizen_whatsapp,
-          signboard_status: newProof.signboard_status,
-          image_url: newProof.image_url,
-          secondary_image_url: newProof.secondary_image_url,
-          video_url: newProof.video_url,
-          media_type: newProof.media_type,
-          citizen_status_claim: newProof.citizen_status_claim,
-          comment: newProof.comment,
-          locality_details: newProof.locality_details,
-          verification_status: 'PENDING',
-        }]),
-        'Upload Preuve Citoyenne'
-      );
+    const { error } = await supabase.from('citizen_proofs').insert([{
+      id: newProof.id,
+      tracking_code: newProof.tracking_code,
+      project_id: newProof.project_id,
+      project_title: newProof.project_title,
+      commune_name: newProof.commune_name,
+      region_name: newProof.region_name,
+      citizen_user_id: identity.user?.id ?? null,
+      citizen_name: newProof.citizen_name,
+      citizen_whatsapp: newProof.citizen_whatsapp,
+      signboard_status: newProof.signboard_status,
+      image_url: newProof.image_url,
+      secondary_image_url: newProof.secondary_image_url,
+      video_url: newProof.video_url,
+      media_type: newProof.media_type,
+      citizen_status_claim: newProof.citizen_status_claim,
+      comment: newProof.comment,
+      locality_details: newProof.locality_details,
+      verification_status: 'PENDING',
+      confirmations_count: 0,
+      created_at: newProof.created_at,
+    }]);
+    if (error) throw error;
+    if (identity.user) {
+      this.proofs.unshift(newProof);
+      this.notify();
     }
-
     return newProof;
   }
 
@@ -1250,61 +1227,39 @@ class DataStore {
     } catch {}
   }
 
-  public confirmProof(proofId: string): { success: boolean; alreadyConfirmed?: boolean } {
-    if (this.hasUserConfirmed(proofId)) {
-      return { success: false, alreadyConfirmed: true };
-    }
-
-    const idx = this.proofs.findIndex(p => p.id === proofId);
-    if (idx !== -1) {
-      this.proofs[idx].confirmations_count = (this.proofs[idx].confirmations_count || 0) + 1;
-      this.recordLocalConfirmation(proofId);
-      this.saveProofs();
-      this.notify();
-      return { success: true };
-    }
-    return { success: false };
+  public confirmProof(proofId: string): { success: boolean; alreadyConfirmed?: boolean; message?: string } {
+    return {
+      success: false,
+      alreadyConfirmed: this.hasUserConfirmed(proofId),
+      message: 'Les confirmations citoyennes ne sont pas encore disponibles.',
+    };
   }
-
-  public moderateProof(proofId: string, status: 'APPROVED' | 'REJECTED', moderatorNotes?: string) {
-    const idx = this.proofs.findIndex(p => p.id === proofId);
-    if (idx !== -1) {
-      this.proofs[idx].verification_status = status;
-      if (moderatorNotes) {
-        this.proofs[idx].moderator_notes = moderatorNotes;
-      }
-      this.saveProofs();
-      this.notify();
-
-      // Live Supabase Update (if configured)
-      if (isSupabaseConfigured()) {
-        safeSupabaseExec(
-          supabase.from('citizen_proofs').update({
-            verification_status: status,
-            moderator_notes: moderatorNotes || null,
-            verified_at: new Date().toISOString(),
-            verified_by: this.authState.fullName || 'Modérateur',
-          }).eq('id', proofId),
-          'Modération Preuve Citoyenne'
-        );
-      }
-    }
-  }
-
-  public deleteProof(proofId: string) {
-    this.proofs = this.proofs.filter(p => p.id !== proofId);
-    this.saveProofs();
+  public async moderateProof(proofId: string, status: 'APPROVED' | 'REJECTED', moderatorNotes?: string): Promise<void> {
+    if (!isSupabaseConfigured()) throw new Error('Service de preuves indisponible.');
+    const { data: identity, error: identityError } = await supabase.auth.getUser();
+    if (identityError) throw identityError;
+    if (!identity.user) throw new Error('Authentification requise.');
+    const { data, error } = await supabase.from('citizen_proofs').update({
+      verification_status: status,
+      moderator_notes: moderatorNotes || null,
+      verified_at: new Date().toISOString(),
+      verified_by: identity.user.id,
+    }).eq('id', proofId).select('*').single();
+    if (error) throw error;
+    this.proofs = this.proofs.map(proof => proof.id === proofId ? { ...proof, ...data } : proof);
     this.notify();
-
-    // Live Supabase Delete (if configured)
-    if (isSupabaseConfigured()) {
-      safeSupabaseExec(
-        supabase.from('citizen_proofs').delete().eq('id', proofId),
-        'Suppression Preuve Citoyenne'
-      );
-    }
   }
 
+  public async deleteProof(proofId: string): Promise<void> {
+    if (!isSupabaseConfigured()) throw new Error('Service de preuves indisponible.');
+    const { data: identity, error: identityError } = await supabase.auth.getUser();
+    if (identityError) throw identityError;
+    if (!identity.user) throw new Error('Authentification requise.');
+    const { error } = await supabase.from('citizen_proofs').delete().eq('id', proofId).select('id').single();
+    if (error) throw error;
+    this.proofs = this.proofs.filter(proof => proof.id !== proofId);
+    this.notify();
+  }
   // --- PROJECT CRUD ---
   public addProject(project: Omit<BudgetProject, 'id' | 'created_at'>): BudgetProject {
     const newProject: BudgetProject = {
@@ -1522,7 +1477,7 @@ class DataStore {
     return this.getDocuments();
   }
 
-  public async addDocument(docData: Omit<PublicDocument, 'id' | 'downloads_count' | 'published_at'> & { published_at?: string }): Promise<PublicDocument> {
+  public async addDocument(docData: Omit<PublicDocument, 'id' | 'downloads_count' | 'published_at'> & { published_at?: string | null }): Promise<PublicDocument> {
     if (!isSupabaseConfigured()) throw new Error('Service documentaire indisponible.');
     if (docData.status && docData.status !== 'TO_VERIFY' && docData.status !== 'UPLOADED') {
       throw new Error('Tout nouveau document doit être vérifié avant publication.');
@@ -1531,7 +1486,7 @@ class DataStore {
       ...docData,
       id: `doc-${crypto.randomUUID()}`,
       downloads_count: 0,
-      published_at: docData.published_at || new Date().toISOString(),
+      published_at: null,
       is_official: docData.is_official ?? false,
       status: 'TO_VERIFY',
       verification_status: 'TO_VERIFY',
@@ -1922,13 +1877,13 @@ class DataStore {
       if (Array.isArray(data.projects)) this.projects = data.projects;
       if (Array.isArray(data.institutions)) this.institutions = data.institutions;
       if (Array.isArray(data.articles)) this.articles = data.articles;
-      if (Array.isArray(data.proofs)) this.proofs = data.proofs;
+
       if (data.settings && typeof data.settings === 'object') this.settings = { ...DEFAULT_SETTINGS, ...data.settings };
 
       this.saveProjects();
       this.saveInstitutions();
       this.saveArticles();
-      this.saveProofs();
+
       this.saveSettings();
       this.notify();
 
@@ -1944,14 +1899,14 @@ class DataStore {
   public resetToFactoryDefaults() {
     this.projects = [...RAW_BUDGET_PROJECTS];
     this.institutions = [...INSTITUTIONS_DATA];
-    this.proofs = [...INITIAL_CITIZEN_PROOFS];
+
     this.articles = [...INITIAL_ARTICLES];
     this.caidpDirectory = [...CAIDP_MASTER_DIRECTORY];
     this.settings = { ...DEFAULT_SETTINGS };
 
     this.saveProjects();
     this.saveInstitutions();
-    this.saveProofs();
+
     this.saveArticles();
     this.saveCaidpDirectory();
     this.saveSettings();
@@ -2102,14 +2057,6 @@ class DataStore {
       localStorage.setItem(STORAGE_KEYS.INSTITUTIONS, JSON.stringify(this.institutions));
     } catch (e) {
       console.warn("Storage quota exceeded for institutions", e);
-    }
-  }
-
-  private saveProofs() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.PROOFS, JSON.stringify(this.proofs));
-    } catch (e) {
-      console.warn("Storage quota exceeded for proofs", e);
     }
   }
 

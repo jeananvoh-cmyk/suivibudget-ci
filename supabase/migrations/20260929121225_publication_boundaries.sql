@@ -58,6 +58,24 @@ using (
 );
 
 -- 7. Preuves citoyennes: modération staff pour les statuts pending/rejected
+drop policy if exists "Approved citizen proofs are viewable by everyone." on public.citizen_proofs;
+drop policy if exists "Citizens read own proofs" on public.citizen_proofs;
+create policy "Citizens read own proofs" on public.citizen_proofs
+for select to authenticated
+using (citizen_user_id = (select auth.uid()));
+
+-- Public projection intentionally excludes contact details, identity and moderation notes.
+create or replace view public.public_citizen_proofs with (security_barrier = true) as
+select id, project_id, project_title, commune_name, region_name,
+  'Citoyen observateur'::text as citizen_name,
+  image_url, video_url, media_type, citizen_status_claim, comment, locality_details,
+  geo_latitude, geo_longitude, verification_status, confirmations_count,
+  created_at, updated_at, signboard_status, secondary_image_url, verified_at,
+  source_url, source_credit, additional_photos
+from public.citizen_proofs
+where verification_status = 'APPROVED';
+revoke all on public.public_citizen_proofs from public, anon, authenticated;
+
 drop policy if exists "Staff read pending citizen proofs" on public.citizen_proofs;
 create policy "Staff read pending citizen proofs" on public.citizen_proofs
 for select to authenticated
@@ -69,7 +87,7 @@ create policy "Anyone can submit a citizen proof." on public.citizen_proofs
 for insert
 with check (
   verification_status = 'PENDING'
-  and (citizen_user_id is null or citizen_user_id = (select auth.uid()))
+  and citizen_user_id is not distinct from (select auth.uid())
   and moderated_by is null and moderated_at is null and moderator_notes is null
   and verified_by is null and verified_at is null
   and coalesce(confirmations_count, 0) = 0
@@ -79,6 +97,8 @@ with check (
 create or replace function public.enforce_document_publication_audit()
 returns trigger language plpgsql set search_path = ''
 as $$
+declare
+  predecessor public.public_documents%rowtype;
 begin
   if not private.has_staff_role(array['ADMIN','DATA_MANAGER']) then
     raise exception 'Document staff authorization required';
@@ -89,18 +109,51 @@ begin
     end if;
     new.verified_by := null;
     new.verified_at := null;
+    new.published_at := null;
+    new.created_by := auth.uid();
+    if new.storage_path is not null and new.checksum_sha256 is null then
+      raise exception 'Uploaded documents require a checksum';
+    end if;
+    if new.replaces_document_id is not null then
+      select * into predecessor from public.public_documents where id = new.replaces_document_id;
+      if not found or new.institution_id is distinct from predecessor.institution_id
+         or new.fiscal_year is distinct from predecessor.fiscal_year
+         or new.document_type is distinct from predecessor.document_type
+         or new.version <> predecessor.version + 1 then
+        raise exception 'Replacement must continue the same document series';
+      end if;
+    elsif new.version <> 1 then
+      raise exception 'Document versions require a predecessor';
+    end if;
   else
     if new.storage_path is distinct from old.storage_path
        or new.checksum_sha256 is distinct from old.checksum_sha256
        or new.version is distinct from old.version
+       or new.id is distinct from old.id
+       or new.created_by is distinct from old.created_by
+       or new.created_at is distinct from old.created_at
+       or new.storage_bucket is distinct from old.storage_bucket
+       or new.replaces_document_id is distinct from old.replaces_document_id
+       or new.replacement_reason is distinct from old.replacement_reason
        or new.file_url is distinct from old.file_url then
       raise exception 'Create a new document version to replace the source';
+    end if;
+    if old.status in ('VERIFIED','PUBLISHED') and new.status <> 'TO_VERIFY'
+       and (new.institution_id is distinct from old.institution_id
+         or new.fiscal_year is distinct from old.fiscal_year
+         or new.document_type is distinct from old.document_type
+         or new.source_name is distinct from old.source_name
+         or new.source_url is distinct from old.source_url) then
+      raise exception 'Reverify changed document provenance';
     end if;
     if new.status = 'PUBLISHED' and old.status <> 'PUBLISHED' then
       if old.status <> 'VERIFIED' or old.verification_status <> 'VERIFIED'
          or old.verified_by is null or old.verified_at is null then
         raise exception 'Verify the document before publishing';
       end if;
+      new.verification_status := old.verification_status;
+      new.verified_by := old.verified_by;
+      new.verified_at := old.verified_at;
       new.published_at := now();
     elsif new.status = 'VERIFIED' and old.status <> 'VERIFIED' then
       if old.status not in ('UPLOADED','TO_VERIFY') then
@@ -117,6 +170,9 @@ begin
       new.verification_status := old.verification_status;
       new.verified_by := old.verified_by;
       new.verified_at := old.verified_at;
+    end if;
+    if new.status <> 'PUBLISHED' or old.status = 'PUBLISHED' then
+      new.published_at := old.published_at;
     end if;
   end if;
   new.updated_at := now();

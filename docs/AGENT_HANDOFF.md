@@ -4,7 +4,7 @@
 - **LAST_UPDATED**: 2026-09-29T15:15:00Z
 - **LAST_AGENT**: Antigravity
 - **CURRENT_BRANCH**: `security-ca-final-20260929`
-- **HEAD_SHA**: `c24c912061e86aa7855f463b2fba8259837a28e3`
+- **HANDOFF_BASE_SHA**: `6c47c8a5e00f4ec9c84de4cf8a20913102b1c122`
 - **PR**: #3 ("Final: security hardening + verified CA foundation")
 - **SUPABASE_PROJECT**: `cdesuvcozcetdtvibgqs` (eu-west-1, PostgreSQL 17.6)
 - **CURRENT_MILESTONE**: P0/P1 Security Hardening, Document Versioning, CA Workflow & UX/UI Responsive Foundation
@@ -12,6 +12,30 @@
 ---
 
 ## EXECUTION SUMMARY & STATUS
+
+### Reprise Codex — contrôle de drift en cours, 29 septembre 2026
+
+État réel contrôlé : HEAD local et PR #3 `6c47c8a`, PR ouverte, checks `verify` et `Vercel Preview Comments` réussis. Projet autorisé confirmé eu-west-1 ACTIVE_HEALTHY. Historique distant toujours limité aux neuf migrations jusqu'à `20260929112823`. Aucun document ni preuve en base ; trois CA 2024 VERIFIED préservés. Les corrections ci-dessous sont locales et **non appliquées** à ce stade. Les anciennes mentions « prêt/idempotent » ne constituent pas une validation SQL.
+
+| OBJECT | REMOTE_STATE | TARGET_STATE | MIGRATION | ACTION | RISK | VERIFICATION |
+| --- | --- | --- | --- | --- | --- | --- |
+| caidp_requests | Table absente, aucun usage métier | Ne pas créer de faux modèle | grants | CONFLICT : retirer référence | Échec transaction initiale | Catalogue + recherche code |
+| caidp_document_requests_log | Journal PRINT_PDF/COPIED/EMAIL_SENT, INSERT public et SELECT staff RLS | INSERT public, SELECT staff, aucun SELECT anon | grants | NEEDS_ADAPTATION | Journal ≠ dossier citoyen, mailto ≠ envoi prouvé | INSERT sans RETURNING, matrice rôles |
+| Privilèges tables public | anon/authenticated ont TRUNCATE/TRIGGER/REFERENCES, aucun DML utile | Allowlist table par table | grants | NEEDS_ADAPTATION | TRUNCATE non protégé par RLS ; ne restaurer DML qu'après policies | Tests réels des rôles et has_table_privilege |
+| CA parent | VERIFIED ou PUBLISHED lisible selon policy | PUBLISHED seul au public | publication | NEEDS_ADAPTATION | VERIFIED ne signifie pas diffusion autorisée | SELECT anon/citoyen/staff |
+| ca_financial_lines | Parent VERIFIED/PUBLISHED | Parent PUBLISHED | publication | NEEDS_ADAPTATION | Fuite des lignes avant publication | CA de tous statuts en fixture |
+| ca_investment_operations / ca_procurement_matches | SELECT true | Parent PUBLISHED | publication | NEEDS_ADAPTATION | Exposition autonome des enfants | Tests des jointures RLS |
+| public_documents staff | ADMIN/DATA_MANAGER/MODERATOR ALL | ADMIN/DATA_MANAGER gestion, pas DELETE accordé | publication + grants | NEEDS_ADAPTATION | Conservation sources et rôles | Matrice DML |
+| storage documents | Update autorisé ; delete sans dépendance | Aucun update, suppression staging sans document référent | publication | NEEDS_ADAPTATION | Écrasement ou suppression source | Tests policies storage |
+| citizen_proofs | APPROVED/owner SELECT, PENDING INSERT sans liaison forte | Table owner/staff, vue publique approuvée sans PII | publication + grants | NEEDS_ADAPTATION | Téléphone, identité et notes ne doivent pas devenir publics | Projection + refus usurpation |
+| Trigger documents | UPDATE seulement, publication force VERIFIED | INSERT TO_VERIFY, vérification humaine puis publication, source immuable | publication | NEEDS_ADAPTATION | Publication directe et falsification audit | SQL insert/update réellement exécuté |
+| published_at | NOT NULL avec default now | NULL avant publication, date serveur | metadata + publication | NEEDS_ADAPTATION | Faux historique de publication | Workflow réel SQL |
+| Métadonnées additionnelles | 12 colonnes absentes | Colonnes typées, FK profils et document précédent | metadata | SAFE_TO_APPLY | Types FK text/uuid contrôlés | information_schema + fixture |
+| Contraintes statut/version | public_documents_status_check et version_check déjà présentes | Conserver existantes | metadata | ALREADY_PRESENT : retirer doublons proposés | Doublons inutiles | pg_constraint |
+| Page/taille/checksum/replacement constraints | Absentes ; table vide | Contraintes de domaine | metadata | SAFE_TO_APPLY | Rejet metadata invalides | Tests valeurs limites |
+| Index série/version + replaces + created_by | Absents ; checksum unique déjà présent | Ajouter seulement trois index nécessaires | metadata | SAFE_TO_APPLY | Conflits version ; couverture FK | pg_indexes, fixture |
+
+Ordre d'application après tests : metadata → publication → grants. Les droits sont rétablis en dernier. Pas de rejeu de migration fondatrice. Les tests SQL locaux et corrections Edge sont en cours ; aucune nouvelle validation UX n'est déclarée. Point découvert : le dépôt de preuve utilisait des aperçus locaux et un succès anticipé ; correction du parcours réel requise malgré la validation visuelle antérieure.
 
 ### COMPLETED
 1. **Supabase Auth & RBAC Consolidation**:

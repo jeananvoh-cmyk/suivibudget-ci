@@ -56,7 +56,7 @@ export interface PublicDocument {
   file_name: string;
   file_size?: string;
   file_format: DocumentFormat;
-  published_at: string;
+  published_at: string | null;
   downloads_count: number;
   is_official: boolean;
   tags?: string[];

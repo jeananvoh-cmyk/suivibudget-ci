@@ -14,10 +14,11 @@ import { DocumentStorageService } from '../../services/documentStorageService';
 import { dataStore } from '../../services/dataStore';
 import { Institution, PublicDocument } from '../../types';
 
-const storageMock = vi.hoisted(() => ({ configured: vi.fn(() => false), upload: vi.fn(), query: vi.fn(), insert: vi.fn(), update: vi.fn() }));
+const storageMock = vi.hoisted(() => ({ configured: vi.fn(() => false), upload: vi.fn(), query: vi.fn(), insert: vi.fn(), update: vi.fn(), getUser: vi.fn(), remove: vi.fn() }));
 vi.mock('../../services/supabase', () => ({
   isSupabaseConfigured: storageMock.configured,
     supabase: {
+    auth: { getUser: storageMock.getUser },
     storage: { from: () => ({ upload: storageMock.upload }) },
     from: () => {
       const builder = {
@@ -25,6 +26,8 @@ vi.mock('../../services/supabase', () => ({
         eq: () => builder,
         insert: (value: unknown) => { storageMock.insert(value); return builder; },
         update: (value: unknown) => { storageMock.update(value); return builder; },
+        delete: () => { storageMock.remove(); return builder; },
+        then: (resolve: (value: unknown) => unknown, reject: (reason: unknown) => unknown) => storageMock.query().then(resolve, reject),
         order: () => storageMock.query(),
         single: () => storageMock.query(),
       };
@@ -228,3 +231,56 @@ describe('Comptes administratifs — persistance et publication', () => {
     expect(storageMock.insert).not.toHaveBeenCalled();
   });
 });
+
+describe('Preuves citoyennes — persistance serveur', () => {
+  const input = { project_id: 'test-project', image_url: 'private/test.jpg', citizen_status_claim: 'IN_PROGRESS' as const, comment: 'Observation terrain' };
+  beforeEach(async () => {
+    storageMock.configured.mockReturnValue(false);
+    await dataStore.refreshProofs();
+    storageMock.configured.mockReturnValue(true);
+    storageMock.query.mockReset();
+    storageMock.insert.mockReset();
+    storageMock.getUser.mockResolvedValue({ data: { user: null }, error: { name: 'AuthSessionMissingError' } });
+  });
+
+  it('ne confirme pas un dépôt refusé et ne modifie pas le cache', async () => {
+    storageMock.query.mockResolvedValueOnce({ error: new Error('RLS refusée') });
+    await expect(dataStore.submitProof(input)).rejects.toThrow('RLS refusée');
+    expect(dataStore.getAllProofs()).toEqual([]);
+  });
+
+  it('lie le dépôt à getUser et attend son insertion', async () => {
+    storageMock.getUser.mockResolvedValue({ data: { user: { id: 'auth-citizen' } }, error: null });
+    storageMock.query.mockResolvedValueOnce({ error: null });
+    const proof = await dataStore.submitProof(input);
+    expect(storageMock.insert).toHaveBeenCalledWith([expect.objectContaining({ citizen_user_id: 'auth-citizen', verification_status: 'PENDING', confirmations_count: 0 })]);
+    expect(dataStore.getAllProofs().map(row => row.id)).toEqual([proof.id]);
+  });
+
+  it('ne conserve pas les données privées du dépôt anonyme', async () => {
+    storageMock.query.mockResolvedValueOnce({ error: null });
+    await dataStore.submitProof(input);
+    expect(storageMock.insert).toHaveBeenCalledWith([expect.objectContaining({ citizen_user_id: null })]);
+    expect(dataStore.getAllProofs()).toEqual([]);
+  });
+
+  it('remplace le cache par une réponse serveur vide', async () => {
+    storageMock.getUser.mockResolvedValue({ data: { user: { id: 'auth-citizen' } }, error: null });
+    storageMock.query.mockResolvedValueOnce({ error: null });
+    await dataStore.submitProof(input);
+    storageMock.query.mockResolvedValue({ data: [], error: null });
+    await dataStore.refreshProofs();
+    expect(dataStore.getAllProofs()).toEqual([]);
+  });
+
+  it('préserve la preuve après refus de modération ou suppression', async () => {
+    storageMock.getUser.mockResolvedValue({ data: { user: { id: 'auth-staff' } }, error: null });
+    storageMock.query.mockResolvedValueOnce({ error: null });
+    const proof = await dataStore.submitProof(input);
+    storageMock.query.mockResolvedValue({ data: null, error: new Error('Interdit') });
+    await expect(dataStore.moderateProof(proof.id, 'APPROVED')).rejects.toThrow('Interdit');
+    await expect(dataStore.deleteProof(proof.id)).rejects.toThrow('Interdit');
+    expect(dataStore.getAllProofs()[0].verification_status).toBe('PENDING');
+  });
+});
+

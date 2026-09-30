@@ -2,6 +2,7 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { BudgetProject, ProjectStatus } from '../types';
 import { validateImageBinary, validateVideoBinary, compressAndSanitizeImage, sanitizeCoordinates } from '../utils/security';
 import { dataStore } from '../services/dataStore';
+import { supabase, isSupabaseConfigured } from '../services/supabase';
 import { formatFCFA, formatAmountInWords } from '../utils/formatters';
 import { matchesSmartSearch } from '../utils/searchHelpers';
 import { 
@@ -68,8 +69,6 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
   targetProject,
   onSuccessToast,
 }) => {
-  if (!isOpen) return null;
-
   const projects = dataStore.getProjects();
   
   // Wizard Step: 1 = Chantier & Statut, 2 = Photo/Vidéo & Lieu, 3 = Témoignage & Envoi
@@ -97,6 +96,8 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [previewSecondaryImage, setPreviewSecondaryImage] = useState<string | null>(null);
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const uploadedMedia = useRef(new Map<string, string>());
   const [isProcessingMedia, setIsProcessingMedia] = useState(false);
   const [citizenWhatsApp, setCitizenWhatsApp] = useState('');
   const [createdTrackingCode, setCreatedTrackingCode] = useState<string | null>(null);
@@ -119,6 +120,10 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
   const secondaryCameraInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const videoRecordRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => () => {
+    if (previewVideo) URL.revokeObjectURL(previewVideo);
+  }, [previewVideo]);
 
   const DRAFT_KEY = 'suivibudget_proof_draft';
   const [hasDraftRestored, setHasDraftRestored] = useState(false);
@@ -228,6 +233,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
         const sanitizedDataUrl = await compressAndSanitizeImage(file);
         setPreviewImage(sanitizedDataUrl);
         setPreviewVideo(null);
+        setVideoFile(null);
         setMediaType('IMAGE');
       } catch (err: any) {
         setErrorMessage("Erreur lors du traitement de l'image : " + (err.message || ''));
@@ -284,7 +290,8 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
       try {
         const videoUrl = URL.createObjectURL(file);
         setPreviewVideo(videoUrl);
-        setPreviewImage('https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=800&q=80'); // Thumbnail fallback
+        setVideoFile(file);
+        setPreviewImage(null);
         setMediaType('VIDEO');
       } catch (err: any) {
         setErrorMessage("Erreur lors de la lecture de la vidéo : " + (err.message || ''));
@@ -352,21 +359,21 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
   };
 
   // Final Submit
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
     // Anti-bot check: Honeypot
     if (honeypotValue.trim()) {
       console.warn("Automated bot submission prevented via honeypot.");
-      setShowSuccess(true);
+      setErrorMessage('Envoi refusé. Vérifiez le formulaire avant de réessayer.');
       return;
     }
 
     // Anti-bot check: Submissions under 1.2 seconds
     if (Date.now() - formOpenedAtRef.current < 1200) {
       console.warn("Automated bot submission prevented via time-to-submit check.");
-      setShowSuccess(true);
+      setErrorMessage('Vérifiez votre constat avant de le transmettre.');
       return;
     }
 
@@ -393,12 +400,30 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      const newProof = dataStore.submitProof({
+    try {
+      if (!isSupabaseConfigured()) throw new Error('Service de dépôt indisponible.');
+      const uploadMedia = async (preview: string, file?: File | null): Promise<string> => {
+        const cachedPath = uploadedMedia.current.get(preview);
+        if (cachedPath) return cachedPath;
+        const blob = file || await (await fetch(preview)).blob();
+        const extensions: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'video/mp4': 'mp4', 'video/webm': 'webm', 'video/quicktime': 'mov' };
+        const extension = extensions[blob.type];
+        if (!extension || blob.size > 25 * 1024 * 1024) throw new Error('Média non accepté ou supérieur à 25 Mo.');
+        const path = `submissions/${crypto.randomUUID()}.${extension}`;
+        const { error } = await supabase.storage.from('citizen_photos').upload(path, blob, { contentType: blob.type, upsert: false });
+        if (error) throw new Error('Téléversement interrompu. Votre constat n’a pas été envoyé.');
+        uploadedMedia.current.set(preview, path);
+        return path;
+      };
+      const imagePath = mediaType === 'IMAGE' && previewImage ? await uploadMedia(previewImage) : '';
+      const videoPath = mediaType === 'VIDEO' && previewVideo && videoFile ? await uploadMedia(previewVideo, videoFile) : undefined;
+      if (!imagePath && !videoPath) throw new Error('Sélectionnez de nouveau votre média.');
+      const secondaryPath = previewSecondaryImage ? await uploadMedia(previewSecondaryImage) : undefined;
+      const newProof = await dataStore.submitProof({
         project_id: selectedProject.id,
-        image_url: previewImage || 'https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=800&q=80',
-        secondary_image_url: previewSecondaryImage || undefined,
-        video_url: previewVideo || undefined,
+        image_url: imagePath,
+        secondary_image_url: secondaryPath,
+        video_url: videoPath,
         media_type: mediaType,
         citizen_status_claim: citizenStatus,
         comment: comment.trim(),
@@ -408,7 +433,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
         signboard_status: signboardStatus,
       });
 
-      setCreatedTrackingCode(newProof.tracking_code || 'CST-CI-2026');
+      setCreatedTrackingCode(newProof.tracking_code || newProof.id);
 
       try {
         localStorage.removeItem(DRAFT_KEY);
@@ -419,10 +444,16 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
       setShowSuccess(true);
 
       if (onSuccessToast) {
-        onSuccessToast(mediaType === 'VIDEO' ? 'Votre vidéo de constat a été transmise aux modérateurs pour certification terrain.' : 'Votre constat citoyen a été transmis aux modérateurs pour certification terrain.');
+        onSuccessToast('Votre constat a été enregistré et attend son examen par les modérateurs.');
       }
-    }, 600);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Le constat n’a pas été envoyé. Réessayez.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 md:p-6 animate-in fade-in duration-200">
@@ -553,7 +584,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
               <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-center justify-center gap-2 max-w-md mx-auto">
                 <MessageCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>
-                  Notification WhatsApp activée pour le <strong>{citizenWhatsApp}</strong> dès validation.
+                  Contact enregistré : <strong>{citizenWhatsApp}</strong>. Un modérateur pourra vous joindre si nécessaire.
                 </span>
               </div>
             )}
