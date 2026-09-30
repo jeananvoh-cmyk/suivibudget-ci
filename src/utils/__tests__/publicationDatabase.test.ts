@@ -14,6 +14,7 @@ const migrationNames = [
   '20260929141800_grant_schema_privileges.sql',
   '20260930030840_public_proof_projection_boundary.sql',
   '20260930033244_foundation_http_access.sql',
+  '20260930153716_least_privilege_passport_boundary.sql',
 ];
 const migrations = () => migrationNames.map(name => readFileSync(resolve('supabase/migrations', name), 'utf8'));
 
@@ -99,12 +100,41 @@ beforeAll(async () => {
     await db.exec(`alter table public.${table} enable row level security`);
   }
   await db.exec('alter table storage.objects enable row level security');
+  await db.exec(`
+    alter table public.local_budgets add column status text;
+    alter table public.local_budgets enable row level security;
+    insert into public.local_budgets values ('published','PUBLISHED'),('verified','VERIFIED');
+    create policy "Allow public read on published local budgets" on public.local_budgets for select using(status in ('PUBLISHED','VERIFIED'));
+    create policy "Staff local budgets" on public.local_budgets for all to authenticated using(private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+    grant truncate, references, trigger on all tables in schema public to service_role;
+  `);
   for (const sql of migrations()) await db.exec(sql);
 }, 30000);
 
 afterAll(async () => { await db?.close(); });
 
 describe('Publication boundaries applied to PostgreSQL', () => {
+  it('removes technical service grants without removing Edge reads', async () => {
+    const tables = ['public_documents','citizen_proofs','administrative_accounts','ca_investment_operations','ca_procurement_matches','ca_financial_lines','profiles','local_budgets','institutions','public_citizen_proofs'];
+    for (const table of tables) {
+      for (const privilege of ['TRUNCATE','REFERENCES','TRIGGER']) {
+        expect((await db.query<{ allowed: boolean }>('select has_table_privilege($1,$2,$3) allowed', ['service_role', `public.${table}`, privilege])).rows[0].allowed).toBe(false);
+      }
+    }
+    await db.exec('begin; set local role service_role');
+    try {
+      expect((await db.query('select id from public.citizen_proofs')).rows).toHaveLength(2);
+      await db.query('select id from public.public_documents');
+    } finally { await db.exec('rollback'); }
+  });
+
+  it('restricts verified local budgets to ADMIN and DATA_MANAGER', async () => {
+    for (const [uid, count] of [[citizen,1],[moderator,1],[manager,2],[admin,2]] as const) {
+      await asRole('authenticated', uid, async () => {
+        expect((await db.query('select id from public.local_budgets')).rows).toHaveLength(count);
+      });
+    }
+  });
   it('allows the Edge service to read sources without granting document mutations', async () => {
     expect((await db.query("select has_table_privilege('service_role','public.public_documents','SELECT') as docs, has_table_privilege('service_role','public.citizen_proofs','SELECT') as proofs, has_table_privilege('service_role','public.public_documents','UPDATE') as mutation")).rows).toEqual([{ docs: true, proofs: true, mutation: false }]);
     expect((await db.query("select file_size_limit from storage.buckets where id='citizen_photos'")).rows).toEqual([{ file_size_limit: 26214400 }]);

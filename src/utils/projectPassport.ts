@@ -10,7 +10,7 @@
 // =========================================================================
 
 import { BudgetProject, CitizenProof } from '../types';
-import { CAInvestmentOperation, ProcurementMatch } from '../types/administrativeAccount';
+import { AdministrativeAccount, CAInvestmentOperation, ProcurementMatch } from '../types/administrativeAccount';
 import { ADMINISTRATIVE_ACCOUNTS_DATA } from '../data/administrativeAccountsData';
 import { matchesSmartSearch, normalizeSearchText, extractWords } from './searchHelpers';
 import { formatFCFA } from './formatters';
@@ -46,7 +46,25 @@ export interface CaOperationMatchResult {
   matchedFields: string[];
   conflictingFields: string[];
   temporalJustification?: string;
+  missingFields?: string[];
+  matchingMethod?: 'EXPLICIT_REFERENCE' | 'INSTITUTION_YEAR_OBJECT' | 'NONE';
 }
+
+export interface PassportFact {
+  label: string;
+  value: string | number | null;
+  availability: 'AVAILABLE' | 'UNKNOWN' | 'NOT_FOUND_PUBLICLY';
+  provenance: DataProvenance;
+  source_document_id: string | null;
+  source_page: number | null;
+  source_reference: string | null;
+  source_url: string | null;
+}
+
+export type PassportField = 'institution_id' | 'institution_type' | 'fiscal_year' | 'object_label' | 'localisation'
+  | 'budget_amount' | 'procurement_amount' | 'executed_amount' | 'contract_reference' | 'supplier'
+  | 'source_document_id' | 'source_page' | 'source_reference' | 'financial_status' | 'physical_status'
+  | 'citizen_evidence_status' | 'institution_response_status' | 'matching_confidence' | 'matching_method' | 'verification_status';
 
 export interface PassportDataPoint {
   label: string;
@@ -69,10 +87,11 @@ export interface PassportStage {
 }
 
 export interface ProjectAccountabilityPassportData {
+  facts: Record<PassportField, PassportFact>;
   projectId: string;
   projectTitle: string;
   institutionName: string;
-  fiscalYear: number;
+  fiscalYear: number | null;
   stages: PassportStage[];
   /** Indice de complétude documentaire (0 à 100 %). Ne constitue en aucun cas une note politique ou de gouvernance. */
   documentationCompletenessPct: number;
@@ -95,7 +114,7 @@ export interface ProjectAccountabilityPassportData {
  * - Identifiants explicites
  * - Justificatifs pluriannuels documentés
  */
-export function findMatchingCaOperationResult(project: BudgetProject): CaOperationMatchResult {
+function findCandidate(project: BudgetProject, accounts: AdministrativeAccount[]): CaOperationMatchResult {
   if (!project) {
     return {
       confidence: 'NONE',
@@ -107,7 +126,7 @@ export function findMatchingCaOperationResult(project: BudgetProject): CaOperati
 
   const projectCommuneNorm = normalizeSearchText(project.commune_name || '');
   const projectTitleNorm = normalizeSearchText(project.title || '');
-  const projectYear = Number(project.fiscal_year) || 2026;
+  const projectYear = Number(project.fiscal_year);
 
   let bestResult: CaOperationMatchResult = {
     confidence: 'NONE',
@@ -116,7 +135,7 @@ export function findMatchingCaOperationResult(project: BudgetProject): CaOperati
     conflictingFields: [],
   };
 
-  for (const ca of ADMINISTRATIVE_ACCOUNTS_DATA) {
+  for (const ca of accounts) {
     const caInstNorm = normalizeSearchText(ca.institution_name);
     const matchesCommune = Boolean(
       projectCommuneNorm && (caInstNorm.includes(projectCommuneNorm) || projectCommuneNorm.includes(caInstNorm))
@@ -132,8 +151,7 @@ export function findMatchingCaOperationResult(project: BudgetProject): CaOperati
       const isMultiYearDoc = Boolean(
         op.operation_reference?.toUpperCase().includes('REPORT') ||
         op.title.toLowerCase().includes('report') ||
-        project.title.toLowerCase().includes('tranche') ||
-        project.title.toLowerCase().includes('phase')
+        op.notes?.toLowerCase().includes('pluriannuel')
       );
 
       // 1. Liaison directe par identifiant officiel
@@ -235,6 +253,28 @@ export function findMatchingCaOperationResult(project: BudgetProject): CaOperati
   return bestResult;
 }
 
+export function findMatchingCaOperationResult(project: BudgetProject, accounts = ADMINISTRATIVE_ACCOUNTS_DATA): CaOperationMatchResult {
+  const result = findCandidate(project, accounts);
+  const operation = result.operation;
+  const missingFields: string[] = [];
+  if (!project.institution_id) missingFields.push('institution_id');
+  if (!project.fiscal_year) missingFields.push('fiscal_year');
+  if (!project.locality_village_neighborhood || !operation?.location) missingFields.push('localisation');
+  if (!operation?.procurement_match?.contract_number) missingFields.push('contract_number');
+  const account = accounts.find(ca => ca.id === operation?.ca_id);
+  if (!account?.source_document_id) missingFields.push('source_document_id');
+  if (!operation?.source_page && !account?.source_page) missingFields.push('source_page');
+  if (operation && project.institution_id && project.institution_id !== operation.institution_id) result.conflictingFields.push('institution_id');
+  if (operation && project.locality_village_neighborhood && operation.location
+    && normalizeSearchText(project.locality_village_neighborhood) !== normalizeSearchText(operation.location)) result.conflictingFields.push('localisation');
+  if (operation && project.budget_amount_fcfa !== operation.planned_amount) result.conflictingFields.push('budget_amount_vs_ca_planned');
+  if (result.conflictingFields.includes('institution_id') || result.conflictingFields.includes('localisation') || !project.fiscal_year) {
+    if (operation) result.confidence = 'TO_VERIFY';
+    result.matchingReason += ' ; identité, localisation ou exercice à vérifier avant toute liaison affirmative';
+  }
+  return { ...result, missingFields, matchingMethod: operation ? (operation.linked_project_id === project.id ? 'EXPLICIT_REFERENCE' : 'INSTITUTION_YEAR_OBJECT') : 'NONE' };
+}
+
 /**
  * Recherche une opération d'investissement CA correspondant à un projet.
  * Ne renvoie l'opération QUE si le rapprochement est qualifié en STRONG ou PROBABLE.
@@ -264,13 +304,47 @@ export function findMatchingDgmpProcurement(project: BudgetProject): Procurement
  */
 export function generateProjectPassport(
   project: BudgetProject, 
-  citizenProofs: CitizenProof[] = []
+  citizenProofs: CitizenProof[] = [],
+  accounts: AdministrativeAccount[] = ADMINISTRATIVE_ACCOUNTS_DATA
 ): ProjectAccountabilityPassportData {
-  const matchResult = findMatchingCaOperationResult(project);
+  const matchResult = findMatchingCaOperationResult(project, accounts);
   const isAffirmativeMatch = matchResult.confidence === 'STRONG' || matchResult.confidence === 'PROBABLE';
   const matchedOp = isAffirmativeMatch ? matchResult.operation : undefined;
   const matchedProc = matchedOp?.procurement_match;
-  const approvedProofs = citizenProofs.filter(p => p.verification_status === 'APPROVED');
+  const approvedProofs = citizenProofs.filter(p => p.project_id === project.id && p.verification_status === 'APPROVED' && !p.is_demo).sort((a, b) => b.created_at.localeCompare(a.created_at));
+  const account = accounts.find(ca => ca.id === matchedOp?.ca_id);
+  const caSource = { source_document_id: account?.source_document_id || null, source_page: matchedOp?.source_page ?? account?.source_page ?? null, source_reference: matchedOp?.source_reference || account?.source_document || null, source_url: account?.source_url || null };
+  const projectSource = { source_document_id: project.source_document_id || null, source_page: project.source_page ?? null, source_reference: project.source || null, source_url: project.source_url || null };
+  const marketSource = { source_document_id: null, source_page: null, source_reference: matchedProc?.source || null, source_url: matchedProc?.source_url || null };
+  const emptySource = { source_document_id: null, source_page: null, source_reference: null, source_url: null };
+  const fact = (label: string, value: string | number | null | undefined, provenance: DataProvenance, source: Pick<PassportFact, 'source_document_id' | 'source_page' | 'source_reference' | 'source_url'> = emptySource): PassportFact => ({ label, value: value ?? null, availability: value == null || value === '' ? 'UNKNOWN' : 'AVAILABLE', provenance, ...source });
+  const responseCandidate = account?.institution_response;
+  const response = responseCandidate?.response_status === 'PUBLISHED'
+    && (!responseCandidate.operation_id || responseCandidate.operation_id === matchedOp?.id)
+    && (!responseCandidate.ca_id || responseCandidate.ca_id === account?.id) ? responseCandidate : undefined;
+  const facts: Record<PassportField, PassportFact> = {
+    institution_id: fact('Institution', project.institution_id, 'OFFICIAL_SOURCE', projectSource),
+    institution_type: fact('Type d’institution', account?.institution_type || project.institution_type, 'OFFICIAL_SOURCE', account ? caSource : projectSource),
+    fiscal_year: fact('Exercice', project.fiscal_year || null, 'OFFICIAL_SOURCE', projectSource),
+    object_label: fact('Quoi ?', project.title, 'OFFICIAL_SOURCE', projectSource),
+    localisation: fact('Où ?', project.locality_village_neighborhood || matchedOp?.location, 'OFFICIAL_SOURCE', project.locality_village_neighborhood ? projectSource : caSource),
+    budget_amount: fact('Budget prévu (FCFA)', project.budget_amount_fcfa, 'OFFICIAL_SOURCE', projectSource),
+    procurement_amount: fact('Marché attribué (FCFA)', matchedProc?.award_amount, 'OFFICIAL_SOURCE', marketSource),
+    executed_amount: fact('Exécution indiquée au CA (FCFA)', matchedOp?.executed_amount, 'OFFICIAL_SOURCE', caSource),
+    contract_reference: fact('Référence du marché / appel d’offres', matchedProc?.contract_number || matchedProc?.tender_number, 'OFFICIAL_SOURCE', marketSource),
+    supplier: fact('Attributaire', matchedProc?.contractor, 'OFFICIAL_SOURCE', marketSource),
+    source_document_id: fact('Document source relié', caSource.source_document_id, 'OFFICIAL_SOURCE', caSource),
+    source_page: fact('Page source', caSource.source_page, 'OFFICIAL_SOURCE', caSource),
+    source_reference: fact('Libellé exact de la source', caSource.source_reference || project.source, 'OFFICIAL_SOURCE', account ? caSource : projectSource),
+    financial_status: fact('Situation financière', matchedOp ? (matchedOp.executed_amount === 0 ? 'CA_REPORTED_ZERO' : 'CA_REPORTED_EXECUTION') : null, 'SUIVIBUDGET_CALCULATION', caSource),
+    physical_status: fact('Réalisation physique', approvedProofs.length ? 'CITIZEN_OBSERVATION' : project.official_progress_source ? 'OFFICIAL_DECLARATION' : null, approvedProofs.length ? 'CITIZEN_OBSERVATION' : project.official_progress_source ? 'OFFICIAL_SOURCE' : 'UNVERIFIED_INPUT', approvedProofs.length ? { ...emptySource, source_reference: `Constat citoyen ${approvedProofs[0].id}` } : project.official_progress_source ? { ...emptySource, source_reference: project.official_progress_source } : emptySource),
+    citizen_evidence_status: fact('Preuves terrain', approvedProofs.length ? 'APPROVED' : 'NOT_FOUND_PUBLICLY', 'CITIZEN_OBSERVATION'),
+    institution_response_status: fact('Réponse institutionnelle', response ? 'PUBLISHED' : 'NOT_FOUND_PUBLICLY', 'INSTITUTION_RESPONSE', response ? { ...emptySource, source_reference: response.supporting_document_name || response.response_text, source_url: response.supporting_document_url || null } : emptySource),
+    matching_confidence: fact('Confiance du rapprochement', matchResult.confidence, 'SUIVIBUDGET_CALCULATION'),
+    matching_method: fact('Méthode de rapprochement', matchResult.matchingMethod, 'SUIVIBUDGET_CALCULATION'),
+    verification_status: fact('Vérification documentaire', account?.verification_status || 'NOT_FOUND_PUBLICLY', 'OFFICIAL_SOURCE', caSource),
+  };
+  for (const value of Object.values(facts)) if (value.value === 'NOT_FOUND_PUBLICLY') value.availability = 'NOT_FOUND_PUBLICLY';
 
   const stages: PassportStage[] = [];
 
@@ -294,7 +368,7 @@ export function generateProjectPassport(
         label: 'Programmation budgétaire',
         value: project.program_name || project.details || 'Ligne d\'investissement inscrite au budget',
         provenance: 'OFFICIAL_SOURCE',
-        sourceDetails: project.source || 'Loi de Finances / Extrait budgétaire officiel',
+        sourceDetails: project.source || 'Document budgétaire source non relié',
       },
       {
         label: 'Expression du besoin citoyen',
@@ -340,7 +414,7 @@ export function generateProjectPassport(
         label: 'Montant inscrit',
         value: project.budget_amount_fcfa > 0 ? formatFCFA(project.budget_amount_fcfa) : 'Non renseigné',
         provenance: 'OFFICIAL_SOURCE',
-        sourceDetails: project.source || 'Loi de Finances (DGBF)',
+        sourceDetails: project.source || 'Document budgétaire source non relié',
       },
       {
         label: 'Nature de la dépense',
@@ -533,7 +607,7 @@ export function generateProjectPassport(
   // RÈGLE CARDINALE : UNE DÉPENSE FINANCIÈRE NE PROUVE PAS UNE RÉALISATION PHYSIQUE (Principe 7)
   // OBSERVATION CITOYENNE != VÉRITÉ ADMINISTRATIVE
   // -------------------------------------------------------------------------
-  const hasOfficialRate = project.progress_percentage > 0;
+  const hasOfficialRate = Boolean(project.official_progress_source) && project.progress_percentage > 0;
   const hasFieldProofs = approvedProofs.length > 0;
 
   let physicalStatus: PassportStageStatus = 'PENDING_DOCUMENTATION';
@@ -619,10 +693,11 @@ export function generateProjectPassport(
   const documentationCompletenessPct = Math.round((documentedStagesCount / stages.length) * 100);
 
   return {
+    facts,
     projectId: project.id,
     projectTitle: project.title,
     institutionName: project.commune_name || project.region_name || project.ministry_name || 'Collectivité',
-    fiscalYear: project.fiscal_year || 2026,
+    fiscalYear: project.fiscal_year || null,
     stages,
     documentationCompletenessPct,
     overallAccountabilityScorePct: documentationCompletenessPct,

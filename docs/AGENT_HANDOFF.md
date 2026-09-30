@@ -1,17 +1,29 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- LAST_UPDATED : 2026-09-30T15:24:00Z
+- LAST_UPDATED : 2026-09-30T21:54:00Z
 - LAST_AGENT : Codex
-- CURRENT_BRANCH : `security-ca-final-20260929`
-- HANDOFF_BASE_SHA : `3b502b1223d304b12f904087430882ea8156f324` (dernier commit fonctionnel validé, après 454d62c)
-- CURRENT_HEAD : `3b502b1223d304b12f904087430882ea8156f324` observé avant le commit documentaire de clôture. Le HEAD Git peut être ce descendant documentaire ; ne pas créer de boucle de commits pour inscrire son propre hash.
-- PR : [#3](https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/3), ouverte, non mergée
+- CURRENT_BRANCH : `codex/passport-phase-2a`
+- HANDOFF_BASE_SHA : `9457f07aff174a63f4826b371296b93c2a54ced8` (fondation et clôture documentaire, CI SUCCESS recontrôlée)
+- CURRENT_HEAD : `ecfb1f789dfd31ecc636e2c1d002e437d634da0e`, dernier commit fonctionnel, CI SUCCESS. Le seul descendant prévu est cette clôture documentaire ; consulter Git pour son hash sans nouvelle boucle de commits.
+- PR : [#4 Phase 2A](https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/4), base security-ca-final-20260929 ; [#3 fondation](https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/3). Toutes deux ouvertes, non fusionnées.
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : fondation HTTP/Storage/Edge et frontière de publication frontend CLOSED ; consolidation Passport suivante
+- CURRENT_MILESTONE : fondation CLOSED ; Passport Phase 2A VALIDATED, revue PR #4 disponible
 - FOUNDATION_READY : TRUE, validé sur 3b502b1 après CI SUCCESS. Aucun P0/P1 connu ouvert dans la fondation.
 
 ## COMPLETED
+### Bloc Phase 2A — 30 septembre, après 9457f07
+- Vingt champs factuels explicites : institution, exercice, objet, localisation, trois montants distincts, référence marché, attributaire, document/page/libellé source, états financier/physique, preuve, réponse, confiance, méthode et vérification. Valeurs absentes UNKNOWN/NOT_FOUND_PUBLICLY ; aucun exercice par défaut inventé.
+- Rapprochement : champs concordants, contradictoires et absents ; conflit d’identifiant institutionnel ou de localisation déclassé TO_VERIFY ; mention « phase » dans le projet insuffisante pour établir une pluriannualité.
+- Trois marchés Tiassalé préservés ; Abobo/Bingerville ne produisent pas de liaison d’opération à partir de leurs seules synthèses. Gardienkro conserve 0 FCFA et « cause non établie ». Aucun CA VERIFIED publié implicitement.
+- UI Comprendre / Explorer / Vérifier, cartes mobiles, lien source externe et accès au document par Edge lorsque son identifiant existe. Réponse institutionnelle distincte de la validation indépendante ; preuves d’autres projets et démonstrations exclues.
+- Deux corrections SQL ciblées : retrait des droits techniques service_role et lecture citoyenne des budgets limitée à PUBLISHED. Matrice complète dans CA_SECURITY_STATUS_20260929.md.
+- 131/131 tests, dont 18 Passport et 13 PGlite ; 23/23 contrôles HTTP publics ; 16/16 scénarios navigateur sur 360/375/390/430/768/1280/1440/1920. Aucun débordement ni erreur JS. Inspection visuelle des captures 375 et 1440.
+- Build final TypeScript/Vite PASS (1722 modules), git diff --check PASS. Le seul avertissement build reste la taille des bundles de données existants.
+- Commits poussés : `1771f67` moindre privilège et `ecfb1f7` Passport. CI du HEAD fonctionnel exact SUCCESS : [Quality / verify](https://github.com/jeananvoh-cmyk/suivibudget-ci/actions/runs/36781974758/job/110114182806), Vercel Preview Comments SUCCESS. La CI du descendant documentaire sera contrôlée après push sans autre commit pour réinscrire son hash.
+- Le navigateur utilise le composant réel dans un aperçu local scratch avec les sources pilotes de tests, puis un état public vide. Ce contrôle ne prétend pas publier ces sources ni revalider toutes les pages.
+
+### Fondation — validations antérieures conservées
 - 197 contrôles HTTP réels réussis avec ANON, ADMIN, DATA_MANAGER, MODERATOR, CITIZEN propriétaire et second CITIZEN ; 2 contrôles supplémentaires des relations CA/opérations/marchés réussis.
 - Sources documentaires : upload ADMIN/DATA_MANAGER, refus autres rôles, doublon et overwrite refusés, suppression staging permise, suppression source référencée refusée.
 - Cycle TO_VERIFY → VERIFIED → PUBLISHED réel, publication directe refusée, created_by/verified_by/verified_at/published_at serveur contrôlés. Tests SQL existants couvrent immutabilité, checksum et versionnement.
@@ -33,6 +45,7 @@
 | 20260929141800_grant_schema_privileges.sql | 20260930030702 | APPLIED |
 | 20260930030840_public_proof_projection_boundary.sql | 20260930031058 | APPLIED |
 | 20260930033244_foundation_http_access.sql | 20260930144753 | APPLIED |
+| 20260930153716_least_privilege_passport_boundary.sql | 20260930153938 | APPLIED |
 
 Les quatre premières migrations n’ont pas été rejouées. Les horodatages distants sont attribués par l’outil ; ne pas rejouer sur la seule différence de préfixe. Schéma metadata, vue publique, triggers, grants et RLS contrôlés.
 
@@ -56,7 +69,7 @@ Trois CA pilotes VERIFIED préservés : Abobo, Bingerville, Tiassalé 2024. Aucu
 
 ## PASSPORT_STATE
 PASS pour la fondation : 10 tests de rapprochement, séparation financier/physique, origine citoyenne non inventée, frontière de publication réelle. La requête imbriquée a retrouvé les trois CA, trois opérations et trois marchés sous le compte ADMIN temporaire ; zéro CA publié sous ANON.
-Consolidation Phase 2A encore PARTIAL : détailler institution/exercice/objet/localisation/montant/référence/source, champs concordants et contradictoires sur échantillon réel sans publier implicitement les pilotes.
+Consolidation Phase 2A VALIDATED : vingt champs et trois niveaux de lecture, 18 tests Passport, trois opérations réelles Tiassalé et deux synthèses sans opérations, CI fonctionnelle SUCCESS sur ecfb1f7. Les document_id manquants, localisations non renseignées et numéros de contrat absents restent explicitement inconnus ; l’identifiant d’appel d’offres n’est pas présenté comme numéro de contrat.
 DGMP Phase 2B et APEC Phase 2C NOT_STARTED. Pas d’ingestion massive.
 
 ## ADVISORS / KNOWN_ANOMALIES
@@ -100,6 +113,6 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Phase 2A : créer une branche produit distincte depuis le dernier HEAD validé, puis consolider le Passport avec les trois opérations Tiassalé réelles accessibles au staff : 20 magasins, EPP François Kadjo, Gardienkro. Ne pas publier implicitement les CA VERIFIED ; compléter les explications institution/exercice/objet/localisation/montant/référence/source et les conflits.
-2. Après cette consolidation, DGMP Phase 2B sur échantillon contrôlé, moteur réutilisable avec niveaux STRONG/PROBABLE/WEAK/NONE/TO_VERIFY ; pas d’ingestion massive.
+1. Reprendre PR #4 et son HEAD réel, vérifier seulement les écarts depuis cette clôture. Ne pas recréer le modèle ni rejouer les migrations déjà APPLIED ; ne fusionner aucune PR automatiquement.
+2. DGMP Phase 2B : sur une branche distincte issue du HEAD validé Phase 2A, commencer par un test local de deux candidats intervertis et d’homonymes incompatibles, puis remplacer la sélection du premier candidat dans findCandidate par une comparaison déterministe explicitant les ambiguïtés. Conserver STRONG/PROBABLE/WEAK/NONE/TO_VERIFY et les trois marchés Tiassalé. Pas d’ingestion massive ni de modification des trois pilotes pour tester.
 3. APEC Phase 2C ensuite : modèle minimal cycle/besoin/rapprochement, contribution traçable et participation distincte de représentativité. Préserver PR #3 comme fondation ; aucun merge automatique effectué.

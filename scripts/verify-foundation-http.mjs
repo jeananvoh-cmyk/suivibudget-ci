@@ -192,6 +192,23 @@ async function cleanup() {
   process.exit(0);
 }
 
+if (process.argv[2] === 'public') {
+  const client = makeClient();
+  for (const table of ['public_documents','citizen_proofs','administrative_accounts','ca_investment_operations','ca_procurement_matches','ca_financial_lines','profiles','local_budgets','institutions','public_citizen_proofs']) {
+    const response = await client.from(table).select('id').limit(1);
+    const privateTable = ['citizen_proofs','profiles','local_budgets'].includes(table);
+    check(`anon-read:${table}`, privateTable ? Boolean(response.error) : !response.error && (table === 'institutions' || response.data.length === 0));
+    const mutation = await client.from(table).delete().eq('id', 'absent-privilege-probe');
+    check(`anon-delete-denied:${table}`, Boolean(mutation.error));
+  }
+  const rpc = await client.schema('private').rpc('published_citizen_proofs');
+  check('private-rpc-not-exposed', Boolean(rpc.error));
+  for (const name of ['public-document-url','citizen-proof-media-url']) {
+    const response = await edge('ANON', name, { document_id: 'absent-privilege-probe', proof_id: 'absent-privilege-probe' });
+    check(`edge-private-not-found:${name}`, response.status === 404 && !response.data.url);
+  }
+  process.exit(results.some(result => !result.pass) ? 1 : 0);
+}
 if (process.argv[2]) {
   const command = JSON.parse(readFileSync(process.argv[2], 'utf8'));
   if (!/^foundation-test-[a-f0-9-]+$/.test(command.prefix)) throw new Error('Invalid fixture prefix');

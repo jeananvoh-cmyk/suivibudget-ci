@@ -13,6 +13,69 @@ import {
 import { BudgetProject, CitizenProof } from '../../types';
 
 describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
+  it('conserve zéro, la page et la source sans inventer un état physique ou un document relié', () => {
+    const passport = generateProjectPassport(mockGardienkroProject);
+    expect(passport.facts.executed_amount.value).toBe(0);
+    expect(passport.facts.financial_status.value).toBe('CA_REPORTED_ZERO');
+    expect(passport.facts.physical_status.value).toBeNull();
+    expect(passport.facts.source_page.value).toBe(36);
+    expect(passport.facts.source_document_id.availability).toBe('UNKNOWN');
+    expect(passport.facts.procurement_amount.source_reference).toContain('DGMP');
+    expect(passport.facts.institution_response_status.value).toBe('NOT_FOUND_PUBLICLY');
+  });
+
+  it('ignore les preuves approuvées d’un autre projet et les démonstrations', () => {
+    const passport = generateProjectPassport(mockTiassaleProject2024, [{ ...mockApprovedProof, project_id: 'other' }, { ...mockApprovedProof, is_demo: true }]);
+    expect(passport.hasCitizenFieldProofs).toBe(false);
+    expect(passport.facts.physical_status.value).toBeNull();
+  });
+
+  it('conserve la provenance du constat citoyen même en présence d’une déclaration officielle', () => {
+    const passport = generateProjectPassport({ ...mockTiassaleProject2024, official_progress_source: 'Déclaration institutionnelle' }, [mockApprovedProof]);
+    expect(passport.facts.physical_status.provenance).toBe('CITIZEN_OBSERVATION');
+    expect(passport.facts.physical_status.source_reference).toBe(`Constat citoyen ${mockApprovedProof.id}`);
+  });
+
+  it('ne remplace pas un exercice manquant par l’année courante', () => {
+    const passport = generateProjectPassport({ ...mockTiassaleProject2024, fiscal_year: 0 });
+    expect(passport.fiscalYear).toBeNull();
+    expect(passport.facts.fiscal_year.availability).toBe('UNKNOWN');
+    expect(passport.hasMatchedCaOperation).toBe(false);
+    expect(passport.matchResult?.missingFields).toContain('fiscal_year');
+  });
+
+  it('déclasse une homonymie dont les identifiants institutionnels se contredisent', () => {
+    const result = findMatchingCaOperationResult({ ...mockTiassaleProject2024, institution_id: 'different-institution' });
+    expect(result.confidence).toBe('TO_VERIFY');
+    expect(result.conflictingFields).toContain('institution_id');
+    expect(generateProjectPassport({ ...mockTiassaleProject2024, institution_id: 'different-institution' }).hasMatchedDgmpTender).toBe(false);
+  });
+
+  it('ne traite pas le mot phase dans le projet comme une preuve de pluriannualité au CA', () => {
+    const result = findMatchingCaOperationResult({ ...mockTiassaleProject2024, fiscal_year: 2025, title: `${mockTiassaleProject2024.title} phase 2` });
+    expect(['TO_VERIFY','WEAK','NONE']).toContain(result.confidence);
+  });
+
+  it('préserve les trois rapprochements documentés Tiassalé sans déduire la réalisation', () => {
+    const account = CA_PILOT_FIXTURES.find(ca => ca.id === 'ca-tiassale-2024')!;
+    for (const operation of account.operations) {
+      const passport = generateProjectPassport({ ...mockTiassaleProject2024, title: operation.title, budget_amount_fcfa: operation.planned_amount }, [], CA_PILOT_FIXTURES);
+      expect(passport.matchResult?.confidence).toBe('STRONG');
+      expect(passport.facts.contract_reference.value).toBe(operation.procurement_match?.tender_number);
+      expect(passport.facts.supplier.value).toBe(operation.procurement_match?.contractor);
+      expect(passport.facts.physical_status.value).toBeNull();
+      expect(passport.matchResult?.missingFields).toContain('localisation');
+    }
+  });
+
+  it('ne crée aucune opération à partir des synthèses Abobo et Bingerville', () => {
+    for (const account of CA_PILOT_FIXTURES.filter(ca => ca.id !== 'ca-tiassale-2024')) {
+      const passport = generateProjectPassport({ ...mockTiassaleProject2024, institution_id: account.institution_id, commune_name: account.institution_name }, [], CA_PILOT_FIXTURES);
+      expect(passport.matchResult?.confidence).toBe('NONE');
+      expect(passport.facts.executed_amount.value).toBeNull();
+    }
+  });
+
   const mockTiassaleProject2024: BudgetProject = {
     id: 'proj-tiassale-marche-20',
     title: 'Construction de vingt (20) magasins au marché de Tiassalé',
