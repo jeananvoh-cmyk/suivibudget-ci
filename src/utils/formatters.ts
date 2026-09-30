@@ -11,7 +11,7 @@ export function formatFCFA(amount: number): string {
   const formatted = new Intl.NumberFormat('fr-FR', {
     maximumFractionDigits: 0,
   }).format(amount);
-  return `${formatted.replace(/\u202F/g, ' ')} FCFA`;
+  return `${formatted.replace(/[\u202F\u00A0]/g, ' ')} FCFA`;
 }
 
 /**

@@ -42,6 +42,13 @@ GitHub : master distant `529db22012848e34afdf8b286983eebfc917b9f7`. Branche PR a
 
 ## Documents de Continuité Multi-Agents
 - `AGENTS.md` : Mis à jour avec le Goal permanent enrichi, les 16 principes non négociables et les garde-fous techniques.
-- `docs/AGENT_HANDOFF.md` : Maintenu avec la matrice complète `UX_UI_AUDIT_STATUS` (13/13 VALIDATED) et les prochaines tâches exécutables.
+- `docs/AGENT_HANDOFF.md` : Maintenu avec la matrice complète `UX_UI_AUDIT_STATUS` (13/13 VALIDATED), le Passeport de Redevabilité et les prochaines tâches exécutables.
+
+## Passeport de Redevabilité du Projet (Project Accountability Passport) — 30 septembre 2026
+- **Architecture & Cycle Civique** : Implémentation du cycle complet en 6 étapes (`NEED_PROGRAMMING` → `BUDGET_VOTED` → `PROCUREMENT_DGMP` → `BUDGET_EXECUTION_CA` → `PHYSICAL_REALIZATION` → `AUDIT_ACCOUNTABILITY`) dans `src/utils/projectPassport.ts`.
+- **Rapprochement Données Réelles** : Détection intelligente des opérations d'investissement du CA 2024 de Tiassalé et des avis d'attribution DGMP (`AOO24062605757` 20 magasins marché de Tiassalé, `AOO24062805823` 3 classes EPP Kadjo) et détection d'anomalie pour l'école de Gardienkro (marché attribué mais CA ordonnancé à 0 FCFA).
+- **Composant Visuel & UX** : Composant `ProjectAccountabilityPassport.tsx` avec cartes d'étapes expansibles, badges de provenance explicites (`OFFICIAL_SOURCE`, `SUIVIBUDGET_CALCULATION`, `CITIZEN_OBSERVATION`), gestion du principe 9 (`NOT_FOUND_PUBLICLY`), et actions citoyennes directes (demande CAIDP, envoi de preuve terrain).
+- **Intégration** : 3e onglet « Passeport Redevabilité » dans `ProjectDetailModal.tsx` avec pastille dynamique (« Lié DGMP/CA » ou « 6 étapes »), cibles tactiles WCAG AA (>= 44px).
+- **Validation** : 10 fichiers de test validés (**112/112 tests réussis**), `npm run build` propre (0 erreur, 1722 modules). Validation visuelle Playwright sur 375px mobile et 1440px desktop avec zéro overflow horizontal (`scrollWidth === 375px`).
 
 

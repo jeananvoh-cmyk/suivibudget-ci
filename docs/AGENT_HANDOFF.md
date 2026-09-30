@@ -1,13 +1,13 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- **LAST_UPDATED**: 2026-09-30T01:50:00Z
+- **LAST_UPDATED**: 2026-09-30T02:10:00Z
 - **LAST_AGENT**: Antigravity
 - **CURRENT_BRANCH**: `security-ca-final-20260929`
-- **HANDOFF_BASE_SHA**: `1cb2b48a1cb5d2eb70e28f110c73e04a74feeb02`
+- **HANDOFF_BASE_SHA**: `8d4759e`
 - **PR**: #3 ("Final: security hardening + verified CA foundation")
 - **SUPABASE_PROJECT**: `cdesuvcozcetdtvibgqs` (eu-west-1, PostgreSQL 17.6)
-- **CURRENT_MILESTONE**: P0/P1 Security Hardening, Document Versioning, CA Workflow & UX/UI Responsive Foundation
+- **CURRENT_MILESTONE**: P0/P1 Security Hardening, Document Versioning, CA Workflow & Project Accountability Passport
 
 ---
 
@@ -62,6 +62,13 @@ Ordre d'application après tests : metadata → publication → grants. Les droi
    - Zero horizontal overflow across all views (`documentScrollWidth === 375px` on mobile).
    - Interactive buttons and touch targets refined to meet or exceed WCAG AA guidelines (>= 44x44px).
    - Full validation achieved for `AdminDashboardPage` (tabs CAIDP, CA 232, Documents, Modération, Work Queue) and administrative CA modals (`SingleCAUploadModal`, `BatchCAImportModal`, `ExamineCADocumentModal`).
+8. **Project Accountability Passport (Passeport de Redevabilité du Projet)**:
+   - Full 6-stage civic lifecycle implemented: `NEED_PROGRAMMING` → `BUDGET_VOTED` → `PROCUREMENT_DGMP` → `BUDGET_EXECUTION_CA` → `PHYSICAL_REALIZATION` → `AUDIT_ACCOUNTABILITY`.
+   - Core utility `src/utils/projectPassport.ts` with smart rapprochement against verified pilot operations in `src/data/administrativeAccountsData.ts` (Tiassalé market 20 magasins tender `AOO24062605757`, Kadjo school tender `AOO24062805823`, Gardienkro anomaly detection `executed_amount === 0`).
+   - Visual responsive component `src/components/ProjectAccountabilityPassport.tsx` with expandable stage cards, status badges, alert callouts, and explicit provenance tags (Principle 2).
+   - Integrated into `src/components/ProjectDetailModal.tsx` as a 3rd tab with status pill ("Lié DGMP/CA" or "6 étapes") and direct civic actions (CAIDP document request, citizen field proof submission).
+   - Upgraded close/action buttons to WCAG AA touch targets (>= 44px).
+   - Multi-viewport visual validation (Playwright at 375px mobile and 1440px desktop) confirmed zero horizontal overflow and flawless interaction.
 
 ### PARTIAL
 1. **Database Migrations Application**:
@@ -79,8 +86,6 @@ Ordre d'application après tests : metadata → publication → grants. Les droi
    - Automated procurement matching to CA investment operations for the remaining collectivités beyond Tiassalé pilot.
 2. **APEC Trajectory & Three-Year Program Ingestion**:
    - Need identification → three-year programs (`three_year_programs`, `program_operations`) deferred until financial/document foundation is completely secured.
-3. **Project Accountability Passport**:
-   - End-to-end citizen passport view linking initial need to budget line, public tender, physical realization photos, and CA execution line.
 
 ### BLOCKED
 - None. All dependencies, testing harnesses, and build tools are fully operational.
@@ -119,14 +124,15 @@ Ordre d'application après tests : metadata → publication → grants. Les droi
   - `src/utils/__tests__/formatters.test.ts` (7 tests) — PASS
   - `src/utils/__tests__/administrativeAccount.test.ts` (18 tests) — PASS
   - `src/utils/__tests__/security.test.ts` (25 tests) — PASS
+  - `src/utils/__tests__/projectPassport.test.ts` (6 tests) — PASS
   - `src/utils/__tests__/institutionProjects.test.ts` (8 tests) — PASS
   - `src/utils/__tests__/publicationDatabase.test.ts` (10 tests) — PASS
   - `src/utils/__tests__/officialWebDirectory.test.ts` (8 tests) — PASS
   - `src/utils/__tests__/searchHelpers.test.ts` (2 tests) — PASS
   - `src/utils/__tests__/navigation.test.ts` (7 tests) — PASS
-  - **TOTAL**: **9 test files passed (9/9), 106 tests passed (106/106)** in ~12.7s.
+  - **TOTAL**: **10 test files passed (10/10), 112 tests passed (112/112)**.
 - **Build Command**: `npm run build` (`tsc && vite build`)
-  - Status: **PASSED (0 errors, 1720 modules transformed)** in ~25.8s. Clean production bundle in `dist/`.
+  - Status: **PASSED (0 errors, 1722 modules transformed)**. Clean production bundle in `dist/`.
 
 ---
 
@@ -161,9 +167,9 @@ Ordre d'application après tests : metadata → publication → grants. Les droi
 ## NEXT EXECUTABLE TASK & PRIORITIES
 - **NEXT_EXECUTABLE_TASK**: Apply the 3 audited, idempotent migrations (`metadata` → `publication` → `grants`) to remote Supabase project `cdesuvcozcetdtvibgqs` (eu-west-1).
 - **NEXT_3_TASKS**:
-  1. Validate anonymous and authenticated signed URL generation via Edge Function `public-document-url` v2 for published accounts.
-  2. Implement the Project Accountability Passport linking initial citizen need → Triennial program → BP → Tender / DGMP match → CA execution line → Citizen proof.
-  3. Expand DGMP Matching & Confidence Scoring for collectivités beyond Tiassalé pilot.
+  1. Validate anonymous and authenticated signed URL generation via Edge Function `public-document-url` v2 for published accounts on remote Supabase.
+  2. Expand DGMP Matching & Confidence Scoring for collectivités beyond Tiassalé pilot.
+  3. Ingest three-year programs (`three_year_programs`, `program_operations`) connecting citizen needs to pluriannual investment plans.
 
 ---
 
