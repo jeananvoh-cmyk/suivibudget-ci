@@ -57,6 +57,13 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
             <span>{label}</span>
           </span>
         );
+      case 'PROBABLE_MATCH':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-indigo-100 text-indigo-900 border border-indigo-300">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-700" />
+            <span>{label}</span>
+          </span>
+        );
       case 'CITIZEN_DOCUMENTED':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-sky-100 text-sky-900 border border-sky-300">
@@ -68,6 +75,13 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">
             <AlertTriangle className="w-3.5 h-3.5 text-amber-700" />
+            <span>{label}</span>
+          </span>
+        );
+      case 'SOURCE_CONFLICT':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-rose-100 text-rose-900 border border-rose-300">
+            <AlertTriangle className="w-3.5 h-3.5 text-rose-700" />
             <span>{label}</span>
           </span>
         );
@@ -115,6 +129,12 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
             Réponse Institutionnelle
           </span>
         );
+      case 'UNVERIFIED_INPUT':
+        return (
+          <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
+            Donnée Déclarative
+          </span>
+        );
       default:
         return (
           <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
@@ -148,7 +168,7 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
               Traçabilité Documentaire & Terrain
             </h3>
             <p className="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
-              Ce passeport relie le besoin initial de la collectivité, le budget voté, l'attribution du marché public, l'exécution au Compte Administratif et la réalité physique constatée.
+              Ce passeport documente les 6 maillons civiques (besoin, budget, marché, compte administratif, terrain, reddition). Il ne constitue en aucun cas une note politique.
             </p>
           </div>
 
@@ -156,17 +176,17 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
           <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/15 flex-shrink-0">
             <div className="text-right">
               <div className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
-                Indice de Traçabilité
+                Complétude Documentaire
               </div>
               <div className="text-2xl sm:text-3xl font-black text-emerald-400 leading-none mt-0.5">
-                {passport.overallAccountabilityScorePct}%
+                {passport.documentationCompletenessPct}%
               </div>
               <div className="text-[10px] text-slate-300 mt-0.5">
-                {passport.overallAccountabilityScorePct >= 70 ? 'Traçabilité Élevée' : passport.overallAccountabilityScorePct >= 40 ? 'Traçabilité Partielle' : 'En Cours de Collecte'}
+                {passport.documentationCompletenessPct >= 70 ? 'Documentation Élevée' : passport.documentationCompletenessPct >= 40 ? 'Documentation Partielle' : 'En Cours de Collecte'}
               </div>
             </div>
             <div className="w-12 h-12 rounded-full border-4 border-emerald-400/30 border-t-emerald-400 flex items-center justify-center font-black text-xs text-white">
-              {passport.overallAccountabilityScorePct}%
+              {passport.documentationCompletenessPct}%
             </div>
           </div>
         </div>
@@ -211,6 +231,10 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
               className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
                 stage.status === 'ANOMALY_DETECTED'
                   ? 'border-amber-300 bg-amber-50/40'
+                  : stage.status === 'SOURCE_CONFLICT'
+                  ? 'border-rose-300 bg-rose-50/40'
+                  : stage.status === 'PROBABLE_MATCH'
+                  ? 'border-indigo-200 bg-indigo-50/20 hover:border-indigo-300'
                   : stage.status === 'VERIFIED_OFFICIAL'
                   ? 'border-emerald-200 bg-white hover:border-emerald-300'
                   : 'border-slate-200 bg-white hover:border-slate-300'
@@ -228,10 +252,14 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
                   <span className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-xs flex-shrink-0 ${
                     stage.status === 'VERIFIED_OFFICIAL'
                       ? 'bg-emerald-600 text-white shadow-xs'
+                      : stage.status === 'PROBABLE_MATCH'
+                      ? 'bg-indigo-600 text-white shadow-xs'
                       : stage.status === 'CITIZEN_DOCUMENTED'
                       ? 'bg-sky-600 text-white shadow-xs'
                       : stage.status === 'ANOMALY_DETECTED'
                       ? 'bg-amber-600 text-white shadow-xs'
+                      : stage.status === 'SOURCE_CONFLICT'
+                      ? 'bg-rose-600 text-white shadow-xs'
                       : 'bg-slate-200 text-slate-700'
                   }`}>
                     {stage.stepNumber}

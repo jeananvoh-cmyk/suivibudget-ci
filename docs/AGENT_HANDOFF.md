@@ -1,10 +1,10 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- **LAST_UPDATED**: 2026-09-30T02:10:00Z
+- **LAST_UPDATED**: 2026-09-30T02:35:00Z
 - **LAST_AGENT**: Antigravity
 - **CURRENT_BRANCH**: `security-ca-final-20260929`
-- **HANDOFF_BASE_SHA**: `8d4759e`
+- **HANDOFF_BASE_SHA**: `14bb861`
 - **PR**: #3 ("Final: security hardening + verified CA foundation")
 - **SUPABASE_PROJECT**: `cdesuvcozcetdtvibgqs` (eu-west-1, PostgreSQL 17.6)
 - **CURRENT_MILESTONE**: P0/P1 Security Hardening, Document Versioning, CA Workflow & Project Accountability Passport
@@ -64,10 +64,14 @@ Ordre d'application après tests : metadata → publication → grants. Les droi
    - Full validation achieved for `AdminDashboardPage` (tabs CAIDP, CA 232, Documents, Modération, Work Queue) and administrative CA modals (`SingleCAUploadModal`, `BatchCAImportModal`, `ExamineCADocumentModal`).
 8. **Project Accountability Passport (Passeport de Redevabilité du Projet)**:
    - Full 6-stage civic lifecycle implemented: `NEED_PROGRAMMING` → `BUDGET_VOTED` → `PROCUREMENT_DGMP` → `BUDGET_EXECUTION_CA` → `PHYSICAL_REALIZATION` → `AUDIT_ACCOUNTABILITY`.
-   - Core utility `src/utils/projectPassport.ts` with smart rapprochement against verified pilot operations in `src/data/administrativeAccountsData.ts` (Tiassalé market 20 magasins tender `AOO24062605757`, Kadjo school tender `AOO24062805823`, Gardienkro anomaly detection `executed_amount === 0`).
+   - Core utility `src/utils/projectPassport.ts` with evidence-aware rapprochement (`findMatchingCaOperationResult`) against verified pilot operations in `src/data/administrativeAccountsData.ts`.
+   - Multi-criteria temporal matching preventing inter-fiscal year hallucinations (e.g. 2026 project vs 2024 CA flagged `WEAK` / `conflictingFields: ['fiscal_year']` unless multi-year trace exists).
+   - Strict political neutrality (Principle 11): 0 FCFA execution phrasing strictly factual (*"Le Compte Administratif consulté indique 0 FCFA exécuté/ordonnancé pour cette opération sur l’exercice observé. La cause de cet écart n’est pas établie par les sources actuellement reliées."*), with zero speculative allegations ("report probable", "fraude", "retard" eliminated).
+   - Clean typed Provenance (`DataProvenance`: `OFFICIAL_SOURCE`, `SUIVIBUDGET_CALCULATION`, `CITIZEN_OBSERVATION`, `INSTITUTION_RESPONSE`, `UNVERIFIED_INPUT`) and Availability (`AVAILABLE`, `NOT_FOUND_PUBLICLY`, `PENDING_COLLECTION`, `SOURCE_CONFLICT`) without `'as any'` casts.
+   - Initial citizen need distinguished from budget programming (Stage 1).
+   - Global score renamed to "Complétude Documentaire" (`documentationCompletenessPct`) to measure factual documentation presence without subjective governance grading.
    - Visual responsive component `src/components/ProjectAccountabilityPassport.tsx` with expandable stage cards, status badges, alert callouts, and explicit provenance tags (Principle 2).
    - Integrated into `src/components/ProjectDetailModal.tsx` as a 3rd tab with status pill ("Lié DGMP/CA" or "6 étapes") and direct civic actions (CAIDP document request, citizen field proof submission).
-   - Upgraded close/action buttons to WCAG AA touch targets (>= 44px).
    - Multi-viewport visual validation (Playwright at 375px mobile and 1440px desktop) confirmed zero horizontal overflow and flawless interaction.
 
 ### PARTIAL
@@ -121,16 +125,16 @@ Ordre d'application après tests : metadata → publication → grants. Les droi
 ## TESTS & BUILD VERIFICATION
 - **Test Command**: `npm test -- --run`
   - `src/utils/__tests__/caManagement.test.ts` (21 tests) — PASS
-  - `src/utils/__tests__/formatters.test.ts` (7 tests) — PASS
   - `src/utils/__tests__/administrativeAccount.test.ts` (18 tests) — PASS
-  - `src/utils/__tests__/security.test.ts` (25 tests) — PASS
-  - `src/utils/__tests__/projectPassport.test.ts` (6 tests) — PASS
+  - `src/utils/__tests__/projectPassport.test.ts` (10 tests) — PASS
+  - `src/utils/__tests__/formatters.test.ts` (7 tests) — PASS
   - `src/utils/__tests__/institutionProjects.test.ts` (8 tests) — PASS
   - `src/utils/__tests__/publicationDatabase.test.ts` (10 tests) — PASS
+  - `src/utils/__tests__/security.test.ts` (25 tests) — PASS
   - `src/utils/__tests__/officialWebDirectory.test.ts` (8 tests) — PASS
-  - `src/utils/__tests__/searchHelpers.test.ts` (2 tests) — PASS
   - `src/utils/__tests__/navigation.test.ts` (7 tests) — PASS
-  - **TOTAL**: **10 test files passed (10/10), 112 tests passed (112/112)**.
+  - `src/utils/__tests__/searchHelpers.test.ts` (2 tests) — PASS
+  - **TOTAL**: **10 test files passed (10/10), 116 tests passed (116/116)**.
 - **Build Command**: `npm run build` (`tsc && vite build`)
   - Status: **PASSED (0 errors, 1722 modules transformed)**. Clean production bundle in `dist/`.
 
