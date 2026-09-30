@@ -116,141 +116,175 @@ export interface ProjectAccountabilityPassportData {
  */
 function findCandidate(project: BudgetProject, accounts: AdministrativeAccount[]): CaOperationMatchResult {
   if (!project) {
-    return {
-      confidence: 'NONE',
-      matchingReason: 'Projet non défini',
-      matchedFields: [],
-      conflictingFields: [],
-    };
+    return { confidence: 'NONE', matchingReason: 'Projet non défini', matchedFields: [], conflictingFields: [] };
   }
 
   const projectCommuneNorm = normalizeSearchText(project.commune_name || '');
   const projectTitleNorm = normalizeSearchText(project.title || '');
   const projectYear = Number(project.fiscal_year);
+  const confidenceRank: Record<MatchingConfidence, number> = { NONE: 0, WEAK: 1, TO_VERIFY: 2, PROBABLE: 3, STRONG: 4 };
+  type RankedCandidate = CaOperationMatchResult & { score: number; stableKey: string };
+  const candidates: RankedCandidate[] = [];
 
-  let bestResult: CaOperationMatchResult = {
-    confidence: 'NONE',
-    matchingReason: 'Aucun compte administratif correspondant retrouvé dans les données auditées',
-    matchedFields: [],
-    conflictingFields: [],
-  };
+  const stopwords = new Set([
+    'construction', 'rehabilitation', 'amenagement', 'batiment', 'salles', 'classe',
+    'projet', 'travaux', 'commune', 'extension', 'nouveau', 'nouvelle', 'equipement', 'ecole', 'primaire', 'publique'
+  ]);
 
   for (const ca of accounts) {
     const caInstNorm = normalizeSearchText(ca.institution_name);
-    const matchesCommune = Boolean(
-      projectCommuneNorm && (caInstNorm.includes(projectCommuneNorm) || projectCommuneNorm.includes(caInstNorm))
-    );
+    const matchesCommune = Boolean(projectCommuneNorm && (caInstNorm.includes(projectCommuneNorm) || projectCommuneNorm.includes(caInstNorm)));
     const matchesInstId = Boolean(project.institution_id && ca.institution_id === project.institution_id);
-
-    // Si l'institution ne concorde pas, passer au CA suivant
     if (!matchesCommune && !matchesInstId) continue;
 
     for (const op of ca.operations || []) {
       const opYear = Number(op.fiscal_year) || ca.fiscal_year;
-      const yearDiff = Math.abs(projectYear - opYear);
+      const yearDiff = Number.isFinite(projectYear) && projectYear > 0 ? Math.abs(projectYear - opYear) : Number.POSITIVE_INFINITY;
       const isMultiYearDoc = Boolean(
         op.operation_reference?.toUpperCase().includes('REPORT') ||
         op.title.toLowerCase().includes('report') ||
         op.notes?.toLowerCase().includes('pluriannuel')
       );
+      const institutionConflict = Boolean(project.institution_id && op.institution_id && project.institution_id !== op.institution_id);
 
-      // 1. Liaison directe par identifiant officiel
-      if (op.linked_project_id && op.linked_project_id === project.id) {
-        if (yearDiff === 0) {
-          return {
-            operation: op,
-            confidence: 'STRONG',
-            matchingReason: 'Liaison directe par identifiant officiel de projet et exercice fiscal concordant',
-            matchedFields: ['linked_project_id', 'fiscal_year', 'institution'],
-            conflictingFields: [],
-          };
-        } else if (isMultiYearDoc) {
-          return {
-            operation: op,
-            confidence: 'STRONG',
-            matchingReason: 'Liaison directe par identifiant officiel avec justificatif de report/pluriannualité documenté',
-            matchedFields: ['linked_project_id', 'institution', 'pluriannual_trace'],
-            conflictingFields: [],
-            temporalJustification: `Exercice projet (${projectYear}) distinct de l'exercice CA (${opYear}), justifié par mention de report/pluriannualité.`,
-          };
-        } else {
-          return {
-            operation: op,
-            confidence: 'TO_VERIFY',
-            matchingReason: `Identifiant identique mais exercices fiscaux distants (${projectYear} vs ${opYear}) sans justificatif pluriannuel certifié`,
-            matchedFields: ['linked_project_id', 'institution'],
-            conflictingFields: ['fiscal_year'],
-            temporalJustification: `Écart de ${yearDiff} an(s) entre projet et CA : requiert vérification documentaire administrative.`,
-          };
-        }
+      if (op.linked_project_id === project.id) {
+        const confidence: MatchingConfidence = institutionConflict ? 'TO_VERIFY' : yearDiff === 0 || isMultiYearDoc ? 'STRONG' : 'TO_VERIFY';
+        const conflictingFields = [
+          ...(institutionConflict ? ['institution_id'] : []),
+          ...(yearDiff !== 0 && !isMultiYearDoc ? ['fiscal_year'] : []),
+        ];
+        candidates.push({
+          operation: op,
+          confidence,
+          matchingReason: institutionConflict
+            ? 'Identifiant de projet concordant mais identifiant institutionnel contradictoire'
+            : yearDiff === 0
+              ? 'Liaison directe par identifiant officiel de projet et exercice fiscal concordant'
+              : isMultiYearDoc
+                ? 'Liaison directe par identifiant officiel avec justificatif de report/pluriannualité documenté'
+                : `Identifiant identique mais exercices fiscaux distants (${projectYear} vs ${opYear}) sans justificatif pluriannuel certifié`,
+          matchedFields: ['linked_project_id', ...(yearDiff === 0 ? ['fiscal_year'] : []), 'institution'],
+          conflictingFields,
+          temporalJustification: yearDiff !== 0
+            ? (isMultiYearDoc
+              ? `Exercice projet (${projectYear}) distinct de l'exercice CA (${opYear}), justifié par mention de report/pluriannualité.`
+              : `Écart de ${Number.isFinite(yearDiff) ? yearDiff : 'N/A'} an(s) entre projet et CA : requiert vérification documentaire administrative.`)
+            : undefined,
+          score: 1000 + (yearDiff === 0 ? 100 : 0) + (matchesInstId ? 40 : 0),
+          stableKey: `${ca.id}:${op.id}`,
+        });
+        continue;
       }
 
-      // 2. Évaluation textuelle et sémantique
       const opTitleNorm = normalizeSearchText(op.title);
       const isExactTitle = opTitleNorm === projectTitleNorm || (opTitleNorm.length > 15 && projectTitleNorm.includes(opTitleNorm));
       const isSmartSearchMatch = matchesSmartSearch([op.title], project.title) || matchesSmartSearch([project.title], op.title);
-
-      const stopwords = new Set([
-        'construction', 'rehabilitation', 'amenagement', 'batiment', 'salles', 'classe', 
-        'projet', 'travaux', 'commune', 'extension', 'nouveau', 'nouvelle', 'equipement', 'ecole', 'primaire', 'publique'
-      ]);
       const opWords = extractWords(op.title).filter(w => w.length >= 4 && !stopwords.has(w));
       const projWords = extractWords(project.title).filter(w => w.length >= 4 && !stopwords.has(w));
-      const commonDistinctiveWords = opWords.filter(w => projWords.includes(w));
-
+      const commonDistinctiveWords = [...new Set(opWords.filter(w => projWords.includes(w)))];
       const hasStrongKeywords = commonDistinctiveWords.length >= 2;
-      const hasLocalityMatch = Boolean(
-        project.locality_village_neighborhood && 
-        op.title.toLowerCase().includes(project.locality_village_neighborhood.toLowerCase())
-      );
-
+      const localityNorm = normalizeSearchText(project.locality_village_neighborhood || '');
+      const opLocationNorm = normalizeSearchText(op.location || '');
+      const hasLocalityMatch = Boolean(localityNorm && (
+        opLocationNorm === localityNorm ||
+        opTitleNorm.includes(localityNorm) ||
+        localityNorm.includes(opLocationNorm) && opLocationNorm.length > 0
+      ));
+      const localityConflict = Boolean(localityNorm && opLocationNorm && localityNorm !== opLocationNorm);
       const isTextuallyCorrelated = isExactTitle || isSmartSearchMatch || hasStrongKeywords || (hasLocalityMatch && commonDistinctiveWords.length >= 1);
+      if (!isTextuallyCorrelated) continue;
 
-      if (isTextuallyCorrelated) {
-        // APPLICATION STRICTE DU FILTRE TEMPOREL (Section 5.1)
-        if (yearDiff === 0) {
-          // Année identique
-          const isStrong = isExactTitle || (hasStrongKeywords && commonDistinctiveWords.length >= 3);
-          return {
-            operation: op,
-            confidence: isStrong ? 'STRONG' : 'PROBABLE',
-            matchingReason: isStrong 
-              ? `Concordance institutionnelle, textuelle forte et exercice fiscal identique (${opYear})` 
-              : `Même institution et exercice fiscal (${opYear}) avec mots-clés concordants`,
-            matchedFields: ['institution', 'fiscal_year', 'title_distinctive_words'],
-            conflictingFields: [],
-          };
-        } else if (isMultiYearDoc) {
-          // Années différentes mais justification pluriannuelle explicite
-          return {
-            operation: op,
-            confidence: 'PROBABLE',
-            matchingReason: `Concordance institutionnelle et textuelle avec justification de report/pluriannualité documentée (${projectYear} vs CA ${opYear})`,
-            matchedFields: ['institution', 'title_distinctive_words', 'pluriannual_trace'],
-            conflictingFields: [],
-            temporalJustification: `Décalage temporel (${projectYear} vs CA ${opYear}) documenté par mention de report/tranche au compte administratif officiel.`,
-          };
-        } else {
-          // Années différentes sans justification pluriannuelle : INTERDICTION D'AFFIRMATION FORTE
-          const candidate: CaOperationMatchResult = {
-            operation: op,
-            confidence: yearDiff === 1 ? 'TO_VERIFY' : 'WEAK',
-            matchingReason: `Similitude textuelle mais exercices incompatibles (${projectYear} vs CA ${opYear}) sans preuve de pluriannualité`,
-            matchedFields: ['institution', 'title_distinctive_words'],
-            conflictingFields: ['fiscal_year'],
-            temporalJustification: `Écart de ${yearDiff} exercice(s) : une ressemblance d'intitulé ne prouve pas l'identité de l'opération (Principe 2).`,
-          };
+      let confidence: MatchingConfidence;
+      const conflictingFields: string[] = [];
+      if (institutionConflict) conflictingFields.push('institution_id');
+      if (localityConflict) conflictingFields.push('localisation');
+      if (yearDiff !== 0 && !isMultiYearDoc) conflictingFields.push('fiscal_year');
 
-          // Ne pas écraser un meilleur résultat existant
-          if (bestResult.confidence === 'NONE' || (bestResult.confidence === 'WEAK' && candidate.confidence === 'TO_VERIFY')) {
-            bestResult = candidate;
-          }
-        }
+      if (institutionConflict || localityConflict || !Number.isFinite(yearDiff)) {
+        confidence = 'TO_VERIFY';
+      } else if (yearDiff === 0) {
+        confidence = isExactTitle || commonDistinctiveWords.length >= 3 ? 'STRONG' : 'PROBABLE';
+      } else if (isMultiYearDoc) {
+        confidence = 'PROBABLE';
+      } else {
+        confidence = yearDiff === 1 ? 'TO_VERIFY' : 'WEAK';
       }
+
+      const score =
+        (isExactTitle ? 300 : 0) +
+        (isSmartSearchMatch ? 120 : 0) +
+        Math.min(commonDistinctiveWords.length, 5) * 35 +
+        (hasLocalityMatch ? 90 : 0) +
+        (matchesInstId ? 60 : matchesCommune ? 25 : 0) +
+        (yearDiff === 0 ? 100 : isMultiYearDoc ? 30 : 0) -
+        (localityConflict ? 180 : 0) -
+        (institutionConflict ? 300 : 0) -
+        (yearDiff !== 0 && !isMultiYearDoc ? Math.min(Number.isFinite(yearDiff) ? yearDiff : 3, 3) * 80 : 0);
+
+      candidates.push({
+        operation: op,
+        confidence,
+        matchingReason: yearDiff === 0
+          ? (confidence === 'STRONG'
+            ? `Concordance institutionnelle, textuelle forte et exercice fiscal identique (${opYear})`
+            : `Même institution et exercice fiscal (${opYear}) avec mots-clés concordants`)
+          : isMultiYearDoc
+            ? `Concordance institutionnelle et textuelle avec justification de report/pluriannualité documentée (${projectYear} vs CA ${opYear})`
+            : `Similitude textuelle mais exercices incompatibles (${projectYear} vs CA ${opYear}) sans preuve de pluriannualité`,
+        matchedFields: [
+          'institution',
+          ...(yearDiff === 0 ? ['fiscal_year'] : []),
+          'title_distinctive_words',
+          ...(hasLocalityMatch ? ['localisation'] : []),
+          ...(isMultiYearDoc ? ['pluriannual_trace'] : []),
+        ],
+        conflictingFields,
+        temporalJustification: yearDiff !== 0
+          ? (isMultiYearDoc
+            ? `Décalage temporel (${projectYear} vs CA ${opYear}) documenté par mention de report/pluriannualité au compte administratif officiel.`
+            : `Écart de ${Number.isFinite(yearDiff) ? yearDiff : 'N/A'} exercice(s) : une ressemblance d'intitulé ne prouve pas l'identité de l'opération (Principe 2).`)
+          : undefined,
+        score,
+        stableKey: `${ca.id}:${op.id}`,
+      });
     }
   }
 
-  return bestResult;
+  if (!candidates.length) {
+    return {
+      confidence: 'NONE',
+      matchingReason: 'Aucun compte administratif correspondant retrouvé dans les données auditées',
+      matchedFields: [],
+      conflictingFields: [],
+    };
+  }
+
+  candidates.sort((a, b) =>
+    confidenceRank[b.confidence] - confidenceRank[a.confidence] ||
+    b.score - a.score ||
+    a.stableKey.localeCompare(b.stableKey)
+  );
+
+  const best = candidates[0];
+  const runnerUp = candidates[1];
+  const sameEvidence = runnerUp &&
+    confidenceRank[runnerUp.confidence] === confidenceRank[best.confidence] &&
+    runnerUp.score === best.score &&
+    runnerUp.operation?.id !== best.operation?.id;
+
+  if (sameEvidence) {
+    return {
+      operation: best.operation,
+      confidence: 'TO_VERIFY',
+      matchingReason: `Ambiguïté : plusieurs opérations présentent un niveau de concordance équivalent (${best.operation?.id}, ${runnerUp.operation?.id}). Aucune correspondance certaine n'est affirmée.`,
+      matchedFields: [...new Set(best.matchedFields.filter(field => runnerUp.matchedFields.includes(field)))],
+      conflictingFields: [...new Set([...best.conflictingFields, ...runnerUp.conflictingFields, 'ambiguous_candidates'])],
+      temporalJustification: best.temporalJustification,
+    };
+  }
+
+  const { score: _score, stableKey: _stableKey, ...result } = best;
+  return result;
 }
 
 export function findMatchingCaOperationResult(project: BudgetProject, accounts = ADMINISTRATIVE_ACCOUNTS_DATA): CaOperationMatchResult {
