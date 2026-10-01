@@ -7,7 +7,7 @@ import {
   PassportFact,
   ProjectAccountabilityPassportData 
 } from '../utils/projectPassport';
-import { formatFCFA } from '../utils/formatters';
+import { formatQualifiedFCFA } from '../utils/formatters';
 import { supabase } from '../services/supabase';
 import { ApecParticipation } from './ApecParticipation';
 import { 
@@ -50,6 +50,7 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
   }, [project, proofs]);
 
   const showFact = (fact: PassportFact) => {
+    if (fact.label.includes('FCFA')) return formatQualifiedFCFA(typeof fact.value === 'number' ? fact.value : null, fact.amount_precision);
     if (fact.value == null) return 'Non documenté';
     const labels: Record<string, string> = {
       UNKNOWN: 'Non documenté', NOT_FOUND_PUBLICLY: 'Non retrouvé publiquement',
@@ -62,7 +63,7 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
       NONE: 'Aucun rapprochement', TO_VERIFY: 'À vérifier', WEAK: 'Faible', PROBABLE: 'Probable', STRONG: 'Forte',
       EXPLICIT_REFERENCE: 'Référence explicite', INSTITUTION_YEAR_OBJECT: 'Institution, exercice et objet',
     };
-    return typeof fact.value === 'number' && fact.label.includes('FCFA') ? formatFCFA(fact.value) : labels[String(fact.value)] || String(fact.value);
+    return labels[String(fact.value)] || String(fact.value);
   };
   const fieldsText = (fields: string[] | undefined, fallback: string) => {
     const labels: Record<string, string> = {

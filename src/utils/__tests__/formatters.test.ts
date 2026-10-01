@@ -1,4 +1,30 @@
 import { describe, it, expect } from 'vitest';
+import { formatQualifiedFCFA, formatRecordAmount, amountPrecision } from '../formatters';
+import { calculateExecutionRate } from '../budgetCalculations';
+
+describe('Public amount precision', () => {
+  it('distinguishes documented zero from unknown and qualifies bounds', () => {
+    expect(formatQualifiedFCFA(0,'EXACT')).toBe('0 FCFA');
+    expect(formatQualifiedFCFA(null,'UNKNOWN')).toBe('Montant à confirmer');
+    expect(formatQualifiedFCFA(0,'UNKNOWN')).toBe('Montant à confirmer');
+    expect(formatQualifiedFCFA(1000,'APPROXIMATE')).toBe('Environ 1 000 FCFA');
+    expect(formatQualifiedFCFA(1000,'LOWER_BOUND')).toBe('Plus de 1 000 FCFA');
+    expect(formatQualifiedFCFA(undefined,'EXACT')).toBe('Montant à confirmer');
+  });
+  it('uses per-field provenance before the legacy BP precision', () => {
+    const record={total_amount:1000,operating_amount:null,amount_precision:'EXACT' as const,import_provenance:{precision:{total_amount:'LOWER_BOUND' as const,operating_amount:'UNKNOWN' as const}}};
+    expect(formatRecordAmount(record,'total_amount')).toBe('Plus de 1 000 FCFA');
+    expect(formatRecordAmount(record,'operating_amount')).toBe('Montant à confirmer');
+    expect(amountPrecision(record,'operating_amount')).toBe('UNKNOWN');
+  });
+  it('does not derive a precise rate or zero-expenditure finding from qualified amounts', () => {
+    for(const precision of ['APPROXIMATE','LOWER_BOUND','UNKNOWN'] as const) {
+      expect(calculateExecutionRate(0,100,precision,'EXACT')).toMatchObject({rate:null,status:'UNKNOWN',isOverBudget:false});
+    }
+    expect(calculateExecutionRate(null,100)).toMatchObject({rate:null,status:'UNKNOWN'});
+    expect(calculateExecutionRate(0,100)).toMatchObject({rate:0,status:'ZERO_EXECUTED'});
+  });
+});
 import { formatFCFA, formatAmountInWords, formatCompactFCFA, getProjectEntityInfo, getStatusConfig, getProjectTier, getProjectTierBadge, getInstitutionLeaderGender } from '../formatters';
 
 describe('Formatters Unit Tests', () => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Institution, BudgetProject, BudgetLineItem } from '../types';
-import { formatFCFA, formatAmountInWords, getProjectTier, getProjectTierBadge, ProjectTier } from '../utils/formatters';
+import { formatQualifiedFCFA, formatFCFA, formatAmountInWords, getProjectTier, getProjectTierBadge, ProjectTier } from '../utils/formatters';
 import { getProjectsForInstitution } from '../utils/institutionProjects';
 import { 
   X, 
@@ -370,13 +370,13 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
         className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        
+
         {/* ========================================================= */}
         {/* 1. EN-TÊTE ÉPURÉ & RESPONSIVE (AUCUN DOUBLON) */}
         {/* ========================================================= */}
         <div className="p-4 sm:p-6 pb-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 via-sky-50/30 to-slate-50 relative flex-shrink-0">
           <div className="flex items-start justify-between gap-3">
-            
+
             <div className="flex items-center gap-3.5 sm:gap-4 flex-1 min-w-0">
               {/* Leader / Minister Photo (Format harmonieux avec gestion fallback) */}
               <ModalLeaderAvatar
@@ -580,7 +580,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
           {/* ========================================================= */}
           {activeTab === 'PROJECTS' && (
             <div className="space-y-4">
-              
+
               {/* Synthèse Chantiers Référencés */}
               <div className="bg-gradient-to-r from-blue-900 via-brand-blue to-sky-800 rounded-2xl p-4 sm:p-5 text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
@@ -1006,7 +1006,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     {/* VUE SOUS-ONGLET 1 : BUDGET 2026 (Existant préservé) */}
                     {financeSubTab === 'BUDGET_2026' && (
                       <div className="space-y-5">
-              
+
               {/* Synthèse Graphique & Ventilation ou Alerte Transparence CAIDP */}
               {(institution.primitive_budget || OFFICIAL_PRIMITIVE_BUDGETS[institution.id]) ? (
                 (() => {
@@ -1014,6 +1014,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   const isRegion = institution.type === 'REGION';
                   const isDistrict = institution.type === 'DISTRICT';
                   const primTotal = prim.total_voted_fcfa;
+                  const exactPrimitive = !prim.precision || prim.precision === 'EXACT';
                   const stateTotal = institution.total_budget_fcfa || 0;
                   const localRev = Math.max(0, primTotal - stateTotal);
                   const statePct = primTotal > 0 ? Math.round((stateTotal / primTotal) * 100) : 0;
@@ -1055,11 +1056,11 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                               Montant Total Équilibré Voté
                             </span>
                             <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                              {prim.precision === 'LOWER_BOUND' && 'Plus de '}
-                              {formatFCFA(primTotal)}
+
+                              {formatQualifiedFCFA(primTotal, prim.precision)}
                             </h3>
                             <p className="text-xs text-brand-blue font-bold tracking-tight">
-                              ({formatAmountInWords(primTotal)})
+
                             </p>
                           </div>
                         </div>
@@ -1112,7 +1113,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                                   1. Subvention & Financement de l'État
                                 </span>
                                 <span className="text-xs font-black text-brand-blue bg-white px-2.5 py-0.5 rounded-full border border-blue-200 shadow-2xs">
-                                  {statePct}% du total
+                                  {exactPrimitive ? `${statePct}% du total` : 'Part non calculée'}
                                 </span>
                               </div>
 
@@ -1164,16 +1165,16 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                                   2. Recettes Propres {isDistrict ? 'du District' : isRegion ? 'de la Région' : 'de la Mairie'}
                                 </span>
                                 <span className="text-xs font-black text-white bg-navy-900 px-2.5 py-0.5 rounded-full shadow-2xs">
-                                  {localPct}% du total
+                                  {exactPrimitive ? `${localPct}% du total` : 'Part non calculée'}
                                 </span>
                               </div>
 
                               <div>
                                 <span className="text-xl sm:text-2xl font-black text-slate-900 block">
-                                  {formatFCFA(localRev)}
+                                  {exactPrimitive ? formatFCFA(localRev) : 'Montant non calculé'}
                                 </span>
                                 <span className="text-[11px] font-bold text-slate-600 block">
-                                  ({formatAmountInWords(localRev)})
+                                  {exactPrimitive ? `(${formatAmountInWords(localRev)})` : ''}
                                 </span>
                               </div>
 
@@ -1219,7 +1220,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                         </div>
 
                         {/* Jauge Bicolore Origine des Fonds */}
-                        <div className="space-y-1.5 pt-2">
+                        <div hidden={!exactPrimitive} className="space-y-1.5 pt-2">
                           <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden flex shadow-inner">
                             <div className="bg-brand-blue h-full transition-all" style={{ width: `${statePct}%` }} title={`Subvention de l'État: ${statePct}%`}></div>
                             <div className="bg-navy-900 h-full transition-all" style={{ width: `${localPct}%` }} title={`Recettes propres: ${localPct}%`}></div>
@@ -1249,12 +1250,12 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                           <div className="p-4 bg-white rounded-xl border border-emerald-200/80 shadow-2xs space-y-1.5">
                             <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Dépenses d'Investissement Votées</span>
                             <span className="text-lg font-black text-slate-900 block">
-                              {formatFCFA(prim.investment_voted_fcfa)}{' '}
+                              {formatQualifiedFCFA(prim.investment_voted_fcfa, prim.precision)}{' '}
                               <span className="text-xs text-emerald-700 font-bold block sm:inline">
-                                ({formatAmountInWords(prim.investment_voted_fcfa)})
+
                               </span>
                             </span>
-                            <span className="text-xs font-bold text-emerald-700 block">({primInvPct}% du budget total)</span>
+                            <span className="text-xs font-bold text-emerald-700 block">{exactPrimitive ? `(${primInvPct}% du budget total)` : 'Part non calculée'}</span>
                             <span className="text-[10px] font-medium text-slate-500 block">
                               {isDistrict
                                 ? "Grands travaux métropolitains, voirie, assainissement, salubrité, équipements scolaires et sanitaires"
@@ -1267,12 +1268,12 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                           <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-2xs space-y-1.5">
                             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 block">Dépenses de Fonctionnement Votées</span>
                             <span className="text-lg font-black text-slate-900 block">
-                              {formatFCFA(prim.functioning_voted_fcfa)}{' '}
+                              {formatQualifiedFCFA(prim.functioning_voted_fcfa, prim.precision)}{' '}
                               <span className="text-xs text-slate-600 font-bold block sm:inline">
-                                ({formatAmountInWords(prim.functioning_voted_fcfa)})
+
                               </span>
                             </span>
-                            <span className="text-xs font-bold text-slate-600 block">({primFonctPct}% du budget total)</span>
+                            <span className="text-xs font-bold text-slate-600 block">{exactPrimitive ? `(${primFonctPct}% du budget total)` : 'Part non calculée'}</span>
                             <span className="text-[10px] font-medium text-slate-500 block">
                               {isDistrict
                                 ? "Personnel administratif du District, sessions du Conseil du District, carburant, charges courantes"
@@ -1284,14 +1285,14 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                         </div>
 
                         {/* Jauge Bicolore Dépenses : Vert Investissement vs Gris Ardoise Fonctionnement */}
-                        <div className="space-y-1.5 pt-1">
+                        <div hidden={!exactPrimitive} className="space-y-1.5 pt-1">
                           <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden flex shadow-inner">
                             <div className="bg-emerald-500 h-full" style={{ width: `${primInvPct}%` }} title={`Investissement: ${primInvPct}%`}></div>
                             <div className="bg-slate-400 h-full" style={{ width: `${primFonctPct}%` }} title={`Fonctionnement: ${primFonctPct}%`}></div>
                           </div>
                           <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-bold gap-1">
-                            <span className="text-emerald-700">■ Investissements Votés : {primInvPct}% ({formatFCFA(prim.investment_voted_fcfa)})</span>
-                            <span className="text-slate-600">■ Fonctionnement & Salaires : {primFonctPct}% ({formatFCFA(prim.functioning_voted_fcfa)})</span>
+                            <span className="text-emerald-700">■ Investissements Votés : {primInvPct}% ({formatQualifiedFCFA(prim.investment_voted_fcfa, prim.precision)})</span>
+                            <span className="text-slate-600">■ Fonctionnement & Salaires : {primFonctPct}% ({formatQualifiedFCFA(prim.functioning_voted_fcfa, prim.precision)})</span>
                           </div>
                         </div>
                       </div>
@@ -1655,7 +1656,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
           {/* ========================================================= */}
           {activeTab === 'LEADER_MISSIONS' && (
             <div className="space-y-4">
-              
+
               {/* Biographie & Vision */}
               <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-3">
                 <div className="flex items-center gap-2 border-b border-slate-100 pb-2">

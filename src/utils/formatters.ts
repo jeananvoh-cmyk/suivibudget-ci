@@ -1,12 +1,32 @@
 // Formatting utilities for Ivorian Civic Tech platform
 import { Institution } from '../types';
+import type { AmountPrecision, ImportProvenance } from '../types/localBudget';
+
+export function formatQualifiedFCFA(value: number | null | undefined, precision: AmountPrecision = 'EXACT'): string {
+  if (value == null || !Number.isFinite(value) || precision === 'UNKNOWN') return 'Montant à confirmer';
+  const prefix = precision === 'APPROXIMATE' ? 'Environ ' : precision === 'LOWER_BOUND' ? 'Plus de ' : precision === 'UPPER_BOUND' ? 'Au plus ' : '';
+  return prefix + formatFCFA(value);
+}
+
+export function amountPrecision(record: { import_provenance?: ImportProvenance; amount_precision?: AmountPrecision }, field: string): AmountPrecision {
+  return record.import_provenance?.precision[field] || record.amount_precision || 'EXACT';
+}
+
+export function formatRecordAmount<T extends { import_provenance?: ImportProvenance; amount_precision?: AmountPrecision }>(record: T, field: keyof T): string {
+  const value = record[field];
+  return formatQualifiedFCFA(typeof value === 'number' ? value : null, amountPrecision(record, String(field)));
+}
+
+export function isExactAmount<T extends { import_provenance?: ImportProvenance; amount_precision?: AmountPrecision }>(record: T, field: keyof T): boolean {
+  return typeof record[field] === 'number' && Number.isFinite(record[field]) && amountPrecision(record, String(field)) === 'EXACT';
+}
 
 /**
  * Format an amount in FCFA with proper spacing (e.g., 40 000 000 FCFA)
  */
-export function formatFCFA(amount: number): string {
-  if (isNaN(amount) || amount === null || amount === undefined) {
-    return '0 FCFA';
+export function formatFCFA(amount: number | null | undefined): string {
+  if (amount == null || !Number.isFinite(amount)) {
+    return 'Montant à confirmer';
   }
   const formatted = new Intl.NumberFormat('fr-FR', {
     maximumFractionDigits: 0,

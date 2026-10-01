@@ -3,7 +3,7 @@
 // SuiviBudget Côte d'Ivoire - Architecture Multi-Exercices & Traçabilité
 // =========================================================================
 
-import { LocalInstitutionType, LocalVerificationStatus } from './localBudget';
+import { LocalInstitutionType, LocalVerificationStatus, ImportProvenance } from './localBudget';
 import { ProjectStatus } from './index';
 
 /**
@@ -19,13 +19,14 @@ export type ProcurementMatchLevel =
  * Marché public DGMP associé à une opération du CA
  */
 export interface ProcurementMatch {
+  import_provenance?: ImportProvenance;
   id: string;
   operation_id?: string;
   tender_number?: string;        // N° Appel d'offres / Dossier
   contract_number?: string;      // N° Marché enregistré à la DGMP
   procurement_object: string;    // Objet du marché
   contractor: string;            // Entreprise attributaire
-  award_amount: number;          // Montant adjugé en FCFA
+  award_amount: number | null;          // Montant adjugé en FCFA
   award_date?: string;           // Date d'approbation / notification
   lot?: string;                  // Lot éventuel
   match_level: ProcurementMatchLevel;
@@ -55,6 +56,7 @@ export interface InstitutionResponse {
  * Opération d'investissement inscrite au Compte Administratif
  */
 export interface CAInvestmentOperation {
+  import_provenance?: ImportProvenance;
   id: string;
   ca_id: string;
   institution_id: string;
@@ -64,8 +66,8 @@ export interface CAInvestmentOperation {
   title: string;
   sector: string;                // Éducation, Santé, Voirie, Hydraulique, Bâtiment...
   location?: string;             // Village, quartier, sous-préfecture
-  planned_amount: number;        // Montant prévu / crédits ouverts (FCFA)
-  executed_amount: number;       // Montant effectivement ordonnancé / mandaté (FCFA)
+  planned_amount: number | null;        // Montant prévu / crédits ouverts (FCFA)
+  executed_amount: number | null;       // Montant effectivement ordonnancé / mandaté (FCFA)
   execution_rate?: number;       // Calculé dynamiquement (executed_amount / planned_amount)
   source_page?: number;          // Page dans le document PDF officiel
   source_reference?: string;
@@ -80,6 +82,7 @@ export interface CAInvestmentOperation {
  * Compte Administratif (Reddition annuelle de l'exécution budgétaire)
  */
 export interface AdministrativeAccount {
+  import_provenance?: ImportProvenance;
   id: string;
   institution_id: string;
   institution_type: LocalInstitutionType;
@@ -88,8 +91,8 @@ export interface AdministrativeAccount {
   status: 'DRAFT' | 'VERIFIED' | 'PUBLISHED';
   
   // Volet Fonctionnement
-  operating_planned: number;     // Crédits de fonctionnement votés (FCFA)
-  operating_realized: number;    // Dépenses de fonctionnement ordonnancées (FCFA)
+  operating_planned: number | null;     // Crédits de fonctionnement votés (FCFA)
+  operating_realized: number | null;    // Dépenses de fonctionnement ordonnancées (FCFA)
   operating_revenue_realized?: number; // Champ historique : recettes effectivement recouvrées
   operating_revenue_planned?: number;
   operating_revenue_emitted?: number;
@@ -98,8 +101,8 @@ export interface AdministrativeAccount {
   operating_expenditure_engaged?: number;
   
   // Volet Investissement / Équipement
-  investment_planned: number;    // Crédits d'équipement votés (FCFA)
-  investment_realized: number;   // Dépenses d'équipement ordonnancées (FCFA)
+  investment_planned: number | null;    // Crédits d'équipement votés (FCFA)
+  investment_realized: number | null;   // Dépenses d'équipement ordonnancées (FCFA)
   investment_revenue_realized?: number; // Champ historique : recettes d'investissement recouvrées
   investment_revenue_planned?: number;
   investment_revenue_emitted?: number;
@@ -108,8 +111,8 @@ export interface AdministrativeAccount {
   investment_expenditure_engaged?: number;
   
   // Totaux consolidés
-  total_planned: number;         // Total prévu (Fonctionnement + Investissement)
-  total_realized: number;        // Total exécuté
+  total_planned: number | null;         // Total prévu (Fonctionnement + Investissement)
+  total_realized: number | null;        // Total exécuté
   surplus_or_deficit?: number;   // Uniquement si le document source qualifie explicitement ce montant ainsi
   total_revenue_collected?: number;
   total_expenditure_engaged?: number;
@@ -140,9 +143,9 @@ export interface AdministrativeAccount {
  * Résultat du calcul d'un taux d'exécution avec gardes-fous civiques
  */
 export interface ExecutionRateResult {
-  rate: number;                  // Ex: 99.95 pour 99,95%
+  rate: number | null;
   formatted: string;             // "99,95 %"
-  status: 'NORMAL' | 'OVER_EXECUTED' | 'ZERO_PLANNED' | 'ZERO_EXECUTED';
+  status: 'NORMAL' | 'OVER_EXECUTED' | 'ZERO_PLANNED' | 'ZERO_EXECUTED' | 'UNKNOWN';
   isOverBudget: boolean;
   statusLabel: string;
   badgeClass: string;

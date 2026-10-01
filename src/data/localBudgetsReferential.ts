@@ -12,6 +12,7 @@ import {
   LocalInstitutionType 
 } from '../types/localBudget';
 import { OFFICIAL_PRIMITIVE_BUDGETS } from './officialPrimitiveBudgets';
+import { amountPrecision } from '../utils/formatters';
 
 /**
  * Registre des sources d'information officielles
@@ -1485,6 +1486,8 @@ export function exportLocalBudgetsToCsv(budgets: LocalBudget[]): string {
     'Fonctionnement_FCFA',
     'Investissement_FCFA',
     'Precision',
+    'Precision_Fonctionnement',
+    'Precision_Investissement',
     'Date_Adoption',
     'Source_Principale',
     'URL_Source'
@@ -1500,7 +1503,9 @@ export function exportLocalBudgetsToCsv(budgets: LocalBudget[]): string {
     b.total_amount,
     b.operating_amount,
     b.investment_amount,
-    `"${b.amount_precision}"`,
+    `"${amountPrecision(b, 'total_amount')}"`,
+    `"${amountPrecision(b, 'operating_amount')}"`,
+    `"${amountPrecision(b, 'investment_amount')}"`,
     `"${b.adoption_date || ''}"`,
     `"${(b.primary_source_label || '').replace(/"/g, '""')}"`,
     `"${(b.primary_source_url || '').replace(/"/g, '""')}"`

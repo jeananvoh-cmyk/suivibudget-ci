@@ -675,7 +675,7 @@ class DataStore {
       return {
         ...inst,
         local_budgets: budgets,
-        primitive_budget: current ? {
+        primitive_budget: current && current.total_amount != null && current.operating_amount != null && current.investment_amount != null ? {
           total_voted_fcfa: current.total_amount,
           investment_voted_fcfa: current.investment_amount,
           functioning_voted_fcfa: current.operating_amount,

@@ -4,6 +4,7 @@
 // =========================================================================
 
 import { LocalBudget, BudgetCoherenceIssue } from '../types/localBudget';
+import { amountPrecision } from './formatters';
 
 /**
  * Valide un budget individuel selon les règles de rigueur SuiviBudget
@@ -36,7 +37,7 @@ export function validateBudgetRecord(budget: Partial<LocalBudget>): BudgetCohere
   }
 
   // 3. Contrôle Total négatif
-  if (budget.total_amount !== undefined && budget.total_amount < 0) {
+  if (budget.total_amount != null && budget.total_amount < 0) {
     issues.push({
       code: 'ERR_TOTAL_NEGATIVE',
       severity: 'ERROR',
@@ -62,9 +63,10 @@ export function validateBudgetRecord(budget: Partial<LocalBudget>): BudgetCohere
 
   // 5. Contrôle Ventilation : Fonctionnement + Investissement != Total
   if (
-    budget.total_amount !== undefined &&
-    budget.operating_amount !== undefined &&
-    budget.investment_amount !== undefined
+    ['total_amount','operating_amount','investment_amount'].every(field => amountPrecision(budget, field) === 'EXACT') &&
+    budget.total_amount != null &&
+    budget.operating_amount != null &&
+    budget.investment_amount != null
   ) {
     const sum = (budget.operating_amount || 0) + (budget.investment_amount || 0);
     // On tolère un écart uniquement si l'un des deux montants est 0 (ex: ventilation non ventilée dans la source)
@@ -83,7 +85,7 @@ export function validateBudgetRecord(budget: Partial<LocalBudget>): BudgetCohere
   }
 
   // 6. Contrôle Pourcentage > 100 %
-  if (budget.operating_percentage !== undefined && budget.operating_percentage > 100) {
+  if (budget.operating_percentage != null && budget.operating_percentage > 100) {
     issues.push({
       code: 'WARN_OP_PCT_OVER_100',
       severity: 'REVIEW',
@@ -92,7 +94,7 @@ export function validateBudgetRecord(budget: Partial<LocalBudget>): BudgetCohere
       fiscal_year: budget.fiscal_year,
     });
   }
-  if (budget.investment_percentage !== undefined && budget.investment_percentage > 100) {
+  if (budget.investment_percentage != null && budget.investment_percentage > 100) {
     issues.push({
       code: 'WARN_INV_PCT_OVER_100',
       severity: 'REVIEW',

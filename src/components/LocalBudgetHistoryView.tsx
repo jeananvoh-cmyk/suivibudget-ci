@@ -6,7 +6,7 @@ import {
   exportLocalBudgetsToJson 
 } from '../data/localBudgetsReferential';
 import { getAdministrativeAccountsForInstitution } from '../data/administrativeAccountsData';
-import { formatFCFA, formatAmountInWords } from '../utils/formatters';
+import { formatRecordAmount, amountPrecision, isExactAmount } from '../utils/formatters';
 import { 
   History, 
   Download, 
@@ -68,7 +68,7 @@ export const LocalBudgetHistoryView: React.FC<LocalBudgetHistoryViewProps> = ({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      
+
       {/* Header */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -113,7 +113,7 @@ export const LocalBudgetHistoryView: React.FC<LocalBudgetHistoryViewProps> = ({
         {accounts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {accounts.map(ca => {
-              const totalRate = calculateExecutionRate(ca.total_realized, ca.total_planned);
+              const totalRate = calculateExecutionRate(ca.total_realized, ca.total_planned, amountPrecision(ca, 'total_realized'), amountPrecision(ca, 'total_planned'));
               return (
                 <div key={ca.id} className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs space-y-3">
                   <div className="flex items-center justify-between">
@@ -128,27 +128,27 @@ export const LocalBudgetHistoryView: React.FC<LocalBudgetHistoryViewProps> = ({
                   <div>
                     <span className="text-[10px] font-bold uppercase text-slate-400 block">Total Réalisé Mandaté</span>
                     <span className="text-lg font-black text-slate-900 block">
-                      {formatFCFA(ca.total_realized)}
+                      {formatRecordAmount(ca, 'total_realized')}
                     </span>
                     <span className="text-[11px] text-slate-500 font-medium">
-                      sur {formatFCFA(ca.total_planned)} votés au Budget
+                      sur {formatRecordAmount(ca, 'total_planned')} votés au Budget
                     </span>
                   </div>
 
                   <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-[11px] space-y-1 text-slate-600">
-                    <div className="flex justify-between">
+                    <div className="flex flex-wrap justify-between gap-2">
                       <span>• Fonctionnement réalisé :</span>
-                      <strong className="text-slate-900">{formatFCFA(ca.operating_realized)}</strong>
+                      <strong className="text-slate-900">{formatRecordAmount(ca, 'operating_realized')}</strong>
                     </div>
                     <div className="flex justify-between">
                       <span>• Investissement réalisé :</span>
-                      <strong className="text-slate-900">{formatFCFA(ca.investment_realized)}</strong>
+                      <strong className="text-slate-900">{formatRecordAmount(ca, 'investment_realized')}</strong>
                     </div>
-                    {ca.surplus_or_deficit !== undefined && (
+                    {ca.surplus_or_deficit != null && (
                       <div className="flex justify-between pt-1 border-t border-slate-200">
                         <span>• Solde de clôture :</span>
                         <strong className={ca.surplus_or_deficit >= 0 ? "text-emerald-700" : "text-rose-700"}>
-                          {ca.surplus_or_deficit >= 0 ? '+' : ''}{formatFCFA(ca.surplus_or_deficit)}
+                          {ca.surplus_or_deficit >= 0 ? '+' : ''}{formatRecordAmount(ca, 'surplus_or_deficit')}
                         </strong>
                       </div>
                     )}
@@ -203,22 +203,22 @@ export const LocalBudgetHistoryView: React.FC<LocalBudgetHistoryViewProps> = ({
 
                   <div className="text-left sm:text-right">
                     <span className="text-base sm:text-lg font-black text-slate-900 block">
-                      {formatFCFA(b.total_amount)}
+                      {formatRecordAmount(b, 'total_amount')}
                     </span>
                     <span className="text-[11px] font-semibold text-brand-blue">
-                      ({formatAmountInWords(b.total_amount)})
+
                     </span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+                  <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-wrap justify-between gap-2 items-center">
                     <span className="text-slate-600">• Fonctionnement :</span>
-                    <strong className="text-slate-900">{formatFCFA(b.operating_amount)} ({b.operating_percentage}%)</strong>
+                    <strong className="text-slate-900">{formatRecordAmount(b, 'operating_amount')}{isExactAmount(b, 'operating_amount') && isExactAmount(b, 'total_amount') && b.operating_percentage != null ? ` (${b.operating_percentage.toFixed(1)} %)` : ''}</strong>
                   </div>
-                  <div className="p-2.5 bg-emerald-50/50 rounded-xl border border-emerald-200 flex justify-between items-center">
+                  <div className="p-2.5 bg-emerald-50/50 rounded-xl border border-emerald-200 flex flex-wrap justify-between gap-2 items-center">
                     <span className="text-emerald-800">• Investissement :</span>
-                    <strong className="text-emerald-950">{formatFCFA(b.investment_amount)} ({b.investment_percentage}%)</strong>
+                    <strong className="text-emerald-950">{formatRecordAmount(b, 'investment_amount')}{isExactAmount(b, 'investment_amount') && isExactAmount(b, 'total_amount') && b.investment_percentage != null ? ` (${b.investment_percentage.toFixed(1)} %)` : ''}</strong>
                   </div>
                 </div>
 

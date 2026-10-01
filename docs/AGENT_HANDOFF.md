@@ -3,15 +3,25 @@
 ## METADATA
 - LAST_UPDATED : 2026-10-01
 - LAST_AGENT : Codex
-- CURRENT_BRANCH : `codex/controlled-data-import`
-- HANDOFF_BASE_SHA : `26711d57e39d84848a5b4629facbe37ea4ec5040` (master après fusion #7)
+- CURRENT_BRANCH : `codex/import-console-amount-precision`
+- HANDOFF_BASE_SHA : `8e934d19dcdbf0172259d4028aa969cb29084918` (master après fusion #8)
 - CURRENT_HEAD : retrouver le HEAD de cette branche dans Git ; validations locales terminées, CI à vérifier après push.
-- PR : #3/#4/#5/#6/#7 fusionnées. Pipeline proposé séparément sur master ; ne pas fusionner sa nouvelle PR.
+- PR : #3/#4/#5/#6/#7/#8 fusionnées. Console proposée séparément sur master ; ne pas fusionner sa nouvelle PR.
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : pipeline contrôlé BP / CA / opérations / DGMP implémenté, migration appliquée, validation locale et HTTP terminée
+- CURRENT_MILESTONE : console données privée et restitution citoyenne des montants qualifiés terminées
 - FOUNDATION_READY : TRUE, validé sur 3b502b1 après CI SUCCESS. Aucun P0/P1 connu ouvert dans la fondation.
 
 ## COMPLETED
+### Console données et précisions — 1er octobre, après #8
+- #8 contrôlée brièvement puis fusionnée au SHA attendu ; master synchronisé sans perte à 8e934d1. Post-merge ciblé : 16 tests pipeline PASS.
+- Console ADMIN/DATA_MANAGER : JSON/JSONL, simulation obligatoire, rapport ligne par ligne, pagination, source/provenance et historique privés. VERIFY / REJECT / PUBLISH séparés ; confirmation explicite contrôlée aussi en SQL. Aucun service_role client, RLS inchangée.
+- BP / CA / opérations / DGMP et Passport : EXACT, Environ, Plus de, Montant à confirmer ; UNKNOWN reste null, zéro exact distinct. Pas de taux/écart calculé sur montants incertains, aucune réalisation physique inférée.
+- Migration locale `20261001144423_import_console_qualified_amounts.sql` APPLIED une seule fois sous version distante `20261001150911`. Montants nullables sans suppression de données, provenance par champ conservée. Ne rejouer aucune version APPLIED, notamment 20261001093613 et 20261001044508.
+- Validation finale : 174 tests / 11 fichiers, TypeScript + build PASS (1726 modules), six HTTP/RLS PASS. RLS active, RPC refusée à anon/service_role et profil contrôlé pour authenticated. Base préservée : staging/journal/BP=0, CA/opérations/DGMP=3 chacun. Aucun import réel.
+- UX/UI VALIDATED sur console, CA/opérations/DGMP, historique BP et Passport : huit largeurs 360/375/390/430/768/1280/1440/1920, aucune erreur JS ni débordement ; captures mobile/desktop inspectées. Parcours privés avec API interceptée localement, refus MODERATOR et confirmation de publication vérifiés.
+- Advisors inchangés : six RPC SECURITY DEFINER intentionnelles protégées par profiles/search_path/grants ([règle 0029](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable)) ; [protection Auth des mots de passe compromis](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) toujours désactivée. Bundles de données volumineux préexistants.
+- Limite restante : correction des versions immuables/conflictuelles via futur workflow dédié, aucun écrasement silencieux. Les limites CLI/montants incertains du bloc historique ci-dessous sont levées.
+
 ### Pipeline données réelles — 1er octobre, après #7
 - #7 e5454ca contrôlée très brièvement (mergeable, CI/Vercel SUCCESS), fusionnée avec SHA attendu ; master synchronisé sans perte à 26711d5. Contrôle post-merge ciblé : 27 tests PostgreSQL PASS. Aucun réaudit historique.
 - Outil opérateur `npm run import:data` : fichiers JSON/JSONL, dry-run sans écriture, plan lié au SHA-256 du fichier et à l’état serveur, import plafonné à 100 lignes/1 Mo, liste/relecture/publication/rejet. Instructions et contrat : [DATA_IMPORT.md](DATA_IMPORT.md). Aucune collecte automatique.
@@ -167,6 +177,6 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Contrôler la CI du HEAD de codex/controlled-data-import après push ; laisser sa PR ouverte. Aucun réaudit #3–#7 ni rejeu APPLIED, notamment 20261001044508 et 20261001093613.
-2. Prochain bloc : préparer un petit lot réel documenté via DATA_IMPORT.md et faire relire le dry-run par l’opérateur habilité ; aucune ingestion massive implicite. Les conflits existants nécessitent une décision de révision, jamais un upsert silencieux. Prévoir ensuite une console de revue et la restitution des montants qualifiés CA/DGMP avant de les publier.
+1. Contrôler la CI du HEAD de codex/import-console-amount-precision après push ; laisser sa PR ouverte. Aucun réaudit #3–#8 ni rejeu APPLIED, notamment 20261001150911.
+2. Prochain bloc : préparer un petit lot réel documenté via DATA_IMPORT.md et faire relire le dry-run dans la console par l’opérateur habilité ; aucune ingestion massive implicite. Les conflits nécessitent un workflow de révision explicite, jamais un upsert silencieux.
 3. Documenter un cycle APEC réel avec source/dates validées avant ouverture citoyenne. Protection des mots de passe compromis à activer manuellement sur le seul projet autorisé. Ne pas fabriquer de contenu pour remplir les états vides.

@@ -1,5 +1,15 @@
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
+## 1er octobre — console données et montants qualifiés, après #8
+
+#8 fusionnée au SHA attendu, master synchronisé sans perte à `8e934d19dcdbf0172259d4028aa969cb29084918`. Post-merge ciblé : 16 tests PASS. Branche `codex/import-console-amount-precision`, nouvelle PR à laisser ouverte.
+
+Console privée ADMIN/DATA_MANAGER : dry-run, import, rapports et provenance ligne par ligne, historique, décisions VERIFY/PUBLISH/REJECT séparées et confirmation explicite de publication côté serveur. Restitution publique BP/CA/opérations/DGMP/Passport qualifiée ; UNKNOWN=null, zéro exact distinct, calculs financiers suspendus pour les montants incertains. Aucun effet déduit sur réalisation physique.
+
+Tests-first critiques puis 174 tests / 11 fichiers PASS ; TypeScript/build PASS (1726 modules), six HTTP/RLS PASS. Huit largeurs 360 à 1920 px sans overflow ni erreur JS ; captures 375/1440 inspectées. Parcours privés vérifiés avec API interceptée, MODERATOR refusé, simulation invalidée après édition et publication impossible sans confirmation. Aucun compte ni fixture en production.
+
+Nouvelle migration locale `20261001144423_import_console_qualified_amounts.sql` appliquée une seule fois sous version distante `20261001150911` ; anciennes migrations APPLIED intactes et non rejouées. Staging/journal/BP=0 ; CA/opérations/DGMP=3 chacun. RLS et grants vérifiés, advisors inchangés documentés dans AGENT_HANDOFF.md. Les limites historiques CLI et affichage des montants qualifiés sont levées ; les corrections de versions conflictuelles restent hors périmètre. Mode opératoire actualisé dans DATA_IMPORT.md.
+
 ## 1er octobre — pipeline contrôlé des données réelles
 
 #7 e5454ca fusionnée après contrôle final court des statuts GitHub/Vercel et du SHA attendu. Master synchronisé sans perte à `26711d57e39d84848a5b4629facbe37ea4ec5040`. Contrôle post-merge limité aux 27 tests PostgreSQL de frontières de publication : PASS. Branche `codex/controlled-data-import`, nouvelle PR à laisser ouverte.
