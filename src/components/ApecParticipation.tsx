@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import type { ApecDecision, ApecEvent, ApecContribution, BudgetProject } from '../types';
-import { createApecCycle, loadApec, loadApecHistory, recordApecDecision, submitApecContribution, submitApecNeed } from '../services/apecService';
+import type { ApecDecision, ApecEvent, ApecContribution } from '../types';
+import { createApecCycle, loadApec, loadApecHistory, recordApecDecision, submitApecContribution, submitApecNeed, publishApecNeed, withdrawApecNeed } from '../services/apecService';
 import { supabase } from '../services/supabase';
 
 const labels: Record<string,string> = {
@@ -12,7 +12,7 @@ const labels: Record<string,string> = {
 const inputClass='mt-1 block w-full min-h-[44px] rounded-lg border border-slate-300 bg-white p-2 text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600';
 const buttonClass='min-h-[44px] rounded-lg bg-blue-700 px-4 py-2 font-semibold text-white disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600';
 
-export function ApecParticipation({ project }: { project: BudgetProject }) {
+export function ApecParticipation({ institutionId, fiscalYear }: { institutionId: string; fiscalYear: number }) {
   const [data,setData]=useState<Awaited<ReturnType<typeof loadApec>> | null>(null);
   const [selected,setSelected]=useState('');
   const [events,setEvents]=useState<ApecEvent[]>([]);
@@ -33,9 +33,9 @@ export function ApecParticipation({ project }: { project: BudgetProject }) {
   useEffect(() => {
     let active=true;
     setLoadError(false);
-    loadApec(project.institution_id!,project.fiscal_year).then(result=>{if(active)setData(result);}).catch(()=>{if(active){setData(null);setLoadError(true);}});
+    loadApec(institutionId,fiscalYear).then(result=>{if(active)setData(result);}).catch(()=>{if(active){setData(null);setLoadError(true);}});
     return ()=>{active=false;};
-  },[project.institution_id,project.fiscal_year,revision]);
+  },[institutionId,fiscalYear,revision]);
 
   useEffect(()=>{
     let active=true;
@@ -47,10 +47,10 @@ export function ApecParticipation({ project }: { project: BudgetProject }) {
   useEffect(()=>{
     let active=true;
     setTargets({projects:[],budgets:[]});
-    if(data?.canManage) supabase.rpc('apec_link_targets',{p_institution_id:project.institution_id,p_fiscal_year:project.fiscal_year})
+    if(data?.canManage) supabase.rpc('apec_link_targets',{p_institution_id:institutionId,p_fiscal_year:fiscalYear})
       .then(({data:links,error})=>{if(active){if(error)setMessage('Rattachements indisponibles. Réessayez.');else setTargets(links);}});
     return ()=>{active=false;};
-  },[data?.canManage,project.institution_id,project.fiscal_year]);
+  },[data?.canManage,institutionId,fiscalYear]);
 
   async function run(event: React.FormEvent<HTMLFormElement>, operation:(form:FormData)=>Promise<string>) {
     event.preventDefault();
@@ -68,10 +68,18 @@ export function ApecParticipation({ project }: { project: BudgetProject }) {
 
   return <section aria-label="Participation APEC" className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
     <h3 className="text-lg font-bold">Besoins citoyens et suivi APEC</h3>
-    <p className="text-sm text-slate-600">La participation observée ne représente pas l’ensemble de la population. Une contribution citoyenne, même vérifiée, n’est pas une donnée officielle. Une priorité ne constitue pas une décision de financement.</p>
-    <p className="text-sm text-slate-600">Les besoins et contributions de ce premier dispositif sont privés : accessibles à leur auteur et aux gestionnaires habilités. Chaque dépôt conserve un identifiant et un historique.</p>
+    <p className="text-sm text-slate-600">La participation observée ne représente pas l’ensemble de la population. Une contribution citoyenne, même vérifiée, n’est pas une donnée officielle. Exprimer un besoin ne signifie pas qu’il est inscrit au budget. Une priorité ne constitue pas une décision de financement.</p>
+    <p className="text-sm text-slate-600">Les dépôts originaux restent privés : accessibles à leur auteur et aux gestionnaires habilités. Seuls des résumés relus, sans identité privée, peuvent être publiés explicitement. Chaque dépôt conserve un identifiant et un historique.</p>
     {loadError ? <button className={buttonClass} onClick={()=>setRevision(v=>v+1)}>Réessayer le chargement APEC</button> : !data ? <p role="status">Chargement du suivi…</p> : <>
       {!data.cycles.length && <p>Aucun cycle documenté pour cette collectivité et cet exercice. Cela ne prouve pas l’absence de participation locale.</p>}
+      <div className="space-y-3" aria-label="Résumés APEC publics">
+        <h4 className="font-bold">Besoins publiés après relecture</h4>
+        {!data.publicNeeds.length && <p className="text-sm text-slate-600">Aucun résumé publié pour cet exercice. Cela ne signifie pas qu’aucun besoin n’a été exprimé.</p>}
+        {data.publicNeeds.map(n=><article key={n.need_id} className="space-y-2 rounded-xl border border-slate-200 p-3 break-words">
+          <h5 className="font-semibold">{n.title}</h5><p className="whitespace-pre-wrap text-sm">{n.summary}</p>
+          <p className="text-xs text-slate-600">Contribution citoyenne · Résumé relu le {new Date(n.reviewed_at).toLocaleDateString('fr-FR')}<br/>Source publique : {n.source_reference} · {n.source_date}</p>
+        </article>)}
+      </div>
       {data.cycles.map(c=><p key={c.id} className="text-sm break-words"><strong>{c.title}</strong> — {c.status==='OPEN'?'Ouvert':'Clos'} · {c.fiscal_year}<br/>Source : {c.source_reference} · {c.source_date}</p>)}
       {!data.signedIn && <details><summary className="min-h-[44px] cursor-pointer font-semibold focus-visible:outline">Se connecter pour participer</summary>
         <form className="space-y-3" onSubmit={e=>void run(e,async f=>{
@@ -87,7 +95,7 @@ export function ApecParticipation({ project }: { project: BudgetProject }) {
         </form></details>}
       {data.signedIn && <button type="button" disabled={busy} className="min-h-[44px] text-sm text-blue-700 underline focus-visible:outline" onClick={()=>{void supabase.auth.signOut().then(({error})=>{if(error)setMessage('Déconnexion indisponible. Réessayez.');else{setSelected('');setMessage('Déconnexion effectuée.');}});}}>Me déconnecter</button>}
       {data.canManage && <details><summary className="min-h-[44px] cursor-pointer font-semibold focus-visible:outline">Ouvrir un cycle documenté</summary>
-        <form className="space-y-3" onSubmit={e=>void run(e,async f=>{await createApecCycle({institution_id:project.institution_id!,fiscal_year:project.fiscal_year,title:String(f.get('title')),source_reference:String(f.get('source')),source_date:String(f.get('date'))});return 'Cycle enregistré.';})}>
+        <form className="space-y-3" onSubmit={e=>void run(e,async f=>{await createApecCycle({institution_id:institutionId,fiscal_year:fiscalYear,title:String(f.get('title')),source_reference:String(f.get('source')),source_date:String(f.get('date'))});return 'Cycle enregistré.';})}>
           <label className="block">Intitulé du cycle<input name="title" required minLength={3} maxLength={240} className={inputClass}/></label>{sourceFields}<button disabled={busy} className={buttonClass}>Ouvrir le cycle</button>
         </form></details>}
       {data.signedIn && data.cycles.some(c=>c.status==='OPEN') && <details><summary className="min-h-[44px] cursor-pointer font-semibold focus-visible:outline">Déposer un besoin citoyen</summary>
@@ -115,6 +123,20 @@ export function ApecParticipation({ project }: { project: BudgetProject }) {
             {action==='RESPONSE' && <p className="text-sm">Consigner uniquement une réponse institutionnelle reçue et sourcée. Elle ne constitue pas une validation citoyenne indépendante.</p>}
             <button disabled={busy} className={buttonClass}>Enregistrer dans l’historique</button>
           </form></details>}
+        {data.canManage && need.verification_status==='VERIFIED' && <details><summary className="min-h-[44px] cursor-pointer font-semibold focus-visible:outline">Préparer un résumé public modéré</summary>
+          <p className="text-sm text-slate-600">Rédigez un résumé et une référence publique expurgés. Retirez noms de particuliers, contacts, adresses précises et toute information permettant d’identifier une personne. Le dépôt original ne sera pas publié.</p>
+          <form className="mt-3 space-y-3" onSubmit={e=>void run(e,async f=>{await publishApecNeed({needId:need.id,title:String(f.get('publicTitle')),summary:String(f.get('summary')),source:String(f.get('source')),date:String(f.get('date')),privacyReviewed:f.get('privacy')==='on'});return 'Résumé relu publié. Le dépôt original reste privé.';})}>
+            <label className="block">Titre public relu<input name="publicTitle" required minLength={3} maxLength={240} className={inputClass}/></label>
+            <label className="block">Résumé public sans identité<textarea name="summary" required minLength={3} maxLength={2000} className={inputClass}/></label>
+            {sourceFields}
+            <label className="flex min-h-[44px] items-center gap-2"><input name="privacy" type="checkbox" required/>J’ai relu le titre, le résumé et la source : ils ne contiennent aucune identité ni donnée privée.</label>
+            <button disabled={busy} className={buttonClass}>Publier le résumé relu</button>
+          </form>
+          {data.publicNeeds.some(n=>n.need_id===need.id) && <form className="mt-4 space-y-3" onSubmit={e=>void run(e,async f=>{await withdrawApecNeed(need.id,String(f.get('reason')));return 'Résumé retiré de la consultation publique.';})}>
+            <label className="block">Motif du retrait<textarea name="reason" required minLength={3} maxLength={4000} className={inputClass}/></label>
+            <button disabled={busy} className={buttonClass}>Retirer le résumé public</button>
+          </form>}
+        </details>}
         <h4 className="font-bold">Historique du besoin</h4>
         <ol className="space-y-3">{events.map(e=><li key={e.id} className="rounded-lg border border-slate-200 p-3 text-sm"><strong>{labels[e.kind]}</strong> · {new Date(e.created_at).toLocaleString('fr-FR')}<p>{e.body}</p><p>Source : {e.source_reference} · {e.source_date}</p><p>{e.provenance==='INSTITUTION_RESPONSE'?'Réponse institutionnelle, sans validation indépendante':e.provenance==='CITIZEN_OBSERVATION'?'Contribution citoyenne':'Traitement documenté par SuiviBudget'}</p>{e.kind==='LINK' && <p>Projet : {e.decision_data.project_id || 'Non relié'} · Budget : {e.decision_data.local_budget_id || 'Non relié'}</p>}{e.kind==='PRIORITIZE' && <p>Rang : {e.decision_data.priority}</p>}</li>)}</ol>
       </div>}

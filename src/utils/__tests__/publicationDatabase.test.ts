@@ -16,6 +16,7 @@ const migrationNames = [
   '20260930033244_foundation_http_access.sql',
   '20260930153716_least_privilege_passport_boundary.sql',
   '20260930223840_apec_participation_cycle.sql',
+  '20261001043805_apec_moderated_publication.sql',
 ];
 const migrations = () => migrationNames.map(name => readFileSync(resolve('supabase/migrations', name), 'utf8'));
 
@@ -113,7 +114,7 @@ beforeAll(async () => {
   for (const sql of migrations()) await db.exec(sql);
   await db.exec(`
     insert into public.institutions values ('apec-institution'),('other-institution');
-    insert into public.budget_projects values ('apec-project','apec-institution',2026,'Projet test'),('other-project','other-institution',2026,'Autre test');
+    insert into public.budget_projects values ('apec-project','apec-institution',2026,'Projet test'),('other-project','other-institution',2026,'Autre test'),('other-year','apec-institution',2025,'Autre exercice');
     update public.local_budgets set institution_id='apec-institution', fiscal_year=2026;
     insert into public.apec_cycles(id,institution_id,fiscal_year,title,source_reference,source_date)
       values ('10000000-0000-0000-0000-000000000001','apec-institution',2026,'Cycle test local','Source test locale','2026-09-30');
@@ -124,9 +125,79 @@ afterAll(async () => { await db?.close(); });
 
 describe('APEC participation boundaries', () => {
   const cycle = '10000000-0000-0000-0000-000000000001';
-  const submit = async () => (await db.query<{ id: string }>(`insert into public.apec_needs(cycle_id,title,description,source_reference,source_date)
-    values ($1,'Besoin test local','Description du besoin test','Déclaration citoyenne test','2026-09-30') returning id`, [cycle])).rows[0].id;
+  const submit = async (description='Description du besoin test') => (await db.query<{ id: string }>(`insert into public.apec_needs(cycle_id,title,description,source_reference,source_date)
+    values ($1,'Besoin test local',$2,'Déclaration citoyenne test','2026-09-30') returning id`, [cycle,description])).rows[0].id;
   const decide = (id: string, action: string, project: string | null = null) => db.query(`select public.record_apec_decision($1,$2,'Motif test local','Source décision test','2026-09-30',1,$3,null,null)`, [id, action, project]);
+  const publish = (id: string, confirmed = true) => db.query("select public.publish_apec_need($1,'Besoin public relu','Résumé public sans identité','Compte rendu public expurgé','2026-09-30',$2)",[id,confirmed]);
+
+  it('does not publish verified needs automatically and rejects citizen publication', async () => {
+    await asRole('authenticated',citizen,async()=>{
+      const id=await submit();
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",[manager]);
+      await decide(id,'VERIFY');
+      expect((await db.query('select * from public.apec_public_needs')).rows).toHaveLength(0);
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",[citizen]);
+      await expect(publish(id)).rejects.toThrow();
+    });
+  });
+
+  it('requires human verification and explicit privacy review before publication', async () => {
+    await asRole('authenticated',citizen,async()=>{
+      const id=await submit();
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",[admin]);
+      await expect(publish(id)).rejects.toThrow();
+    });
+    await asRole('authenticated',citizen,async()=>{
+      const id=await submit();
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",[admin]);
+      await decide(id,'VERIFY');
+      await expect(publish(id,false)).rejects.toThrow();
+    });
+  });
+
+  it('exposes only curated fields to anonymous readers and withdraws immediately', async()=>{
+    await asRole('authenticated',citizen,async()=>{
+      const id=await submit('Identité privée test : personne@example.invalid, téléphone personnel 0123456789');
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",[manager]);
+      await decide(id,'VERIFY'); await publish(id);
+      await db.exec('set local role anon');
+      const row=(await db.query<Record<string,unknown>>('select * from public.apec_public_needs')).rows[0];
+      expect(Object.keys(row).sort()).toEqual(['need_id','institution_id','fiscal_year','title','summary','source_reference','source_date','provenance','status','reviewed_at'].sort());
+      expect(row.summary).toBe('Résumé public sans identité');
+      expect(row.source_reference).not.toBe('Déclaration citoyenne test');
+      expect(row.provenance).toBe('CITIZEN_OBSERVATION');
+      expect(JSON.stringify(row)).not.toContain('personne@example.invalid');
+      expect(JSON.stringify(row)).not.toContain('0123456789');
+      expect(JSON.stringify(row)).not.toContain(citizen);
+      await db.exec('set local role authenticated');
+      await db.query("select public.withdraw_apec_need($1,'Retrait de test motivé')",[id]);
+      await db.exec('set local role anon');
+      expect((await db.query('select * from public.apec_public_needs')).rows).toHaveLength(0);
+      await db.exec('set local role authenticated');
+      const history=(await db.query<{decision_data:{publication:string}}>("select decision_data from public.apec_events where need_id=$1 and kind='FOLLOW_UP' order by sequence",[id])).rows;
+      expect(history.map(e=>e.decision_data.publication)).toEqual(['PUBLISHED','WITHDRAWN']);
+    });
+  });
+
+  it('denies direct publication writes even to staff', async()=>{
+    await asRole('authenticated',admin,async()=>{await expect(db.query("delete from public.apec_public_needs")).rejects.toThrow();});
+    await asRole('anon',null,async()=>{await expect(db.query("select public.withdraw_apec_need('00000000-0000-0000-0000-000000000000','Retrait')")).rejects.toThrow();});
+  });
+
+  it('rejects links to a project or published budget from another fiscal year',async()=>{
+    for(const target of ['project','budget']) await asRole('authenticated',citizen,async()=>{
+      const id=await submit();
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",[manager]);
+      await decide(id,'VERIFY');await decide(id,'PRIORITIZE');
+      if(target==='project') await expect(decide(id,'LINK','other-year')).rejects.toThrow();
+      else {
+        await db.exec('reset role');
+        await db.query("update public.local_budgets set fiscal_year=2025 where id='published'");
+        await db.exec('set local role authenticated');
+        await expect(db.query("select public.record_apec_decision($1,'LINK','Motif test','Source test','2026-09-30',null,null,'published')",[id])).rejects.toThrow();
+      }
+    });
+  });
 
   it('records identity, provenance, pending verification and an initial event on submission', async () => {
     await asRole('authenticated', citizen, async () => {
@@ -259,7 +330,7 @@ describe('Publication boundaries applied to PostgreSQL', () => {
   });
 
   it('reapplies historical publication boundary repairs without drift errors', async () => {
-    for (const sql of migrations().slice(0,-1)) await db.exec(sql);
+    for (const sql of migrations().slice(0,6)) await db.exec(sql);
   });
 
   it('only exposes a published CA and its financial, operation and procurement children', async () => {

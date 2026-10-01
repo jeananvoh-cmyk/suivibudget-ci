@@ -3,15 +3,27 @@
 ## METADATA
 - LAST_UPDATED : 2026-10-01
 - LAST_AGENT : Codex
-- CURRENT_BRANCH : `codex/apec-phase-2c`
-- HANDOFF_BASE_SHA : `4aed61d18d4ebf139009dc3d72e5bbebda994380` (master consolidé, CI SUCCESS)
-- CURRENT_HEAD : `51bf26577a057af3f734b9547c9706c9c3b9e5b0`, dernier commit fonctionnel Phase 2C, CI SUCCESS. Son descendant documentaire est à retrouver dans Git sans boucle de commits de métadonnées.
-- PR : #3, #4 et #5 fusionnées dans cet ordre sur master avec autorisation explicite de l’utilisateur. [PR #6 APEC](https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/6) ouverte sur master, non fusionnée.
+- CURRENT_BRANCH : `codex/apec-collectivities-publication`
+- HANDOFF_BASE_SHA : `3958dd17639f61e381da755a8826abb342580b37` (master après fusion #6)
+- CURRENT_HEAD : retrouver le HEAD de cette branche dans Git ; validations locales terminées, CI à vérifier après push.
+- PR : #3/#4/#5/#6 fusionnées. Nouveau bloc produit proposé séparément sur master ; ne pas fusionner sa PR.
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : fondation / Passport 2A / DGMP 2B consolidés ; APEC 2C minimal VALIDATED, CI fonctionnelle SUCCESS
+- CURRENT_MILESTONE : APEC produit citoyen implémenté et validé localement, entrée collectivité et publication modérée
 - FOUNDATION_READY : TRUE, validé sur 3b502b1 après CI SUCCESS. Aucun P0/P1 connu ouvert dans la fondation.
 
 ## COMPLETED
+### APEC produit citoyen — 1er octobre, après fusion #6
+- Master synchronisé sans perte de travail ; contrôle unique après fusion : 145 tests et TypeScript/build PASS. Aucun réaudit ni rejeu de migration APPLIED.
+- Onglet Participation APEC sur les fiches MAIRIE/REGION, indépendant des projets, avec filtre d’exercice. Accès Passport conservé avec le même composant. Besoin, dépôt, contributions, suivi et décisions privées préservés.
+- Projection additive apec_public_needs : dix champs publics seulement, aucun auteur/contact privé. Vérification préalable du besoin et publication explicite ADMIN/DATA_MANAGER ; formulaire de résumé distinct, champs vierges et confirmation obligatoire de relecture anonymisante. Aucun texte original recopié automatiquement. L’identification de données personnelles dans le texte libre reste une responsabilité humaine.
+- RLS publique limitée à PUBLISHED, retrait explicite et versions des résumés conservées dans l’historique privé immuable. Aucune mutation directe accordée aux clients ni à service_role. Provenance toujours CITIZEN_OBSERVATION ; participation non représentative, besoin distinct de la programmation budgétaire.
+- 150 tests / 10 fichiers PASS, dont 27 PostgreSQL : refus de publication citoyenne/non vérifiée/sans relecture, projection exacte sans identité/contact des originaux, retrait, historique et rejet des liens d’un autre exercice. TypeScript + build PASS, 1724 modules.
+- Quatre contrôles HTTP réels ciblés PASS : lecture publique, refus DELETE et RPC publication/retrait anonymes. Mode : node scripts/verify-foundation-http.mjs apec-public. RLS/grants distants contrôlés ; zéro ligne publique, besoins privés vides, trois CA préservés. Aucun compte ni donnée de test créé en production.
+- UX/UI VALIDATED : communes et régions sans projet sur 360/375/390/430/768/1280/1440/1920, zéro débordement/erreur JS, captures 375/1440 inspectées. Onglets mobiles en grille. Passport, connexion/dépôt et publication/retrait testés par API interceptée localement ; état public vide lu sur Supabase réel.
+- Migration locale 20261001043805 appliquée une seule fois sous version distante 20261001044508. Ne jamais la rejouer. BP, CA, DGMP, Passport, preuves et sources privées existants préservés ; aucune ingestion massive.
+
+Les sections de consolidation suivantes décrivent les validations historiques, sans remplacer ce bloc courant.
+
 ### Consolidation et APEC Phase 2C — 1er octobre
 - Chaîne Git linéaire #3 → #4 → #5 et CI exactes vérifiées sans refaire les audits. Fusions : `1ebd9ab` (#3), `abc884a` (#4), `4aed61d` (#5). Arbre final identique au HEAD validé de #5. Quality / verify SUCCESS sur master consolidé : run 36786596459.
 - Quatre tables additives : apec_cycles, apec_needs, apec_contributions, apec_events. Aucun changement des tables BP/CA/Passport/DGMP/preuves. Aucune ancienne migration rejouée et aucune ingestion.
@@ -74,6 +86,7 @@ Les blocs suivants sont historiques ; leurs anciennes interdictions de fusion et
 | 20260930033244_foundation_http_access.sql | 20260930144753 | APPLIED |
 | 20260930153716_least_privilege_passport_boundary.sql | 20260930153938 | APPLIED |
 | 20260930223840_apec_participation_cycle.sql | 20261001040746 | APPLIED |
+| 20261001043805_apec_moderated_publication.sql | 20261001044508 | APPLIED |
 
 Les quatre premières migrations n’ont pas été rejouées. Les horodatages distants sont attribués par l’outil ; ne pas rejouer sur la seule différence de préfixe. Schéma metadata, vue publique, triggers, grants et RLS contrôlés.
 
@@ -101,7 +114,7 @@ Consolidation Phase 2A VALIDATED : vingt champs et trois niveaux de lecture, 18 
 DGMP Phase 2B VALIDATED et fusionnée ; aucune ingestion massive. APEC Phase 2C minimal VALIDATED localement, avec suivi privé et historique sourcé ; voir bloc courant ci-dessus pour CI et limites.
 
 ## ADVISORS / KNOWN_ANOMALIES
-- SECURITY_ADVISORS : seul WARN Leaked Password Protection Disabled ; aucun autre signal sécurité.
+- SECURITY_ADVISORS : WARN Leaked Password Protection Disabled inchangé ; quatre WARN 0029 pour les RPC APEC SECURITY DEFINER intentionnelles (deux existantes, publication et retrait). Autorisation profiles ADMIN/DATA_MANAGER avant accès, search_path vide, SQL statique, mutations directes interdites et refus testés. Aucun autre signal sécurité.
 - PERFORMANCE_ADVISORS : 31 unused indexes INFO et 16 multiple permissive policies WARN au contrôle final après nettoyage (38 index à 14:58 UTC ; les tests ont exercé certains index). Pas de suppression ni consolidation mécanique, aucun gain mesuré ne justifie ce refactoring pour fermer la fondation.
 - Bundle volumineux préexistant (données budgétaires notamment) : avertissement build, pas une erreur.
 - KNOWN_FAILURES : aucune dans les validations terminées ; CI 454d62c et 3b502b1 SUCCESS.
@@ -141,6 +154,6 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Reprendre la PR #6 codex/apec-phase-2c et inspecter seulement les écarts depuis le commit fonctionnel validé 51bf265. Ne pas rejouer 20261001040746 ni les migrations antérieures APPLIED. Le bloc minimal est terminé ; ne pas le recommencer ni fusionner #6 sans instruction.
-2. Extension suivante, hors de ce bloc : accès APEC depuis la fiche collectivité même sans projet existant, puis publication publique séparée avec modération et projection sans identité privée. Conserver le suivi privé et les événements immuables.
-3. Préparer ensuite une stratégie d’ingestion DGMP/APEC avec sources réelles, déduplication, reprise sur erreur et validation humaine, sans démarrer d’ingestion massive implicitement. Protection des mots de passe compromis à activer manuellement sur le seul projet autorisé.
+1. Contrôler la CI du HEAD de codex/apec-collectivities-publication après push ; laisser sa PR ouverte. Aucun réaudit #3/#4/#5/#6, aucune migration APPLIED à rejouer, notamment 20261001040746 et 20261001044508.
+2. Prochain bloc opérationnel : documenter un cycle réel avec source et dates validées, puis exercer la modération sur des contributions réelles autorisées. Aucun cycle fictif à ouvrir pour remplir l’interface ; sans cycle documenté, état vide explicite.
+3. Préparer ensuite une stratégie d’ingestion DGMP/APEC sourcée, dédupliquée et validée humainement, sans ingestion massive implicite. Protection des mots de passe compromis à activer manuellement sur le seul projet autorisé.
