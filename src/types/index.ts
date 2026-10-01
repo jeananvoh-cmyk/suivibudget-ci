@@ -82,6 +82,59 @@ export interface BudgetLineItem {
   year?: number;
 }
 
+export interface ApecCycle {
+  id: string;
+  institution_id: string;
+  fiscal_year: number;
+  title: string;
+  source_reference: string;
+  source_date: string;
+  status: 'OPEN' | 'CLOSED';
+}
+
+export interface ApecNeed {
+  id: string;
+  cycle_id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  source_reference: string;
+  source_date: string;
+  created_at: string;
+  provenance: 'CITIZEN_OBSERVATION';
+  verification_status: 'TO_VERIFY' | 'VERIFIED' | 'REJECTED';
+  status: 'SUBMITTED' | 'PRIORITIZED' | 'LINKED' | 'ANSWERED';
+  priority: number | null;
+  project_id: string | null;
+  local_budget_id: string | null;
+}
+
+export interface ApecContribution {
+  id: string;
+  need_id: string;
+  body: string;
+  source_reference: string;
+  source_date: string;
+  verification_status: ApecNeed['verification_status'];
+  provenance: 'CITIZEN_OBSERVATION';
+  created_at: string;
+}
+
+export type ApecDecision = 'VERIFY' | 'REJECT' | 'PRIORITIZE' | 'LINK' | 'RESPONSE' | 'FOLLOW_UP' | 'VERIFY_CONTRIBUTION' | 'REJECT_CONTRIBUTION';
+
+export interface ApecEvent {
+  id: string;
+  need_id: string;
+  contribution_id: string | null;
+  kind: ApecDecision | 'SUBMITTED' | 'CONTRIBUTION';
+  body: string;
+  source_reference: string;
+  source_date: string;
+  provenance: 'CITIZEN_OBSERVATION' | 'SUIVIBUDGET_CALCULATION' | 'INSTITUTION_RESPONSE';
+  created_at: string;
+  decision_data: { priority?: number | null; project_id?: string | null; local_budget_id?: string | null };
+}
+
 export interface BudgetProject {
   institution_type?: import('./localBudget').LocalInstitutionType;
   source_document_id?: string;
