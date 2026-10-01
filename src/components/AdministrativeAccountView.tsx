@@ -14,7 +14,7 @@ import {
   getExecutionStatusLabel 
 } from '../utils/budgetCalculations';
 import { 
-  formatFCFA, 
+  formatFCFA, formatRecordAmount, amountPrecision, isExactAmount,
   formatAmountInWords 
 } from '../utils/formatters';
 import { isSafeUrl } from '../utils/security';
@@ -89,15 +89,15 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
 
   // Dynamic calculations
   const operatingRate = currentCA 
-    ? calculateExecutionRate(currentCA.operating_realized, currentCA.operating_planned)
+    ? calculateExecutionRate(currentCA.operating_realized, currentCA.operating_planned, amountPrecision(currentCA, 'operating_realized'), amountPrecision(currentCA, 'operating_planned'))
     : null;
 
   const investmentRate = currentCA 
-    ? calculateExecutionRate(currentCA.investment_realized, currentCA.investment_planned)
+    ? calculateExecutionRate(currentCA.investment_realized, currentCA.investment_planned, amountPrecision(currentCA, 'investment_realized'), amountPrecision(currentCA, 'investment_planned'))
     : null;
 
   const totalRate = currentCA 
-    ? calculateExecutionRate(currentCA.total_realized, currentCA.total_planned)
+    ? calculateExecutionRate(currentCA.total_realized, currentCA.total_planned, amountPrecision(currentCA, 'total_realized'), amountPrecision(currentCA, 'total_planned'))
     : null;
 
   // Filter operations
@@ -134,14 +134,14 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
     if (!currentCA) return;
     const headers = ["Reference", "Titre", "Secteur", "Localisation", "Prevu_FCFA", "Realise_FCFA", "Taux_Execution_Pct", "Marche_DGMP", "Attributaire", "Statut_Terrain"];
     const rows = (currentCA.operations || []).map(op => {
-      const rate = calculateExecutionRate(op.executed_amount, op.planned_amount);
+      const rate = calculateExecutionRate(op.executed_amount, op.planned_amount, amountPrecision(op, 'executed_amount'), amountPrecision(op, 'planned_amount'));
       return [
         `"${op.operation_reference || ''}"`,
         `"${op.title.replace(/"/g, '""')}"`,
         `"${op.sector}"`,
         `"${op.location || ''}"`,
-        op.planned_amount,
-        op.executed_amount,
+        `"${formatRecordAmount(op, 'planned_amount')}"`,
+        `"${formatRecordAmount(op, 'executed_amount')}"`,
         `"${rate.formatted}"`,
         `"${op.procurement_match?.contract_number || op.procurement_match?.verification_status || 'Non répertorié'}"`,
         `"${op.procurement_match?.contractor || 'Régie/Gré à gré'}"`,
@@ -354,16 +354,16 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             <div>
               <span className="text-[10px] font-bold uppercase text-slate-400 block">Dépensé Réellement</span>
               <span className="text-xl font-black text-slate-900 block">
-                {formatFCFA(currentCA.operating_realized)}
+                {formatRecordAmount(currentCA, 'operating_realized')}
               </span>
               <span className="text-[11px] font-semibold text-slate-500 block">
-                sur {formatFCFA(currentCA.operating_planned)} prévus
+                sur {formatRecordAmount(currentCA, 'operating_planned')} prévus
               </span>
             </div>
 
             {/* Jauge */}
             <div className="space-y-1 pt-1">
-              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+              <div hidden={operatingRate?.rate == null} className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                 <div 
                   className={`h-full transition-all duration-500 ${
                     (operatingRate?.rate || 0) >= 90 ? 'bg-emerald-500' :
@@ -374,14 +374,14 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               </div>
               <div className="flex justify-between text-[10px] text-slate-500 font-medium">
                 <span>Taux ordonnancé : {operatingRate?.formatted}</span>
-                <span>Écart : {formatFCFA(Math.abs(currentCA.operating_planned - currentCA.operating_realized))}</span>
+                <span>Écart : {isExactAmount(currentCA, 'operating_planned') && isExactAmount(currentCA, 'operating_realized') ? formatFCFA(Math.abs(currentCA.operating_planned! - currentCA.operating_realized!)) : 'Non calculable'}</span>
               </div>
             </div>
           </div>
 
-          {currentCA.operating_revenue_realized && (
+          {currentCA.operating_revenue_realized != null && (
             <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-600">
-              Recettes de fonctionnement encaissées : <strong className="text-slate-900">{formatFCFA(currentCA.operating_revenue_realized)}</strong>
+              Recettes de fonctionnement encaissées : <strong className="text-slate-900">{formatRecordAmount(currentCA, 'operating_revenue_realized')}</strong>
             </div>
           )}
         </div>
@@ -403,16 +403,16 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             <div>
               <span className="text-[10px] font-bold uppercase text-slate-400 block">Dépensé Réellement</span>
               <span className="text-xl font-black text-slate-900 block">
-                {formatFCFA(currentCA.investment_realized)}
+                {formatRecordAmount(currentCA, 'investment_realized')}
               </span>
               <span className="text-[11px] font-semibold text-slate-500 block">
-                sur {formatFCFA(currentCA.investment_planned)} prévus
+                sur {formatRecordAmount(currentCA, 'investment_planned')} prévus
               </span>
             </div>
 
             {/* Jauge */}
             <div className="space-y-1 pt-1">
-              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+              <div hidden={investmentRate?.rate == null} className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                 <div 
                   className={`h-full transition-all duration-500 ${
                     (investmentRate?.rate || 0) >= 80 ? 'bg-emerald-600' :
@@ -422,15 +422,15 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                 />
               </div>
               <div className="flex justify-between text-[10px] text-slate-500 font-medium">
-                <span>Taux de réalisation : {investmentRate?.formatted}</span>
+                <span>Taux financier : {investmentRate?.formatted}</span>
                 <span>{currentCA.operations.length} opérations suivies</span>
               </div>
             </div>
           </div>
 
-          {currentCA.investment_revenue_realized && (
+          {currentCA.investment_revenue_realized != null && (
             <div className="p-2.5 bg-emerald-50/60 rounded-xl border border-emerald-200 text-[11px] text-emerald-900">
-              Recettes d'investissement recouvrées : <strong className="text-emerald-950">{formatFCFA(currentCA.investment_revenue_realized)}</strong>
+              Recettes d'investissement recouvrées : <strong className="text-emerald-950">{formatRecordAmount(currentCA, 'investment_revenue_realized')}</strong>
             </div>
           )}
         </div>
@@ -452,16 +452,16 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             <div>
               <span className="text-[10px] font-bold uppercase text-slate-300 block">Exécution Totale Réelle</span>
               <span className="text-2xl font-black text-amber-300 block">
-                {formatFCFA(currentCA.total_realized)}
+                {formatRecordAmount(currentCA, 'total_realized')}
               </span>
               <span className="text-xs font-semibold text-blue-100 block">
-                sur {formatFCFA(currentCA.total_planned)} votés au Budget
+                sur {formatRecordAmount(currentCA, 'total_planned')} votés au Budget
               </span>
             </div>
 
             {/* Jauge globale */}
             <div className="space-y-1 pt-1">
-              <div className="w-full bg-white/20 h-2 rounded-full overflow-hidden">
+              <div hidden={totalRate?.rate == null} className="w-full bg-white/20 h-2 rounded-full overflow-hidden">
                 <div 
                   className="bg-amber-400 h-full transition-all duration-500" 
                   style={{ width: `${Math.min(100, totalRate?.rate || 0)}%` }}
@@ -474,15 +474,15 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </div>
           </div>
 
-          {currentCA.surplus_or_deficit !== undefined && (
+          {currentCA.surplus_or_deficit != null && (
             <div className="p-2.5 bg-white/10 backdrop-blur-md rounded-xl border border-white/15 text-[11px] text-white">
               {currentCA.surplus_or_deficit >= 0 ? (
                 <>
-                  Excédent budgétaire de clôture : <strong className="text-emerald-300">{formatFCFA(currentCA.surplus_or_deficit)}</strong>
+                  Excédent budgétaire de clôture : <strong className="text-emerald-300">{formatRecordAmount(currentCA, 'surplus_or_deficit')}</strong>
                 </>
               ) : (
                 <>
-                  Déficit d'exercice : <strong className="text-rose-300">{formatFCFA(Math.abs(currentCA.surplus_or_deficit))}</strong>
+                  Déficit d'exercice : <strong className="text-rose-300">{formatRecordAmount(currentCA, 'surplus_or_deficit')}</strong>
                 </>
               )}
             </div>
@@ -530,7 +530,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
         </div>
 
         {/* Filtres Opérations */}
-        <div className="flex flex-col sm:flex-row items-center gap-2.5">
+        <div className="flex flex-col lg:flex-row items-center gap-2.5">
           <div className="relative flex-1 w-full">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -542,12 +542,12 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             />
           </div>
 
-          <div className="flex items-center gap-1.5 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch gap-1.5 w-full lg:w-auto">
             {uniqueSectors.length > 0 && (
               <select
                 value={selectedSector}
                 onChange={(e) => setSelectedSector(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 focus:outline-none"
+                className="min-w-0 max-w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600"
               >
                 <option value="ALL">Tous les secteurs</option>
                 {uniqueSectors.map(s => <option key={s} value={s}>{s}</option>)}
@@ -557,7 +557,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             <select
               value={selectedMatchLevel}
               onChange={(e) => setSelectedMatchLevel(e.target.value as any)}
-              className="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 focus:outline-none"
+              className="min-w-0 max-w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600"
             >
               <option value="ALL">Tous les rapprochements DGMP</option>
               <option value="STRONG">Marché Retrouvé (DGMP)</option>
@@ -570,7 +570,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
         {/* Liste des Opérations */}
         <div className="space-y-3 pt-1">
           {filteredOperations.map((op) => {
-            const opRate = calculateExecutionRate(op.executed_amount, op.planned_amount);
+            const opRate = calculateExecutionRate(op.executed_amount, op.planned_amount, amountPrecision(op, 'executed_amount'), amountPrecision(op, 'planned_amount'));
             const match = op.procurement_match;
 
             return (
@@ -610,9 +610,9 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                       </span>
                     </div>
                     <div className="text-xs font-black text-slate-900">
-                      {formatFCFA(op.executed_amount)}{' '}
+                      {formatRecordAmount(op, 'executed_amount')}{' '}
                       <span className="text-[11px] font-normal text-slate-500">
-                        / {formatFCFA(op.planned_amount)}
+                        / {formatRecordAmount(op, 'planned_amount')}
                       </span>
                     </div>
                   </div>
@@ -661,7 +661,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                       </div>
                       <div>
                         <span className="text-slate-400 block font-medium">Montant attribué :</span>
-                        <strong className="text-slate-900">{match.award_amount ? formatFCFA(match.award_amount) : 'Non renseigné'}</strong>
+                        <strong className="text-slate-900">{formatRecordAmount(match, 'award_amount')}</strong>
                       </div>
                       <div>
                         <span className="text-slate-400 block font-medium">Date d'attribution :</span>

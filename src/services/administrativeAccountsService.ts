@@ -1,6 +1,7 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 import { AdministrativeAccount, CAInvestmentOperation, ProcurementMatch } from '../types';
 import type { LocalBudget } from '../types/localBudget';
+import { amountPrecision } from '../utils/formatters';
 
 export async function fetchPublishedLocalBudgets(): Promise<LocalBudget[]> {
   if (!isSupabaseConfigured()) return [];
@@ -8,8 +9,8 @@ export async function fetchPublishedLocalBudgets(): Promise<LocalBudget[]> {
   if (error) throw error;
   return (data || []).map(row => ({
     ...row,
-    operating_percentage: row.total_amount > 0 ? row.operating_amount / row.total_amount * 100 : 0,
-    investment_percentage: row.total_amount > 0 ? row.investment_amount / row.total_amount * 100 : 0,
+    operating_percentage: row.total_amount > 0 && row.operating_amount != null && amountPrecision(row,'total_amount') === 'EXACT' && amountPrecision(row,'operating_amount') === 'EXACT' ? row.operating_amount / row.total_amount * 100 : null,
+    investment_percentage: row.total_amount > 0 && row.investment_amount != null && amountPrecision(row,'total_amount') === 'EXACT' && amountPrecision(row,'investment_amount') === 'EXACT' ? row.investment_amount / row.total_amount * 100 : null,
     sources: [],
     primary_source_label: row.import_provenance?.source?.name || row.document_name,
     primary_source_url: row.import_provenance?.source?.url || row.document_url,

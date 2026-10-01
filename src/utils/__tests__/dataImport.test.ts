@@ -1,6 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { PGlite } from '@electric-sql/pglite';
-import { beforeAll, afterAll, describe, it, expect } from 'vitest';
+import { beforeAll, afterAll, describe, it, expect, vi } from 'vitest';
+import { parseImportInput, reviewImport } from '../../services/dataImportService';
+const transport = vi.hoisted(() => ({ rpc: vi.fn() }));
+vi.mock('../../services/supabase', () => ({ supabase: transport }));
 import { CA_PILOT_FIXTURES } from './caPilotFixtures';
 import { LOCAL_BUDGETS_REFERENTIAL, setPublishedLocalBudgets, getLocalBudgetsForInstitution } from '../../data/localBudgetsReferential';
 
@@ -15,7 +18,7 @@ async function plan(rows: unknown[], commit=false, hash: string|null=null): Prom
   return (await db.query<{result: any}>('select public.import_data_batch($1::jsonb,$2,$3) result',[JSON.stringify(rows),commit,hash])).rows[0].result;
 }
 async function stage(rows: unknown[]) {const preview=await plan(rows);return plan(rows,true,preview.plan_hash);}
-async function review(ids: string[], action: string) {return (await db.query<{result:any}>('select public.review_data_import($1::text[],$2,$3) result',[ids,action,'Relecture locale des sources pilotes'])).rows[0].result;}
+async function review(ids: string[], action: string, confirmed=true) {return (await db.query<{result:any}>('select public.review_data_import($1::text[],$2,$3,$4) result',[ids,action,'Relecture locale des sources pilotes',confirmed])).rows[0].result;}
 async function isolated(run:()=>Promise<void>) {await db.exec('begin');try{await db.query("select set_config('request.jwt.claim.sub',$1,true)",[admin]);await db.exec('set local role authenticated');await run();}finally{await db.exec('rollback');}}
 
 beforeAll(async()=>{
@@ -23,7 +26,9 @@ beforeAll(async()=>{
   await db.exec(`create role anon; create role authenticated; create role service_role bypassrls;
     create schema auth; create schema private;
     create function auth.uid() returns uuid language sql as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
-    create function private.has_staff_role(text[]) returns boolean language sql as $$select auth.uid()='${admin}'::uuid$$;
+    create table public.profiles(id uuid primary key,role text,is_active boolean);
+    insert into public.profiles values ('${admin}','ADMIN',true),('00000000-0000-0000-0000-000000000002','DATA_MANAGER',true),('00000000-0000-0000-0000-000000000003','MODERATOR',true);
+    create function private.has_staff_role(roles text[]) returns boolean language sql security definer set search_path='' as $$select exists(select 1 from public.profiles where id=auth.uid() and role=any(roles) and is_active)$$;
     create function public.uuid_generate_v4() returns uuid language sql as $$select gen_random_uuid()$$;
     create table public.institutions(id text primary key,name text,type text);
     create table public.projects(id text primary key);
@@ -37,10 +42,42 @@ beforeAll(async()=>{
   ] as const){const sql=readFileSync(`supabase/migrations/${file}`,'utf8');for(const name of names) await db.exec(sql.match(new RegExp(`CREATE TABLE IF NOT EXISTS public\\.${name} \\([\\s\\S]*?\\n\\);`))![0]);}
   const migration=readFileSync('supabase/migrations/20261001091748_controlled_data_import.sql','utf8');
   await db.exec(migration);
+  await db.exec(readFileSync('supabase/migrations/20261001144423_import_console_qualified_amounts.sql','utf8'));
 },30000);
 afterAll(async()=>{await db?.close();});
 
 describe('Controlled real data import',()=>{
+  it('keeps malformed JSONL line positions and refuses unconfirmed browser publication',async()=>{
+    expect(parseImportInput('{"kind":"CA"}\nbroken\n{}',true)).toEqual([{kind:'CA'},null,{}]);
+    expect(()=>parseImportInput('[]',false)).toThrow('1 à 100');
+    transport.rpc.mockClear();
+    await expect(reviewImport('row','PUBLISH','Source relue',false)).rejects.toThrow('explicitement');
+    expect(transport.rpc).not.toHaveBeenCalled();
+    transport.rpc.mockResolvedValueOnce({data:{rows:[{status:'PUBLISHED'}]},error:null});
+    await reviewImport('row','PUBLISH','Source relue',true);
+    expect(transport.rpc).toHaveBeenCalledWith('review_data_import',expect.objectContaining({p_publish_confirmed:true,p_action:'PUBLISH'}));
+  });
+  it('allows DATA_MANAGER and rejects MODERATOR review/import even with a valid session',async()=>{
+    await isolated(async()=>{
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",['00000000-0000-0000-0000-000000000002']);
+      expect((await stage([row()])).counts.imported).toBe(1);
+    });
+    await isolated(async()=>{
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",['00000000-0000-0000-0000-000000000003']);
+      await expect(plan([row()])).rejects.toThrow('Staff');
+    });
+  });
+  it('requires explicit publication confirmation even for verified staff imports',()=>isolated(async()=>{
+    const id=(await stage([row()])).rows[0].id;await review([id],'VERIFY');
+    await expect(review([id],'PUBLISH',false)).rejects.toThrow('confirmation');
+  }));
+  it('publishes qualified CA amounts with exact provenance and never replaces UNKNOWN by zero',()=>isolated(async()=>{
+    const r={...row(),data:{...row().data,total_realized:null,operating_realized:0},precision:{...row().precision,total_realized:'UNKNOWN',operating_realized:'EXACT',investment_realized:'LOWER_BOUND',total_planned:'APPROXIMATE'}};
+    const id=(await stage([r])).rows[0].id;await review([id],'VERIFY');
+    expect((await review([id],'PUBLISH')).rows[0].status).toBe('PUBLISHED');
+    await db.exec('reset role');const result=(await db.query<any>('select * from public.administrative_accounts')).rows[0];
+    expect(result.total_realized).toBeNull();expect(result.operating_realized).toBe(0);expect(result.import_provenance.precision).toEqual(r.precision);
+  }));
   it('feeds published remote budgets into the existing public history only',()=>{
     const pilot=LOCAL_BUDGETS_REFERENTIAL.find(b=>b.institution_id==='inst-com-bingerville')!;
     try {
@@ -92,7 +129,7 @@ describe('Controlled real data import',()=>{
     const rows=budgets.map(b=>({kind:'BP',institution_id:b.institution_id,institution_type:b.institution_type,fiscal_year:b.fiscal_year,source:{name:b.primary_source_label,reference:b.primary_source_url,date:b.updated_at.slice(0,10),date_kind:'RECORDED',url:b.primary_source_url},data:{budget_type:b.budget_type,version_number:b.version_number,total_amount:b.total_amount,operating_amount:b.institution_id==='inst-com-cocody'?null:b.operating_amount,investment_amount:b.institution_id==='inst-com-cocody'?null:b.investment_amount,verification_status:b.verification_status,confidence_level:b.confidence_level},precision:{total_amount:b.amount_precision,operating_amount:b.institution_id==='inst-com-cocody'?'UNKNOWN':b.amount_precision,investment_amount:b.institution_id==='inst-com-cocody'?'UNKNOWN':b.amount_precision}}));
     const p=await stage(rows);expect(p.counts.imported).toBe(2);
     const ids=p.rows.map((r:any)=>r.id);await review(ids,'VERIFY');const published=await review(ids,'PUBLISH');
-    expect(published.rows[0].status).toBe('ERROR');expect(published.rows[1].status).toBe('PUBLISHED');
+    expect(published.rows[0].status).toBe('PUBLISHED');expect(published.rows[1].status).toBe('PUBLISHED');
   }));
   it('rejects direct mutation and anonymous execution',async()=>{
     for(const statement of ["insert into public.data_import_rows(id,payload) values ('forged','{}')","select public.import_data_batch('[]')"]){
@@ -111,22 +148,22 @@ describe('Controlled real data import',()=>{
     const invalid={...row(),source:{...row().source,date:'2024-02-30'}};
     const p=await stage([row(),row(),invalid]);expect(p.counts).toMatchObject({imported:1,ignored:1,errors:1});
     expect((await stage([row()])).counts.ignored).toBe(1);
-    const changed=row();changed.data.total_realized++;
+    const changed=row();changed.data.total_realized = changed.data.total_realized! + 1;
     expect((await stage([changed])).counts.conflicts).toBe(1);
   }));
   it('refuses both conflicting duplicates regardless of order',()=>isolated(async()=>{
-    const changed=row();changed.data.total_realized++;
+    const changed=row();changed.data.total_realized = changed.data.total_realized! + 1;
     for(const rows of [[row(),changed],[changed,row()]]) expect((await stage(rows)).counts.conflicts).toBe(2);
   }));
   it('requires source, explicit matching institution type, precision and rejects injected fields',()=>isolated(async()=>{
     const candidates=[{...row(),source:{}},{...row(),institution_type:'REGIONAL_COUNCIL'},{...row(),precision:{}},{...row(),data:{...row().data,status:'PUBLISHED'}},{...row(),data:{...row().data,total_realized:1.5}}];
     expect((await stage(candidates)).counts.errors).toBe(candidates.length);
   }));
-  it('keeps UNKNOWN null and non-exact values in staging without inventing legacy amounts',()=>isolated(async()=>{
+  it('preserves UNKNOWN null through explicit publication',()=>isolated(async()=>{
     const r={...row(),data:{...row().data,total_realized:null},precision:{...row().precision,total_realized:'UNKNOWN'}};
     const result=await stage([r]);const id=result.rows[0].id;
     expect((await review([id],'VERIFY')).rows[0].status).toBe('VERIFIED');
-    expect((await review([id],'PUBLISH')).rows[0].status).toBe('ERROR');
+    expect((await review([id],'PUBLISH')).rows[0].status).toBe('PUBLISHED');
     expect((await db.query<any>('select payload from public.data_import_rows')).rows[0].payload.data.total_realized).toBeNull();
   }));
   it('separates verification from publication, preserves provenance and prevents duplicate promotion',()=>isolated(async()=>{

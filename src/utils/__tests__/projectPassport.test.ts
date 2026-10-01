@@ -14,6 +14,18 @@ import { BudgetProject, CitizenProof } from '../../types';
 import type { AdministrativeAccount, CAInvestmentOperation } from '../../types/administrativeAccount';
 
 describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
+  it('ne déduit ni zéro ni réalisation à partir des montants CA/DGMP qualifiés', () => {
+    const accounts=structuredClone(CA_PILOT_FIXTURES);
+    const op=accounts.find(ca=>ca.id==='ca-tiassale-2024')!.operations[2];
+    op.executed_amount=null;op.import_provenance={precision:{executed_amount:'UNKNOWN',planned_amount:'APPROXIMATE'}};
+    op.procurement_match!.import_provenance={precision:{award_amount:'LOWER_BOUND'}};
+    const passport=generateProjectPassport(mockGardienkroProject,[],accounts);
+    expect(passport.facts.executed_amount.amount_precision).toBe('UNKNOWN');
+    expect(passport.facts.financial_status.value).toBeNull();
+    expect(passport.facts.physical_status.value).toBeNull();
+    expect(passport.stages.find(stage=>stage.id==='BUDGET_EXECUTION_CA')!.dataPoints.some(point=>point.value==='Montant à confirmer')).toBe(true);
+    expect(passport.stages.find(stage=>stage.id==='PROCUREMENT_DGMP')!.dataPoints.some(point=>point.value.startsWith('Plus de '))).toBe(true);
+  });
   it('conserve zéro, la page et la source sans inventer un état physique ou un document relié', () => {
     const passport = generateProjectPassport(mockGardienkroProject);
     expect(passport.facts.executed_amount.value).toBe(0);
@@ -60,7 +72,7 @@ describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
   it('préserve les trois rapprochements documentés Tiassalé sans déduire la réalisation', () => {
     const account = CA_PILOT_FIXTURES.find(ca => ca.id === 'ca-tiassale-2024')!;
     for (const operation of account.operations) {
-      const passport = generateProjectPassport({ ...mockTiassaleProject2024, title: operation.title, budget_amount_fcfa: operation.planned_amount }, [], CA_PILOT_FIXTURES);
+      const passport = generateProjectPassport({ ...mockTiassaleProject2024, title: operation.title, budget_amount_fcfa: operation.planned_amount! }, [], CA_PILOT_FIXTURES);
       expect(passport.matchResult?.confidence).toBe('STRONG');
       expect(passport.facts.contract_reference.value).toBe(operation.procurement_match?.tender_number);
       expect(passport.facts.supplier.value).toBe(operation.procurement_match?.contractor);
@@ -381,7 +393,7 @@ describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
         ...mockTiassaleProject2024,
         id: operation.linked_project_id || `test-${operation.id}`,
         title: operation.title,
-        budget_amount_fcfa: operation.planned_amount,
+        budget_amount_fcfa: operation.planned_amount!,
       };
       const normal = findMatchingCaOperationResult(project, CA_PILOT_FIXTURES);
       const reversedAccount = { ...structuredClone(account), operations: [...structuredClone(account.operations)].reverse() };

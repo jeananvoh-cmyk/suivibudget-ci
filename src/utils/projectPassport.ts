@@ -13,7 +13,8 @@ import { BudgetProject, CitizenProof } from '../types';
 import { AdministrativeAccount, CAInvestmentOperation, ProcurementMatch } from '../types/administrativeAccount';
 import { ADMINISTRATIVE_ACCOUNTS_DATA } from '../data/administrativeAccountsData';
 import { matchesSmartSearch, normalizeSearchText, extractWords } from './searchHelpers';
-import { formatFCFA } from './formatters';
+import type { AmountPrecision } from '../types/localBudget';
+import { formatFCFA, formatRecordAmount, amountPrecision, isExactAmount } from './formatters';
 
 export type PassportStageStatus = 
   | 'VERIFIED_OFFICIAL'     // Documenté avec source officielle vérifiable
@@ -51,6 +52,7 @@ export interface CaOperationMatchResult {
 }
 
 export interface PassportFact {
+  amount_precision?: AmountPrecision;
   label: string;
   value: string | number | null;
   availability: 'AVAILABLE' | 'UNKNOWN' | 'NOT_FOUND_PUBLICLY';
@@ -301,7 +303,7 @@ export function findMatchingCaOperationResult(project: BudgetProject, accounts =
   if (operation && project.institution_id && project.institution_id !== operation.institution_id) result.conflictingFields.push('institution_id');
   if (operation && project.locality_village_neighborhood && operation.location
     && normalizeSearchText(project.locality_village_neighborhood) !== normalizeSearchText(operation.location)) result.conflictingFields.push('localisation');
-  if (operation && project.budget_amount_fcfa !== operation.planned_amount) result.conflictingFields.push('budget_amount_vs_ca_planned');
+  if (operation && isExactAmount(operation, 'planned_amount') && project.budget_amount_fcfa !== operation.planned_amount) result.conflictingFields.push('budget_amount_vs_ca_planned');
   if (result.conflictingFields.includes('institution_id') || result.conflictingFields.includes('localisation') || !project.fiscal_year) {
     if (operation) result.confidence = 'TO_VERIFY';
     result.matchingReason += ' ; identité, localisation ou exercice à vérifier avant toute liaison affirmative';
@@ -370,7 +372,7 @@ export function generateProjectPassport(
     source_document_id: fact('Document source relié', caSource.source_document_id, 'OFFICIAL_SOURCE', caSource),
     source_page: fact('Page source', caSource.source_page, 'OFFICIAL_SOURCE', caSource),
     source_reference: fact('Libellé exact de la source', caSource.source_reference || project.source, 'OFFICIAL_SOURCE', account ? caSource : projectSource),
-    financial_status: fact('Situation financière', matchedOp ? (matchedOp.executed_amount === 0 ? 'CA_REPORTED_ZERO' : 'CA_REPORTED_EXECUTION') : null, 'SUIVIBUDGET_CALCULATION', caSource),
+    financial_status: fact('Situation financière', matchedOp && isExactAmount(matchedOp, 'executed_amount') ? (matchedOp.executed_amount === 0 ? 'CA_REPORTED_ZERO' : 'CA_REPORTED_EXECUTION') : null, 'SUIVIBUDGET_CALCULATION', caSource),
     physical_status: fact('Réalisation physique', approvedProofs.length ? 'CITIZEN_OBSERVATION' : project.official_progress_source ? 'OFFICIAL_DECLARATION' : null, approvedProofs.length ? 'CITIZEN_OBSERVATION' : project.official_progress_source ? 'OFFICIAL_SOURCE' : 'UNVERIFIED_INPUT', approvedProofs.length ? { ...emptySource, source_reference: `Constat citoyen ${approvedProofs[0].id}` } : project.official_progress_source ? { ...emptySource, source_reference: project.official_progress_source } : emptySource),
     citizen_evidence_status: fact('Preuves terrain', approvedProofs.length ? 'APPROVED' : 'NOT_FOUND_PUBLICLY', 'CITIZEN_OBSERVATION'),
     institution_response_status: fact('Réponse institutionnelle', response ? 'PUBLISHED' : 'NOT_FOUND_PUBLICLY', 'INSTITUTION_RESPONSE', response ? { ...emptySource, source_reference: response.supporting_document_name || response.response_text, source_url: response.supporting_document_url || null } : emptySource),
@@ -497,7 +499,7 @@ export function generateProjectPassport(
         },
         {
           label: 'Montant adjugé',
-          value: formatFCFA(matchedProc.award_amount),
+          value: formatRecordAmount(matchedProc, 'award_amount'),
           provenance: 'OFFICIAL_SOURCE',
         },
         {
@@ -556,7 +558,8 @@ export function generateProjectPassport(
   // RÈGLE : STRICTEMENT NEUTRE, AUCUNE INTERPRÉTATION CAUSALE ("REPORT PROBABLE" INTERDIT)
   // -------------------------------------------------------------------------
   if (matchedOp) {
-    const isZeroExecuted = matchedOp.executed_amount === 0;
+    const isZeroExecuted = isExactAmount(matchedOp, 'executed_amount') && matchedOp.executed_amount === 0;
+    const isUncertainExecuted = !isExactAmount(matchedOp, 'executed_amount');
     const isProbable = matchResult.confidence === 'PROBABLE';
 
     // Formulation factuelle et neutre obligatoire (Section 5.3)
@@ -569,8 +572,8 @@ export function generateProjectPassport(
       stepNumber: 4,
       label: 'Exécution Budgétaire (Compte Administratif)',
       shortDescription: 'Crédits mandatés et ordonnancés inscrits au Compte Administratif audité',
-      status: isZeroExecuted ? 'ANOMALY_DETECTED' : (isProbable ? 'PROBABLE_MATCH' : 'VERIFIED_OFFICIAL'),
-      statusLabel: isZeroExecuted ? 'Exécution financière à 0 FCFA' : (isProbable ? 'Opération CA Probable' : 'Mandaté au Compte Administratif'),
+      status: isUncertainExecuted ? 'PENDING_DOCUMENTATION' : isZeroExecuted ? 'ANOMALY_DETECTED' : (isProbable ? 'PROBABLE_MATCH' : 'VERIFIED_OFFICIAL'),
+      statusLabel: isUncertainExecuted ? 'Montant d’exécution qualifié ou à confirmer' : isZeroExecuted ? 'Exécution financière à 0 FCFA' : (isProbable ? 'Opération CA Probable' : 'Mandaté au Compte Administratif'),
       alertMessage,
       dataPoints: [
         {
@@ -585,12 +588,12 @@ export function generateProjectPassport(
         },
         {
           label: 'Crédits prévus au CA',
-          value: formatFCFA(matchedOp.planned_amount),
+          value: formatRecordAmount(matchedOp, 'planned_amount'),
           provenance: 'OFFICIAL_SOURCE',
         },
         {
           label: 'Montant effectivement ordonnancé',
-          value: formatFCFA(matchedOp.executed_amount),
+          value: formatRecordAmount(matchedOp, 'executed_amount'),
           provenance: 'OFFICIAL_SOURCE',
           sourceDetails: `Page ${matchedOp.source_page || 'CA'} du Compte Administratif officiel`,
         },
@@ -726,6 +729,8 @@ export function generateProjectPassport(
   ).length;
   const documentationCompletenessPct = Math.round((documentedStagesCount / stages.length) * 100);
 
+  facts.procurement_amount.amount_precision = matchedProc ? amountPrecision(matchedProc, 'award_amount') : 'UNKNOWN';
+  facts.executed_amount.amount_precision = matchedOp ? amountPrecision(matchedOp, 'executed_amount') : 'UNKNOWN';
   return {
     facts,
     projectId: project.id,

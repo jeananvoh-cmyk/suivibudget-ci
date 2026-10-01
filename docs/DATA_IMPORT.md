@@ -1,6 +1,8 @@
 # Import contrôlé BP / CA / opérations / DGMP
 
-Le pipeline est un outil opérateur en ligne de commande, connecté uniquement à `cdesuvcozcetdtvibgqs`. Il ne lance aucune collecte automatique. Les tables métier et leur lecture publique existante sont conservées. Le chargement des BP publiés depuis Supabase alimente maintenant aussi l’historique budgétaire de la fiche collectivité.
+Le pipeline est accessible depuis « Console données » dans l’administration (ADMIN/DATA_MANAGER), ainsi qu’en ligne de commande, uniquement sur `cdesuvcozcetdtvibgqs`. Aucune collecte automatique. La console utilise la session Auth et les mêmes RPC/RLS que la CLI, sans clé service_role.
+
+Charger un fichier JSON/JSONL ou coller le lot, simuler sans écrire, relire les résultats ligne par ligne puis importer les lignes prêtes. Toute modification du contenu invalide la simulation. La liste privée est paginée par 25 lignes et filtrable par statut. Chaque détail conserve source, date, précision et historique. Vérifier, rejeter et publier sont des décisions séparées avec motif ; publier exige une case de confirmation explicite, également contrôlée côté serveur.
 
 ## Utilisation
 
@@ -11,7 +13,7 @@ npm run import:data -- dry-run lot.json plan.json
 npm run import:data -- import lot.json plan.json
 npm run import:data -- list
 npm run import:data -- verify import-<identifiant retourné> "Source et contrôles effectués"
-npm run import:data -- publish import-<identifiant retourné> "Décision explicite de publication"
+npm run import:data -- publish import-<identifiant retourné> "Décision explicite de publication" --confirm-publication
 npm run import:data -- reject import-<identifiant retourné> "Motif documenté"
 ```
 
@@ -52,7 +54,7 @@ Import → TO_VERIFY ; décision VERIFY → VERIFIED ; décision PUBLISH sépar�
 
 Pour les dépendances, importer/publier d’abord le CA puis reprendre son identifiant dans `ca_id` ; publier l’opération puis reprendre son identifiant dans `operation_id`. Institution et exercice doivent correspondre exactement. Un BP ne devient jamais un CA automatiquement. Un lien DGMP nécessite `STRONG`, une opération publiée compatible et une preuve de rapprochement relue (`match_evidence`). PARTIAL/NONE/TO_VERIFY restent privés. Le pipeline ne calcule aucun rapprochement automatique.
 
-Un BP peut publier une précision connue homogène EXACT/APPROXIMATE/LOWER_BOUND. Une ventilation absente ou des précisions différentes restent en staging. Les écrans CA/opérations/DGMP actuels supposent des montants exacts : leurs montants qualifiés ou UNKNOWN sont conservés en staging, avec refus explicite de publication. Cette limite évite de présenter un montant incertain comme exact. Les champs monétaires obligatoires doivent être sourcés avant publication ; les autres restent NULL, y compris les anciens champs dont le défaut SQL était zéro.
+BP, CA, opérations et DGMP restituent la précision par champ : EXACT affiche le montant, APPROXIMATE « Environ », LOWER_BOUND « Plus de », UNKNOWN « Montant à confirmer ». UNKNOWN exige null, jamais un zéro inventé ; un zéro exact documenté reste affiché. Les champs monétaires requis doivent être présents et qualifiés, même inconnus. Les champs facultatifs absents restent NULL. Taux, écarts et pourcentages ne sont calculés que sur des montants exacts disponibles. Aucune précision financière ne prouve la réalisation physique.
 
 Une identité déjà importée à contenu identique est ignorée ; un contenu différent produit un conflit sans remplacement. Les doublons contradictoires dans le même lot sont refusés indépendamment de l’ordre. Les données canoniques déjà présentes produisent également un conflit, même si leurs anciens identifiants diffèrent. Pas de remplacement automatique ni de correction d’une version immuable : les conflits demandent une décision de révision dédiée, hors de ce pipeline initial. REJECT conserve le contenu et le motif ; il ne libère pas l’identité pour un écrasement.
 

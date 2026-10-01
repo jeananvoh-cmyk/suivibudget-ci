@@ -37,7 +37,9 @@ async function main() {
     result = await request('data_import_rows?select=*&order=created_at.desc&limit=100');
   } else if (['verify','publish','reject'].includes(command)) {
     if (!file || !extra) throw new Error('Identifiants et motif de relecture requis.');
-    result = await request('rpc/review_data_import', { p_ids: file.split(','), p_action: command.toUpperCase(), p_reason: extra });
+    const confirmed = process.argv.includes('--confirm-publication');
+    if (command === 'publish' && !confirmed) throw new Error('Publication : relire les sources puis ajouter --confirm-publication.');
+    result = await request('rpc/review_data_import', { p_ids: file.split(','), p_action: command.toUpperCase(), p_reason: extra, p_publish_confirmed: confirmed });
   } else {
     if (!file || !extra) throw new Error('Fichier de lot et chemin du plan requis.');
     if ((await stat(file)).size > 1_000_000) throw new Error('Lot limité à 1 Mo et 100 lignes.');

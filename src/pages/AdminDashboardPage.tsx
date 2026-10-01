@@ -12,6 +12,7 @@ import { DocumentManager } from '../components/DocumentManager';
 import { CaidpAnalyticsManager } from '../components/CaidpAnalyticsManager';
 import { PrimitiveBudgetImporterModal } from '../components/PrimitiveBudgetImporterModal';
 import { AdminActionHeader } from '../components/admin/AdminActionHeader';
+import { DataImportConsole } from '../components/admin/DataImportConsole';
 import { AdminWorkQueue } from '../components/admin/AdminWorkQueue';
 import { AdminGlobalSearchModal } from '../components/admin/AdminGlobalSearchModal';
 import { AdministrativeAccountsAdminManager } from '../components/admin/AdministrativeAccountsAdminManager';
@@ -72,7 +73,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   onOpenShare,
 }) => {
   const auth = dataStore.getAuth();
-  const [adminTab, setAdminTab] = useState<'work_queue' | 'caidp_manager' | 'caidp_analytics' | 'documents_manager' | 'comptes_administratifs' | 'moderation' | 'budget_table' | 'institutions_manager' | 'news_manager' | 'social_generator' | 'site_settings' | 'digital_opportunities' | 'team_moderators'>(
+  const [adminTab, setAdminTab] = useState<'data_import' | 'work_queue' | 'caidp_manager' | 'caidp_analytics' | 'documents_manager' | 'comptes_administratifs' | 'moderation' | 'budget_table' | 'institutions_manager' | 'news_manager' | 'social_generator' | 'site_settings' | 'digital_opportunities' | 'team_moderators'>(
     auth.role === 'MODERATOR' ? 'work_queue' : 'caidp_manager'
   );
   
@@ -1449,6 +1450,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       {/* ========================================================================= */}
       {/* TAB -1: OPERATIONAL WORK QUEUE */}
       {/* ========================================================================= */}
+      {(auth.role === 'ADMIN' || auth.role === 'DATA_MANAGER') && <button className="my-4 min-h-[44px] rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-blue" onClick={() => setAdminTab('data_import')}>Console données</button>}
+      {adminTab === 'data_import' && (auth.role === 'ADMIN' || auth.role === 'DATA_MANAGER') && <DataImportConsole role={auth.role} />}
       {adminTab === 'work_queue' && (
         <AdminWorkQueue
           currentUserEmail={auth.email}

@@ -4,6 +4,7 @@
 // =========================================================================
 
 import { ExecutionRateResult } from '../types/administrativeAccount';
+import type { AmountPrecision } from '../types/localBudget';
 
 /**
  * Calcule dynamiquement le taux d'exécution financière
@@ -15,7 +16,10 @@ import { ExecutionRateResult } from '../types/administrativeAccount';
  * - Si realized_amount > planned_amount : alerte civique "À vérifier / Réalisé supérieur au prévu",
  *   sans jamais formuler d'accusation.
  */
-export function calculateExecutionRate(realizedAmount: number, plannedAmount: number): ExecutionRateResult {
+export function calculateExecutionRate(realizedAmount: number | null | undefined, plannedAmount: number | null | undefined, realizedPrecision: AmountPrecision = 'EXACT', plannedPrecision: AmountPrecision = 'EXACT'): ExecutionRateResult {
+  if (realizedAmount == null || plannedAmount == null || !Number.isFinite(realizedAmount) || !Number.isFinite(plannedAmount) || realizedPrecision !== 'EXACT' || plannedPrecision !== 'EXACT') {
+    return { rate: null, formatted: 'Non calculable', status: 'UNKNOWN', isOverBudget: false, statusLabel: 'Montants à confirmer ou qualifiés : taux non calculé', badgeClass: 'bg-slate-100 text-slate-700 border-slate-300' };
+  }
   // Protection contre les valeurs négatives ou non définies
   const realized = Math.max(0, realizedAmount || 0);
   const planned = Math.max(0, plannedAmount || 0);
@@ -96,7 +100,8 @@ export function calculateExecutionRate(realizedAmount: number, plannedAmount: nu
 /**
  * Retourne la classe CSS de badge selon le statut et le taux
  */
-export function getExecutionRateBadgeColor(status: ExecutionRateResult['status'], rate: number): string {
+export function getExecutionRateBadgeColor(status: ExecutionRateResult['status'], rate: number | null): string {
+  if (status === 'UNKNOWN' || rate == null) return 'bg-slate-100 text-slate-700 border-slate-300';
   if (status === 'OVER_EXECUTED') return 'bg-purple-100 text-purple-900 border-purple-300';
   if (status === 'ZERO_PLANNED' || status === 'ZERO_EXECUTED') return 'bg-slate-100 text-slate-700 border-slate-300';
   if (rate >= 80) return 'bg-emerald-100 text-emerald-800 border-emerald-300';
@@ -109,6 +114,7 @@ export function getExecutionRateBadgeColor(status: ExecutionRateResult['status']
  */
 export function getExecutionStatusLabel(status: ExecutionRateResult['status']): string {
   switch (status) {
+    case 'UNKNOWN': return 'Montants à confirmer ou qualifiés : taux non calculé';
     case 'OVER_EXECUTED': return 'À vérifier : Réalisé supérieur au montant prévu';
     case 'ZERO_PLANNED': return 'Non budgétisé';
     case 'ZERO_EXECUTED': return 'Aucune dépense exécutée';

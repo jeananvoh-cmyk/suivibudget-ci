@@ -169,6 +169,7 @@ export interface LocalBudgetSourceRef {
  * - La précision rigoureuse (sans invention de centimes)
  */
 export interface LocalBudget {
+  import_provenance?: ImportProvenance;
   id: string;
   institution_id: string;
   institution_type: LocalInstitutionType;
@@ -180,11 +181,11 @@ export interface LocalBudget {
   version_number: number;         // 1, 2, 3...
   
   // Montants consolidés
-  total_amount: number;
-  operating_amount: number;       // Dépenses de fonctionnement
-  investment_amount: number;      // Dépenses d'investissement
-  operating_percentage: number;   // Calculé dynamiquement (operating_amount / total_amount * 100)
-  investment_percentage: number;  // Calculé dynamiquement (investment_amount / total_amount * 100)
+  total_amount: number | null;
+  operating_amount: number | null;       // Dépenses de fonctionnement
+  investment_amount: number | null;      // Dépenses d'investissement
+  operating_percentage: number | null;   // Calculé dynamiquement (operating_amount / total_amount * 100)
+  investment_percentage: number | null;  // Calculé dynamiquement (investment_amount / total_amount * 100)
   amount_precision: AmountPrecision;
 
   // Dates clés du cycle budgétaire
@@ -229,4 +230,11 @@ export interface BudgetCoherenceIssue {
   institution_id?: string;
   fiscal_year?: number;
   details?: Record<string, any>;
+}
+
+export interface ImportProvenance {
+  precision: Partial<Record<string, AmountPrecision>>;
+  source?: { name: string; reference: string; date: string; date_kind: string; url?: string };
+  import_id?: string;
+  match_evidence?: string;
 }
