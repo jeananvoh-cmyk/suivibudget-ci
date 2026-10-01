@@ -37,6 +37,7 @@ import { AdministrativeAccountView } from './AdministrativeAccountView';
 import { LocalBudgetHistoryView } from './LocalBudgetHistoryView';
 import { getLatestAvailableCA, hasCA } from '../data/administrativeAccountsData';
 import { OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
+import { ApecParticipation } from './ApecParticipation';
 
 interface InstitutionDetailModalProps {
   isOpen: boolean;
@@ -44,7 +45,7 @@ interface InstitutionDetailModalProps {
   institution: Institution | null;
   allProjects: BudgetProject[];
   onNavigateToProjects: (query: string) => void;
-  initialTab?: 'PROJECTS' | 'FINANCES' | 'LEADER_MISSIONS';
+  initialTab?: 'PROJECTS' | 'FINANCES' | 'LEADER_MISSIONS' | 'APEC';
   initialFinanceSubTab?: 'BUDGET_2026' | 'EXECUTION' | 'HISTORY';
 }
 
@@ -136,8 +137,8 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   initialTab,
   initialFinanceSubTab,
 }) => {
-  // 3 Primary Consolidate Tabs (NO 4th main tab)
-  const [activeTab, setActiveTab] = useState<'PROJECTS' | 'FINANCES' | 'LEADER_MISSIONS'>(initialTab || 'PROJECTS');
+  const [activeTab, setActiveTab] = useState<'PROJECTS' | 'FINANCES' | 'LEADER_MISSIONS' | 'APEC'>(initialTab || 'PROJECTS');
+  const [apecYear,setApecYear] = useState(String(new Date().getFullYear()));
   const [financeSubTab, setFinanceSubTab] = useState<'BUDGET_2026' | 'EXECUTION' | 'HISTORY'>(initialFinanceSubTab || 'BUDGET_2026');
   const [docModalOpen, setDocModalOpen] = useState(false);
   const [selectedProjectForDoc, setSelectedProjectForDoc] = useState<BudgetProject | null>(null);
@@ -519,7 +520,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
         {/* ========================================================= */}
         {/* 2. BARRE DE NAVIGATION EN 3 ONGLETS MAJEURS (SANS CLUTTER) */}
         {/* ========================================================= */}
-        <div className="px-4 sm:px-6 bg-white border-b border-slate-200 flex items-center gap-2 overflow-x-auto scrollbar-none flex-shrink-0">
+        <div className="px-4 sm:px-6 bg-white border-b border-slate-200 grid grid-cols-2 sm:flex sm:items-center gap-2 sm:overflow-x-auto scrollbar-none flex-shrink-0">
           {[
             { 
               id: 'PROJECTS', 
@@ -538,11 +539,12 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                      institution.type === 'MAIRIE' ? 'Le Maire & Organisation' : 'Direction & Missions',
               badge: undefined
             },
+            ...(['MAIRIE','REGION'].includes(institution.type) ? [{id:'APEC',label:'Participation APEC',badge:undefined}] : []),
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`py-3 px-3 sm:px-4 text-xs font-black uppercase tracking-wider transition-all border-b-2 whitespace-nowrap flex items-center gap-2 cursor-pointer ${
+              onClick={() => setActiveTab(tab.id as typeof activeTab)}
+              className={`min-h-[44px] py-3 px-3 sm:px-4 text-xs font-black uppercase tracking-wider transition-all border-b-2 whitespace-normal sm:whitespace-nowrap flex flex-wrap sm:flex-nowrap items-center gap-2 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600 ${
                 activeTab === tab.id
                   ? 'border-brand-blue text-brand-blue bg-blue-50/50'
                   : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-50'
@@ -564,6 +566,14 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
         {/* 3. CONTENU DES 3 ONGLETS HARMONISÉS */}
         {/* ========================================================= */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-5 flex-1 bg-slate-50/70">
+          {activeTab==='APEC' && ['MAIRIE','REGION'].includes(institution.type) && <div className="space-y-4">
+            <label className="block text-sm font-semibold">Exercice de participation
+              <input type="number" min={2000} max={2100} value={apecYear} onChange={e=>setApecYear(e.target.value)} className="ml-3 min-h-[44px] w-28 rounded-lg border border-slate-300 px-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"/>
+            </label>
+            {Number.isInteger(Number(apecYear)) && Number(apecYear)>=2000 && Number(apecYear)<=2100
+              ? <ApecParticipation key={`${institution.id}:${apecYear}`} institutionId={institution.id} fiscalYear={Number(apecYear)}/>
+              : <p role="status">Choisissez un exercice entre 2000 et 2100.</p>}
+          </div>}
 
           {/* ========================================================= */}
           {/* TAB 1 : CHANTIERS & PROJETS CONCRETS */}

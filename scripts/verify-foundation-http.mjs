@@ -192,6 +192,18 @@ async function cleanup() {
   process.exit(0);
 }
 
+if (process.argv[2] === 'apec-public') {
+  const client = makeClient();
+  const rows = await client.from('apec_public_needs').select('*').limit(10);
+  check('apec-public-projection-readable', !rows.error && rows.data.every(row => row.status === 'PUBLISHED' && !('user_id' in row) && !('actor_id' in row)));
+  const deletion = await client.from('apec_public_needs').delete().eq('need_id','00000000-0000-0000-0000-000000000000');
+  check('apec-public-anon-delete-denied', deletion.error?.code === '42501');
+  const publication = await client.rpc('publish_apec_need',{p_need_id:'00000000-0000-0000-0000-000000000000',p_title:'Non-writing probe',p_summary:'Non-writing probe',p_source_reference:'Probe',p_source_date:'2026-10-01',p_privacy_reviewed:true});
+  check('apec-public-anon-publish-denied', publication.error?.code === '42501');
+  const withdrawal = await client.rpc('withdraw_apec_need',{p_need_id:'00000000-0000-0000-0000-000000000000',p_reason:'Non-writing probe'});
+  check('apec-public-anon-withdraw-denied', withdrawal.error?.code === '42501');
+  process.exit(results.some(result => !result.pass) ? 1 : 0);
+}
 if (process.argv[2] === 'apec') {
   const client = makeClient();
   const cycles = await client.from('apec_cycles').select('id').limit(1);

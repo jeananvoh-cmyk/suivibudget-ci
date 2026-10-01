@@ -1,5 +1,17 @@
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
+## 1er octobre — APEC produit citoyen, après #6
+
+#6 fusionnée sur autorisation, master synchronisé à `3958dd17639f61e381da755a8826abb342580b37` sans perte locale. Contrôle unique après fusion : 145 tests et TypeScript/build PASS. Branche produit `codex/apec-collectivities-publication` ; nouvelle PR à laisser ouverte, sans fusion.
+
+Entrée Participation APEC depuis les fiches communes/régions même sans projet, filtre d’exercice éditable et accès Passport conservé. Dépôt, suivi privé, contributions et décisions sourcées préservés. Publication séparée : besoin VERIFIED, résumé rédigé spécifiquement pour le public, confirmation explicite d’absence de données privées, RPC réservées ADMIN/DATA_MANAGER. Projection de dix champs sans identité/contact des originaux, provenance CITIZEN_OBSERVATION permanente, retrait et versions conservées dans l’historique privé. L’anonymisation du texte libre requiert une relecture humaine ; aucune publication automatique.
+
+Migration additive `20261001043805_apec_moderated_publication.sql` APPLIED une seule fois sous version distante `20261001044508` sur cdesuvcozcetdtvibgqs. Aucune migration antérieure rejouée, aucune ingestion ni fixture de production. Zéro résumé public/besoin privé, trois CA préservés au contrôle distant.
+
+Validation finale : 150 tests / 10 fichiers dont 27 PostgreSQL PASS, TypeScript et Vite build PASS (1724 modules). Quatre contrôles HTTP publics ciblés PASS. Fiches communes/régions sans projet vérifiées sur huit largeurs 360 à 1920 px, sans débordement ni erreur JS, captures 375/1440 inspectées ; navigation mobile en grille. Publication/retrait, parcours staff, connexion/dépôt et maintien Passport vérifiés avec API interceptée localement, état vide réel vérifié sur Supabase. Advisors : quatre RPC SECURITY DEFINER intentionnelles protégées par profiles/search_path/grants, avertissement Auth préexistant inchangé. Aucun autre signal sécurité. Bundles de données volumineux préexistants.
+
+Relais : AGENT_HANDOFF.md porte les versions APPLIED et les prochaines tâches. Vérifier la CI du HEAD poussé sans boucle de commits de hash ; ne pas fusionner cette nouvelle PR.
+
 ## 1er octobre — consolidation master et APEC Phase 2C
 
 Sur autorisation explicite, #3 → #4 → #5 fusionnées dans cet ordre, avec retarget des deux PR empilées vers master. HEAD consolidé `4aed61d18d4ebf139009dc3d72e5bbebda994380`, arbre identique à #5, CI Quality SUCCESS (run 36786596459). Les audits antérieurs n’ont pas été recommencés ; aucune migration APPLIED rejouée.

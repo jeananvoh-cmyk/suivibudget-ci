@@ -462,7 +462,7 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
       {/* ------------------------------------------------------------------ */}
       {/* CIVIC DISCLAIMER & METHODOLOGY NOTE                                */}
       {/* ------------------------------------------------------------------ */}
-      {project.institution_id && project.fiscal_year > 0 && <ApecParticipation key={`${project.institution_id}:${project.fiscal_year}`} project={project} />}
+      {project.institution_id && project.fiscal_year > 0 && <ApecParticipation key={`${project.institution_id}:${project.fiscal_year}`} institutionId={project.institution_id} fiscalYear={project.fiscal_year} />}
       <footer className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-1.5">
         <div className="font-bold text-slate-800 flex items-center gap-1.5">
           <Scale className="w-4 h-4 text-emerald-600" />

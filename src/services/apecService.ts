@@ -1,10 +1,12 @@
 import { supabase } from './supabase';
-import type { ApecContribution, ApecCycle, ApecDecision, ApecEvent, ApecNeed } from '../types';
+import type { ApecContribution, ApecCycle, ApecDecision, ApecEvent, ApecNeed, ApecPublicNeed } from '../types';
 
 export async function loadApec(institutionId: string, fiscalYear: number) {
   const { data: { user } } = await supabase.auth.getUser();
   const cycles = await supabase.from('apec_cycles').select('*').eq('institution_id', institutionId).eq('fiscal_year', fiscalYear).order('created_at');
   if (cycles.error) throw cycles.error;
+  const publicNeeds = await supabase.from('apec_public_needs').select('*').eq('institution_id',institutionId).eq('fiscal_year',fiscalYear).eq('status','PUBLISHED').order('reviewed_at',{ascending:false});
+  if(publicNeeds.error) throw publicNeeds.error;
   let canManage = false;
   let needs: ApecNeed[] = [];
   if (user) {
@@ -19,7 +21,7 @@ export async function loadApec(institutionId: string, fiscalYear: number) {
       needs = result.data as ApecNeed[];
     }
   }
-  return { cycles: cycles.data as ApecCycle[], needs, canManage, signedIn: Boolean(user) };
+  return { cycles: cycles.data as ApecCycle[], publicNeeds: publicNeeds.data as ApecPublicNeed[], needs, canManage, signedIn: Boolean(user) };
 }
 
 export async function loadApecHistory(needId: string, canManage = false) {
@@ -59,4 +61,14 @@ export async function recordApecDecision(input: { needId: string; action: ApecDe
     p_priority:input.priority ?? null, p_project_id:input.projectId || null, p_local_budget_id:input.budgetId || null, p_contribution_id:input.contributionId || null,
   });
   if (error) throw error;
+}
+
+export async function publishApecNeed(input: {needId:string;title:string;summary:string;source:string;date:string;privacyReviewed:boolean}) {
+  const {error}=await supabase.rpc('publish_apec_need',{p_need_id:input.needId,p_title:input.title,p_summary:input.summary,p_source_reference:input.source,p_source_date:input.date,p_privacy_reviewed:input.privacyReviewed});
+  if(error) throw error;
+}
+
+export async function withdrawApecNeed(needId:string,reason:string) {
+  const {error}=await supabase.rpc('withdraw_apec_need',{p_need_id:needId,p_reason:reason});
+  if(error) throw error;
 }

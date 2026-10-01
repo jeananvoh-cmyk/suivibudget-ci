@@ -120,6 +120,19 @@ export interface ApecContribution {
   created_at: string;
 }
 
+export interface ApecPublicNeed {
+  need_id: string;
+  institution_id: string;
+  fiscal_year: number;
+  title: string;
+  summary: string;
+  source_reference: string;
+  source_date: string;
+  provenance: 'CITIZEN_OBSERVATION';
+  status: 'PUBLISHED';
+  reviewed_at: string;
+}
+
 export type ApecDecision = 'VERIFY' | 'REJECT' | 'PRIORITIZE' | 'LINK' | 'RESPONSE' | 'FOLLOW_UP' | 'VERIFY_CONTRIBUTION' | 'REJECT_CONTRIBUTION';
 
 export interface ApecEvent {
