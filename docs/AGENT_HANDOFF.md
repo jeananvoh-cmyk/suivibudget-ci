@@ -2,16 +2,32 @@
 
 ## METADATA
 - LAST_UPDATED : 2026-10-01
-- LAST_AGENT : Codex
-- CURRENT_BRANCH : `codex/import-console-amount-precision`
-- HANDOFF_BASE_SHA : `8e934d19dcdbf0172259d4028aa969cb29084918` (master après fusion #8)
-- CURRENT_HEAD : retrouver le HEAD de cette branche dans Git ; validations locales terminées, CI à vérifier après push.
-- PR : #3/#4/#5/#6/#7/#8 fusionnées. Console proposée séparément sur master ; ne pas fusionner sa nouvelle PR.
+- LAST_AGENT : Antigravity
+- CURRENT_BRANCH : `antigravity/first-real-data-pilot`
+- HANDOFF_BASE_SHA : `cef34418659698c199bb644b92b67879e6056ce4` (master après fusion #9)
+- CURRENT_HEAD : retrouver le HEAD de cette branche dans Git ; validations locales terminées, suite de tests 179/179 PASS.
+- PR : PR #9 fusionnée. Nouvelle PR `antigravity/first-real-data-pilot` ouverte vers master ; ne pas fusionner.
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : console données privée et restitution citoyenne des montants qualifiés terminées
+- CURRENT_MILESTONE : premier lot réel de bout en bout (BP, CA, DGMP) validé sur le pipeline de données réelles
 - FOUNDATION_READY : TRUE, validé sur 3b502b1 après CI SUCCESS. Aucun P0/P1 connu ouvert dans la fondation.
 
 ## COMPLETED
+### Premier lot réel de bout en bout — 1er octobre, après #9
+- Master basé sur `cef3441` (PR #9 fusionnée). Aucun travail antérieur Codex réaudité ou écrasé.
+- Branche `antigravity/first-real-data-pilot` créée et synchronisée sur GitHub (`4c44cb2` initial).
+- Trois fichiers de lots réels documentés et vérifiés créés dans `docs/imports/` :
+  1. `docs/imports/bingerville-bp-2026.json` : BP 2026 Bingerville (Total: 4 046 222 000 FCFA EXACT, Fonctionnement: 1 877 888 000 FCFA EXACT, Investissement: 2 168 334 000 FCFA EXACT). Source AIP 2026-01-28. Non conflictuel (0 ligne dans local_budgets).
+  2. `docs/imports/cocody-bp-2026.json` : BP 2026 Cocody (Total: 19 764 660 000 FCFA EXACT, Fonctionnement: null UNKNOWN, Investissement: null UNKNOWN). Source Abidjan.net / Le Nouveau Réveil 2026-02-25. Démontre la règle fondamentale `UNKNOWN != 0` (restitution citoyenne "Montant à confirmer", zéro exact distinct).
+  3. `docs/imports/tiassale-ca-2024.json` : CA 2024 Tiassalé (Total Prévu: 1 007 841 000 FCFA, Total Réalisé: 1 059 255 758 FCFA, tous EXACT). Source CA 2024 page 36.
+- Suite complète d'intégration de bout en bout implémentée dans `src/utils/__tests__/realPilotChain.test.ts` (5 tests réels sous PGlite exécutant le schéma SQL et les migrations réelles du projet) :
+  - Validation structurelle et de provenance des fichiers JSON.
+  - Chaîne complète Bingerville BP 2026 : dry-run (plan_hash et SHA-256 déterministe sans écriture) → staging (TO_VERIFY) → revue humaine (VERIFIED) → rejet de publication sans confirmation explicite (`p_publish_confirmed = false`) → acceptation avec confirmation explicite (`p_publish_confirmed = true`) → publication dans `local_budgets` avec formatage FCFA exact.
+  - Chaîne complète Cocody BP 2026 : respect strict des montants nuls (UNKNOWN) non transformés en 0.
+  - Chaîne complète Tiassalé 2024 : CA 2024 publié → Opération n°6 (Marché 20 magasins) reliée au CA parent → Rapprochement DGMP (AOO24062605757, Société DEM, match STRONG) relié à l'opération → Restitution Project Accountability Passport (taux financier 99.46%, séparation financier != physique).
+  - Détection canonique de conflit : le pipeline refuse tout écrasement silencieux d'un enregistrement canonique préexistant avec `CONFLICT: Existing canonical record; no overwrite`.
+- Validation technique : 179/179 tests PASS sur 12 suites de test (dont 5/5 dans `realPilotChain.test.ts`), `npm run build` PASS (1726 modules transformés, zéro erreur TypeScript).
+- Base Supabase distante `cdesuvcozcetdtvibgqs` préservée intacte : aucune migration réappliquée, aucune ingestion massive non autorisée, aucun compte de test créé en production.
+
 ### Console données et précisions — 1er octobre, après #8
 - #8 contrôlée brièvement puis fusionnée au SHA attendu ; master synchronisé sans perte à 8e934d1. Post-merge ciblé : 16 tests pipeline PASS.
 - Console ADMIN/DATA_MANAGER : JSON/JSONL, simulation obligatoire, rapport ligne par ligne, pagination, source/provenance et historique privés. VERIFY / REJECT / PUBLISH séparés ; confirmation explicite contrôlée aussi en SQL. Aucun service_role client, RLS inchangée.
@@ -177,6 +193,6 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Contrôler la CI du HEAD de codex/import-console-amount-precision après push ; laisser sa PR ouverte. Aucun réaudit #3–#8 ni rejeu APPLIED, notamment 20261001150911.
-2. Prochain bloc : préparer un petit lot réel documenté via DATA_IMPORT.md et faire relire le dry-run dans la console par l’opérateur habilité ; aucune ingestion massive implicite. Les conflits nécessitent un workflow de révision explicite, jamais un upsert silencieux.
-3. Documenter un cycle APEC réel avec source/dates validées avant ouverture citoyenne. Protection des mots de passe compromis à activer manuellement sur le seul projet autorisé. Ne pas fabriquer de contenu pour remplir les états vides.
+1. Contrôler la CI du HEAD de `antigravity/first-real-data-pilot` après push ; laisser sa PR ouverte vers master sans fusionner.
+2. Préparer le déploiement/revue humaine en console de production avec session opérateur habilitée pour les deux lots BP prêts (Bingerville et Cocody), sans écraser ni fabriquer de données.
+3. Implémenter le workflow dédié de révision/résolution des enregistrements canoniques conflictuels pour le CA 2024 Tiassalé avant ré-import. Protection des mots de passe compromis à activer manuellement sur le seul projet autorisé.
