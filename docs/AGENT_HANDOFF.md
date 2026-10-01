@@ -5,10 +5,10 @@
 - LAST_AGENT : Codex
 - CURRENT_BRANCH : `codex/apec-phase-2c`
 - HANDOFF_BASE_SHA : `4aed61d18d4ebf139009dc3d72e5bbebda994380` (master consolidé, CI SUCCESS)
-- CURRENT_HEAD : consulter Git pour le commit Phase 2C et son descendant documentaire ; ne pas créer de boucle de commits de métadonnées.
-- PR : #3, #4 et #5 fusionnées dans cet ordre sur master avec autorisation explicite de l’utilisateur. Phase 2C sur branche distincte ; PR à ouvrir après commit.
+- CURRENT_HEAD : `51bf26577a057af3f734b9547c9706c9c3b9e5b0`, dernier commit fonctionnel Phase 2C, CI SUCCESS. Son descendant documentaire est à retrouver dans Git sans boucle de commits de métadonnées.
+- PR : #3, #4 et #5 fusionnées dans cet ordre sur master avec autorisation explicite de l’utilisateur. [PR #6 APEC](https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/6) ouverte sur master, non fusionnée.
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : fondation / Passport 2A / DGMP 2B consolidés ; APEC 2C minimal VALIDATED localement, CI de sa PR à vérifier après push
+- CURRENT_MILESTONE : fondation / Passport 2A / DGMP 2B consolidés ; APEC 2C minimal VALIDATED, CI fonctionnelle SUCCESS
 - FOUNDATION_READY : TRUE, validé sur 3b502b1 après CI SUCCESS. Aucun P0/P1 connu ouvert dans la fondation.
 
 ## COMPLETED
@@ -20,9 +20,10 @@
 - RLS : cycles lisibles ; besoins privés auteur / ADMIN / DATA_MANAGER ; contributions privées auteur / gestionnaires ; événements visibles à l’auteur du besoin et aux gestionnaires. Aucune lecture privée anonyme, aucun droit service_role, aucun UPDATE/DELETE direct des besoins/contributions/événements. Modérateur sans pouvoir APEC de gestion.
 - Panneau APEC dans le Passport : cycles documentés, dépôt, suivi, sources et décisions. Connexion/inscription citoyenne par Supabase Auth et déconnexion, sans utiliser l’accès back-office qui refuse les citoyens. Les formulaires n’accordent jamais un rôle.
 - 145 tests / 10 fichiers PASS, dont 22 tests PostgreSQL et 9 nouveaux tests APEC écrits avant l’implémentation. TypeScript + build PASS (1724 modules), git diff --check PASS sur ce bloc.
+- CI exacte de `51bf265` : [Quality / verify SUCCESS](https://github.com/jeananvoh-cmyk/suivibudget-ci/actions/runs/36815164988/job/110218535405), Vercel Preview Comments SUCCESS. Le descendant documentaire sera poussé et contrôlé, sans nouveau commit pour réinscrire son hash.
 - 10/10 contrôles HTTP réels APEC PASS : cycles lisibles, tables privées et RPC interdites à ANON, DELETE refusé sur les quatre tables. Mode reproductible : node scripts/verify-foundation-http.mjs apec.
 - UX/UI ApecParticipation VALIDATED sur 360/375/390/430/768/1280/1440/1920 : zéro débordement, captures 375/1440 inspectées ; parcours staff et connexion/dépôt citoyen vérifiés avec réponses réseau interceptées localement. État public vide vérifié contre Supabase réel. Aucun compte ou objet de test créé en production.
-- Contrôle distant : RLS active sur quatre tables, zéro ligne APEC, trois CA préservés. Migration locale 20260930223840 appliquée une seule fois sous version distante 20261001040746.
+- Contrôle distant final : RLS active sur quatre tables, zéro ligne APEC, un compte Auth et trois CA préservés. Migration locale 20260930223840 appliquée une seule fois sous version distante 20261001040746.
 - Limite assumée de ce bloc : besoins/contributions privés, sans publication publique automatique ni agrégat de représentativité ; entrée actuelle par le Passport d’un projet. L’inscription peut demander une confirmation e-mail selon la configuration Auth ; aucun e-mail envoyé pendant les tests.
 - Advisors : protection des mots de passe compromis toujours désactivée. Deux WARN SECURITY DEFINER pour record_apec_decision et apec_link_targets : élévation intentionnelle, autorisation ADMIN/DATA_MANAGER vérifiée avant lecture/écriture, search_path vide, SQL statique et paramètres bornés par contraintes. Elle évite d’accorder les mutations directes et l’accès intégral aux projets. Refus citoyen/anonyme testé. Voir [règle 0029](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable).
 
@@ -140,6 +141,6 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Reprendre la PR codex/apec-phase-2c, confirmer son HEAD et sa CI. Ne pas rejouer 20261001040746 ni les migrations antérieures APPLIED. Le bloc minimal est implémenté ; ne pas le recommencer.
+1. Reprendre la PR #6 codex/apec-phase-2c et inspecter seulement les écarts depuis le commit fonctionnel validé 51bf265. Ne pas rejouer 20261001040746 ni les migrations antérieures APPLIED. Le bloc minimal est terminé ; ne pas le recommencer ni fusionner #6 sans instruction.
 2. Extension suivante, hors de ce bloc : accès APEC depuis la fiche collectivité même sans projet existant, puis publication publique séparée avec modération et projection sans identité privée. Conserver le suivi privé et les événements immuables.
 3. Préparer ensuite une stratégie d’ingestion DGMP/APEC avec sources réelles, déduplication, reprise sur erreur et validation humaine, sans démarrer d’ingestion massive implicitement. Protection des mots de passe compromis à activer manuellement sur le seul projet autorisé.

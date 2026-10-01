@@ -10,7 +10,9 @@ Panneau APEC intégré après les informations Passport existantes, avec connexi
 
 Validation : 145 tests / 10 fichiers PASS (22 PostgreSQL dont 9 nouveaux APEC), TypeScript + Vite PASS (1724 modules), diff du bloc sans défaut d’espacement. Dix contrôles HTTP réels APEC PASS. Huit largeurs 360/375/390/430/768/1280/1440/1920 et parcours connexion/dépôt citoyen avec API interceptée localement ; état public vide réel vérifié, captures 375/1440 inspectées, aucun overflow/erreur JS du parcours staff. Aucun compte ou fixture créé en production. Le premier test SQL a révélé une fixture sans les colonnes réelles et un test historique de rejeu à isoler du nouveau schéma initial ; corrigés avant application. Les premiers appels réseau natifs étaient bloqués par le sandbox ; les contrôles autorisés hors sandbox passent.
 
-Advisors : avertissement Auth préexistant et deux WARN 0029 sur les RPC SECURITY DEFINER intentionnelles, documentés avec les garde-fous et tests de refus dans AGENT_HANDOFF.md. Aucune autre vulnérabilité signalée par Advisors. Limites du bloc : suivi privé, entrée par Passport ; publication publique et entrée indépendante depuis les collectivités à traiter séparément. CI de la PR Phase 2C à confirmer sur le HEAD poussé.
+Advisors : avertissement Auth préexistant et deux WARN 0029 sur les RPC SECURITY DEFINER intentionnelles, documentés avec les garde-fous et tests de refus dans AGENT_HANDOFF.md. Aucun autre signal sécurité Advisors. Limites du bloc : suivi privé, entrée par Passport ; publication publique et entrée indépendante depuis les collectivités à traiter séparément.
+
+Commit fonctionnel `51bf26577a057af3f734b9547c9706c9c3b9e5b0` poussé, PR #6 ouverte sur master. CI Quality / verify SUCCESS (run 36815164988), Vercel Preview Comments SUCCESS. Dernier contrôle distant : 1 compte Auth, 3 CA, 0 ligne dans chacune des 4 tables APEC. Ce checkpoint documentaire sera également poussé et sa CI contrôlée sans boucle de commits de hash. Serveur de test local arrêté.
 
 
 ## 30 septembre — DGMP Phase 2B déterministe
