@@ -192,7 +192,20 @@ async function cleanup() {
   process.exit(0);
 }
 
-if (process.argv[2] === 'apec-public') {
+if (process.argv[2] === 'data-import') {
+  const client = makeClient();
+  for (const table of ['data_import_rows','data_import_events']) {
+    const read = await client.from(table).select('*').limit(1);
+    check(`import-anon-read-denied:${table}`, read.error?.code === '42501');
+    const deletion = await client.from(table).delete().eq(table === 'data_import_rows' ? 'id' : 'row_id', 'nonexistent-import-security-check');
+    check(`import-anon-delete-denied:${table}`, deletion.error?.code === '42501');
+  }
+  const dryRun = await client.rpc('import_data_batch', { p_rows: [], p_commit: false, p_plan_hash: null });
+  check('import-anon-rpc-denied', dryRun.error?.code === '42501');
+  const review = await client.rpc('review_data_import', { p_ids: ['nonexistent-import-security-check'], p_action: 'PUBLISH', p_reason: 'Contrôle sécurité sans écriture' });
+  check('import-anon-review-denied', review.error?.code === '42501');
+  process.exit(results.every(result => result.pass) ? 0 : 1);
+} else if (process.argv[2] === 'apec-public') {
   const client = makeClient();
   const rows = await client.from('apec_public_needs').select('*').limit(10);
   check('apec-public-projection-readable', !rows.error && rows.data.every(row => row.status === 'PUBLISHED' && !('user_id' in row) && !('actor_id' in row)));

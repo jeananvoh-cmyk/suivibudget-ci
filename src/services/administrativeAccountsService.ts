@@ -1,5 +1,20 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 import { AdministrativeAccount, CAInvestmentOperation, ProcurementMatch } from '../types';
+import type { LocalBudget } from '../types/localBudget';
+
+export async function fetchPublishedLocalBudgets(): Promise<LocalBudget[]> {
+  if (!isSupabaseConfigured()) return [];
+  const { data, error } = await supabase.from('local_budgets').select('*').eq('status', 'PUBLISHED');
+  if (error) throw error;
+  return (data || []).map(row => ({
+    ...row,
+    operating_percentage: row.total_amount > 0 ? row.operating_amount / row.total_amount * 100 : 0,
+    investment_percentage: row.total_amount > 0 ? row.investment_amount / row.total_amount * 100 : 0,
+    sources: [],
+    primary_source_label: row.import_provenance?.source?.name || row.document_name,
+    primary_source_url: row.import_provenance?.source?.url || row.document_url,
+  })) as LocalBudget[];
+}
 
 export async function fetchAdministrativeAccounts(institutionId: string): Promise<AdministrativeAccount[]> {
   if (!isSupabaseConfigured()) return [];

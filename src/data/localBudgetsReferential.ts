@@ -1454,8 +1454,16 @@ export const LOCAL_BUDGETS_REFERENTIAL: LocalBudget[] = [
   },
 ];
 
+let publishedRemoteBudgets: LocalBudget[] = [];
+
+export function setPublishedLocalBudgets(budgets: LocalBudget[]): void {
+  publishedRemoteBudgets = budgets.filter(b => b.status === 'PUBLISHED');
+}
+
 export function getLocalBudgetsForInstitution(institutionId: string): LocalBudget[] {
-  return LOCAL_BUDGETS_REFERENTIAL.filter(b => b.institution_id === institutionId || b.institution_name === institutionId)
+  const local = LOCAL_BUDGETS_REFERENTIAL.filter(b => !publishedRemoteBudgets.some(remote =>
+    remote.institution_id === b.institution_id && remote.fiscal_year === b.fiscal_year && remote.budget_type === b.budget_type && remote.version_number === b.version_number));
+  return [...publishedRemoteBudgets, ...local].filter(b => b.institution_id === institutionId || b.institution_name === institutionId)
     .sort((a, b) => b.fiscal_year - a.fiscal_year || b.version_number - a.version_number);
 }
 

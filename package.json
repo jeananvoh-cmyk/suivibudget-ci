@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "ingest:budget": "node scripts/ingest_budget_csv.cjs"
+    "ingest:budget": "node scripts/import-data.mjs",
+    "import:data": "node scripts/import-data.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
