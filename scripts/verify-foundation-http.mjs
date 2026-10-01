@@ -192,6 +192,24 @@ async function cleanup() {
   process.exit(0);
 }
 
+if (process.argv[2] === 'apec') {
+  const client = makeClient();
+  const cycles = await client.from('apec_cycles').select('id').limit(1);
+  check('apec-public-cycles-readable', !cycles.error);
+  for (const table of ['apec_needs','apec_contributions','apec_events']) {
+    const response = await client.from(table).select('id').limit(1);
+    check(`apec-private-read-denied:${table}`, response.error?.code === '42501');
+  }
+  for (const table of ['apec_cycles','apec_needs','apec_contributions','apec_events']) {
+    const response = await client.from(table).delete().eq('id','00000000-0000-0000-0000-000000000000');
+    check(`apec-anon-delete-denied:${table}`, response.error?.code === '42501');
+  }
+  const targets = await client.rpc('apec_link_targets', { p_institution_id:'absent-probe',p_fiscal_year:2026 });
+  check('apec-targets-anon-denied', targets.error?.code === '42501');
+  const decision = await client.rpc('record_apec_decision', { p_need_id:'00000000-0000-0000-0000-000000000000',p_action:'VERIFY',p_body:'Non-writing probe',p_source_reference:'Probe',p_source_date:'2026-09-30' });
+  check('apec-decision-anon-denied', decision.error?.code === '42501');
+  process.exit(results.some(result => !result.pass) ? 1 : 0);
+}
 if (process.argv[2] === 'public') {
   const client = makeClient();
   for (const table of ['public_documents','citizen_proofs','administrative_accounts','ca_investment_operations','ca_procurement_matches','ca_financial_lines','profiles','local_budgets','institutions','public_citizen_proofs']) {

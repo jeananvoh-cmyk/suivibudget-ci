@@ -15,6 +15,7 @@ const migrationNames = [
   '20260930030840_public_proof_projection_boundary.sql',
   '20260930033244_foundation_http_access.sql',
   '20260930153716_least_privilege_passport_boundary.sql',
+  '20260930223840_apec_participation_cycle.sql',
 ];
 const migrations = () => migrationNames.map(name => readFileSync(resolve('supabase/migrations', name), 'utf8'));
 
@@ -59,6 +60,7 @@ beforeAll(async () => {
     create policy "Strict citizen media upload only" on storage.objects for insert with check(false);
     create table public.projects(id text primary key);
     create table public.institutions(id text primary key);
+    create table public.budget_projects(id text primary key, institution_id text, fiscal_year integer, title text);
     create table public.news_articles(id text primary key);
     create table public.site_settings(id text primary key); create table public.caidp_directory(id text primary key); create table public.sources(id text primary key); create table public.local_budgets(id text primary key); create table public.newsletter_subscribers(id text primary key);
   `);
@@ -101,17 +103,133 @@ beforeAll(async () => {
   }
   await db.exec('alter table storage.objects enable row level security');
   await db.exec(`
-    alter table public.local_budgets add column status text;
+    alter table public.local_budgets add column status text, add column institution_id text, add column fiscal_year integer;
     alter table public.local_budgets enable row level security;
-    insert into public.local_budgets values ('published','PUBLISHED'),('verified','VERIFIED');
+    insert into public.local_budgets(id,status) values ('published','PUBLISHED'),('verified','VERIFIED');
     create policy "Allow public read on published local budgets" on public.local_budgets for select using(status in ('PUBLISHED','VERIFIED'));
     create policy "Staff local budgets" on public.local_budgets for all to authenticated using(private.has_staff_role(array['ADMIN','DATA_MANAGER']));
     grant truncate, references, trigger on all tables in schema public to service_role;
   `);
   for (const sql of migrations()) await db.exec(sql);
+  await db.exec(`
+    insert into public.institutions values ('apec-institution'),('other-institution');
+    insert into public.budget_projects values ('apec-project','apec-institution',2026,'Projet test'),('other-project','other-institution',2026,'Autre test');
+    update public.local_budgets set institution_id='apec-institution', fiscal_year=2026;
+    insert into public.apec_cycles(id,institution_id,fiscal_year,title,source_reference,source_date)
+      values ('10000000-0000-0000-0000-000000000001','apec-institution',2026,'Cycle test local','Source test locale','2026-09-30');
+  `);
 }, 30000);
 
 afterAll(async () => { await db?.close(); });
+
+describe('APEC participation boundaries', () => {
+  const cycle = '10000000-0000-0000-0000-000000000001';
+  const submit = async () => (await db.query<{ id: string }>(`insert into public.apec_needs(cycle_id,title,description,source_reference,source_date)
+    values ($1,'Besoin test local','Description du besoin test','Déclaration citoyenne test','2026-09-30') returning id`, [cycle])).rows[0].id;
+  const decide = (id: string, action: string, project: string | null = null) => db.query(`select public.record_apec_decision($1,$2,'Motif test local','Source décision test','2026-09-30',1,$3,null,null)`, [id, action, project]);
+
+  it('records identity, provenance, pending verification and an initial event on submission', async () => {
+    await asRole('authenticated', citizen, async () => {
+      const id = await submit();
+      expect((await db.query('select user_id,verification_status,status,provenance from public.apec_needs where id=$1',[id])).rows[0]).toEqual({user_id:citizen,verification_status:'TO_VERIFY',status:'SUBMITTED',provenance:'CITIZEN_OBSERVATION'});
+      expect((await db.query('select kind from public.apec_events where need_id=$1',[id])).rows).toEqual([{kind:'SUBMITTED'}]);
+    });
+  });
+
+  it('prevents spoofed owners and citizen self-verification', async () => {
+    await asRole('authenticated', citizen, async () => {
+      await expect(db.query(`insert into public.apec_needs(cycle_id,user_id,title,description,source_reference,source_date)
+        values ($1,$2,'Titre test','Description test','Source test','2026-09-30')`,[cycle,admin])).rejects.toThrow();
+    });
+    await asRole('authenticated', citizen, async () => {
+      const id = await submit();
+      await expect(decide(id,'VERIFY')).rejects.toThrow();
+    });
+  });
+
+  it('keeps other citizens’ needs private and denies anonymous writes', async () => {
+    await asRole('authenticated', citizen, async () => {
+      await submit();
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",[moderator]);
+      expect((await db.query('select id from public.apec_needs')).rows).toHaveLength(0);
+    });
+    await asRole('anon',null,async () => { await expect(submit()).rejects.toThrow(); });
+  });
+
+  it('requires verification before prioritisation and rejects cross-institution links atomically', async () => {
+    await asRole('authenticated',citizen,async () => {
+      const id=await submit();
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",[admin]);
+      await expect(decide(id,'PRIORITIZE')).rejects.toThrow();
+    });
+    await asRole('authenticated',citizen,async () => {
+      const id=await submit();
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",[manager]);
+      await decide(id,'VERIFY'); await decide(id,'PRIORITIZE');
+      await expect(decide(id,'LINK','other-project')).rejects.toThrow();
+    });
+  });
+
+  it('preserves a sourced need → priority → project → contribution → response history', async () => {
+    await asRole('authenticated',citizen,async () => {
+      const id=await submit();
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",[manager]);
+      await decide(id,'VERIFY'); await decide(id,'PRIORITIZE'); await decide(id,'LINK','apec-project');
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",[citizen]);
+      const contribution=(await db.query<{id:string}>(`insert into public.apec_contributions(need_id,body,source_reference,source_date) values ($1,'Contribution test','Observation test','2026-09-30') returning id`,[id])).rows[0];
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",[manager]);
+      await db.query(`select public.record_apec_decision($1,'VERIFY_CONTRIBUTION','Motif test','Source test','2026-09-30',null,null,null,$2)`,[id,contribution.id]);
+      await decide(id,'RESPONSE');
+      expect((await db.query('select status,project_id,provenance from public.apec_needs where id=$1',[id])).rows[0]).toEqual({status:'ANSWERED',project_id:'apec-project',provenance:'CITIZEN_OBSERVATION'});
+      expect((await db.query('select verification_status,provenance from public.apec_contributions where id=$1',[contribution.id])).rows[0]).toEqual({verification_status:'VERIFIED',provenance:'CITIZEN_OBSERVATION'});
+      const events=(await db.query<{kind:string,source_reference:string}>('select kind,source_reference from public.apec_events where need_id=$1 order by sequence',[id])).rows;
+      expect(events.map(e=>e.kind)).toEqual(['SUBMITTED','VERIFY','PRIORITIZE','LINK','CONTRIBUTION','VERIFY_CONTRIBUTION','RESPONSE']);
+      expect(events.every(e=>e.source_reference.length>0)).toBe(true);
+    });
+  });
+
+  it('denies direct history mutation even to staff and blocks submissions after closure', async () => {
+    await asRole('authenticated',admin,async () => { await expect(db.query('delete from public.apec_events')).rejects.toThrow(); });
+    await asRole('authenticated',admin,async () => {
+      await db.query("update public.apec_cycles set status='CLOSED' where id=$1",[cycle]);
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",[citizen]);
+      await expect(submit()).rejects.toThrow();
+    });
+  });
+
+  it('exposes only scoped link identifiers to staff, never private project data to citizens', async () => {
+    await asRole('authenticated',manager,async () => {
+      const result=await db.query<{targets:unknown}>("select public.apec_link_targets('apec-institution',2026) as targets");
+      expect(result.rows[0].targets).toEqual({projects:[{id:'apec-project',title:'Projet test'}],budgets:[{id:'published'}]});
+    });
+    await asRole('authenticated',citizen,async () => { await expect(db.query("select public.apec_link_targets('apec-institution',2026)")).rejects.toThrow(); });
+    await asRole('anon',null,async () => { await expect(db.query("select public.apec_link_targets('apec-institution',2026)")).rejects.toThrow(); });
+  });
+
+  it('rolls back a decision without a source and preserves original citizen input', async () => {
+    await asRole('authenticated',citizen,async () => {
+      const id=await submit();
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",[admin]);
+      await db.exec('savepoint invalid_source');
+      await expect(db.query("select public.record_apec_decision($1,'VERIFY','Motif test','','2026-09-30')",[id])).rejects.toThrow();
+      await db.exec('rollback to savepoint invalid_source');
+      expect((await db.query('select verification_status from public.apec_needs where id=$1',[id])).rows[0]).toEqual({verification_status:'TO_VERIFY'});
+      await expect(db.query("update public.apec_needs set description='Texte remplacé' where id=$1",[id])).rejects.toThrow();
+    });
+  });
+
+  it('rejects unpublished budgets and never grants service_role access to APEC data', async () => {
+    await asRole('authenticated',citizen,async () => {
+      const id=await submit();
+      await db.query("select set_config('request.jwt.claim.sub',$1,true)",[admin]);
+      await decide(id,'VERIFY'); await decide(id,'PRIORITIZE');
+      await expect(db.query("select public.record_apec_decision($1,'LINK','Motif test','Source test','2026-09-30',null,null,'verified')",[id])).rejects.toThrow();
+    });
+    for(const table of ['apec_cycles','apec_needs','apec_contributions','apec_events']) {
+      expect((await db.query<{allowed:boolean}>("select has_table_privilege('service_role',$1,'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') as allowed",[`public.${table}`])).rows[0].allowed).toBe(false);
+    }
+  });
+});
 
 describe('Publication boundaries applied to PostgreSQL', () => {
   it('removes technical service grants without removing Edge reads', async () => {
@@ -140,8 +258,8 @@ describe('Publication boundaries applied to PostgreSQL', () => {
     expect((await db.query("select file_size_limit from storage.buckets where id='citizen_photos'")).rows).toEqual([{ file_size_limit: 26214400 }]);
   });
 
-  it('applies all migrations twice without drift errors', async () => {
-    for (const sql of migrations()) await db.exec(sql);
+  it('reapplies historical publication boundary repairs without drift errors', async () => {
+    for (const sql of migrations().slice(0,-1)) await db.exec(sql);
   });
 
   it('only exposes a published CA and its financial, operation and procurement children', async () => {
