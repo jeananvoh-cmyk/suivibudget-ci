@@ -20,6 +20,7 @@ import { AuthSecurityService } from './authSecurity';
 import { sanitizeCsvCell } from '../utils/security';
 import { supabase, isSupabaseConfigured } from './supabase';
 import { refreshPublishedAdministrativeAccounts } from '../data/administrativeAccountsData';
+import { fetchPublishedLocalBudgets } from './administrativeAccountsService';
 import { enrichWithPrimitiveBudgets, OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
 import { 
   LocalBudget, 
@@ -27,6 +28,7 @@ import {
 } from '../types/localBudget';
 import { 
   LOCAL_BUDGETS_REFERENTIAL, 
+  setPublishedLocalBudgets,
   getLocalBudgetsForInstitution, 
   getCurrentLocalBudget, 
   exportLocalBudgetsToCsv, 
@@ -770,6 +772,10 @@ class DataStore {
     if (!isSupabaseConfigured()) return;
     try {
       await refreshPublishedAdministrativeAccounts();
+      const remoteBudgets = await fetchPublishedLocalBudgets();
+      setPublishedLocalBudgets(remoteBudgets);
+      this.localBudgets = [...this.localBudgets.filter(local => !remoteBudgets.some(remote =>
+        remote.institution_id === local.institution_id && remote.fiscal_year === local.fiscal_year && remote.budget_type === local.budget_type && remote.version_number === local.version_number)), ...remoteBudgets];
       this.notify();
       await this.refreshProofs();
 

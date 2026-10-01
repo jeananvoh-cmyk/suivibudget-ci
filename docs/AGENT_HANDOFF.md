@@ -3,15 +3,27 @@
 ## METADATA
 - LAST_UPDATED : 2026-10-01
 - LAST_AGENT : Codex
-- CURRENT_BRANCH : `codex/apec-collectivities-publication`
-- HANDOFF_BASE_SHA : `3958dd17639f61e381da755a8826abb342580b37` (master après fusion #6)
+- CURRENT_BRANCH : `codex/controlled-data-import`
+- HANDOFF_BASE_SHA : `26711d57e39d84848a5b4629facbe37ea4ec5040` (master après fusion #7)
 - CURRENT_HEAD : retrouver le HEAD de cette branche dans Git ; validations locales terminées, CI à vérifier après push.
-- PR : #3/#4/#5/#6 fusionnées. Nouveau bloc produit proposé séparément sur master ; ne pas fusionner sa PR.
+- PR : #3/#4/#5/#6/#7 fusionnées. Pipeline proposé séparément sur master ; ne pas fusionner sa nouvelle PR.
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : APEC produit citoyen implémenté et validé localement, entrée collectivité et publication modérée
+- CURRENT_MILESTONE : pipeline contrôlé BP / CA / opérations / DGMP implémenté, migration appliquée, validation locale et HTTP terminée
 - FOUNDATION_READY : TRUE, validé sur 3b502b1 après CI SUCCESS. Aucun P0/P1 connu ouvert dans la fondation.
 
 ## COMPLETED
+### Pipeline données réelles — 1er octobre, après #7
+- #7 e5454ca contrôlée très brièvement (mergeable, CI/Vercel SUCCESS), fusionnée avec SHA attendu ; master synchronisé sans perte à 26711d5. Contrôle post-merge ciblé : 27 tests PostgreSQL PASS. Aucun réaudit historique.
+- Outil opérateur `npm run import:data` : fichiers JSON/JSONL, dry-run sans écriture, plan lié au SHA-256 du fichier et à l’état serveur, import plafonné à 100 lignes/1 Mo, liste/relecture/publication/rejet. Instructions et contrat : [DATA_IMPORT.md](DATA_IMPORT.md). Aucune collecte automatique.
+- Staging privé immutable et journal RLS ; origine/URL ou référence/date qualifiée/exercice/institution/type obligatoires. Montants entiers explicitement qualifiés EXACT/APPROXIMATE/LOWER_BOUND/UNKNOWN, UNKNOWN=null. Aucune conversion de valeur manquante en zéro. Date RECORDED distinguée de la publication/consultation.
+- Identités déterministes, doublons identiques ignorés, divergences et données canoniques existantes signalées sans écrasement. Lots et décisions traités ligne par ligne ; isolation des erreurs. Imports concurrents sérialisés par verrou transactionnel, aperçu périmé refusé.
+- TO_VERIFY → VERIFIED → PUBLISHED par deux décisions humaines séparées. Promotion vers local_budgets / administrative_accounts / ca_investment_operations / ca_procurement_matches ; les sources et précisions accompagnent les lignes dans import_provenance. Compatibilité institution/exercice et parents publiés contrôlée. Aucun DGMP ambigu publié ; STRONG et preuve de rapprochement explicitement relue requis.
+- Lecture des BP PUBLISHED depuis Supabase reliée à l’historique existant, sans modification manuelle du code pour ajouter des budgets. Lecture CA/opérations/DGMP déjà dynamique préservée. Aucun changement de disposition UI ; validations UX historiques conservées, aucune nouvelle revendication d’audit visuel global.
+- 166 tests / 11 fichiers PASS, dont 16 nouveaux tests pipeline PostgreSQL/intégration et 27 tests RLS existants ; TypeScript + build PASS (1724 modules). Parseur CLI JSON/JSONL contrôlé. Six contrôles HTTP/RLS réels PASS, RLS active, droits directs/service_role refusés, tables d’import/journal vides. Base inchangée : 0 BP, 3 CA, 3 opérations, 3 marchés.
+- Petites fixtures exclusivement locales : Abobo, Bingerville, Tiassalé et Cocody déjà présents dans le dépôt. La ventilation Cocody incertaine reste UNKNOWN ; aucune donnée ni compte de test créé en production, aucune ingestion réelle ou massive.
+- Limites explicites : outil opérateur CLI, pas de nouvelle console graphique ; corrections de versions immuables/conflictuelles à traiter dans un futur workflow dédié. CA/opérations/DGMP aux montants non exacts restent privés tant que leurs écrans ne restituent pas cette qualification ; BP à précision connue homogène publiable. Champs obligatoires manquants bloquent la publication. Aucun contournement des tables existantes.
+- Migration locale 20261001091748 APPLIED une seule fois sous version distante 20261001093613. Ne jamais la rejouer. Les deux RPC métier utilisent une élévation limitée, profils protégés contrôlés avant accès, search_path vide et liste fermée de tables pour la promotion SQL paramétrée.
+
 ### APEC produit citoyen — 1er octobre, après fusion #6
 - Master synchronisé sans perte de travail ; contrôle unique après fusion : 145 tests et TypeScript/build PASS. Aucun réaudit ni rejeu de migration APPLIED.
 - Onglet Participation APEC sur les fiches MAIRIE/REGION, indépendant des projets, avec filtre d’exercice. Accès Passport conservé avec le même composant. Besoin, dépôt, contributions, suivi et décisions privées préservés.
@@ -87,6 +99,7 @@ Les blocs suivants sont historiques ; leurs anciennes interdictions de fusion et
 | 20260930153716_least_privilege_passport_boundary.sql | 20260930153938 | APPLIED |
 | 20260930223840_apec_participation_cycle.sql | 20261001040746 | APPLIED |
 | 20261001043805_apec_moderated_publication.sql | 20261001044508 | APPLIED |
+| 20261001091748_controlled_data_import.sql | 20261001093613 | APPLIED |
 
 Les quatre premières migrations n’ont pas été rejouées. Les horodatages distants sont attribués par l’outil ; ne pas rejouer sur la seule différence de préfixe. Schéma metadata, vue publique, triggers, grants et RLS contrôlés.
 
@@ -114,7 +127,7 @@ Consolidation Phase 2A VALIDATED : vingt champs et trois niveaux de lecture, 18 
 DGMP Phase 2B VALIDATED et fusionnée ; aucune ingestion massive. APEC Phase 2C minimal VALIDATED localement, avec suivi privé et historique sourcé ; voir bloc courant ci-dessus pour CI et limites.
 
 ## ADVISORS / KNOWN_ANOMALIES
-- SECURITY_ADVISORS : WARN Leaked Password Protection Disabled inchangé ; quatre WARN 0029 pour les RPC APEC SECURITY DEFINER intentionnelles (deux existantes, publication et retrait). Autorisation profiles ADMIN/DATA_MANAGER avant accès, search_path vide, SQL statique, mutations directes interdites et refus testés. Aucun autre signal sécurité.
+- SECURITY_ADVISORS : WARN Leaked Password Protection Disabled inchangé ; six WARN [0029](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable) intentionnels (quatre RPC APEC, deux RPC import). Autorisation profiles ADMIN/DATA_MANAGER avant accès, search_path vide, mutations staging directes interdites et refus testés. Promotion import paramétrée avec liste fermée de quatre tables. Aucun autre signal sécurité.
 - PERFORMANCE_ADVISORS : 31 unused indexes INFO et 16 multiple permissive policies WARN au contrôle final après nettoyage (38 index à 14:58 UTC ; les tests ont exercé certains index). Pas de suppression ni consolidation mécanique, aucun gain mesuré ne justifie ce refactoring pour fermer la fondation.
 - Bundle volumineux préexistant (données budgétaires notamment) : avertissement build, pas une erreur.
 - KNOWN_FAILURES : aucune dans les validations terminées ; CI 454d62c et 3b502b1 SUCCESS.
@@ -154,6 +167,6 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Contrôler la CI du HEAD de codex/apec-collectivities-publication après push ; laisser sa PR ouverte. Aucun réaudit #3/#4/#5/#6, aucune migration APPLIED à rejouer, notamment 20261001040746 et 20261001044508.
-2. Prochain bloc opérationnel : documenter un cycle réel avec source et dates validées, puis exercer la modération sur des contributions réelles autorisées. Aucun cycle fictif à ouvrir pour remplir l’interface ; sans cycle documenté, état vide explicite.
-3. Préparer ensuite une stratégie d’ingestion DGMP/APEC sourcée, dédupliquée et validée humainement, sans ingestion massive implicite. Protection des mots de passe compromis à activer manuellement sur le seul projet autorisé.
+1. Contrôler la CI du HEAD de codex/controlled-data-import après push ; laisser sa PR ouverte. Aucun réaudit #3–#7 ni rejeu APPLIED, notamment 20261001044508 et 20261001093613.
+2. Prochain bloc : préparer un petit lot réel documenté via DATA_IMPORT.md et faire relire le dry-run par l’opérateur habilité ; aucune ingestion massive implicite. Les conflits existants nécessitent une décision de révision, jamais un upsert silencieux. Prévoir ensuite une console de revue et la restitution des montants qualifiés CA/DGMP avant de les publier.
+3. Documenter un cycle APEC réel avec source/dates validées avant ouverture citoyenne. Protection des mots de passe compromis à activer manuellement sur le seul projet autorisé. Ne pas fabriquer de contenu pour remplir les états vides.

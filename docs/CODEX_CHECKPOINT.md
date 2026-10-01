@@ -1,5 +1,17 @@
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
+## 1er octobre — pipeline contrôlé des données réelles
+
+#7 e5454ca fusionnée après contrôle final court des statuts GitHub/Vercel et du SHA attendu. Master synchronisé sans perte à `26711d57e39d84848a5b4629facbe37ea4ec5040`. Contrôle post-merge limité aux 27 tests PostgreSQL de frontières de publication : PASS. Branche `codex/controlled-data-import`, nouvelle PR à laisser ouverte.
+
+Pipeline opérateur JSON/JSONL : simulation sans écriture, plan lié au fichier et à l’état de déduplication, import idempotent dans staging privé immutable, rapports ligne par ligne, vérification/publication/rejet humains distincts. Publication dans les quatre tables métier existantes, avec source/date/exercice/type collectivité et précisions conservées ; aucun écrasement des données existantes ni rapprochement DGMP automatique. Compatibilité parents/institution/exercice et preuve de rapprochement STRONG exigées. BP publiés chargés dynamiquement dans l’historique existant ; CA/Passport/APEC/préuves préservés.
+
+Tests-first : huit règles critiques initialement rouges puis implémentées et étendues à seize contrôles. Petites fixtures locales Abobo/Bingerville/Tiassalé/Cocody provenant du dépôt, aucune ingestion réelle. Cocody conserve UNKNOWN pour sa ventilation contestée ; dates de fixtures étiquetées RECORDED. Résultat final : 166 tests / 11 fichiers, TypeScript et Vite build PASS (1724 modules), parseur CLI contrôlé, six tests HTTP/RLS ciblés PASS. Aucun audit historique répété.
+
+Migration locale `20261001091748_controlled_data_import.sql` appliquée une seule fois sous version distante `20261001093613` ; ne jamais rejouer, ni la migration APEC `20261001044508`. État distant après contrôle : staging=0, journal=0, BP=0, CA=3, opérations=3, marchés=3. Aucune fixture ni compte créé. Advisors : six RPC SECURITY DEFINER intentionnelles (dont deux import) contrôlées par profiles et moindre privilège ; avertissement Auth préexistant inchangé. Garde-fous et [remédiations](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable) documentés dans AGENT_HANDOFF.md.
+
+Mode opératoire : DATA_IMPORT.md. Limites explicites : CLI, pas encore de console graphique ; aucune correction automatique de version/conflict ; CA/opérations/DGMP incertains conservés privés avant prise en charge fidèle par les écrans. BP à précision homogène connue publiable. La publication refuse toute donnée obligatoire absente au lieu d’inventer un zéro. Vérifier la CI du HEAD poussé, sans boucle de commits de hash ; ne pas fusionner la nouvelle PR.
+
 ## 1er octobre — APEC produit citoyen, après #6
 
 #6 fusionnée sur autorisation, master synchronisé à `3958dd17639f61e381da755a8826abb342580b37` sans perte locale. Contrôle unique après fusion : 145 tests et TypeScript/build PASS. Branche produit `codex/apec-collectivities-publication` ; nouvelle PR à laisser ouverte, sans fusion.
