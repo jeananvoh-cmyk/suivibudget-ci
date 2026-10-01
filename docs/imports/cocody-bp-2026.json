@@ -18,9 +18,9 @@
       "operating_amount": null,
       "investment_amount": null,
       "adoption_date": "2026-02-25",
-      "verification_status": "AIP_VERIFIED",
-      "confidence_level": "HIGH",
-      "notes": "L'article donne 19,7 milliards FCFA (19 764 660 000 FCFA). Les montants de fonctionnement et d'investissement ne comportent pas d'unités certaines et sont donc qualifiés UNKNOWN (null) conformément aux règles d'intégrité."
+      "verification_status": "SECONDARY_TO_CORROBORATE",
+      "confidence_level": "MEDIUM",
+      "notes": "L'article Abidjan.net / Le Nouveau Réveil donne 19,7 milliards FCFA (19 764 660 000 FCFA). Source de presse nationale classée SECONDARY_TO_CORROBORATE. Les montants de fonctionnement et d'investissement ne comportent pas d'unités certaines et sont donc qualifiés UNKNOWN (null) conformément aux règles d'intégrité."
     },
     "precision": {
       "total_amount": "EXACT",

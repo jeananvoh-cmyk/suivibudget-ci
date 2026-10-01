@@ -139,7 +139,72 @@ export function validateBudgetRecord(budget: Partial<LocalBudget>): BudgetCohere
     });
   }
 
+  // 9. Contrôle Incompatibilité Source / Statut de vérification (AIP_VERIFIED vs Source de presse générale)
+  if (budget.verification_status === 'AIP_VERIFIED') {
+    const sourceTexts: string[] = [];
+    if (budget.primary_source_label) sourceTexts.push(budget.primary_source_label);
+    if (budget.primary_source_url) sourceTexts.push(budget.primary_source_url);
+    if (budget.sources) {
+      for (const s of budget.sources) {
+        if (s.source?.publisher) sourceTexts.push(s.source.publisher);
+        if (s.source?.title) sourceTexts.push(s.source.title);
+        if (s.source?.url) sourceTexts.push(s.source.url);
+      }
+    }
+    const combined = sourceTexts.join(' ').toLowerCase();
+    if (combined.length > 0) {
+      const mentionsAip = combined.includes('aip') || combined.includes('agence ivoirienne de presse');
+      const mentionsPress = combined.includes('abidjan.net') || combined.includes('nouveau réveil') ||
+                            combined.includes('nouveau reveil') || combined.includes('fraternité matin') ||
+                            combined.includes('fratmat') || combined.includes('koaci') ||
+                            combined.includes('soir info') || combined.includes('l\'inter');
+      if (!mentionsAip && mentionsPress) {
+        issues.push({
+          code: 'ERR_SOURCE_VERIFICATION_MISMATCH',
+          severity: 'ERROR',
+          message: 'Contradiction de provenance : Le statut AIP_VERIFIED ne peut pas être attribué à une source de presse générale. Utiliser SECONDARY_TO_CORROBORATE.',
+          budget_id: budget.id,
+          institution_id: budget.institution_id,
+          fiscal_year: budget.fiscal_year,
+        });
+      }
+    }
+  }
+
   return issues;
+}
+
+/**
+ * Vérifie la cohérence entre la source déclarée et le statut de vérification d'un lot d'importation
+ */
+export function validateImportProvenanceConsistency(row: any): { valid: boolean; error?: string } {
+  if (!row || !row.source || !row.data) return { valid: true };
+  const sourceName = `${row.source.name || ''} ${row.source.reference || ''} ${row.source.url || ''}`.toLowerCase();
+  const verificationStatus = row.data.verification_status;
+
+  if (verificationStatus === 'AIP_VERIFIED') {
+    const isAIP = sourceName.includes('aip') || sourceName.includes('agence ivoirienne de presse');
+    if (!isAIP) {
+      return {
+        valid: false,
+        error: `Incohérence de provenance : la source "${row.source.name}" n'est pas une dépêche AIP et ne peut pas porter le statut AIP_VERIFIED. Utiliser SECONDARY_TO_CORROBORATE pour une source de presse.`,
+      };
+    }
+  }
+  if (verificationStatus === 'OFFICIAL_DOCUMENT') {
+    const isOfficial = sourceName.includes('compte administratif') || sourceName.includes('délibération') ||
+                       sourceName.includes('deliberation') || sourceName.includes('procès-verbal') ||
+                       sourceName.includes('proces-verbal') || sourceName.includes('arrêté') ||
+                       sourceName.includes('arrete') || sourceName.includes('budget primitif') ||
+                       sourceName.includes('registre');
+    if (!isOfficial && (sourceName.includes('abidjan.net') || sourceName.includes('koaci'))) {
+      return {
+        valid: false,
+        error: `Incohérence de provenance : un article de presse ne peut pas porter le statut OFFICIAL_DOCUMENT sans document officiel rattaché.`,
+      };
+    }
+  }
+  return { valid: true };
 }
 
 /**

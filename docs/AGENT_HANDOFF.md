@@ -4,28 +4,33 @@
 - LAST_UPDATED : 2026-10-01
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/first-real-data-pilot`
-- HANDOFF_BASE_SHA : `cef34418659698c199bb644b92b67879e6056ce4` (master après fusion #9)
-- CURRENT_HEAD : retrouver le HEAD de cette branche dans Git ; validations locales terminées, suite de tests 179/179 PASS.
-- PR : PR #9 fusionnée. Nouvelle PR `antigravity/first-real-data-pilot` ouverte vers master ; ne pas fusionner.
+- HANDOFF_BASE_SHA : `cef3441aa6fb37e5a72d5e5ed57409532309666b` (master après fusion #9)
+- CURRENT_HEAD : retrouver le HEAD de cette branche dans Git ; validations locales terminées, suite de tests PASS.
+- PR : PR #9 fusionnée. Nouvelle PR `antigravity/first-real-data-pilot` (#10) ouverte vers master ; ne pas fusionner.
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
 - CURRENT_MILESTONE : premier lot réel de bout en bout (BP, CA, DGMP) validé sur le pipeline de données réelles
 - FOUNDATION_READY : TRUE, validé sur 3b502b1 après CI SUCCESS. Aucun P0/P1 connu ouvert dans la fondation.
 
 ## COMPLETED
 ### Premier lot réel de bout en bout — 1er octobre, après #9
-- Master basé sur `cef3441` (PR #9 fusionnée). Aucun travail antérieur Codex réaudité ou écrasé.
-- Branche `antigravity/first-real-data-pilot` créée et synchronisée sur GitHub (`4c44cb2` initial).
+- Master basé sur `cef3441aa6fb37e5a72d5e5ed57409532309666b` (PR #9 fusionnée). Aucun travail antérieur Codex réaudité ou écrasé.
+- Branche `antigravity/first-real-data-pilot` créée et synchronisée sur GitHub (`4c44cb2` initial, PR #10).
+- **Distinction explicite de la chaîne pilote** :
+  - **A. Chaîne d'intégration locale avec données réelles sourcées** : **VALIDÉE** (fichiers `docs/imports/`, PGlite avec migrations réelles, tests 5/5).
+  - **B. Recette réelle Supabase** : **EN COURS** (pilotage contrôlé sur un seul BP : Bingerville 2026 en mode dry-run, arrêt avant publication humaine).
+  - **C. Publication réelle visible côté citoyen** : **NON ENCORE EFFECTUÉE** (réservée à l'étape ultérieure après validation humaine explicite).
 - Trois fichiers de lots réels documentés et vérifiés créés dans `docs/imports/` :
-  1. `docs/imports/bingerville-bp-2026.json` : BP 2026 Bingerville (Total: 4 046 222 000 FCFA EXACT, Fonctionnement: 1 877 888 000 FCFA EXACT, Investissement: 2 168 334 000 FCFA EXACT). Source AIP 2026-01-28. Non conflictuel (0 ligne dans local_budgets).
-  2. `docs/imports/cocody-bp-2026.json` : BP 2026 Cocody (Total: 19 764 660 000 FCFA EXACT, Fonctionnement: null UNKNOWN, Investissement: null UNKNOWN). Source Abidjan.net / Le Nouveau Réveil 2026-02-25. Démontre la règle fondamentale `UNKNOWN != 0` (restitution citoyenne "Montant à confirmer", zéro exact distinct).
+  1. `docs/imports/bingerville-bp-2026.json` : BP 2026 Bingerville (Total: 4 046 222 000 FCFA EXACT, Fonctionnement: 1 877 888 000 FCFA EXACT, Investissement: 2 168 334 000 FCFA EXACT). Source AIP 2026-01-28 (`AIP_VERIFIED`, `HIGH`). Non conflictuel (0 ligne dans local_budgets).
+  2. `docs/imports/cocody-bp-2026.json` : BP 2026 Cocody (Total: 19 764 660 000 FCFA EXACT, Fonctionnement: null UNKNOWN, Investissement: null UNKNOWN). Source Abidjan.net / Le Nouveau Réveil 2026-02-25. Statut rigoureusement classifié en `SECONDARY_TO_CORROBORATE` et `MEDIUM` (source de presse corroborée, jamais transformée en source AIP ou officielle). Démontre la règle fondamentale `UNKNOWN != 0` (restitution citoyenne "Montant à confirmer", zéro exact distinct).
   3. `docs/imports/tiassale-ca-2024.json` : CA 2024 Tiassalé (Total Prévu: 1 007 841 000 FCFA, Total Réalisé: 1 059 255 758 FCFA, tous EXACT). Source CA 2024 page 36.
+- Règle de cohérence source / vérification ajoutée dans `src/utils/budgetValidation.ts` (`validateImportProvenanceConsistency` et `validateBudgetRecord`) empêchant toute contradiction entre source de presse et statut officiel/AIP.
 - Suite complète d'intégration de bout en bout implémentée dans `src/utils/__tests__/realPilotChain.test.ts` (5 tests réels sous PGlite exécutant le schéma SQL et les migrations réelles du projet) :
-  - Validation structurelle et de provenance des fichiers JSON.
+  - Validation structurelle, de provenance et anti-contradiction des fichiers JSON.
   - Chaîne complète Bingerville BP 2026 : dry-run (plan_hash et SHA-256 déterministe sans écriture) → staging (TO_VERIFY) → revue humaine (VERIFIED) → rejet de publication sans confirmation explicite (`p_publish_confirmed = false`) → acceptation avec confirmation explicite (`p_publish_confirmed = true`) → publication dans `local_budgets` avec formatage FCFA exact.
-  - Chaîne complète Cocody BP 2026 : respect strict des montants nuls (UNKNOWN) non transformés en 0.
+  - Chaîne complète Cocody BP 2026 : respect strict des montants nuls (UNKNOWN) non transformés en 0 et statut `SECONDARY_TO_CORROBORATE`.
   - Chaîne complète Tiassalé 2024 : CA 2024 publié → Opération n°6 (Marché 20 magasins) reliée au CA parent → Rapprochement DGMP (AOO24062605757, Société DEM, match STRONG) relié à l'opération → Restitution Project Accountability Passport (taux financier 99.46%, séparation financier != physique).
   - Détection canonique de conflit : le pipeline refuse tout écrasement silencieux d'un enregistrement canonique préexistant avec `CONFLICT: Existing canonical record; no overwrite`.
-- Validation technique : 179/179 tests PASS sur 12 suites de test (dont 5/5 dans `realPilotChain.test.ts`), `npm run build` PASS (1726 modules transformés, zéro erreur TypeScript).
+- Validation technique locale : 179/179 tests PASS sur 12 suites de test, `npm run build` PASS (1726 modules transformés, zéro erreur TypeScript).
 - Base Supabase distante `cdesuvcozcetdtvibgqs` préservée intacte : aucune migration réappliquée, aucune ingestion massive non autorisée, aucun compte de test créé en production.
 
 ### Console données et précisions — 1er octobre, après #8

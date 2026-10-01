@@ -5,6 +5,7 @@ import { CA_PILOT_FIXTURES } from './caPilotFixtures';
 import { parseImportInput } from '../../services/dataImportService';
 import { formatQualifiedFCFA, amountPrecision } from '../formatters';
 import { generateProjectPassport, findMatchingCaOperationResult } from '../projectPassport';
+import { validateBudgetRecord, validateImportProvenanceConsistency } from '../budgetValidation';
 import type { BudgetProject } from '../../types';
 
 let db: PGlite;
@@ -97,6 +98,31 @@ describe('Premier lot réel de bout en bout (Pilote)', () => {
     expect(cocodyRows[0].institution_id).toBe('inst-com-cocody');
     expect(cocodyRows[0].data.operating_amount).toBeNull();
     expect(cocodyRows[0].precision.operating_amount).toBe('UNKNOWN');
+    expect(cocodyRows[0].data.verification_status).toBe('SECONDARY_TO_CORROBORATE');
+    expect(cocodyRows[0].data.confidence_level).toBe('MEDIUM');
+
+    // Contrôle anti-contradiction de provenance :
+    // Une source de presse (Abidjan.net) ne peut JAMAIS être déclarée AIP_VERIFIED
+    const cocodyConsistency = validateImportProvenanceConsistency(cocodyRows[0]);
+    expect(cocodyConsistency.valid).toBe(true);
+
+    const contradictoryRow = {
+      source: { name: 'Abidjan.net / Le Nouveau Réveil', reference: 'Article du 25 février 2026' },
+      data: { verification_status: 'AIP_VERIFIED' },
+    };
+    const invalidConsistency = validateImportProvenanceConsistency(contradictoryRow);
+    expect(invalidConsistency.valid).toBe(false);
+    expect(invalidConsistency.error).toMatch(/Incohérence de provenance.*AIP_VERIFIED.*SECONDARY_TO_CORROBORATE/i);
+
+    const issues = validateBudgetRecord({
+      id: 'test-contradictory-press',
+      institution_id: 'inst-com-cocody',
+      institution_name: 'Mairie de Cocody',
+      fiscal_year: 2026,
+      verification_status: 'AIP_VERIFIED',
+      primary_source_label: 'Abidjan.net / Le Nouveau Réveil',
+    });
+    expect(issues.some(i => i.code === 'ERR_SOURCE_VERIFICATION_MISMATCH')).toBe(true);
 
     const tiassaleText = readFileSync('docs/imports/tiassale-ca-2024.json', 'utf8');
     const tiassaleRows = parseImportInput(tiassaleText, false) as any[];
@@ -185,6 +211,8 @@ describe('Premier lot réel de bout en bout (Pilote)', () => {
       expect(published.total_amount).toBe(19764660000);
       expect(published.operating_amount).toBeNull();
       expect(published.investment_amount).toBeNull();
+      expect(published.verification_status).toBe('SECONDARY_TO_CORROBORATE');
+      expect(published.confidence_level).toBe('MEDIUM');
       expect(published.import_provenance.precision.operating_amount).toBe('UNKNOWN');
       expect(published.import_provenance.precision.investment_amount).toBe('UNKNOWN');
 
