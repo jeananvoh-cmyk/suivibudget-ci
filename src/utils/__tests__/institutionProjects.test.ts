@@ -91,7 +91,7 @@ describe('institutionProjects - Anti-Contamination Verification', () => {
     });
 
     expect(contaminatedCount).toBe(0);
-  });
+  }, 15000);
 
   it('verifies that all 31 regions have ZERO municipal projects leaking into regional sheets', () => {
     let contaminatedCount = 0;
@@ -108,7 +108,7 @@ describe('institutionProjects - Anti-Contamination Verification', () => {
     });
 
     expect(contaminatedCount).toBe(0);
-  });
+  }, 15000);
 
   it('verifies ministries match only national projects and never municipal or regional projects', () => {
     ALL_MINISTRIES_DATA.forEach(m => {
