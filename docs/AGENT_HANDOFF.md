@@ -3,12 +3,12 @@
 ## METADATA
 - LAST_UPDATED : 2026-10-02
 - LAST_AGENT : Antigravity
-- CURRENT_BRANCH : `antigravity/first-real-data-pilot`
-- HANDOFF_BASE_SHA : `cef3441aa6fb37e5a72d5e5ed57409532309666b` (master après fusion #9)
-- CURRENT_HEAD : `b4b0928c8ab07227c53e6841912ad2c591b1c101` ; 180 tests PASS, build PASS, Vercel Preview READY.
-- PR : PR #9 fusionnée sur master. PR #10 `antigravity/first-real-data-pilot` ouverte vers master ; ne pas fusionner.
+- CURRENT_BRANCH : `master`
+- HANDOFF_BASE_SHA : `4fb9c7dc8e0ecb146adf7a6e4e3a23f2447f1446` (master après fusion #10)
+- CURRENT_HEAD : `4fb9c7dc8e0ecb146adf7a6e4e3a23f2447f1446` ; 180 tests PASS, build PASS, Production READY.
+- PR : PR #10 `antigravity/first-real-data-pilot` MERGED dans master (`4fb9c7d`).
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : Parcours citoyen réel Bingerville BP 2026 validé de bout en bout (Supabase distant PostgREST 200, frontend synchronisé, responsive multi-viewports validé)
+- CURRENT_MILESTONE : Pilote Bingerville BP 2026 en production (PR #10 fusionnée, Production Vercel READY, recette citoyenne 100% validée)
 - FOUNDATION_READY : TRUE.
 
 ## BINGERVILLE BP 2026 — STATUT DE VALIDATION
@@ -16,8 +16,9 @@
 - **ACCÈS ANON SUPABASE** : **VALIDÉ** (`has_table_privilege('anon', 'public.local_budgets', 'SELECT') = TRUE`, PostgREST HTTP 200, migration `20261002090824_grant_anon_published_local_budgets` appliquée avec succès sur `cdesuvcozcetdtvibgqs`).
 - **RLS SUPABASE** : **VALIDÉ** (policy "Allow public read on published local budgets" `USING (status = 'PUBLISHED')` active ; 0 ligne non-PUBLISHED accessible à anon).
 - **SYNCHRONISATION FRONTEND** : **VALIDÉE** (`enrichInstitutionsWithBudgets()` connecte les données distantes Supabase directement à l'institution et écrase le fallback statique).
-- **RENDU CITOYEN SUR PREVIEW & BUNDLE PROD** : **VALIDÉ** (sur Preview PR #10 et bundle de production, vue citoyenne responsive 375/768/1440 sans débordement horizontal).
-- **PRODUCTION (`suivibudget.vercel.app`)** : **EN ATTENTE FUSION PR #10** (la production Vercel pointe sur `master` `cef3441` ; PR #10 prête et mergeable).
+- **RENDU CITOYEN SUR PREVIEW & BUNDLE PROD** : **VALIDÉ** (vue citoyenne responsive 375/768/1440 sans débordement horizontal).
+- **PRODUCTION (`suivibudget.vercel.app`)** : **VALIDÉ** (Production Vercel READY sur `4fb9c7d`, données Supabase 2026 affichées, 0 erreur console, 0 erreur réseau).
+- **BINGERVILLE** : **PILOTE TERMINÉ**
 - **NE PLUS RÉIMPORTER BINGERVILLE** : Le lot Bingerville est définitivement importé et publié, aucun ré-import requis.
 
 ## COMPLETED
@@ -228,7 +229,5 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Contrôle externe et fusion de la PR #10 sur `master` pour déployer la synchronisation frontend Supabase sur la production Vercel (`suivibudget.vercel.app`).
-2. Après fusion #10, vérifier sur la production Vercel le parcours citoyen Bingerville BP 2026.
-3. Préparer le lot pilote suivant selon les priorités du projet (ex. Tiassalé CA 2024 / Cocody BP 2026).
+1. Sélection et cadrage par l'orchestrateur du prochain lot pilote réel (ex. Tiassalé CA 2024 / Cocody BP 2026).
 
