@@ -47,7 +47,7 @@ describe('Budget Cycle Engine — Tests Structurés du Cycle Budgétaire (Items 
     totalDelta: number | null, 
     operatingDelta: number | null, 
     investmentDelta: number | null,
-    overrides: Partial<LocalBudget> & { amount_semantics?: 'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN' } = {}
+    overrides: Partial<LocalBudget> = {}
   ): LocalBudget => ({
     id,
     institution_id: 'inst-test-01',

@@ -177,7 +177,7 @@ export function consolidateBudgetCycle(
       (doc.notes?.toLowerCase().includes('réduction') || doc.notes?.toLowerCase().includes('diminution'));
 
     // Sémantique financière du montant (Item 12 : DELTA vs REVISED_TOTAL vs UNKNOWN)
-    const rawSemantics = (doc as unknown as { amount_semantics?: string }).amount_semantics || '';
+    const rawSemantics = doc.amount_semantics || '';
     let amountSemantics: AmendmentAmountSemantics = 'DELTA';
     if (rawSemantics === 'REVISED_TOTAL' || doc.notes?.toLowerCase().includes('total révisé') || doc.notes?.toLowerCase().includes('revised_total')) {
       amountSemantics = 'REVISED_TOTAL';

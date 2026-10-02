@@ -5,13 +5,38 @@
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/budget-cycle-document-console`
 - HANDOFF_BASE_SHA : `46c4f1753a1c6d5aa564a70f082f859141d58fd0` (HEAD de PR #13 `antigravity/tiassale-ca-2024-reconciliation`)
-- CURRENT_HEAD : `9ae3d90` feat(cycle): harden PR #14 with strict final credits status, distinct BP steps, document fingerprinting and amendment semantics ; 217 tests PASS (15 suites), build PASS.
-- PR : PR #14 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/14) ouverte sur `antigravity/budget-cycle-document-console` vers `master` (dépendance explicite sur PR #13, NON FUSIONNÉE, soumise au contrôle de l'orchestrateur).
+- CURRENT_HEAD : `f7a8ae8` fix(cycle): enforce human validation gate, strict semantics, and canonical fingerprinting ; 231 tests PASS (15 suites), build PASS.
+- PR : PR #14 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/14) ouverte sur `antigravity/budget-cycle-document-console` vers `master` (dépendance explicite sur PR #13, NON FUSIONNÉE, soumise au contrôle externe de l'orchestrateur).
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : Industrialisation & Durcissement du Cycle Budgétaire Complet & Console d'Import Documentaire (Crédits définitifs fiabilisés : NOT_ESTABLISHED si BP seul sans modifications, interdiction formelle d'assimiler crédits définitifs = BP ; Étapes BP distinctes : primitif adopté, après tutelle, exécutoire ; Type réel et versionnement dynamique préservés sans hardcode ; Empreinte documentaire déterministe prévenant les doublons sans bloquer des BM distincts ; Sémantique financière DELTA vs REVISED_TOTAL vs UNKNOWN ; Page source propagée de bout en bout ; Statut initial PENDING et confiance qualifiée non auto-HIGH ; Non-régression totale Bingerville, Cocody, Tiassalé).
+- CURRENT_MILESTONE : Gate Final Qualité PR #14 — Validation Humaine Bloquante, Sémantique Stricte & Fingerprint Canonique (Validation humaine obligatoire : statut PENDING bloque l'import avec can_import = false ; Sémantique financière bloquante : UNKNOWN ou non spécifié interdit l'import des actes modificatifs ; Zéro version arbitraire : version officielle préservée si documentée, sinon undefined sans invention de faux numéros 1 ou N+1 ; Normalisation canonique des types : équivalence BUDGET_PRIMITIF <-> PRIMITIF_ADOPTE pour le fingerprint déterministe avec détection des doublons cross-vocabulaire ; Préservation étanche des actes distincts BM1/BM2/BS/virements ; Non-régression totale Bingerville, Cocody, Tiassalé ; 231 tests PASS, build PASS).
 - FOUNDATION_READY : TRUE.
 
-## INDUSTRIALISATION DU CYCLE BUDGÉTAIRE & CONSOLE DOCUMENTAIRE (DURCIE PR #14)
+## INDUSTRIALISATION DU CYCLE BUDGÉTAIRE & CONSOLE DOCUMENTAIRE (DURCIE PR #14 — GATE FINAL QUALITÉ)
+- **GATE QUALITÉ FINAL VALIDÉ SUR PR #14** :
+  - **1. Validation Humaine Bloquante (`budgetDocumentDryRun.ts`)** :
+    - Dès lors qu'une valeur financière est au statut `PENDING`, l'import est formellement bloqué (`can_import = false`, `is_valid = false`) avec message d'erreur explicite : *« Validation humaine requise : Certaines valeurs doivent encore être validées avant l’import. »*
+    - Statuts autorisés pour l'import : `VALIDATED`, `CORRECTED`, `MARKED_UNKNOWN` (avec `amount === null`).
+    - Statut `REJECTED` : exclu du lot d'import sans bloquer les autres valeurs validées ; si toutes les valeurs sont rejetées, l'import est bloqué.
+    - Statut `MARKED_UNKNOWN` avec un montant non null : bloquant (violation de la règle d'or `NULL != 0`).
+    - Helper dédié exporté : `isImportableValueStatus(status)`.
+  - **2. Sémantique Financière Stricte & Bloquante pour Actes Modificatifs** :
+    - Pour `BUDGET_MODIFICATIF`, `BUDGET_SUPPLEMENTAIRE`, `DECISION_MODIFICATIVE`, `VIREMENT_CREDITS` :
+      Si `amount_semantics === 'UNKNOWN'` ou absent, l'import est bloqué (`can_import = false`, `is_valid = false`) avec erreur bloquante : *« La sémantique des montants (cumulatif ou différentiel) doit être précisée pour les actes modificatifs. »*
+    - `DELTA` et `REVISED_TOTAL` sont autorisés et traités selon leurs sémantiques respectives.
+  - **3. Suppression des Fallbacks de Numérotation Inventée** :
+    - Retrait de `existingBudgetsCount + 1` et du fallback `version_number = 1`.
+    - `LocalBudget.version_number` et `BudgetAmendment.version_number` déclarés optionnels (`version_number?: number`).
+    - Si la version officielle est inconnue, elle reste strictement `undefined` (aucun faux numéro injecté).
+    - Affichage citoyen et référentiel (`LocalBudgetHistoryView`, `dataStore`, `localBudgetsReferential`) adaptés en toute sécurité (`version_number != null ? ...`).
+  - **4. Normalisation Canonique des Types & Fingerprint Déterministe** :
+    - Fonction `normalizeDocumentIdentityType(rawType)` centralisée et exportée dans `budgetDocumentDryRun.ts`.
+    - Établit l'équivalence canonique `BUDGET_PRIMITIF` <-> `PRIMITIF_ADOPTE` pour la console et le stockage.
+    - Préserve formellement les types distincts : `PRIMITIF_APRES_TUTELLE`, `AUTORISATION_EXECUTION`, `BUDGET_SUPPLEMENTAIRE`, `MODIFICATIF_1`, `MODIFICATIF_2`, `BUDGET_MODIFICATIF`, `DECISION_MODIFICATIVE`, `VIREMENT_CREDITS`, `COMPTE_ADMINISTRATIF`.
+    - Détection cross-vocabulaire : un budget primitif ingéré via la console avec `BUDGET_PRIMITIF` est immédiatement reconnu comme doublon exact s'il existe déjà sous `PRIMITIF_ADOPTE` avec la même référence et date.
+    - Deux actes distincts (BM1 vs BM2, BS vs BM, virements distincts) conservent des empreintes distinctes sans fausse collision.
+  - **5. Hygiène des Types & Accès Sécurisé** :
+    - Ajout de `amount_semantics?: 'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN'` dans `LocalBudget`.
+    - Élimination des casts `(doc as unknown as { amount_semantics?: string })` dans `budgetCycleEngine.ts`.
 - **MOTEUR DE CONSOLIDATION DU CYCLE BUDGÉTAIRE (`budgetCycleEngine.ts`)** :
   - **Architecture Unifiée du Cycle & Étapes Distinctes du BP** :
     - Préservation chronologique étanche : `PRIMITIF_ADOPTE` (vrai BP initial voté par le Conseil), `PRIMITIF_APRES_TUTELLE` (BP approuvé par la tutelle DGDDL), `AUTORISATION_EXECUTION` (budget rendu exécutoire).
@@ -21,32 +46,13 @@
     - `DERIVED_FROM_DOCUMENTED_AMENDMENTS` : calculé à partir du BP et d'une chaîne complète attestée (`amendment_chain_status = 'COMPLETE'`).
     - `NOT_ESTABLISHED` : non établi en cas de BP seul ou de chaîne partielle/non exhaustive. **Garantie absolue : les crédits définitifs ne reprennent JAMAIS le BP par défaut.**
     - En cas de chaîne partielle, calcul distinct d'un `documented_adjusted_amount` provisoire sans le qualifier de crédits définitifs.
-  - **Sémantique Financière des Actes Modificatifs (`amount_semantics`)** :
-    - `DELTA` : variation nette (+/-) additionnée au solde.
-    - `REVISED_TOTAL` : nouveau plafond révisé, non additionné comme delta pour éviter tout gonflement erroné.
-    - `UNKNOWN` : sémantique non précisée, bloque l'addition automatique et exige une revue humaine.
   - **Virement de Crédits & Règle `NULL != 0`** :
     - Un virement peut avoir un solde net total `0 FCFA réel` (conservé rigoureusement).
     - Une modification non chiffrée reste `NULL` / `UNKNOWN` et n'est jamais convertie en 0.
   - **Provenance & Page Source Propagée** :
     - Chaque valeur et chaque acte propage le numéro de page source (`page: 36`) de bout en bout.
-- **CONSOLE D'IMPORT DOCUMENTAIRE GUIDÉE (`DataImportConsole.tsx` & `budgetDocumentDryRun.ts`)** :
-  - **Assistant de Saisie Structurée** :
-    - Sélection parmi les 232 collectivités réelles (201 communes + 31 conseils régionaux).
-    - Métadonnées documentaires rigoureuses : type d'acte, nom du document, référence, date, nature de date, page, URL sécurisée, notes.
-    - Grille de valeurs financières avec statut de validation humaine : `TO_VALIDATE` → `VALIDATED` (vert), `CORRECTED` (ambre), `UNKNOWN` (ardoise, valeur `null` préservée), `REJECTED` (rouge).
-  - **Pre-flight Dry-Run Déterministe** :
-    - Validation institutionnelle et détection des collectivités inconnues.
-    - Contrôle de cohérence de l'exercice budgétaire (2000-2100).
-    - Vérification obligatoire de la traçabilité documentaire (nom, référence, page obligatoires).
-    - Détection des conflits avec des versions déjà publiées (`PUBLISHED`).
-    - Contrôles arithmétiques stricts : cohérence Total vs Fonctionnement + Investissement, détection des incohérences ou maintien d'`UNKNOWN` si ventilation omise.
-    - Transformation en enveloppe standard `data_import_rows` prête pour la simulation et l'ingestion dans le pipeline sans altération du schéma.
 - **RESTITUTION CITOYENNE DANS LE COMPTE ADMINISTRATIF (`AdministrativeAccountView.tsx`)** :
-  - Bloc supérieur dédié : « *Traçabilité du Cycle Budgétaire — Exercice [Année]* » en 3 étapes claires :
-    - A. Budget Primitif Initial
-    - B. Modifications Budgétaires (nombre d'actes + montant net ou mention civique d'absence de document)
-    - C. Crédits Définitifs (avec badge "Calculé (Dérivé)" et formule explicite)
+  - Bloc supérieur dédié : « *Traçabilité du Cycle Budgétaire — Exercice [Année]* » en 3 étapes claires (BP initial, modifications, crédits définitifs dérivés).
   - Préservation intégrale et étanche du bandeau civique `SOURCE_ANOMALY` de Tiassalé 2024, des 3 opérations d'investissement et des 3 rapprochements DGMP `STRONG`.
 - **ZÉRO IMPACT SUR LA BASE DE DONNÉES DISTANTE** :
   - `NEW_TABLES: NONE`
@@ -55,7 +61,7 @@
   - `SUPABASE_WRITTEN: FALSE`
   - `SUPABASE_PUBLISHED: FALSE`
 - **VALIDATION TECHNIQUE & TESTS** :
-  - **216/216 tests unitaires et d'intégration PASS** sur 15 suites (`npm test`).
+  - **231/231 tests unitaires et d'intégration PASS** sur 15 suites (`npm test`).
   - **`npm run build` PASS** (zéro erreur TypeScript, sortie Vite propre).
   - Deux nouvelles suites de tests spécialisées :
     - `src/utils/__tests__/budgetCycleEngine.test.ts` (13 tests) : consolidation du cycle, prise en compte des modifications négatives, préservation des valeurs nulles et zéros réels, formules dérivées, double taux d'exécution, préservation de `SOURCE_ANOMALY`, non-régression Bingerville, Cocody et Tiassalé.

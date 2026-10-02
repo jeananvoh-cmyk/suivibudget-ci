@@ -93,7 +93,7 @@ export interface BudgetAmendment {
   institution_id: string;
   fiscal_year: number;
   budget_type: BudgetEventType;
-  version_number: number;
+  version_number?: number;
   label: string;
   amount_semantics: AmendmentAmountSemantics;
   total_delta: number | null;

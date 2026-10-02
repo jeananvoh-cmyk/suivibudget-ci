@@ -193,7 +193,7 @@ export const LocalBudgetHistoryView: React.FC<LocalBudgetHistoryViewProps> = ({
                       Exercice {b.fiscal_year}
                     </span>
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-50 text-brand-blue border border-blue-200">
-                      Version {b.version_number} : {formatBudgetTypeLabel(b.budget_type)}
+                      {b.version_number != null ? `Version ${b.version_number} : ` : ''}{formatBudgetTypeLabel(b.budget_type)}
                     </span>
                     {b.is_current_version && (
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">

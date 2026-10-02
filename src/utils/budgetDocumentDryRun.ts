@@ -14,6 +14,38 @@ import type {
 } from '../types/budgetCycle';
 
 /**
+ * Normalise le type de document pour l'identification et le calcul d'empreinte déterministe
+ * Établit l'équivalence canonique entre vocabulaires (ex: BUDGET_PRIMITIF <-> PRIMITIF_ADOPTE)
+ * tout en préservant strictement les distinctions entre actes distincts (BM1 vs BM2, BS, virements...).
+ */
+export function normalizeDocumentIdentityType(rawType: string): string {
+  const t = (rawType || '').trim().toUpperCase();
+  if (t === 'BUDGET_PRIMITIF' || t === 'PRIMITIF_ADOPTE') {
+    return 'PRIMITIF_ADOPTE';
+  }
+  if (t === 'PRIMITIF_APRES_TUTELLE') return 'PRIMITIF_APRES_TUTELLE';
+  if (t === 'AUTORISATION_EXECUTION') return 'AUTORISATION_EXECUTION';
+  if (t === 'BUDGET_SUPPLEMENTAIRE') return 'BUDGET_SUPPLEMENTAIRE';
+  if (t === 'MODIFICATIF_1') return 'MODIFICATIF_1';
+  if (t === 'MODIFICATIF_2') return 'MODIFICATIF_2';
+  if (t === 'BUDGET_MODIFICATIF' || t === 'AUTRE_MODIFICATIF') return 'BUDGET_MODIFICATIF';
+  if (t === 'DECISION_MODIFICATIVE') return 'DECISION_MODIFICATIVE';
+  if (t === 'VIREMENT_CREDITS') return 'VIREMENT_CREDITS';
+  if (t === 'COMPTE_ADMINISTRATIF') return 'COMPTE_ADMINISTRATIF';
+  return t;
+}
+
+/**
+ * Vérifie si le statut d'une valeur financière proposée est éligible à l'importation
+ * Statuts autorisés : VALIDATED, CORRECTED, MARKED_UNKNOWN (si montant null)
+ * Statut PENDING : bloque l'importation
+ * Statut REJECTED : exclu du lot
+ */
+export function isImportableValueStatus(status: ProposedFinancialValue['status']): boolean {
+  return status === 'VALIDATED' || status === 'CORRECTED' || status === 'MARKED_UNKNOWN';
+}
+
+/**
  * Calcule un fingerprint documentaire déterministe pour identifier un acte unique (Item 7)
  * Permet de distinguer formellement :
  * - deux BM de la même année pour la même commune (références ou dates distinctes)
@@ -29,7 +61,7 @@ export function computeDocumentFingerprint(params: {
 }): string {
   const normInst = (params.institution_id || '').trim().toLowerCase();
   const year = params.fiscal_year;
-  const normType = (params.document_type || '').trim().toUpperCase();
+  const normType = normalizeDocumentIdentityType(params.document_type);
   const normRef = (params.source_reference || '')
     .trim()
     .toLowerCase()
@@ -331,17 +363,31 @@ export function runDocumentDryRun(
 
   // Contrôle de la sémantique pour les actes modificatifs (Item 12)
   if (['BUDGET_MODIFICATIF', 'BUDGET_SUPPLEMENTAIRE', 'DECISION_MODIFICATIVE', 'VIREMENT_CREDITS'].includes(metadata.document_type)) {
-    if (metadata.amount_semantics === 'UNKNOWN') {
-      warnings.push('Sémantique financière non spécifiée : Il est recommandé de préciser si le montant correspond à une variation (DELTA) ou un nouveau total révisé (REVISED_TOTAL).');
+    if (!metadata.amount_semantics || metadata.amount_semantics === 'UNKNOWN') {
+      errors.push('La sémantique des montants (cumulatif ou différentiel) doit être précisée pour les actes modificatifs.');
     }
   }
 
-  // 5. Contrôle des valeurs et cohérence arithmétique (Item 13 : UNKNOWN != 0 et zéro réel)
+  // 5. Contrôle du statut de validation humaine et cohérence des valeurs (Item 10 & 13)
+  const pendingValues = values.filter(v => v.status === 'PENDING');
+  if (pendingValues.length > 0) {
+    errors.push(`Validation humaine requise : Certaines valeurs doivent encore être validées avant l’import (${pendingValues.length} valeur(s) en attente au statut PENDING).`);
+  }
+
+  for (const v of values) {
+    if (v.status === 'MARKED_UNKNOWN' && v.amount !== null) {
+      errors.push(`Règle d'or violée : Le champ "${v.label}" est marqué inconnu (MARKED_UNKNOWN) mais contient une valeur non nulle (${v.amount}). Une valeur indéterminée doit avoir un montant null.`);
+    }
+  }
+
   let unknownValuesCount = 0;
   let zeroValuesCount = 0;
   let arithmeticValid = true;
 
-  const validValues = values.filter(v => v.status !== 'REJECTED');
+  const validValues = values.filter(v => v.status !== 'REJECTED' && v.status !== 'PENDING');
+  if (values.length > 0 && validValues.length === 0 && pendingValues.length === 0) {
+    errors.push('Aucune valeur retenue : Toutes les valeurs proposées ont été rejetées.');
+  }
 
   for (const val of validValues) {
     if (val.amount === null || val.precision === 'UNKNOWN') {
@@ -510,13 +556,9 @@ export function buildStandardImportEnvelope(
 
     dataObj.budget_type = budgetType;
 
-    // Numéro de version : NE PAS CODER 1 EN DUR (Item 6)
+    // Numéro de version officiel : préserver si documenté, ne jamais inventer de numéro arbitraire
     if (metadata.version_number !== undefined) {
       dataObj.version_number = metadata.version_number;
-    } else if (existingBudgetsCount > 0) {
-      dataObj.version_number = existingBudgetsCount + 1;
-    } else {
-      dataObj.version_number = 1;
     }
 
     // Sémantique financière du montant (Item 12)

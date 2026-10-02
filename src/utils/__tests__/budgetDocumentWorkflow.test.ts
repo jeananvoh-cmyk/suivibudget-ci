@@ -3,7 +3,9 @@ import {
   buildProposedValuesTemplate, 
   runDocumentDryRun, 
   buildStandardImportEnvelope,
-  computeDocumentFingerprint
+  computeDocumentFingerprint,
+  normalizeDocumentIdentityType,
+  isImportableValueStatus
 } from '../budgetDocumentDryRun';
 import type { DocumentIngestionMetadata, ProposedFinancialValue } from '../../types/budgetCycle';
 import type { Institution } from '../../types';
@@ -134,7 +136,8 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire (Items 7
     source_reference: 'DELIB-2024-05',
     source_date: '2024-06-25',
     source_date_kind: 'PUBLISHED',
-    source_page: 12
+    source_page: 12,
+    amount_semantics: 'DELTA'
   };
 
   // TEST 14
@@ -157,7 +160,8 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire (Items 7
       source_name: 'Arrêté Municipal Tiassalé',
       source_reference: 'VIR-2024-01',
       source_date: '2024-03-31',
-      source_date_kind: 'PUBLISHED'
+      source_date_kind: 'PUBLISHED',
+      amount_semantics: 'DELTA'
     };
 
     const res = runDocumentDryRun(duplicateMeta, [], {
@@ -182,7 +186,8 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire (Items 7
       source_name: 'Arrêté Municipal Tiassalé n°2',
       source_reference: 'VIR-2024-02', // Référence différente
       source_date: '2024-09-30',
-      source_date_kind: 'PUBLISHED'
+      source_date_kind: 'PUBLISHED',
+      amount_semantics: 'DELTA'
     };
 
     const res = runDocumentDryRun(secondVirementMeta, [], {
@@ -204,7 +209,8 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire (Items 7
       source_name: 'Arrêté Municipal Cocody',
       source_reference: 'VIR-2024-01', // Même libellé de référence
       source_date: '2024-03-31',
-      source_date_kind: 'PUBLISHED'
+      source_date_kind: 'PUBLISHED',
+      amount_semantics: 'DELTA'
     };
 
     const res = runDocumentDryRun(otherCommuneMeta, [], {
@@ -225,7 +231,8 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire (Items 7
       source_name: 'Arrêté Municipal Tiassalé',
       source_reference: 'VIR-2024-01',
       source_date: '2025-03-31',
-      source_date_kind: 'PUBLISHED'
+      source_date_kind: 'PUBLISHED',
+      amount_semantics: 'DELTA'
     };
 
     const res = runDocumentDryRun(otherYearMeta, [], {
@@ -263,9 +270,9 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire (Items 7
       institution_id: 'inst-com-cocody',
       fiscal_year: 2026,
       document_type: 'BUDGET_PRIMITIF',
-      source_name: 'Dépêche AIP',
-      source_reference: 'AIP-2026-COCODY',
-      source_date: '2026-02-25',
+      source_name: 'Autre Document Cocody',
+      source_reference: 'DELIB-2026-NOUVELLE',
+      source_date: '2026-03-01',
       source_date_kind: 'PUBLISHED'
     };
 
@@ -277,7 +284,7 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire (Items 7
 
     expect(res.conflicts.length).toBeGreaterThan(0);
     expect(res.can_import).toBe(false);
-    expect(res.conflicts[0]).toContain('Budget Primitif PUBLIÉ existe déjà');
+    expect(res.conflicts.some(c => c.includes('Budget Primitif PUBLIÉ existe déjà'))).toBe(true);
   });
 
   it('Dry-run : Règle d\'or NULL != 0 respectée (UNKNOWN avec montant non nul est rejeté)', () => {
@@ -318,5 +325,278 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire (Items 7
     // Page source propagée
     expect(envelope.data.source_page).toBe(24);
     expect(envelope.source.page).toBe(24);
+  });
+
+  // TESTS SUPPLÉMENTAIRES : GATE FINAL QUALITÉ PR #14
+
+  describe('Validation humaine obligatoire et statuts autorisés', () => {
+    it('Statut PENDING bloque formellement l\'importation (can_import = false)', () => {
+      const proposed: ProposedFinancialValue[] = [
+        { id: '1', field: 'total_amount', label: 'Total', section: 'GLOBAL', nature: 'MODIFICATION', amount: 50_000_000, precision: 'EXACT', confidence: 'MEDIUM', status: 'PENDING' }
+      ];
+
+      const res = runDocumentDryRun(validMetadata, proposed, {
+        knownInstitutions: mockInstitutions,
+        existingBudgets: mockExistingBudgets,
+        existingAccounts: mockExistingAccounts
+      });
+
+      expect(res.is_valid).toBe(false);
+      expect(res.can_import).toBe(false);
+      expect(res.errors.some(e => e.includes('Validation humaine requise'))).toBe(true);
+    });
+
+    it('Statuts VALIDATED, CORRECTED et MARKED_UNKNOWN (montant null) autorisent l\'importation', () => {
+      const proposed: ProposedFinancialValue[] = [
+        { id: '1', field: 'total_amount', label: 'Total', section: 'GLOBAL', nature: 'MODIFICATION', amount: 50_000_000, precision: 'EXACT', confidence: 'MEDIUM', status: 'VALIDATED' },
+        { id: '2', field: 'operating_amount', label: 'Fonctionnement', section: 'FONCTIONNEMENT', nature: 'MODIFICATION', amount: 30_000_000, precision: 'EXACT', confidence: 'MEDIUM', status: 'CORRECTED', original_amount: 25_000_000, correction_reason: 'Rectification erreur dactylographique' },
+        { id: '3', field: 'investment_amount', label: 'Investissement', section: 'INVESTISSEMENT', nature: 'MODIFICATION', amount: 20_000_000, precision: 'EXACT', confidence: 'MEDIUM', status: 'VALIDATED' },
+        { id: '4', field: 'other_amount', label: 'Autre', section: 'AUTRE', nature: 'MODIFICATION', amount: null, precision: 'UNKNOWN', confidence: 'LOW', status: 'MARKED_UNKNOWN' }
+      ];
+
+      const res = runDocumentDryRun(validMetadata, proposed, {
+        knownInstitutions: mockInstitutions,
+        existingBudgets: mockExistingBudgets,
+        existingAccounts: mockExistingAccounts
+      });
+
+      expect(res.is_valid).toBe(true);
+      expect(res.can_import).toBe(true);
+      expect(res.errors.length).toBe(0);
+    });
+
+    it('Statut MARKED_UNKNOWN avec montant non null bloque l\'importation (règle NULL != 0)', () => {
+      const proposed: ProposedFinancialValue[] = [
+        { id: '1', field: 'total_amount', label: 'Total', section: 'GLOBAL', nature: 'MODIFICATION', amount: 50_000_000, precision: 'EXACT', confidence: 'MEDIUM', status: 'MARKED_UNKNOWN' }
+      ];
+
+      const res = runDocumentDryRun(validMetadata, proposed, {
+        knownInstitutions: mockInstitutions,
+        existingBudgets: mockExistingBudgets,
+        existingAccounts: mockExistingAccounts
+      });
+
+      expect(res.is_valid).toBe(false);
+      expect(res.can_import).toBe(false);
+      expect(res.errors.some(e => e.includes('Règle d\'or violée'))).toBe(true);
+    });
+
+    it('Statut REJECTED est exclu de l\'enveloppe d\'importation et ne bloque pas les valeurs validées', () => {
+      const proposed: ProposedFinancialValue[] = [
+        { id: '1', field: 'total_amount', label: 'Total', section: 'GLOBAL', nature: 'MODIFICATION', amount: 50_000_000, precision: 'EXACT', confidence: 'MEDIUM', status: 'VALIDATED' },
+        { id: '2', field: 'operating_amount', label: 'Fonctionnement', section: 'FONCTIONNEMENT', nature: 'MODIFICATION', amount: 999_999, precision: 'EXACT', confidence: 'LOW', status: 'REJECTED' }
+      ];
+
+      const res = runDocumentDryRun(validMetadata, proposed, {
+        knownInstitutions: mockInstitutions,
+        existingBudgets: mockExistingBudgets,
+        existingAccounts: mockExistingAccounts
+      });
+
+      expect(res.is_valid).toBe(true);
+      expect(res.can_import).toBe(true);
+      expect(res.warnings.some(w => w.includes('rejetée(s)'))).toBe(true);
+
+      const envelope = buildStandardImportEnvelope(validMetadata, proposed, mockInstitutions[0]);
+      expect(envelope.data.total_amount).toBe(50_000_000);
+      expect(envelope.data.operating_amount).toBeUndefined();
+    });
+
+    it('Si toutes les valeurs sont REJECTED, l\'importation est bloquée', () => {
+      const proposed: ProposedFinancialValue[] = [
+        { id: '1', field: 'total_amount', label: 'Total', section: 'GLOBAL', nature: 'MODIFICATION', amount: 50_000_000, precision: 'EXACT', confidence: 'LOW', status: 'REJECTED' }
+      ];
+
+      const res = runDocumentDryRun(validMetadata, proposed, {
+        knownInstitutions: mockInstitutions,
+        existingBudgets: mockExistingBudgets,
+        existingAccounts: mockExistingAccounts
+      });
+
+      expect(res.is_valid).toBe(false);
+      expect(res.can_import).toBe(false);
+      expect(res.errors.some(e => e.includes('Aucune valeur retenue'))).toBe(true);
+    });
+
+    it('Helper isImportableValueStatus : valide uniquement VALIDATED, CORRECTED, MARKED_UNKNOWN', () => {
+      expect(isImportableValueStatus('VALIDATED')).toBe(true);
+      expect(isImportableValueStatus('CORRECTED')).toBe(true);
+      expect(isImportableValueStatus('MARKED_UNKNOWN')).toBe(true);
+      expect(isImportableValueStatus('PENDING')).toBe(false);
+      expect(isImportableValueStatus('REJECTED')).toBe(false);
+    });
+  });
+
+  describe('Sémantique financière stricte pour les actes modificatifs', () => {
+    it('Acte modificatif avec sémantique UNKNOWN ou absente est bloqué (can_import = false)', () => {
+      const metaUnknown: DocumentIngestionMetadata = {
+        ...validMetadata,
+        amount_semantics: 'UNKNOWN'
+      };
+
+      const resUnknown = runDocumentDryRun(metaUnknown, [], {
+        knownInstitutions: mockInstitutions,
+        existingBudgets: mockExistingBudgets,
+        existingAccounts: mockExistingAccounts
+      });
+
+      expect(resUnknown.is_valid).toBe(false);
+      expect(resUnknown.can_import).toBe(false);
+      expect(resUnknown.errors.some(e => e.includes('sémantique des montants'))).toBe(true);
+
+      const metaUndefined: DocumentIngestionMetadata = {
+        ...validMetadata,
+        amount_semantics: undefined
+      };
+
+      const resUndefined = runDocumentDryRun(metaUndefined, [], {
+        knownInstitutions: mockInstitutions,
+        existingBudgets: mockExistingBudgets,
+        existingAccounts: mockExistingAccounts
+      });
+
+      expect(resUndefined.is_valid).toBe(false);
+      expect(resUndefined.can_import).toBe(false);
+      expect(resUndefined.errors.some(e => e.includes('sémantique des montants'))).toBe(true);
+    });
+
+    it('Acte modificatif avec sémantique DELTA ou REVISED_TOTAL est autorisé', () => {
+      const metaDelta: DocumentIngestionMetadata = {
+        ...validMetadata,
+        amount_semantics: 'DELTA'
+      };
+      const resDelta = runDocumentDryRun(metaDelta, [], {
+        knownInstitutions: mockInstitutions,
+        existingBudgets: mockExistingBudgets,
+        existingAccounts: mockExistingAccounts
+      });
+      expect(resDelta.is_valid).toBe(true);
+      expect(resDelta.can_import).toBe(true);
+
+      const metaRevised: DocumentIngestionMetadata = {
+        ...validMetadata,
+        amount_semantics: 'REVISED_TOTAL'
+      };
+      const resRevised = runDocumentDryRun(metaRevised, [], {
+        knownInstitutions: mockInstitutions,
+        existingBudgets: mockExistingBudgets,
+        existingAccounts: mockExistingAccounts
+      });
+      expect(resRevised.is_valid).toBe(true);
+      expect(resRevised.can_import).toBe(true);
+    });
+  });
+
+  describe('Gestion du numéro de version : officiel préservé, inconnu non inventé', () => {
+    it('Préserve la version officielle si spécifiée', () => {
+      const metaWithVersion: DocumentIngestionMetadata = {
+        ...validMetadata,
+        version_number: 3
+      };
+      const envelope = buildStandardImportEnvelope(metaWithVersion, [], mockInstitutions[0]);
+      expect(envelope.data.version_number).toBe(3);
+    });
+
+    it('Ne génère aucun numéro de version arbitraire (1 ou existant+1) si la version officielle est inconnue', () => {
+      const metaWithoutVersion: DocumentIngestionMetadata = {
+        ...validMetadata,
+        version_number: undefined
+      };
+      // Même avec existingBudgetsCount > 0, aucune version inventée
+      const envelope = buildStandardImportEnvelope(metaWithoutVersion, [], mockInstitutions[0], 5);
+      expect(envelope.data.version_number).toBeUndefined();
+    });
+  });
+
+  describe('Normalisation canonique des types et calcul du fingerprint déterministe', () => {
+    it('normalizeDocumentIdentityType établit l\'équivalence canonique BUDGET_PRIMITIF <-> PRIMITIF_ADOPTE', () => {
+      expect(normalizeDocumentIdentityType('BUDGET_PRIMITIF')).toBe('PRIMITIF_ADOPTE');
+      expect(normalizeDocumentIdentityType('PRIMITIF_ADOPTE')).toBe('PRIMITIF_ADOPTE');
+      expect(normalizeDocumentIdentityType('budget_primitif')).toBe('PRIMITIF_ADOPTE');
+      expect(normalizeDocumentIdentityType('primitif_adopte')).toBe('PRIMITIF_ADOPTE');
+    });
+
+    it('normalizeDocumentIdentityType préserve formellement les types distincts', () => {
+      expect(normalizeDocumentIdentityType('PRIMITIF_APRES_TUTELLE')).toBe('PRIMITIF_APRES_TUTELLE');
+      expect(normalizeDocumentIdentityType('AUTORISATION_EXECUTION')).toBe('AUTORISATION_EXECUTION');
+      expect(normalizeDocumentIdentityType('BUDGET_SUPPLEMENTAIRE')).toBe('BUDGET_SUPPLEMENTAIRE');
+      expect(normalizeDocumentIdentityType('MODIFICATIF_1')).toBe('MODIFICATIF_1');
+      expect(normalizeDocumentIdentityType('MODIFICATIF_2')).toBe('MODIFICATIF_2');
+      expect(normalizeDocumentIdentityType('BUDGET_MODIFICATIF')).toBe('BUDGET_MODIFICATIF');
+      expect(normalizeDocumentIdentityType('AUTRE_MODIFICATIF')).toBe('BUDGET_MODIFICATIF');
+      expect(normalizeDocumentIdentityType('DECISION_MODIFICATIVE')).toBe('DECISION_MODIFICATIVE');
+      expect(normalizeDocumentIdentityType('VIREMENT_CREDITS')).toBe('VIREMENT_CREDITS');
+      expect(normalizeDocumentIdentityType('COMPTE_ADMINISTRATIF')).toBe('COMPTE_ADMINISTRATIF');
+    });
+
+    it('Cross-vocabulaire : BUDGET_PRIMITIF ingéré vs PRIMITIF_ADOPTE en base déclenche la détection de doublon', () => {
+      // Cocody a déjà un budget en base avec budget_type: 'PRIMITIF_ADOPTE', ref 'AIP-2026-COCODY', date '2026-02-25'
+      const consoleIngestedMeta: DocumentIngestionMetadata = {
+        institution_id: 'inst-com-cocody',
+        fiscal_year: 2026,
+        document_type: 'BUDGET_PRIMITIF', // Vocabulaire console
+        source_name: 'AIP Cocody',
+        source_reference: 'AIP-2026-COCODY',
+        source_date: '2026-02-25',
+        source_date_kind: 'PUBLISHED'
+      };
+
+      const res = runDocumentDryRun(consoleIngestedMeta, [], {
+        knownInstitutions: mockInstitutions,
+        existingBudgets: mockExistingBudgets,
+        existingAccounts: mockExistingAccounts
+      });
+
+      expect(res.checks.duplicate_detected).toBe(true);
+      expect(res.is_valid).toBe(false);
+      expect(res.can_import).toBe(false);
+      expect(res.errors.some(e => e.includes('Document en doublon'))).toBe(true);
+    });
+
+    it('Actes distincts : BM1 vs BM2, BS vs BM et virements restent strictement distincts', () => {
+      const fpBM1 = computeDocumentFingerprint({
+        institution_id: 'inst-com-tiassale',
+        fiscal_year: 2024,
+        document_type: 'MODIFICATIF_1',
+        source_reference: 'DELIB-01',
+        source_date: '2024-06-01'
+      });
+
+      const fpBM2 = computeDocumentFingerprint({
+        institution_id: 'inst-com-tiassale',
+        fiscal_year: 2024,
+        document_type: 'MODIFICATIF_2',
+        source_reference: 'DELIB-01',
+        source_date: '2024-06-01'
+      });
+
+      const fpBS = computeDocumentFingerprint({
+        institution_id: 'inst-com-tiassale',
+        fiscal_year: 2024,
+        document_type: 'BUDGET_SUPPLEMENTAIRE',
+        source_reference: 'DELIB-01',
+        source_date: '2024-06-01'
+      });
+
+      const fpVir1 = computeDocumentFingerprint({
+        institution_id: 'inst-com-tiassale',
+        fiscal_year: 2024,
+        document_type: 'VIREMENT_CREDITS',
+        source_reference: 'VIR-01',
+        source_date: '2024-06-01'
+      });
+
+      const fpVir2 = computeDocumentFingerprint({
+        institution_id: 'inst-com-tiassale',
+        fiscal_year: 2024,
+        document_type: 'VIREMENT_CREDITS',
+        source_reference: 'VIR-02',
+        source_date: '2024-06-01'
+      });
+
+      expect(fpBM1).not.toBe(fpBM2);
+      expect(fpBM1).not.toBe(fpBS);
+      expect(fpVir1).not.toBe(fpVir2);
+    });
   });
 });

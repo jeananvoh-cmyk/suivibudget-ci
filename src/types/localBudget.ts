@@ -181,7 +181,8 @@ export interface LocalBudget {
   budget_type: BudgetEventType;
   status: BudgetRecordStatus;
   is_current_version: boolean;    // Version active actuellement retenue
-  version_number: number;         // 1, 2, 3...
+  version_number?: number;        // 1, 2, 3... (optionnel si non attesté officiellement)
+  amount_semantics?: 'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN'; // Sémantique financière des montants modificatifs
   
   // Montants consolidés
   total_amount: number | null;
