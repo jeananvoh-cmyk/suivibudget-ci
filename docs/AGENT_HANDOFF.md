@@ -12,13 +12,15 @@
 - FOUNDATION_READY : TRUE.
 
 ## BINGERVILLE BP 2026 — STATUT DE VALIDATION
+- **BINGERVILLE_PILOT** : **COMPLETE**
+- **PRODUCTION_CONTAINS_PR10** : **TRUE**
 - **SUPABASE PUBLISHED** : **VALIDÉ** (1 enregistrement canonique 2026 publié dans `local_budgets`, `data_import_rows` et 3 événements au journal).
 - **ACCÈS ANON SUPABASE** : **VALIDÉ** (`has_table_privilege('anon', 'public.local_budgets', 'SELECT') = TRUE`, PostgREST HTTP 200, migration `20261002090824_grant_anon_published_local_budgets` appliquée avec succès sur `cdesuvcozcetdtvibgqs`).
 - **RLS SUPABASE** : **VALIDÉ** (policy "Allow public read on published local budgets" `USING (status = 'PUBLISHED')` active ; 0 ligne non-PUBLISHED accessible à anon).
 - **SYNCHRONISATION FRONTEND** : **VALIDÉE** (`enrichInstitutionsWithBudgets()` connecte les données distantes Supabase directement à l'institution et écrase le fallback statique).
 - **RENDU CITOYEN SUR PREVIEW & BUNDLE PROD** : **VALIDÉ** (vue citoyenne responsive 375/768/1440 sans débordement horizontal).
-- **PRODUCTION (`suivibudget.vercel.app`)** : **VALIDÉ** (Production Vercel READY sur `4fb9c7d`, données Supabase 2026 affichées, 0 erreur console, 0 erreur réseau).
-- **BINGERVILLE** : **PILOTE TERMINÉ**
+- **PRODUCTION (`suivibudget.vercel.app`)** : **VALIDÉ** (Production Vercel READY sur `4fb9c7d` et `d4f0b30`, données Supabase 2026 affichées, 0 erreur console, 0 erreur réseau).
+- **RESPONSIVE PRODUCTION** : **VALIDÉ** (375 px, 768 px, 1440 px sans débordement horizontal ni régression).
 - **NE PLUS RÉIMPORTER BINGERVILLE** : Le lot Bingerville est définitivement importé et publié, aucun ré-import requis.
 
 ## COMPLETED
@@ -229,5 +231,5 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Sélection et cadrage par l'orchestrateur du prochain lot pilote réel (ex. Tiassalé CA 2024 / Cocody BP 2026).
+1. STOP_AND_WAIT_FOR_ORCHESTRATOR
 
