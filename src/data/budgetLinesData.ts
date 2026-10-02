@@ -493,16 +493,16 @@ export function getBudgetLinesForEntity(
 
   // 4. Communes of Abidjan
   if (entityType === 'MAIRIE' || q.includes('MAIRIE')) {
-    if (q.includes('YOPOUGON')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-yopougon'];
-    if (q.includes('ABOBO')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-abobo'];
-    if (q.includes('COCODY')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-cocody'];
-    if (q.includes('KOUMASSI')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-koumassi'];
-    if (q.includes('ADJAME')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-adjame'];
-    if (q.includes('PORT-BOUET') || q.includes('PORT BOUET')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-port-bouet'];
-    if (q.includes('MARCORY')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-marcory'];
-    if (q.includes('TREICHVILLE')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-treichville'];
-    if (q.includes('PLATEAU')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-plateau'];
-    if (q.includes('ATTECOUBE')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-attecoube'];
+    if (q.includes('YOPOUGON')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-yopougon'] || [];
+    if (q.includes('ABOBO')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-abobo'] || [];
+    if (q.includes('COCODY')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-cocody'] || [];
+    if (q.includes('KOUMASSI')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-koumassi'] || [];
+    if (q.includes('ADJAME')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-adjame'] || [];
+    if (q.includes('PORT-BOUET') || q.includes('PORT BOUET')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-port-bouet'] || [];
+    if (q.includes('MARCORY')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-marcory'] || [];
+    if (q.includes('TREICHVILLE')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-treichville'] || [];
+    if (q.includes('PLATEAU')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-plateau'] || [];
+    if (q.includes('ATTECOUBE')) return ABIDJAN_COMMUNES_BUDGET_LINES['inst-com-attecoube'] || [];
   }
 
   // 5. Exact match in OFFICIAL_ENTITY_BUDGET_LINES

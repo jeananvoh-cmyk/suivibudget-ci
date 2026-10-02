@@ -3,22 +3,61 @@
 ## METADATA
 - LAST_UPDATED : 2026-10-02
 - LAST_AGENT : Antigravity
-- CURRENT_BRANCH : `master`
-- HANDOFF_BASE_SHA : `4fb9c7dc8e0ecb146adf7a6e4e3a23f2447f1446` (master après fusion #10)
-- CURRENT_HEAD : `4fb9c7dc8e0ecb146adf7a6e4e3a23f2447f1446` ; 180 tests PASS, build PASS, Production READY.
-- PR : PR #10 `antigravity/first-real-data-pilot` MERGED dans master (`4fb9c7d`).
+- CURRENT_BRANCH : `antigravity/cocody-bp-2026`
+- HANDOFF_BASE_SHA : `d4f0b308d77c2cfce96c522e1a135a8bcd4e6be8` (master après fusion PR #10)
+- CURRENT_HEAD : `f8f12aa` (fonctionnel `2010284` feat(budget): support partial primitive budgets generically across pipeline and UI) ; 181 tests PASS, build PASS.
+- PR : PR #12 sur `antigravity/cocody-bp-2026` vers `master` (OPEN, non fusionnée, soumise au contrôle externe).
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : Pilote Bingerville BP 2026 en production (PR #10 fusionnée, Production Vercel READY, recette citoyenne 100% validée)
+- CURRENT_MILESTONE : Industrialisation du pipeline — Commune de Cocody BP 2026 (Cas budget partiel, réutilisabilité validée, Bingerville Golden Reference 100% intacte)
 - FOUNDATION_READY : TRUE.
 
-## BINGERVILLE BP 2026 — STATUT DE VALIDATION
+## COCODY BP 2026 — INDUSTRIALISATION DU PIPELINE (BUDGET PARTIEL)
+- **DISTINCTION STATUT RÉEL : LOCAL vs DISTANT** :
+  - **LOCAL_TEST_VALIDATED** : **TRUE** (Chaîne complète dry-run → staging `TO_VERIFY` → revue `VERIFIED` → publication `PUBLISHED` et restitution citoyenne sans falsification des montants nuls validée sous PostgreSQL PGlite dans `src/utils/__tests__/realPilotChain.test.ts`).
+  - **REMOTE_SUPABASE_VALIDATED** : **TRUE** — orchestrateur : dry-run réel puis import/revue/publication exécutés sur `cdesuvcozcetdtvibgqs`.
+  - **COCODY_REAL_SUPABASE_IMPORTED** : **TRUE** — 1 ligne de staging canonique, sans doublon.
+  - **COCODY_REAL_SUPABASE_PUBLISHED** : **TRUE** — `inst-com-cocody`, 2026, `PUBLISHED`, total 19 764 660 000 FCFA, fonctionnement/investissement `NULL`, `SECONDARY_TO_CORROBORATE`, confiance `MEDIUM`.
+  - **BLOCKER TECHNIQUE DISTANT** : **LEVÉ** — l'orchestrateur a utilisé un profil ADMIN actif existant via le workflow RPC protégé ; aucun RLS/GRANT/service_role ajouté.
+- **QUALIFICATION DES SOURCES** : **VALIDÉE**
+  - Source : Abidjan.net / Le Nouveau Réveil (25 février 2026, 1ère session ordinaire du conseil municipal de Cocody tenue le 24 février 2026).
+  - Montant total voté : **19 764 660 000 FCFA** (19,7 milliards FCFA). Précision : `EXACT`.
+  - Ventilation fonctionnement / investissement : Unités omises dans le compte-rendu de presse. Rigoureusement qualifiées `null` / `UNKNOWN`. Règle d'or respectée : `UNKNOWN != 0 FCFA` et `ABSENCE DE DONNÉE != 0 FCFA`.
+  - Statut de vérification : `SECONDARY_TO_CORROBORATE`, niveau de confiance `MEDIUM`.
+- **RÉUTILISABILITÉ DU MOTEUR & ÉVOLUTIONS GÉNÉRIQUES** : **VALIDÉES** (0 règle ad-hoc `if Cocody`)
+  - `PrimitiveBudgetInfo` (`src/types/index.ts`) : `investment_voted_fcfa` et `functioning_voted_fcfa` acceptent `number | null`.
+  - `dataStore.enrichInstitutionsWithBudgets()` : enrichit dès que `current.total_amount != null`, sans forcer un fallback statique erroné lorsque la ventilation est en cours de corroboration.
+  - `InstitutionDetailModal` : calcul conditionnel `hasBreakdown`. En l'absence de ventilation exacte vérifiée :
+    - Affiche "Part non calculée" et "Montant à confirmer" via `formatQualifiedFCFA`.
+    - Masque la jauge bicolore (évite d'afficher un faux 0% / 100%).
+    - Affiche un encadré informatif citoyen neutre et sourcé.
+  - `getBudgetLinesForEntity` (`budgetLinesData.ts`) et `InstitutionDetailModal` : retour défensif `[]` garantissant qu'aucune absence de lignes budgétaires nationales ne génère d'erreur runtime.
+- **RÉFÉRENTIELS ET FIXTURES ALIGNÉS** :
+  - `docs/imports/cocody-bp-2026.json` : validé conforme aux gates de staging / publication.
+  - `src/data/localBudgetsReferential.ts` et `src/data/officialPrimitiveBudgets.ts` : données statiques corrigées pour Cocody (montants nuls, source de presse `SECONDARY_TO_CORROBORATE` / `MEDIUM`, suppression de l'ancien mock non sourcé).
+- **NON-RÉGRESSION BINGERVILLE (RÉFÉRENCE D'OR)** : **100% VALIDÉE & INTACTE**
+  - Montant Total : **4 046 222 000 FCFA** (`EXACT`).
+  - Fonctionnement : **1 877 888 000 FCFA** (`EXACT`, 46.0%).
+  - Investissement : **2 168 334 000 FCFA** (`EXACT`, 54.0%).
+  - Jauge bicolore et 29 lignes budgétaires intactes.
+- **VALIDATION TECHNIQUE** :
+  - **181/181 tests unitaires et d'intégration PASS** sur 12 suites (`npm test`).
+  - **`npm run build` PASS** (1726 modules, zéro erreur TypeScript).
+  - Test d'intégration bout en bout dans `src/utils/__tests__/realPilotChain.test.ts` (test 3) validant la chaîne complète Cocody : dry-run → staging → revue → publication → restitution `dataStore` avec `null` préservés.
+- **VALIDATION VISUELLE & RESPONSIVE (Playwright 375, 768, 1440 px)** :
+  - Testé sur fiche Cocody (`/institutions/mairies` → Cocody → onglet `BUDGET & FINANCES`).
+  - 375 px (Mobile) : `windowWidth: 375`, `bodyScrollWidth: 375`, `hasHorizontalOverflow: false`.
+  - 768 px (Tablette) : `windowWidth: 768`, `bodyScrollWidth: 768`, `hasHorizontalOverflow: false`.
+  - 1440 px (Desktop) : `windowWidth: 1440`, `bodyScrollWidth: 1440`, `hasHorizontalOverflow: false`.
+  - 0 erreur console, 0 avertissement.
+
+## BINGERVILLE BP 2026 — STATUT DE VALIDATION (RÉFÉRENCE D'OR)
 - **SUPABASE PUBLISHED** : **VALIDÉ** (1 enregistrement canonique 2026 publié dans `local_budgets`, `data_import_rows` et 3 événements au journal).
 - **ACCÈS ANON SUPABASE** : **VALIDÉ** (`has_table_privilege('anon', 'public.local_budgets', 'SELECT') = TRUE`, PostgREST HTTP 200, migration `20261002090824_grant_anon_published_local_budgets` appliquée avec succès sur `cdesuvcozcetdtvibgqs`).
 - **RLS SUPABASE** : **VALIDÉ** (policy "Allow public read on published local budgets" `USING (status = 'PUBLISHED')` active ; 0 ligne non-PUBLISHED accessible à anon).
 - **SYNCHRONISATION FRONTEND** : **VALIDÉE** (`enrichInstitutionsWithBudgets()` connecte les données distantes Supabase directement à l'institution et écrase le fallback statique).
 - **RENDU CITOYEN SUR PREVIEW & BUNDLE PROD** : **VALIDÉ** (vue citoyenne responsive 375/768/1440 sans débordement horizontal).
 - **PRODUCTION (`suivibudget.vercel.app`)** : **VALIDÉ** (Production Vercel READY sur `4fb9c7d`, données Supabase 2026 affichées, 0 erreur console, 0 erreur réseau).
-- **BINGERVILLE** : **PILOTE TERMINÉ**
+- **BINGERVILLE** : **PILOTE TERMINÉ & PRÉSERVÉ INTACT**
 - **NE PLUS RÉIMPORTER BINGERVILLE** : Le lot Bingerville est définitivement importé et publié, aucun ré-import requis.
 
 ## COMPLETED
@@ -229,5 +268,19 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Sélection et cadrage par l'orchestrateur du prochain lot pilote réel (ex. Tiassalé CA 2024 / Cocody BP 2026).
+1. Contrôle CI/Vercel de PR #12 puis fusion si tous les gates restent verts.
+2. Recette Production Cocody après fusion : lecture distante, rendu budget partiel, absence de faux 0 et non-régression Bingerville.
+3. Après clôture Cocody, cadrage du prochain pilote par l'orchestrateur (Tiassalé CA 2024).
 
+## COCODY_REMOTE_CLOSEOUT — ORCHESTRATEUR 2026-10-02
+- Institution canonique ajoutée à `public.institutions` : `inst-com-cocody`, `Mairie de Cocody`, type applicatif `MAIRIE`, région Abidjan, District Autonome d'Abidjan.
+- Dry-run distant : READY=1, errors=0, conflicts=0 ; plan_hash `eb38f544e2c4b8bf11372dcc342c1ca73bb9b0f7f05f3dbf945b68f2e9f9bd9d`.
+- Import distant : IMPORTED.
+- Revue distante : VERIFIED.
+- Publication distante : PUBLISHED.
+- `data_import_events` : IMPORTED → VERIFIED → PUBLISHED.
+- `local_budgets` : exactement 1 ligne Cocody 2026 canonique.
+- Total : 19 764 660 000 FCFA ; fonctionnement : NULL ; investissement : NULL ; précision : EXACT ; vérification : SECONDARY_TO_CORROBORATE ; confiance : MEDIUM.
+- Lecture sous rôle `anon` : PASS sur la ligne PUBLISHED.
+- Bingerville Golden Reference contrôlée intacte : 4 046 222 000 / 1 877 888 000 / 2 168 334 000 FCFA.
+- Aucune migration créée ; aucun RLS/GRANT modifié.
