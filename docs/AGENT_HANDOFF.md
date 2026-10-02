@@ -5,13 +5,19 @@
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/cocody-bp-2026`
 - HANDOFF_BASE_SHA : `d4f0b308d77c2cfce96c522e1a135a8bcd4e6be8` (master après fusion PR #10)
-- CURRENT_HEAD : `92c22f5` (fonctionnel `2010284` feat(budget): support partial primitive budgets generically across pipeline and UI) ; 181 tests PASS, build PASS.
-- PR : PR en cours sur `antigravity/cocody-bp-2026` vers `master` (NON fusionnée, soumise au contrôle externe).
+- CURRENT_HEAD : `f8f12aa` (fonctionnel `2010284` feat(budget): support partial primitive budgets generically across pipeline and UI) ; 181 tests PASS, build PASS.
+- PR : PR #12 sur `antigravity/cocody-bp-2026` vers `master` (OPEN, non fusionnée, soumise au contrôle externe).
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
 - CURRENT_MILESTONE : Industrialisation du pipeline — Commune de Cocody BP 2026 (Cas budget partiel, réutilisabilité validée, Bingerville Golden Reference 100% intacte)
 - FOUNDATION_READY : TRUE.
 
 ## COCODY BP 2026 — INDUSTRIALISATION DU PIPELINE (BUDGET PARTIEL)
+- **DISTINCTION STATUT RÉEL : LOCAL vs DISTANT** :
+  - **LOCAL_TEST_VALIDATED** : **TRUE** (Chaîne complète dry-run → staging `TO_VERIFY` → revue `VERIFIED` → publication `PUBLISHED` et restitution citoyenne sans falsification des montants nuls validée sous PostgreSQL PGlite dans `src/utils/__tests__/realPilotChain.test.ts`).
+  - **REMOTE_SUPABASE_VALIDATED** : **FALSE** (Sur l'instance distante `cdesuvcozcetdtvibgqs`, `local_budgets` pour `inst-com-cocody` = 0 ligne).
+  - **COCODY_REAL_SUPABASE_IMPORTED** : **FALSE** (staging distant non encore alimenté).
+  - **COCODY_REAL_SUPABASE_PUBLISHED** : **FALSE** (non publié sur le Supabase distant).
+  - **BLOCKER TECHNIQUE DISTANT** : L'accès à `rpc/import_data_batch` et `data_import_rows` sur `cdesuvcozcetdtvibgqs` exige les privilèges de rôle protégé staff (`ADMIN` ou `DATA_MANAGER` via `SUIVIBUDGET_ACCESS_TOKEN`), non configuré dans l'environnement d'exécution de l'agent.
 - **QUALIFICATION DES SOURCES** : **VALIDÉE**
   - Source : Abidjan.net / Le Nouveau Réveil (25 février 2026, 1ère session ordinaire du conseil municipal de Cocody tenue le 24 février 2026).
   - Montant total voté : **19 764 660 000 FCFA** (19,7 milliards FCFA). Précision : `EXACT`.
@@ -262,6 +268,7 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Contrôle externe de la PR Cocody par l'orchestrateur (vérification des gates de données, non-régression Bingerville, CI GitHub Actions et Vercel Preview).
-2. Après validation externe et fusion sur master : recette citoyenne en production sur suivibudget.vercel.app.
-3. Prochain lot pilote cadré par l'orchestrateur (ex. Tiassalé CA 2024).
+1. Exécution ou déblocage de l'import distant Cocody BP 2026 sur Supabase `cdesuvcozcetdtvibgqs` par l'orchestrateur (session staff `SUIVIBUDGET_ACCESS_TOKEN` requise pour `import_data_batch` et `review_data_import`).
+2. Contrôle externe de la PR #12 par l'orchestrateur (vérification des gates de données, non-régression Bingerville, CI GitHub Actions et Vercel Preview).
+3. Après validation externe et fusion sur master : recette citoyenne en production sur suivibudget.vercel.app.
+4. Prochain lot pilote cadré par l'orchestrateur (ex. Tiassalé CA 2024).
