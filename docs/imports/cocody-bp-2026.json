@@ -1,0 +1,31 @@
+[
+  {
+    "kind": "BP",
+    "institution_id": "inst-com-cocody",
+    "institution_type": "COMMUNE",
+    "fiscal_year": 2026,
+    "source": {
+      "name": "Abidjan.net / Le Nouveau Réveil",
+      "reference": "1ère session du conseil municipal de Cocody, 25 février 2026",
+      "date": "2026-02-25",
+      "date_kind": "PUBLISHED",
+      "url": "https://news.abidjan.net/articles/746842/1ere-session-du-conseil-municipal-de-cocody-un-budget-primitif-de-197-milliards-pour-booster-les-travaux-innovants"
+    },
+    "data": {
+      "budget_type": "PRIMITIF_ADOPTE",
+      "version_number": 1,
+      "total_amount": 19764660000,
+      "operating_amount": null,
+      "investment_amount": null,
+      "adoption_date": "2026-02-25",
+      "verification_status": "SECONDARY_TO_CORROBORATE",
+      "confidence_level": "MEDIUM",
+      "notes": "L'article Abidjan.net / Le Nouveau Réveil donne 19,7 milliards FCFA (19 764 660 000 FCFA). Source de presse nationale classée SECONDARY_TO_CORROBORATE. Les montants de fonctionnement et d'investissement ne comportent pas d'unités certaines et sont donc qualifiés UNKNOWN (null) conformément aux règles d'intégrité."
+    },
+    "precision": {
+      "total_amount": "EXACT",
+      "operating_amount": "UNKNOWN",
+      "investment_amount": "UNKNOWN"
+    }
+  }
+]

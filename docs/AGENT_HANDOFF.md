@@ -1,17 +1,66 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- LAST_UPDATED : 2026-10-01
-- LAST_AGENT : Codex
-- CURRENT_BRANCH : `codex/import-console-amount-precision`
-- HANDOFF_BASE_SHA : `8e934d19dcdbf0172259d4028aa969cb29084918` (master après fusion #8)
-- CURRENT_HEAD : retrouver le HEAD de cette branche dans Git ; validations locales terminées, CI à vérifier après push.
-- PR : #3/#4/#5/#6/#7/#8 fusionnées. Console proposée séparément sur master ; ne pas fusionner sa nouvelle PR.
+- LAST_UPDATED : 2026-10-02
+- LAST_AGENT : Antigravity
+- CURRENT_BRANCH : `antigravity/first-real-data-pilot`
+- HANDOFF_BASE_SHA : `cef3441aa6fb37e5a72d5e5ed57409532309666b` (master après fusion #9)
+- CURRENT_HEAD : `b4b0928c8ab07227c53e6841912ad2c591b1c101` ; 180 tests PASS, build PASS, Vercel Preview READY.
+- PR : PR #9 fusionnée sur master. PR #10 `antigravity/first-real-data-pilot` ouverte vers master ; ne pas fusionner.
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : console données privée et restitution citoyenne des montants qualifiés terminées
-- FOUNDATION_READY : TRUE, validé sur 3b502b1 après CI SUCCESS. Aucun P0/P1 connu ouvert dans la fondation.
+- CURRENT_MILESTONE : Parcours citoyen réel Bingerville BP 2026 validé de bout en bout (Supabase distant PostgREST 200, frontend synchronisé, responsive multi-viewports validé)
+- FOUNDATION_READY : TRUE.
+
+## BINGERVILLE BP 2026 — STATUT DE VALIDATION
+- **SUPABASE PUBLISHED** : **VALIDÉ** (1 enregistrement canonique 2026 publié dans `local_budgets`, `data_import_rows` et 3 événements au journal).
+- **ACCÈS ANON SUPABASE** : **VALIDÉ** (`has_table_privilege('anon', 'public.local_budgets', 'SELECT') = TRUE`, PostgREST HTTP 200, migration `20261002090824_grant_anon_published_local_budgets` appliquée avec succès sur `cdesuvcozcetdtvibgqs`).
+- **RLS SUPABASE** : **VALIDÉ** (policy "Allow public read on published local budgets" `USING (status = 'PUBLISHED')` active ; 0 ligne non-PUBLISHED accessible à anon).
+- **SYNCHRONISATION FRONTEND** : **VALIDÉE** (`enrichInstitutionsWithBudgets()` connecte les données distantes Supabase directement à l'institution et écrase le fallback statique).
+- **RENDU CITOYEN SUR PREVIEW & BUNDLE PROD** : **VALIDÉ** (sur Preview PR #10 et bundle de production, vue citoyenne responsive 375/768/1440 sans débordement horizontal).
+- **PRODUCTION (`suivibudget.vercel.app`)** : **EN ATTENTE FUSION PR #10** (la production Vercel pointe sur `master` `cef3441` ; PR #10 prête et mergeable).
+- **NE PLUS RÉIMPORTER BINGERVILLE** : Le lot Bingerville est définitivement importé et publié, aucun ré-import requis.
 
 ## COMPLETED
+### Parcours citoyen réel Bingerville BP 2026 — 2 octobre
+- **État Supabase réel vérifié indépendamment** :
+  - `local_budgets` : 1 enregistrement canonique publié (`inst-com-bingerville`, 2026, `status = 'PUBLISHED'`).
+  - `data_import_rows` : 1 ligne de staging (Bingerville BP 2026).
+  - `data_import_events` : 3 événements au journal (`IMPORTED` → `VERIFIED` → `PUBLISHED`).
+  - **B. Recette réelle Supabase** : **EFFECTUÉE**.
+  - **C. Publication canonique Supabase** : **EFFECTUÉE**.
+- **Traçage du flux de bout en bout et ruptures identifiées/corrigées** :
+  - Flux : Supabase `local_budgets` → `administrativeAccountsService.fetchPublishedLocalBudgets` → `dataStore.initSupabaseSync` / `enrichInstitutionsWithBudgets` → `dataStore.institutions` / `primitive_budget` → `InstitutionDetailModal` / `MunicipalitiesPage` → Rendu citoyen.
+  - **Rupture DDL (Base de données)** : Le rôle `anon` ne disposait pas de `GRANT SELECT ON public.local_budgets TO anon;` (omis lors de `20260929141800_grant_schema_privileges.sql`), causant un HTTP 401 / code `42501 permission denied for table local_budgets` pour les citoyens non connectés malgré la policy RLS `USING (status = 'PUBLISHED')`.
+    - Migration additive rédigée : `supabase/migrations/20261002010000_grant_anon_published_local_budgets.sql` (`GRANT SELECT ON public.local_budgets TO anon;`).
+    - Test PGlite ajouté dans `src/utils/__tests__/publicationDatabase.test.ts` garantissant que `anon` lit les budgets `PUBLISHED` mais que les budgets non publiés (`VERIFIED`, `TO_VERIFY`, `DRAFT`) restent strictement invisibles.
+  - **Rupture Synchronisation Frontend (`dataStore.ts`)** : `initSupabaseSync` mettait à jour `this.localBudgets` mais ne ré-enrichissait pas `this.institutions`. Ajout de la méthode `enrichInstitutionsWithBudgets()` appelée après la récupération des budgets distants et dans `saveLocalBudget`.
+  - **Rupture Libellé de Provenance** : Libellé source harmonisé avec la donnée officielle publiée : `"AIP — Budget primitif 2026 de Bingerville"`.
+- **Validation visuelle & Responsive (Playwright sur 375, 768, 1440 px)** :
+  - Route testée : `/institutions/mairies` → Fiche Bingerville (`InstitutionDetailModal` > onglet `BUDGET & FINANCES` et sous-onglets).
+  - Total : **4 046 222 000 FCFA**
+  - Fonctionnement : **1 877 888 000 FCFA** (46.0 %)
+  - Investissement : **2 168 334 000 FCFA** (54.0 %)
+  - Exercice : **2026**
+  - Précision : **EXACT** (Montant Délibéré Exact)
+  - Source : **AIP — Budget primitif 2026 de Bingerville**
+  - Aucun débordement horizontal (`bodyScrollWidth = windowWidth` : 375, 768, 1440 px).
+- **Validation technique locale** :
+  - **180/180 tests PASS** sur 12 suites de tests (`npm test`).
+  - **`npm run build` PASS** (1726 modules, zéro erreur TypeScript).
+- Trois fichiers de lots réels documentés et vérifiés créés dans `docs/imports/` :
+  1. `docs/imports/bingerville-bp-2026.json` : BP 2026 Bingerville (Total: 4 046 222 000 FCFA EXACT, Fonctionnement: 1 877 888 000 FCFA EXACT, Investissement: 2 168 334 000 FCFA EXACT). Source AIP 2026-01-28 (`AIP_VERIFIED`, `HIGH`). Non conflictuel (0 ligne dans local_budgets).
+  2. `docs/imports/cocody-bp-2026.json` : BP 2026 Cocody (Total: 19 764 660 000 FCFA EXACT, Fonctionnement: null UNKNOWN, Investissement: null UNKNOWN). Source Abidjan.net / Le Nouveau Réveil 2026-02-25. Statut rigoureusement classifié en `SECONDARY_TO_CORROBORATE` et `MEDIUM` (source de presse corroborée, jamais transformée en source AIP ou officielle). Démontre la règle fondamentale `UNKNOWN != 0` (restitution citoyenne "Montant à confirmer", zéro exact distinct).
+  3. `docs/imports/tiassale-ca-2024.json` : CA 2024 Tiassalé (Total Prévu: 1 007 841 000 FCFA, Total Réalisé: 1 059 255 758 FCFA, tous EXACT). Source CA 2024 page 36.
+- Règle de cohérence source / vérification ajoutée dans `src/utils/budgetValidation.ts` (`validateImportProvenanceConsistency` et `validateBudgetRecord`) empêchant toute contradiction entre source de presse et statut officiel/AIP.
+- Suite complète d'intégration de bout en bout implémentée dans `src/utils/__tests__/realPilotChain.test.ts` (5 tests réels sous PGlite exécutant le schéma SQL et les migrations réelles du projet) :
+  - Validation structurelle, de provenance et anti-contradiction des fichiers JSON.
+  - Chaîne complète Bingerville BP 2026 : dry-run (plan_hash et SHA-256 déterministe sans écriture) → staging (TO_VERIFY) → revue humaine (VERIFIED) → rejet de publication sans confirmation explicite (`p_publish_confirmed = false`) → acceptation avec confirmation explicite (`p_publish_confirmed = true`) → publication dans `local_budgets` avec formatage FCFA exact.
+  - Chaîne complète Cocody BP 2026 : respect strict des montants nuls (UNKNOWN) non transformés en 0 et statut `SECONDARY_TO_CORROBORATE`.
+  - Chaîne complète Tiassalé 2024 : CA 2024 publié → Opération n°6 (Marché 20 magasins) reliée au CA parent → Rapprochement DGMP (AOO24062605757, Société DEM, match STRONG) relié à l'opération → Restitution Project Accountability Passport (taux financier 99.46%, séparation financier != physique).
+  - Détection canonique de conflit : le pipeline refuse tout écrasement silencieux d'un enregistrement canonique préexistant avec `CONFLICT: Existing canonical record; no overwrite`.
+- Validation technique locale : 179/179 tests PASS sur 12 suites de test, `npm run build` PASS (1726 modules transformés, zéro erreur TypeScript).
+- Base Supabase distante `cdesuvcozcetdtvibgqs` préservée intacte : aucune migration réappliquée, aucune ingestion massive non autorisée, aucun compte de test créé en production.
+
 ### Console données et précisions — 1er octobre, après #8
 - #8 contrôlée brièvement puis fusionnée au SHA attendu ; master synchronisé sans perte à 8e934d1. Post-merge ciblé : 16 tests pipeline PASS.
 - Console ADMIN/DATA_MANAGER : JSON/JSONL, simulation obligatoire, rapport ligne par ligne, pagination, source/provenance et historique privés. VERIFY / REJECT / PUBLISH séparés ; confirmation explicite contrôlée aussi en SQL. Aucun service_role client, RLS inchangée.
@@ -110,6 +159,8 @@ Les blocs suivants sont historiques ; leurs anciennes interdictions de fusion et
 | 20260930223840_apec_participation_cycle.sql | 20261001040746 | APPLIED |
 | 20261001043805_apec_moderated_publication.sql | 20261001044508 | APPLIED |
 | 20261001091748_controlled_data_import.sql | 20261001093613 | APPLIED |
+| 20261001144423_import_console_qualified_amounts.sql | 20261001150911 | APPLIED |
+| 20261002010000_grant_anon_published_local_budgets.sql | 20261002090824 | APPLIED |
 
 Les quatre premières migrations n’ont pas été rejouées. Les horodatages distants sont attribués par l’outil ; ne pas rejouer sur la seule différence de préfixe. Schéma metadata, vue publique, triggers, grants et RLS contrôlés.
 
@@ -177,6 +228,7 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Contrôler la CI du HEAD de codex/import-console-amount-precision après push ; laisser sa PR ouverte. Aucun réaudit #3–#8 ni rejeu APPLIED, notamment 20261001150911.
-2. Prochain bloc : préparer un petit lot réel documenté via DATA_IMPORT.md et faire relire le dry-run dans la console par l’opérateur habilité ; aucune ingestion massive implicite. Les conflits nécessitent un workflow de révision explicite, jamais un upsert silencieux.
-3. Documenter un cycle APEC réel avec source/dates validées avant ouverture citoyenne. Protection des mots de passe compromis à activer manuellement sur le seul projet autorisé. Ne pas fabriquer de contenu pour remplir les états vides.
+1. Contrôle externe et fusion de la PR #10 sur `master` pour déployer la synchronisation frontend Supabase sur la production Vercel (`suivibudget.vercel.app`).
+2. Après fusion #10, vérifier sur la production Vercel le parcours citoyen Bingerville BP 2026.
+3. Préparer le lot pilote suivant selon les priorités du projet (ex. Tiassalé CA 2024 / Cocody BP 2026).
+

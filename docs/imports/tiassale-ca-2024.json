@@ -1,0 +1,33 @@
+[
+  {
+    "kind": "CA",
+    "institution_id": "inst-com-tiassale",
+    "institution_type": "COMMUNE",
+    "fiscal_year": 2024,
+    "source": {
+      "name": "COMMUNE DE TIASSALE — Compte administratif 2024",
+      "reference": "Compte administratif 2024, page 36",
+      "date": "2024-12-31",
+      "date_kind": "RECORDED"
+    },
+    "data": {
+      "operating_planned": 618000000,
+      "operating_realized": 726260304,
+      "investment_planned": 389841000,
+      "investment_realized": 332995454,
+      "total_planned": 1007841000,
+      "total_realized": 1059255758,
+      "verification_status": "OFFICIAL_DOCUMENT",
+      "source_page": 36,
+      "notes": "Compte administratif 2024 de Tiassalé. La synthèse extraite comporte des taux supérieurs à 100 % en fonctionnement conservés tels qu’extraits."
+    },
+    "precision": {
+      "operating_planned": "EXACT",
+      "operating_realized": "EXACT",
+      "investment_planned": "EXACT",
+      "investment_realized": "EXACT",
+      "total_planned": "EXACT",
+      "total_realized": "EXACT"
+    }
+  }
+]

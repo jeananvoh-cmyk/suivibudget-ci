@@ -1,0 +1,32 @@
+[
+  {
+    "kind": "BP",
+    "institution_id": "inst-com-bingerville",
+    "institution_type": "COMMUNE",
+    "fiscal_year": 2026,
+    "source": {
+      "name": "AIP — Budget primitif 2026 de Bingerville",
+      "reference": "Dépêche AIP du 28 janvier 2026",
+      "date": "2026-01-28",
+      "date_kind": "PUBLISHED",
+      "url": "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2026-de-la-commune-de-bingerville-arrete-a-plus-de-4-milliards-fcfa/"
+    },
+    "data": {
+      "budget_type": "AUTORISATION_EXECUTION",
+      "version_number": 2,
+      "total_amount": 4046222000,
+      "operating_amount": 1877888000,
+      "investment_amount": 2168334000,
+      "adoption_date": "2026-01-27",
+      "tutelle_approval_date": "2025-12-04",
+      "verification_status": "AIP_VERIFIED",
+      "confidence_level": "HIGH",
+      "notes": "Prévisions budgétaires 2026 après révision par la commission d’approbation de la tutelle DGDDL ; aucune exécution financière ni réalisation physique déduite."
+    },
+    "precision": {
+      "total_amount": "EXACT",
+      "operating_amount": "EXACT",
+      "investment_amount": "EXACT"
+    }
+  }
+]

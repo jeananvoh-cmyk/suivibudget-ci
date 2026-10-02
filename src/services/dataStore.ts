@@ -669,25 +669,7 @@ class DataStore {
     }
 
     // Enrich institutions with multi-exercices local budgets referential
-    this.institutions = this.institutions.map(inst => {
-      const budgets = this.getLocalBudgets(inst.id);
-      const current = budgets.find(b => b.fiscal_year === 2026 && b.is_current_version) || budgets.find(b => b.fiscal_year === 2026);
-      return {
-        ...inst,
-        local_budgets: budgets,
-        primitive_budget: current && current.total_amount != null && current.operating_amount != null && current.investment_amount != null ? {
-          total_voted_fcfa: current.total_amount,
-          investment_voted_fcfa: current.investment_amount,
-          functioning_voted_fcfa: current.operating_amount,
-          voted_date: current.adoption_date || '2026',
-          source: current.primary_source_label || 'SuiviBudget',
-          source_url: current.primary_source_url,
-          precision: current.amount_precision,
-          session_notes: current.session_notes || current.notes,
-          projects_count: current.projects_count,
-        } : (OFFICIAL_PRIMITIVE_BUDGETS[inst.id] || inst.primitive_budget)
-      };
-    });
+    this.enrichInstitutionsWithBudgets();
 
     this.proofs = [];
     try {
@@ -768,15 +750,40 @@ class DataStore {
     this.initSupabaseSync();
   }
 
+  public enrichInstitutionsWithBudgets(): void {
+    this.institutions = this.institutions.map(inst => {
+      const budgets = this.getLocalBudgets(inst.id);
+      const current = budgets.find(b => b.fiscal_year === 2026 && b.is_current_version) || budgets.find(b => b.fiscal_year === 2026);
+      return {
+        ...inst,
+        local_budgets: budgets,
+        primitive_budget: current && current.total_amount != null && current.operating_amount != null && current.investment_amount != null ? {
+          total_voted_fcfa: current.total_amount,
+          investment_voted_fcfa: current.investment_amount,
+          functioning_voted_fcfa: current.operating_amount,
+          voted_date: current.adoption_date || '2026',
+          source: current.primary_source_label || 'SuiviBudget',
+          source_url: current.primary_source_url,
+          precision: current.amount_precision,
+          session_notes: current.session_notes || current.notes,
+          projects_count: current.projects_count,
+        } : (OFFICIAL_PRIMITIVE_BUDGETS[inst.id] || inst.primitive_budget)
+      };
+    });
+  }
+
   private async initSupabaseSync() {
     if (!isSupabaseConfigured()) return;
     try {
       await refreshPublishedAdministrativeAccounts();
       const remoteBudgets = await fetchPublishedLocalBudgets();
-      setPublishedLocalBudgets(remoteBudgets);
-      this.localBudgets = [...this.localBudgets.filter(local => !remoteBudgets.some(remote =>
-        remote.institution_id === local.institution_id && remote.fiscal_year === local.fiscal_year && remote.budget_type === local.budget_type && remote.version_number === local.version_number)), ...remoteBudgets];
-      this.notify();
+      if (remoteBudgets.length > 0) {
+        setPublishedLocalBudgets(remoteBudgets);
+        this.localBudgets = [...this.localBudgets.filter(local => !remoteBudgets.some(remote =>
+          remote.institution_id === local.institution_id && remote.fiscal_year === local.fiscal_year && remote.budget_type === local.budget_type && remote.version_number === local.version_number)), ...remoteBudgets];
+        this.enrichInstitutionsWithBudgets();
+        this.notify();
+      }
       await this.refreshProofs();
 
       // Sync public documents from Supabase if table exists
@@ -988,6 +995,7 @@ class DataStore {
       );
     }
 
+    this.enrichInstitutionsWithBudgets();
     this.notify();
   }
 

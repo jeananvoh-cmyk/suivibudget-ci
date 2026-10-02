@@ -17,6 +17,7 @@ const migrationNames = [
   '20260930153716_least_privilege_passport_boundary.sql',
   '20260930223840_apec_participation_cycle.sql',
   '20261001043805_apec_moderated_publication.sql',
+  '20261002010000_grant_anon_published_local_budgets.sql',
 ];
 const migrations = () => migrationNames.map(name => readFileSync(resolve('supabase/migrations', name), 'utf8'));
 
@@ -331,6 +332,7 @@ describe('Publication boundaries applied to PostgreSQL', () => {
 
   it('reapplies historical publication boundary repairs without drift errors', async () => {
     for (const sql of migrations().slice(0,6)) await db.exec(sql);
+    await db.exec(readFileSync(resolve('supabase/migrations', '20261002010000_grant_anon_published_local_budgets.sql'), 'utf8'));
   });
 
   it('only exposes a published CA and its financial, operation and procurement children', async () => {
@@ -413,6 +415,14 @@ describe('Publication boundaries applied to PostgreSQL', () => {
     });
     await asRole('authenticated', citizen, async () => {
       expect((await db.query('select * from public.caidp_document_requests_log')).rows).toEqual([]);
+    });
+  });
+
+  it('allows anon to read only PUBLISHED local budgets while unpublished stay invisible', async () => {
+    await asRole('anon', null, async () => {
+      const rows = (await db.query<{ id: string; status: string }>('select id, status from public.local_budgets')).rows;
+      expect(rows).toHaveLength(1);
+      expect(rows[0].status).toBe('PUBLISHED');
     });
   });
 });

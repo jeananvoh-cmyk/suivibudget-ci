@@ -268,7 +268,7 @@ export const LOCAL_BUDGETS_REFERENTIAL: LocalBudget[] = [
     confidence_level: 'HIGH',
     notes: "Initialement 4 144 152 000 FCFA ; revu à 4 046 222 000 FCFA par la commission d'approbation.",
     sources: [{ source: LOCAL_BUDGET_SOURCES['src-aip'], role: 'PRIMARY' }],
-    primary_source_label: "AIP",
+    primary_source_label: "AIP — Budget primitif 2026 de Bingerville",
     primary_source_url: "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2026-de-la-commune-de-bingerville-arrete-a-plus-de-4-milliards-fcfa/",
     created_at: '2026-01-28T10:00:00Z',
     updated_at: '2026-01-28T10:00:00Z',
