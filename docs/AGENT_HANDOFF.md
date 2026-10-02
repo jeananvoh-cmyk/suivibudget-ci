@@ -5,8 +5,8 @@
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/tiassale-ca-2024-reconciliation`
 - HANDOFF_BASE_SHA : `cc0ad7732930b964a9dd379631c4e01bac4fa1e3` (master après fusion PR #12 Cocody)
-- CURRENT_HEAD : `243a744` feat(ca): reconcile Tiassalé CA 2024, justify source anomaly and eliminate mock referential ; 193 tests PASS (13 suites), build PASS.
-- PR : PR ouverte sur `antigravity/tiassale-ca-2024-reconciliation` vers `master` (NON FUSIONNÉE, soumise au contrôle de l'orchestrateur).
+- CURRENT_HEAD : `d87f75c` docs(handoff): document Tiassalé CA 2024 reconciliation and data reliability audit ; 193 tests PASS (13 suites), build PASS.
+- PR : PR #13 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/13) ouverte sur `antigravity/tiassale-ca-2024-reconciliation` vers `master` (NON FUSIONNÉE, soumise au contrôle de l'orchestrateur).
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
 - CURRENT_MILESTONE : Réconciliation & Fiabilisation — Tiassalé Compte Administratif 2024 (Résolution des contradictions documentaires, maintien justifié de SOURCE_ANOMALY, élimination du faux mock 1.12B, séparation étanche financier != physique, préservation des 3 opérations et des 3 rapprochements DGMP STRONG, non-régression Bingerville & Cocody)
 - FOUNDATION_READY : TRUE.
