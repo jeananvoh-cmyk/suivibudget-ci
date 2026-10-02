@@ -65,6 +65,7 @@ export function DataImportConsole({ role }: { role: string }) {
   const [sourceDateKind, setSourceDateKind] = useState<'PUBLISHED' | 'ACCESSED' | 'RECORDED'>('RECORDED');
   const [sourceUrl, setSourceUrl] = useState<string>('');
   const [sourcePage, setSourcePage] = useState<number | undefined>(undefined);
+  const [amountSemantics, setAmountSemantics] = useState<'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN'>('DELTA');
   const [notes, setNotes] = useState<string>('');
 
   // Proposed structured values
@@ -163,6 +164,7 @@ export function DataImportConsole({ role }: { role: string }) {
       source_date_kind: sourceDateKind,
       source_url: sourceUrl || undefined,
       source_page: sourcePage,
+      amount_semantics: amountSemantics,
       notes: notes || undefined
     };
 
@@ -193,10 +195,12 @@ export function DataImportConsole({ role }: { role: string }) {
       source_date_kind: sourceDateKind,
       source_url: sourceUrl || undefined,
       source_page: sourcePage,
+      amount_semantics: amountSemantics,
       notes: notes || undefined
     };
 
-    const envelope = buildStandardImportEnvelope(meta, proposedValues, selectedInstitution);
+    const existingCount = dataStore.getLocalBudgets(selectedInstitutionId).length;
+    const envelope = buildStandardImportEnvelope(meta, proposedValues, selectedInstitution, existingCount);
     const jsonString = JSON.stringify([envelope], null, 2);
 
     setText(jsonString);
@@ -336,13 +340,35 @@ export function DataImportConsole({ role }: { role: string }) {
                 <option value="BUDGET_PRIMITIF">Budget Primitif (BP)</option>
                 <option value="BUDGET_SUPPLEMENTAIRE">Budget Supplémentaire (BS)</option>
                 <option value="BUDGET_MODIFICATIF">Budget Modificatif (BM)</option>
-                <option value="DECISION_MODIFICATIVE">Décision Modificative / Virement de crédits</option>
+                <option value="DECISION_MODIFICATIVE">Décision Modificative</option>
                 <option value="VIREMENT_CREDITS">Virement de Crédits</option>
                 <option value="COMPTE_ADMINISTRATIF">Compte Administratif (CA)</option>
                 <option value="DELIBERATION_BUDGETAIRE">Délibération Budgétaire</option>
                 <option value="AUTRE_DOCUMENT_OFFICIEL">Autre document officiel</option>
               </select>
             </div>
+
+            {/* Sémantique financière pour actes modificatifs */}
+            {['BUDGET_SUPPLEMENTAIRE', 'BUDGET_MODIFICATIF', 'DECISION_MODIFICATIVE', 'VIREMENT_CREDITS'].includes(documentType) && (
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="block text-xs font-bold uppercase text-slate-600">
+                  Sémantique Financière des Montants *
+                </label>
+                <select
+                  aria-label="Sémantique Financière"
+                  className={input}
+                  value={amountSemantics}
+                  onChange={e => {
+                    setAmountSemantics(e.target.value as 'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN');
+                    setDryRunResult(null);
+                  }}
+                >
+                  <option value="DELTA">Variation Nette (+/- Crédits budgétaires)</option>
+                  <option value="REVISED_TOTAL">Nouveau Total Révisé Autorisé</option>
+                  <option value="UNKNOWN">Indéterminé (Revue humaine requise)</option>
+                </select>
+              </div>
+            )}
 
             {/* Date de l'acte */}
             <div className="space-y-1.5">

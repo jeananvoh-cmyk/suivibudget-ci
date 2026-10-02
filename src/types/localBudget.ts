@@ -211,6 +211,7 @@ export interface LocalBudget {
   primary_source_url?: string;
   document_url?: string;                   // Lien direct vers le document officiel PDF / Délibération
   document_name?: string;
+  source_page?: number;                    // Page du document officiel source
 
   // Détails facultatifs (dépouillement exhaustif)
   revenue_sources?: LocalBudgetRevenueSource[];
@@ -237,7 +238,7 @@ export interface BudgetCoherenceIssue {
 
 export interface ImportProvenance {
   precision: Partial<Record<string, AmountPrecision>>;
-  source?: { name: string; reference: string; date: string; date_kind: string; url?: string };
+  source?: { name: string; reference: string; date: string; date_kind: string; url?: string; page?: number };
   import_id?: string;
   match_evidence?: string;
 }

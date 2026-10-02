@@ -14,8 +14,38 @@ import type {
 } from '../types/budgetCycle';
 
 /**
+ * Calcule un fingerprint documentaire déterministe pour identifier un acte unique (Item 7)
+ * Permet de distinguer formellement :
+ * - deux BM de la même année pour la même commune (références ou dates distinctes)
+ * - un doublon exact d'un même document importé deux fois
+ * - des actes identiques sur des communes ou années différentes
+ */
+export function computeDocumentFingerprint(params: {
+  institution_id: string;
+  fiscal_year: number;
+  document_type: string;
+  source_reference: string;
+  source_date?: string;
+}): string {
+  const normInst = (params.institution_id || '').trim().toLowerCase();
+  const year = params.fiscal_year;
+  const normType = (params.document_type || '').trim().toUpperCase();
+  const normRef = (params.source_reference || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+  const normDate = (params.source_date || '').trim();
+  return `${normInst}::${year}::${normType}::${normRef}::${normDate}`;
+}
+
+/**
  * Génère le squelette des valeurs financières proposées selon la catégorie de document
  * CONTRAT PROPRE : Aucune simulation de fausse IA. Structure les champs nécessaires pour la validation humaine.
+ * Respect des règles d'or (Items 10 & 11) :
+ * - Statut initial STRICTEMENT 'PENDING' (aucune auto-validation d'un montant saisi)
+ * - Confiance non automatiquement HIGH par défaut (MEDIUM ou LOW selon la source)
  */
 export function buildProposedValuesTemplate(
   category: BudgetDocumentCategory,
@@ -32,8 +62,8 @@ export function buildProposedValuesTemplate(
           nature: 'PREVISION',
           amount: initialValues.total_amount ?? null,
           precision: initialValues.total_amount != null ? 'EXACT' : 'UNKNOWN',
-          confidence: 'HIGH',
-          status: initialValues.total_amount != null ? 'VALIDATED' : 'PENDING'
+          confidence: 'MEDIUM',
+          status: 'PENDING'
         },
         {
           id: 'val-operating',
@@ -43,8 +73,8 @@ export function buildProposedValuesTemplate(
           nature: 'PREVISION',
           amount: initialValues.operating_amount ?? null,
           precision: initialValues.operating_amount != null ? 'EXACT' : 'UNKNOWN',
-          confidence: 'HIGH',
-          status: initialValues.operating_amount != null ? 'VALIDATED' : 'PENDING'
+          confidence: 'MEDIUM',
+          status: 'PENDING'
         },
         {
           id: 'val-investment',
@@ -54,8 +84,8 @@ export function buildProposedValuesTemplate(
           nature: 'PREVISION',
           amount: initialValues.investment_amount ?? null,
           precision: initialValues.investment_amount != null ? 'EXACT' : 'UNKNOWN',
-          confidence: 'HIGH',
-          status: initialValues.investment_amount != null ? 'VALIDATED' : 'PENDING'
+          confidence: 'MEDIUM',
+          status: 'PENDING'
         }
       ];
 
@@ -72,8 +102,8 @@ export function buildProposedValuesTemplate(
           nature: 'MODIFICATION',
           amount: initialValues.total_amount ?? null,
           precision: initialValues.total_amount != null ? 'EXACT' : 'UNKNOWN',
-          confidence: 'HIGH',
-          status: initialValues.total_amount != null ? 'VALIDATED' : 'PENDING'
+          confidence: 'MEDIUM',
+          status: 'PENDING'
         },
         {
           id: 'val-mod-operating',
@@ -83,8 +113,8 @@ export function buildProposedValuesTemplate(
           nature: 'MODIFICATION',
           amount: initialValues.operating_amount ?? null,
           precision: initialValues.operating_amount != null ? 'EXACT' : 'UNKNOWN',
-          confidence: 'HIGH',
-          status: initialValues.operating_amount != null ? 'VALIDATED' : 'PENDING'
+          confidence: 'MEDIUM',
+          status: 'PENDING'
         },
         {
           id: 'val-mod-investment',
@@ -94,8 +124,8 @@ export function buildProposedValuesTemplate(
           nature: 'MODIFICATION',
           amount: initialValues.investment_amount ?? null,
           precision: initialValues.investment_amount != null ? 'EXACT' : 'UNKNOWN',
-          confidence: 'HIGH',
-          status: initialValues.investment_amount != null ? 'VALIDATED' : 'PENDING'
+          confidence: 'MEDIUM',
+          status: 'PENDING'
         }
       ];
 
@@ -109,8 +139,8 @@ export function buildProposedValuesTemplate(
           nature: 'PREVISION',
           amount: initialValues.total_planned ?? null,
           precision: initialValues.total_planned != null ? 'EXACT' : 'UNKNOWN',
-          confidence: 'HIGH',
-          status: initialValues.total_planned != null ? 'VALIDATED' : 'PENDING'
+          confidence: 'MEDIUM',
+          status: 'PENDING'
         },
         {
           id: 'val-ca-total-realized',
@@ -120,8 +150,8 @@ export function buildProposedValuesTemplate(
           nature: 'EXECUTION',
           amount: initialValues.total_realized ?? null,
           precision: initialValues.total_realized != null ? 'EXACT' : 'UNKNOWN',
-          confidence: 'HIGH',
-          status: initialValues.total_realized != null ? 'VALIDATED' : 'PENDING'
+          confidence: 'MEDIUM',
+          status: 'PENDING'
         },
         {
           id: 'val-ca-operating-planned',
@@ -131,8 +161,8 @@ export function buildProposedValuesTemplate(
           nature: 'PREVISION',
           amount: initialValues.operating_planned ?? null,
           precision: initialValues.operating_planned != null ? 'EXACT' : 'UNKNOWN',
-          confidence: 'HIGH',
-          status: initialValues.operating_planned != null ? 'VALIDATED' : 'PENDING'
+          confidence: 'MEDIUM',
+          status: 'PENDING'
         },
         {
           id: 'val-ca-operating-realized',
@@ -142,8 +172,8 @@ export function buildProposedValuesTemplate(
           nature: 'EXECUTION',
           amount: initialValues.operating_realized ?? null,
           precision: initialValues.operating_realized != null ? 'EXACT' : 'UNKNOWN',
-          confidence: 'HIGH',
-          status: initialValues.operating_realized != null ? 'VALIDATED' : 'PENDING'
+          confidence: 'MEDIUM',
+          status: 'PENDING'
         },
         {
           id: 'val-ca-investment-planned',
@@ -153,8 +183,8 @@ export function buildProposedValuesTemplate(
           nature: 'PREVISION',
           amount: initialValues.investment_planned ?? null,
           precision: initialValues.investment_planned != null ? 'EXACT' : 'UNKNOWN',
-          confidence: 'HIGH',
-          status: initialValues.investment_planned != null ? 'VALIDATED' : 'PENDING'
+          confidence: 'MEDIUM',
+          status: 'PENDING'
         },
         {
           id: 'val-ca-investment-realized',
@@ -164,8 +194,8 @@ export function buildProposedValuesTemplate(
           nature: 'EXECUTION',
           amount: initialValues.investment_realized ?? null,
           precision: initialValues.investment_realized != null ? 'EXACT' : 'UNKNOWN',
-          confidence: 'HIGH',
-          status: initialValues.investment_realized != null ? 'VALIDATED' : 'PENDING'
+          confidence: 'MEDIUM',
+          status: 'PENDING'
         }
       ];
 
@@ -179,7 +209,7 @@ export function buildProposedValuesTemplate(
           nature: 'PREVISION',
           amount: initialValues.total_amount ?? null,
           precision: initialValues.total_amount != null ? 'EXACT' : 'UNKNOWN',
-          confidence: 'HIGH',
+          confidence: 'LOW',
           status: 'PENDING'
         }
       ];
@@ -217,7 +247,7 @@ export function runDocumentDryRun(
     errors.push(`Exercice incohérent : "${metadata.fiscal_year}". L'année budgétaire doit être comprise entre 2000 et 2100.`);
   }
 
-  // 3. Contrôle des métadonnées de source (Provenance obligatoire)
+  // 3. Contrôle des métadonnées de source (Provenance obligatoire - Item 9)
   const sourceNameValid = !!metadata.source_name && metadata.source_name.trim().length >= 3;
   const sourceRefValid = !!metadata.source_reference && metadata.source_reference.trim().length >= 2;
   const sourceDateValid = !!metadata.source_date && /^\d{4}-\d{2}-\d{2}$/.test(metadata.source_date);
@@ -233,10 +263,44 @@ export function runDocumentDryRun(
     errors.push('Date obligatoire : La date de l\'acte ou de consultation doit respecter le format AAAA-MM-JJ.');
   }
 
-  // 4. Contrôle des doublons et conflits avec versions publiées
+  // Contrôle de la page source (Item 9)
+  if (metadata.source_page !== undefined && metadata.source_page <= 0) {
+    errors.push('Page source invalide : Le numéro de page doit être un entier strictement positif.');
+  }
+
+  // 4. Détection déterministe des doublons par fingerprint documentaire (Items 7 & 8)
+  const targetFingerprint = computeDocumentFingerprint({
+    institution_id: metadata.institution_id,
+    fiscal_year: metadata.fiscal_year,
+    document_type: metadata.document_type,
+    source_reference: metadata.source_reference,
+    source_date: metadata.source_date
+  });
+
   let duplicateDetected = false;
   let conflictsWithPublished = false;
 
+  // Contrôle des doublons exacts dans les budgets existants
+  for (const b of context.existingBudgets) {
+    const bRef = b.import_provenance?.source?.reference || b.document_name || '';
+    const bDate = b.publication_date || b.adoption_date || b.import_provenance?.source?.date || '';
+    const bFingerprint = computeDocumentFingerprint({
+      institution_id: b.institution_id,
+      fiscal_year: b.fiscal_year,
+      document_type: b.budget_type,
+      source_reference: bRef,
+      source_date: bDate
+    });
+
+    if (bFingerprint === targetFingerprint) {
+      duplicateDetected = true;
+      errors.push(`Document en doublon : Cet acte identique existe déjà pour cette collectivité (ID existant: ${b.id}).`);
+      conflicts.push(`Doublon exact détecté sur la référence "${metadata.source_reference}" et la date "${metadata.source_date}".`);
+      break;
+    }
+  }
+
+  // Contrôles spécifiques aux budgets primitifs (BP)
   if (metadata.document_type === 'BUDGET_PRIMITIF') {
     const existingPublishedBP = context.existingBudgets.find(
       b => b.institution_id === metadata.institution_id && 
@@ -244,11 +308,12 @@ export function runDocumentDryRun(
            b.status === 'PUBLISHED' &&
            b.budget_type === 'PRIMITIF_ADOPTE'
     );
-    if (existingPublishedBP) {
+    if (existingPublishedBP && (!metadata.version_number || metadata.version_number <= (existingPublishedBP.version_number || 1))) {
       conflictsWithPublished = true;
       conflicts.push(`Un Budget Primitif PUBLIÉ existe déjà pour ${institution?.name || metadata.institution_id} en ${metadata.fiscal_year} (${existingPublishedBP.total_amount?.toLocaleString('fr-FR')} FCFA). Une nouvelle version doit incrémenter le numéro de version.`);
     }
   } else if (metadata.document_type === 'COMPTE_ADMINISTRATIF') {
+    // Contrôles spécifiques au Compte Administratif (CA)
     const existingCA = context.existingAccounts.find(
       a => a.institution_id === metadata.institution_id && 
            a.fiscal_year === metadata.fiscal_year
@@ -259,12 +324,19 @@ export function runDocumentDryRun(
         conflictsWithPublished = true;
         conflicts.push(`Un Compte Administratif PUBLIÉ existe déjà pour ${institution?.name || metadata.institution_id} en ${metadata.fiscal_year}. Écrasement interdit.`);
       } else {
-        warnings.push(`Un Compte Administratif au statut ${existingCA.status} existe déjà pour cet exercice.`);
+        warnings.push(`Un Compte Administratif au statut ${existingCA.status} existe déjà pour cet exercice. Une revue humaine est requise avant mise à jour.`);
       }
     }
   }
 
-  // 5. Contrôle des valeurs et cohérence arithmétique
+  // Contrôle de la sémantique pour les actes modificatifs (Item 12)
+  if (['BUDGET_MODIFICATIF', 'BUDGET_SUPPLEMENTAIRE', 'DECISION_MODIFICATIVE', 'VIREMENT_CREDITS'].includes(metadata.document_type)) {
+    if (metadata.amount_semantics === 'UNKNOWN') {
+      warnings.push('Sémantique financière non spécifiée : Il est recommandé de préciser si le montant correspond à une variation (DELTA) ou un nouveau total révisé (REVISED_TOTAL).');
+    }
+  }
+
+  // 5. Contrôle des valeurs et cohérence arithmétique (Item 13 : UNKNOWN != 0 et zéro réel)
   let unknownValuesCount = 0;
   let zeroValuesCount = 0;
   let arithmeticValid = true;
@@ -300,6 +372,15 @@ export function runDocumentDryRun(
     }
   }
 
+  // Rejet de montants négatifs invalides pour les budgets primitifs
+  if (metadata.document_type === 'BUDGET_PRIMITIF') {
+    for (const v of validValues) {
+      if (v.amount !== null && v.amount < 0) {
+        errors.push(`Montant négatif invalide : Le budget primitif ne peut pas comporter de crédits initiaux négatifs (${v.label}: ${v.amount}).`);
+      }
+    }
+  }
+
   // Si des valeurs ont été rejetées
   const rejectedCount = values.filter(v => v.status === 'REJECTED').length;
   if (rejectedCount > 0) {
@@ -310,12 +391,10 @@ export function runDocumentDryRun(
   const canImport = isValid;
 
   let summaryMessage = '';
-  if (!isValid) {
-    summaryMessage = `Simulation échouée : ${errors.length} erreur(s) bloquante(s), ${conflicts.length} conflit(s).`;
-  } else if (warnings.length > 0) {
-    summaryMessage = `Simulation réussie avec ${warnings.length} avertissement(s). Prêt pour import contrôlé.`;
+  if (canImport) {
+    summaryMessage = `Document conforme aux contrôles de cohérence. Prêt pour import (${validValues.length} valeurs retenues).`;
   } else {
-    summaryMessage = 'Simulation réussie à 100 %. Tous les contrôles de conformité et de provenance sont satisfaits.';
+    summaryMessage = `Document non importable : ${errors.length} erreur(s), ${conflicts.length} conflit(s) bloquant(s).`;
   }
 
   return {
@@ -332,21 +411,27 @@ export function runDocumentDryRun(
       arithmetic_valid: arithmeticValid,
       conflicts_with_published: conflictsWithPublished,
       unknown_values_count: unknownValuesCount,
-      zero_values_count: zeroValuesCount
+      zero_values_count: zeroValuesCount,
+      fingerprint: targetFingerprint
     },
     summary_message: summaryMessage
   };
 }
 
 /**
- * Convertit un formulaire documentaire validé en enveloppe standard pour `data_import_rows`
+ * Construit une enveloppe d'import standardisée (pour insertion dans data_import_rows)
+ * Respect des règles d'or (Items 4, 5, 6, 9) :
+ * - Type réel préservé (BS reste BS, BM reste BM, Virement reste Virement)
+ * - Numéro de version dynamique non codé en dur à 1
+ * - Propagation de la page source pour tous les actes
  */
 export function buildStandardImportEnvelope(
   metadata: DocumentIngestionMetadata,
   values: ProposedFinancialValue[],
-  institution: Institution
+  institution: Institution,
+  existingBudgetsCount = 0
 ): {
-  kind: 'BP' | 'CA' | 'OPERATION' | 'DGMP';
+  kind: 'BP' | 'CA';
   institution_id: string;
   institution_type: 'COMMUNE' | 'REGIONAL_COUNCIL';
   fiscal_year: number;
@@ -356,6 +441,7 @@ export function buildStandardImportEnvelope(
     date: string;
     date_kind: 'PUBLISHED' | 'ACCESSED' | 'RECORDED';
     url?: string;
+    page?: number;
   };
   data: Record<string, unknown>;
   precision: Record<string, string>;
@@ -370,9 +456,24 @@ export function buildStandardImportEnvelope(
   for (const v of acceptedValues) {
     dataObj[v.field] = v.amount;
     precisionObj[v.field] = v.precision;
+    if (v.source_page && !dataObj.source_page) {
+      dataObj.source_page = v.source_page;
+    }
   }
 
-  const sourceObj: { name: string; reference: string; date: string; date_kind: 'PUBLISHED' | 'ACCESSED' | 'RECORDED'; url?: string } = {
+  // Propagation systématique de la page source pour tous les types d'actes (Item 9)
+  if (metadata.source_page) {
+    dataObj.source_page = metadata.source_page;
+  }
+
+  const sourceObj: { 
+    name: string; 
+    reference: string; 
+    date: string; 
+    date_kind: 'PUBLISHED' | 'ACCESSED' | 'RECORDED'; 
+    url?: string;
+    page?: number;
+  } = {
     name: metadata.source_name,
     reference: metadata.source_reference,
     date: metadata.source_date,
@@ -381,25 +482,51 @@ export function buildStandardImportEnvelope(
   if (metadata.source_url) {
     sourceObj.url = metadata.source_url;
   }
+  if (metadata.source_page) {
+    sourceObj.page = metadata.source_page;
+  }
 
   let kind: 'BP' | 'CA' = 'BP';
   if (metadata.document_type === 'COMPTE_ADMINISTRATIF') {
     kind = 'CA';
-    if (metadata.source_page) {
-      dataObj.source_page = metadata.source_page;
-    }
   } else {
-    // Mapper le budget_type pour BP
-    let budgetType = 'PRIMITIF_ADOPTE';
-    if (metadata.document_type === 'BUDGET_SUPPLEMENTAIRE') budgetType = 'MODIFICATIF_1'; // Compatible migration DB
-    else if (metadata.document_type === 'BUDGET_MODIFICATIF') budgetType = 'MODIFICATIF_1';
-    else if (metadata.document_type === 'DECISION_MODIFICATIVE') budgetType = 'AUTRE_MODIFICATIF';
-    else if (metadata.document_type === 'VIREMENT_CREDITS') budgetType = 'AUTRE_MODIFICATIF';
+    // PRÉSERVER LE TYPE RÉEL DE L'ACTE (Items 4 & 5)
+    let budgetType: string = 'PRIMITIF_ADOPTE';
+    if (metadata.document_type === 'BUDGET_PRIMITIF') {
+      budgetType = 'PRIMITIF_ADOPTE';
+    } else if (metadata.document_type === 'BUDGET_SUPPLEMENTAIRE') {
+      budgetType = 'BUDGET_SUPPLEMENTAIRE';
+    } else if (metadata.document_type === 'DECISION_MODIFICATIVE') {
+      budgetType = 'DECISION_MODIFICATIVE';
+    } else if (metadata.document_type === 'VIREMENT_CREDITS') {
+      budgetType = 'VIREMENT_CREDITS';
+    } else if (metadata.document_type === 'BUDGET_MODIFICATIF') {
+      if (metadata.version_number === 1) budgetType = 'MODIFICATIF_1';
+      else if (metadata.version_number === 2) budgetType = 'MODIFICATIF_2';
+      else budgetType = 'AUTRE_MODIFICATIF';
+    } else {
+      budgetType = 'AUTRE_MODIFICATIF';
+    }
 
     dataObj.budget_type = budgetType;
-    dataObj.version_number = 1;
+
+    // Numéro de version : NE PAS CODER 1 EN DUR (Item 6)
+    if (metadata.version_number !== undefined) {
+      dataObj.version_number = metadata.version_number;
+    } else if (existingBudgetsCount > 0) {
+      dataObj.version_number = existingBudgetsCount + 1;
+    } else {
+      dataObj.version_number = 1;
+    }
+
+    // Sémantique financière du montant (Item 12)
+    if (metadata.amount_semantics) {
+      dataObj.amount_semantics = metadata.amount_semantics;
+    }
+
     dataObj.verification_status = 'OFFICIAL_DOCUMENT';
-    dataObj.confidence_level = 'HIGH';
+    // Confiance par défaut qualifiée (Item 10)
+    dataObj.confidence_level = metadata.source_date_kind === 'PUBLISHED' ? 'MEDIUM' : 'LOW';
     if (metadata.notes) dataObj.notes = metadata.notes;
   }
 

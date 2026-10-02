@@ -413,37 +413,63 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </p>
           </div>
 
-          {/* Étape C : Crédits Définitifs (Valeur Dérivée) */}
+          {/* Étape C : Crédits Définitifs (Valeur Dérivée ou Source Confirmée) */}
           <div className="p-3.5 bg-emerald-50/50 rounded-xl border border-emerald-200 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 block">
                 C. Crédits Définitifs
               </span>
-              {cycleConsolidation.final_credits?.is_derived && (
+              {cycleConsolidation.final_credits_status === 'DERIVED_FROM_DOCUMENTED_AMENDMENTS' && (
                 <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-200 text-emerald-900 uppercase">
                   Calculé (Dérivé)
                 </span>
               )}
+              {cycleConsolidation.final_credits_status === 'SOURCE_CONFIRMED' && (
+                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-blue-200 text-blue-900 uppercase">
+                  Source Officielle
+                </span>
+              )}
+              {cycleConsolidation.final_credits_status === 'NOT_ESTABLISHED' && (
+                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 uppercase">
+                  Non Établis
+                </span>
+              )}
             </div>
             <div className="text-base font-black text-emerald-950">
-              {cycleConsolidation.final_credits?.total.amount != null
-                ? formatFCFA(cycleConsolidation.final_credits.total.amount)
-                : formatRecordAmount(currentCA, 'total_planned')}
+              {cycleConsolidation.final_credits?.total.amount != null ? (
+                formatFCFA(cycleConsolidation.final_credits.total.amount)
+              ) : (
+                <span className="text-slate-500 font-bold text-sm">Non établis</span>
+              )}
             </div>
-            <p className="text-[11px] text-emerald-800 leading-snug">
-              {cycleConsolidation.final_credits?.total.formula || 'Base de comparaison officielle de l\'exercice pour l\'exécution financière.'}
+            <p className="text-[11px] text-slate-600 leading-snug">
+              {cycleConsolidation.final_credits?.total.formula || cycleConsolidation.final_credits_notice || 'Les crédits définitifs ne peuvent pas être établis avec les documents actuellement disponibles.'}
             </p>
+            {cycleConsolidation.documented_adjusted_amount?.total != null && (
+              <div className="text-[10px] text-amber-800 bg-amber-50 rounded p-1 border border-amber-200">
+                Montant ajusté provisoire : <strong>{formatFCFA(cycleConsolidation.documented_adjusted_amount.total)}</strong> (chaîne d'actes partielle)
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Détail pédagogique des doubles taux d'exécution si modifications */}
-        {cycleConsolidation.final_credits?.is_derived && cycleConsolidation.execution_comparison?.vs_final_credits && cycleConsolidation.execution_comparison?.vs_initial_budget && (
+        {/* Détail pédagogique des doubles taux d'exécution si crédits définitifs établis */}
+        {cycleConsolidation.execution_comparison?.vs_final_credits && cycleConsolidation.execution_comparison?.vs_initial_budget ? (
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <span className="text-slate-700">
               <strong>Double lecture civique :</strong> Taux d'exécution sur crédits définitifs = <strong>{cycleConsolidation.execution_comparison.vs_final_credits.total.formatted}</strong> vs Taux sur budget primitif initial = <strong>{cycleConsolidation.execution_comparison.vs_initial_budget.total.formatted}</strong>.
             </span>
             <span className="text-[10px] text-slate-500 italic">
               Les deux indicateurs mesurent respectivement le respect de l'autorisation finale et l'évolution par rapport aux orientations initiales.
+            </span>
+          </div>
+        ) : (
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span className="text-slate-700">
+              <strong>Lecture civique :</strong> Taux d'exécution mesuré sur le budget primitif initial ({cycleConsolidation.execution_comparison?.vs_initial_budget?.total.formatted || 'non calculé'}). Crédits définitifs non établis à ce jour.
+            </span>
+            <span className="text-[10px] text-slate-500 italic">
+              Absence de document public ≠ Preuve d'absence d'actes administratifs.
             </span>
           </div>
         )}

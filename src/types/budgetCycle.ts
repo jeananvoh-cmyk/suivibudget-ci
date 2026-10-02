@@ -27,6 +27,39 @@ export type BudgetDocumentCategory =
 export type ValueOriginType = 'SOURCE_VALUE' | 'DERIVED_VALUE';
 
 /**
+ * Statut d'établissement des crédits définitifs (Item 2 & 14)
+ * - SOURCE_CONFIRMED : direct depuis un acte officiel clôturant les crédits
+ * - DERIVED_FROM_DOCUMENTED_AMENDMENTS : calculé depuis BP + chaîne complète attestée
+ * - NOT_ESTABLISHED : non établi (BP seul, ou chaîne partielle/non exhaustive)
+ */
+export type FinalCreditsStatus = 
+  | 'SOURCE_CONFIRMED'
+  | 'DERIVED_FROM_DOCUMENTED_AMENDMENTS'
+  | 'NOT_ESTABLISHED';
+
+/**
+ * Complétude documentaire de la chaîne de modifications (Item 14)
+ * - COMPLETE : tous les actes sont attestés et validés pour l'exercice
+ * - PARTIAL : certains actes sont documentés mais complétude non certifiée
+ * - UNKNOWN : statut d'exhaustivité inconnu
+ */
+export type AmendmentChainStatus = 
+  | 'COMPLETE'
+  | 'PARTIAL'
+  | 'UNKNOWN';
+
+/**
+ * Sémantique financière du montant d'un acte modificatif (Item 12)
+ * - DELTA : variation nette de crédits (+ ou -)
+ * - REVISED_TOTAL : nouveau total révisé autorisé
+ * - UNKNOWN : nature du montant non documentée (exige revue humaine)
+ */
+export type AmendmentAmountSemantics = 
+  | 'DELTA'
+  | 'REVISED_TOTAL'
+  | 'UNKNOWN';
+
+/**
  * Source rattachée à une valeur financière
  */
 export interface FinancialValueSource {
@@ -62,6 +95,7 @@ export interface BudgetAmendment {
   budget_type: BudgetEventType;
   version_number: number;
   label: string;
+  amount_semantics: AmendmentAmountSemantics;
   total_delta: number | null;
   operating_delta: number | null;
   investment_delta: number | null;
@@ -87,8 +121,13 @@ export interface BudgetCycleConsolidation {
   institution_id: string;
   institution_name: string;
   fiscal_year: number;
+
+  // Étapes distinctes du budget initial (Item 3 : ne pas écraser chronologie)
+  primitive_adopted?: LocalBudget | null;
+  primitive_after_tutelle?: LocalBudget | null;
+  execution_authorized?: LocalBudget | null;
   
-  // 1. Budget Initial (BP adopté / arrêté)
+  // 1. Budget Initial (référence retenue pour le cycle)
   initial_budget: {
     total: BudgetFinancialValue;
     operating: BudgetFinancialValue;
@@ -101,6 +140,7 @@ export interface BudgetCycleConsolidation {
   // 2. Modifications Budgétaires (BS, BM, Décisions, Virements)
   amendments: BudgetAmendment[];
   amendments_status: 'DOCUMENTED' | 'NO_AMENDMENTS_FOUND_PUBLICLY';
+  amendment_chain_status: AmendmentChainStatus;
   amendments_explanation: string;
   net_amendments: {
     total: number | null;
@@ -109,20 +149,31 @@ export interface BudgetCycleConsolidation {
     precision: AmountPrecision;
   };
 
-  // 3. Crédits Définitifs / Budget Révisé Calculé
+  // Montant ajusté documenté provisoire (si chaîne partielle, distinct de crédits définitifs)
+  documented_adjusted_amount?: {
+    total: number | null;
+    operating: number | null;
+    investment: number | null;
+    precision: AmountPrecision;
+    formula?: string;
+  };
+
+  // 3. Crédits Définitifs (Item 2 & 14 : distingué de BP)
+  final_credits_status: FinalCreditsStatus;
   final_credits: {
     total: BudgetFinancialValue;
     operating: BudgetFinancialValue;
     investment: BudgetFinancialValue;
     is_derived: boolean;
   } | null;
+  final_credits_notice?: string;
 
   // 4. Compte Administratif (Exécution Financière de Clôture)
   administrative_account: AdministrativeAccount | null;
 
   // 5. Comparaisons Civiques & Doubles Taux d'Exécution
   execution_comparison: {
-    // Taux vs Crédits Définitifs (si modifications documentées)
+    // Taux vs Crédits Définitifs (si statut SOURCE_CONFIRMED ou DERIVED_FROM_DOCUMENTED_AMENDMENTS)
     vs_final_credits: {
       total: ExecutionRateResult;
       operating: ExecutionRateResult;
@@ -194,6 +245,9 @@ export interface DocumentIngestionMetadata {
   source_page?: number;
   notes?: string;
   file_name?: string;
+  amount_semantics?: AmendmentAmountSemantics;
+  amendment_chain_status?: AmendmentChainStatus;
+  version_number?: number;
 }
 
 /**
@@ -214,6 +268,7 @@ export interface DocumentDryRunResult {
     conflicts_with_published: boolean;
     unknown_values_count: number;
     zero_values_count: number;
+    fingerprint?: string;
   };
   summary_message: string;
 }

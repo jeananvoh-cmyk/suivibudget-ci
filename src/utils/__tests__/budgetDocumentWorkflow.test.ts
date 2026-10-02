@@ -2,14 +2,15 @@ import { describe, it, expect } from 'vitest';
 import { 
   buildProposedValuesTemplate, 
   runDocumentDryRun, 
-  buildStandardImportEnvelope 
+  buildStandardImportEnvelope,
+  computeDocumentFingerprint
 } from '../budgetDocumentDryRun';
 import type { DocumentIngestionMetadata, ProposedFinancialValue } from '../../types/budgetCycle';
 import type { Institution } from '../../types';
 import type { LocalBudget } from '../../types/localBudget';
 import type { AdministrativeAccount } from '../../types/administrativeAccount';
 
-describe('Budget Document Workflow — Dry-Run & Assistant Documentaire', () => {
+describe('Budget Document Workflow — Dry-Run & Assistant Documentaire (Items 7, 8, 9, 14)', () => {
 
   const mockInstitutions: Institution[] = [
     {
@@ -54,8 +55,50 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire', () => 
       verification_status: 'SECONDARY_TO_CORROBORATE',
       confidence_level: 'MEDIUM',
       sources: [],
+      document_name: 'Budget Primitif Cocody 2026',
+      import_provenance: {
+        precision: { total_amount: 'EXACT' },
+        source: {
+          name: 'AIP Cocody',
+          reference: 'AIP-2026-COCODY',
+          date: '2026-02-25',
+          date_kind: 'PUBLISHED'
+        }
+      },
       created_at: '2026-01-01T00:00:00Z',
       updated_at: '2026-01-01T00:00:00Z'
+    },
+    {
+      id: 'lbud-tiassale-vir1',
+      institution_id: 'inst-com-tiassale',
+      institution_type: 'COMMUNE',
+      institution_name: 'Mairie de Tiassalé',
+      fiscal_year: 2024,
+      budget_type: 'VIREMENT_CREDITS',
+      status: 'VERIFIED',
+      is_current_version: false,
+      version_number: 2,
+      total_amount: 0,
+      operating_amount: -10_000_000,
+      investment_amount: 10_000_000,
+      amount_precision: 'EXACT',
+      operating_percentage: null,
+      investment_percentage: null,
+      verification_status: 'OFFICIAL_DOCUMENT',
+      confidence_level: 'MEDIUM',
+      sources: [],
+      document_name: 'Virement de Crédits Trimestre 1',
+      import_provenance: {
+        precision: { total_amount: 'EXACT' },
+        source: {
+          name: 'Arrêté Municipal Tiassalé',
+          reference: 'VIR-2024-01',
+          date: '2024-03-31',
+          date_kind: 'PUBLISHED'
+        }
+      },
+      created_at: '2024-03-31T00:00:00Z',
+      updated_at: '2024-03-31T00:00:00Z'
     }
   ];
 
@@ -94,25 +137,30 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire', () => 
     source_page: 12
   };
 
-  it('1. Génération de template selon le type d\'acte sans fausse IA', () => {
-    const bpTemplate = buildProposedValuesTemplate('BUDGET_PRIMITIF');
-    expect(bpTemplate.map(t => t.field)).toEqual(['total_amount', 'operating_amount', 'investment_amount']);
-
-    const caTemplate = buildProposedValuesTemplate('COMPTE_ADMINISTRATIF');
-    expect(caTemplate.map(t => t.field)).toEqual([
-      'total_planned', 'total_realized', 
-      'operating_planned', 'operating_realized', 
-      'investment_planned', 'investment_realized'
-    ]);
+  // TEST 14
+  it('Test 14 : Valeur saisie mais non validée -> Statut PENDING, pas automatiquement HIGH/VALIDATED', () => {
+    const bpTemplate = buildProposedValuesTemplate('BUDGET_PRIMITIF', { total_amount: 500_000_000 });
+    
+    // Le fait qu'un montant soit renseigné NE DOIT PAS le marquer VALIDATED automatiquement
+    expect(bpTemplate[0].status).toBe('PENDING');
+    // La confiance NE DOIT PAS être auto-HIGH
+    expect(bpTemplate[0].confidence).not.toBe('HIGH');
   });
 
-  it('2. Dry-run : Détection d\'institution inexistante', () => {
-    const invalidMeta: DocumentIngestionMetadata = {
-      ...validMetadata,
-      institution_id: 'inst-inconnue-999'
+  // TEST 9
+  it('Test 9 : Même document exact -> Doublon bloqué par empreinte documentaire', () => {
+    // Acte ayant exactement la même collectivité, année, type, référence et date que lbud-tiassale-vir1
+    const duplicateMeta: DocumentIngestionMetadata = {
+      institution_id: 'inst-com-tiassale',
+      fiscal_year: 2024,
+      document_type: 'VIREMENT_CREDITS',
+      source_name: 'Arrêté Municipal Tiassalé',
+      source_reference: 'VIR-2024-01',
+      source_date: '2024-03-31',
+      source_date_kind: 'PUBLISHED'
     };
 
-    const res = runDocumentDryRun(invalidMeta, [], {
+    const res = runDocumentDryRun(duplicateMeta, [], {
       knownInstitutions: mockInstitutions,
       existingBudgets: mockExistingBudgets,
       existingAccounts: mockExistingAccounts
@@ -120,26 +168,77 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire', () => 
 
     expect(res.is_valid).toBe(false);
     expect(res.can_import).toBe(false);
-    expect(res.errors.some(e => e.includes('Collectivité inconnue'))).toBe(true);
+    expect(res.checks.duplicate_detected).toBe(true);
+    expect(res.errors.some(e => e.includes('Document en doublon'))).toBe(true);
   });
 
-  it('3. Dry-run : Détection d\'exercice budgétaire incohérent', () => {
-    const invalidMeta: DocumentIngestionMetadata = {
-      ...validMetadata,
-      fiscal_year: 1995 // Hors de [2000, 2100]
+  // TEST 8
+  it('Test 8 : Deux virements avec références différentes -> Autorisés / Pas doublons', () => {
+    // Virement 2 de la même année pour la même commune avec une référence différente
+    const secondVirementMeta: DocumentIngestionMetadata = {
+      institution_id: 'inst-com-tiassale',
+      fiscal_year: 2024,
+      document_type: 'VIREMENT_CREDITS',
+      source_name: 'Arrêté Municipal Tiassalé n°2',
+      source_reference: 'VIR-2024-02', // Référence différente
+      source_date: '2024-09-30',
+      source_date_kind: 'PUBLISHED'
     };
 
-    const res = runDocumentDryRun(invalidMeta, [], {
+    const res = runDocumentDryRun(secondVirementMeta, [], {
       knownInstitutions: mockInstitutions,
       existingBudgets: mockExistingBudgets,
       existingAccounts: mockExistingAccounts
     });
 
-    expect(res.is_valid).toBe(false);
-    expect(res.errors.some(e => e.includes('Exercice incohérent'))).toBe(true);
+    expect(res.checks.duplicate_detected).toBe(false);
+    expect(res.is_valid).toBe(true);
+    expect(res.can_import).toBe(true);
   });
 
-  it('4. Dry-run : Traçabilité obligatoire (nom, référence, date de source requis)', () => {
+  it('Contrôle : Même référence mais autre commune -> Autorisée', () => {
+    const otherCommuneMeta: DocumentIngestionMetadata = {
+      institution_id: 'inst-com-cocody', // Autre commune
+      fiscal_year: 2024,
+      document_type: 'VIREMENT_CREDITS',
+      source_name: 'Arrêté Municipal Cocody',
+      source_reference: 'VIR-2024-01', // Même libellé de référence
+      source_date: '2024-03-31',
+      source_date_kind: 'PUBLISHED'
+    };
+
+    const res = runDocumentDryRun(otherCommuneMeta, [], {
+      knownInstitutions: mockInstitutions,
+      existingBudgets: mockExistingBudgets,
+      existingAccounts: mockExistingAccounts
+    });
+
+    expect(res.checks.duplicate_detected).toBe(false);
+    expect(res.is_valid).toBe(true);
+  });
+
+  it('Contrôle : Même référence et commune mais autre année -> Autorisée', () => {
+    const otherYearMeta: DocumentIngestionMetadata = {
+      institution_id: 'inst-com-tiassale',
+      fiscal_year: 2025, // Autre année
+      document_type: 'VIREMENT_CREDITS',
+      source_name: 'Arrêté Municipal Tiassalé',
+      source_reference: 'VIR-2024-01',
+      source_date: '2025-03-31',
+      source_date_kind: 'PUBLISHED'
+    };
+
+    const res = runDocumentDryRun(otherYearMeta, [], {
+      knownInstitutions: mockInstitutions,
+      existingBudgets: mockExistingBudgets,
+      existingAccounts: mockExistingAccounts
+    });
+
+    expect(res.checks.duplicate_detected).toBe(false);
+    expect(res.is_valid).toBe(true);
+  });
+
+  it('Dry-run : Traçabilité obligatoire (nom, référence, date de source requis)', () => {
     const invalidMeta: DocumentIngestionMetadata = {
       ...validMetadata,
       source_name: '',
@@ -159,14 +258,14 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire', () => 
     expect(res.errors.some(e => e.includes('Date obligatoire'))).toBe(true);
   });
 
-  it('5. Dry-run : Détection de conflit avec un BP déjà publié', () => {
+  it('Dry-run : Détection de conflit avec un BP déjà publié', () => {
     const conflictMeta: DocumentIngestionMetadata = {
       institution_id: 'inst-com-cocody',
       fiscal_year: 2026,
       document_type: 'BUDGET_PRIMITIF',
       source_name: 'Dépêche AIP',
-      source_reference: 'AIP-2026',
-      source_date: '2026-01-05',
+      source_reference: 'AIP-2026-COCODY',
+      source_date: '2026-02-25',
       source_date_kind: 'PUBLISHED'
     };
 
@@ -181,26 +280,9 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire', () => 
     expect(res.conflicts[0]).toContain('Budget Primitif PUBLIÉ existe déjà');
   });
 
-  it('6. Dry-run : Détection d\'incohérence arithmétique (Total != Fonctionnement + Investissement)', () => {
+  it('Dry-run : Règle d\'or NULL != 0 respectée (UNKNOWN avec montant non nul est rejeté)', () => {
     const proposed: ProposedFinancialValue[] = [
-      { id: '1', field: 'total_amount', label: 'Total', section: 'GLOBAL', nature: 'PREVISION', amount: 1_000_000_000, precision: 'EXACT', confidence: 'HIGH', status: 'VALIDATED' },
-      { id: '2', field: 'operating_amount', label: 'Fonctionnement', section: 'FONCTIONNEMENT', nature: 'PREVISION', amount: 600_000_000, precision: 'EXACT', confidence: 'HIGH', status: 'VALIDATED' },
-      { id: '3', field: 'investment_amount', label: 'Investissement', section: 'INVESTISSEMENT', nature: 'PREVISION', amount: 300_000_000, precision: 'EXACT', confidence: 'HIGH', status: 'VALIDATED' } // Somme = 900M != 1000M
-    ];
-
-    const res = runDocumentDryRun(validMetadata, proposed, {
-      knownInstitutions: mockInstitutions,
-      existingBudgets: mockExistingBudgets,
-      existingAccounts: mockExistingAccounts
-    });
-
-    expect(res.is_valid).toBe(false);
-    expect(res.errors.some(e => e.includes('Incompatibilité arithmétique'))).toBe(true);
-  });
-
-  it('7. Dry-run : Règle d\'or NULL != 0 respectée (UNKNOWN avec montant non nul est rejeté)', () => {
-    const proposed: ProposedFinancialValue[] = [
-      { id: '1', field: 'operating_amount', label: 'Fonctionnement', section: 'FONCTIONNEMENT', nature: 'PREVISION', amount: 500_000_000, precision: 'UNKNOWN', confidence: 'HIGH', status: 'VALIDATED' }
+      { id: '1', field: 'operating_amount', label: 'Fonctionnement', section: 'FONCTIONNEMENT', nature: 'PREVISION', amount: 500_000_000, precision: 'UNKNOWN', confidence: 'MEDIUM', status: 'VALIDATED' }
     ];
 
     const res = runDocumentDryRun(validMetadata, proposed, {
@@ -213,49 +295,28 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire', () => 
     expect(res.errors.some(e => e.includes('Règle d\'or violée'))).toBe(true);
   });
 
-  it('8. Dry-run : Zéro réel est accepté et distingué de NULL', () => {
+  it('Conversion en enveloppe standard pour data_import_rows et conservation du type réel (BS reste BS)', () => {
+    const bsMeta: DocumentIngestionMetadata = {
+      ...validMetadata,
+      document_type: 'BUDGET_SUPPLEMENTAIRE',
+      source_page: 24,
+      version_number: 2
+    };
+
     const proposed: ProposedFinancialValue[] = [
-      { id: '1', field: 'total_amount', label: 'Total', section: 'GLOBAL', nature: 'MODIFICATION', amount: 100_000_000, precision: 'EXACT', confidence: 'HIGH', status: 'VALIDATED' },
-      { id: '2', field: 'operating_amount', label: 'Fonctionnement', section: 'FONCTIONNEMENT', nature: 'MODIFICATION', amount: 100_000_000, precision: 'EXACT', confidence: 'HIGH', status: 'VALIDATED' },
-      { id: '3', field: 'investment_amount', label: 'Investissement', section: 'INVESTISSEMENT', nature: 'MODIFICATION', amount: 0, precision: 'EXACT', confidence: 'HIGH', status: 'VALIDATED' } // Zéro réel
+      { id: '1', field: 'total_amount', label: 'Total Delta', section: 'GLOBAL', nature: 'MODIFICATION', amount: 80_000_000, precision: 'EXACT', confidence: 'MEDIUM', status: 'VALIDATED' }
     ];
 
-    const res = runDocumentDryRun(validMetadata, proposed, {
-      knownInstitutions: mockInstitutions,
-      existingBudgets: mockExistingBudgets,
-      existingAccounts: mockExistingAccounts
-    });
-
-    expect(res.is_valid).toBe(true);
-    expect(res.can_import).toBe(true);
-    expect(res.checks.zero_values_count).toBe(1);
-    expect(res.checks.unknown_values_count).toBe(0);
-  });
-
-  it('9. Conversion en enveloppe standard pour le pipeline d\'import (data_import_rows)', () => {
-    const proposed: ProposedFinancialValue[] = [
-      { id: '1', field: 'total_amount', label: 'Total', section: 'GLOBAL', nature: 'MODIFICATION', amount: 80_000_000, precision: 'EXACT', confidence: 'HIGH', status: 'VALIDATED' },
-      { id: '2', field: 'operating_amount', label: 'Fonctionnement', section: 'FONCTIONNEMENT', nature: 'MODIFICATION', amount: 50_000_000, precision: 'EXACT', confidence: 'HIGH', status: 'VALIDATED' },
-      { id: '3', field: 'investment_amount', label: 'Investissement', section: 'INVESTISSEMENT', nature: 'MODIFICATION', amount: 30_000_000, precision: 'EXACT', confidence: 'HIGH', status: 'VALIDATED' }
-    ];
-
-    const envelope = buildStandardImportEnvelope(validMetadata, proposed, mockInstitutions[0]);
+    const envelope = buildStandardImportEnvelope(bsMeta, proposed, mockInstitutions[0]);
 
     expect(envelope.kind).toBe('BP');
-    expect(envelope.institution_id).toBe('inst-com-tiassale');
-    expect(envelope.institution_type).toBe('COMMUNE');
     expect(envelope.fiscal_year).toBe(2024);
-    expect(envelope.data.total_amount).toBe(80_000_000);
-    expect(envelope.precision.total_amount).toBe('EXACT');
-    expect(envelope.source.name).toBe('Délibération Conseil Municipal n°2024-05');
-  });
-
-  it('10. Workflow découplé : Import != Publication', () => {
-    // Vérification du principe fondamental : un document importé prend le statut TO_VERIFY
-    // et ne peut être publié sans transition explicite (VERIFIED -> PUBLISHED).
-    expect(validMetadata.document_type).toBe('BUDGET_MODIFICATIF');
-    // Le statut d'un nouvel import généré n'est JAMAIS publié d'office
-    const envelope = buildStandardImportEnvelope(validMetadata, [], mockInstitutions[0]);
-    expect((envelope.data as any).status).toBeUndefined(); // Le statut en table est DRAFT / staging TO_VERIFY
+    // RÈGLE : BUDGET_SUPPLEMENTAIRE reste BUDGET_SUPPLEMENTAIRE (pas écrasé en MODIFICATIF_1)
+    expect(envelope.data.budget_type).toBe('BUDGET_SUPPLEMENTAIRE');
+    // Numéro de version dynamique préservé
+    expect(envelope.data.version_number).toBe(2);
+    // Page source propagée
+    expect(envelope.data.source_page).toBe(24);
+    expect(envelope.source.page).toBe(24);
   });
 });

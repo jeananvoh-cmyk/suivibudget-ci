@@ -5,25 +5,31 @@
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/budget-cycle-document-console`
 - HANDOFF_BASE_SHA : `46c4f1753a1c6d5aa564a70f082f859141d58fd0` (HEAD de PR #13 `antigravity/tiassale-ca-2024-reconciliation`)
-- CURRENT_HEAD : `4100118` docs(handoff): document generic budget cycle industrialization and dry-run pipeline ; 216 tests PASS (15 suites), build PASS.
+- CURRENT_HEAD : `9ae3d90` feat(cycle): harden PR #14 with strict final credits status, distinct BP steps, document fingerprinting and amendment semantics ; 217 tests PASS (15 suites), build PASS.
 - PR : PR #14 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/14) ouverte sur `antigravity/budget-cycle-document-console` vers `master` (dépendance explicite sur PR #13, NON FUSIONNÉE, soumise au contrôle de l'orchestrateur).
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : Industrialisation du Cycle Budgétaire Complet & Console d'Import Documentaire Guidée (Moteur de consolidation BP → Modifications/BS/BM → Crédits Définitifs Dérivés → CA Exécution ; Assistant documentaire avec validation humaine explicite VALIDER/CORRIGER/INCONNU/REJETER ; Pre-flight dry-run strict ; Double taux d'exécution civique ; Non-régression totale Bingerville, Cocody, Tiassalé).
+- CURRENT_MILESTONE : Industrialisation & Durcissement du Cycle Budgétaire Complet & Console d'Import Documentaire (Crédits définitifs fiabilisés : NOT_ESTABLISHED si BP seul sans modifications, interdiction formelle d'assimiler crédits définitifs = BP ; Étapes BP distinctes : primitif adopté, après tutelle, exécutoire ; Type réel et versionnement dynamique préservés sans hardcode ; Empreinte documentaire déterministe prévenant les doublons sans bloquer des BM distincts ; Sémantique financière DELTA vs REVISED_TOTAL vs UNKNOWN ; Page source propagée de bout en bout ; Statut initial PENDING et confiance qualifiée non auto-HIGH ; Non-régression totale Bingerville, Cocody, Tiassalé).
 - FOUNDATION_READY : TRUE.
 
-## INDUSTRIALISATION DU CYCLE BUDGÉTAIRE & CONSOLE DOCUMENTAIRE
+## INDUSTRIALISATION DU CYCLE BUDGÉTAIRE & CONSOLE DOCUMENTAIRE (DURCIE PR #14)
 - **MOTEUR DE CONSOLIDATION DU CYCLE BUDGÉTAIRE (`budgetCycleEngine.ts`)** :
-  - **Architecture Unifiée du Cycle** : BP Initial (`PRIMITIF_ADOPTE`, `PRIMITIF_APRES_TUTELLE`) → Actes Modificatifs (`BUDGET_SUPPLEMENTAIRE`, `DECISION_MODIFICATIVE`, `VIREMENT_CREDITS`) → Crédits Définitifs (calculés dynamiquement avec formule traçable) → CA Clôturé (`COMPTE_ADMINISTRATIF`).
-  - **Traçabilité & Provenance par Défaut** :
-    - Chaque valeur porte son origine (`OFFICIAL_DOCUMENT`, `DERIVED_VALUE`, `AMENDMENT_SUM`, `CITIZEN_OBSERVATION`, `UNKNOWN_NOT_FOUND`).
-    - Aucune valeur dérivée n'est présentée comme une donnée brute de source : toute valeur dérivée expose sa formule arithmétique exacte (ex: `618 000 000 FCFA (BP Initial) + 120 000 000 FCFA (Modifications nettes) = 738 000 000 FCFA`).
-    - Respect absolu de la règle : `NULL != 0` et `0 FCFA réel` (aucune fabrication de montants).
-  - **Double Taux d'Exécution Civique** :
-    - Calcul et présentation systématique de deux indicateurs clairs :
-      1. Taux d'exécution sur crédits définitifs (respect de l'autorisation budgétaire finale).
-      2. Taux d'exécution sur budget primitif initial (mesure de la trajectoire par rapport aux orientations de début d'exercice).
-  - **Mentions Pédagogiques Républicaines** :
-    - En l'absence de modifications documentées, affichage explicite : « *Aucune décision modificative ou budget supplémentaire n'a été documenté publiquement pour cet exercice. Conformément à nos principes civiques, l'absence de document public ne constitue pas la preuve de son inexistence juridique.* »
+  - **Architecture Unifiée du Cycle & Étapes Distinctes du BP** :
+    - Préservation chronologique étanche : `PRIMITIF_ADOPTE` (vrai BP initial voté par le Conseil), `PRIMITIF_APRES_TUTELLE` (BP approuvé par la tutelle DGDDL), `AUTORISATION_EXECUTION` (budget rendu exécutoire).
+    - Actes Modificatifs réels : `BUDGET_SUPPLEMENTAIRE` (BS), `DECISION_MODIFICATIVE` (DM), `VIREMENT_CREDITS` (virement sans altération du total), `MODIFICATIF_1`, `MODIFICATIF_2`.
+  - **Fiabilisation des Crédits Définitifs (`final_credits_status`)** :
+    - `SOURCE_CONFIRMED` : issu directement d'un document officiel clôturant les crédits.
+    - `DERIVED_FROM_DOCUMENTED_AMENDMENTS` : calculé à partir du BP et d'une chaîne complète attestée (`amendment_chain_status = 'COMPLETE'`).
+    - `NOT_ESTABLISHED` : non établi en cas de BP seul ou de chaîne partielle/non exhaustive. **Garantie absolue : les crédits définitifs ne reprennent JAMAIS le BP par défaut.**
+    - En cas de chaîne partielle, calcul distinct d'un `documented_adjusted_amount` provisoire sans le qualifier de crédits définitifs.
+  - **Sémantique Financière des Actes Modificatifs (`amount_semantics`)** :
+    - `DELTA` : variation nette (+/-) additionnée au solde.
+    - `REVISED_TOTAL` : nouveau plafond révisé, non additionné comme delta pour éviter tout gonflement erroné.
+    - `UNKNOWN` : sémantique non précisée, bloque l'addition automatique et exige une revue humaine.
+  - **Virement de Crédits & Règle `NULL != 0`** :
+    - Un virement peut avoir un solde net total `0 FCFA réel` (conservé rigoureusement).
+    - Une modification non chiffrée reste `NULL` / `UNKNOWN` et n'est jamais convertie en 0.
+  - **Provenance & Page Source Propagée** :
+    - Chaque valeur et chaque acte propage le numéro de page source (`page: 36`) de bout en bout.
 - **CONSOLE D'IMPORT DOCUMENTAIRE GUIDÉE (`DataImportConsole.tsx` & `budgetDocumentDryRun.ts`)** :
   - **Assistant de Saisie Structurée** :
     - Sélection parmi les 232 collectivités réelles (201 communes + 31 conseils régionaux).
@@ -79,7 +85,7 @@
     - Résolution : **SUPPRIMÉ DÉFINITIVEMENT** de `src/data/localBudgetsReferential.ts`.
 - **ANALYSE DE SOURCE_ANOMALY & DÉCISION DE MAINTIEN JUSTIFIÉ** :
   - Cause exacte du statut : Le taux d'exécution des dépenses de fonctionnement est de `726 260 304 / 618 000 000 = 117,52 %` (> 100 %).
-  - Analyse comptable municipale : Les dépenses de fonctionnement ordonnancées (726,26M) ont dépassé les crédits primitifs votés (618M) de +108,26M FCFA. Ce dépassement a été couvert financièrement par une surperformance des recettes de fonctionnement recouvrées (883,18M FCFA, soit 142,91 % de recouvrement, +265,18M FCFA d'excédent de recettes).
+  - Analyse comptable municipale : Le document indique simultanément des recettes recouvrées supérieures aux prévisions et des dépenses ordonnancées supérieures aux crédits primitifs. Cette concomitance ne permet pas, à elle seule, d’établir le mécanisme juridique ou comptable ayant autorisé le dépassement.
   - Décision de gouvernance : Le statut `reconciliation_status = 'SOURCE_ANOMALY'` est **strictement maintenu** tant qu'une décision modificative ou délibération complémentaire formelle de la tutelle n'est pas réceptionnée et jointe au dossier. Il ne s'agit pas d'une accusation mais d'une exigence de rigueur probatoire (Principe 2 & 9).
   - Statut CA proposé : **VERIFIED** / **SOURCE_ANOMALY** (pas de passage en PUBLISHED sans ordre formel de l'orchestrateur).
 - **SÉPARATION ÉTANCHE : FINANCIER ≠ PHYSIQUE & 0 FCFA ≠ ABANDON** :
@@ -92,7 +98,7 @@
     - L'attribution du marché DGMP ne prouve pas l'achèvement physique des travaux sur le terrain.
     - `physical_status` reste `null` / non inventé dans le Passport citoyen.
 - **AMÉLIORATION UX CITOYENNE (`AdministrativeAccountView.tsx`)** :
-  - Bandeau d'alerte civique de réconciliation documentaire expliquant le taux de 117,52% et sa couverture par les recettes recouvrées sans présomption d'irrégularité.
+  - Bandeau d'alerte civique de réconciliation documentaire expliquant le taux de 117,52% et la concomitance avec des recettes supérieures sans présomption d'irrégularité ni d'autorisation implicite.
   - Cartes de synthèse Fonctionnement, Investissement et Total consolidé articulées autour de 4 indicateurs clairs : « Ce qui était prévu », « Ce qui a été réalisé financièrement », « Écart », « Taux d’exécution ».
   - Chaque opération d'investissement intègre une ventilation financière dédiée, le bloc de contrôle DGMP, et un bloc pédagogique d'imputabilité séparant distinctement :
     - « Ce que les documents prouvent »
