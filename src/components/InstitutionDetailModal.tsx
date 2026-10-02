@@ -195,7 +195,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
             institution.leader_title || institution.leader_name,
             institution.id
           );
-          setEntityBudgetLines(lines);
+          setEntityBudgetLines(Array.isArray(lines) ? lines : []);
           setLoadedEntityId(institution.id);
           setIsLoadingLines(false);
         }
@@ -213,12 +213,13 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   if (!isOpen || !institution) return null;
 
   // Extract unique natures
+  const safeBudgetLines = Array.isArray(entityBudgetLines) ? entityBudgetLines : [];
   const uniqueNatures = Array.from(new Set(
-    entityBudgetLines.map(l => l.nature).filter(Boolean)
+    safeBudgetLines.map(l => l.nature).filter(Boolean)
   )) as string[];
 
   // Filter lines
-  const filteredLines = entityBudgetLines.filter(l => {
+  const filteredLines = safeBudgetLines.filter(l => {
     const matchesSearch = !lineSearch.trim() || 
       l.libelle.toLowerCase().includes(lineSearch.toLowerCase().trim()) ||
       (l.sous_categorie_3 && l.sous_categorie_3.toLowerCase().includes(lineSearch.toLowerCase().trim()));
@@ -228,7 +229,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
     return matchesSearch && matchesNature;
   });
 
-  const totalLinesAmount = entityBudgetLines.reduce((sum, l) => sum + (l.montant_fcfa || 0), 0);
+  const totalLinesAmount = safeBudgetLines.reduce((sum, l) => sum + (l.montant_fcfa || 0), 0);
 
   // Budget ratios (Safe zero & exact proportion handling)
   const primInfo = institution.primitive_budget || OFFICIAL_PRIMITIVE_BUDGETS[institution.id];
@@ -245,7 +246,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   let functioningPct = 0;
   let investmentPct = 0;
 
-  if (totalBudget > 0) {
+  if (totalBudget > 0 && (functioningBudget > 0 || investmentBudget > 0)) {
     if (investmentBudget === 0 && functioningBudget > 0) {
       functioningPct = 100;
       investmentPct = 0;
@@ -1019,8 +1020,9 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   const localRev = Math.max(0, primTotal - stateTotal);
                   const statePct = primTotal > 0 ? Math.round((stateTotal / primTotal) * 100) : 0;
                   const localPct = 100 - statePct;
-                  const primInvPct = primTotal > 0 ? Math.round((prim.investment_voted_fcfa / primTotal) * 100) : 0;
-                  const primFonctPct = 100 - primInvPct;
+                  const hasBreakdown = prim.investment_voted_fcfa != null && prim.functioning_voted_fcfa != null;
+                  const primInvPct = (hasBreakdown && primTotal > 0) ? Math.round((prim.investment_voted_fcfa! / primTotal) * 100) : null;
+                  const primFonctPct = primInvPct !== null ? 100 - primInvPct : null;
 
                   return (
                     <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-6">
@@ -1250,12 +1252,12 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                           <div className="p-4 bg-white rounded-xl border border-emerald-200/80 shadow-2xs space-y-1.5">
                             <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Dépenses d'Investissement Votées</span>
                             <span className="text-lg font-black text-slate-900 block">
-                              {formatQualifiedFCFA(prim.investment_voted_fcfa, prim.precision)}{' '}
+                              {formatQualifiedFCFA(prim.investment_voted_fcfa, prim.investment_voted_fcfa == null ? 'UNKNOWN' : prim.precision)}{' '}
                               <span className="text-xs text-emerald-700 font-bold block sm:inline">
 
                               </span>
                             </span>
-                            <span className="text-xs font-bold text-emerald-700 block">{exactPrimitive ? `(${primInvPct}% du budget total)` : 'Part non calculée'}</span>
+                            <span className="text-xs font-bold text-emerald-700 block">{exactPrimitive && primInvPct !== null ? `(${primInvPct}% du budget total)` : 'Part non calculée'}</span>
                             <span className="text-[10px] font-medium text-slate-500 block">
                               {isDistrict
                                 ? "Grands travaux métropolitains, voirie, assainissement, salubrité, équipements scolaires et sanitaires"
@@ -1268,12 +1270,12 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                           <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-2xs space-y-1.5">
                             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 block">Dépenses de Fonctionnement Votées</span>
                             <span className="text-lg font-black text-slate-900 block">
-                              {formatQualifiedFCFA(prim.functioning_voted_fcfa, prim.precision)}{' '}
+                              {formatQualifiedFCFA(prim.functioning_voted_fcfa, prim.functioning_voted_fcfa == null ? 'UNKNOWN' : prim.precision)}{' '}
                               <span className="text-xs text-slate-600 font-bold block sm:inline">
 
                               </span>
                             </span>
-                            <span className="text-xs font-bold text-slate-600 block">{exactPrimitive ? `(${primFonctPct}% du budget total)` : 'Part non calculée'}</span>
+                            <span className="text-xs font-bold text-slate-600 block">{exactPrimitive && primFonctPct !== null ? `(${primFonctPct}% du budget total)` : 'Part non calculée'}</span>
                             <span className="text-[10px] font-medium text-slate-500 block">
                               {isDistrict
                                 ? "Personnel administratif du District, sessions du Conseil du District, carburant, charges courantes"
@@ -1284,17 +1286,26 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                           </div>
                         </div>
 
-                        {/* Jauge Bicolore Dépenses : Vert Investissement vs Gris Ardoise Fonctionnement */}
-                        <div hidden={!exactPrimitive} className="space-y-1.5 pt-1">
-                          <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden flex shadow-inner">
-                            <div className="bg-emerald-500 h-full" style={{ width: `${primInvPct}%` }} title={`Investissement: ${primInvPct}%`}></div>
-                            <div className="bg-slate-400 h-full" style={{ width: `${primFonctPct}%` }} title={`Fonctionnement: ${primFonctPct}%`}></div>
+                        {/* Jauge Bicolore Dépenses : Vert Investissement vs Gris Ardoise Fonctionnement (si ventilation connue) */}
+                        {hasBreakdown ? (
+                          <div hidden={!exactPrimitive} className="space-y-1.5 pt-1">
+                            <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden flex shadow-inner">
+                              <div className="bg-emerald-500 h-full" style={{ width: `${primInvPct}%` }} title={`Investissement: ${primInvPct}%`}></div>
+                              <div className="bg-slate-400 h-full" style={{ width: `${primFonctPct}%` }} title={`Fonctionnement: ${primFonctPct}%`}></div>
+                            </div>
+                            <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-bold gap-1">
+                              <span className="text-emerald-700">■ Investissements Votés : {primInvPct}% ({formatQualifiedFCFA(prim.investment_voted_fcfa, prim.precision)})</span>
+                              <span className="text-slate-600">■ Fonctionnement & Salaires : {primFonctPct}% ({formatQualifiedFCFA(prim.functioning_voted_fcfa, prim.precision)})</span>
+                            </div>
                           </div>
-                          <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-bold gap-1">
-                            <span className="text-emerald-700">■ Investissements Votés : {primInvPct}% ({formatQualifiedFCFA(prim.investment_voted_fcfa, prim.precision)})</span>
-                            <span className="text-slate-600">■ Fonctionnement & Salaires : {primFonctPct}% ({formatQualifiedFCFA(prim.functioning_voted_fcfa, prim.precision)})</span>
+                        ) : (
+                          <div className="p-3 bg-amber-50/70 rounded-xl border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
+                            <Info className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                            <span>
+                              La délibération officielle votée ne détaille pas la ventilation exacte entre investissement et fonctionnement dans la source vérifiée. Les montants distincts restent à corroborer via l'acte budgétaire intégral.
+                            </span>
                           </div>
-                        </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -1537,7 +1548,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                         onChange={(e) => setSelectedNature(e.target.value)}
                         className="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 focus:outline-none"
                       >
-                        <option value="ALL">Toutes les natures ({entityBudgetLines.length})</option>
+                        <option value="ALL">Toutes les natures ({safeBudgetLines.length})</option>
                         {uniqueNatures.map(n => <option key={n} value={n}>{n}</option>)}
                       </select>
                     </div>

@@ -757,10 +757,10 @@ class DataStore {
       return {
         ...inst,
         local_budgets: budgets,
-        primitive_budget: current && current.total_amount != null && current.operating_amount != null && current.investment_amount != null ? {
+        primitive_budget: current && current.total_amount != null ? {
           total_voted_fcfa: current.total_amount,
-          investment_voted_fcfa: current.investment_amount,
-          functioning_voted_fcfa: current.operating_amount,
+          investment_voted_fcfa: current.investment_amount ?? null,
+          functioning_voted_fcfa: current.operating_amount ?? null,
           voted_date: current.adoption_date || '2026',
           source: current.primary_source_label || 'SuiviBudget',
           source_url: current.primary_source_url,

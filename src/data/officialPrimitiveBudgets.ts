@@ -150,8 +150,8 @@ export const OFFICIAL_PRIMITIVE_BUDGETS: Record<string, PrimitiveBudgetInfo> = {
   // Cocody (Commune)
   'inst-com-cocody': {
     total_voted_fcfa: 19764660000,
-    investment_voted_fcfa: 10277623200,
-    functioning_voted_fcfa: 9487036800,
+    investment_voted_fcfa: null,
+    functioning_voted_fcfa: null,
     voted_date: "25 février 2026",
     source: "Mairie de Cocody & Abidjan.net / Le Nouveau Réveil",
     source_url: "https://news.abidjan.net/articles/746842/1ere-session-du-conseil-municipal-de-cocody-un-budget-primitif-de-197-milliards-pour-booster-les-travaux-innovants",

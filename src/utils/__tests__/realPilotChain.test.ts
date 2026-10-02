@@ -231,6 +231,17 @@ describe('Premier lot réel de bout en bout (Pilote)', () => {
       expect(formatQualifiedFCFA(published.operating_amount, 'UNKNOWN')).toBe('Montant à confirmer');
       expect(formatQualifiedFCFA(published.investment_amount, 'UNKNOWN')).toBe('Montant à confirmer');
       expect(formatQualifiedFCFA(published.total_amount, 'EXACT')).toMatch(/19[\s\u202f]764[\s\u202f]660[\s\u202f]000 FCFA/);
+
+      // Contrôle de restitution citoyenne via dataStore pour un budget partiel publié
+      dataStore.saveLocalBudget(published);
+      dataStore.enrichInstitutionsWithBudgets();
+      const cocodyInst = dataStore.getInstitutions().find(i => i.id === 'inst-com-cocody');
+      expect(cocodyInst).toBeDefined();
+      expect(cocodyInst?.primitive_budget?.total_voted_fcfa).toBe(19764660000);
+      expect(cocodyInst?.primitive_budget?.functioning_voted_fcfa).toBeNull();
+      expect(cocodyInst?.primitive_budget?.investment_voted_fcfa).toBeNull();
+      expect(cocodyInst?.primitive_budget?.precision).toBe('EXACT');
+      expect(cocodyInst?.primitive_budget?.source).toBe('Abidjan.net / Le Nouveau Réveil');
     });
   });
 

@@ -58,8 +58,8 @@ export interface Institution {
 
 export interface PrimitiveBudgetInfo {
   total_voted_fcfa: number;
-  investment_voted_fcfa: number;
-  functioning_voted_fcfa: number;
+  investment_voted_fcfa: number | null;
+  functioning_voted_fcfa: number | null;
   voted_date: string;
   source: string;
   source_url?: string;

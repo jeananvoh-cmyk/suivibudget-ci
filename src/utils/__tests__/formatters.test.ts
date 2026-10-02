@@ -24,6 +24,17 @@ describe('Public amount precision', () => {
     expect(calculateExecutionRate(null,100)).toMatchObject({rate:null,status:'UNKNOWN'});
     expect(calculateExecutionRate(0,100)).toMatchObject({rate:0,status:'ZERO_EXECUTED'});
   });
+  it('safely formats partial primitive budgets with null breakdown without fabricating amounts', () => {
+    const partialBudget = {
+      total_voted_fcfa: 19764660000,
+      functioning_voted_fcfa: null,
+      investment_voted_fcfa: null,
+      precision: 'EXACT' as const,
+    };
+    expect(formatQualifiedFCFA(partialBudget.total_voted_fcfa, partialBudget.precision)).toMatch(/19[\s\u202f]764[\s\u202f]660[\s\u202f]000 FCFA/);
+    expect(formatQualifiedFCFA(partialBudget.functioning_voted_fcfa, 'UNKNOWN')).toBe('Montant à confirmer');
+    expect(formatQualifiedFCFA(partialBudget.investment_voted_fcfa, 'UNKNOWN')).toBe('Montant à confirmer');
+  });
 });
 import { formatFCFA, formatAmountInWords, formatCompactFCFA, getProjectEntityInfo, getStatusConfig, getProjectTier, getProjectTierBadge, getInstitutionLeaderGender } from '../formatters';
 
