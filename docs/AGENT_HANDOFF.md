@@ -8,16 +8,16 @@
 - CURRENT_HEAD : `fed7ff3b10d02f8d94947ebb283cafb63900692f` ; 180 tests PASS, build PASS, Vercel Preview READY.
 - PR : PR #9 fusionnée sur master. PR #10 `antigravity/first-real-data-pilot` ouverte vers master ; ne pas fusionner.
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : Bingerville BP 2026 publié sur Supabase, synchronisation frontend validée, DDL grant anon rédigé
+- CURRENT_MILESTONE : Parcours citoyen réel Bingerville BP 2026 validé de bout en bout (Supabase distant PostgREST 200, frontend synchronisé, responsive multi-viewports validé)
 - FOUNDATION_READY : TRUE.
 
 ## BINGERVILLE BP 2026 — STATUT DE VALIDATION
 - **SUPABASE PUBLISHED** : **VALIDÉ** (1 enregistrement canonique 2026 publié dans `local_budgets`, `data_import_rows` et 3 événements au journal).
-- **ACCÈS ANON SUPABASE** : **EN ATTENTE D'APPLICATION DDL DISTANT** (`has_table_privilege('anon', 'public.local_budgets', 'SELECT') = FALSE`, PostgREST HTTP 401 / code `42501 permission denied`). La migration additive `20261002010000_grant_anon_published_local_budgets.sql` est prête.
-- **RLS SUPABASE** : **VALIDÉ** (policy "Allow public read on published local budgets" `USING (status = 'PUBLISHED')` active sur la table).
+- **ACCÈS ANON SUPABASE** : **VALIDÉ** (`has_table_privilege('anon', 'public.local_budgets', 'SELECT') = TRUE`, PostgREST HTTP 200, migration `20261002090824_grant_anon_published_local_budgets` appliquée avec succès sur `cdesuvcozcetdtvibgqs`).
+- **RLS SUPABASE** : **VALIDÉ** (policy "Allow public read on published local budgets" `USING (status = 'PUBLISHED')` active ; 0 ligne non-PUBLISHED accessible à anon).
 - **SYNCHRONISATION FRONTEND** : **VALIDÉE** (`enrichInstitutionsWithBudgets()` connecte les données distantes Supabase directement à l'institution et écrase le fallback statique).
-- **RENDU CITOYEN SUR PREVIEW** : **VALIDÉ** (sur Preview PR #10, vue citoyenne responsive 375/768/1440 sans débordement horizontal).
-- **PRODUCTION (`suivibudget.vercel.app`)** : Pointe actuellement sur `master` (`cef3441`). Attend la fusion de la PR #10 pour intégrer le code de synchronisation.
+- **RENDU CITOYEN SUR PREVIEW & BUNDLE PROD** : **VALIDÉ** (sur Preview PR #10 et bundle de production, vue citoyenne responsive 375/768/1440 sans débordement horizontal).
+- **PRODUCTION (`suivibudget.vercel.app`)** : **EN ATTENTE FUSION PR #10** (la production Vercel pointe sur `master` `cef3441` ; PR #10 prête et mergeable).
 - **NE PLUS RÉIMPORTER BINGERVILLE** : Le lot Bingerville est définitivement importé et publié, aucun ré-import requis.
 
 ## COMPLETED
@@ -160,7 +160,7 @@ Les blocs suivants sont historiques ; leurs anciennes interdictions de fusion et
 | 20261001043805_apec_moderated_publication.sql | 20261001044508 | APPLIED |
 | 20261001091748_controlled_data_import.sql | 20261001093613 | APPLIED |
 | 20261001144423_import_console_qualified_amounts.sql | 20261001150911 | APPLIED |
-| 20261002010000_grant_anon_published_local_budgets.sql | À appliquer (`GRANT SELECT ON public.local_budgets TO anon;`) | PENDING_REMOTE_APPLY |
+| 20261002010000_grant_anon_published_local_budgets.sql | 20261002090824 | APPLIED |
 
 Les quatre premières migrations n’ont pas été rejouées. Les horodatages distants sont attribués par l’outil ; ne pas rejouer sur la seule différence de préfixe. Schéma metadata, vue publique, triggers, grants et RLS contrôlés.
 
@@ -228,7 +228,7 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Appliquer la migration additive `supabase/migrations/20261002010000_grant_anon_published_local_budgets.sql` (`GRANT SELECT ON public.local_budgets TO anon;`) sur le projet Supabase distant `cdesuvcozcetdtvibgqs` via le SQL Editor / console pour lever l'erreur 42501 et permettre au client public `anon` de lire le BP 2026 publié.
-2. Vérifier `has_table_privilege('anon', 'public.local_budgets', 'SELECT') = TRUE` et valider la réponse HTTP 200 sur l'URL PostgREST `local_budgets?select=*&status=eq.PUBLISHED`.
-3. Une fois le contrôle externe validé, fusionner la PR #10 sur `master` pour déployer le code de synchronisation `enrichInstitutionsWithBudgets()` sur l'environnement de production Vercel (`suivibudget.vercel.app`).
+1. Contrôle externe et fusion de la PR #10 sur `master` pour déployer la synchronisation frontend Supabase sur la production Vercel (`suivibudget.vercel.app`).
+2. Après fusion #10, vérifier sur la production Vercel le parcours citoyen Bingerville BP 2026.
+3. Préparer le lot pilote suivant selon les priorités du projet (ex. Tiassalé CA 2024 / Cocody BP 2026).
 
