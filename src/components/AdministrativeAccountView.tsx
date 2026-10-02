@@ -340,11 +340,11 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             <p className="leading-relaxed text-purple-900 font-medium">
               Le Compte Administratif officiel{currentCA.source_page ? ` (page ${currentCA.source_page})` : ''} retrace des dépenses de fonctionnement ordonnancées ({formatRecordAmount(currentCA, 'operating_realized')}) supérieures aux crédits primitifs votés ({formatRecordAmount(currentCA, 'operating_planned')}), soit un taux d'exécution de <strong>{operatingRate?.formatted}</strong>.
               {currentCA.operating_revenue_realized != null && (
-                <span> Ces dépenses sont couvertes par des recettes recouvrées de <strong>{formatRecordAmount(currentCA, 'operating_revenue_realized')}</strong> (recettes supérieures aux prévisions).</span>
+                <span> Le même document indique par ailleurs des recettes de fonctionnement recouvrées de <strong>{formatRecordAmount(currentCA, 'operating_revenue_realized')}</strong>. Cette concomitance ne permet pas, à elle seule, d'établir le mécanisme juridique ou comptable ayant autorisé le dépassement des dépenses.</span>
               )}
             </p>
             <p className="text-[11px] text-purple-800 italic">
-              Conformément à la charte SuiviBudget CI, ces valeurs sont fidèlement extraites du document officiel et signalées pour analyse administrative. Ce constat technique ne présume d’aucune anomalie irrégulière.
+              Conformément à la charte SuiviBudget CI, ces valeurs sont fidèlement extraites du document officiel. Le statut SOURCE_ANOMALY signale ici un écart à corroborer : les pièces actuellement rattachées au dossier ne permettent pas d'en établir la cause ni la nature de l'autorisation budgétaire correspondante. Ce constat technique ne présume d'aucune irrégularité.
             </p>
           </div>
         )}
