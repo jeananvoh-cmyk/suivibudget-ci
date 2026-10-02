@@ -5,7 +5,7 @@
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/budget-cycle-document-console`
 - HANDOFF_BASE_SHA : `46c4f1753a1c6d5aa564a70f082f859141d58fd0` (HEAD de PR #13 `antigravity/tiassale-ca-2024-reconciliation`)
-- CURRENT_HEAD : `f7a8ae8` fix(cycle): enforce human validation gate, strict semantics, and canonical fingerprinting ; 231 tests PASS (15 suites), build PASS.
+- CURRENT_HEAD : `22e02f3` fix(cycle): enforce human validation gate, strict semantics, and canonical fingerprinting ; 231 tests PASS (15 suites), build PASS.
 - PR : PR #14 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/14) ouverte sur `antigravity/budget-cycle-document-console` vers `master` (dépendance explicite sur PR #13, NON FUSIONNÉE, soumise au contrôle externe de l'orchestrateur).
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
 - CURRENT_MILESTONE : Gate Final Qualité PR #14 — Validation Humaine Bloquante, Sémantique Stricte & Fingerprint Canonique (Validation humaine obligatoire : statut PENDING bloque l'import avec can_import = false ; Sémantique financière bloquante : UNKNOWN ou non spécifié interdit l'import des actes modificatifs ; Zéro version arbitraire : version officielle préservée si documentée, sinon undefined sans invention de faux numéros 1 ou N+1 ; Normalisation canonique des types : équivalence BUDGET_PRIMITIF <-> PRIMITIF_ADOPTE pour le fingerprint déterministe avec détection des doublons cross-vocabulaire ; Préservation étanche des actes distincts BM1/BM2/BS/virements ; Non-régression totale Bingerville, Cocody, Tiassalé ; 231 tests PASS, build PASS).
