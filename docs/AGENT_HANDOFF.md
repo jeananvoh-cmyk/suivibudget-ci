@@ -17,8 +17,8 @@
 - Branche `antigravity/first-real-data-pilot` créée et synchronisée sur GitHub (`4c44cb2` initial, PR #10).
 - **Distinction explicite de la chaîne pilote** :
   - **A. Chaîne d'intégration locale avec données réelles sourcées** : **VALIDÉE** (fichiers `docs/imports/`, PGlite avec migrations réelles, tests 5/5).
-  - **B. Recette réelle Supabase** : **EN COURS** (pilotage contrôlé sur un seul BP : Bingerville 2026 en mode dry-run, arrêt avant publication humaine).
-  - **C. Publication réelle visible côté citoyen** : **NON ENCORE EFFECTUÉE** (réservée à l'étape ultérieure après validation humaine explicite).
+  - **B. Recette réelle Supabase** : **VALIDÉE SUR LOT PILOTE BINGERVILLE BP 2026** (dry-run sans écriture validé `READY` avec `plan_hash` déterministe `cf991b9bfb8c75fedf864fcf46ece9ca6e6f5b96fc092f2e7bb555943853b66f`, import staging `TO_VERIFY` contrôlé : 1 ligne staging `TO_VERIFY`, 0 ligne `PUBLISHED` dans `local_budgets`, 0 altération des données préexistantes ; arrêt strict avant `VERIFY` et `PUBLISH`).
+  - **C. Publication réelle visible côté citoyen** : **ARRÊT STRICT / EN ATTENTE DE REVUE HUMAINE** (conformité stricte avec le workflow découplé : la transition `TO_VERIFY` → `VERIFIED` → `PUBLISHED` est une décision humaine séparée en console opérateur habilitée).
 - Trois fichiers de lots réels documentés et vérifiés créés dans `docs/imports/` :
   1. `docs/imports/bingerville-bp-2026.json` : BP 2026 Bingerville (Total: 4 046 222 000 FCFA EXACT, Fonctionnement: 1 877 888 000 FCFA EXACT, Investissement: 2 168 334 000 FCFA EXACT). Source AIP 2026-01-28 (`AIP_VERIFIED`, `HIGH`). Non conflictuel (0 ligne dans local_budgets).
   2. `docs/imports/cocody-bp-2026.json` : BP 2026 Cocody (Total: 19 764 660 000 FCFA EXACT, Fonctionnement: null UNKNOWN, Investissement: null UNKNOWN). Source Abidjan.net / Le Nouveau Réveil 2026-02-25. Statut rigoureusement classifié en `SECONDARY_TO_CORROBORATE` et `MEDIUM` (source de presse corroborée, jamais transformée en source AIP ou officielle). Démontre la règle fondamentale `UNKNOWN != 0` (restitution citoyenne "Montant à confirmer", zéro exact distinct).
