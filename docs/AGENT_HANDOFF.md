@@ -6,7 +6,7 @@
 - CURRENT_BRANCH : `antigravity/budget-cycle-document-console`
 - HANDOFF_BASE_SHA : `46c4f1753a1c6d5aa564a70f082f859141d58fd0` (HEAD de PR #13 `antigravity/tiassale-ca-2024-reconciliation`)
 - CURRENT_HEAD : `4100118` docs(handoff): document generic budget cycle industrialization and dry-run pipeline ; 216 tests PASS (15 suites), build PASS.
-- PR : Dédiée sur `antigravity/budget-cycle-document-console` vers `master` (dépendance explicite sur PR #13, NON FUSIONNÉE, soumise au contrôle de l'orchestrateur).
+- PR : PR #14 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/14) ouverte sur `antigravity/budget-cycle-document-console` vers `master` (dépendance explicite sur PR #13, NON FUSIONNÉE, soumise au contrôle de l'orchestrateur).
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
 - CURRENT_MILESTONE : Industrialisation du Cycle Budgétaire Complet & Console d'Import Documentaire Guidée (Moteur de consolidation BP → Modifications/BS/BM → Crédits Définitifs Dérivés → CA Exécution ; Assistant documentaire avec validation humaine explicite VALIDER/CORRIGER/INCONNU/REJETER ; Pre-flight dry-run strict ; Double taux d'exécution civique ; Non-régression totale Bingerville, Cocody, Tiassalé).
 - FOUNDATION_READY : TRUE.
