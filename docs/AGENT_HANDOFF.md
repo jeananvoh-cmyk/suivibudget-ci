@@ -3,13 +3,58 @@
 ## METADATA
 - LAST_UPDATED : 2026-10-02
 - LAST_AGENT : Antigravity
-- CURRENT_BRANCH : `antigravity/tiassale-ca-2024-reconciliation`
-- HANDOFF_BASE_SHA : `cc0ad7732930b964a9dd379631c4e01bac4fa1e3` (master après fusion PR #12 Cocody)
-- CURRENT_HEAD : `d87f75c` docs(handoff): document Tiassalé CA 2024 reconciliation and data reliability audit ; 193 tests PASS (13 suites), build PASS.
-- PR : PR #13 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/13) ouverte sur `antigravity/tiassale-ca-2024-reconciliation` vers `master` (NON FUSIONNÉE, soumise au contrôle de l'orchestrateur).
+- CURRENT_BRANCH : `antigravity/budget-cycle-document-console`
+- HANDOFF_BASE_SHA : `46c4f1753a1c6d5aa564a70f082f859141d58fd0` (HEAD de PR #13 `antigravity/tiassale-ca-2024-reconciliation`)
+- CURRENT_HEAD : `4100118` docs(handoff): document generic budget cycle industrialization and dry-run pipeline ; 216 tests PASS (15 suites), build PASS.
+- PR : Dédiée sur `antigravity/budget-cycle-document-console` vers `master` (dépendance explicite sur PR #13, NON FUSIONNÉE, soumise au contrôle de l'orchestrateur).
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : Réconciliation & Fiabilisation — Tiassalé Compte Administratif 2024 (Résolution des contradictions documentaires, maintien justifié de SOURCE_ANOMALY, élimination du faux mock 1.12B, séparation étanche financier != physique, préservation des 3 opérations et des 3 rapprochements DGMP STRONG, non-régression Bingerville & Cocody)
+- CURRENT_MILESTONE : Industrialisation du Cycle Budgétaire Complet & Console d'Import Documentaire Guidée (Moteur de consolidation BP → Modifications/BS/BM → Crédits Définitifs Dérivés → CA Exécution ; Assistant documentaire avec validation humaine explicite VALIDER/CORRIGER/INCONNU/REJETER ; Pre-flight dry-run strict ; Double taux d'exécution civique ; Non-régression totale Bingerville, Cocody, Tiassalé).
 - FOUNDATION_READY : TRUE.
+
+## INDUSTRIALISATION DU CYCLE BUDGÉTAIRE & CONSOLE DOCUMENTAIRE
+- **MOTEUR DE CONSOLIDATION DU CYCLE BUDGÉTAIRE (`budgetCycleEngine.ts`)** :
+  - **Architecture Unifiée du Cycle** : BP Initial (`PRIMITIF_ADOPTE`, `PRIMITIF_APRES_TUTELLE`) → Actes Modificatifs (`BUDGET_SUPPLEMENTAIRE`, `DECISION_MODIFICATIVE`, `VIREMENT_CREDITS`) → Crédits Définitifs (calculés dynamiquement avec formule traçable) → CA Clôturé (`COMPTE_ADMINISTRATIF`).
+  - **Traçabilité & Provenance par Défaut** :
+    - Chaque valeur porte son origine (`OFFICIAL_DOCUMENT`, `DERIVED_VALUE`, `AMENDMENT_SUM`, `CITIZEN_OBSERVATION`, `UNKNOWN_NOT_FOUND`).
+    - Aucune valeur dérivée n'est présentée comme une donnée brute de source : toute valeur dérivée expose sa formule arithmétique exacte (ex: `618 000 000 FCFA (BP Initial) + 120 000 000 FCFA (Modifications nettes) = 738 000 000 FCFA`).
+    - Respect absolu de la règle : `NULL != 0` et `0 FCFA réel` (aucune fabrication de montants).
+  - **Double Taux d'Exécution Civique** :
+    - Calcul et présentation systématique de deux indicateurs clairs :
+      1. Taux d'exécution sur crédits définitifs (respect de l'autorisation budgétaire finale).
+      2. Taux d'exécution sur budget primitif initial (mesure de la trajectoire par rapport aux orientations de début d'exercice).
+  - **Mentions Pédagogiques Républicaines** :
+    - En l'absence de modifications documentées, affichage explicite : « *Aucune décision modificative ou budget supplémentaire n'a été documenté publiquement pour cet exercice. Conformément à nos principes civiques, l'absence de document public ne constitue pas la preuve de son inexistence juridique.* »
+- **CONSOLE D'IMPORT DOCUMENTAIRE GUIDÉE (`DataImportConsole.tsx` & `budgetDocumentDryRun.ts`)** :
+  - **Assistant de Saisie Structurée** :
+    - Sélection parmi les 232 collectivités réelles (201 communes + 31 conseils régionaux).
+    - Métadonnées documentaires rigoureuses : type d'acte, nom du document, référence, date, nature de date, page, URL sécurisée, notes.
+    - Grille de valeurs financières avec statut de validation humaine : `TO_VALIDATE` → `VALIDATED` (vert), `CORRECTED` (ambre), `UNKNOWN` (ardoise, valeur `null` préservée), `REJECTED` (rouge).
+  - **Pre-flight Dry-Run Déterministe** :
+    - Validation institutionnelle et détection des collectivités inconnues.
+    - Contrôle de cohérence de l'exercice budgétaire (2000-2100).
+    - Vérification obligatoire de la traçabilité documentaire (nom, référence, page obligatoires).
+    - Détection des conflits avec des versions déjà publiées (`PUBLISHED`).
+    - Contrôles arithmétiques stricts : cohérence Total vs Fonctionnement + Investissement, détection des incohérences ou maintien d'`UNKNOWN` si ventilation omise.
+    - Transformation en enveloppe standard `data_import_rows` prête pour la simulation et l'ingestion dans le pipeline sans altération du schéma.
+- **RESTITUTION CITOYENNE DANS LE COMPTE ADMINISTRATIF (`AdministrativeAccountView.tsx`)** :
+  - Bloc supérieur dédié : « *Traçabilité du Cycle Budgétaire — Exercice [Année]* » en 3 étapes claires :
+    - A. Budget Primitif Initial
+    - B. Modifications Budgétaires (nombre d'actes + montant net ou mention civique d'absence de document)
+    - C. Crédits Définitifs (avec badge "Calculé (Dérivé)" et formule explicite)
+  - Préservation intégrale et étanche du bandeau civique `SOURCE_ANOMALY` de Tiassalé 2024, des 3 opérations d'investissement et des 3 rapprochements DGMP `STRONG`.
+- **ZÉRO IMPACT SUR LA BASE DE DONNÉES DISTANTE** :
+  - `NEW_TABLES: NONE`
+  - `NEW_COLUMNS: NONE`
+  - `NEW_MIGRATIONS: NONE`
+  - `SUPABASE_WRITTEN: FALSE`
+  - `SUPABASE_PUBLISHED: FALSE`
+- **VALIDATION TECHNIQUE & TESTS** :
+  - **216/216 tests unitaires et d'intégration PASS** sur 15 suites (`npm test`).
+  - **`npm run build` PASS** (zéro erreur TypeScript, sortie Vite propre).
+  - Deux nouvelles suites de tests spécialisées :
+    - `src/utils/__tests__/budgetCycleEngine.test.ts` (13 tests) : consolidation du cycle, prise en compte des modifications négatives, préservation des valeurs nulles et zéros réels, formules dérivées, double taux d'exécution, préservation de `SOURCE_ANOMALY`, non-régression Bingerville, Cocody et Tiassalé.
+    - `src/utils/__tests__/budgetDocumentWorkflow.test.ts` (10 tests) : génération de formulaires d'extraction, pre-flight dry-run (institution invalide, année invalide, provenance manquante, montants négatifs invalides, arithmétique, préservation UNKNOWN=null, conflits de versions publiées), conversion en lot d'import standard.
+
 
 ## TIASSALÉ CA 2024 — RÉCONCILIATION & FIABILISATION DOCUMENTAIRE
 - **AUDIT DE PROVENANCE DES SOURCES** :
@@ -327,9 +372,9 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Contrôle externe de la PR Tiassalé (`antigravity/tiassale-ca-2024-reconciliation`) par l'orchestrateur (tests 193/193 PASS, build PASS).
-2. Décision d'arbitrage de l'orchestrateur sur le statut distant de Tiassalé CA 2024 (maintien VERIFIED / SOURCE_ANOMALY ou instruction spécifique).
-3. Recette citoyenne du module Compte Administratif sur les environnements connectés sans publication non autorisée.
+1. Contrôle externe de la PR Cycle Budgétaire & Console Documentaire (`antigravity/budget-cycle-document-console`) par l'orchestrateur (tests 216/216 PASS, build PASS).
+2. Revue de l'intégration du cycle complet (BP → Modifications → Crédits Définitifs → CA) et de l'assistant documentaire guidé.
+3. Arbitrage sur le déploiement ou l'ingestion d'actes modificatifs réels (budgets supplémentaires ou décisions modificatives) pour les collectivités pilotes.
 
 ## COCODY_REMOTE_CLOSEOUT — ORCHESTRATEUR 2026-10-02
 - Institution canonique ajoutée à `public.institutions` : `inst-com-cocody`, `Mairie de Cocody`, type applicatif `MAIRIE`, région Abidjan, District Autonome d'Abidjan.
