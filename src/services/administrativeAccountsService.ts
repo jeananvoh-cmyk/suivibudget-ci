@@ -6,7 +6,10 @@ import { amountPrecision } from '../utils/formatters';
 export async function fetchPublishedLocalBudgets(): Promise<LocalBudget[]> {
   if (!isSupabaseConfigured()) return [];
   const { data, error } = await supabase.from('local_budgets').select('*').eq('status', 'PUBLISHED');
-  if (error) throw error;
+  if (error) {
+    console.warn("Could not fetch published local budgets:", error.message);
+    return [];
+  }
   return (data || []).map(row => ({
     ...row,
     operating_percentage: row.total_amount > 0 && row.operating_amount != null && amountPrecision(row,'total_amount') === 'EXACT' && amountPrecision(row,'operating_amount') === 'EXACT' ? row.operating_amount / row.total_amount * 100 : null,

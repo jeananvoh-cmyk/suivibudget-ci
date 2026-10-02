@@ -6,6 +6,7 @@ import { parseImportInput } from '../../services/dataImportService';
 import { formatQualifiedFCFA, amountPrecision } from '../formatters';
 import { generateProjectPassport, findMatchingCaOperationResult } from '../projectPassport';
 import { validateBudgetRecord, validateImportProvenanceConsistency } from '../budgetValidation';
+import { dataStore } from '../../services/dataStore';
 import type { BudgetProject } from '../../types';
 
 let db: PGlite;
@@ -191,6 +192,16 @@ describe('Premier lot réel de bout en bout (Pilote)', () => {
       expect(formatQualifiedFCFA(published.total_amount, 'EXACT')).toMatch(/4[\s\u202f]046[\s\u202f]222[\s\u202f]000 FCFA/);
       expect(formatQualifiedFCFA(published.operating_amount, 'EXACT')).toMatch(/1[\s\u202f]877[\s\u202f]888[\s\u202f]000 FCFA/);
       expect(formatQualifiedFCFA(published.investment_amount, 'EXACT')).toMatch(/2[\s\u202f]168[\s\u202f]334[\s\u202f]000 FCFA/);
+
+      // Contrôle de restitution citoyenne via dataStore
+      dataStore.enrichInstitutionsWithBudgets();
+      const bingervilleInst = dataStore.getInstitutions().find(i => i.id === 'inst-com-bingerville');
+      expect(bingervilleInst).toBeDefined();
+      expect(bingervilleInst?.primitive_budget?.total_voted_fcfa).toBe(4046222000);
+      expect(bingervilleInst?.primitive_budget?.functioning_voted_fcfa).toBe(1877888000);
+      expect(bingervilleInst?.primitive_budget?.investment_voted_fcfa).toBe(2168334000);
+      expect(bingervilleInst?.primitive_budget?.precision).toBe('EXACT');
+      expect(bingervilleInst?.primitive_budget?.source).toBe('AIP — Budget primitif 2026 de Bingerville');
     });
   });
 

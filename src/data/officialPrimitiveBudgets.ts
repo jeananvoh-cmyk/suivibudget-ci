@@ -88,7 +88,7 @@ export const OFFICIAL_PRIMITIVE_BUDGETS: Record<string, PrimitiveBudgetInfo> = {
     investment_voted_fcfa: 2168334000,
     functioning_voted_fcfa: 1877888000,
     voted_date: "28 janvier 2026",
-    source: "Mairie de Bingerville & AIP",
+    source: "AIP — Budget primitif 2026 de Bingerville",
     source_url: "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2026-de-la-commune-de-bingerville-arrete-a-plus-de-4-milliards-fcfa/",
     precision: "EXACT",
     editor_source: "AIP",

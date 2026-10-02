@@ -1,24 +1,43 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- LAST_UPDATED : 2026-10-01
+- LAST_UPDATED : 2026-10-02
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/first-real-data-pilot`
 - HANDOFF_BASE_SHA : `cef3441aa6fb37e5a72d5e5ed57409532309666b` (master après fusion #9)
-- CURRENT_HEAD : retrouver le HEAD de cette branche dans Git ; validations locales terminées, suite de tests PASS.
+- CURRENT_HEAD : retrouver le HEAD de cette branche dans Git ; 180 tests PASS, build PASS.
 - PR : PR #9 fusionnée. Nouvelle PR `antigravity/first-real-data-pilot` (#10) ouverte vers master ; ne pas fusionner.
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : premier lot réel de bout en bout (BP, CA, DGMP) validé sur le pipeline de données réelles
-- FOUNDATION_READY : TRUE, validé sur 3b502b1 après CI SUCCESS. Aucun P0/P1 connu ouvert dans la fondation.
+- CURRENT_MILESTONE : premier lot réel Bingerville BP 2026 publié sur Supabase et parcours citoyen validé
+- FOUNDATION_READY : TRUE.
 
 ## COMPLETED
-### Premier lot réel de bout en bout — 1er octobre, après #9
-- Master basé sur `cef3441aa6fb37e5a72d5e5ed57409532309666b` (PR #9 fusionnée). Aucun travail antérieur Codex réaudité ou écrasé.
-- Branche `antigravity/first-real-data-pilot` créée et synchronisée sur GitHub (`4c44cb2` initial, PR #10).
-- **Distinction explicite de la chaîne pilote** :
-  - **A. Chaîne d'intégration locale avec données réelles sourcées** : **VALIDÉE** (fichiers `docs/imports/`, PGlite avec migrations réelles, tests 5/5).
-  - **B. Recette réelle Supabase** : **VALIDÉE SUR LOT PILOTE BINGERVILLE BP 2026** (dry-run sans écriture validé `READY` avec `plan_hash` déterministe `cf991b9bfb8c75fedf864fcf46ece9ca6e6f5b96fc092f2e7bb555943853b66f`, import staging `TO_VERIFY` contrôlé : 1 ligne staging `TO_VERIFY`, 0 ligne `PUBLISHED` dans `local_budgets`, 0 altération des données préexistantes ; arrêt strict avant `VERIFY` et `PUBLISH`).
-  - **C. Publication réelle visible côté citoyen** : **ARRÊT STRICT / EN ATTENTE DE REVUE HUMAINE** (conformité stricte avec le workflow découplé : la transition `TO_VERIFY` → `VERIFIED` → `PUBLISHED` est une décision humaine séparée en console opérateur habilitée).
+### Parcours citoyen réel Bingerville BP 2026 — 2 octobre
+- **État Supabase réel vérifié indépendamment** :
+  - `local_budgets` : 1 enregistrement canonique publié (`inst-com-bingerville`, 2026, `status = 'PUBLISHED'`).
+  - `data_import_rows` : 1 ligne de staging (Bingerville BP 2026).
+  - `data_import_events` : 3 événements au journal (`IMPORTED` → `VERIFIED` → `PUBLISHED`).
+  - **B. Recette réelle Supabase** : **EFFECTUÉE**.
+  - **C. Publication canonique Supabase** : **EFFECTUÉE**.
+- **Traçage du flux de bout en bout et ruptures identifiées/corrigées** :
+  - Flux : Supabase `local_budgets` → `administrativeAccountsService.fetchPublishedLocalBudgets` → `dataStore.initSupabaseSync` / `enrichInstitutionsWithBudgets` → `dataStore.institutions` / `primitive_budget` → `InstitutionDetailModal` / `MunicipalitiesPage` → Rendu citoyen.
+  - **Rupture DDL (Base de données)** : Le rôle `anon` ne disposait pas de `GRANT SELECT ON public.local_budgets TO anon;` (omis lors de `20260929141800_grant_schema_privileges.sql`), causant un HTTP 401 / code `42501 permission denied for table local_budgets` pour les citoyens non connectés malgré la policy RLS `USING (status = 'PUBLISHED')`.
+    - Migration additive rédigée : `supabase/migrations/20261002010000_grant_anon_published_local_budgets.sql` (`GRANT SELECT ON public.local_budgets TO anon;`).
+    - Test PGlite ajouté dans `src/utils/__tests__/publicationDatabase.test.ts` garantissant que `anon` lit les budgets `PUBLISHED` mais que les budgets non publiés (`VERIFIED`, `TO_VERIFY`, `DRAFT`) restent strictement invisibles.
+  - **Rupture Synchronisation Frontend (`dataStore.ts`)** : `initSupabaseSync` mettait à jour `this.localBudgets` mais ne ré-enrichissait pas `this.institutions`. Ajout de la méthode `enrichInstitutionsWithBudgets()` appelée après la récupération des budgets distants et dans `saveLocalBudget`.
+  - **Rupture Libellé de Provenance** : Libellé source harmonisé avec la donnée officielle publiée : `"AIP — Budget primitif 2026 de Bingerville"`.
+- **Validation visuelle & Responsive (Playwright sur 375, 768, 1440 px)** :
+  - Route testée : `/institutions/mairies` → Fiche Bingerville (`InstitutionDetailModal` > onglet `BUDGET & FINANCES` et sous-onglets).
+  - Total : **4 046 222 000 FCFA**
+  - Fonctionnement : **1 877 888 000 FCFA** (46.0 %)
+  - Investissement : **2 168 334 000 FCFA** (54.0 %)
+  - Exercice : **2026**
+  - Précision : **EXACT** (Montant Délibéré Exact)
+  - Source : **AIP — Budget primitif 2026 de Bingerville**
+  - Aucun débordement horizontal (`bodyScrollWidth = windowWidth` : 375, 768, 1440 px).
+- **Validation technique locale** :
+  - **180/180 tests PASS** sur 12 suites de tests (`npm test`).
+  - **`npm run build` PASS** (1726 modules, zéro erreur TypeScript).
 - Trois fichiers de lots réels documentés et vérifiés créés dans `docs/imports/` :
   1. `docs/imports/bingerville-bp-2026.json` : BP 2026 Bingerville (Total: 4 046 222 000 FCFA EXACT, Fonctionnement: 1 877 888 000 FCFA EXACT, Investissement: 2 168 334 000 FCFA EXACT). Source AIP 2026-01-28 (`AIP_VERIFIED`, `HIGH`). Non conflictuel (0 ligne dans local_budgets).
   2. `docs/imports/cocody-bp-2026.json` : BP 2026 Cocody (Total: 19 764 660 000 FCFA EXACT, Fonctionnement: null UNKNOWN, Investissement: null UNKNOWN). Source Abidjan.net / Le Nouveau Réveil 2026-02-25. Statut rigoureusement classifié en `SECONDARY_TO_CORROBORATE` et `MEDIUM` (source de presse corroborée, jamais transformée en source AIP ou officielle). Démontre la règle fondamentale `UNKNOWN != 0` (restitution citoyenne "Montant à confirmer", zéro exact distinct).
