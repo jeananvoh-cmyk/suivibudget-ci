@@ -41,6 +41,8 @@ import {
 } from 'lucide-react';
 import { CompteAdministratifExplainerModal } from './CompteAdministratifExplainerModal';
 import { fetchAdministrativeAccounts } from '../services/administrativeAccountsService';
+import { consolidateBudgetCycle, formatBudgetTypeLabel } from '../utils/budgetCycleEngine';
+import { dataStore } from '../services/dataStore';
 
 interface AdministrativeAccountViewProps {
   institution: Institution;
@@ -86,6 +88,15 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
   const currentCA: AdministrativeAccount | undefined = effectiveAccounts.find(
     a => a.fiscal_year === selectedYear
   ) || effectiveAccounts[0];
+
+  // Complete Budget Cycle Consolidation (BP -> BS/BM -> Final Credits -> CA)
+  const allBudgets = dataStore.getLocalBudgets(institution.id);
+  const cycleConsolidation = consolidateBudgetCycle(
+    institution.id, 
+    selectedYear, 
+    allBudgets, 
+    effectiveAccounts
+  );
 
   // Dynamic calculations
   const operatingRate = currentCA 
@@ -330,6 +341,138 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             « {currentCA.notes} »
           </p>
         )}
+        {/* Alerte civique de réconciliation documentaire si SOURCE_ANOMALY ou dépassement */}
+        {(currentCA.reconciliation_status === 'SOURCE_ANOMALY' || operatingRate?.isOverBudget) && (
+          <div className="p-4 bg-purple-50 rounded-2xl border border-purple-200 text-xs text-purple-950 space-y-2">
+            <div className="flex items-center gap-2 font-black text-purple-900">
+              <AlertCircle className="w-4 h-4 text-purple-700 flex-shrink-0" />
+              <span>Contrôle de Réconciliation des Sources (SOURCE_ANOMALY)</span>
+            </div>
+            <p className="leading-relaxed text-purple-900 font-medium">
+              Le Compte Administratif officiel{currentCA.source_page ? ` (page ${currentCA.source_page})` : ''} retrace des dépenses de fonctionnement ordonnancées ({formatRecordAmount(currentCA, 'operating_realized')}) supérieures aux crédits primitifs votés ({formatRecordAmount(currentCA, 'operating_planned')}), soit un taux d'exécution de <strong>{operatingRate?.formatted}</strong>.
+              {currentCA.operating_revenue_realized != null && (
+                <span> Le même document indique par ailleurs des recettes de fonctionnement recouvrées de <strong>{formatRecordAmount(currentCA, 'operating_revenue_realized')}</strong>. Cette concomitance ne permet pas, à elle seule, d'établir le mécanisme juridique ou comptable ayant autorisé le dépassement des dépenses.</span>
+              )}
+            </p>
+            <p className="text-[11px] text-purple-800 italic">
+              Conformément à la charte SuiviBudget CI, ces valeurs sont fidèlement extraites du document officiel. Le statut SOURCE_ANOMALY signale ici un écart à corroborer : les pièces actuellement rattachées au dossier ne permettent pas d'en établir la cause ni la nature de l'autorisation budgétaire correspondante. Ce constat technique ne présume d'aucune irrégularité.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 1.5 TRAÇABILITÉ DU CYCLE BUDGÉTAIRE : BP → MODIFICATIONS → CRÉDITS DÉFINITIFS */}
+      {/* ========================================================================= */}
+      <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <Layers className="w-5 h-5 text-brand-blue" />
+            <h4 className="text-sm font-black uppercase tracking-wider text-slate-900">
+              Traçabilité du Cycle Budgétaire — Exercice {selectedYear}
+            </h4>
+          </div>
+          <span className="text-[11px] font-semibold text-slate-500">
+            BP initial → Modifications officielles → Crédits définitifs calculés
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          {/* Étape A : Budget Primitif Initial */}
+          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block">
+              A. Budget Primitif Initial
+            </span>
+            <div className="text-base font-black text-slate-900">
+              {cycleConsolidation.initial_budget?.total.amount != null
+                ? formatFCFA(cycleConsolidation.initial_budget.total.amount)
+                : formatRecordAmount(currentCA, 'total_planned')}
+            </div>
+            <p className="text-[11px] text-slate-500">
+              {cycleConsolidation.initial_budget?.document?.document_name || 'Crédits votés initiaux extraits de l\'acte budgétaire officiel.'}
+            </p>
+          </div>
+
+          {/* Étape B : Modifications Budgétaires */}
+          <div className="p-3.5 bg-blue-50/50 rounded-xl border border-blue-100 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-brand-blue block">
+                B. Modifications Budgétaires
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white border border-blue-200 text-brand-blue">
+                {cycleConsolidation.amendments.length} acte(s)
+              </span>
+            </div>
+            <div className="text-base font-black text-brand-blue">
+              {cycleConsolidation.net_amendments.total !== null
+                ? `${cycleConsolidation.net_amendments.total >= 0 ? '+' : '-'}${formatFCFA(Math.abs(cycleConsolidation.net_amendments.total))}`
+                : 'Non documenté'}
+            </div>
+            <p className="text-[11px] text-slate-600 leading-snug">
+              {cycleConsolidation.amendments_explanation}
+            </p>
+          </div>
+
+          {/* Étape C : Crédits Définitifs (Valeur Dérivée ou Source Confirmée) */}
+          <div className="p-3.5 bg-emerald-50/50 rounded-xl border border-emerald-200 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 block">
+                C. Crédits Définitifs
+              </span>
+              {cycleConsolidation.final_credits_status === 'DERIVED_FROM_DOCUMENTED_AMENDMENTS' && (
+                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-200 text-emerald-900 uppercase">
+                  Calculé (Dérivé)
+                </span>
+              )}
+              {cycleConsolidation.final_credits_status === 'SOURCE_CONFIRMED' && (
+                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-blue-200 text-blue-900 uppercase">
+                  Source Officielle
+                </span>
+              )}
+              {cycleConsolidation.final_credits_status === 'NOT_ESTABLISHED' && (
+                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 uppercase">
+                  Non Établis
+                </span>
+              )}
+            </div>
+            <div className="text-base font-black text-emerald-950">
+              {cycleConsolidation.final_credits?.total.amount != null ? (
+                formatFCFA(cycleConsolidation.final_credits.total.amount)
+              ) : (
+                <span className="text-slate-500 font-bold text-sm">Non établis</span>
+              )}
+            </div>
+            <p className="text-[11px] text-slate-600 leading-snug">
+              {cycleConsolidation.final_credits?.total.formula || cycleConsolidation.final_credits_notice || 'Les crédits définitifs ne peuvent pas être établis avec les documents actuellement disponibles.'}
+            </p>
+            {cycleConsolidation.documented_adjusted_amount?.total != null && (
+              <div className="text-[10px] text-amber-800 bg-amber-50 rounded p-1 border border-amber-200">
+                Montant ajusté provisoire : <strong>{formatFCFA(cycleConsolidation.documented_adjusted_amount.total)}</strong> (chaîne d'actes partielle)
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Détail pédagogique des doubles taux d'exécution si crédits définitifs établis */}
+        {cycleConsolidation.execution_comparison?.vs_final_credits && cycleConsolidation.execution_comparison?.vs_initial_budget ? (
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span className="text-slate-700">
+              <strong>Double lecture civique :</strong> Taux d'exécution sur crédits définitifs = <strong>{cycleConsolidation.execution_comparison.vs_final_credits.total.formatted}</strong> vs Taux sur budget primitif initial = <strong>{cycleConsolidation.execution_comparison.vs_initial_budget.total.formatted}</strong>.
+            </span>
+            <span className="text-[10px] text-slate-500 italic">
+              Les deux indicateurs mesurent respectivement le respect de l'autorisation finale et l'évolution par rapport aux orientations initiales.
+            </span>
+          </div>
+        ) : (
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span className="text-slate-700">
+              <strong>Lecture civique :</strong> Taux d'exécution mesuré sur le budget primitif initial ({cycleConsolidation.execution_comparison?.vs_initial_budget?.total.formatted || 'non calculé'}). Crédits définitifs non établis à ce jour.
+            </span>
+            <span className="text-[10px] text-slate-500 italic">
+              Absence de document public ≠ Preuve d'absence d'actes administratifs.
+            </span>
+          </div>
+        )}
       </div>
 
       {/* ========================================================================= */}
@@ -339,7 +482,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
         
         {/* Volet 1 : Fonctionnement */}
         <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-3 flex flex-col justify-between">
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200">
                 1. Dépenses de Fonctionnement
@@ -351,14 +494,27 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               )}
             </div>
 
-            <div>
-              <span className="text-[10px] font-bold uppercase text-slate-400 block">Dépensé Réellement</span>
-              <span className="text-xl font-black text-slate-900 block">
-                {formatRecordAmount(currentCA, 'operating_realized')}
-              </span>
-              <span className="text-[11px] font-semibold text-slate-500 block">
-                sur {formatRecordAmount(currentCA, 'operating_planned')} prévus
-              </span>
+            <div className="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+              <div className="flex justify-between items-baseline">
+                <span className="text-[11px] text-slate-500 font-medium">Ce qui était prévu :</span>
+                <strong className="text-slate-900">{formatRecordAmount(currentCA, 'operating_planned')}</strong>
+              </div>
+              <div className="flex justify-between items-baseline">
+                <span className="text-[11px] text-slate-500 font-medium">Ce qui a été réalisé financièrement :</span>
+                <strong className="text-slate-900 text-sm font-black">{formatRecordAmount(currentCA, 'operating_realized')}</strong>
+              </div>
+              <div className="flex justify-between items-baseline pt-1 border-t border-slate-200 text-[11px]">
+                <span className="text-slate-500 font-medium">Écart :</span>
+                <span className={`font-bold ${isExactAmount(currentCA, 'operating_planned') && isExactAmount(currentCA, 'operating_realized') && currentCA.operating_realized! > currentCA.operating_planned! ? 'text-purple-700' : 'text-slate-700'}`}>
+                  {isExactAmount(currentCA, 'operating_planned') && isExactAmount(currentCA, 'operating_realized')
+                    ? `${(currentCA.operating_realized! - currentCA.operating_planned!) >= 0 ? '+' : '-'}${formatFCFA(Math.abs(currentCA.operating_planned! - currentCA.operating_realized!))}`
+                    : 'Non calculable'}
+                </span>
+              </div>
+              <div className="flex justify-between items-baseline text-[11px]">
+                <span className="text-slate-500 font-medium">Taux d'exécution :</span>
+                <span className="font-black text-brand-blue">{operatingRate?.formatted}</span>
+              </div>
             </div>
 
             {/* Jauge */}
@@ -366,15 +522,12 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               <div hidden={operatingRate?.rate == null} className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                 <div 
                   className={`h-full transition-all duration-500 ${
+                    (operatingRate?.rate || 0) > 100 ? 'bg-purple-600' :
                     (operatingRate?.rate || 0) >= 90 ? 'bg-emerald-500' :
                     (operatingRate?.rate || 0) >= 70 ? 'bg-blue-500' : 'bg-amber-500'
                   }`} 
                   style={{ width: `${Math.min(100, operatingRate?.rate || 0)}%` }}
                 />
-              </div>
-              <div className="flex justify-between text-[10px] text-slate-500 font-medium">
-                <span>Taux ordonnancé : {operatingRate?.formatted}</span>
-                <span>Écart : {isExactAmount(currentCA, 'operating_planned') && isExactAmount(currentCA, 'operating_realized') ? formatFCFA(Math.abs(currentCA.operating_planned! - currentCA.operating_realized!)) : 'Non calculable'}</span>
               </div>
             </div>
           </div>
@@ -388,7 +541,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
 
         {/* Volet 2 : Investissement */}
         <div className="bg-white rounded-2xl p-5 border border-emerald-200/90 shadow-2xs space-y-3 flex flex-col justify-between">
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
                 2. Dépenses d'Investissement
@@ -400,14 +553,27 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               )}
             </div>
 
-            <div>
-              <span className="text-[10px] font-bold uppercase text-slate-400 block">Dépensé Réellement</span>
-              <span className="text-xl font-black text-slate-900 block">
-                {formatRecordAmount(currentCA, 'investment_realized')}
-              </span>
-              <span className="text-[11px] font-semibold text-slate-500 block">
-                sur {formatRecordAmount(currentCA, 'investment_planned')} prévus
-              </span>
+            <div className="space-y-1.5 bg-emerald-50/50 p-3 rounded-xl border border-emerald-200 text-xs">
+              <div className="flex justify-between items-baseline">
+                <span className="text-[11px] text-slate-500 font-medium">Ce qui était prévu :</span>
+                <strong className="text-slate-900">{formatRecordAmount(currentCA, 'investment_planned')}</strong>
+              </div>
+              <div className="flex justify-between items-baseline">
+                <span className="text-[11px] text-slate-500 font-medium">Ce qui a été réalisé financièrement :</span>
+                <strong className="text-slate-900 text-sm font-black">{formatRecordAmount(currentCA, 'investment_realized')}</strong>
+              </div>
+              <div className="flex justify-between items-baseline pt-1 border-t border-emerald-200 text-[11px]">
+                <span className="text-slate-500 font-medium">Écart :</span>
+                <span className="font-bold text-slate-700">
+                  {isExactAmount(currentCA, 'investment_planned') && isExactAmount(currentCA, 'investment_realized')
+                    ? `${(currentCA.investment_realized! - currentCA.investment_planned!) >= 0 ? '+' : '-'}${formatFCFA(Math.abs(currentCA.investment_planned! - currentCA.investment_realized!))}`
+                    : 'Non calculable'}
+                </span>
+              </div>
+              <div className="flex justify-between items-baseline text-[11px]">
+                <span className="text-slate-500 font-medium">Taux d'exécution :</span>
+                <span className="font-black text-emerald-700">{investmentRate?.formatted}</span>
+              </div>
             </div>
 
             {/* Jauge */}
@@ -422,8 +588,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                 />
               </div>
               <div className="flex justify-between text-[10px] text-slate-500 font-medium">
-                <span>Taux financier : {investmentRate?.formatted}</span>
-                <span>{currentCA.operations.length} opérations suivies</span>
+                <span>{currentCA.operations.length} opérations identifiées</span>
               </div>
             </div>
           </div>
@@ -437,7 +602,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
 
         {/* Volet 3 : Total Consolidé & Résultat */}
         <div className="bg-gradient-to-br from-slate-900 to-brand-blue-dark text-white rounded-2xl p-5 shadow-xs space-y-3 flex flex-col justify-between">
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-white/10 text-white border border-white/20">
                 3. Total Consolidé
@@ -449,14 +614,27 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               )}
             </div>
 
-            <div>
-              <span className="text-[10px] font-bold uppercase text-slate-300 block">Exécution Totale Réelle</span>
-              <span className="text-2xl font-black text-amber-300 block">
-                {formatRecordAmount(currentCA, 'total_realized')}
-              </span>
-              <span className="text-xs font-semibold text-blue-100 block">
-                sur {formatRecordAmount(currentCA, 'total_planned')} votés au Budget
-              </span>
+            <div className="space-y-1.5 bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/15 text-xs">
+              <div className="flex justify-between items-baseline">
+                <span className="text-[11px] text-blue-200 font-medium">Ce qui était prévu :</span>
+                <strong className="text-white">{formatRecordAmount(currentCA, 'total_planned')}</strong>
+              </div>
+              <div className="flex justify-between items-baseline">
+                <span className="text-[11px] text-blue-200 font-medium">Ce qui a été réalisé financièrement :</span>
+                <strong className="text-amber-300 text-sm font-black">{formatRecordAmount(currentCA, 'total_realized')}</strong>
+              </div>
+              <div className="flex justify-between items-baseline pt-1 border-t border-white/15 text-[11px]">
+                <span className="text-blue-200 font-medium">Écart :</span>
+                <span className="font-bold text-amber-200">
+                  {isExactAmount(currentCA, 'total_planned') && isExactAmount(currentCA, 'total_realized')
+                    ? `${(currentCA.total_realized! - currentCA.total_planned!) >= 0 ? '+' : '-'}${formatFCFA(Math.abs(currentCA.total_planned! - currentCA.total_realized!))}`
+                    : 'Non calculable'}
+                </span>
+              </div>
+              <div className="flex justify-between items-baseline text-[11px]">
+                <span className="text-blue-200 font-medium">Taux d'exécution global :</span>
+                <span className="font-black text-amber-300">{totalRate?.formatted}</span>
+              </div>
             </div>
 
             {/* Jauge globale */}
@@ -468,7 +646,6 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                 />
               </div>
               <div className="flex justify-between text-[10px] text-blue-200 font-medium">
-                <span>Taux global exécuté : {totalRate?.formatted}</span>
                 <span>{getExecutionStatusLabel(totalRate?.status || 'NORMAL')}</span>
               </div>
             </div>
@@ -526,6 +703,17 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               <Download className="w-3.5 h-3.5" />
               <span>JSON</span>
             </button>
+          </div>
+        </div>
+
+        {/* Règle Républicaine Non Négociable */}
+        <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-xl text-xs text-amber-950 flex items-start gap-2.5">
+          <Scale className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+          <div className="space-y-0.5">
+            <span className="font-bold block text-amber-900">Règle républicaine d'imputabilité : Réalisé financier ≠ Réalisation physique</span>
+            <p className="text-[11px] text-amber-800 leading-relaxed">
+              Une dépense ordonnancée ou un marché public attribué documentent un engagement financier et juridique, jamais la livraison physique des travaux sur le terrain. À l'inverse, 0 FCFA ordonnancé au CA sur un exercice ne signifie pas l'abandon d'un projet (report budgétaire).
+            </p>
           </div>
         </div>
 
@@ -609,12 +797,30 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                         {opRate.formatted}
                       </span>
                     </div>
-                    <div className="text-xs font-black text-slate-900">
-                      {formatRecordAmount(op, 'executed_amount')}{' '}
-                      <span className="text-[11px] font-normal text-slate-500">
-                        / {formatRecordAmount(op, 'planned_amount')}
-                      </span>
-                    </div>
+                  </div>
+                </div>
+
+                {/* Ventilation Financière : Prévu vs Réalisé Financièrement */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-500 font-medium block">Ce qui était prévu</span>
+                    <strong className="text-slate-900 block">{formatRecordAmount(op, 'planned_amount')}</strong>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-500 font-medium block">Ce qui a été réalisé financièrement</span>
+                    <strong className="text-slate-900 block">{formatRecordAmount(op, 'executed_amount')}</strong>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-500 font-medium block">Écart</span>
+                    <span className="font-bold text-slate-700 block">
+                      {op.planned_amount != null && op.executed_amount != null
+                        ? `${(op.executed_amount - op.planned_amount) >= 0 ? '+' : '-'}${formatFCFA(Math.abs(op.planned_amount - op.executed_amount))}`
+                        : 'Non calculable'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-500 font-medium block">Taux d'exécution</span>
+                    <span className="font-black text-brand-blue block">{opRate.formatted}</span>
                   </div>
                 </div>
 
@@ -623,7 +829,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                        Contrôle Marchés Publics :
+                        Marchés publics rapprochés (DGMP) :
                       </span>
                       {match?.match_level === 'STRONG' && (
                         <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
@@ -687,6 +893,35 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                       Précision : {match.notes}
                     </p>
                   )}
+                </div>
+
+                {/* Bloc Pédagogique d'Imputabilité : Ce que les documents prouvent vs ce qu'ils ne permettent pas d'affirmer */}
+                <div className="p-3 rounded-xl border border-slate-200 bg-white text-xs space-y-2">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black uppercase text-emerald-800 tracking-wider flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      Ce que les documents prouvent
+                    </span>
+                    <p className="text-slate-700 text-[11px] leading-relaxed">
+                      {op.executed_amount === 0 && match ? (
+                        <>Attribution officielle du marché public DGMP (n° <strong>{match.tender_number}</strong>, {formatRecordAmount(match, 'award_amount')}, titulaire <strong>{match.contractor}</strong>), mais <strong>0 FCFA ordonnancé</strong> au Compte Administratif {op.fiscal_year} (opération reportée / non mandatée sur l'exercice clos).</>
+                      ) : match && match.match_level === 'STRONG' ? (
+                        <>Attribution du marché public (Avis <strong>{match.tender_number}</strong>, {formatRecordAmount(match, 'award_amount')}, <strong>{match.contractor}</strong>) et ordonnancement effectif de <strong>{formatRecordAmount(op, 'executed_amount')}</strong> retracé au Compte Administratif{op.source_page ? ` (page ${op.source_page})` : ''}.</>
+                      ) : (
+                        <>Ordonnancement financier de <strong>{formatRecordAmount(op, 'executed_amount')}</strong> consigné dans le Compte Administratif officiel{op.source_page ? ` (page ${op.source_page})` : ''}.</>
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="pt-1.5 border-t border-slate-100 space-y-1">
+                    <span className="text-[10px] font-black uppercase text-amber-800 tracking-wider flex items-center gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                      Ce qu'ils ne permettent pas encore d'affirmer
+                    </span>
+                    <p className="text-slate-600 text-[11px] leading-relaxed italic">
+                      Un mandat financier ou un marché attribué ne prouvent jamais à eux seuls l'achèvement physique des travaux sur le terrain. De même, 0 FCFA ordonnancé sur un exercice ne signifie pas que le projet est abandonné.
+                    </p>
+                  </div>
                 </div>
 
                 {/* Ligne 3 : Observation Citoyenne & Preuve de Terrain */}

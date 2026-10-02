@@ -3,13 +3,129 @@
 ## METADATA
 - LAST_UPDATED : 2026-10-02
 - LAST_AGENT : Antigravity
-- CURRENT_BRANCH : `antigravity/cocody-bp-2026`
-- HANDOFF_BASE_SHA : `d4f0b308d77c2cfce96c522e1a135a8bcd4e6be8` (master après fusion PR #10)
-- CURRENT_HEAD : `f8f12aa` (fonctionnel `2010284` feat(budget): support partial primitive budgets generically across pipeline and UI) ; 181 tests PASS, build PASS.
-- PR : PR #12 sur `antigravity/cocody-bp-2026` vers `master` (OPEN, non fusionnée, soumise au contrôle externe).
+- CURRENT_BRANCH : `antigravity/budget-cycle-document-console`
+- HANDOFF_BASE_SHA : `46c4f1753a1c6d5aa564a70f082f859141d58fd0` (HEAD de PR #13 `antigravity/tiassale-ca-2024-reconciliation`)
+- CURRENT_HEAD : `22e02f3` fix(cycle): enforce human validation gate, strict semantics, and canonical fingerprinting ; 231 tests PASS (15 suites), build PASS.
+- PR : PR #14 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/14) ouverte sur `antigravity/budget-cycle-document-console` vers `master` (dépendance explicite sur PR #13, NON FUSIONNÉE, soumise au contrôle externe de l'orchestrateur).
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : Industrialisation du pipeline — Commune de Cocody BP 2026 (Cas budget partiel, réutilisabilité validée, Bingerville Golden Reference 100% intacte)
+- CURRENT_MILESTONE : Gate Final Qualité PR #14 — Validation Humaine Bloquante, Sémantique Stricte & Fingerprint Canonique (Validation humaine obligatoire : statut PENDING bloque l'import avec can_import = false ; Sémantique financière bloquante : UNKNOWN ou non spécifié interdit l'import des actes modificatifs ; Zéro version arbitraire : version officielle préservée si documentée, sinon undefined sans invention de faux numéros 1 ou N+1 ; Normalisation canonique des types : équivalence BUDGET_PRIMITIF <-> PRIMITIF_ADOPTE pour le fingerprint déterministe avec détection des doublons cross-vocabulaire ; Préservation étanche des actes distincts BM1/BM2/BS/virements ; Non-régression totale Bingerville, Cocody, Tiassalé ; 231 tests PASS, build PASS).
 - FOUNDATION_READY : TRUE.
+
+## INDUSTRIALISATION DU CYCLE BUDGÉTAIRE & CONSOLE DOCUMENTAIRE (DURCIE PR #14 — GATE FINAL QUALITÉ)
+- **GATE QUALITÉ FINAL VALIDÉ SUR PR #14** :
+  - **1. Validation Humaine Bloquante (`budgetDocumentDryRun.ts`)** :
+    - Dès lors qu'une valeur financière est au statut `PENDING`, l'import est formellement bloqué (`can_import = false`, `is_valid = false`) avec message d'erreur explicite : *« Validation humaine requise : Certaines valeurs doivent encore être validées avant l’import. »*
+    - Statuts autorisés pour l'import : `VALIDATED`, `CORRECTED`, `MARKED_UNKNOWN` (avec `amount === null`).
+    - Statut `REJECTED` : exclu du lot d'import sans bloquer les autres valeurs validées ; si toutes les valeurs sont rejetées, l'import est bloqué.
+    - Statut `MARKED_UNKNOWN` avec un montant non null : bloquant (violation de la règle d'or `NULL != 0`).
+    - Helper dédié exporté : `isImportableValueStatus(status)`.
+  - **2. Sémantique Financière Stricte & Bloquante pour Actes Modificatifs** :
+    - Pour `BUDGET_MODIFICATIF`, `BUDGET_SUPPLEMENTAIRE`, `DECISION_MODIFICATIVE`, `VIREMENT_CREDITS` :
+      Si `amount_semantics === 'UNKNOWN'` ou absent, l'import est bloqué (`can_import = false`, `is_valid = false`) avec erreur bloquante : *« La sémantique des montants (cumulatif ou différentiel) doit être précisée pour les actes modificatifs. »*
+    - `DELTA` et `REVISED_TOTAL` sont autorisés et traités selon leurs sémantiques respectives.
+  - **3. Suppression des Fallbacks de Numérotation Inventée** :
+    - Retrait de `existingBudgetsCount + 1` et du fallback `version_number = 1`.
+    - `LocalBudget.version_number` et `BudgetAmendment.version_number` déclarés optionnels (`version_number?: number`).
+    - Si la version officielle est inconnue, elle reste strictement `undefined` (aucun faux numéro injecté).
+    - Affichage citoyen et référentiel (`LocalBudgetHistoryView`, `dataStore`, `localBudgetsReferential`) adaptés en toute sécurité (`version_number != null ? ...`).
+  - **4. Normalisation Canonique des Types & Fingerprint Déterministe** :
+    - Fonction `normalizeDocumentIdentityType(rawType)` centralisée et exportée dans `budgetDocumentDryRun.ts`.
+    - Établit l'équivalence canonique `BUDGET_PRIMITIF` <-> `PRIMITIF_ADOPTE` pour la console et le stockage.
+    - Préserve formellement les types distincts : `PRIMITIF_APRES_TUTELLE`, `AUTORISATION_EXECUTION`, `BUDGET_SUPPLEMENTAIRE`, `MODIFICATIF_1`, `MODIFICATIF_2`, `BUDGET_MODIFICATIF`, `DECISION_MODIFICATIVE`, `VIREMENT_CREDITS`, `COMPTE_ADMINISTRATIF`.
+    - Détection cross-vocabulaire : un budget primitif ingéré via la console avec `BUDGET_PRIMITIF` est immédiatement reconnu comme doublon exact s'il existe déjà sous `PRIMITIF_ADOPTE` avec la même référence et date.
+    - Deux actes distincts (BM1 vs BM2, BS vs BM, virements distincts) conservent des empreintes distinctes sans fausse collision.
+  - **5. Hygiène des Types & Accès Sécurisé** :
+    - Ajout de `amount_semantics?: 'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN'` dans `LocalBudget`.
+    - Élimination des casts `(doc as unknown as { amount_semantics?: string })` dans `budgetCycleEngine.ts`.
+- **MOTEUR DE CONSOLIDATION DU CYCLE BUDGÉTAIRE (`budgetCycleEngine.ts`)** :
+  - **Architecture Unifiée du Cycle & Étapes Distinctes du BP** :
+    - Préservation chronologique étanche : `PRIMITIF_ADOPTE` (vrai BP initial voté par le Conseil), `PRIMITIF_APRES_TUTELLE` (BP approuvé par la tutelle DGDDL), `AUTORISATION_EXECUTION` (budget rendu exécutoire).
+    - Actes Modificatifs réels : `BUDGET_SUPPLEMENTAIRE` (BS), `DECISION_MODIFICATIVE` (DM), `VIREMENT_CREDITS` (virement sans altération du total), `MODIFICATIF_1`, `MODIFICATIF_2`.
+  - **Fiabilisation des Crédits Définitifs (`final_credits_status`)** :
+    - `SOURCE_CONFIRMED` : issu directement d'un document officiel clôturant les crédits.
+    - `DERIVED_FROM_DOCUMENTED_AMENDMENTS` : calculé à partir du BP et d'une chaîne complète attestée (`amendment_chain_status = 'COMPLETE'`).
+    - `NOT_ESTABLISHED` : non établi en cas de BP seul ou de chaîne partielle/non exhaustive. **Garantie absolue : les crédits définitifs ne reprennent JAMAIS le BP par défaut.**
+    - En cas de chaîne partielle, calcul distinct d'un `documented_adjusted_amount` provisoire sans le qualifier de crédits définitifs.
+  - **Virement de Crédits & Règle `NULL != 0`** :
+    - Un virement peut avoir un solde net total `0 FCFA réel` (conservé rigoureusement).
+    - Une modification non chiffrée reste `NULL` / `UNKNOWN` et n'est jamais convertie en 0.
+  - **Provenance & Page Source Propagée** :
+    - Chaque valeur et chaque acte propage le numéro de page source (`page: 36`) de bout en bout.
+- **RESTITUTION CITOYENNE DANS LE COMPTE ADMINISTRATIF (`AdministrativeAccountView.tsx`)** :
+  - Bloc supérieur dédié : « *Traçabilité du Cycle Budgétaire — Exercice [Année]* » en 3 étapes claires (BP initial, modifications, crédits définitifs dérivés).
+  - Préservation intégrale et étanche du bandeau civique `SOURCE_ANOMALY` de Tiassalé 2024, des 3 opérations d'investissement et des 3 rapprochements DGMP `STRONG`.
+- **ZÉRO IMPACT SUR LA BASE DE DONNÉES DISTANTE** :
+  - `NEW_TABLES: NONE`
+  - `NEW_COLUMNS: NONE`
+  - `NEW_MIGRATIONS: NONE`
+  - `SUPABASE_WRITTEN: FALSE`
+  - `SUPABASE_PUBLISHED: FALSE`
+- **VALIDATION TECHNIQUE & TESTS** :
+  - **231/231 tests unitaires et d'intégration PASS** sur 15 suites (`npm test`).
+  - **`npm run build` PASS** (zéro erreur TypeScript, sortie Vite propre).
+  - Deux nouvelles suites de tests spécialisées :
+    - `src/utils/__tests__/budgetCycleEngine.test.ts` (13 tests) : consolidation du cycle, prise en compte des modifications négatives, préservation des valeurs nulles et zéros réels, formules dérivées, double taux d'exécution, préservation de `SOURCE_ANOMALY`, non-régression Bingerville, Cocody et Tiassalé.
+    - `src/utils/__tests__/budgetDocumentWorkflow.test.ts` (10 tests) : génération de formulaires d'extraction, pre-flight dry-run (institution invalide, année invalide, provenance manquante, montants négatifs invalides, arithmétique, préservation UNKNOWN=null, conflits de versions publiées), conversion en lot d'import standard.
+
+
+## TIASSALÉ CA 2024 — RÉCONCILIATION & FIABILISATION DOCUMENTAIRE
+- **AUDIT DE PROVENANCE DES SOURCES** :
+  - **SOURCE_A (OFFICIELLE / CANONIQUE)** :
+    - Document source : `COMMUNE DE TIASSALE — Compte administratif 2024`, page 36.
+    - Exercice : 2024 (clos).
+    - Fonctionnement : Prévu = **618 000 000 FCFA** (`EXACT`), Réalisé (ordonnancé) = **726 260 304 FCFA** (`EXACT`).
+    - Recettes fonctionnement recouvrées : **883 184 725 FCFA** (`EXACT`).
+    - Investissement : Prévu = **389 841 000 FCFA** (`EXACT`), Réalisé (ordonnancé) = **332 995 454 FCFA** (`EXACT`).
+    - Recettes investissement recouvrées : **333 151 833 FCFA** (`EXACT`).
+    - Total Prévu : **1 007 841 000 FCFA** (`EXACT`) (618 000 000 + 389 841 000).
+    - Total Réalisé : **1 059 255 758 FCFA** (`EXACT`) (726 260 304 + 332 995 454).
+    - Total Recettes recouvrées : **1 216 336 558 FCFA** (`EXACT`) (883 184 725 + 333 151 833).
+    - Différence arithmétique globale : **+157 080 800 FCFA** (1 216 336 558 - 1 059 255 758).
+    - Statut dans Supabase `administrative_accounts` : `VERIFIED`, `OFFICIAL_DOCUMENT`, `reconciliation_status: SOURCE_ANOMALY`.
+    - Fixture : `docs/imports/tiassale-ca-2024.json`.
+  - **SOURCE_B (MOCK FABRIQUÉ / ANCIEN RÉFÉRENTIEL)** :
+    - Provenance : Entrée `lbud-tiassale-2024-ca` insérée dans `src/data/localBudgetsReferential.ts` lors du commit de scaffolding `de0916b`.
+    - Montants : Total = 1 120 000 000 FCFA, Fonctionnement = 470 400 000 FCFA (42%), Investissement = 649 600 000 FCFA (58%).
+    - Sources rattachées : `sources: []` (aucune pièce officielle, aucune délibération, aucune URL, aucune page).
+    - Diagnostic : Fabrication purement arithmétique non sourcée, placée à tort dans le référentiel des budgets primitifs avec `budget_type: 'COMPTE_ADMINISTRATIF'`.
+    - Résolution : **SUPPRIMÉ DÉFINITIVEMENT** de `src/data/localBudgetsReferential.ts`.
+- **ANALYSE DE SOURCE_ANOMALY & DÉCISION DE MAINTIEN JUSTIFIÉ** :
+  - Cause exacte du statut : Le taux d'exécution des dépenses de fonctionnement est de `726 260 304 / 618 000 000 = 117,52 %` (> 100 %).
+  - Analyse comptable municipale : Le document indique simultanément des recettes recouvrées supérieures aux prévisions et des dépenses ordonnancées supérieures aux crédits primitifs. Cette concomitance ne permet pas, à elle seule, d’établir le mécanisme juridique ou comptable ayant autorisé le dépassement.
+  - Décision de gouvernance : Le statut `reconciliation_status = 'SOURCE_ANOMALY'` est **strictement maintenu** tant qu'une décision modificative ou délibération complémentaire formelle de la tutelle n'est pas réceptionnée et jointe au dossier. Il ne s'agit pas d'une accusation mais d'une exigence de rigueur probatoire (Principe 2 & 9).
+  - Statut CA proposé : **VERIFIED** / **SOURCE_ANOMALY** (pas de passage en PUBLISHED sans ordre formel de l'orchestrateur).
+- **SÉPARATION ÉTANCHE : FINANCIER ≠ PHYSIQUE & 0 FCFA ≠ ABANDON** :
+  - **Priorité n°6** : Construction de 20 magasins au marché de Tiassalé. Prévu: 28 000 000 FCFA, Réalisé: 27 850 646 FCFA (page 36). Rapprochement DGMP: AOO24062605757, SOCIETE DEM, 27 730 380 FCFA (`STRONG`).
+  - **Priorité n°14** : Construction de 3 classes EPP François KADJO. Prévu: 15 000 000 FCFA, Réalisé: 12 413 014 FCFA (page 36). Rapprochement DGMP: AOO24062805823, AGBEVA, 12 413 014 FCFA (`STRONG`).
+  - **REPORT / Gardienkro** : Construction d'un bâtiment de 3 classes, bureau et latrines à Gardienkro. Prévu: 29 000 000 FCFA, Réalisé: **0 FCFA** (page 36). Rapprochement DGMP: AOO24062605747, SOCIETE DEM, 23 725 064 FCFA (`STRONG`).
+  - Garde-fous appliqués :
+    - Le 0 FCFA exécuté au CA est conservé strictement comme 0 réel (`ZERO_EXECUTED`).
+    - 0 FCFA ne signifie pas l'abandon du projet (report d'exercice tracé).
+    - L'attribution du marché DGMP ne prouve pas l'achèvement physique des travaux sur le terrain.
+    - `physical_status` reste `null` / non inventé dans le Passport citoyen.
+- **AMÉLIORATION UX CITOYENNE (`AdministrativeAccountView.tsx`)** :
+  - Bandeau d'alerte civique de réconciliation documentaire expliquant le taux de 117,52% et la concomitance avec des recettes supérieures sans présomption d'irrégularité ni d'autorisation implicite.
+  - Cartes de synthèse Fonctionnement, Investissement et Total consolidé articulées autour de 4 indicateurs clairs : « Ce qui était prévu », « Ce qui a été réalisé financièrement », « Écart », « Taux d’exécution ».
+  - Chaque opération d'investissement intègre une ventilation financière dédiée, le bloc de contrôle DGMP, et un bloc pédagogique d'imputabilité séparant distinctement :
+    - « Ce que les documents prouvent »
+    - « Ce qu’ils ne permettent pas encore d’affirmer »
+  - Bandeau républicain non négociable : *Réalisé financier ≠ Réalisation physique*.
+- **NON-RÉGRESSION ABSOLUE** :
+  - **Bingerville BP 2026** : Total 4 046 222 000 FCFA, Fonctionnement 1 877 888 000 FCFA, Investissement 2 168 334 000 FCFA, 100% intact.
+  - **Cocody BP 2026** : Total 19 764 660 000 FCFA, ventilation `null` préservée, 100% intact.
+- **VALIDATION TECHNIQUE** :
+  - **193/193 tests unitaires et d'intégration PASS** sur 13 suites (`npm test`).
+  - **`npm run build` PASS** (1726 modules, zéro erreur TypeScript).
+  - Nouvelle suite dédiée `src/utils/__tests__/tiassaleCaReconciliation.test.ts` (12 tests) couvrant :
+    - Concordance canonique SOURCE_A vs fixture vs page 36.
+    - Maintien justifié de SOURCE_ANOMALY.
+    - Acceptation des taux >100% documentairement fondés.
+    - Règle `null/unknown != 0` et préservation du zéro réel.
+    - Préservation des 3 opérations et des 3 rapprochements DGMP STRONG.
+    - Séparation étanche financier != physique pour Gardienkro.
+    - Suppression effective du faux mock 1.12B.
+    - Non-régression Bingerville et Cocody.
+
 
 ## COCODY BP 2026 — INDUSTRIALISATION DU PIPELINE (BUDGET PARTIEL)
 - **DISTINCTION STATUT RÉEL : LOCAL vs DISTANT** :
@@ -268,9 +384,9 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Contrôle CI/Vercel de PR #12 puis fusion si tous les gates restent verts.
-2. Recette Production Cocody après fusion : lecture distante, rendu budget partiel, absence de faux 0 et non-régression Bingerville.
-3. Après clôture Cocody, cadrage du prochain pilote par l'orchestrateur (Tiassalé CA 2024).
+1. Contrôle externe de la PR Cycle Budgétaire & Console Documentaire (`antigravity/budget-cycle-document-console`) par l'orchestrateur (tests 216/216 PASS, build PASS).
+2. Revue de l'intégration du cycle complet (BP → Modifications → Crédits Définitifs → CA) et de l'assistant documentaire guidé.
+3. Arbitrage sur le déploiement ou l'ingestion d'actes modificatifs réels (budgets supplémentaires ou décisions modificatives) pour les collectivités pilotes.
 
 ## COCODY_REMOTE_CLOSEOUT — ORCHESTRATEUR 2026-10-02
 - Institution canonique ajoutée à `public.institutions` : `inst-com-cocody`, `Mairie de Cocody`, type applicatif `MAIRIE`, région Abidjan, District Autonome d'Abidjan.

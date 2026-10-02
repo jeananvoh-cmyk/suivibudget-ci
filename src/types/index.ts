@@ -272,3 +272,6 @@ export * from './localBudget';
 
 // Exportation du domaine Comptes Administratifs (CA) & Exécution
 export * from './administrativeAccount';
+
+// Exportation du domaine Cycle Budgétaire & Console Documentaire
+export * from './budgetCycle';

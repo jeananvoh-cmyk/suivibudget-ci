@@ -1379,31 +1379,6 @@ export const LOCAL_BUDGETS_REFERENTIAL: LocalBudget[] = [
     updated_at: '2025-11-21T10:00:00Z',
   },
   {
-    id: 'lbud-tiassale-2024-ca',
-    institution_id: 'inst-com-tiassale',
-    institution_type: 'COMMUNE',
-    institution_name: 'Mairie de Tiassalé',
-    fiscal_year: 2024,
-    budget_type: 'COMPTE_ADMINISTRATIF',
-    status: 'PUBLISHED',
-    is_current_version: true,
-    version_number: 1,
-    total_amount: 1120000000,
-    operating_amount: 470400000,
-    investment_amount: 649600000,
-    operating_percentage: 42,
-    investment_percentage: 58,
-    amount_precision: 'EXACT',
-    adoption_date: '2025-03-15',
-    verification_status: 'OFFICIAL_DOCUMENT',
-    confidence_level: 'HIGH',
-    notes: "Compte administratif 2024 exécuté et approuvé en session du Conseil Municipal de Tiassalé.",
-    sources: [],
-    primary_source_label: 'Conseil Municipal de Tiassalé',
-    created_at: '2025-03-20T10:00:00Z',
-    updated_at: '2025-03-20T10:00:00Z',
-  },
-  {
     id: 'lbud-tiassale-2025',
     institution_id: 'inst-com-tiassale',
     institution_type: 'COMMUNE',
@@ -1465,7 +1440,7 @@ export function getLocalBudgetsForInstitution(institutionId: string): LocalBudge
   const local = LOCAL_BUDGETS_REFERENTIAL.filter(b => !publishedRemoteBudgets.some(remote =>
     remote.institution_id === b.institution_id && remote.fiscal_year === b.fiscal_year && remote.budget_type === b.budget_type && remote.version_number === b.version_number));
   return [...publishedRemoteBudgets, ...local].filter(b => b.institution_id === institutionId || b.institution_name === institutionId)
-    .sort((a, b) => b.fiscal_year - a.fiscal_year || b.version_number - a.version_number);
+    .sort((a, b) => b.fiscal_year - a.fiscal_year || (b.version_number ?? 0) - (a.version_number ?? 0));
 }
 
 export function getCurrentLocalBudget(institutionId: string, fiscalYear: number = 2026): LocalBudget | undefined {
