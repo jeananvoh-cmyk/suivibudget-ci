@@ -5,7 +5,7 @@
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/first-real-data-pilot`
 - HANDOFF_BASE_SHA : `cef3441aa6fb37e5a72d5e5ed57409532309666b` (master après fusion #9)
-- CURRENT_HEAD : `fed7ff3b10d02f8d94947ebb283cafb63900692f` ; 180 tests PASS, build PASS, Vercel Preview READY.
+- CURRENT_HEAD : `b4b0928c8ab07227c53e6841912ad2c591b1c101` ; 180 tests PASS, build PASS, Vercel Preview READY.
 - PR : PR #9 fusionnée sur master. PR #10 `antigravity/first-real-data-pilot` ouverte vers master ; ne pas fusionner.
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
 - CURRENT_MILESTONE : Parcours citoyen réel Bingerville BP 2026 validé de bout en bout (Supabase distant PostgREST 200, frontend synchronisé, responsive multi-viewports validé)
