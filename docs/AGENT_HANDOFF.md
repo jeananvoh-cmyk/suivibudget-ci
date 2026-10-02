@@ -14,10 +14,10 @@
 ## COCODY BP 2026 — INDUSTRIALISATION DU PIPELINE (BUDGET PARTIEL)
 - **DISTINCTION STATUT RÉEL : LOCAL vs DISTANT** :
   - **LOCAL_TEST_VALIDATED** : **TRUE** (Chaîne complète dry-run → staging `TO_VERIFY` → revue `VERIFIED` → publication `PUBLISHED` et restitution citoyenne sans falsification des montants nuls validée sous PostgreSQL PGlite dans `src/utils/__tests__/realPilotChain.test.ts`).
-  - **REMOTE_SUPABASE_VALIDATED** : **FALSE** (Sur l'instance distante `cdesuvcozcetdtvibgqs`, `local_budgets` pour `inst-com-cocody` = 0 ligne).
-  - **COCODY_REAL_SUPABASE_IMPORTED** : **FALSE** (staging distant non encore alimenté).
-  - **COCODY_REAL_SUPABASE_PUBLISHED** : **FALSE** (non publié sur le Supabase distant).
-  - **BLOCKER TECHNIQUE DISTANT** : L'accès à `rpc/import_data_batch` et `data_import_rows` sur `cdesuvcozcetdtvibgqs` exige les privilèges de rôle protégé staff (`ADMIN` ou `DATA_MANAGER` via `SUIVIBUDGET_ACCESS_TOKEN`), non configuré dans l'environnement d'exécution de l'agent.
+  - **REMOTE_SUPABASE_VALIDATED** : **TRUE** — orchestrateur : dry-run réel puis import/revue/publication exécutés sur `cdesuvcozcetdtvibgqs`.
+  - **COCODY_REAL_SUPABASE_IMPORTED** : **TRUE** — 1 ligne de staging canonique, sans doublon.
+  - **COCODY_REAL_SUPABASE_PUBLISHED** : **TRUE** — `inst-com-cocody`, 2026, `PUBLISHED`, total 19 764 660 000 FCFA, fonctionnement/investissement `NULL`, `SECONDARY_TO_CORROBORATE`, confiance `MEDIUM`.
+  - **BLOCKER TECHNIQUE DISTANT** : **LEVÉ** — l'orchestrateur a utilisé un profil ADMIN actif existant via le workflow RPC protégé ; aucun RLS/GRANT/service_role ajouté.
 - **QUALIFICATION DES SOURCES** : **VALIDÉE**
   - Source : Abidjan.net / Le Nouveau Réveil (25 février 2026, 1ère session ordinaire du conseil municipal de Cocody tenue le 24 février 2026).
   - Montant total voté : **19 764 660 000 FCFA** (19,7 milliards FCFA). Précision : `EXACT`.
@@ -268,7 +268,19 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Exécution ou déblocage de l'import distant Cocody BP 2026 sur Supabase `cdesuvcozcetdtvibgqs` par l'orchestrateur (session staff `SUIVIBUDGET_ACCESS_TOKEN` requise pour `import_data_batch` et `review_data_import`).
-2. Contrôle externe de la PR #12 par l'orchestrateur (vérification des gates de données, non-régression Bingerville, CI GitHub Actions et Vercel Preview).
-3. Après validation externe et fusion sur master : recette citoyenne en production sur suivibudget.vercel.app.
-4. Prochain lot pilote cadré par l'orchestrateur (ex. Tiassalé CA 2024).
+1. Contrôle CI/Vercel de PR #12 puis fusion si tous les gates restent verts.
+2. Recette Production Cocody après fusion : lecture distante, rendu budget partiel, absence de faux 0 et non-régression Bingerville.
+3. Après clôture Cocody, cadrage du prochain pilote par l'orchestrateur (Tiassalé CA 2024).
+
+## COCODY_REMOTE_CLOSEOUT — ORCHESTRATEUR 2026-10-02
+- Institution canonique ajoutée à `public.institutions` : `inst-com-cocody`, `Mairie de Cocody`, type applicatif `MAIRIE`, région Abidjan, District Autonome d'Abidjan.
+- Dry-run distant : READY=1, errors=0, conflicts=0 ; plan_hash `eb38f544e2c4b8bf11372dcc342c1ca73bb9b0f7f05f3dbf945b68f2e9f9bd9d`.
+- Import distant : IMPORTED.
+- Revue distante : VERIFIED.
+- Publication distante : PUBLISHED.
+- `data_import_events` : IMPORTED → VERIFIED → PUBLISHED.
+- `local_budgets` : exactement 1 ligne Cocody 2026 canonique.
+- Total : 19 764 660 000 FCFA ; fonctionnement : NULL ; investissement : NULL ; précision : EXACT ; vérification : SECONDARY_TO_CORROBORATE ; confiance : MEDIUM.
+- Lecture sous rôle `anon` : PASS sur la ligne PUBLISHED.
+- Bingerville Golden Reference contrôlée intacte : 4 046 222 000 / 1 877 888 000 / 2 168 334 000 FCFA.
+- Aucune migration créée ; aucun RLS/GRANT modifié.
