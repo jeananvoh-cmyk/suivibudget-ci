@@ -14,8 +14,7 @@ import {
   getExecutionStatusLabel 
 } from '../utils/budgetCalculations';
 import { 
-  formatFCFA, formatRecordAmount, amountPrecision, isExactAmount,
-  formatAmountInWords 
+  formatFCFA, formatFCFAWithWords, formatRecordAmount, amountPrecision, isExactAmount, formatAmountInWords
 } from '../utils/formatters';
 import { isSafeUrl } from '../utils/security';
 import { 
@@ -59,6 +58,19 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
   const [selectedMatchLevel, setSelectedMatchLevel] = useState<'ALL' | 'STRONG' | 'PARTIAL' | 'NONE'>('ALL');
   const [copiedData, setCopiedData] = useState(false);
   const [fieldContributionMsg, setFieldContributionMsg] = useState<string | null>(null);
+
+  const formatReadableAmount = (value: number | null | undefined) =>
+    value == null || !Number.isFinite(value) ? 'Montant à confirmer' : formatFCFAWithWords(value);
+
+  const formatReadableRecordAmount = <T extends { import_provenance?: any; amount_precision?: any }>(
+    record: T,
+    field: keyof T
+  ) => {
+    const value = record[field];
+    return typeof value === 'number' && Number.isFinite(value)
+      ? `${formatRecordAmount(record, field)} (${formatAmountInWords(value)} FCFA)`
+      : formatRecordAmount(record, field);
+  };
 
   const staticAccountsById = getAdministrativeAccountsForInstitution(institution.id) || [];
   const staticAccounts = staticAccountsById.length
@@ -151,8 +163,8 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
         `"${op.title.replace(/"/g, '""')}"`,
         `"${op.sector}"`,
         `"${op.location || ''}"`,
-        `"${formatRecordAmount(op, 'planned_amount')}"`,
-        `"${formatRecordAmount(op, 'executed_amount')}"`,
+        `"${formatReadableRecordAmount(op, 'planned_amount')}"`,
+        `"${formatReadableRecordAmount(op, 'executed_amount')}"`,
         `"${rate.formatted}"`,
         `"${op.procurement_match?.contract_number || op.procurement_match?.verification_status || 'Non répertorié'}"`,
         `"${op.procurement_match?.contractor || 'Régie/Gré à gré'}"`,
@@ -254,11 +266,6 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-slate-100 text-slate-800 border border-slate-200">
                 Exercice {currentCA.fiscal_year}
               </span>
-              {currentCA.verification_status === 'OFFICIAL_DOCUMENT' && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-brand-blue border border-blue-200">
-                  Délibération Certifiée
-                </span>
-              )}
             </div>
 
             <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight pt-1">
@@ -269,7 +276,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             <p className="text-xs text-brand-blue font-semibold flex items-center gap-1.5">
               <Info className="w-3.5 h-3.5 flex-shrink-0" />
               <span>
-                Dernier compte administratif disponible : <strong>exercice {currentCA.fiscal_year}</strong>. Le compte administratif de l'exercice suivant sera publié dès son adoption par le Conseil et visa par la tutelle.
+                Compte administratif officiel disponible : <strong>exercice {currentCA.fiscal_year}</strong>. Les données présentées ci-dessous sont issues du document officiel référencé par SuiviBudget.
               </span>
             </p>
           </div>
@@ -309,11 +316,11 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-slate-50/80 p-3 sm:p-4 rounded-xl border border-slate-200/80">
           <div>
             <span className="text-[10px] font-bold uppercase text-slate-400 block">Date Délibération Conseil</span>
-            <strong className="text-slate-900">{currentCA.approval_date || 'Enregistrée'}</strong>
+            <strong className="text-slate-900 break-words sm:text-right">{currentCA.approval_date || 'Date non renseignée'}</strong>
           </div>
           <div>
             <span className="text-[10px] font-bold uppercase text-slate-400 block">Visa de Tutelle Préfecture</span>
-            <strong className="text-slate-900">{currentCA.prefecture_visa_date || 'Visé par la Préfecture'}</strong>
+            <strong className="text-slate-900 break-words sm:text-right">{currentCA.prefecture_visa_date || 'Date non renseignée'}</strong>
           </div>
           <div>
             <span className="text-[10px] font-bold uppercase text-slate-400 block">Document Source</span>
@@ -362,8 +369,8 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </span>
             <div className="text-base font-black text-slate-900">
               {cycleConsolidation.initial_budget?.total.amount != null
-                ? formatFCFA(cycleConsolidation.initial_budget.total.amount)
-                : formatRecordAmount(currentCA, 'total_planned')}
+                ? formatReadableAmount(cycleConsolidation.initial_budget.total.amount)
+                : formatReadableRecordAmount(currentCA, 'total_planned')}
             </div>
             <p className="text-[11px] text-slate-500">
               {cycleConsolidation.initial_budget?.document?.document_name || 'Crédits votés initiaux extraits de l\'acte budgétaire officiel.'}
@@ -382,7 +389,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </div>
             <div className="text-base font-black text-brand-blue">
               {cycleConsolidation.net_amendments.total !== null
-                ? `${cycleConsolidation.net_amendments.total >= 0 ? '+' : '-'}${formatFCFA(Math.abs(cycleConsolidation.net_amendments.total))}`
+                ? `${cycleConsolidation.net_amendments.total >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(cycleConsolidation.net_amendments.total))}`
                 : 'Non documenté'}
             </div>
             <p className="text-[11px] text-slate-600 leading-snug">
@@ -414,7 +421,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </div>
             <div className="text-base font-black text-emerald-950">
               {cycleConsolidation.final_credits?.total.amount != null ? (
-                formatFCFA(cycleConsolidation.final_credits.total.amount)
+                formatReadableAmount(cycleConsolidation.final_credits.total.amount)
               ) : (
                 <span className="text-slate-500 font-bold text-sm">Non établis</span>
               )}
@@ -424,7 +431,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </p>
             {cycleConsolidation.documented_adjusted_amount?.total != null && (
               <div className="text-[10px] text-amber-800 bg-amber-50 rounded p-1 border border-amber-200">
-                Montant ajusté provisoire : <strong>{formatFCFA(cycleConsolidation.documented_adjusted_amount.total)}</strong> (chaîne d'actes partielle)
+                Montant ajusté provisoire : <strong>{formatReadableAmount(cycleConsolidation.documented_adjusted_amount.total)}</strong> (chaîne d'actes partielle)
               </div>
             )}
           </div>
@@ -472,19 +479,19 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </div>
 
             <div className="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
-              <div className="flex justify-between items-baseline">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3">
                 <span className="text-[11px] text-slate-500 font-medium">Ce qui était prévu :</span>
-                <strong className="text-slate-900">{formatRecordAmount(currentCA, 'operating_planned')}</strong>
+                <strong className="text-slate-900 break-words sm:text-right">{formatReadableRecordAmount(currentCA, 'operating_planned')}</strong>
               </div>
-              <div className="flex justify-between items-baseline">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3">
                 <span className="text-[11px] text-slate-500 font-medium">Ce qui a été réalisé financièrement :</span>
-                <strong className="text-slate-900 text-sm font-black">{formatRecordAmount(currentCA, 'operating_realized')}</strong>
+                <strong className="text-slate-900 text-sm font-black break-words sm:text-right">{formatReadableRecordAmount(currentCA, 'operating_realized')}</strong>
               </div>
-              <div className="flex justify-between items-baseline pt-1 border-t border-slate-200 text-[11px]">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3 pt-1 border-t border-slate-200 text-[11px]">
                 <span className="text-slate-500 font-medium">Écart :</span>
                 <span className={`font-bold ${isExactAmount(currentCA, 'operating_planned') && isExactAmount(currentCA, 'operating_realized') && currentCA.operating_realized! > currentCA.operating_planned! ? 'text-purple-700' : 'text-slate-700'}`}>
                   {isExactAmount(currentCA, 'operating_planned') && isExactAmount(currentCA, 'operating_realized')
-                    ? `${(currentCA.operating_realized! - currentCA.operating_planned!) >= 0 ? '+' : '-'}${formatFCFA(Math.abs(currentCA.operating_planned! - currentCA.operating_realized!))}`
+                    ? `${(currentCA.operating_realized! - currentCA.operating_planned!) >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(currentCA.operating_planned! - currentCA.operating_realized!))}`
                     : 'Non calculable'}
                 </span>
               </div>
@@ -511,7 +518,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
 
           {currentCA.operating_revenue_realized != null && (
             <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-600">
-              Recettes de fonctionnement encaissées : <strong className="text-slate-900">{formatRecordAmount(currentCA, 'operating_revenue_realized')}</strong>
+              Recettes de fonctionnement encaissées : <strong className="text-slate-900 break-words sm:text-right">{formatReadableRecordAmount(currentCA, 'operating_revenue_realized')}</strong>
             </div>
           )}
         </div>
@@ -531,19 +538,19 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </div>
 
             <div className="space-y-1.5 bg-emerald-50/50 p-3 rounded-xl border border-emerald-200 text-xs">
-              <div className="flex justify-between items-baseline">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3">
                 <span className="text-[11px] text-slate-500 font-medium">Ce qui était prévu :</span>
-                <strong className="text-slate-900">{formatRecordAmount(currentCA, 'investment_planned')}</strong>
+                <strong className="text-slate-900 break-words sm:text-right">{formatReadableRecordAmount(currentCA, 'investment_planned')}</strong>
               </div>
-              <div className="flex justify-between items-baseline">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3">
                 <span className="text-[11px] text-slate-500 font-medium">Ce qui a été réalisé financièrement :</span>
-                <strong className="text-slate-900 text-sm font-black">{formatRecordAmount(currentCA, 'investment_realized')}</strong>
+                <strong className="text-slate-900 text-sm font-black break-words sm:text-right">{formatReadableRecordAmount(currentCA, 'investment_realized')}</strong>
               </div>
-              <div className="flex justify-between items-baseline pt-1 border-t border-emerald-200 text-[11px]">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3 pt-1 border-t border-emerald-200 text-[11px]">
                 <span className="text-slate-500 font-medium">Écart :</span>
                 <span className="font-bold text-slate-700">
                   {isExactAmount(currentCA, 'investment_planned') && isExactAmount(currentCA, 'investment_realized')
-                    ? `${(currentCA.investment_realized! - currentCA.investment_planned!) >= 0 ? '+' : '-'}${formatFCFA(Math.abs(currentCA.investment_planned! - currentCA.investment_realized!))}`
+                    ? `${(currentCA.investment_realized! - currentCA.investment_planned!) >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(currentCA.investment_planned! - currentCA.investment_realized!))}`
                     : 'Non calculable'}
                 </span>
               </div>
@@ -572,7 +579,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
 
           {currentCA.investment_revenue_realized != null && (
             <div className="p-2.5 bg-emerald-50/60 rounded-xl border border-emerald-200 text-[11px] text-emerald-900">
-              Recettes d'investissement recouvrées : <strong className="text-emerald-950">{formatRecordAmount(currentCA, 'investment_revenue_realized')}</strong>
+              Recettes d'investissement recouvrées : <strong className="text-emerald-950">{formatReadableRecordAmount(currentCA, 'investment_revenue_realized')}</strong>
             </div>
           )}
         </div>
@@ -592,19 +599,19 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </div>
 
             <div className="space-y-1.5 bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/15 text-xs">
-              <div className="flex justify-between items-baseline">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3">
                 <span className="text-[11px] text-blue-200 font-medium">Ce qui était prévu :</span>
-                <strong className="text-white">{formatRecordAmount(currentCA, 'total_planned')}</strong>
+                <strong className="text-white">{formatReadableRecordAmount(currentCA, 'total_planned')}</strong>
               </div>
-              <div className="flex justify-between items-baseline">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3">
                 <span className="text-[11px] text-blue-200 font-medium">Ce qui a été réalisé financièrement :</span>
-                <strong className="text-amber-300 text-sm font-black">{formatRecordAmount(currentCA, 'total_realized')}</strong>
+                <strong className="text-amber-300 text-sm font-black">{formatReadableRecordAmount(currentCA, 'total_realized')}</strong>
               </div>
-              <div className="flex justify-between items-baseline pt-1 border-t border-white/15 text-[11px]">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3 pt-1 border-t border-white/15 text-[11px]">
                 <span className="text-blue-200 font-medium">Écart :</span>
                 <span className="font-bold text-amber-200">
                   {isExactAmount(currentCA, 'total_planned') && isExactAmount(currentCA, 'total_realized')
-                    ? `${(currentCA.total_realized! - currentCA.total_planned!) >= 0 ? '+' : '-'}${formatFCFA(Math.abs(currentCA.total_planned! - currentCA.total_realized!))}`
+                    ? `${(currentCA.total_realized! - currentCA.total_planned!) >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(currentCA.total_planned! - currentCA.total_realized!))}`
                     : 'Non calculable'}
                 </span>
               </div>
@@ -632,11 +639,11 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             <div className="p-2.5 bg-white/10 backdrop-blur-md rounded-xl border border-white/15 text-[11px] text-white">
               {currentCA.surplus_or_deficit >= 0 ? (
                 <>
-                  Excédent budgétaire de clôture : <strong className="text-emerald-300">{formatRecordAmount(currentCA, 'surplus_or_deficit')}</strong>
+                  Excédent budgétaire de clôture : <strong className="text-emerald-300">{formatReadableRecordAmount(currentCA, 'surplus_or_deficit')}</strong>
                 </>
               ) : (
                 <>
-                  Déficit d'exercice : <strong className="text-rose-300">{formatRecordAmount(currentCA, 'surplus_or_deficit')}</strong>
+                  Déficit d'exercice : <strong className="text-rose-300">{formatReadableRecordAmount(currentCA, 'surplus_or_deficit')}</strong>
                 </>
               )}
             </div>
@@ -781,17 +788,17 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
                   <div>
                     <span className="text-[10px] text-slate-500 font-medium block">Ce qui était prévu</span>
-                    <strong className="text-slate-900 block">{formatRecordAmount(op, 'planned_amount')}</strong>
+                    <strong className="text-slate-900 block">{formatReadableRecordAmount(op, 'planned_amount')}</strong>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-500 font-medium block">Ce qui a été réalisé financièrement</span>
-                    <strong className="text-slate-900 block">{formatRecordAmount(op, 'executed_amount')}</strong>
+                    <strong className="text-slate-900 block">{formatReadableRecordAmount(op, 'executed_amount')}</strong>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-500 font-medium block">Écart</span>
                     <span className="font-bold text-slate-700 block">
                       {op.planned_amount != null && op.executed_amount != null
-                        ? `${(op.executed_amount - op.planned_amount) >= 0 ? '+' : '-'}${formatFCFA(Math.abs(op.planned_amount - op.executed_amount))}`
+                        ? `${(op.executed_amount - op.planned_amount) >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(op.planned_amount - op.executed_amount))}`
                         : 'Non calculable'}
                     </span>
                   </div>
@@ -840,15 +847,15 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-slate-200/80 text-[11px]">
                       <div>
                         <span className="text-slate-400 block font-medium">Contrat / Titulaire :</span>
-                        <strong className="text-slate-900">{match.contractor || 'Non spécifié'}</strong>
+                        <strong className="text-slate-900 break-words sm:text-right">{match.contractor || 'Non spécifié'}</strong>
                       </div>
                       <div>
                         <span className="text-slate-400 block font-medium">Montant attribué :</span>
-                        <strong className="text-slate-900">{formatRecordAmount(match, 'award_amount')}</strong>
+                        <strong className="text-slate-900 break-words sm:text-right">{formatReadableRecordAmount(match, 'award_amount')}</strong>
                       </div>
                       <div>
                         <span className="text-slate-400 block font-medium">Date d'attribution :</span>
-                        <strong className="text-slate-900">{match.award_date || 'Exercice clos'}</strong>
+                        <strong className="text-slate-900 break-words sm:text-right">{match.award_date || 'Exercice clos'}</strong>
                       </div>
                     </div>
                   )}
@@ -881,11 +888,11 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                     </span>
                     <p className="text-slate-700 text-[11px] leading-relaxed">
                       {op.executed_amount === 0 && match ? (
-                        <>Attribution officielle du marché public DGMP (n° <strong>{match.tender_number}</strong>, {formatRecordAmount(match, 'award_amount')}, titulaire <strong>{match.contractor}</strong>), mais <strong>0 FCFA ordonnancé</strong> au Compte Administratif {op.fiscal_year} (opération reportée / non mandatée sur l'exercice clos).</>
+                        <>Attribution officielle du marché public DGMP (n° <strong>{match.tender_number}</strong>, {formatReadableRecordAmount(match, 'award_amount')}, titulaire <strong>{match.contractor}</strong>), mais <strong>0 FCFA (zéro FCFA) ordonnancé</strong> au Compte Administratif {op.fiscal_year} (opération reportée / non mandatée sur l'exercice clos).</>
                       ) : match && match.match_level === 'STRONG' ? (
-                        <>Attribution du marché public (Avis <strong>{match.tender_number}</strong>, {formatRecordAmount(match, 'award_amount')}, <strong>{match.contractor}</strong>) et ordonnancement effectif de <strong>{formatRecordAmount(op, 'executed_amount')}</strong> retracé au Compte Administratif{op.source_page ? ` (page ${op.source_page})` : ''}.</>
+                        <>Attribution du marché public (Avis <strong>{match.tender_number}</strong>, {formatReadableRecordAmount(match, 'award_amount')}, <strong>{match.contractor}</strong>) et ordonnancement effectif de <strong>{formatReadableRecordAmount(op, 'executed_amount')}</strong> retracé au Compte Administratif{op.source_page ? ` (page ${op.source_page})` : ''}.</>
                       ) : (
-                        <>Ordonnancement financier de <strong>{formatRecordAmount(op, 'executed_amount')}</strong> consigné dans le Compte Administratif officiel{op.source_page ? ` (page ${op.source_page})` : ''}.</>
+                        <>Ordonnancement financier de <strong>{formatReadableRecordAmount(op, 'executed_amount')}</strong> consigné dans le Compte Administratif officiel{op.source_page ? ` (page ${op.source_page})` : ''}.</>
                       )}
                     </p>
                   </div>
