@@ -199,8 +199,7 @@ export function DataImportConsole({ role }: { role: string }) {
       notes: notes || undefined
     };
 
-    const existingCount = dataStore.getLocalBudgets(selectedInstitutionId).length;
-    const envelope = buildStandardImportEnvelope(meta, proposedValues, selectedInstitution, existingCount);
+    const envelope = buildStandardImportEnvelope(meta, proposedValues, selectedInstitution);
     const jsonString = JSON.stringify([envelope], null, 2);
 
     setText(jsonString);

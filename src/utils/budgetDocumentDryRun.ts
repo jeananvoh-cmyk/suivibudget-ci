@@ -46,6 +46,16 @@ export function isImportableValueStatus(status: ProposedFinancialValue['status']
 }
 
 /**
+ * Vérifie si une valeur financière proposée est intrinsèquement importable dans l'enveloppe
+ * Règle d'or : statut importable ET (si MARKED_UNKNOWN, montant strictement null)
+ */
+export function isImportableValue(value: ProposedFinancialValue): boolean {
+  if (!isImportableValueStatus(value.status)) return false;
+  if (value.status === 'MARKED_UNKNOWN' && value.amount !== null) return false;
+  return true;
+}
+
+/**
  * Calcule un fingerprint documentaire déterministe pour identifier un acte unique (Item 7)
  * Permet de distinguer formellement :
  * - deux BM de la même année pour la même commune (références ou dates distinctes)
@@ -340,9 +350,37 @@ export function runDocumentDryRun(
            b.status === 'PUBLISHED' &&
            b.budget_type === 'PRIMITIF_ADOPTE'
     );
-    if (existingPublishedBP && (!metadata.version_number || metadata.version_number <= (existingPublishedBP.version_number || 1))) {
-      conflictsWithPublished = true;
-      conflicts.push(`Un Budget Primitif PUBLIÉ existe déjà pour ${institution?.name || metadata.institution_id} en ${metadata.fiscal_year} (${existingPublishedBP.total_amount?.toLocaleString('fr-FR')} FCFA). Une nouvelle version doit incrémenter le numéro de version.`);
+    if (existingPublishedBP) {
+      const existingVer = existingPublishedBP.version_number;
+      const newVer = metadata.version_number;
+
+      if (existingVer !== undefined && newVer !== undefined) {
+        // Cas 1 : versions existante et nouvelle connues
+        if (newVer <= existingVer) {
+          conflictsWithPublished = true;
+          conflicts.push(
+            `Un Budget Primitif PUBLIÉ existe déjà en version ${existingVer} pour ${institution?.name || metadata.institution_id} en ${metadata.fiscal_year} (${existingPublishedBP.total_amount?.toLocaleString('fr-FR')} FCFA). La nouvelle version proposée (${newVer}) doit avoir un numéro strictement supérieur.`
+          );
+        }
+      } else if (existingVer !== undefined && newVer === undefined) {
+        // Cas 2 : version existante connue, nouvelle version inconnue
+        conflictsWithPublished = true;
+        conflicts.push(
+          `Un Budget Primitif PUBLIÉ existe déjà en version ${existingVer} pour ${institution?.name || metadata.institution_id} en ${metadata.fiscal_year} (${existingPublishedBP.total_amount?.toLocaleString('fr-FR')} FCFA). Le nouveau document ne précise aucun numéro de version officiel permettant d'établir une révision postérieure.`
+        );
+      } else if (existingVer === undefined && newVer !== undefined) {
+        // Cas 3 : version existante inconnue, nouvelle version connue
+        conflictsWithPublished = true;
+        conflicts.push(
+          `Un Budget Primitif PUBLIÉ existe déjà sans numéro de version attesté pour ${institution?.name || metadata.institution_id} en ${metadata.fiscal_year} (${existingPublishedBP.total_amount?.toLocaleString('fr-FR')} FCFA). Une revue humaine est requise pour attester la postériorité de la nouvelle version ${newVer}.`
+        );
+      } else {
+        // Cas 4 : versions existante et nouvelle inconnues
+        conflictsWithPublished = true;
+        conflicts.push(
+          `Un Budget Primitif PUBLIÉ existe déjà pour ${institution?.name || metadata.institution_id} en ${metadata.fiscal_year} (${existingPublishedBP.total_amount?.toLocaleString('fr-FR')} FCFA) sans numéro de version officiel. Deux documents non versionnés ne peuvent coexister sans arbitrage humain.`
+        );
+      }
     }
   } else if (metadata.document_type === 'COMPTE_ADMINISTRATIF') {
     // Contrôles spécifiques au Compte Administratif (CA)
@@ -474,8 +512,7 @@ export function runDocumentDryRun(
 export function buildStandardImportEnvelope(
   metadata: DocumentIngestionMetadata,
   values: ProposedFinancialValue[],
-  institution: Institution,
-  existingBudgetsCount = 0
+  institution: Institution
 ): {
   kind: 'BP' | 'CA';
   institution_id: string;
@@ -492,12 +529,38 @@ export function buildStandardImportEnvelope(
   data: Record<string, unknown>;
   precision: Record<string, string>;
 } {
+  // 1. Contrôle strict de la frontière d'import : validation humaine obligatoire
+  const pendingValues = values.filter(v => v.status === 'PENDING');
+  if (pendingValues.length > 0) {
+    throw new Error(
+      `Validation humaine obligatoire : Impossible de construire une enveloppe d'importation avec ${pendingValues.length} valeur(s) en attente (PENDING).`
+    );
+  }
+
+  for (const v of values) {
+    if (v.status === 'MARKED_UNKNOWN' && v.amount !== null) {
+      throw new Error(
+        `Règle d'or violée : Le champ "${v.label}" est marqué MARKED_UNKNOWN mais contient une valeur non nulle (${v.amount}). Une valeur indéterminée doit être null.`
+      );
+    }
+    if (v.status !== 'REJECTED' && !isImportableValueStatus(v.status)) {
+      throw new Error(
+        `Statut non importable : Le champ "${v.label}" possède un statut non éligible (${v.status}).`
+      );
+    }
+  }
+
+  const acceptedValues = values.filter(v => v.status !== 'REJECTED');
+  if (acceptedValues.length === 0) {
+    throw new Error(
+      "Impossible de construire une enveloppe d'importation sans aucune valeur financière importable."
+    );
+  }
+
   const institutionType = institution.type === 'MAIRIE' ? 'COMMUNE' : 'REGIONAL_COUNCIL';
 
   const dataObj: Record<string, unknown> = {};
   const precisionObj: Record<string, string> = {};
-
-  const acceptedValues = values.filter(v => v.status !== 'REJECTED');
 
   for (const v of acceptedValues) {
     dataObj[v.field] = v.amount;

@@ -1,30 +1,38 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- LAST_UPDATED : 2026-10-02
+- LAST_UPDATED : 2026-10-04
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/budget-cycle-document-console`
 - HANDOFF_BASE_SHA : `46c4f1753a1c6d5aa564a70f082f859141d58fd0` (HEAD de PR #13 `antigravity/tiassale-ca-2024-reconciliation`)
-- CURRENT_HEAD : `22e02f3` fix(cycle): enforce human validation gate, strict semantics, and canonical fingerprinting ; 231 tests PASS (15 suites), build PASS.
+- CURRENT_HEAD : fix(cycle): seal human gate at import boundary, eliminate version fallbacks, clean API ; 244 tests PASS (15 suites), build PASS.
 - PR : PR #14 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/14) ouverte sur `antigravity/budget-cycle-document-console` vers `master` (dépendance explicite sur PR #13, NON FUSIONNÉE, soumise au contrôle externe de l'orchestrateur).
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : Gate Final Qualité PR #14 — Validation Humaine Bloquante, Sémantique Stricte & Fingerprint Canonique (Validation humaine obligatoire : statut PENDING bloque l'import avec can_import = false ; Sémantique financière bloquante : UNKNOWN ou non spécifié interdit l'import des actes modificatifs ; Zéro version arbitraire : version officielle préservée si documentée, sinon undefined sans invention de faux numéros 1 ou N+1 ; Normalisation canonique des types : équivalence BUDGET_PRIMITIF <-> PRIMITIF_ADOPTE pour le fingerprint déterministe avec détection des doublons cross-vocabulaire ; Préservation étanche des actes distincts BM1/BM2/BS/virements ; Non-régression totale Bingerville, Cocody, Tiassalé ; 231 tests PASS, build PASS).
+- CURRENT_MILESTONE : Durcissement Ultime PR #14 — Fermeture Étanche du Gate Humain à la Frontière d'Import & Élimination des Fallbacks de Version (Validation humaine étanche à la frontière d'import `buildStandardImportEnvelope` via `isImportableValue` : rejet bloquant de PENDING avec Error explicite, rejet de MARKED_UNKNOWN avec montant non-null, exclusion de REJECTED, rejet des lots vides avec 0 valeur importable ; Matrice de conflits BP publié à 4 cas stricts sans aucun fallback artificiel `|| 1` ou `?? 1` ; Suppression du paramètre mort `existingBudgetsCount` ; Zéro régression Bingerville, Cocody, Tiassalé ; 244 tests PASS sur 15 suites, build PASS).
 - FOUNDATION_READY : TRUE.
 
 ## INDUSTRIALISATION DU CYCLE BUDGÉTAIRE & CONSOLE DOCUMENTAIRE (DURCIE PR #14 — GATE FINAL QUALITÉ)
 - **GATE QUALITÉ FINAL VALIDÉ SUR PR #14** :
-  - **1. Validation Humaine Bloquante (`budgetDocumentDryRun.ts`)** :
-    - Dès lors qu'une valeur financière est au statut `PENDING`, l'import est formellement bloqué (`can_import = false`, `is_valid = false`) avec message d'erreur explicite : *« Validation humaine requise : Certaines valeurs doivent encore être validées avant l’import. »*
-    - Statuts autorisés pour l'import : `VALIDATED`, `CORRECTED`, `MARKED_UNKNOWN` (avec `amount === null`).
-    - Statut `REJECTED` : exclu du lot d'import sans bloquer les autres valeurs validées ; si toutes les valeurs sont rejetées, l'import est bloqué.
-    - Statut `MARKED_UNKNOWN` avec un montant non null : bloquant (violation de la règle d'or `NULL != 0`).
-    - Helper dédié exporté : `isImportableValueStatus(status)`.
+  - **1. Validation Humaine Bloquante à la Frontière d'Import (`budgetDocumentDryRun.ts`)** :
+    - Non-contournement garanti : `buildStandardImportEnvelope()` valide désormais formellement chaque valeur proposée via `isImportableValue()`.
+    - Dès lors qu'une valeur financière est au statut `PENDING`, une `Error` explicite est levée (*« Impossible de construire une enveloppe d'importation : la valeur pour [field] est en attente de validation humaine (PENDING). »*).
+    - Statut `MARKED_UNKNOWN` avec un montant non null : lève une `Error` explicite (*« Incohérence sémantique : la valeur pour [field] est marquée inconnue mais contient un montant. »* - règle d'or `NULL != 0`).
+    - Statut non reconnu ou non importable : lève une `Error` explicite.
+    - Statuts autorisés pour l'import : `VALIDATED` (montant validé), `CORRECTED` (montant corrigé), `MARKED_UNKNOWN` (avec montant strictement null).
+    - Statut `REJECTED` : exclu du lot d'import. Si toutes les valeurs proposées sont rejetées, lève une `Error` explicite (*« Aucune valeur importable valide dans le document (toutes les valeurs sont rejetées ou absentes). »*).
+    - Helpers dédiés exportés : `isImportableValueStatus(status)` et `isImportableValue(value)`.
   - **2. Sémantique Financière Stricte & Bloquante pour Actes Modificatifs** :
     - Pour `BUDGET_MODIFICATIF`, `BUDGET_SUPPLEMENTAIRE`, `DECISION_MODIFICATIVE`, `VIREMENT_CREDITS` :
       Si `amount_semantics === 'UNKNOWN'` ou absent, l'import est bloqué (`can_import = false`, `is_valid = false`) avec erreur bloquante : *« La sémantique des montants (cumulatif ou différentiel) doit être précisée pour les actes modificatifs. »*
     - `DELTA` et `REVISED_TOTAL` sont autorisés et traités selon leurs sémantiques respectives.
-  - **3. Suppression des Fallbacks de Numérotation Inventée** :
-    - Retrait de `existingBudgetsCount + 1` et du fallback `version_number = 1`.
+  - **3. Suppression Totale des Fallbacks de Version Inventée & Matrice 4 Cas** :
+    - Retrait de tout fallback artificiel `|| 1`, `?? 1` ou `+ 1` dans `budgetDocumentDryRun.ts`.
+    - Détection de conflit avec un BP publié existant traitant rigoureusement les 4 combinaisons de versions :
+      1) Version existante connue & nouvelle version connue : conflit si `newVer <= existingVer` ; autorisé comme révision si `newVer > existingVer`.
+      2) Version existante connue & nouvelle version indéterminée (`undefined`) : conflit bloquant (requiert précision de version).
+      3) Version existante indéterminée & nouvelle version connue : conflit bloquant (requiert arbitrage humain).
+      4) Deux versions indéterminées : conflit bloquant (requiert arbitrage humain).
+    - Nettoyage d'API : suppression du paramètre mort `existingBudgetsCount = 0` dans la signature de `buildStandardImportEnvelope()`.
     - `LocalBudget.version_number` et `BudgetAmendment.version_number` déclarés optionnels (`version_number?: number`).
     - Si la version officielle est inconnue, elle reste strictement `undefined` (aucun faux numéro injecté).
     - Affichage citoyen et référentiel (`LocalBudgetHistoryView`, `dataStore`, `localBudgetsReferential`) adaptés en toute sécurité (`version_number != null ? ...`).
@@ -61,11 +69,11 @@
   - `SUPABASE_WRITTEN: FALSE`
   - `SUPABASE_PUBLISHED: FALSE`
 - **VALIDATION TECHNIQUE & TESTS** :
-  - **231/231 tests unitaires et d'intégration PASS** sur 15 suites (`npm test`).
+  - **244/244 tests unitaires et d'intégration PASS** sur 15 suites (`npm test`).
   - **`npm run build` PASS** (zéro erreur TypeScript, sortie Vite propre).
   - Deux nouvelles suites de tests spécialisées :
     - `src/utils/__tests__/budgetCycleEngine.test.ts` (13 tests) : consolidation du cycle, prise en compte des modifications négatives, préservation des valeurs nulles et zéros réels, formules dérivées, double taux d'exécution, préservation de `SOURCE_ANOMALY`, non-régression Bingerville, Cocody et Tiassalé.
-    - `src/utils/__tests__/budgetDocumentWorkflow.test.ts` (10 tests) : génération de formulaires d'extraction, pre-flight dry-run (institution invalide, année invalide, provenance manquante, montants négatifs invalides, arithmétique, préservation UNKNOWN=null, conflits de versions publiées), conversion en lot d'import standard.
+    - `src/utils/__tests__/budgetDocumentWorkflow.test.ts` (36 tests) : génération de formulaires d'extraction, pre-flight dry-run (institution invalide, année invalide, provenance manquante, montants négatifs invalides, arithmétique, préservation UNKNOWN=null, conflits de versions publiées selon la matrice des 4 cas sans fallback arbitraire), frontière d'importation et validation humaine obligatoire (tests A-G, rejet strict PENDING, rejet MARKED_UNKNOWN avec montant, exclusion REJECTED, erreur sur lot vide), conversion en lot d'import standard.
 
 
 ## TIASSALÉ CA 2024 — RÉCONCILIATION & FIABILISATION DOCUMENTAIRE
@@ -384,9 +392,9 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Contrôle externe de la PR Cycle Budgétaire & Console Documentaire (`antigravity/budget-cycle-document-console`) par l'orchestrateur (tests 216/216 PASS, build PASS).
-2. Revue de l'intégration du cycle complet (BP → Modifications → Crédits Définitifs → CA) et de l'assistant documentaire guidé.
-3. Arbitrage sur le déploiement ou l'ingestion d'actes modificatifs réels (budgets supplémentaires ou décisions modificatives) pour les collectivités pilotes.
+1. Contrôle externe de PR #14 (`antigravity/budget-cycle-document-console`) par l'orchestrateur (244/244 tests PASS, build PASS, CI GitHub Quality SUCCESS, Vercel Preview SUCCESS).
+2. Autorisation de merge de PR #14 vers master par l'orchestrateur (aucune fusion non autorisée, aucun impact distant Supabase).
+3. Suite du cycle budgétaire et déploiement selon les directives de l'orchestrateur.
 
 ## COCODY_REMOTE_CLOSEOUT — ORCHESTRATEUR 2026-10-02
 - Institution canonique ajoutée à `public.institutions` : `inst-com-cocody`, `Mairie de Cocody`, type applicatif `MAIRIE`, région Abidjan, District Autonome d'Abidjan.

@@ -5,7 +5,8 @@ import {
   buildStandardImportEnvelope,
   computeDocumentFingerprint,
   normalizeDocumentIdentityType,
-  isImportableValueStatus
+  isImportableValueStatus,
+  isImportableValue
 } from '../budgetDocumentDryRun';
 import type { DocumentIngestionMetadata, ProposedFinancialValue } from '../../types/budgetCycle';
 import type { Institution } from '../../types';
@@ -493,7 +494,10 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire (Items 7
         ...validMetadata,
         version_number: 3
       };
-      const envelope = buildStandardImportEnvelope(metaWithVersion, [], mockInstitutions[0]);
+      const validVal: ProposedFinancialValue[] = [
+        { id: '1', field: 'total_amount', label: 'Total', section: 'GLOBAL', nature: 'MODIFICATION', amount: 50_000_000, precision: 'EXACT', confidence: 'MEDIUM', status: 'VALIDATED' }
+      ];
+      const envelope = buildStandardImportEnvelope(metaWithVersion, validVal, mockInstitutions[0]);
       expect(envelope.data.version_number).toBe(3);
     });
 
@@ -502,8 +506,10 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire (Items 7
         ...validMetadata,
         version_number: undefined
       };
-      // Même avec existingBudgetsCount > 0, aucune version inventée
-      const envelope = buildStandardImportEnvelope(metaWithoutVersion, [], mockInstitutions[0], 5);
+      const validVal: ProposedFinancialValue[] = [
+        { id: '1', field: 'total_amount', label: 'Total', section: 'GLOBAL', nature: 'MODIFICATION', amount: 50_000_000, precision: 'EXACT', confidence: 'MEDIUM', status: 'VALIDATED' }
+      ];
+      const envelope = buildStandardImportEnvelope(metaWithoutVersion, validVal, mockInstitutions[0]);
       expect(envelope.data.version_number).toBeUndefined();
     });
   });
@@ -597,6 +603,197 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire (Items 7
       expect(fpBM1).not.toBe(fpBM2);
       expect(fpBM1).not.toBe(fpBS);
       expect(fpVir1).not.toBe(fpVir2);
+    });
+  });
+
+  describe('Frontière d’importation et validation humaine obligatoire (Tests A-G)', () => {
+    const validMeta: DocumentIngestionMetadata = {
+      institution_id: 'inst-com-tiassale',
+      fiscal_year: 2024,
+      document_type: 'BUDGET_MODIFICATIF',
+      source_name: 'Délibération Conseil',
+      source_reference: 'DELIB-2024-01',
+      source_date: '2024-06-15',
+      source_date_kind: 'PUBLISHED',
+      amount_semantics: 'DELTA'
+    };
+
+    it('Test A : Une valeur PENDING ne peut JAMAIS être sérialisée dans une enveloppe (rejet explicite)', () => {
+      const values: ProposedFinancialValue[] = [
+        { id: '1', field: 'total_amount', label: 'Total', section: 'GLOBAL', nature: 'MODIFICATION', amount: 50_000_000, precision: 'EXACT', confidence: 'MEDIUM', status: 'PENDING' }
+      ];
+      expect(() => buildStandardImportEnvelope(validMeta, values, mockInstitutions[0]))
+        .toThrow(/Validation humaine obligatoire.*PENDING/);
+    });
+
+    it('Test B : Les valeurs REJECTED restent formellement exclues de l’enveloppe d’importation', () => {
+      const values: ProposedFinancialValue[] = [
+        { id: '1', field: 'total_amount', label: 'Total Voté', section: 'GLOBAL', nature: 'MODIFICATION', amount: 50_000_000, precision: 'EXACT', confidence: 'HIGH', status: 'VALIDATED' },
+        { id: '2', field: 'operating_amount', label: 'Fonctionnement Rejeté', section: 'FONCTIONNEMENT', nature: 'MODIFICATION', amount: 20_000_000, precision: 'EXACT', confidence: 'LOW', status: 'REJECTED' }
+      ];
+      const envelope = buildStandardImportEnvelope(validMeta, values, mockInstitutions[0]);
+      expect(envelope.data.total_amount).toBe(50_000_000);
+      expect(envelope.data.operating_amount).toBeUndefined();
+      expect(envelope.precision.operating_amount).toBeUndefined();
+    });
+
+    it('Test C : Une valeur VALIDATED est acceptée et sérialisée', () => {
+      const values: ProposedFinancialValue[] = [
+        { id: '1', field: 'total_amount', label: 'Total', section: 'GLOBAL', nature: 'MODIFICATION', amount: 45_000_000, precision: 'EXACT', confidence: 'HIGH', status: 'VALIDATED' }
+      ];
+      const envelope = buildStandardImportEnvelope(validMeta, values, mockInstitutions[0]);
+      expect(envelope.data.total_amount).toBe(45_000_000);
+      expect(envelope.precision.total_amount).toBe('EXACT');
+    });
+
+    it('Test D : Une valeur CORRECTED est acceptée avec le montant rectifié', () => {
+      const values: ProposedFinancialValue[] = [
+        { id: '1', field: 'total_amount', label: 'Total Rectifié', section: 'GLOBAL', nature: 'MODIFICATION', amount: 60_000_000, original_amount: 50_000_000, correction_reason: 'Rectification procès-verbal', precision: 'EXACT', confidence: 'HIGH', status: 'CORRECTED' }
+      ];
+      const envelope = buildStandardImportEnvelope(validMeta, values, mockInstitutions[0]);
+      expect(envelope.data.total_amount).toBe(60_000_000);
+    });
+
+    it('Test E : MARKED_UNKNOWN avec amount null est accepté en conservant strictement la valeur null', () => {
+      const values: ProposedFinancialValue[] = [
+        { id: '1', field: 'total_amount', label: 'Total', section: 'GLOBAL', nature: 'MODIFICATION', amount: 50_000_000, precision: 'EXACT', confidence: 'HIGH', status: 'VALIDATED' },
+        { id: '2', field: 'investment_amount', label: 'Investissement Non Précisé', section: 'INVESTISSEMENT', nature: 'MODIFICATION', amount: null, precision: 'UNKNOWN', confidence: 'LOW', status: 'MARKED_UNKNOWN' }
+      ];
+      const envelope = buildStandardImportEnvelope(validMeta, values, mockInstitutions[0]);
+      expect(envelope.data.total_amount).toBe(50_000_000);
+      expect(envelope.data.investment_amount).toBeNull();
+      expect(envelope.precision.investment_amount).toBe('UNKNOWN');
+    });
+
+    it('Test F : MARKED_UNKNOWN avec montant non null est rejeté (violation règle d\'or)', () => {
+      const values: ProposedFinancialValue[] = [
+        { id: '1', field: 'total_amount', label: 'Total Incohérent', section: 'GLOBAL', nature: 'MODIFICATION', amount: 50_000_000, precision: 'UNKNOWN', confidence: 'LOW', status: 'MARKED_UNKNOWN' }
+      ];
+      expect(() => buildStandardImportEnvelope(validMeta, values, mockInstitutions[0]))
+        .toThrow(/Règle d'or violée.*MARKED_UNKNOWN.*non nulle/);
+    });
+
+    it('Test G : Une enveloppe ne peut JAMAIS être construite avec uniquement des valeurs non importables', () => {
+      // Cas 1 : aucune valeur
+      expect(() => buildStandardImportEnvelope(validMeta, [], mockInstitutions[0]))
+        .toThrow(/Impossible de construire une enveloppe d'importation sans aucune valeur financière importable/);
+
+      // Cas 2 : uniquement REJECTED
+      const onlyRejected: ProposedFinancialValue[] = [
+        { id: '1', field: 'total_amount', label: 'Total Rejeté', section: 'GLOBAL', nature: 'MODIFICATION', amount: 50_000_000, precision: 'EXACT', confidence: 'LOW', status: 'REJECTED' }
+      ];
+      expect(() => buildStandardImportEnvelope(validMeta, onlyRejected, mockInstitutions[0]))
+        .toThrow(/Impossible de construire une enveloppe d'importation sans aucune valeur financière importable/);
+    });
+
+    it('Helper isImportableValue qualifie rigoureusement chaque valeur', () => {
+      expect(isImportableValue({ id: '1', field: 'x', label: 'x', section: 'GLOBAL', nature: 'PREVISION', amount: 100, precision: 'EXACT', confidence: 'HIGH', status: 'VALIDATED' })).toBe(true);
+      expect(isImportableValue({ id: '2', field: 'x', label: 'x', section: 'GLOBAL', nature: 'PREVISION', amount: 100, precision: 'EXACT', confidence: 'HIGH', status: 'CORRECTED' })).toBe(true);
+      expect(isImportableValue({ id: '3', field: 'x', label: 'x', section: 'GLOBAL', nature: 'PREVISION', amount: null, precision: 'UNKNOWN', confidence: 'LOW', status: 'MARKED_UNKNOWN' })).toBe(true);
+      expect(isImportableValue({ id: '4', field: 'x', label: 'x', section: 'GLOBAL', nature: 'PREVISION', amount: 100, precision: 'UNKNOWN', confidence: 'LOW', status: 'MARKED_UNKNOWN' })).toBe(false);
+      expect(isImportableValue({ id: '5', field: 'x', label: 'x', section: 'GLOBAL', nature: 'PREVISION', amount: 100, precision: 'EXACT', confidence: 'MEDIUM', status: 'PENDING' })).toBe(false);
+      expect(isImportableValue({ id: '6', field: 'x', label: 'x', section: 'GLOBAL', nature: 'PREVISION', amount: 100, precision: 'EXACT', confidence: 'LOW', status: 'REJECTED' })).toBe(false);
+    });
+  });
+
+  describe('Détection conservative de conflit avec BP publié — 4 cas de versions (sans fallback artificiel)', () => {
+    const baseExistingBudget: LocalBudget = {
+      id: 'lbud-bp-published',
+      institution_id: 'inst-com-tiassale',
+      institution_type: 'COMMUNE',
+      institution_name: 'Mairie de Tiassalé',
+      fiscal_year: 2025,
+      budget_type: 'PRIMITIF_ADOPTE',
+      status: 'PUBLISHED',
+      is_current_version: true,
+      total_amount: 1_000_000_000,
+      operating_amount: 500_000_000,
+      investment_amount: 500_000_000,
+      amount_precision: 'EXACT',
+      operating_percentage: 50,
+      investment_percentage: 50,
+      verification_status: 'OFFICIAL_DOCUMENT',
+      confidence_level: 'HIGH',
+      sources: [],
+      created_at: '2025-01-01T00:00:00Z',
+      updated_at: '2025-01-01T00:00:00Z'
+    };
+
+    const bpMeta: DocumentIngestionMetadata = {
+      institution_id: 'inst-com-tiassale',
+      fiscal_year: 2025,
+      document_type: 'BUDGET_PRIMITIF',
+      source_name: 'Délibération Conseil',
+      source_reference: 'DELIB-BP-2025-NEW',
+      source_date: '2025-01-15',
+      source_date_kind: 'PUBLISHED'
+    };
+
+    it('Cas 1A : Version existante connue (1) + nouvelle version connue inférieure ou égale (1) -> Conflit bloquant', () => {
+      const existingWithVer = [{ ...baseExistingBudget, version_number: 1 }];
+      const meta = { ...bpMeta, version_number: 1 };
+      const res = runDocumentDryRun(meta, [], {
+        knownInstitutions: mockInstitutions,
+        existingBudgets: existingWithVer,
+        existingAccounts: []
+      });
+      expect(res.checks.conflicts_with_published).toBe(true);
+      expect(res.can_import).toBe(false);
+      expect(res.conflicts[0]).toContain('version 1');
+      expect(res.conflicts[0]).toContain('numéro strictement supérieur');
+    });
+
+    it('Cas 1B : Version existante connue (1) + nouvelle version connue strictement supérieure (2) -> Autorisé (pas de conflit)', () => {
+      const existingWithVer = [{ ...baseExistingBudget, version_number: 1 }];
+      const meta = { ...bpMeta, version_number: 2 };
+      const res = runDocumentDryRun(meta, [], {
+        knownInstitutions: mockInstitutions,
+        existingBudgets: existingWithVer,
+        existingAccounts: []
+      });
+      expect(res.checks.conflicts_with_published).toBe(false);
+      expect(res.can_import).toBe(true);
+      expect(res.conflicts.length).toBe(0);
+    });
+
+    it('Cas 2 : Version existante connue (1) + nouvelle version inconnue (undefined) -> Conflit bloquant', () => {
+      const existingWithVer = [{ ...baseExistingBudget, version_number: 1 }];
+      const meta = { ...bpMeta, version_number: undefined };
+      const res = runDocumentDryRun(meta, [], {
+        knownInstitutions: mockInstitutions,
+        existingBudgets: existingWithVer,
+        existingAccounts: []
+      });
+      expect(res.checks.conflicts_with_published).toBe(true);
+      expect(res.can_import).toBe(false);
+      expect(res.conflicts[0]).toContain('ne précise aucun numéro de version officiel');
+    });
+
+    it('Cas 3 : Version existante inconnue (undefined) + nouvelle version connue (2) -> Conflit bloquant (arbitrage requis)', () => {
+      const existingWithoutVer = [{ ...baseExistingBudget, version_number: undefined }];
+      const meta = { ...bpMeta, version_number: 2 };
+      const res = runDocumentDryRun(meta, [], {
+        knownInstitutions: mockInstitutions,
+        existingBudgets: existingWithoutVer,
+        existingAccounts: []
+      });
+      expect(res.checks.conflicts_with_published).toBe(true);
+      expect(res.can_import).toBe(false);
+      expect(res.conflicts[0]).toContain('sans numéro de version attesté');
+      expect(res.conflicts[0]).toContain('Une revue humaine est requise');
+    });
+
+    it('Cas 4 : Versions existante (undefined) et nouvelle (undefined) inconnues -> Conflit bloquant', () => {
+      const existingWithoutVer = [{ ...baseExistingBudget, version_number: undefined }];
+      const meta = { ...bpMeta, version_number: undefined };
+      const res = runDocumentDryRun(meta, [], {
+        knownInstitutions: mockInstitutions,
+        existingBudgets: existingWithoutVer,
+        existingAccounts: []
+      });
+      expect(res.checks.conflicts_with_published).toBe(true);
+      expect(res.can_import).toBe(false);
+      expect(res.conflicts[0]).toContain('Deux documents non versionnés ne peuvent coexister');
     });
   });
 });
