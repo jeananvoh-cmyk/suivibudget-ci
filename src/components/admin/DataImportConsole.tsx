@@ -62,6 +62,7 @@ export function DataImportConsole({ role }: { role: string }) {
   const [sourceName, setSourceName] = useState<string>('');
   const [sourceReference, setSourceReference] = useState<string>('');
   const [sourceDate, setSourceDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [adoptionDate, setAdoptionDate] = useState<string>('');
   const [sourceDateKind, setSourceDateKind] = useState<'PUBLISHED' | 'ACCESSED' | 'RECORDED'>('RECORDED');
   const [sourceUrl, setSourceUrl] = useState<string>('');
   const [sourcePage, setSourcePage] = useState<number | undefined>(undefined);
@@ -166,6 +167,7 @@ export function DataImportConsole({ role }: { role: string }) {
       source_url: sourceUrl || undefined,
       source_page: sourcePage,
       evidence_level: evidenceLevel,
+      adoption_date: adoptionDate || undefined,
       amount_semantics: amountSemantics,
       notes: notes || undefined
     };
@@ -198,6 +200,7 @@ export function DataImportConsole({ role }: { role: string }) {
       source_url: sourceUrl || undefined,
       source_page: sourcePage,
       evidence_level: evidenceLevel,
+      adoption_date: adoptionDate || undefined,
       amount_semantics: amountSemantics,
       notes: notes || undefined
     };
@@ -420,6 +423,21 @@ export function DataImportConsole({ role }: { role: string }) {
                 <option value="AIP_VERIFIED">Dépêche AIP vérifiée</option>
                 <option value="SECONDARY_TO_CORROBORATE">Source secondaire à corroborer</option>
               </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold uppercase text-slate-600">
+                Date d'adoption / vote de l'acte
+              </label>
+              <input
+                type="date"
+                className={input}
+                value={adoptionDate}
+                onChange={e => {
+                  setAdoptionDate(e.target.value);
+                  setDryRunResult(null);
+                }}
+              />
             </div>
 
             {/* Nom de la source */}
