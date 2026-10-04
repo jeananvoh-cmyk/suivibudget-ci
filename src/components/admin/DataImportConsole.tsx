@@ -65,6 +65,7 @@ export function DataImportConsole({ role }: { role: string }) {
   const [sourceDateKind, setSourceDateKind] = useState<'PUBLISHED' | 'ACCESSED' | 'RECORDED'>('RECORDED');
   const [sourceUrl, setSourceUrl] = useState<string>('');
   const [sourcePage, setSourcePage] = useState<number | undefined>(undefined);
+  const [evidenceLevel, setEvidenceLevel] = useState<'OFFICIAL_DOCUMENT' | 'OFFICIAL_INSTITUTION' | 'AIP_VERIFIED' | 'SECONDARY_TO_CORROBORATE'>('OFFICIAL_DOCUMENT');
   const [amountSemantics, setAmountSemantics] = useState<'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN'>('DELTA');
   const [notes, setNotes] = useState<string>('');
 
@@ -164,6 +165,7 @@ export function DataImportConsole({ role }: { role: string }) {
       source_date_kind: sourceDateKind,
       source_url: sourceUrl || undefined,
       source_page: sourcePage,
+      evidence_level: evidenceLevel,
       amount_semantics: amountSemantics,
       notes: notes || undefined
     };
@@ -195,6 +197,7 @@ export function DataImportConsole({ role }: { role: string }) {
       source_date_kind: sourceDateKind,
       source_url: sourceUrl || undefined,
       source_page: sourcePage,
+      evidence_level: evidenceLevel,
       amount_semantics: amountSemantics,
       notes: notes || undefined
     };
@@ -397,6 +400,26 @@ export function DataImportConsole({ role }: { role: string }) {
                   setDryRunResult(null);
                 }}
               />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold uppercase text-slate-600">
+                Niveau de preuve documentaire
+              </label>
+              <select
+                aria-label="Niveau de preuve documentaire"
+                className={input}
+                value={evidenceLevel}
+                onChange={e => {
+                  setEvidenceLevel(e.target.value as typeof evidenceLevel);
+                  setDryRunResult(null);
+                }}
+              >
+                <option value="OFFICIAL_DOCUMENT">Document officiel primaire</option>
+                <option value="OFFICIAL_INSTITUTION">Institution publique officielle</option>
+                <option value="AIP_VERIFIED">Dépêche AIP vérifiée</option>
+                <option value="SECONDARY_TO_CORROBORATE">Source secondaire à corroborer</option>
+              </select>
             </div>
 
             {/* Nom de la source */}
