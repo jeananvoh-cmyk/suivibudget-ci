@@ -336,6 +336,8 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
           </div>
         </div>
 
+      </div>
+
       {/* ========================================================================= */}
       {/* 1.5 TRAÇABILITÉ DU CYCLE BUDGÉTAIRE : BP → MODIFICATIONS → CRÉDITS DÉFINITIFS */}
       {/* ========================================================================= */}
