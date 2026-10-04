@@ -188,7 +188,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                 </span>
               </div>
               <h3 className="text-lg sm:text-xl font-black text-slate-900">
-                Compte Administratif non encore transmis pour {institution.name}
+                Compte Administratif non disponible dans le référentiel public pour {institution.name}
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
                 Le Compte Administratif (CA) retrace <strong>l'exécution financière réelle et définitive</strong> de l'exercice clos (recettes recouvrées et dépenses ordonnancées). Il est arrêté par le Maire ou le Président et voté par le Conseil avant d'être transmis à la tutelle (Direction Générale de la Décentralisation et du Développement Local — DGDDL).
