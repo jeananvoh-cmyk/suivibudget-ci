@@ -154,7 +154,7 @@ export const CommuneComparatorModal: React.FC<CommuneComparatorModalProps> = ({
                   </div>
                 ) : (
                   <div>
-                    <div className="text-2xl font-black text-slate-900">{formatFCFA(communeA.total_budget_fcfa)}</div>
+                    <div className="text-2xl font-black text-slate-900">{formatFCFA(communeA.total_budget_fcfa)}<span className="block text-xs font-semibold text-brand-blue break-words">({formatAmountInWords(communeA.total_budget_fcfa)} FCFA)</span></div>
                     <div className="text-xs font-bold text-brand-blue">({formatAmountInWords(communeA.total_budget_fcfa)})</div>
                   </div>
                 )}
@@ -218,7 +218,7 @@ export const CommuneComparatorModal: React.FC<CommuneComparatorModalProps> = ({
                   </div>
                 ) : (
                   <div>
-                    <div className="text-2xl font-black text-slate-900">{formatFCFA(communeB.total_budget_fcfa)}</div>
+                    <div className="text-2xl font-black text-slate-900">{formatFCFA(communeB.total_budget_fcfa)}<span className="block text-xs font-semibold text-brand-blue break-words">({formatAmountInWords(communeB.total_budget_fcfa)} FCFA)</span></div>
                     <div className="text-xs font-bold text-brand-orange">({formatAmountInWords(communeB.total_budget_fcfa)})</div>
                   </div>
                 )}

@@ -259,7 +259,7 @@ export const SpotlightSearchModal: React.FC<SpotlightSearchModalProps> = ({
                           {r.name}
                         </div>
                         <div className="text-[11px] text-slate-500">
-                          Chef-lieu : {r.departement} • Budget : {formatFCFA(r.total_budget_fcfa)}
+                          Chef-lieu : {r.departement} • Budget : {formatFCFA(r.total_budget_fcfa)} ({formatAmountInWords(r.total_budget_fcfa)} FCFA)
                         </div>
                       </div>
                     </div>

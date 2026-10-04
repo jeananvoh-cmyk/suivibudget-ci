@@ -983,7 +983,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                           <div className="space-y-1.5">
                             <span className="text-[10px] font-bold text-brand-orange uppercase">{p.commune_name}</span>
                             <h5 className="text-xs font-bold text-slate-900 line-clamp-2 leading-snug">{p.title}</h5>
-                            <div className="text-[11px] font-black text-slate-700">{formatFCFA(p.budget_amount_fcfa)}</div>
+                            <div className="text-[11px] font-black text-slate-700 break-words">{formatFCFA(p.budget_amount_fcfa)} <span className="font-semibold text-brand-blue">({formatAmountInWords(p.budget_amount_fcfa)} FCFA)</span></div>
                           </div>
                           <button
                             onClick={() => onOpenSendProof(p)}
