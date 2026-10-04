@@ -389,7 +389,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </div>
             <div className="text-base font-black text-brand-blue">
               {cycleConsolidation.net_amendments.total !== null
-                ? `${cycleConsolidation.net_amendments.total >= 0 ? '+' : '-'}${formatFCFA(Math.abs(cycleConsolidation.net_amendments.total))}`
+                ? `${cycleConsolidation.net_amendments.total >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(cycleConsolidation.net_amendments.total))}`
                 : 'Non documenté'}
             </div>
             <p className="text-[11px] text-slate-600 leading-snug">
@@ -491,7 +491,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                 <span className="text-slate-500 font-medium">Écart :</span>
                 <span className={`font-bold ${isExactAmount(currentCA, 'operating_planned') && isExactAmount(currentCA, 'operating_realized') && currentCA.operating_realized! > currentCA.operating_planned! ? 'text-purple-700' : 'text-slate-700'}`}>
                   {isExactAmount(currentCA, 'operating_planned') && isExactAmount(currentCA, 'operating_realized')
-                    ? `${(currentCA.operating_realized! - currentCA.operating_planned!) >= 0 ? '+' : '-'}${formatFCFA(Math.abs(currentCA.operating_planned! - currentCA.operating_realized!))}`
+                    ? `${(currentCA.operating_realized! - currentCA.operating_planned!) >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(currentCA.operating_planned! - currentCA.operating_realized!))}`
                     : 'Non calculable'}
                 </span>
               </div>
@@ -550,7 +550,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                 <span className="text-slate-500 font-medium">Écart :</span>
                 <span className="font-bold text-slate-700">
                   {isExactAmount(currentCA, 'investment_planned') && isExactAmount(currentCA, 'investment_realized')
-                    ? `${(currentCA.investment_realized! - currentCA.investment_planned!) >= 0 ? '+' : '-'}${formatFCFA(Math.abs(currentCA.investment_planned! - currentCA.investment_realized!))}`
+                    ? `${(currentCA.investment_realized! - currentCA.investment_planned!) >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(currentCA.investment_planned! - currentCA.investment_realized!))}`
                     : 'Non calculable'}
                 </span>
               </div>
@@ -611,7 +611,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                 <span className="text-blue-200 font-medium">Écart :</span>
                 <span className="font-bold text-amber-200">
                   {isExactAmount(currentCA, 'total_planned') && isExactAmount(currentCA, 'total_realized')
-                    ? `${(currentCA.total_realized! - currentCA.total_planned!) >= 0 ? '+' : '-'}${formatFCFA(Math.abs(currentCA.total_planned! - currentCA.total_realized!))}`
+                    ? `${(currentCA.total_realized! - currentCA.total_planned!) >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(currentCA.total_planned! - currentCA.total_realized!))}`
                     : 'Non calculable'}
                 </span>
               </div>
@@ -798,7 +798,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                     <span className="text-[10px] text-slate-500 font-medium block">Écart</span>
                     <span className="font-bold text-slate-700 block">
                       {op.planned_amount != null && op.executed_amount != null
-                        ? `${(op.executed_amount - op.planned_amount) >= 0 ? '+' : '-'}${formatFCFA(Math.abs(op.planned_amount - op.executed_amount))}`
+                        ? `${(op.executed_amount - op.planned_amount) >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(op.planned_amount - op.executed_amount))}`
                         : 'Non calculable'}
                     </span>
                   </div>
@@ -888,7 +888,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                     </span>
                     <p className="text-slate-700 text-[11px] leading-relaxed">
                       {op.executed_amount === 0 && match ? (
-                        <>Attribution officielle du marché public DGMP (n° <strong>{match.tender_number}</strong>, {formatReadableRecordAmount(match, 'award_amount')}, titulaire <strong>{match.contractor}</strong>), mais <strong>0 FCFA ordonnancé</strong> au Compte Administratif {op.fiscal_year} (opération reportée / non mandatée sur l'exercice clos).</>
+                        <>Attribution officielle du marché public DGMP (n° <strong>{match.tender_number}</strong>, {formatReadableRecordAmount(match, 'award_amount')}, titulaire <strong>{match.contractor}</strong>), mais <strong>0 FCFA (zéro FCFA) ordonnancé</strong> au Compte Administratif {op.fiscal_year} (opération reportée / non mandatée sur l'exercice clos).</>
                       ) : match && match.match_level === 'STRONG' ? (
                         <>Attribution du marché public (Avis <strong>{match.tender_number}</strong>, {formatReadableRecordAmount(match, 'award_amount')}, <strong>{match.contractor}</strong>) et ordonnancement effectif de <strong>{formatReadableRecordAmount(op, 'executed_amount')}</strong> retracé au Compte Administratif{op.source_page ? ` (page ${op.source_page})` : ''}.</>
                       ) : (
