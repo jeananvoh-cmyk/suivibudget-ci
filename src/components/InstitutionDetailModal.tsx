@@ -832,7 +832,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                               <div>
                                 <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">Dotation Allouée</span>
                                 <span className="text-base sm:text-lg font-black text-brand-blue">
-                                  {formatFCFA(proj.budget_amount_fcfa)} <span className="block text-[10px] font-semibold text-brand-blue break-words">({formatAmountInWords(proj.budget_amount_fcfa)} FCFA)</span>
+                                  {formatFCFA(proj.budget_amount_fcfa)}
                                 </span>
                                 <span className="text-[10px] font-semibold text-slate-500 ml-1.5">
                                   ({formatAmountInWords(proj.budget_amount_fcfa)})
