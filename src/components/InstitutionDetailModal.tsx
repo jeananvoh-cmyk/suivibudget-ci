@@ -328,7 +328,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   const isAttecoube = institution.id === 'inst-com-attecoube' || institution.name.toLowerCase().includes('attécoubé');
 
   const handleShareProject = (proj: BudgetProject) => {
-    const text = `Chantier citoyen : ${proj.title} - Budget : ${formatFCFA(proj.budget_amount_fcfa)} (${proj.commune_name || 'Côte d\'Ivoire'}). Suivi transparent sur SuiviBudget CI : https://suivibudget.ci/`;
+    const text = `Chantier citoyen : ${proj.title} - Budget : ${formatFCFA(proj.budget_amount_fcfa)} (${formatAmountInWords(proj.budget_amount_fcfa)}) - ${proj.commune_name || 'Côte d\'Ivoire'}. Suivi transparent sur SuiviBudget CI : https://suivibudget.ci/`;
     if (navigator.share) {
       navigator.share({ title: proj.title, text, url: window.location.href }).catch(() => {});
     } else {
@@ -1581,7 +1581,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                                   {line.nature || 'Fonctionnement'}
                                 </span>
                               </td>
-                              <td className="p-3 pr-4 text-right font-black text-slate-900 whitespace-nowrap">
+                              <td className="p-3 pr-4 text-right font-black text-slate-900 break-words">
                                 <div className="text-xs break-words">{formatFCFA(line.montant_fcfa)}</div>
                                 <div className="text-[10px] font-semibold text-slate-500 tracking-tight">
                                   {formatAmountInWords(line.montant_fcfa)}
@@ -1596,7 +1596,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                               <td colSpan={2} className="p-3 pl-4 font-black text-slate-900 text-xs uppercase">
                                 Total Lignes Budgétaires ({filteredLines.length})
                               </td>
-                              <td className="p-3 pr-4 text-right font-black text-slate-900 whitespace-nowrap">
+                              <td className="p-3 pr-4 text-right font-black text-slate-900 break-words">
                                 <div className="text-sm text-slate-900">
                                   {formatFCFA(filteredLines.reduce((acc, l) => acc + (l.montant_fcfa || 0), 0))}
                                 </div>
