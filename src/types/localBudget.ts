@@ -22,9 +22,12 @@ export type BudgetEventType =
   | 'PRIMITIF_ADOPTE'             // Budget initial adopté par l'organe délibérant (Conseil)
   | 'PRIMITIF_APRES_TUTELLE'       // Budget après révision / intervention de la Commission d'approbation (Tutelle DGDDL)
   | 'AUTORISATION_EXECUTION'       // Budget arrêté et autorisé pour exécution (exécutoire)
+  | 'BUDGET_SUPPLEMENTAIRE'        // Budget supplémentaire adopté en cours d'exercice (BS)
   | 'MODIFICATIF_1'               // Décision modificative n°1 (BM1)
   | 'MODIFICATIF_2'               // Décision modificative n°2 (BM2)
   | 'AUTRE_MODIFICATIF'           // Autre réaménagement budgétaire
+  | 'DECISION_MODIFICATIVE'        // Décision modificative / délibération de tutelle
+  | 'VIREMENT_CREDITS'            // Virement de crédits entre chapitres / programmes
   | 'EXECUTION_TRIMESTRIELLE'      // Point d'exécution en cours d'année
   | 'COMPTE_ADMINISTRATIF';        // Reddition des comptes / exécution réelle clôturée
 
@@ -178,7 +181,8 @@ export interface LocalBudget {
   budget_type: BudgetEventType;
   status: BudgetRecordStatus;
   is_current_version: boolean;    // Version active actuellement retenue
-  version_number: number;         // 1, 2, 3...
+  version_number?: number;        // 1, 2, 3... (optionnel si non attesté officiellement)
+  amount_semantics?: 'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN'; // Sémantique financière des montants modificatifs
   
   // Montants consolidés
   total_amount: number | null;
@@ -208,6 +212,7 @@ export interface LocalBudget {
   primary_source_url?: string;
   document_url?: string;                   // Lien direct vers le document officiel PDF / Délibération
   document_name?: string;
+  source_page?: number;                    // Page du document officiel source
 
   // Détails facultatifs (dépouillement exhaustif)
   revenue_sources?: LocalBudgetRevenueSource[];
@@ -234,7 +239,7 @@ export interface BudgetCoherenceIssue {
 
 export interface ImportProvenance {
   precision: Partial<Record<string, AmountPrecision>>;
-  source?: { name: string; reference: string; date: string; date_kind: string; url?: string };
+  source?: { name: string; reference: string; date: string; date_kind: string; url?: string; page?: number };
   import_id?: string;
   match_evidence?: string;
 }

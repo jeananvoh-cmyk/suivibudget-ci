@@ -917,7 +917,7 @@ class DataStore {
   public getLocalBudgets(institutionId?: string): LocalBudget[] {
     if (institutionId) {
       return this.localBudgets.filter(b => b.institution_id === institutionId)
-        .sort((a, b) => b.fiscal_year - a.fiscal_year || b.version_number - a.version_number);
+        .sort((a, b) => b.fiscal_year - a.fiscal_year || (b.version_number ?? 0) - (a.version_number ?? 0));
     }
     return this.localBudgets;
   }

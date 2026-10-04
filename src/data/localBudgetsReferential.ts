@@ -1440,7 +1440,7 @@ export function getLocalBudgetsForInstitution(institutionId: string): LocalBudge
   const local = LOCAL_BUDGETS_REFERENTIAL.filter(b => !publishedRemoteBudgets.some(remote =>
     remote.institution_id === b.institution_id && remote.fiscal_year === b.fiscal_year && remote.budget_type === b.budget_type && remote.version_number === b.version_number));
   return [...publishedRemoteBudgets, ...local].filter(b => b.institution_id === institutionId || b.institution_name === institutionId)
-    .sort((a, b) => b.fiscal_year - a.fiscal_year || b.version_number - a.version_number);
+    .sort((a, b) => b.fiscal_year - a.fiscal_year || (b.version_number ?? 0) - (a.version_number ?? 0));
 }
 
 export function getCurrentLocalBudget(institutionId: string, fiscalYear: number = 2026): LocalBudget | undefined {
