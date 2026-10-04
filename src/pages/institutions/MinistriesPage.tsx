@@ -401,7 +401,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                       </h3>
                       <p className="text-[11px] text-slate-500 line-clamp-2 leading-tight">{official.department_ministry}</p>
                       <div className="text-[11px] font-bold text-slate-800 pt-0.5 whitespace-nowrap">
-                        Budget : <span className="text-brand-blue">{formatFCFA(official.budget_fcfa || 0)}</span> <span className="text-slate-500 font-semibold text-[10px] whitespace-nowrap">({formatAmountInWords(official.budget_fcfa || 0)})</span>
+                        Budget : <span className="text-brand-blue">{formatFCFA(official.budget_fcfa || 0)}</span> <span className="text-slate-500 font-semibold text-[10px] break-words">({formatAmountInWords(official.budget_fcfa || 0)})</span>
                       </div>
                     </div>
                   </div>
@@ -446,7 +446,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                     </h3>
                     <p className="text-[11px] text-slate-600 font-medium line-clamp-2 leading-tight">{official.department_ministry}</p>
                     <div className="text-[11px] font-bold text-slate-800 pt-0.5 whitespace-nowrap">
-                      Budget : <span className="text-brand-blue">{formatFCFA(official.budget_fcfa || 0)}</span> <span className="text-slate-500 font-semibold text-[10px] whitespace-nowrap">({formatAmountInWords(official.budget_fcfa || 0)})</span>
+                      Budget : <span className="text-brand-blue">{formatFCFA(official.budget_fcfa || 0)}</span> <span className="text-slate-500 font-semibold text-[10px] break-words">({formatAmountInWords(official.budget_fcfa || 0)})</span>
                     </div>
                   </div>
                 </div>
