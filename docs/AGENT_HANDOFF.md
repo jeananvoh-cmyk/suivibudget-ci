@@ -5,7 +5,7 @@
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/budget-cycle-document-console`
 - HANDOFF_BASE_SHA : `46c4f1753a1c6d5aa564a70f082f859141d58fd0` (HEAD de PR #13 `antigravity/tiassale-ca-2024-reconciliation`)
-- CURRENT_HEAD : fix(cycle): seal human gate at import boundary, eliminate version fallbacks, clean API ; 244 tests PASS (15 suites), build PASS.
+- CURRENT_HEAD : `9f57001` fix(cycle): seal human gate at import boundary, eliminate version fallbacks, clean API ; 244 tests PASS (15 suites), build PASS.
 - PR : PR #14 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/14) ouverte sur `antigravity/budget-cycle-document-console` vers `master` (dépendance explicite sur PR #13, NON FUSIONNÉE, soumise au contrôle externe de l'orchestrateur).
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
 - CURRENT_MILESTONE : Durcissement Ultime PR #14 — Fermeture Étanche du Gate Humain à la Frontière d'Import & Élimination des Fallbacks de Version (Validation humaine étanche à la frontière d'import `buildStandardImportEnvelope` via `isImportableValue` : rejet bloquant de PENDING avec Error explicite, rejet de MARKED_UNKNOWN avec montant non-null, exclusion de REJECTED, rejet des lots vides avec 0 valeur importable ; Matrice de conflits BP publié à 4 cas stricts sans aucun fallback artificiel `|| 1` ou `?? 1` ; Suppression du paramètre mort `existingBudgetsCount` ; Zéro régression Bingerville, Cocody, Tiassalé ; 244 tests PASS sur 15 suites, build PASS).
