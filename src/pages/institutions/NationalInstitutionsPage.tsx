@@ -246,8 +246,8 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
                 <div className="text-[11px] font-black uppercase text-amber-300 tracking-wider">
                   Dotation Budgétaire Présidence
                 </div>
-                <div className="text-lg font-black text-white whitespace-nowrap">
-                  {formatFCFA(presidence.total_budget_fcfa)} <span className="block text-xs font-semibold text-brand-blue break-words">({formatAmountInWords(presidence.total_budget_fcfa)} FCFA)</span>
+                <div className="text-lg font-black text-white break-words">
+                  {formatFCFA(presidence.total_budget_fcfa)}
                 </div>
                 <div className="text-xs text-amber-200 font-bold break-words">
                   ({formatAmountInWords(presidence.total_budget_fcfa)})

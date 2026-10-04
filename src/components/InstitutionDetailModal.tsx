@@ -328,7 +328,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   const isAttecoube = institution.id === 'inst-com-attecoube' || institution.name.toLowerCase().includes('attécoubé');
 
   const handleShareProject = (proj: BudgetProject) => {
-    const text = `Chantier citoyen : ${proj.title} - Budget : ${formatFCFA(proj.budget_amount_fcfa)} <span className="block text-[10px] font-semibold text-brand-blue break-words">({formatAmountInWords(proj.budget_amount_fcfa)} FCFA)</span> (${proj.commune_name || 'Côte d\'Ivoire'}). Suivi transparent sur SuiviBudget CI : https://suivibudget.ci/`;
+    const text = `Chantier citoyen : ${proj.title} - Budget : ${formatFCFA(proj.budget_amount_fcfa)} (${formatAmountInWords(proj.budget_amount_fcfa)}) - ${proj.commune_name || 'Côte d\'Ivoire'}. Suivi transparent sur SuiviBudget CI : https://suivibudget.ci/`;
     if (navigator.share) {
       navigator.share({ title: proj.title, text, url: window.location.href }).catch(() => {});
     } else {
@@ -605,7 +605,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   <div className="text-left pl-1">
                     <span className="text-[10px] font-bold uppercase text-blue-200 block">Enveloppe Votée</span>
                     <span className="text-sm sm:text-base font-black text-amber-300">
-                      {formatFCFA(totalProjectsBudget > 0 ? totalProjectsBudget : institution.budget_investment_fcfa)} <span className="block text-xs font-semibold text-brand-blue break-words">({formatAmountInWords(totalProjectsBudget > 0 ? totalProjectsBudget : institution.budget_investment_fcfa)} FCFA)</span>
+                      {formatFCFA(totalProjectsBudget > 0 ? totalProjectsBudget : institution.budget_investment_fcfa)}
                     </span>
                     <span className="text-[10px] font-medium text-blue-100 block">
                       ({formatAmountInWords(totalProjectsBudget > 0 ? totalProjectsBudget : institution.budget_investment_fcfa)})
@@ -832,7 +832,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                               <div>
                                 <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">Dotation Allouée</span>
                                 <span className="text-base sm:text-lg font-black text-brand-blue">
-                                  {formatFCFA(proj.budget_amount_fcfa)} <span className="block text-[10px] font-semibold text-brand-blue break-words">({formatAmountInWords(proj.budget_amount_fcfa)} FCFA)</span>
+                                  {formatFCFA(proj.budget_amount_fcfa)}
                                 </span>
                                 <span className="text-[10px] font-semibold text-slate-500 ml-1.5">
                                   ({formatAmountInWords(proj.budget_amount_fcfa)})
@@ -1121,7 +1121,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
 
                               <div>
                                 <span className="text-xl sm:text-2xl font-black text-slate-900 block">
-                                  {formatFCFA(stateTotal)} <span className="text-xs font-semibold text-brand-blue break-words">({formatAmountInWords(stateTotal)} FCFA)</span>
+                                  {formatFCFA(stateTotal)}
                                 </span>
                                 <span className="text-[11px] font-bold text-brand-blue block">
                                   ({formatAmountInWords(stateTotal)})
@@ -1173,7 +1173,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
 
                               <div>
                                 <span className="text-xl sm:text-2xl font-black text-slate-900 block">
-                                  {exactPrimitive ? `${formatFCFA(localRev)} (${formatAmountInWords(localRev)} FCFA)` : 'Montant non calculé'}
+                                  {exactPrimitive ? formatFCFA(localRev) : 'Montant non calculé'}
                                 </span>
                                 <span className="text-[11px] font-bold text-slate-600 block">
                                   {exactPrimitive ? `(${formatAmountInWords(localRev)})` : ''}
@@ -1388,7 +1388,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                           : "Dotation Globale Allouée par l'État (Loi de Finances 2026)"}
                       </span>
                       <h3 className="text-xl sm:text-2xl font-black text-slate-900">
-                        {formatFCFA(institution.total_budget_fcfa)} <span className="block text-xs font-semibold text-brand-blue break-words">({formatAmountInWords(institution.total_budget_fcfa)} FCFA)</span>
+                        {formatFCFA(institution.total_budget_fcfa)}
                       </h3>
                       <p className="text-xs text-brand-blue font-bold">
                         {formatAmountInWords(institution.total_budget_fcfa)}
@@ -1404,14 +1404,14 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="p-3.5 bg-sky-50 rounded-xl border border-sky-200 space-y-1">
                       <span className="text-[10px] font-black uppercase tracking-wider text-sky-700 block">Dépenses de Fonctionnement (DGF)</span>
-                      <span className="text-lg font-black text-slate-900 block break-words">{formatFCFA(institution.budget_functioning_fcfa)} <span className="block text-xs font-semibold text-brand-blue">({formatAmountInWords(institution.budget_functioning_fcfa)} FCFA)</span></span>
+                      <span className="text-lg font-black text-slate-900 block break-words">{formatFCFA(institution.budget_functioning_fcfa)}</span>
                       <span className="text-xs font-bold text-sky-800 block">({functioningPct}% de la dotation)</span>
                       <span className="text-[10px] font-semibold text-sky-900 block">({formatAmountInWords(institution.budget_functioning_fcfa)})</span>
                     </div>
 
                     <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 space-y-1">
                       <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 block">Dépenses d'Investissement Public (DGE)</span>
-                      <span className="text-lg font-black text-slate-900 block break-words">{formatFCFA(institution.budget_investment_fcfa)} <span className="block text-xs font-semibold text-brand-blue">({formatAmountInWords(institution.budget_investment_fcfa)} FCFA)</span></span>
+                      <span className="text-lg font-black text-slate-900 block break-words">{formatFCFA(institution.budget_investment_fcfa)}</span>
                       <span className="text-xs font-bold text-emerald-800 block">({investmentPct}% de la dotation)</span>
                       <span className="text-[10px] font-semibold text-emerald-900 block">({formatAmountInWords(institution.budget_investment_fcfa)})</span>
                       {investmentBudget === 0 && (
@@ -1581,8 +1581,8 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                                   {line.nature || 'Fonctionnement'}
                                 </span>
                               </td>
-                              <td className="p-3 pr-4 text-right font-black text-slate-900 whitespace-nowrap">
-                                <div className="text-xs break-words">{formatFCFA(line.montant_fcfa)}<span className="block text-[10px] font-semibold text-brand-blue">({formatAmountInWords(line.montant_fcfa)} FCFA)</span></div>
+                              <td className="p-3 pr-4 text-right font-black text-slate-900 break-words">
+                                <div className="text-xs break-words">{formatFCFA(line.montant_fcfa)}</div>
                                 <div className="text-[10px] font-semibold text-slate-500 tracking-tight">
                                   {formatAmountInWords(line.montant_fcfa)}
                                 </div>
@@ -1596,9 +1596,9 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                               <td colSpan={2} className="p-3 pl-4 font-black text-slate-900 text-xs uppercase">
                                 Total Lignes Budgétaires ({filteredLines.length})
                               </td>
-                              <td className="p-3 pr-4 text-right font-black text-slate-900 whitespace-nowrap">
+                              <td className="p-3 pr-4 text-right font-black text-slate-900 break-words">
                                 <div className="text-sm text-slate-900">
-                                  {formatFCFA(filteredLines.reduce((acc, l) => acc + (l.montant_fcfa || 0), 0))} <span className="block text-[10px] font-semibold text-brand-blue break-words">({formatAmountInWords(filteredLines.reduce((acc, l) => acc + (l.montant_fcfa || 0), 0))} FCFA)</span>
+                                  {formatFCFA(filteredLines.reduce((acc, l) => acc + (l.montant_fcfa || 0), 0))}
                                 </div>
                                 <div className="text-[10px] font-bold text-slate-500 tracking-tight">
                                   {formatAmountInWords(filteredLines.reduce((acc, l) => acc + (l.montant_fcfa || 0), 0))}

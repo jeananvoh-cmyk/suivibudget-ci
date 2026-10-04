@@ -223,10 +223,10 @@ export const RegulatoryAuthoritiesPage: React.FC<RegulatoryAuthoritiesPageProps>
                 </div>
                 
                 <div>
-                  <div className="text-sm font-black text-slate-900 whitespace-nowrap">
-                    {formatFCFA(item.total_budget_fcfa)} <span className="block text-xs font-semibold text-brand-blue break-words">({formatAmountInWords(item.total_budget_fcfa)} FCFA)</span>
+                  <div className="text-sm font-black text-slate-900 break-words">
+                    {formatFCFA(item.total_budget_fcfa)}
                   </div>
-                  <div className="text-[11px] text-slate-500 font-semibold whitespace-nowrap">
+                  <div className="text-[11px] text-slate-500 font-semibold break-words">
                     ({formatAmountInWords(item.total_budget_fcfa)})
                   </div>
                 </div>

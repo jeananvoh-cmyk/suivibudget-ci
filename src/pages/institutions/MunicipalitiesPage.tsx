@@ -536,7 +536,7 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                             )}
                           </div>
                           <span className="font-black text-slate-900 text-sm">
-                            {formatFCFA(primTotal)} <span className="font-semibold text-brand-blue break-words">({formatAmountInWords(primTotal)} FCFA)</span>{' '}
+                            {formatFCFA(primTotal)}{' '}
                             <span className="text-brand-blue font-bold text-xs">
                               ({formatAmountInWords(primTotal)})
                             </span>
