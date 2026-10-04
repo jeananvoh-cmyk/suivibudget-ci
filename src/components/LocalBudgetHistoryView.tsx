@@ -242,7 +242,22 @@ export const LocalBudgetHistoryView: React.FC<LocalBudgetHistoryViewProps> = ({
                 <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-400 pt-1">
                   <span>Adoption : {b.adoption_date || 'Enregistrée'}</span>
                   {b.tutelle_approval_date && <span>Visa Tutelle : {b.tutelle_approval_date}</span>}
-                  {b.primary_source_label && <span>Source : {b.primary_source_label}</span>}
+                  {b.primary_source_label && (
+                    b.primary_source_url ? (
+                      <a
+                        href={b.primary_source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 font-semibold text-brand-blue hover:underline"
+                        aria-label={`Consulter la source : ${b.primary_source_label}`}
+                      >
+                        Source : {b.primary_source_label}
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ) : (
+                      <span>Source : {b.primary_source_label}</span>
+                    )
+                  )}
                 </div>
               </div>
             ))}

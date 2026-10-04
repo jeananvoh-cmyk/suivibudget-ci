@@ -324,6 +324,21 @@ describe('Budget Cycle Engine — Tests Structurés du Cycle Budgétaire (Items 
     expect(bingerville?.status).toBe('PUBLISHED');
   });
 
+  it('Test 17b : Tiassalé BP 2026 publié avec provenance AIP cliquable sans faux document primaire', () => {
+    const tiassale = LOCAL_BUDGETS_REFERENTIAL.find(
+      b => b.institution_id === 'inst-com-tiassale' && b.fiscal_year === 2026
+    );
+
+    expect(tiassale).toBeDefined();
+    expect(tiassale?.total_amount).toBe(1_760_000_000);
+    expect(tiassale?.amount_precision).toBe('APPROXIMATE');
+    expect(tiassale?.operating_amount).toBeNull();
+    expect(tiassale?.investment_amount).toBeNull();
+    expect(tiassale?.verification_status).toBe('AIP_VERIFIED');
+    expect(tiassale?.document_url).toBeUndefined();
+    expect(tiassale?.primary_source_url).toBe('https://www.aip.ci/cote-divoire-aip-la-commune-de-tiassale-adopte-un-budget-primitif-de-plus-de-17-milliard-fcfa/');
+  });
+
   // TEST 18
   it('Test 18 : Non-régression Cocody BP 2026 inchangé (NULL != 0)', () => {
     const cocody = LOCAL_BUDGETS_REFERENTIAL.find(
