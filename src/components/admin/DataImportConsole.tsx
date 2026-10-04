@@ -199,6 +199,20 @@ export function DataImportConsole({ role }: { role: string }) {
       notes: notes || undefined
     };
 
+    // Revalider systématiquement l'état courant : un ancien dry-run ne doit jamais
+    // autoriser une enveloppe après modification des métadonnées ou des montants.
+    const currentDryRun = runDocumentDryRun(meta, proposedValues, {
+      knownInstitutions: institutions,
+      existingBudgets: dataStore.getLocalBudgets(),
+      existingAccounts: ADMINISTRATIVE_ACCOUNTS_DATA
+    });
+    setDryRunResult(currentDryRun);
+
+    if (!currentDryRun.can_import) {
+      setMessage('Passage au pipeline bloqué : relisez les erreurs du dry-run courant.');
+      return;
+    }
+
     const envelope = buildStandardImportEnvelope(meta, proposedValues, selectedInstitution);
     const jsonString = JSON.stringify([envelope], null, 2);
 
@@ -213,7 +227,7 @@ export function DataImportConsole({ role }: { role: string }) {
       const result = await runImport(parsed);
       setReport(result);
       setPreview({ rows: parsed, report: result });
-      setMessage('Document structuré converti en lot et simulé avec succès dans le pipeline.');
+      setMessage('Document structuré revalidé, converti en lot et simulé avec succès dans le pipeline.');
     });
   };
 
@@ -599,7 +613,7 @@ export function DataImportConsole({ role }: { role: string }) {
                 disabled={busy || !dryRunResult?.can_import}
                 onClick={handleInjectIntoPipeline}
               >
-                2. Générer & Infiltrer dans le Pipeline d'Import →
+                2. Préparer le lot pour le Pipeline d'Import →
               </button>
             </div>
 
