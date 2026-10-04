@@ -223,12 +223,6 @@ export const LocalBudgetHistoryView: React.FC<LocalBudgetHistoryViewProps> = ({
                   </div>
                 </div>
 
-                {b.notes && (
-                  <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 italic">
-                    « {b.notes} »
-                  </p>
-                )}
-
                 {/* Historique des révisions de tutelle */}
                 {b.revision_history && b.revision_history.length > 0 && (
                   <div className="pt-2 border-t border-slate-100 space-y-1.5 text-[11px]">
