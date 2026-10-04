@@ -62,9 +62,11 @@ export function DataImportConsole({ role }: { role: string }) {
   const [sourceName, setSourceName] = useState<string>('');
   const [sourceReference, setSourceReference] = useState<string>('');
   const [sourceDate, setSourceDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [adoptionDate, setAdoptionDate] = useState<string>('');
   const [sourceDateKind, setSourceDateKind] = useState<'PUBLISHED' | 'ACCESSED' | 'RECORDED'>('RECORDED');
   const [sourceUrl, setSourceUrl] = useState<string>('');
   const [sourcePage, setSourcePage] = useState<number | undefined>(undefined);
+  const [evidenceLevel, setEvidenceLevel] = useState<'OFFICIAL_DOCUMENT' | 'OFFICIAL_INSTITUTION' | 'AIP_VERIFIED' | 'SECONDARY_TO_CORROBORATE'>('OFFICIAL_DOCUMENT');
   const [amountSemantics, setAmountSemantics] = useState<'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN'>('DELTA');
   const [notes, setNotes] = useState<string>('');
 
@@ -164,6 +166,8 @@ export function DataImportConsole({ role }: { role: string }) {
       source_date_kind: sourceDateKind,
       source_url: sourceUrl || undefined,
       source_page: sourcePage,
+      evidence_level: evidenceLevel,
+      adoption_date: adoptionDate || undefined,
       amount_semantics: amountSemantics,
       notes: notes || undefined
     };
@@ -195,6 +199,8 @@ export function DataImportConsole({ role }: { role: string }) {
       source_date_kind: sourceDateKind,
       source_url: sourceUrl || undefined,
       source_page: sourcePage,
+      evidence_level: evidenceLevel,
+      adoption_date: adoptionDate || undefined,
       amount_semantics: amountSemantics,
       notes: notes || undefined
     };
@@ -394,6 +400,41 @@ export function DataImportConsole({ role }: { role: string }) {
                 value={sourceDate}
                 onChange={e => {
                   setSourceDate(e.target.value);
+                  setDryRunResult(null);
+                }}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold uppercase text-slate-600">
+                Niveau de preuve documentaire
+              </label>
+              <select
+                aria-label="Niveau de preuve documentaire"
+                className={input}
+                value={evidenceLevel}
+                onChange={e => {
+                  setEvidenceLevel(e.target.value as typeof evidenceLevel);
+                  setDryRunResult(null);
+                }}
+              >
+                <option value="OFFICIAL_DOCUMENT">Document officiel primaire</option>
+                <option value="OFFICIAL_INSTITUTION">Institution publique officielle</option>
+                <option value="AIP_VERIFIED">Dépêche AIP vérifiée</option>
+                <option value="SECONDARY_TO_CORROBORATE">Source secondaire à corroborer</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold uppercase text-slate-600">
+                Date d'adoption / vote de l'acte
+              </label>
+              <input
+                type="date"
+                className={input}
+                value={adoptionDate}
+                onChange={e => {
+                  setAdoptionDate(e.target.value);
                   setDryRunResult(null);
                 }}
               />

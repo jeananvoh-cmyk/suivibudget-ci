@@ -629,7 +629,8 @@ export function buildStandardImportEnvelope(
       dataObj.amount_semantics = metadata.amount_semantics;
     }
 
-    dataObj.verification_status = 'OFFICIAL_DOCUMENT';
+    if (metadata.adoption_date) dataObj.adoption_date = metadata.adoption_date;
+    dataObj.verification_status = metadata.evidence_level ?? 'OFFICIAL_DOCUMENT';
     // Confiance par défaut qualifiée (Item 10)
     dataObj.confidence_level = metadata.source_date_kind === 'PUBLISHED' ? 'MEDIUM' : 'LOW';
     if (metadata.notes) dataObj.notes = metadata.notes;

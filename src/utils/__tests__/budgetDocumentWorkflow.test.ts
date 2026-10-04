@@ -796,4 +796,30 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire (Items 7
       expect(res.conflicts[0]).toContain('Deux documents non versionnés ne peuvent coexister');
     });
   });
+  it('Enveloppe : une dépêche AIP ne devient jamais un document officiel primaire', () => {
+    const meta: DocumentIngestionMetadata = {
+      institution_id: 'inst-com-tiassale',
+      institution_name: 'Mairie de Tiassalé',
+      fiscal_year: 2024,
+      document_type: 'BUDGET_PRIMITIF',
+      source_name: 'Agence Ivoirienne de Presse',
+      source_reference: 'AIP-TIASSALE-2024-03-13',
+      source_date: '2024-03-13',
+      source_date_kind: 'PUBLISHED',
+      evidence_level: 'AIP_VERIFIED',
+      adoption_date: '2024-03-12'
+    };
+    const proposed: ProposedFinancialValue[] = [
+      { id: '1', field: 'total_amount', label: 'Total', section: 'GLOBAL', nature: 'PREVISION', amount: 820_150_000, precision: 'APPROXIMATE', confidence: 'HIGH', status: 'VALIDATED' },
+      { id: '2', field: 'operating_amount', label: 'Fonctionnement', section: 'FONCTIONNEMENT', nature: 'PREVISION', amount: null, precision: 'UNKNOWN', confidence: 'LOW', status: 'MARKED_UNKNOWN' },
+      { id: '3', field: 'investment_amount', label: 'Investissement', section: 'INVESTISSEMENT', nature: 'PREVISION', amount: null, precision: 'UNKNOWN', confidence: 'LOW', status: 'MARKED_UNKNOWN' }
+    ];
+    const envelope = buildStandardImportEnvelope(meta, proposed, mockInstitutions[0]);
+    expect(envelope.data.verification_status).toBe('AIP_VERIFIED');
+    expect(envelope.data.total_amount).toBe(820_150_000);
+    expect(envelope.data.adoption_date).toBe('2024-03-12');
+    expect(envelope.data.operating_amount).toBeNull();
+    expect(envelope.data.investment_amount).toBeNull();
+  });
+
 });
