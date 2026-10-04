@@ -246,6 +246,7 @@ export interface DocumentIngestionMetadata {
   source_url?: string;
   source_page?: number;
   evidence_level?: DocumentEvidenceLevel;
+  adoption_date?: string;
   notes?: string;
   file_name?: string;
   amount_semantics?: AmendmentAmountSemantics;
