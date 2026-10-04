@@ -1059,7 +1059,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                             </span>
                             <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
 
-                              {formatQualifiedFCFA(primTotal, prim.precision)}
+                              {formatQualifiedFCFA(primTotal, prim.precision)} <span className="block text-xs font-semibold text-brand-blue break-words">({formatAmountInWords(primTotal)} FCFA)</span>
                             </h3>
                             <p className="text-xs text-brand-blue font-bold tracking-tight">
 
@@ -1252,7 +1252,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                           <div className="p-4 bg-white rounded-xl border border-emerald-200/80 shadow-2xs space-y-1.5">
                             <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Dépenses d'Investissement Votées</span>
                             <span className="text-lg font-black text-slate-900 block">
-                              {formatQualifiedFCFA(prim.investment_voted_fcfa, prim.investment_voted_fcfa == null ? 'UNKNOWN' : prim.precision)}{' '}
+                              {formatQualifiedFCFA(prim.investment_voted_fcfa, prim.investment_voted_fcfa == null ? 'UNKNOWN' : prim.precision)} {prim.investment_voted_fcfa != null && <span className="text-xs font-semibold text-brand-blue break-words">({formatAmountInWords(prim.investment_voted_fcfa)} FCFA)</span>}{' '}
                               <span className="text-xs text-emerald-700 font-bold block sm:inline">
 
                               </span>
@@ -1270,7 +1270,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                           <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-2xs space-y-1.5">
                             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 block">Dépenses de Fonctionnement Votées</span>
                             <span className="text-lg font-black text-slate-900 block">
-                              {formatQualifiedFCFA(prim.functioning_voted_fcfa, prim.functioning_voted_fcfa == null ? 'UNKNOWN' : prim.precision)}{' '}
+                              {formatQualifiedFCFA(prim.functioning_voted_fcfa, prim.functioning_voted_fcfa == null ? 'UNKNOWN' : prim.precision)} {prim.functioning_voted_fcfa != null && <span className="text-xs font-semibold text-brand-blue break-words">({formatAmountInWords(prim.functioning_voted_fcfa)} FCFA)</span>}{' '}
                               <span className="text-xs text-slate-600 font-bold block sm:inline">
 
                               </span>
@@ -1294,8 +1294,8 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                               <div className="bg-slate-400 h-full" style={{ width: `${primFonctPct}%` }} title={`Fonctionnement: ${primFonctPct}%`}></div>
                             </div>
                             <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-bold gap-1">
-                              <span className="text-emerald-700">■ Investissements Votés : {primInvPct}% ({formatQualifiedFCFA(prim.investment_voted_fcfa, prim.precision)})</span>
-                              <span className="text-slate-600">■ Fonctionnement & Salaires : {primFonctPct}% ({formatQualifiedFCFA(prim.functioning_voted_fcfa, prim.precision)})</span>
+                              <span className="text-emerald-700">■ Investissements Votés : {primInvPct}% ({formatQualifiedFCFA(prim.investment_voted_fcfa, prim.precision)}{prim.investment_voted_fcfa != null ? ` — ${formatAmountInWords(prim.investment_voted_fcfa)} FCFA` : ''})</span>
+                              <span className="text-slate-600">■ Fonctionnement & Salaires : {primFonctPct}% ({formatQualifiedFCFA(prim.functioning_voted_fcfa, prim.precision)}{prim.functioning_voted_fcfa != null ? ` — ${formatAmountInWords(prim.functioning_voted_fcfa)} FCFA` : ''})</span>
                             </div>
                           </div>
                         ) : (
