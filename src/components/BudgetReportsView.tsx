@@ -262,7 +262,7 @@ export const BudgetReportsView: React.FC = () => {
                 </span>
               </div>
               <div className="text-2xl font-black text-slate-900">
-                {formatFCFA(stats.nationalAmount)}
+                {formatFCFA(stats.nationalAmount)} <span className="block text-xs font-semibold text-slate-500 break-words">({formatAmountInWords(stats.nationalAmount)} FCFA)</span>
               </div>
               <p className="text-xs text-slate-600 leading-relaxed">
                 Pilotés par les Ministères sectoriels pour les grandes liaisons routières, hôpitaux régionaux, universités et centrales électriques.
@@ -280,7 +280,7 @@ export const BudgetReportsView: React.FC = () => {
                 </span>
               </div>
               <div className="text-2xl font-black text-slate-900">
-                {formatFCFA(stats.localAmount)}
+                {formatFCFA(stats.localAmount)} <span className="block text-xs font-semibold text-slate-500 break-words">({formatAmountInWords(stats.localAmount)} FCFA)</span>
               </div>
               <p className="text-xs text-slate-600 leading-relaxed">
                 Gérés directement par les Mairies et Conseils Régionaux pour les écoles primaires, centres de santé de proximité et hydraulique villageoise.
@@ -313,7 +313,7 @@ export const BudgetReportsView: React.FC = () => {
                     <td className="p-3.5 font-bold text-slate-500">#{idx + 1}</td>
                     <td className="p-3.5 font-black text-slate-900">{ent.name}</td>
                     <td className="p-3.5 text-center font-bold text-slate-700">{ent.count}</td>
-                    <td className="p-3.5 text-right font-black text-slate-900">{formatFCFA(ent.amount)}</td>
+                    <td className="p-3.5 text-right font-black text-slate-900">{formatFCFA(ent.amount)}<span className="block text-[10px] font-semibold text-slate-500 break-words">({formatAmountInWords(ent.amount)} FCFA)</span></td>
                     <td className="p-3.5 text-right font-bold text-brand-blue">
                       {stats.totalAmount > 0 ? ((ent.amount / stats.totalAmount) * 100).toFixed(1) : '0'} %
                     </td>
