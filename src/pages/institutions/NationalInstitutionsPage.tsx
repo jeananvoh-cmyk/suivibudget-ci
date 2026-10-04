@@ -247,9 +247,9 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
                   Dotation Budgétaire Présidence
                 </div>
                 <div className="text-lg font-black text-white whitespace-nowrap">
-                  {formatFCFA(presidence.total_budget_fcfa)}
+                  {formatFCFA(presidence.total_budget_fcfa)} <span className="block text-xs font-semibold text-brand-blue break-words">({formatAmountInWords(presidence.total_budget_fcfa)} FCFA)</span>
                 </div>
-                <div className="text-xs text-amber-200 font-bold whitespace-nowrap">
+                <div className="text-xs text-amber-200 font-bold break-words">
                   ({formatAmountInWords(presidence.total_budget_fcfa)})
                 </div>
               </div>
@@ -342,7 +342,7 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-slate-500 font-bold uppercase">Dotation Budgétaire</span>
                       <span className="font-black text-slate-900 whitespace-nowrap">
-                        {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold whitespace-nowrap">({formatAmountInWords(inst.total_budget_fcfa)})</span>
+                        {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold break-words">({formatAmountInWords(inst.total_budget_fcfa)})</span>
                       </span>
                     </div>
                     <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden flex">
