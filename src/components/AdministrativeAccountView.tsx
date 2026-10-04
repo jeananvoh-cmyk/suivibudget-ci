@@ -336,29 +336,6 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
           </div>
         </div>
 
-        {currentCA.notes && (
-          <p className="text-xs text-slate-600 italic bg-amber-50/60 p-3 rounded-xl border border-amber-200/60">
-            « {currentCA.notes} »
-          </p>
-        )}
-        {/* Alerte civique de réconciliation documentaire si SOURCE_ANOMALY ou dépassement */}
-        {(currentCA.reconciliation_status === 'SOURCE_ANOMALY' || operatingRate?.isOverBudget) && (
-          <div className="p-4 bg-purple-50 rounded-2xl border border-purple-200 text-xs text-purple-950 space-y-2">
-            <div className="flex items-center gap-2 font-black text-purple-900">
-              <AlertCircle className="w-4 h-4 text-purple-700 flex-shrink-0" />
-              <span>Contrôle de Réconciliation des Sources (SOURCE_ANOMALY)</span>
-            </div>
-            <p className="leading-relaxed text-purple-900 font-medium">
-              Le Compte Administratif officiel{currentCA.source_page ? ` (page ${currentCA.source_page})` : ''} retrace des dépenses de fonctionnement ordonnancées ({formatRecordAmount(currentCA, 'operating_realized')}) supérieures aux crédits primitifs votés ({formatRecordAmount(currentCA, 'operating_planned')}), soit un taux d'exécution de <strong>{operatingRate?.formatted}</strong>.
-              {currentCA.operating_revenue_realized != null && (
-                <span> Le même document indique par ailleurs des recettes de fonctionnement recouvrées de <strong>{formatRecordAmount(currentCA, 'operating_revenue_realized')}</strong>. Cette concomitance ne permet pas, à elle seule, d'établir le mécanisme juridique ou comptable ayant autorisé le dépassement des dépenses.</span>
-              )}
-            </p>
-            <p className="text-[11px] text-purple-800 italic">
-              Conformément à la charte SuiviBudget CI, ces valeurs sont fidèlement extraites du document officiel. Le statut SOURCE_ANOMALY signale ici un écart à corroborer : les pièces actuellement rattachées au dossier ne permettent pas d'en établir la cause ni la nature de l'autorisation budgétaire correspondante. Ce constat technique ne présume d'aucune irrégularité.
-            </p>
-          </div>
-        )}
       </div>
 
       {/* ========================================================================= */}
