@@ -1228,8 +1228,8 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                             <div className="bg-navy-900 h-full transition-all" style={{ width: `${localPct}%` }} title={`Recettes propres: ${localPct}%`}></div>
                           </div>
                           <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-bold gap-1">
-                            <span className="text-brand-blue">■ Subvention de l'État : {statePct}% ({formatFCFA(stateTotal)} <span className="text-xs font-semibold text-brand-blue break-words">({formatAmountInWords(stateTotal)} FCFA)</span> — {formatAmountInWords(stateTotal)})</span>
-                            <span className="text-navy-900">■ Recettes propres {isDistrict ? 'District' : isRegion ? 'Région' : 'Mairie'} : {localPct}% ({formatFCFA(localRev)} — {formatAmountInWords(localRev)})</span>
+                            <span className="text-brand-blue break-words">■ Subvention de l'État : {statePct}% ({formatFCFA(stateTotal)} — {formatAmountInWords(stateTotal)} FCFA)</span>
+                            <span className="text-navy-900 break-words">■ Recettes propres {isDistrict ? 'District' : isRegion ? 'Région' : 'Mairie'} : {localPct}% ({formatFCFA(localRev)} — {formatAmountInWords(localRev)} FCFA)</span>
                           </div>
                         </div>
                       </div>
@@ -1491,7 +1491,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                     <h4 className="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wider">
-                      Dépenses d'Investissement Public Votées : {formatFCFA(institution.budget_investment_fcfa)}
+                      Dépenses d'Investissement Public Votées : {formatFCFA(institution.budget_investment_fcfa)} ({formatAmountInWords(institution.budget_investment_fcfa)} FCFA)
                     </h4>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed font-normal">
