@@ -163,7 +163,7 @@ describe('Lot 2 — Architecture Pilote des Budgets Ministériels (MMPE gov-008)
       expect(proj90043500010!.budget_amount_fcfa).toBe(60_000_000_000);
       expect(proj90043500010!.amount_derivation).toBe('SUM_OF_OFFICIAL_SOURCE_LINES');
       expect(proj90043500010!.source_lines?.length).toBe(2);
-      const sum90043500010 = proj90043500010!.source_lines!.reduce((acc, l) => acc + l.amount_fcfa, 0);
+      const sum90043500010 = proj90043500010!.source_lines!.reduce((acc, l) => acc + (l.amount_fcfa as number), 0);
       expect(sum90043500010).toBe(60_000_000_000);
 
       // Projet 78043500065 (Dorsale Abidjan PK24-Bingerville) : Trésor 6,45 Md + Fin Ext 28,53 Md = 34,99 Md

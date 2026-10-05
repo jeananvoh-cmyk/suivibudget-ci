@@ -77,7 +77,7 @@ export function runMinistryIngestionPipeline(
   // Étape 5 : Normalisation vers le modèle applicatif runtime
   let normalizedModel: MinistryBudget | undefined;
   if (gateDecision.canPublish) {
-    normalizedModel = normalizeToApplicationModel(extraction, options?.institutionIdOverride);
+    normalizedModel = normalizeToApplicationModel(extraction, options?.institutionIdOverride, reconciliation);
   }
 
   return {

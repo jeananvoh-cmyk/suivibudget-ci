@@ -58,12 +58,18 @@ flowchart TD
    Un montant non renseigné ou non décomposé dans les documents officiels est stocké sous forme `null`. Il n'est JAMAIS converti silencieusement en `0`. Seul un zéro formellement documenté (`0 FCFA`) est admis comme valeur numérique nulle.
 2. **`UNKNOWN ≠ ESTIMATION` & `UNKNOWN ≠ FALLBACK`** :
    Aucune valeur n'est inventée ou déduite pour "boucher un trou".
-3. **`SOURCE_GAP ≠ RECONCILED`** :
-   Si $\sum \text{Programmes} \neq \text{Total Ministère}$ ou $\sum \text{Actions} \neq \text{Programme}$, le moteur constate formellement un `SOURCE_GAP` et documente le `delta`. En aucun cas le delta n'est forcé à zéro.
-4. **`Budget Line ≠ Project`** :
+3. **`SOURCE_GAP ≠ RECONCILED` & `NOT_COMPARABLE ≠ RECONCILED`** :
+   - Si $\sum \text{Programmes} \neq \text{Total Ministère}$ ou $\sum \text{Actions} \neq \text{Programme}$, le moteur constate formellement un `SOURCE_GAP` et documente le `delta`. En aucun cas le delta n'est forcé à zéro.
+   - Si un montant requis pour la réconciliation est inconnu (`null`), le statut est strictement qualifié en `NOT_COMPARABLE`. Un statut `NOT_COMPARABLE` ne peut **JAMAIS** être assimilé à `RECONCILED`.
+4. **Décomposition des Activités & Null-Safety** :
+   - Lorsqu'une action budgétaire présente une décomposition en activités (`activities`), si au moins une activité a un montant inconnu (`null`), la somme observée est strictement `null` et le statut est `NOT_COMPARABLE`.
+   - Aucune somme partielle tronquée n'est calculée comme équivalente au total de l'action.
+5. **`Budget Line ≠ Project`** :
    Les projets d'investissements s'inscrivent à l'intérieur des crédits alloués aux actions (`is_funded_within_actions = true`). Ils ne s'additionnent jamais par-dessus les actions ni par-dessus le budget ministériel.
-5. **Consolidation Multi-Lignes Déterministe** :
-   Lorsqu'un projet présente une décomposition multi-lignes de financement (`amount_derivation = 'SUM_OF_OFFICIAL_SOURCE_LINES'`), la règle :
+6. **Consolidation Multi-Lignes Déterministe & Lignes Null-Safe** :
+   - Les lignes de financement d'un projet (`source_lines`) acceptent `amount_fcfa: number | null`. Zéro fallback silencieux `?? 0` ou `|| 0`.
+   - Lorsqu'un projet présente une décomposition multi-lignes de financement (`amount_derivation = 'SUM_OF_OFFICIAL_SOURCE_LINES'`), chaque ligne de source doit obligatoirement avoir un montant numérique documenté non-nul (erreur `MULTI_LINE_AMOUNT_REQUIRED` si `null` ou indéfini).
+   - La règle :
    $$\text{consolidated\_amount\_2026\_fcfa} == \sum \text{source\_lines.amount}$$
    est strictement vérifiée au franc près. Tout écart lève une erreur bloquante `MULTI_LINE_SUM_MISMATCH`.
 
@@ -73,11 +79,18 @@ flowchart TD
 
 Pour qu'un budget ministériel puisse être publié (`canPublish = true`), toutes les conditions suivantes doivent être simultanément remplies :
 1. **Validation structurelle réussie** : Zéro erreur critique (`errors.length === 0`).
-2. **Réconciliation ministérielle exacte** : $\text{Total Ministère} == \sum \text{Programmes}$ ($\text{delta} = 0$).
-3. **Réconciliation de chaque programme** : Pour tout programme, $\text{Dotation Programme} == \sum \text{Actions}$ ($\text{delta} = 0$).
-4. **Intégrité multi-lignes des projets** : Zéro erreur de sommation sur les projets d'investissement.
-5. **Non-double comptage des projets** : Règle `is_funded_within_actions = true` respectée.
-6. **Provenance primaire vérifiable** : URL source officielle HTTPS valide et référence documentaire présente.
+2. **Réconciliation ministérielle exacte** : $\text{Total Ministère} == \sum \text{Programmes}$ ($\text{delta} = 0$, statut `RECONCILED`).
+   - Tout statut `NOT_COMPARABLE` au niveau ministériel bloque immédiatement la publication (`[NOT_COMPARABLE_MINISTRY]`).
+   - Tout total ministériel ou somme de programmes nul/inconnu bloque la publication.
+3. **Réconciliation de chaque programme** : Pour tout programme, $\text{Dotation Programme} == \sum \text{Actions}$ ($\text{delta} = 0$, statut `RECONCILED`).
+   - Tout programme ayant un statut `NOT_COMPARABLE` bloque immédiatement la publication (`[NOT_COMPARABLE_PROGRAM]`).
+4. **Réconciliation de chaque action / activité** :
+   - Toute action ayant un statut `NOT_COMPARABLE` ou un écart non documenté bloque immédiatement la publication (`[NOT_COMPARABLE_ACTION]`).
+5. **Statut global strictement `RECONCILED`** :
+   - Si `global_reconciliation_status === 'NOT_COMPARABLE'`, la publication est formellement bloquée (`[GLOBAL_STATUS_NOT_COMPARABLE]`).
+6. **Intégrité multi-lignes des projets** : Zéro erreur de sommation sur les projets d'investissement. Zéro montant manquant dans les décompositions multi-lignes obligatoires.
+7. **Non-double comptage des projets** : Règle `is_funded_within_actions = true` respectée.
+8. **Provenance primaire vérifiable** : URL source officielle HTTPS valide et référence documentaire présente.
 
 Si une seule condition fait défaut, `canPublish` est évalué à `false` et l'ensemble des motifs bloquants (`blockerReasons`) est retourné.
 

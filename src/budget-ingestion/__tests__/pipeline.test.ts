@@ -66,7 +66,7 @@ describe('LOT 3 — Pipeline Industriel d\'Ingestion Budgétaire Ministérielle'
 
       // Actions Level (Exactly 21)
       expect(recon.actions_level).toHaveLength(21);
-      const totalActionsSum = recon.actions_level.reduce((acc, a) => acc + (a.expected_amount_fcfa ?? 0), 0);
+      const totalActionsSum = recon.actions_level.reduce((acc, a) => acc + (a.expected_amount_fcfa as number), 0);
       expect(totalActionsSum).toBe(706_060_209_015);
 
       // Projects Summary (Exactly 18 projects, 304 158 991 377 FCFA)
@@ -266,8 +266,145 @@ describe('LOT 3 — Pipeline Industriel d\'Ingestion Budgétaire Ministérielle'
       withNull.programs[0].actions[0].amount_2026_fcfa = null;
       const res = validateGenericMinistryBudget(withNull);
       // Null est syntaxiquement accepté (non rejeté par ROOT validator car un montant inconnu peut exister)
-      // mais le réconciliateur signalera un statut SOURCE_GAP ou NOT_COMPARABLE
+      // mais le réconciliateur signalera un statut NOT_COMPARABLE
       expect(res.errors.filter(e => e.rule === 'NEGATIVE_AMOUNT')).toHaveLength(0);
+    });
+
+    it('Cas 14 : total ministériel = null => statut NOT_COMPARABLE et publication bloquée (canPublish false)', () => {
+      const payload: CanonicalMinistryExtraction = JSON.parse(JSON.stringify(MMPE_CANONICAL));
+      payload.totals.total_ministry_2026_fcfa = null;
+
+      const result = runMinistryIngestionPipeline(payload);
+      expect(result.canPublish).toBe(false);
+      expect(result.reconciliation?.ministry_level.status).toBe('NOT_COMPARABLE');
+      expect(result.reconciliation?.global_status).toBe('NOT_COMPARABLE');
+      expect(result.blockers.some(b => b.includes('NOT_COMPARABLE_MINISTRY'))).toBe(true);
+    });
+
+    it('Cas 15 : montant de programme = null => statut NOT_COMPARABLE et publication bloquée (canPublish false)', () => {
+      const payload: CanonicalMinistryExtraction = JSON.parse(JSON.stringify(MMPE_CANONICAL));
+      payload.programs[0].program_amount_2026_fcfa = null;
+
+      const result = runMinistryIngestionPipeline(payload);
+      expect(result.canPublish).toBe(false);
+      const progRecon = result.reconciliation?.programs_level.find(p => p.code === payload.programs[0].program_code);
+      expect(progRecon?.status).toBe('NOT_COMPARABLE');
+      expect(result.reconciliation?.global_status).toBe('NOT_COMPARABLE');
+      expect(result.blockers.some(b => b.includes('NOT_COMPARABLE_PROGRAM'))).toBe(true);
+    });
+
+    it('Cas 16 : montant d\'action = null => statut NOT_COMPARABLE pour le programme parent et publication bloquée', () => {
+      const payload: CanonicalMinistryExtraction = JSON.parse(JSON.stringify(MMPE_CANONICAL));
+      payload.programs[0].actions[0].amount_2026_fcfa = null;
+
+      const result = runMinistryIngestionPipeline(payload);
+      expect(result.canPublish).toBe(false);
+      const progRecon = result.reconciliation?.programs_level.find(p => p.code === payload.programs[0].program_code);
+      expect(progRecon?.status).toBe('NOT_COMPARABLE');
+      expect(result.reconciliation?.global_status).toBe('NOT_COMPARABLE');
+      expect(result.blockers.some(b => b.includes('NOT_COMPARABLE_PROGRAM'))).toBe(true);
+    });
+
+    it('Cas 17 : montant d\'activité = null => aucune conversion en 0, statut NOT_COMPARABLE et publication bloquée', () => {
+      const payload: CanonicalMinistryExtraction = JSON.parse(JSON.stringify(MMPE_CANONICAL));
+      payload.programs[0].actions[0].activities = [
+        {
+          official_code: 'ACT-01',
+          official_name: 'Activité 1 documentée',
+          program_code: payload.programs[0].program_code,
+          action_code: payload.programs[0].actions[0].action_code,
+          amount_2026_fcfa: 1_000_000,
+        },
+        {
+          official_code: 'ACT-02',
+          official_name: 'Activité 2 non documentée (UNKNOWN)',
+          program_code: payload.programs[0].program_code,
+          action_code: payload.programs[0].actions[0].action_code,
+          amount_2026_fcfa: null,
+        },
+      ];
+
+      const result = runMinistryIngestionPipeline(payload);
+      expect(result.canPublish).toBe(false);
+      const actRecon = result.reconciliation?.actions_level.find(a => a.code === payload.programs[0].actions[0].action_code);
+      expect(actRecon?.status).toBe('NOT_COMPARABLE');
+      expect(actRecon?.observed_sum_fcfa).toBeNull();
+      expect(result.reconciliation?.global_status).toBe('NOT_COMPARABLE');
+      expect(result.blockers.some(b => b.includes('NOT_COMPARABLE_ACTION'))).toBe(true);
+    });
+
+    it('Cas 18 : SUM_OF_OFFICIAL_SOURCE_LINES avec une ligne amount null => jamais considérée comme ligne à 0 => publication bloquée', () => {
+      const payload: CanonicalMinistryExtraction = JSON.parse(JSON.stringify(MMPE_CANONICAL));
+      const multiLineProj = payload.projects?.find(p => p.amount_derivation === 'SUM_OF_OFFICIAL_SOURCE_LINES');
+      expect(multiLineProj).toBeDefined();
+      if (multiLineProj && multiLineProj.source_lines.length > 0) {
+        multiLineProj.source_lines[0].amount_2026_fcfa = null;
+        multiLineProj.source_lines[0].amount_fcfa = null;
+      }
+
+      const result = runMinistryIngestionPipeline(payload);
+      expect(result.canPublish).toBe(false);
+      expect(result.blockers.length).toBeGreaterThan(0);
+      expect(
+        result.blockers.some(b => b.includes('MULTI_LINE_AMOUNT_REQUIRED') || b.includes('PROJECT_MULTI_LINE_ERROR'))
+      ).toBe(true);
+    });
+
+    it('Cas 19 : source line sans amount_2026_fcfa et sans amount_fcfa => UNKNOWN préservé (null, jamais 0)', () => {
+      const payload: CanonicalMinistryExtraction = JSON.parse(JSON.stringify(MMPE_CANONICAL));
+      const directProj = payload.projects?.find(p => p.amount_derivation === 'DIRECT_SOURCE_LINE');
+      expect(directProj).toBeDefined();
+      if (directProj && directProj.source_lines.length > 0) {
+        delete directProj.source_lines[0].amount_2026_fcfa;
+        delete directProj.source_lines[0].amount_fcfa;
+      }
+
+      const normalized = normalizeToApplicationModel(payload);
+      const normProj = normalized.programs
+        .flatMap(p => p.actions)
+        .flatMap(a => a.linked_projects || [])
+        .find(p => p.code === directProj?.official_code);
+
+      expect(normProj?.source_lines?.[0].amount_fcfa).toBeNull();
+      expect(normProj?.source_lines?.[0].amount_fcfa).not.toBe(0);
+    });
+
+    it('Cas 20 : normalizer ne transforme aucun montant UNKNOWN en 0 (ministère, programmes, actions, source_lines)', () => {
+      const payload: CanonicalMinistryExtraction = JSON.parse(JSON.stringify(MMPE_CANONICAL));
+      payload.totals.total_ministry_2026_fcfa = null;
+      payload.programs[0].program_amount_2026_fcfa = null;
+      payload.programs[0].actions[0].amount_2026_fcfa = null;
+      if (payload.projects && payload.projects[0]?.source_lines[0]) {
+        payload.projects[0].source_lines[0].amount_2026_fcfa = null;
+        payload.projects[0].source_lines[0].amount_fcfa = null;
+      }
+
+      const normalized = normalizeToApplicationModel(payload);
+      expect(normalized.total_budget_fcfa).toBeNull();
+      expect(normalized.programs[0].amount_fcfa).toBeNull();
+      expect(normalized.programs[0].actions[0].amount_fcfa).toBeNull();
+
+      const firstProjSourceLine = normalized.programs[0].actions[0].linked_projects?.[0]?.source_lines?.[0];
+      if (firstProjSourceLine) {
+        expect(firstProjSourceLine.amount_fcfa).toBeNull();
+      }
+    });
+
+    it('Cas 21 : Golden MMPE reste strictement conforme aux totaux et réconciliations officielles', () => {
+      const result = runMinistryIngestionPipeline(MMPE_CANONICAL, { institutionIdOverride: 'gov-008' });
+      expect(result.success).toBe(true);
+      expect(result.canPublish).toBe(true);
+
+      const rep = result.controlReport!;
+      expect(rep.program_count).toBe(10);
+      expect(rep.action_count).toBe(21);
+      expect(rep.project_count).toBe(18);
+      expect(rep.ministry_total).toBe(706_060_209_015);
+      expect(rep.programs_sum).toBe(706_060_209_015);
+      expect(rep.actions_sum).toBe(706_060_209_015);
+      expect(rep.projects_sum).toBe(304_158_991_377);
+      expect(rep.program_delta).toBe(0);
+      expect(rep.reconciliation_status).toBe('RECONCILED');
     });
   });
 
@@ -278,7 +415,7 @@ describe('LOT 3 — Pipeline Industriel d\'Ingestion Budgétaire Ministérielle'
     it('détecte un écart entre somme des programmes et total ministère et bloque la publication', () => {
       const withGap: CanonicalMinistryExtraction = JSON.parse(JSON.stringify(MMPE_CANONICAL));
       // Altération du montant d'un programme
-      withGap.programs[0].program_amount_2026_fcfa = (withGap.programs[0].program_amount_2026_fcfa ?? 0) + 1_000_000;
+      withGap.programs[0].program_amount_2026_fcfa = (withGap.programs[0].program_amount_2026_fcfa as number) + 1_000_000;
 
       const recon = reconcileMinistryBudget(withGap);
       expect(recon.ministry_level.status).toBe('SOURCE_GAP');
@@ -294,7 +431,7 @@ describe('LOT 3 — Pipeline Industriel d\'Ingestion Budgétaire Ministérielle'
     it('détecte un écart entre actions et programme parent et bloque la publication', () => {
       const withGap: CanonicalMinistryExtraction = JSON.parse(JSON.stringify(MMPE_CANONICAL));
       // Altération de la somme des actions du programme 1
-      withGap.programs[0].actions[0].amount_2026_fcfa = (withGap.programs[0].actions[0].amount_2026_fcfa ?? 0) + 500_000;
+      withGap.programs[0].actions[0].amount_2026_fcfa = (withGap.programs[0].actions[0].amount_2026_fcfa as number) + 500_000;
 
       const recon = reconcileMinistryBudget(withGap);
       const progCheck = recon.programs_level.find(p => p.code === withGap.programs[0].program_code);

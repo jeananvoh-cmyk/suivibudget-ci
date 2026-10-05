@@ -1,6 +1,6 @@
 // Gate de publication pure (LOT 3)
 // Décision déterministe protégeant l'espace public contre toute donnée invalide ou non réconciliée.
-// Invariant : Aucune publication automatique si anomalie structurelle ou écart non documenté.
+// Invariants : NOT_COMPARABLE != RECONCILED, SOURCE_GAP != RECONCILED, UNKNOWN != 0
 
 import {
   CanonicalMinistryExtraction,
@@ -42,37 +42,69 @@ export function canPublishMinistryBudget(
     warningReasons.push(`[VALIDATION_WARNING] ${warn.rule} à ${warn.path}: ${warn.message}`);
   });
 
-  // 3. Réconciliation du montant ministériel
-  if (report.ministry_level.status === 'SOURCE_GAP') {
+  // 3. Statut de réconciliation global
+  if (report.global_status === 'NOT_COMPARABLE') {
     blockerReasons.push(
-      `Écart arithmétique global non réconcilié (delta: ${report.ministry_level.delta_fcfa} FCFA). La somme des programmes doit égaler le total voté.`
+      '[GLOBAL_STATUS_NOT_COMPARABLE] Données financières non comparables (montant total, dotation de programme, action ou activité inconnue). Publication bloquée.'
+    );
+  } else if (report.global_status === 'SOURCE_GAP') {
+    blockerReasons.push(
+      '[GLOBAL_STATUS_SOURCE_GAP] Écart arithmétique officiel constaté non réconcilié. Publication bloquée.'
     );
   }
 
-  // 4. Réconciliation au niveau des programmes
+  // 4. Réconciliation au niveau MINISTÈRE
+  if (report.ministry_level.status === 'NOT_COMPARABLE') {
+    blockerReasons.push(
+      '[NOT_COMPARABLE_MINISTRY] Montant total ministériel inconnu (null) ou somme des programmes non comparable. Publication bloquée.'
+    );
+  } else if (report.ministry_level.status === 'SOURCE_GAP') {
+    blockerReasons.push(
+      `[RECONCILIATION_GAP_MINISTRY] Écart arithmétique global non réconcilié (delta: ${report.ministry_level.delta_fcfa} FCFA). La somme des programmes doit égaler le total voté.`
+    );
+  }
+
+  // 5. Réconciliation au niveau des PROGRAMMES
   for (const progCheck of report.programs_level) {
-    if (progCheck.status === 'SOURCE_GAP') {
+    if (progCheck.status === 'NOT_COMPARABLE') {
       blockerReasons.push(
-        `Programme "${progCheck.code}" : delta de ${progCheck.delta_fcfa} FCFA entre somme des actions (${progCheck.observed_sum_fcfa}) et montant officiel (${progCheck.expected_amount_fcfa}).`
+        `[NOT_COMPARABLE_PROGRAM] Programme "${progCheck.code}" : dotation ou action nécessaire à la réconciliation inconnue (null). Publication bloquée.`
+      );
+    } else if (progCheck.status === 'SOURCE_GAP') {
+      blockerReasons.push(
+        `[RECONCILIATION_GAP_PROGRAM] Programme "${progCheck.code}" : delta de ${progCheck.delta_fcfa} FCFA entre somme des actions (${progCheck.observed_sum_fcfa}) et montant officiel (${progCheck.expected_amount_fcfa}).`
       );
     }
   }
 
-  // 5. Intégrité des projets multi-lignes
+  // 6. Réconciliation au niveau des ACTIONS
+  for (const actCheck of report.actions_level) {
+    if (actCheck.status === 'NOT_COMPARABLE') {
+      blockerReasons.push(
+        `[NOT_COMPARABLE_ACTION] Action "${actCheck.code}" : montant ou décomposition d'activité non comparable (UNKNOWN / null). Publication bloquée.`
+      );
+    } else if (actCheck.status === 'SOURCE_GAP') {
+      blockerReasons.push(
+        `[ACTION_SOURCE_GAP] Action "${actCheck.code}" : écart de ${actCheck.delta_fcfa} FCFA entre activités et montant officiel de l'action.`
+      );
+    }
+  }
+
+  // 7. Intégrité des projets multi-lignes
   if (report.projects_summary.multi_line_errors_count > 0) {
     blockerReasons.push(
-      `[PROJECT_MULTI_LINE_ERROR] ${report.projects_summary.multi_line_errors_count} projet(s) ont une somme de lignes source incohérente avec leur montant consolidé.`
+      `[PROJECT_MULTI_LINE_ERROR] ${report.projects_summary.multi_line_errors_count} projet(s) ont une anomalie de sommation ou une ligne source inconnue (null).`
     );
   }
 
-  // 6. Double comptage interdit
+  // 8. Double comptage interdit
   if (!report.projects_summary.is_funded_within_actions) {
     blockerReasons.push(
       '[DOUBLE_COUNTING_VIOLATION] Les projets doivent être strictement financés au sein des actions budgétaires (is_funded_within_actions doit être vrai).'
     );
   }
 
-  // 7. Source primaire officielle vérifiable (si extraction fournie)
+  // 9. Source primaire officielle vérifiable (si extraction fournie)
   if (data && (!data.source || !data.source.url || !data.source.url.startsWith('https://'))) {
     blockerReasons.push(
       '[MISSING_PRIMARY_SOURCE] URL source primaire HTTPS obligatoire absente ou invalide.'

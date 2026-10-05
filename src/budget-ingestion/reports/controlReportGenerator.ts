@@ -59,7 +59,10 @@ export function generateControlReport(
   const projectCount = data.projects ? data.projects.length : 0;
 
   const programsSum = reconciliation.ministry_level.observed_sum_fcfa;
-  const actionsSum = reconciliation.programs_level.reduce((acc, p) => acc + p.observed_sum_fcfa, 0);
+  const hasAnyNullProgramSum = reconciliation.programs_level.some(p => p.observed_sum_fcfa === null);
+  const actionsSum = hasAnyNullProgramSum
+    ? null
+    : reconciliation.programs_level.reduce((acc, p) => acc + (p.observed_sum_fcfa as number), 0);
 
   return {
     ministry_code: data.institution_code,

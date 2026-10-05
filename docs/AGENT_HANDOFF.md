@@ -5,34 +5,37 @@
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/lot3-ministry-ingestion-engine`
 - BASE_MASTER_SHA : `e188fde5c7f1db973907a45f9301e20080f4e2bf` (Merge commit de PR #25 sur master)
-- CURRENT_HEAD : en cours de finalisation PR LOT 3
-- PR : `feat(pipeline): industrial ministerial budget ingestion engine` (LOT 3)
+- CURRENT_HEAD : `f6bba8e367d9f9614f4d763cb909010b97f23fc7` (correctif post-audit indépendant orchestrateur)
+- PR : #26 (`feat(pipeline): industrial ministerial budget ingestion engine` - LOT 3)
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_SUPABASE_WRITES = 0)
-- CURRENT_MILESTONE : LOT 3 — Industrialisation du pipeline budgétaire ministériel. Moteur d'ingestion déterministe, pur et typé (`src/budget-ingestion/`) validé par le Golden Reference Test MMPE 2026 (10 programmes, 21 actions, 18 projets, 706 060 209 015 FCFA, delta = 0, RECONCILED), 13 tests négatifs stricts de non-régression et d'invariants (0 any, aucune inférence arbitraire, publication gate hermétique, registre central des 35 ministères 2026 avec MMPE seul publié et 34 en attente documentaire ; 18/18 test files PASS, 306/306 tests PASS, build PASS).
+- CURRENT_MILESTONE : LOT 3 — Industrialisation du pipeline budgétaire ministériel. Moteur d'ingestion déterministe, pur et typé (`src/budget-ingestion/`) validé par le Golden Reference Test MMPE 2026 (10 programmes, 21 actions, 18 projets, 706 060 209 015 FCFA, delta = 0, RECONCILED), publication gate hermétique avec blocage strict de `NOT_COMPARABLE` (`NOT_COMPARABLE != RECONCILED`), null-safety sur activités et lignes de sources, éradication totale des fallbacks financiers `UNKNOWN -> 0`, registre central des 35 ministères 2026 avec MMPE seul publié et 34 en attente documentaire (18/18 test files PASS, 314/314 tests PASS, build PASS).
 - FOUNDATION_READY : TRUE.
 
 ## LOT 3 : INDUSTRIALISATION DU PIPELINE BUDGÉTAIRE MINISTÉRIEL
 - **1. Objectif & Principes d'Ingénierie** :
   - Industrialisation générique du pipeline budgétaire de l'État de Côte d'Ivoire (Nomenclature Budget-Programmes DGBF 2026).
   - Sanctuaire des données réelles : Zéro extrapolation arbitraire, zéro devinette, zéro cast permissif (`0 any`).
-  - Invariants stricts : `UNKNOWN ≠ 0`, `UNKNOWN ≠ estimation`, `UNKNOWN ≠ fallback`, `SOURCE_GAP ≠ RECONCILED`, `Budget Line ≠ Project`.
+  - Invariants stricts : `UNKNOWN ≠ 0`, `UNKNOWN ≠ estimation`, `UNKNOWN ≠ fallback`, `SOURCE_GAP ≠ RECONCILED`, `NOT_COMPARABLE ≠ RECONCILED`, `Budget Line ≠ Project`.
   - MMPE (`MMPE_CANONICAL_BUDGET_2026.json`) maintenu comme Golden Reference absolue verrouillée.
   - Aucun import précipité des 34 autres ministères sans validation documentaire préalable.
 - **2. Architecture Modulaire (`src/budget-ingestion/`)** :
-  - `types/index.ts` : Typage TypeScript exhaustif des structures canoniques (`CanonicalMinistryExtraction`, `CanonicalProgram`, `CanonicalAction`, `CanonicalProject`, `CanonicalSourceLine`), résultats de validation, réconciliation, audit et registre.
-  - `validators/genericMinistryValidator.ts` : Validateur pur et déterministe sans effet de bord vérifiant la complétude structurelle, l'absence de montants négatifs, l'unicité des codes, l'absence d'éléments orphelins, la présence de sources HTTPS vérifiables et la concordance de la sommation multi-lignes.
-  - `reconcilers/ministryReconciler.ts` : Moteur de réconciliation arithmétique multi-niveaux constatant les équilibres ou écarts officiels (`MINISTRY`, `PROGRAM`, `ACTION`, `PROJECT`) sans jamais forcer un delta à zéro.
-  - `gates/publicationGate.ts` : Décision binaire et déterministe de publication (`canPublish`), bloquant immédiatement la diffusion si validation en échec, delta non nul, erreur multi-lignes ou double comptage.
+  - `types/index.ts` : Typage TypeScript exhaustif des structures canoniques (`CanonicalMinistryExtraction`, `CanonicalProgram`, `CanonicalAction`, `CanonicalProject`, `CanonicalSourceLine`), résultats de validation, réconciliation (`observed_sum_fcfa: number | null`, `delta_fcfa: number | null`), audit et registre.
+  - `validators/genericMinistryValidator.ts` : Validateur pur et déterministe sans effet de bord vérifiant la complétude structurelle, l'absence de montants négatifs, l'unicité des codes, l'absence d'éléments orphelins, la présence de sources HTTPS vérifiables, la complétude numérique des lignes de sources (`MULTI_LINE_AMOUNT_REQUIRED`), et la concordance de la sommation multi-lignes.
+  - `reconcilers/ministryReconciler.ts` : Moteur de réconciliation arithmétique multi-niveaux constatant les équilibres ou écarts officiels (`MINISTRY`, `PROGRAM`, `ACTION`, `PROJECT`) sans jamais forcer un delta à zéro, propageant `null` / `NOT_COMPARABLE` dès qu'un montant requis est inconnu.
+  - `gates/publicationGate.ts` : Décision binaire et déterministe de publication (`canPublish`), bloquant immédiatement la diffusion si validation en échec, delta non nul, statut `NOT_COMPARABLE` (ministère, programme, action ou global), erreur multi-lignes ou double comptage.
   - `reports/controlReportGenerator.ts` : Générateur de rapport de contrôle auditable et machine-readable (`ControlReport`) récapitulant l'intégralité des vérifications pour les tiers et la gouvernance.
-  - `normalizers/canonicalNormalizer.ts` : Fonction pure transformant l'extraction canonique validée vers le modèle applicatif runtime `MinistryBudget`.
+  - `normalizers/canonicalNormalizer.ts` : Fonction pure transformant l'extraction canonique validée vers le modèle applicatif runtime `MinistryBudget`, dérivant le statut de réconciliation directement du rapport sans hardcoding.
   - `registry/ministryRegistry.ts` : Registre central des 35 ministères et entités gouvernementales 2026. MMPE (`gov-008` / `348`) est l'unique entité `VERIFIED` et `PUBLISHED`. Les 34 autres sont `PENDING_DOCUMENTATION` et `DRAFT`.
   - `index.ts` : Orchestrateur central exportant la fonction `runMinistryIngestionPipeline`.
 - **3. Suite de Tests Exhaustive (`src/budget-ingestion/__tests__/pipeline.test.ts`)** :
   - Golden Reference Master Test sur MMPE 2026 : validation de bout en bout, 10/10 programmes, 21/21 actions, 18/18 projets, total 706 060 209 015 FCFA, delta = 0, statut `RECONCILED`, `canPublish === true`.
-  - 13 cas de tests négatifs stricts : Rejet de payload non-objet, métadonnées manquantes, montants négatifs, doublons de programmes/actions/projets, actions/projets orphelins, programmes vides, incohérences multi-lignes, et respect de `UNKNOWN ≠ 0`.
+  - 21 cas de tests unitaires et d'intégration stricts couvrant :
+    - Rejet de payload non-objet, métadonnées manquantes, montants négatifs, doublons de programmes/actions/projets, actions/projets orphelins, programmes vides, incohérences multi-lignes.
+    - Respect absolu de `UNKNOWN ≠ 0` et élimination des conversions tacites.
+    - Cas 14 à 21 (Correctifs Audit Orchestrateur) : Blocage publication si ministère NOT_COMPARABLE, blocage si programme NOT_COMPARABLE, blocage si action/activités NOT_COMPARABLE, rejet montant manquant dans source_lines, acceptation amount_fcfa: null en dehors des calculs obligatoires, protection contre division/sommation partielle sur activités incomplètes, statut dérivé dynamiquement du réconciliateur, 0 occurrence de `?? 0` ou `|| 0` financier.
   - Tests du registre des 35 ministères : Détection et statut isolé du MMPE, 34 ministères en attente documentaire.
 - **4. Documentation Technique (`docs/budget-ingestion/MINISTRY_INGESTION_PIPELINE.md`)** :
-  - Spécification complète du pipeline, diagramme de flux, règles du portail de publication et protocole pas-à-pas pour l'intégration future des 34 autres ministères.
+  - Spécification complète du pipeline, diagramme de flux, règles d'intégrité `NOT_COMPARABLE`, règles du portail de publication et protocole pas-à-pas pour l'intégration future des 34 autres ministères.
 
 ## LOT 2 : ARCHITECTURE PILOTE DES MINISTÈRES (MINISTÈRE DES MINES, DU PÉTROLE ET DE L'ÉNERGIE)
 - **1. Doctrine Républicaine & Périmètre Pilote Unique** :

@@ -391,26 +391,43 @@ export function validateGenericMinistryData(data: unknown): ValidationResult {
         });
       } else {
         const derivation = proj.amount_derivation;
+        let hasIncompleteLine = false;
         let sumSourceLines = 0;
 
         (proj.source_lines as Array<Record<string, unknown>>).forEach((line, slIdx) => {
           const rawLineAmount = line.amount_2026_fcfa ?? line.amount_fcfa;
-          const lineAmount = typeof rawLineAmount === 'number' ? rawLineAmount : 0;
 
-          if (lineAmount < 0) {
+          if (rawLineAmount === null || rawLineAmount === undefined) {
+            if (derivation === 'SUM_OF_OFFICIAL_SOURCE_LINES') {
+              hasIncompleteLine = true;
+              errors.push({
+                path: `${prPath}.source_lines[${slIdx}]`,
+                rule: 'MULTI_LINE_AMOUNT_REQUIRED',
+                message: `Montant requis pour la ligne source ${slIdx} du projet multi-lignes "${projCode}". Une valeur UNKNOWN/null ne peut pas être sommée.`,
+                critical: true,
+              });
+            }
+          } else if (typeof rawLineAmount !== 'number') {
+            errors.push({
+              path: `${prPath}.source_lines[${slIdx}]`,
+              rule: 'INVALID_SOURCE_LINE_AMOUNT',
+              message: `Montant invalide pour la ligne source ${slIdx} du projet "${projCode}".`,
+              critical: true,
+            });
+          } else if (rawLineAmount < 0) {
             errors.push({
               path: `${prPath}.source_lines[${slIdx}]`,
               rule: 'NEGATIVE_AMOUNT',
               message: `Montant négatif interdit dans la ligne source ${slIdx} du projet "${projCode}".`,
               critical: true,
             });
+          } else {
+            sumSourceLines += rawLineAmount;
           }
-
-          sumSourceLines += lineAmount;
         });
 
         // Si sommation déclarée, la somme des lignes doit correspondre au montant consolidé
-        if (derivation === 'SUM_OF_OFFICIAL_SOURCE_LINES') {
+        if (derivation === 'SUM_OF_OFFICIAL_SOURCE_LINES' && !hasIncompleteLine) {
           if (typeof amount === 'number' && sumSourceLines !== amount) {
             errors.push({
               path: `${prPath}.consolidated_amount_2026_fcfa`,

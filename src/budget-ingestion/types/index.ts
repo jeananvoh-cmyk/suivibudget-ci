@@ -35,8 +35,8 @@ export interface CanonicalSourceLine {
   official_code?: string;
   financing_type?: FinancingType;
   economic_nature?: EconomicNature;
-  amount_fcfa?: number;
-  amount_2026_fcfa?: number;
+  amount_fcfa?: number | null;
+  amount_2026_fcfa?: number | null;
   page_reference?: string;
   table_reference?: string;
   notes?: string;
@@ -156,8 +156,8 @@ export interface ReconciliationLevelResult {
   name: string;
   level: 'MINISTRY' | 'PROGRAM' | 'ACTION' | 'PROJECT';
   expected_amount_fcfa: number | null;
-  observed_sum_fcfa: number;
-  delta_fcfa: number;
+  observed_sum_fcfa: number | null;
+  delta_fcfa: number | null;
   status: IngestionReconciliationStatus;
   sub_items_count: number;
   notes?: string;
@@ -171,10 +171,11 @@ export interface IngestionReconciliationReport {
   actions_level: ReconciliationLevelResult[];
   projects_summary: {
     total_projects_count: number;
-    total_projects_amount_fcfa: number;
+    total_projects_amount_fcfa: number | null;
     is_funded_within_actions: boolean;
     multi_line_projects_checked: number;
     multi_line_errors_count: number;
+    has_incomplete_source_lines?: boolean;
   };
   global_status: IngestionReconciliationStatus;
 }
@@ -194,17 +195,17 @@ export interface ControlReport {
   action_count: number;
   project_count: number;
   ministry_total: number | null;
-  programs_sum: number;
-  program_delta: number;
-  actions_sum: number;
-  projects_sum: number;
+  programs_sum: number | null;
+  program_delta: number | null;
+  actions_sum: number | null;
+  projects_sum: number | null;
   reconciliation_status: IngestionReconciliationStatus;
   source_gaps: Array<{
     level: string;
     code: string;
     expected: number | null;
-    observed: number;
-    delta: number;
+    observed: number | null;
+    delta: number | null;
   }>;
   errors: string[];
   warnings: string[];
