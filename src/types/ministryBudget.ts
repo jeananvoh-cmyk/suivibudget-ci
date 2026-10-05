@@ -32,11 +32,20 @@ export interface BudgetActivity {
   fiscal_year: number;
 }
 
+export interface ProjectSourceLine {
+  official_code?: string;
+  amount_fcfa: number;
+  financing_type?: 'TRESOR' | 'FINANCEMENT_EXTERIEUR' | 'OTHER' | string;
+  economic_nature?: 'INVESTISSEMENTS' | string;
+  page_reference?: string;
+  table_reference?: string;
+}
+
 export interface MinistryLinkedProject {
   id: string;
   internal_id?: string;
   code: string;
-  official_code?: string;
+  official_code: string; // Code officiel DGBF (ex: '90043500010')
   title: string;
   budget_amount_fcfa: number;
   program_id: string;
@@ -44,6 +53,10 @@ export interface MinistryLinkedProject {
   current_status: string;
   region_name?: string;
   page_reference?: string;
+  table_reference?: string;
+  source_lines?: ProjectSourceLine[];
+  amount_derivation?: 'DIRECT_SOURCE_LINE' | 'SUM_OF_OFFICIAL_SOURCE_LINES';
+  citizen_description?: string;
   is_funded_within_action: boolean; // Toujours true pour formaliser l'absence de double comptage
 }
 
@@ -52,13 +65,16 @@ export interface BudgetAction {
   program_id: string;
   code: string;
   official_code: string; // Ex: '2110601'
-  name: string;
+  name: string; // Libellé officiel DGBF
   description?: string;
+  citizen_description?: string;
   amount_fcfa: number | null;
   reconciliation_status: ReconciliationStatus;
   page_reference?: string;
+  table_reference?: string;
   source?: string;
   source_url?: string;
+  evidence_status?: string;
   evidence_type?: EvidenceType;
   activities?: BudgetActivity[];
   linked_projects?: MinistryLinkedProject[];

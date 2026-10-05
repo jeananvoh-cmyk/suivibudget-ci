@@ -71,36 +71,16 @@ const getProgramTheme = (code: string) => {
         iconBg: 'bg-amber-100 text-amber-700',
       };
     case '22107':
-      return {
-        bg: 'bg-emerald-50/60',
-        border: 'border-emerald-200',
-        badgeBg: 'bg-emerald-100 text-emerald-800',
-        iconBg: 'bg-emerald-100 text-emerald-700',
-      };
+      return { bg: 'bg-emerald-50/60', border: 'border-emerald-200', badgeBg: 'bg-emerald-100 text-emerald-800', iconBg: 'bg-emerald-100 text-emerald-700' };
     case '23230':
     case '23251':
-      return {
-        bg: 'bg-sky-50/60',
-        border: 'border-sky-200',
-        badgeBg: 'bg-sky-100 text-sky-800',
-        iconBg: 'bg-sky-100 text-sky-700',
-      };
+      return { bg: 'bg-sky-50/60', border: 'border-sky-200', badgeBg: 'bg-sky-100 text-sky-800', iconBg: 'bg-sky-100 text-sky-700' };
     case '23231':
     case '23233':
     case '23234':
-      return {
-        bg: 'bg-orange-50/60',
-        border: 'border-orange-200',
-        badgeBg: 'bg-orange-100 text-orange-800',
-        iconBg: 'bg-orange-100 text-orange-700',
-      };
+      return { bg: 'bg-orange-50/60', border: 'border-orange-200', badgeBg: 'bg-orange-100 text-orange-800', iconBg: 'bg-orange-100 text-orange-700' };
     default:
-      return {
-        bg: 'bg-blue-50/60',
-        border: 'border-blue-200',
-        badgeBg: 'bg-blue-100 text-blue-800',
-        iconBg: 'bg-blue-100 text-brand-blue',
-      };
+      return { bg: 'bg-blue-50/60', border: 'border-blue-200', badgeBg: 'bg-blue-100 text-blue-800', iconBg: 'bg-blue-100 text-brand-blue' };
   }
 };
 

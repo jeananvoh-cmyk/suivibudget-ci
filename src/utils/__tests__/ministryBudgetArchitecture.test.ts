@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
 import {
   MMPE_MINISTRY_BUDGET_2026,
   MMPE_INSTITUTION_ID,
@@ -10,42 +12,34 @@ import { GOVERNMENT_OFFICIALS } from '../../data/governmentData';
 import { OFFICIAL_PRIMITIVE_BUDGETS } from '../../data/officialPrimitiveBudgets';
 import { CA_PILOT_FIXTURES } from './caPilotFixtures';
 
+// Load canonical referential locked during documentary validation
+const canonicalPath = path.resolve(
+  __dirname,
+  '../../../docs/references/2026/ministry-mines-petroleum-energy/MMPE_CANONICAL_BUDGET_2026.json'
+);
+const CANONICAL_DATA = JSON.parse(fs.readFileSync(canonicalPath, 'utf-8'));
+
 describe('Lot 2 — Architecture Pilote des Budgets Ministériels (MMPE gov-008)', () => {
   // -------------------------------------------------------------------------
   // 1. GOLDEN REFERENCE TEST (Nomenclature Canonique DGBF 2026 — 10 Programmes)
   // -------------------------------------------------------------------------
   describe('Golden Reference Test — 10 Programmes Officiels DGBF', () => {
-    const EXPECTED_PROGRAMS = [
-      { code: '21106', name: 'Administration Générale', amount: 8_701_872_126 },
-      { code: '22036', name: 'Hydrocarbures', amount: 116_054_336 },
-      { code: '22037', name: 'Energie', amount: 320_914_619_601 },
-      { code: '22107', name: 'Mines et géologie', amount: 783_321_335 },
-      { code: '23230', name: "Appui au financement du secteur de l'électricité", amount: 70_368_000_000 },
-      { code: '23231', name: 'Appui au financement de la Société Ivoirienne de Raffinage (SIR)', amount: 57_906_341_617 },
-      { code: '23232', name: 'Appui au financement du secteur minier', amount: 28_500_000_000 },
-      { code: '23233', name: 'Péréquation produit à la Société Ivoirienne de Raffinage (SIR)', amount: 105_000_000_000 },
-      { code: '23234', name: "Péréquation transport à la Société d'Etudes et de Gestion en Hydrocarbures (SEGH)", amount: 70_000_000_000 },
-      { code: '23251', name: "Appui au financement à Côte d'Ivoire ENERGIE", amount: 43_770_000_000 },
-    ];
-
-    it('imposes exactly 10 official DGBF programs with correct canonical codes and amounts', () => {
+    it('imposes exactly 10 official DGBF programs perfectly matching canonical referential', () => {
       // 1. Nombre exact de programmes = 10
       expect(MMPE_MINISTRY_BUDGET_2026.programs.length).toBe(10);
+      expect(CANONICAL_DATA.programs.length).toBe(10);
 
-      // 2. Codes officiels
-      const actualCodes = MMPE_MINISTRY_BUDGET_2026.programs.map(p => p.official_code || p.code);
-      const expectedCodes = EXPECTED_PROGRAMS.map(p => p.code);
-      expect(actualCodes).toEqual(expectedCodes);
-
-      // 3. Montants officiels exacts pour chaque programme
-      EXPECTED_PROGRAMS.forEach((expected, index) => {
+      // 2. Alignement strict avec le référentiel canonique pour chaque programme
+      CANONICAL_DATA.programs.forEach((canonicalProg: any, index: number) => {
         const prog = MMPE_MINISTRY_BUDGET_2026.programs[index];
-        expect(prog.official_code).toBe(expected.code);
-        expect(prog.name).toContain(expected.name.slice(0, 15));
-        expect(prog.amount_fcfa).toBe(expected.amount);
+        expect(prog.official_code).toBe(canonicalProg.program_code);
+        expect(prog.code).toBe(canonicalProg.program_code);
+        expect(prog.name).toBe(canonicalProg.official_name);
+        expect(prog.amount_fcfa).toBe(canonicalProg.program_amount_2026_fcfa);
+        expect(prog.reconciliation_status).toBe('RECONCILED');
       });
 
-      // 4. Somme arithmétique exacte = 706 060 209 015 FCFA
+      // 3. Somme arithmétique exacte = 706 060 209 015 FCFA avec delta = 0
       const sum = MMPE_MINISTRY_BUDGET_2026.programs.reduce(
         (acc, p) => acc + (p.amount_fcfa ?? 0),
         0
@@ -56,13 +50,12 @@ describe('Lot 2 — Architecture Pilote des Budgets Ministériels (MMPE gov-008)
     });
 
     it('forbids the pseudo-program CAS (Comptes Spéciaux du Trésor & Fonds de Soutien)', () => {
-      // Vérifie l'absence absolue de prog-mmpe-cas
       const casProgram = MMPE_MINISTRY_BUDGET_2026.programs.find(
         p => p.id === 'prog-mmpe-cas' || p.code === 'CAS' || p.name.includes('Comptes Spéciaux')
       );
       expect(casProgram).toBeUndefined();
 
-      // Vérifie que les 6 programmes de transferts sont bien individualisés (23230 à 23251)
+      // Vérifie que les 6 programmes de transferts/fonds sont individualisés (23230 à 23251)
       const specialTransferCodes = ['23230', '23231', '23232', '23233', '23234', '23251'];
       specialTransferCodes.forEach(code => {
         const found = MMPE_MINISTRY_BUDGET_2026.programs.find(p => p.official_code === code);
@@ -73,31 +66,26 @@ describe('Lot 2 — Architecture Pilote des Budgets Ministériels (MMPE gov-008)
   });
 
   // -------------------------------------------------------------------------
-  // 2. INTÉGRITÉ DES ACTIONS ET VENTILATIONS BUDGÉTAIRES
+  // 2. INTÉGRITÉ DES 21 ACTIONS OFFICIELLES ET RÉCONCILIATION ARITHMÉTIQUE
   // -------------------------------------------------------------------------
-  describe('Actions et Réconciliation', () => {
-    it('all actions have official codes and match parent programs', () => {
-      const validProgramIds = new Set(MMPE_MINISTRY_BUDGET_2026.programs.map(p => p.id));
-      let totalActions = 0;
+  describe('Actions et Réconciliation (21 Actions Officielles DGBF)', () => {
+    it('all 21 actions match canonical referential exactly without discrepancy', () => {
+      const allRuntimeActions = MMPE_MINISTRY_BUDGET_2026.programs.flatMap(p => p.actions);
+      const allCanonicalActions = CANONICAL_DATA.programs.flatMap((p: any) => p.actions);
 
-      MMPE_MINISTRY_BUDGET_2026.programs.forEach(prog => {
-        expect(prog.actions.length).toBeGreaterThan(0);
-        prog.actions.forEach(act => {
-          expect(validProgramIds.has(act.program_id)).toBe(true);
-          expect(act.program_id).toBe(prog.id);
-          expect(act.official_code).toMatch(new RegExp(`^${prog.official_code}`));
-          expect(['RECONCILED', 'PARTIAL', 'SOURCE_GAP', 'NOT_COMPARABLE']).toContain(
-            act.reconciliation_status
-          );
-          totalActions++;
-        });
+      expect(allRuntimeActions.length).toBe(21);
+      expect(allCanonicalActions.length).toBe(21);
+
+      allCanonicalActions.forEach((canonicalAct: any) => {
+        const runtimeAct = allRuntimeActions.find(a => a.official_code === canonicalAct.action_code);
+        expect(runtimeAct).toBeDefined();
+        expect(runtimeAct!.name).toBe(canonicalAct.official_name);
+        expect(runtimeAct!.amount_fcfa).toBe(canonicalAct.amount_2026_fcfa);
+        expect(runtimeAct!.reconciliation_status).toBe('RECONCILED');
       });
-
-      // 4 actions P1 + 3 actions P2 + 4 actions P3 + 4 actions P4 + 6 actions pour 23230-23251 = 21 actions
-      expect(totalActions).toBe(21);
     });
 
-    it('reconciles actions arithmetically for each program without discrepancy', () => {
+    it('reconciles actions arithmetically for each program with delta = 0', () => {
       const check = performMinistryArithmeticCheck(MMPE_MINISTRY_BUDGET_2026);
       expect(check.programs_delta_fcfa).toBe(0);
       expect(check.programs_reconciliation_status).toBe('RECONCILED');
@@ -108,12 +96,37 @@ describe('Lot 2 — Architecture Pilote des Budgets Ministériels (MMPE gov-008)
         expect(actionCheck.status).toBe('RECONCILED');
       });
     });
+
+    it('forbids fabricated action amounts and non-existent Action 2210704', () => {
+      const allRuntimeActions = MMPE_MINISTRY_BUDGET_2026.programs.flatMap(p => p.actions);
+      const allActionAmounts = allRuntimeActions.map(a => a.amount_fcfa);
+
+      // 8 montants fabriqués dans l'ancienne version qui doivent être rigoureusement absents
+      const FORBIDDEN_OLD_AMOUNTS = [
+        5_450_635_152,
+        880_412_900,
+        1_730_544_074,
+        640_280_000,
+        45_200_000,
+        42_854_336,
+        28_000_000,
+        102_000_000,
+      ];
+
+      FORBIDDEN_OLD_AMOUNTS.forEach(forbiddenAmount => {
+        expect(allActionAmounts).not.toContain(forbiddenAmount);
+      });
+
+      // L'Action 2210704 (102 000 000 FCFA) n'existe pas dans le document officiel DGBF
+      const forbiddenAction = allRuntimeActions.find(a => a.official_code === '2210704');
+      expect(forbiddenAction).toBeUndefined();
+    });
   });
 
   // -------------------------------------------------------------------------
-  // 3. PROJETS LIÉS ET RÈGLE BUDGET LINE ≠ PROJECT
+  // 3. PROJETS LIÉS ET RÈGLE BUDGET LINE ≠ PROJECT (18 PROJETS D'INVESTISSEMENT)
   // -------------------------------------------------------------------------
-  describe('Projets Liés et Règle de Non-Double Comptage', () => {
+  describe('Projets Liés et Règle de Non-Double Comptage (18 Projets)', () => {
     it('18 national projects are integrated within action envelopes without inflating total', () => {
       const allLinkedProjects = MMPE_MINISTRY_BUDGET_2026.programs.flatMap(p =>
         p.actions.flatMap(a => a.linked_projects || [])
@@ -123,19 +136,54 @@ describe('Lot 2 — Architecture Pilote des Budgets Ministériels (MMPE gov-008)
       const sumProjects = allLinkedProjects.reduce((acc, p) => acc + p.budget_amount_fcfa, 0);
       expect(sumProjects).toBe(304_158_991_377);
 
+      // Vérifie les codes officiels à 11 chiffres (pas de code inventé PROJ-MMPE-)
       allLinkedProjects.forEach(proj => {
         expect(proj.is_funded_within_action).toBe(true);
-        expect(proj.internal_id).toMatch(/^nat-proj-2026-\d{4}$/);
-        expect(proj.official_code).toMatch(/^PROJ-MMPE-/);
+        expect(proj.official_code).toMatch(/^\d{11}$/);
+        expect(proj.code).toMatch(/^\d{11}$/);
       });
 
-      // Règle d'or : le budget total du ministère reste la somme des programmes,
-      // sans additionner la somme des projets par-dessus !
+      // Règle d'or : le budget total du ministère reste la somme des programmes
       const sumPrograms = MMPE_MINISTRY_BUDGET_2026.programs.reduce(
         (acc, p) => acc + (p.amount_fcfa ?? 0),
         0
       );
       expect(sumPrograms).toBe(MMPE_MINISTRY_BUDGET_2026.total_budget_fcfa);
+    });
+
+    it('validates multi-line source breakdown and amounts derivation for complex projects', () => {
+      const allLinkedProjects = MMPE_MINISTRY_BUDGET_2026.programs.flatMap(p =>
+        p.actions.flatMap(a => a.linked_projects || [])
+      );
+
+      // Projet 90043500010 (Numérisation électricité) : Trésor 10 Md + Fin Ext 50 Md = 60 Md
+      const proj90043500010 = allLinkedProjects.find(p => p.official_code === '90043500010');
+      expect(proj90043500010).toBeDefined();
+      expect(proj90043500010!.budget_amount_fcfa).toBe(60_000_000_000);
+      expect(proj90043500010!.amount_derivation).toBe('SUM_OF_OFFICIAL_SOURCE_LINES');
+      expect(proj90043500010!.source_lines?.length).toBe(2);
+      const sum90043500010 = proj90043500010!.source_lines!.reduce((acc, l) => acc + l.amount_fcfa, 0);
+      expect(sum90043500010).toBe(60_000_000_000);
+
+      // Projet 78043500065 (Dorsale Abidjan PK24-Bingerville) : Trésor 6,45 Md + Fin Ext 28,53 Md = 34,99 Md
+      const proj78043500065 = allLinkedProjects.find(p => p.official_code === '78043500065');
+      expect(proj78043500065).toBeDefined();
+      expect(proj78043500065!.budget_amount_fcfa).toBe(34_990_845_661);
+      expect(proj78043500065!.amount_derivation).toBe('SUM_OF_OFFICIAL_SOURCE_LINES');
+      expect(proj78043500065!.source_lines?.length).toBe(2);
+
+      // Projet 90043500017 (Corridor Nord) : Trésor 6 Md + Fin Ext 40 Md = 46 Md
+      const proj90043500017 = allLinkedProjects.find(p => p.official_code === '90043500017');
+      expect(proj90043500017).toBeDefined();
+      expect(proj90043500017!.budget_amount_fcfa).toBe(46_000_000_000);
+      expect(proj90043500017!.source_lines?.length).toBe(2);
+
+      // Projet 78043200113 (Schéma Directeur SI) : 300 M sous action 2110601 (Programme 21106)
+      const projSI = allLinkedProjects.find(p => p.official_code === '78043200113');
+      expect(projSI).toBeDefined();
+      expect(projSI!.budget_amount_fcfa).toBe(300_000_000);
+      expect(projSI!.action_id).toBe('act-2110601');
+      expect(projSI!.program_id).toBe('prog-21106');
     });
   });
 

@@ -502,9 +502,9 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Contrôle par l'orchestrateur de l'extraction documentaire canonique candidate (`docs/references/2026/ministry-mines-petroleum-energy/ANTIGRAVITY_CANONICAL_EXTRACTION_CANDIDATE.json`) et du rapport des divergences (`ANTIGRAVITY_EXTRACTION_DIFF.md`).
-2. Décision d'arbitrage de l'orchestrateur sur l'alignement des actions et libellés dans le modèle applicatif `mmpe.json` (séparation stricte Extraction vs Implémentation respectée, 0 fichier `src/` modifié).
-3. Contrôle indépendant et validation globale du LOT 2 avant autorisation de merge.
+1. Contrôle final indépendant par l'orchestrateur de la PR #25 sur la branche `antigravity/lot2-ministry-budget-architecture-pilot`.
+2. Autorisation formelle de fusion de la PR #25 sur master après vérification des 10 programmes, 21 actions, 18 projets et 0 régression communale.
+3. Préparation du cadrage pour le LOT 3 (après fusion effective de la PR #25).
 
 ## COCODY_REMOTE_CLOSEOUT — ORCHESTRATEUR 2026-10-02
 - Institution canonique ajoutée à `public.institutions` : `inst-com-cocody`, `Mairie de Cocody`, type applicatif `MAIRIE`, région Abidjan, District Autonome d'Abidjan.
