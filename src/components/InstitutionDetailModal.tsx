@@ -1147,7 +1147,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                                 </div>
                               ) : (
                                 <div className="p-2.5 bg-white rounded-xl border border-blue-100 text-[11px] text-slate-600 shadow-2xs leading-snug">
-                                  Collectivité à forte autonomie fiscale : les dépenses sont couvertes sans dotation directe de l'État, grâce aux quotes-parts de fiscalité locale directe reversées par la DGI.
+                                  Aucune dotation directe de l'État n'est renseignée pour cette composante dans les données actuellement disponibles.
                                 </div>
                               )}
                             </div>
@@ -1444,7 +1444,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 flex items-start gap-2">
                       <Info className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
                       <span>
-                        La ventilation détaillée entre dépenses de fonctionnement et dépenses d'investissement de cette entité est en cours de corroboration avec l'annexe officielle de la Loi de Finances.
+                        Ventilation détaillée entre dépenses de fonctionnement et dépenses d'investissement non disponible dans les données actuellement publiées.
                       </span>
                     </div>
                   )}

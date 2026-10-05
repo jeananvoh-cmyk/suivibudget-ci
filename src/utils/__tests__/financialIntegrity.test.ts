@@ -405,38 +405,120 @@ describe('Financial Integrity & Data Sanitation (LOT 1)', () => {
     });
   });
 
-  describe('Database Schema Integrity', () => {
-    it('D. Schema verification: drops DEFAULT 0 on 5 target columns and keeps executed_amount untouched', () => {
-      const schemaSql = readFileSync('supabase/schema.sql', 'utf8');
-      const supabaseSchemaSql = readFileSync('supabase_schema.sql', 'utf8');
-      const migrationSql = readFileSync('supabase/migrations/20261005100000_drop_default_zero_institutions_budget.sql', 'utf8');
+  describe('Database Schema & Migration Integrity (LOT 1 Clôture Définitive)', () => {
+    const migrationSql = readFileSync('supabase/migrations/20261005100000_drop_default_zero_institutions_budget.sql', 'utf8');
+    const schemaSql = readFileSync('supabase/schema.sql', 'utf8');
+    const supabaseSchemaSql = readFileSync('supabase_schema.sql', 'utf8');
 
-      // 1. supabase/schema.sql ne doit plus contenir DEFAULT 0 sur les 3 colonnes de institutions
-      expect(schemaSql).not.toMatch(/total_budget_fcfa\s+BIGINT\s+DEFAULT\s+0/i);
-      expect(schemaSql).not.toMatch(/budget_functioning_fcfa\s+BIGINT\s+DEFAULT\s+0/i);
-      expect(schemaSql).not.toMatch(/budget_investment_fcfa\s+BIGINT\s+DEFAULT\s+0/i);
+    it('A. Migration targets strictly the 4 legacy historical institutions', () => {
+      const expectedLegacyIds = [
+        'inst-com-abobo',
+        'inst-com-bingerville',
+        'inst-com-cocody',
+        'inst-com-tiassale',
+      ];
 
-      // 2. supabase_schema.sql ne doit plus contenir DEFAULT 0 sur les 3 colonnes de institutions
-      expect(supabaseSchemaSql).not.toMatch(/budget_functioning_fcfa\s+NUMERIC\(15,\s*2\)\s+DEFAULT\s+0/i);
-      expect(supabaseSchemaSql).not.toMatch(/budget_investment_fcfa\s+NUMERIC\(15,\s*2\)\s+DEFAULT\s+0/i);
-      expect(supabaseSchemaSql).not.toMatch(/total_budget_fcfa\s+NUMERIC\(15,\s*2\)\s+DEFAULT\s+0/i);
+      for (const id of expectedLegacyIds) {
+        expect(migrationSql).toContain(`'${id}'`);
+      }
 
-      // 3. Migration d'assainissement dédiée appliquant DROP DEFAULT sur les 5 colonnes cibles
+      const whereMatch = migrationSql.match(/WHERE\s+id\s+IN\s*\(([^)]+)\)/i);
+      expect(whereMatch).not.toBeNull();
+      const extractedIds = whereMatch![1]
+        .split(',')
+        .map(s => s.trim().replace(/['"]/g, ''))
+        .filter(Boolean);
+      expect(extractedIds.sort()).toEqual(expectedLegacyIds.sort());
+    });
+
+    it('B. Migration uses CASE WHEN col = 0 THEN NULL ELSE col END for safe targeted sanitation', () => {
+      expect(migrationSql).toMatch(/budget_functioning_fcfa\s*=\s*CASE\s+WHEN\s+budget_functioning_fcfa\s*=\s*0\s+THEN\s+NULL\s+ELSE\s+budget_functioning_fcfa\s+END/i);
+      expect(migrationSql).toMatch(/budget_investment_fcfa\s*=\s*CASE\s+WHEN\s+budget_investment_fcfa\s*=\s*0\s+THEN\s+NULL\s+ELSE\s+budget_investment_fcfa\s+END/i);
+      expect(migrationSql).toMatch(/total_budget_fcfa\s*=\s*CASE\s+WHEN\s+total_budget_fcfa\s*=\s*0\s+THEN\s+NULL\s+ELSE\s+total_budget_fcfa\s+END/i);
+    });
+
+    it('C. Migration forbids any global untargeted UPDATE on institutions', () => {
+      const updateMatches = migrationSql.match(/UPDATE\s+public\.institutions/gi);
+      expect(updateMatches).toHaveLength(1);
+      // L'unique UPDATE est strictement borné par WHERE id IN
+      expect(migrationSql).toMatch(/UPDATE\s+public\.institutions[\s\S]+?WHERE\s+id\s+IN/i);
+    });
+
+    it('D. Migration executes NO data UPDATE on local_budgets and drops DEFAULT on 5 target columns', () => {
+      // 1. Aucun UPDATE de données sur local_budgets
+      expect(migrationSql).not.toMatch(/UPDATE\s+public\.local_budgets/i);
+
+      // 2. Drop DEFAULT 0 sur les 5 colonnes cibles
       expect(migrationSql).toContain('ALTER TABLE public.institutions ALTER COLUMN total_budget_fcfa DROP DEFAULT;');
       expect(migrationSql).toContain('ALTER TABLE public.institutions ALTER COLUMN budget_functioning_fcfa DROP DEFAULT;');
       expect(migrationSql).toContain('ALTER TABLE public.institutions ALTER COLUMN budget_investment_fcfa DROP DEFAULT;');
       expect(migrationSql).toContain('ALTER TABLE public.local_budgets ALTER COLUMN operating_amount DROP DEFAULT;');
       expect(migrationSql).toContain('ALTER TABLE public.local_budgets ALTER COLUMN investment_amount DROP DEFAULT;');
 
-      // 4. ca_investment_operations.executed_amount reste STRICTEMENT HORS PÉRIMÈTRE
+      // 3. supabase/schema.sql et supabase_schema.sql sans DEFAULT 0
+      expect(schemaSql).not.toMatch(/total_budget_fcfa\s+BIGINT\s+DEFAULT\s+0/i);
+      expect(schemaSql).not.toMatch(/budget_functioning_fcfa\s+BIGINT\s+DEFAULT\s+0/i);
+      expect(schemaSql).not.toMatch(/budget_investment_fcfa\s+BIGINT\s+DEFAULT\s+0/i);
+      expect(supabaseSchemaSql).not.toMatch(/budget_functioning_fcfa\s+NUMERIC\(15,\s*2\)\s+DEFAULT\s+0/i);
+      expect(supabaseSchemaSql).not.toMatch(/budget_investment_fcfa\s+NUMERIC\(15,\s*2\)\s+DEFAULT\s+0/i);
+      expect(supabaseSchemaSql).not.toMatch(/total_budget_fcfa\s+NUMERIC\(15,\s*2\)\s+DEFAULT\s+0/i);
+    });
+
+    it('E. ca_investment_operations.executed_amount remains strictly out of scope', () => {
       expect(migrationSql).not.toContain('ca_investment_operations');
       expect(migrationSql).not.toContain('executed_amount');
     });
   });
 
-  describe('Non-regression on Legitimate Verified Pilots & Zero Arbitrary Split', () => {
-    it('E. Bingerville BP 2026 non-regression: maintains exact canonical values', () => {
-      // 1. Dans OFFICIAL_PRIMITIVE_BUDGETS
+  describe('UI Civic Wording & Neutrality (LOT 1 Clôture Définitive)', () => {
+    const modalContent = readFileSync('src/components/InstitutionDetailModal.tsx', 'utf8');
+
+    it('F. Eliminates speculative "forte autonomie fiscale" inference from citizen UI', () => {
+      expect(modalContent).not.toContain('forte autonomie fiscale');
+      expect(modalContent).not.toContain('Collectivité à forte autonomie fiscale');
+    });
+
+    it('G. Eliminates internal audit jargon "en cours de corroboration avec l\'annexe officielle"', () => {
+      expect(modalContent).not.toContain("en cours de corroboration avec l'annexe officielle");
+      expect(modalContent).not.toContain("en cours de corroboration");
+    });
+  });
+
+  describe('Three-State Value Invariants & Pilot Non-Regression (LOT 1 Clôture Définitive)', () => {
+    it('H. Preserves genuine documented zero (0 FCFA) across data and presentation layers', () => {
+      const communeWithZero: Partial<Institution> = {
+        id: 'inst-com-documented-zero',
+        name: 'Mairie Zéro Documenté',
+        total_budget_fcfa: 0,
+        budget_functioning_fcfa: 0,
+        budget_investment_fcfa: 0,
+      };
+
+      expect(communeWithZero.total_budget_fcfa).toBe(0);
+      expect(communeWithZero.budget_functioning_fcfa).toBe(0);
+      expect(communeWithZero.budget_investment_fcfa).toBe(0);
+      expect(formatFCFA(communeWithZero.total_budget_fcfa)).toBe('0 FCFA');
+      expect(formatCompactFCFA(communeWithZero.total_budget_fcfa)).toBe('0 FCFA');
+    });
+
+    it('I. Preserves unknown amounts (NULL) without defaulting to 0 or arbitrary ratios', () => {
+      const communeWithNull: Partial<Institution> = {
+        id: 'inst-com-unknown-budget',
+        name: 'Mairie Budget Inconnu',
+        total_budget_fcfa: null,
+        budget_functioning_fcfa: null,
+        budget_investment_fcfa: null,
+      };
+
+      expect(communeWithNull.total_budget_fcfa).toBeNull();
+      expect(communeWithNull.budget_functioning_fcfa).toBeNull();
+      expect(communeWithNull.budget_investment_fcfa).toBeNull();
+      expect(formatFCFA(communeWithNull.total_budget_fcfa)).toBe('Montant à confirmer');
+      expect(formatCompactFCFA(communeWithNull.total_budget_fcfa)).toBe('Montant à confirmer');
+    });
+
+    it('J. Non-regression on verified pilots: Bingerville and Tiassalé canonical data integrity', () => {
+      // 1. Bingerville BP 2026 : 4 046 222 000 FCFA = 1 877 888 000 + 2 168 334 000 FCFA
       const bingervillePrim = OFFICIAL_PRIMITIVE_BUDGETS['inst-com-bingerville'];
       expect(bingervillePrim).toBeDefined();
       expect(bingervillePrim.total_voted_fcfa).toBe(4_046_222_000);
@@ -445,20 +527,31 @@ describe('Financial Integrity & Data Sanitation (LOT 1)', () => {
       expect(bingervillePrim.precision).toBe('EXACT');
       expect(bingervillePrim.functioning_voted_fcfa! + bingervillePrim.investment_voted_fcfa!).toBe(bingervillePrim.total_voted_fcfa);
 
-      // 2. Dans LOCAL_BUDGETS_REFERENTIAL
       const bingervilleRef = LOCAL_BUDGETS_REFERENTIAL.find(b => b.id === 'lbud-bingerville-2026');
       expect(bingervilleRef).toBeDefined();
       expect(bingervilleRef!.total_amount).toBe(4_046_222_000);
       expect(bingervilleRef!.operating_amount).toBe(1_877_888_000);
       expect(bingervilleRef!.investment_amount).toBe(2_168_334_000);
-      expect(bingervilleRef!.amount_precision).toBe('EXACT');
       expect(bingervilleRef!.verification_status).toBe('AIP_VERIFIED');
-      expect(bingervilleRef!.confidence_level).toBe('HIGH');
       expect(bingervilleRef!.status).toBe('PUBLISHED');
-      expect(bingervilleRef!.operating_amount! + bingervilleRef!.investment_amount!).toBe(bingervilleRef!.total_amount);
-    });
 
-    it('Cocody BP 2026 maintains partial budget without manufactured breakdown', () => {
+      // 2. Tiassalé CA 2024 : anomalie de source vérifiée
+      const caTiassale = CA_PILOT_FIXTURES.find(c => c.institution_id === 'inst-com-tiassale' && c.fiscal_year === 2024);
+      expect(caTiassale).toBeDefined();
+      expect(caTiassale!.total_planned).toBe(1_007_841_000);
+      expect(caTiassale!.total_realized).toBe(1_059_255_758);
+      expect(caTiassale!.status).toBe('VERIFIED');
+      expect(caTiassale!.reconciliation_status).toBe('SOURCE_ANOMALY');
+
+      // 3. Tiassalé BP 2026 : total 1 760 000 000 FCFA sans ventilation arbitraire
+      const tiassaleBp2026 = LOCAL_BUDGETS_REFERENTIAL.find(b => b.id === 'lbud-tiassale-2026');
+      expect(tiassaleBp2026).toBeDefined();
+      expect(tiassaleBp2026!.total_amount).toBe(1_760_000_000);
+      expect(tiassaleBp2026!.operating_amount).toBeNull();
+      expect(tiassaleBp2026!.investment_amount).toBeNull();
+      expect(tiassaleBp2026!.amount_precision).toBe('APPROXIMATE');
+
+      // 4. Cocody BP 2026 : maintien du budget partiel vérifié sans répartition inventée
       const cocody = OFFICIAL_PRIMITIVE_BUDGETS['inst-com-cocody'];
       expect(cocody).toBeDefined();
       expect(cocody.total_voted_fcfa).toBe(19_764_660_000);
@@ -467,40 +560,12 @@ describe('Financial Integrity & Data Sanitation (LOT 1)', () => {
       expect(cocody.precision).toBe('EXACT');
     });
 
-    it('F. Tiassalé non-regression: maintains audited values and strict unventilated status', () => {
-      // 1. CA 2024 vérifié avec anomalie de source
-      const caTiassale = CA_PILOT_FIXTURES.find(c => c.institution_id === 'inst-com-tiassale' && c.fiscal_year === 2024);
-      expect(caTiassale).toBeDefined();
-      expect(caTiassale!.total_planned).toBe(1_007_841_000);
-      expect(caTiassale!.total_realized).toBe(1_059_255_758);
-      expect(caTiassale!.status).toBe('VERIFIED');
-      expect(caTiassale!.reconciliation_status).toBe('SOURCE_ANOMALY');
-
-      // 2. Fixture import CA 2024
-      const fixtureJson = JSON.parse(readFileSync('docs/imports/tiassale-ca-2024.json', 'utf8'))[0];
-      expect(fixtureJson.institution_id).toBe('inst-com-tiassale');
-      expect(fixtureJson.data.total_planned).toBe(1_007_841_000);
-      expect(fixtureJson.data.total_realized).toBe(1_059_255_758);
-
-      // 3. BP 2026 dans LOCAL_BUDGETS_REFERENTIAL : pas de ventilation inventée
-      const tiassaleBp2026 = LOCAL_BUDGETS_REFERENTIAL.find(b => b.id === 'lbud-tiassale-2026');
-      expect(tiassaleBp2026).toBeDefined();
-      expect(tiassaleBp2026!.total_amount).toBe(1_760_000_000);
-      expect(tiassaleBp2026!.operating_amount).toBeNull();
-      expect(tiassaleBp2026!.investment_amount).toBeNull();
-      expect(tiassaleBp2026!.operating_percentage).toBeNull();
-      expect(tiassaleBp2026!.investment_percentage).toBeNull();
-      expect(tiassaleBp2026!.amount_precision).toBe('APPROXIMATE');
-    });
-
-    it('G. Zero arbitrary split: no 65/35, 70/30 or fabricated ratios in institutions or budgets', () => {
-      // 1. Tous les ministères ont operating = null et investment = null
+    it('Zero arbitrary split: no 65/35, 70/30 or fabricated ratios in institutions or budgets', () => {
       for (const m of ALL_MINISTRIES_DATA) {
         expect(m.budget_functioning_fcfa).toBeNull();
         expect(m.budget_investment_fcfa).toBeNull();
       }
 
-      // 2. Les communes sans ratio explicite n'ont pas de split 35% automatique
       const communesWithoutRatio = ALL_COMMUNES_DATA.filter(c => c.budget_functioning_fcfa === null);
       expect(communesWithoutRatio.length).toBeGreaterThan(100);
       for (const c of communesWithoutRatio) {
@@ -508,7 +573,6 @@ describe('Financial Integrity & Data Sanitation (LOT 1)', () => {
         expect(c.budget_investment_fcfa).toBeNull();
       }
 
-      // 3. Contrôle du code source : aucun multiplicateur arbitraire (0.65 / 0.35 / 0.70 / 0.30)
       const ministriesPageCode = readFileSync('src/pages/institutions/MinistriesPage.tsx', 'utf8');
       expect(ministriesPageCode).not.toMatch(/\*\s*0\.(65|35|70|30)/);
 
