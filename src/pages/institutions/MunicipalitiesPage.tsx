@@ -135,12 +135,18 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
     } else if (sortBy === 'NAME_DESC') {
       return nameB.localeCompare(nameA, 'fr', { sensitivity: 'base' });
     } else if (sortBy === 'BUDGET_DESC') {
-      const budgetA = a.primitive_budget?.total_voted_fcfa || OFFICIAL_PRIMITIVE_BUDGETS[a.id]?.total_voted_fcfa || a.total_budget_fcfa || 0;
-      const budgetB = b.primitive_budget?.total_voted_fcfa || OFFICIAL_PRIMITIVE_BUDGETS[b.id]?.total_voted_fcfa || b.total_budget_fcfa || 0;
+      const budgetA = a.primitive_budget?.total_voted_fcfa ?? OFFICIAL_PRIMITIVE_BUDGETS[a.id]?.total_voted_fcfa ?? a.total_budget_fcfa ?? null;
+      const budgetB = b.primitive_budget?.total_voted_fcfa ?? OFFICIAL_PRIMITIVE_BUDGETS[b.id]?.total_voted_fcfa ?? b.total_budget_fcfa ?? null;
+      if (budgetA === null && budgetB === null) return 0;
+      if (budgetA === null) return 1;
+      if (budgetB === null) return -1;
       return budgetB - budgetA;
     } else if (sortBy === 'BUDGET_ASC') {
-      const budgetA = a.primitive_budget?.total_voted_fcfa || OFFICIAL_PRIMITIVE_BUDGETS[a.id]?.total_voted_fcfa || a.total_budget_fcfa || 0;
-      const budgetB = b.primitive_budget?.total_voted_fcfa || OFFICIAL_PRIMITIVE_BUDGETS[b.id]?.total_voted_fcfa || b.total_budget_fcfa || 0;
+      const budgetA = a.primitive_budget?.total_voted_fcfa ?? OFFICIAL_PRIMITIVE_BUDGETS[a.id]?.total_voted_fcfa ?? a.total_budget_fcfa ?? null;
+      const budgetB = b.primitive_budget?.total_voted_fcfa ?? OFFICIAL_PRIMITIVE_BUDGETS[b.id]?.total_voted_fcfa ?? b.total_budget_fcfa ?? null;
+      if (budgetA === null && budgetB === null) return 0;
+      if (budgetA === null) return 1;
+      if (budgetB === null) return -1;
       return budgetA - budgetB;
     }
     return nameA.localeCompare(nameB, 'fr', { sensitivity: 'base' });

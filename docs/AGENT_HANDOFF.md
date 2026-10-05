@@ -11,27 +11,35 @@
 - CURRENT_MILESTONE : LOT 1 — Assainissement de l'Intégrité Financière de SuiviBudget (Élimination intégrale des valeurs financières artificielles, estimations silencieuses, ventilations arbitraires 65/35, 70/30, 55/45, fallbacks 32.5B, 175.6B, 4354 et faux zéros ; verrouillage par suite de tests financialIntegrity.test.ts ; 16/16 test suites PASS, 257/257 tests PASS, build PASS).
 - FOUNDATION_READY : TRUE.
 
-## LOT 1 : ASSAINISSEMENT DE L'INTÉGRITÉ FINANCIÈRE (RÉALISÉ)
+## LOT 1 : ASSAINISSEMENT DE L'INTÉGRITÉ FINANCIÈRE (RÉALISÉ & DURCI CORRECTIF FINAL PR #24)
 - **1. Élimination des Ventilations Arbitraires (Class D -> Éliminées)** :
   - **Ministères (65/35 et 70/30)** :
     - `src/pages/institutions/MinistriesPage.tsx` : Suppression de `* 0.65` et `* 0.35`. Les ministères sans ventilation officielle disposent désormais de `budget_functioning_fcfa: null` et `budget_investment_fcfa: null`.
     - `src/data/institutionsData.ts` : Suppression de `* 0.7` et `* 0.3` ainsi que du fallback de 32,5 Milliards FCFA (`32500000000`).
   - **Mairies & Conseils Régionaux (55/45 et 35%)** :
     - `src/components/PrimitiveBudgetImporterModal.tsx` : Suppression de la moyenne municipale fictive 55% investissement / 45% fonctionnement. `investmentVoted` et `functioningVoted` restent strictement `null` si non fournis.
-    - `src/pages/AdminDashboardPage.tsx` : Suppression de l'auto-split 55%/45% dans `handleSaveQuickWeb`, `handleSaveInstitution` et dans les `onChange` des formulaires de saisie de budget primitif.
+    - `src/pages/AdminDashboardPage.tsx` : Suppression de l'auto-split 55%/45% dans `handleSaveQuickWeb`, `handleSaveInstitution` et dans les formulaires de saisie de budget primitif.
     - `src/data/communesData.ts` : Suppression du fallback `c.functioningRatio || 0.35` affecté arbitrairement aux 188 communes hors Abidjan. Les communes sans ratio documenté ont désormais `budget_functioning_fcfa: null` et `budget_investment_fcfa: null`.
-- **2. Élimination des Fallbacks de Montants & Données Globales** :
-  - `src/components/StatImpactBanner.tsx` : Suppression du montant de secours de 175,6 Milliards FCFA (`175648952140`). Affichage neutre de `"Montant à confirmer"` si le total n'est pas consolidé.
-  - `src/services/dataStore.ts` : Suppression du fallback de 4 354 projets (`4354`) dans `getImpactStats()`. `totalBudgetLines` reflète rigoureusement `this.projects.length`.
-  - `src/services/dataStore.ts` : Remplacement du faux label de source `'SuiviBudget'` par la source officielle de provenance (`current.primary_source_label || current.import_provenance?.source?.name || 'Source officielle'`).
-  - `src/data/nationalBudgetData.ts` : Correction de la Cour Suprême (qui affichait des budgets à 0 alors que non publiés) vers `null`.
-- **3. Respect Strict de l'Invariant "UNKNOWN != 0"** :
-  - `src/utils/formatters.ts` : `formatAmountInWords`, `formatCompactFCFA`, et `formatFCFAWithWords` renvoient désormais `'Montant à confirmer'` pour les montants `null` ou `undefined`, et préservent `'0 FCFA'` uniquement pour les vrais zéros documentés (`0`).
-  - `src/components/Footer.tsx` : Remplacement des fallbacks `|| 0` par `?? ''` pour l'export CSV des budgets, évitant de faire passer des montants inconnus pour des budgets nuls.
-  - `src/components/InstitutionDetailModal.tsx`, `MunicipalitiesPage.tsx`, `RegionalCouncilsPage.tsx`, `CommuneComparatorModal.tsx`, `NationalInstitutionsPage.tsx`, `RegulatoryAuthoritiesPage.tsx` : La jauge bicolore et les pourcentages fonctionnement/investissement ne sont affichés QUE si les deux composantes sont réellement documentées et non nulles (`hasBreakdown`). Si non disponibles, mention explicite que la ventilation est à confirmer via l'acte budgétaire.
-- **4. Tests & Validation** :
-  - Nouvelle suite `src/utils/__tests__/financialIntegrity.test.ts` (11 tests unitaires validant l'absence de ratios fabriqués, l'absence de fallbacks, le respect de `UNKNOWN != 0`, et la non-régression sur Bingerville BP 2026, Cocody BP 2026 et Tiassalé CA 2024).
-  - 16 suites de tests exécutées : 257 tests unitaires PASS.
+- **2. Schéma Supabase & Suppression de DEFAULT 0** :
+  - Nouvelle migration `supabase/migrations/20261005100000_drop_default_zero_institutions_budget.sql` : applique `ALTER TABLE public.institutions ALTER COLUMN ... DROP DEFAULT;` sur `total_budget_fcfa`, `budget_functioning_fcfa` et `budget_investment_fcfa` sans écriture destructive ni altération des lignes existantes.
+  - Mise à jour de `supabase/schema.sql` et `supabase_schema.sql` pour retirer `DEFAULT 0` de ces trois colonnes budgétaires.
+- **3. AdminDashboardPage — Support Strict des Trois États Budgétaires** :
+  - Élimination des conversions `null -> 0` (`inst.budget_functioning_fcfa || 0`, `inst.budget_investment_fcfa || 0`, `inst.total_budget_fcfa || 0`) dans l'état initial, `handleEditInstitution`, `handleOpenCreateInst`, `handleOpenQuickWebEdit`.
+  - Logique de calcul du total révisée : si les deux composantes sont null, le total n'est pas faussement calculé à 0.
+  - Formulaires d'édition adaptés avec `e.target.value.trim() === '' ? null : Number(e.target.value)` et `value={val != null ? val : ''}`, gérant parfaitement les 3 états : montant renseigné, vrai zéro documenté (0), montant inconnu (null).
+- **4. Export Admin & Élimination des Faux Zéros** :
+  - `handleExportProspectsCsv` et `handleExportCSV` : remplacement de `p.total_budget_fcfa || 0` et `p.budget_amount_fcfa` par un contrôle null-safe produisant une cellule vide `""` pour les montants inconnus, et préservant `"0"` uniquement pour les vrais zéros documentés.
+- **5. Provenance & Élimination du Fallback Fictif** :
+  - Suppression intégrale du fallback `'Conseil Municipal / Délibération officielle'` dans `AdminDashboardPage.tsx` et `PrimitiveBudgetImporterModal.tsx`. Une source absente produit `'Source à confirmer'`, jamais un acte délibérant fictif.
+- **6. Tests & Validation Renforcée** :
+  - Suite `src/utils/__tests__/financialIntegrity.test.ts` renforcée (16 tests unitaires) :
+    - Roundtrip d'ouverture / édition / sauvegarde préservant strictement `null`.
+    - Préservation du vrai zéro documenté `0`.
+    - Export CSV produisant une cellule vide et non `"0"`.
+    - Source vide produisant `'Source à confirmer'` sans fallback délibérant.
+    - Contrôle du schéma et de la migration sans `DEFAULT 0`.
+    - Remplacement du test fragile `not.toBe(32_500_000_000)` par le test de contrat réel du mapping ministériel.
+  - 16 suites de tests exécutées : 262/262 tests PASS.
   - TypeScript & Vite build : PASS (0 erreur).
 
 ## INDUSTRIALISATION DU CYCLE BUDGÉTAIRE & CONSOLE DOCUMENTAIRE (DURCIE PR #14 — GATE FINAL QUALITÉ)

@@ -443,7 +443,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       `"${p.region_name}"`,
       `"${p.category}"`,
       `"${p.title.replace(/"/g, '""')}"`,
-      p.budget_amount_fcfa,
+      p.budget_amount_fcfa != null ? p.budget_amount_fcfa : '',
       p.current_status,
       `${p.progress_percentage}%`
     ]);
@@ -486,12 +486,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     info_officer_title: "Service d'Accès aux Documents Publics (Loi n°2013-867)",
     political_party: '',
     mission_summary: '',
-    budget_functioning_fcfa: 0,
-    budget_investment_fcfa: 0,
-    total_budget_fcfa: 0,
-    primitive_total_fcfa: 0,
-    primitive_investment_fcfa: 0,
-    primitive_functioning_fcfa: 0,
+    budget_functioning_fcfa: null as number | null,
+    budget_investment_fcfa: null as number | null,
+    total_budget_fcfa: null as number | null,
+    primitive_total_fcfa: null as number | null,
+    primitive_investment_fcfa: null as number | null,
+    primitive_functioning_fcfa: null as number | null,
     primitive_voted_date: '',
     primitive_source: '',
     primitive_source_url: '',
@@ -663,7 +663,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         `"${(p.facebook_url || '').replace(/"/g, '""')}"`,
         `"${(p.contact_phone || p.info_officer_phone || '').replace(/"/g, '""')}"`,
         `"${(p.contact_email || p.info_officer_email || '').replace(/"/g, '""')}"`,
-        `"${p.total_budget_fcfa || 0}"`,
+        `"${p.total_budget_fcfa != null ? p.total_budget_fcfa : ''}"`,
       ];
     });
     const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
@@ -703,9 +703,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     contact_email: string;
     web_status: 'FONCTIONNEL' | 'INACTIF' | 'AUCUN';
     web_observations: string;
-    primitive_total_fcfa: number;
-    primitive_investment_fcfa: number;
-    primitive_functioning_fcfa: number;
+    primitive_total_fcfa: number | null;
+    primitive_investment_fcfa: number | null;
+    primitive_functioning_fcfa: number | null;
     primitive_voted_date: string;
     primitive_source: string;
     primitive_source_url: string;
@@ -717,9 +717,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     contact_email: '',
     web_status: 'AUCUN',
     web_observations: '',
-    primitive_total_fcfa: 0,
-    primitive_investment_fcfa: 0,
-    primitive_functioning_fcfa: 0,
+    primitive_total_fcfa: null,
+    primitive_investment_fcfa: null,
+    primitive_functioning_fcfa: null,
     primitive_voted_date: '',
     primitive_source: '',
     primitive_source_url: '',
@@ -737,9 +737,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       contact_email: inst.contact_email || inst.info_officer_email || '',
       web_status: inst.web_status || (inst.website ? 'FONCTIONNEL' : 'AUCUN'),
       web_observations: inst.web_observations || '',
-      primitive_total_fcfa: prim?.total_voted_fcfa || 0,
-      primitive_investment_fcfa: prim?.investment_voted_fcfa || 0,
-      primitive_functioning_fcfa: prim?.functioning_voted_fcfa || 0,
+      primitive_total_fcfa: prim?.total_voted_fcfa ?? null,
+      primitive_investment_fcfa: prim?.investment_voted_fcfa ?? null,
+      primitive_functioning_fcfa: prim?.functioning_voted_fcfa ?? null,
       primitive_voted_date: prim?.voted_date || '',
       primitive_source: prim?.source || '',
       primitive_source_url: prim?.source_url || '',
@@ -768,15 +768,16 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     }
 
     let primitive: PrimitiveBudgetInfo | undefined = quickWebInst.primitive_budget;
-    if (quickWebForm.primitive_total_fcfa > 0 || cleanSourceUrl) {
-      const inv = quickWebForm.primitive_investment_fcfa > 0 ? quickWebForm.primitive_investment_fcfa : null;
-      const func = quickWebForm.primitive_functioning_fcfa > 0 ? quickWebForm.primitive_functioning_fcfa : null;
+    const hasPrimitiveData = (quickWebForm.primitive_total_fcfa != null && quickWebForm.primitive_total_fcfa >= 0)
+      || cleanSourceUrl
+      || quickWebForm.primitive_source.trim().length > 0;
+    if (hasPrimitiveData) {
       primitive = {
-        total_voted_fcfa: quickWebForm.primitive_total_fcfa,
-        investment_voted_fcfa: inv,
-        functioning_voted_fcfa: func,
+        total_voted_fcfa: quickWebForm.primitive_total_fcfa ?? 0,
+        investment_voted_fcfa: quickWebForm.primitive_investment_fcfa,
+        functioning_voted_fcfa: quickWebForm.primitive_functioning_fcfa,
         voted_date: quickWebForm.primitive_voted_date || new Date().toLocaleDateString('fr-FR'),
-        source: quickWebForm.primitive_source || 'Conseil Municipal / Délibération officielle',
+        source: quickWebForm.primitive_source.trim() || 'Source à confirmer',
         source_url: cleanSourceUrl || undefined,
         session_notes: quickWebForm.primitive_session_notes.trim() || undefined,
       };
@@ -818,12 +819,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       info_officer_title: inst.info_officer_title || "Service d'Accès aux Documents Publics (Loi n°2013-867)",
       political_party: inst.political_party || '',
       mission_summary: inst.mission_summary || '',
-      budget_functioning_fcfa: inst.budget_functioning_fcfa || 0,
-      budget_investment_fcfa: inst.budget_investment_fcfa || 0,
-      total_budget_fcfa: inst.total_budget_fcfa || 0,
-      primitive_total_fcfa: prim?.total_voted_fcfa || 0,
-      primitive_investment_fcfa: prim?.investment_voted_fcfa || 0,
-      primitive_functioning_fcfa: prim?.functioning_voted_fcfa || 0,
+      budget_functioning_fcfa: inst.budget_functioning_fcfa ?? null,
+      budget_investment_fcfa: inst.budget_investment_fcfa ?? null,
+      total_budget_fcfa: inst.total_budget_fcfa ?? null,
+      primitive_total_fcfa: prim?.total_voted_fcfa ?? null,
+      primitive_investment_fcfa: prim?.investment_voted_fcfa ?? null,
+      primitive_functioning_fcfa: prim?.functioning_voted_fcfa ?? null,
       primitive_voted_date: prim?.voted_date || '',
       primitive_source: prim?.source || '',
       primitive_source_url: prim?.source_url || '',
@@ -850,12 +851,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       info_officer_title: "Service d'Accès aux Documents Publics (Loi n°2013-867)",
       political_party: '',
       mission_summary: '',
-      budget_functioning_fcfa: 0,
-      budget_investment_fcfa: 0,
-      total_budget_fcfa: 0,
-      primitive_total_fcfa: 0,
-      primitive_investment_fcfa: 0,
-      primitive_functioning_fcfa: 0,
+      budget_functioning_fcfa: null,
+      budget_investment_fcfa: null,
+      total_budget_fcfa: null,
+      primitive_total_fcfa: null,
+      primitive_investment_fcfa: null,
+      primitive_functioning_fcfa: null,
       primitive_voted_date: '',
       primitive_source: '',
       primitive_source_url: '',
@@ -866,7 +867,6 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
   const handleSaveInstitution = (e: React.FormEvent) => {
     e.preventDefault();
-    const total = (instForm.budget_functioning_fcfa || 0) + (instForm.budget_investment_fcfa || 0);
 
     let cleanWebsite = instForm.website.trim();
     if (cleanWebsite && !cleanWebsite.startsWith('http://') && !cleanWebsite.startsWith('https://')) {
@@ -884,20 +884,29 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     }
 
     let primitive: PrimitiveBudgetInfo | undefined = editingInst?.primitive_budget;
-    if (instForm.primitive_total_fcfa > 0 || cleanSourceUrl) {
-      const inv = instForm.primitive_investment_fcfa > 0 ? instForm.primitive_investment_fcfa : null;
-      const func = instForm.primitive_functioning_fcfa > 0 ? instForm.primitive_functioning_fcfa : null;
+    const hasPrimitiveData = (instForm.primitive_total_fcfa != null && instForm.primitive_total_fcfa >= 0)
+      || cleanSourceUrl
+      || instForm.primitive_source.trim().length > 0;
+    if (hasPrimitiveData) {
       primitive = {
-        total_voted_fcfa: instForm.primitive_total_fcfa,
-        investment_voted_fcfa: inv,
-        functioning_voted_fcfa: func,
+        total_voted_fcfa: instForm.primitive_total_fcfa ?? 0,
+        investment_voted_fcfa: instForm.primitive_investment_fcfa,
+        functioning_voted_fcfa: instForm.primitive_functioning_fcfa,
         voted_date: instForm.primitive_voted_date || new Date().toLocaleDateString('fr-FR'),
-        source: instForm.primitive_source || 'Conseil Municipal / Délibération officielle',
+        source: instForm.primitive_source.trim() || 'Source à confirmer',
         source_url: cleanSourceUrl || undefined,
         session_notes: instForm.primitive_session_notes.trim() || undefined,
       };
     }
-    
+
+    const hasBothBreakdowns = instForm.budget_functioning_fcfa != null && instForm.budget_investment_fcfa != null;
+    const computedTotal = hasBothBreakdowns 
+      ? (instForm.budget_functioning_fcfa! + instForm.budget_investment_fcfa!) 
+      : null;
+    const resolvedTotal = computedTotal != null 
+      ? computedTotal 
+      : (instForm.total_budget_fcfa ?? (editingInst ? editingInst.total_budget_fcfa : null));
+
     if (editingInst) {
       const updated: Institution = {
         ...editingInst,
@@ -905,7 +914,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         website: cleanWebsite,
         facebook_url: cleanFacebook,
         primitive_budget: primitive,
-        total_budget_fcfa: total > 0 ? total : (instForm.total_budget_fcfa || editingInst.total_budget_fcfa),
+        total_budget_fcfa: resolvedTotal,
       };
       dataStore.updateInstitution(updated);
       showToast('Informations de l\'entité mises à jour avec succès !');
@@ -917,7 +926,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         website: cleanWebsite,
         facebook_url: cleanFacebook,
         primitive_budget: primitive,
-        total_budget_fcfa: total > 0 ? total : instForm.total_budget_fcfa,
+        total_budget_fcfa: resolvedTotal,
       });
       showToast('Nouvelle entité ajoutée avec succès !');
       setIsCreateInstModalOpen(false);
@@ -3407,7 +3416,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                             )}
                           </td>
                           <td className="py-3 px-4 text-right font-mono font-bold text-emerald-700">
-                            {inst.total_budget_fcfa ? formatFCFA(inst.total_budget_fcfa) : '—'}
+                            {inst.total_budget_fcfa != null ? formatFCFA(inst.total_budget_fcfa) : '—'}
                           </td>
                           <td className="py-3 px-4 text-center">
                             <div className="flex items-center justify-center gap-1.5">
@@ -3791,7 +3800,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       </p>
                     </div>
                   </div>
-                  {instForm.primitive_total_fcfa > 0 && (
+                  {instForm.primitive_total_fcfa != null && (
                     <span className="px-2 py-0.5 rounded-md bg-amber-200 text-amber-900 font-black text-[10px]">
                       {formatFCFA(instForm.primitive_total_fcfa)}
                     </span>
@@ -3803,15 +3812,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     <label className="block font-bold text-slate-800 mb-1">Budget Total Voté (FCFA)</label>
                     <input
                       type="number"
-                      value={instForm.primitive_total_fcfa || ''}
+                      value={instForm.primitive_total_fcfa != null ? instForm.primitive_total_fcfa : ''}
                       onChange={(e) => {
-                        const total = Number(e.target.value);
-                        setInstForm(prev => {
-                          return {
-                            ...prev,
-                            primitive_total_fcfa: total,
-                          };
-                        });
+                        const val = e.target.value.trim() === '' ? null : Number(e.target.value);
+                        setInstForm(prev => ({
+                          ...prev,
+                          primitive_total_fcfa: val,
+                        }));
                       }}
                       placeholder="Ex: 1450000000"
                       className="w-full p-2.5 border border-amber-300 rounded-xl bg-white font-bold text-slate-900 focus:ring-2 focus:ring-amber-500"
@@ -3822,8 +3829,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     <label className="block font-bold text-slate-800 mb-1">Part Investissement (FCFA)</label>
                     <input
                       type="number"
-                      value={instForm.primitive_investment_fcfa || ''}
-                      onChange={(e) => setInstForm({ ...instForm, primitive_investment_fcfa: Number(e.target.value) })}
+                      value={instForm.primitive_investment_fcfa != null ? instForm.primitive_investment_fcfa : ''}
+                      onChange={(e) => {
+                        const val = e.target.value.trim() === '' ? null : Number(e.target.value);
+                        setInstForm(prev => ({ ...prev, primitive_investment_fcfa: val }));
+                      }}
                       placeholder="Ex: 797500000"
                       className="w-full p-2.5 border border-slate-300 rounded-xl bg-white text-slate-900"
                     />
@@ -3833,8 +3843,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     <label className="block font-bold text-slate-800 mb-1">Part Fonctionnement (FCFA)</label>
                     <input
                       type="number"
-                      value={instForm.primitive_functioning_fcfa || ''}
-                      onChange={(e) => setInstForm({ ...instForm, primitive_functioning_fcfa: Number(e.target.value) })}
+                      value={instForm.primitive_functioning_fcfa != null ? instForm.primitive_functioning_fcfa : ''}
+                      onChange={(e) => {
+                        const val = e.target.value.trim() === '' ? null : Number(e.target.value);
+                        setInstForm(prev => ({ ...prev, primitive_functioning_fcfa: val }));
+                      }}
                       placeholder="Ex: 652500000"
                       className="w-full p-2.5 border border-slate-300 rounded-xl bg-white text-slate-900"
                     />
@@ -3914,8 +3927,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   <label className="block font-bold text-slate-700 mb-1">Dotation Fonctionnement Annuelle (FCFA)</label>
                   <input
                     type="number"
-                    value={instForm.budget_functioning_fcfa}
-                    onChange={(e) => setInstForm({ ...instForm, budget_functioning_fcfa: Number(e.target.value) })}
+                    value={instForm.budget_functioning_fcfa != null ? instForm.budget_functioning_fcfa : ''}
+                    onChange={(e) => {
+                      const val = e.target.value.trim() === '' ? null : Number(e.target.value);
+                      setInstForm(prev => ({ ...prev, budget_functioning_fcfa: val }));
+                    }}
                     className="w-full p-2.5 border border-slate-300 rounded-xl bg-white"
                   />
                 </div>
@@ -3924,8 +3940,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   <label className="block font-bold text-slate-700 mb-1">Dotation Investissement Annuelle (FCFA)</label>
                   <input
                     type="number"
-                    value={instForm.budget_investment_fcfa}
-                    onChange={(e) => setInstForm({ ...instForm, budget_investment_fcfa: Number(e.target.value) })}
+                    value={instForm.budget_investment_fcfa != null ? instForm.budget_investment_fcfa : ''}
+                    onChange={(e) => {
+                      const val = e.target.value.trim() === '' ? null : Number(e.target.value);
+                      setInstForm(prev => ({ ...prev, budget_investment_fcfa: val }));
+                    }}
                     className="w-full p-2.5 border border-slate-300 rounded-xl bg-white"
                   />
                 </div>
@@ -4549,7 +4568,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               >
                 <Receipt className="w-4 h-4" />
                 <span>🧾 Budget Primitif</span>
-                {quickWebForm.primitive_total_fcfa > 0 && (
+                {quickWebForm.primitive_total_fcfa != null && quickWebForm.primitive_total_fcfa > 0 && (
                   <span className="px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 text-[9px] font-bold">
                     Voté
                   </span>
@@ -4659,7 +4678,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       <label className="block text-xs font-black uppercase tracking-wider text-slate-700">
                         Budget Total Voté (FCFA) *
                       </label>
-                      {quickWebForm.primitive_total_fcfa > 0 && (
+                      {quickWebForm.primitive_total_fcfa != null && (
                         <span className="text-[11px] font-black text-amber-800">
                           {formatFCFA(quickWebForm.primitive_total_fcfa)}
                         </span>
@@ -4667,12 +4686,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     </div>
                     <input
                       type="number"
-                      value={quickWebForm.primitive_total_fcfa || ''}
+                      value={quickWebForm.primitive_total_fcfa != null ? quickWebForm.primitive_total_fcfa : ''}
                       onChange={(e) => {
-                        const total = Number(e.target.value);
+                        const val = e.target.value.trim() === '' ? null : Number(e.target.value);
                         setQuickWebForm(prev => ({
                           ...prev,
-                          primitive_total_fcfa: total,
+                          primitive_total_fcfa: val,
                         }));
                       }}
                       placeholder="Ex: 1450000000"
@@ -4687,8 +4706,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       </label>
                       <input
                         type="number"
-                        value={quickWebForm.primitive_investment_fcfa || ''}
-                        onChange={(e) => setQuickWebForm(prev => ({ ...prev, primitive_investment_fcfa: Number(e.target.value) }))}
+                        value={quickWebForm.primitive_investment_fcfa != null ? quickWebForm.primitive_investment_fcfa : ''}
+                        onChange={(e) => {
+                          const val = e.target.value.trim() === '' ? null : Number(e.target.value);
+                          setQuickWebForm(prev => ({ ...prev, primitive_investment_fcfa: val }));
+                        }}
                         placeholder="Ex: 797500000"
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden"
                       />
@@ -4700,8 +4722,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       </label>
                       <input
                         type="number"
-                        value={quickWebForm.primitive_functioning_fcfa || ''}
-                        onChange={(e) => setQuickWebForm(prev => ({ ...prev, primitive_functioning_fcfa: Number(e.target.value) }))}
+                        value={quickWebForm.primitive_functioning_fcfa != null ? quickWebForm.primitive_functioning_fcfa : ''}
+                        onChange={(e) => {
+                          const val = e.target.value.trim() === '' ? null : Number(e.target.value);
+                          setQuickWebForm(prev => ({ ...prev, primitive_functioning_fcfa: val }));
+                        }}
                         placeholder="Ex: 652500000"
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden"
                       />

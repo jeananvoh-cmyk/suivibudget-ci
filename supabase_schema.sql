@@ -88,9 +88,9 @@ CREATE TABLE IF NOT EXISTS public.institutions (
     info_officer_title TEXT DEFAULT 'Responsable de l''Information et des Relations Publiques',
     green_line_number TEXT,
     -- Repartition budgetaire annuelle 2026
-    budget_functioning_fcfa NUMERIC(15, 2) DEFAULT 0,
-    budget_investment_fcfa NUMERIC(15, 2) DEFAULT 0,
-    total_budget_fcfa NUMERIC(15, 2) DEFAULT 0,
+    budget_functioning_fcfa NUMERIC(15, 2),
+    budget_investment_fcfa NUMERIC(15, 2),
+    total_budget_fcfa NUMERIC(15, 2),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

@@ -1017,10 +1017,11 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   const isDistrict = institution.type === 'DISTRICT';
                   const primTotal = prim.total_voted_fcfa;
                   const exactPrimitive = !prim.precision || prim.precision === 'EXACT';
-                  const stateTotal = institution.total_budget_fcfa || 0;
-                  const localRev = Math.max(0, primTotal - stateTotal);
-                  const statePct = primTotal > 0 ? Math.round((stateTotal / primTotal) * 100) : 0;
-                  const localPct = 100 - statePct;
+                  const stateTotal = institution.total_budget_fcfa ?? null;
+                  const hasStateTotal = stateTotal !== null;
+                  const localRev = (hasStateTotal && primTotal > 0) ? Math.max(0, primTotal - stateTotal) : null;
+                  const statePct = (hasStateTotal && primTotal > 0) ? Math.round((stateTotal / primTotal) * 100) : null;
+                  const localPct = statePct !== null ? 100 - statePct : null;
                   const hasBreakdown = prim.investment_voted_fcfa != null && prim.functioning_voted_fcfa != null;
                   const primInvPct = (hasBreakdown && primTotal > 0) ? Math.round((prim.investment_voted_fcfa! / primTotal) * 100) : null;
                   const primFonctPct = primInvPct !== null ? 100 - primInvPct : null;
@@ -1074,7 +1075,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                             <strong className="text-slate-800">{prim.voted_date}</strong>
                           </div>
                           <div className="flex sm:justify-end items-center gap-1 text-[11px] text-slate-500">
-                            <span>Source : {prim.source}</span>
+                            <span>Source : {prim.source || 'Source à confirmer'}</span>
                             {prim.source_url && (
                               <a
                                 href={prim.source_url}
@@ -1116,7 +1117,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                                   1. Subvention & Financement de l'État
                                 </span>
                                 <span className="text-xs font-black text-brand-blue bg-white px-2.5 py-0.5 rounded-full border border-blue-200 shadow-2xs">
-                                  {exactPrimitive ? `${statePct}% du total` : 'Part non calculée'}
+                                  {exactPrimitive && statePct !== null ? `${statePct}% du total` : 'Part non calculée'}
                                 </span>
                               </div>
 
@@ -1129,7 +1130,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                                 </span>
                               </div>
 
-                              {stateTotal > 0 ? (
+                              {stateTotal != null && stateTotal > 0 ? (
                                 <div className="p-2.5 bg-white rounded-xl border border-blue-100 text-xs space-y-1.5 shadow-2xs">
                                   <div className="flex justify-between text-[11px]">
                                     <span className="text-slate-600">• Fonctionnement (DGF) :</span>
@@ -1139,6 +1140,10 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                                     <span className="text-slate-600">• Équipement & Chantiers (DGE) :</span>
                                     <strong className="text-slate-900">{formatFCFA(institution.budget_investment_fcfa)} ({formatAmountInWords(institution.budget_investment_fcfa)})</strong>
                                   </div>
+                                </div>
+                              ) : stateTotal === null ? (
+                                <div className="p-2.5 bg-amber-50/70 rounded-xl border border-amber-200 text-[11px] text-amber-900 shadow-2xs leading-snug">
+                                  Dotation globale de l'État non consolidée pour cet exercice. En attente de publication des répartitions DGF/DGE.
                                 </div>
                               ) : (
                                 <div className="p-2.5 bg-white rounded-xl border border-blue-100 text-[11px] text-slate-600 shadow-2xs leading-snug">
@@ -1168,16 +1173,16 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                                   2. Recettes Propres {isDistrict ? 'du District' : isRegion ? 'de la Région' : 'de la Mairie'}
                                 </span>
                                 <span className="text-xs font-black text-white bg-navy-900 px-2.5 py-0.5 rounded-full shadow-2xs">
-                                  {exactPrimitive ? `${localPct}% du total` : 'Part non calculée'}
+                                  {exactPrimitive && localPct !== null ? `${localPct}% du total` : 'Part non calculée'}
                                 </span>
                               </div>
 
                               <div>
                                 <span className="text-xl sm:text-2xl font-black text-slate-900 block">
-                                  {exactPrimitive ? formatFCFA(localRev) : 'Montant non calculé'}
+                                  {exactPrimitive && localRev !== null ? formatFCFA(localRev) : 'Montant non calculé'}
                                 </span>
                                 <span className="text-[11px] font-bold text-slate-600 block">
-                                  {exactPrimitive ? `(${formatAmountInWords(localRev)})` : ''}
+                                  {exactPrimitive && localRev !== null ? `(${formatAmountInWords(localRev)})` : ''}
                                 </span>
                               </div>
 

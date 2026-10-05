@@ -135,7 +135,7 @@ export const PrimitiveBudgetImporterModal: React.FC<PrimitiveBudgetImporterModal
       const invStr = tokens[2] || '';
       const funcStr = tokens[3] || '';
       const votedDate = tokens[4] || new Date().toLocaleDateString('fr-FR');
-      const source = tokens[5] || 'Conseil Municipal / Délibération officielle';
+      const source = tokens[5]?.trim() || 'Source à confirmer';
       const sourceUrl = tokens[6] || '';
       const notes = tokens[7] || '';
 
