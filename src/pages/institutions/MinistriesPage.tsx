@@ -131,9 +131,9 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
       info_officer_phone: official.info_officer_phone || '',
       info_officer_title: official.info_officer_title || 'Service d\'Accès aux Documents Publics (Loi n°2013-867)',
       green_line_number: official.green_line_number,
-      budget_functioning_fcfa: Math.round((official.budget_fcfa || 0) * 0.65),
-      budget_investment_fcfa: Math.round((official.budget_fcfa || 0) * 0.35),
-      total_budget_fcfa: official.budget_fcfa || 0,
+      budget_functioning_fcfa: null,
+      budget_investment_fcfa: null,
+      total_budget_fcfa: official.budget_fcfa ?? null,
       budget_not_published: !official.budget_fcfa
     };
     setSelectedInstForDetail(instObj);
@@ -188,9 +188,9 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
               info_officer_email: official.info_officer_email || '',
               info_officer_phone: official.info_officer_phone || '',
               info_officer_title: official.info_officer_title || 'Service d\'Accès aux Documents Publics (Loi n°2013-867)',
-              budget_functioning_fcfa: Math.round((official.budget_fcfa || 0) * 0.65),
-              budget_investment_fcfa: Math.round((official.budget_fcfa || 0) * 0.35),
-              total_budget_fcfa: official.budget_fcfa || 0,
+              budget_functioning_fcfa: null,
+              budget_investment_fcfa: null,
+              total_budget_fcfa: official.budget_fcfa ?? null,
             };
             setSelectedInstForDoc(instObj);
           }}
@@ -325,7 +325,14 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                     </h3>
                     <p className="text-xs text-slate-500 font-medium">{premierMinistre.department_ministry}</p>
                     <div className="text-xs font-black text-slate-800 pt-0.5">
-                      Budget : <span className="text-brand-blue">{formatFCFA(premierMinistre.budget_fcfa || 0)}</span> <span className="text-slate-500 font-bold">({formatAmountInWords(premierMinistre.budget_fcfa || 0)})</span>
+                      Budget : {premierMinistre.budget_fcfa ? (
+                        <>
+                          <span className="text-brand-blue">{formatFCFA(premierMinistre.budget_fcfa)}</span>{' '}
+                          <span className="text-slate-500 font-bold">({formatAmountInWords(premierMinistre.budget_fcfa)})</span>
+                        </>
+                      ) : (
+                        <span className="text-slate-400 font-semibold italic">Montant à confirmer</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -356,7 +363,14 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                     </h3>
                     <p className="text-xs text-slate-500 font-medium">{vicePremierMinistre.role_title}</p>
                     <div className="text-xs font-black text-slate-800 pt-0.5">
-                      Budget : <span className="text-brand-blue">{formatFCFA(vicePremierMinistre.budget_fcfa || 0)}</span> <span className="text-slate-500 font-bold">({formatAmountInWords(vicePremierMinistre.budget_fcfa || 0)})</span>
+                      Budget : {vicePremierMinistre.budget_fcfa ? (
+                        <>
+                          <span className="text-brand-blue">{formatFCFA(vicePremierMinistre.budget_fcfa)}</span>{' '}
+                          <span className="text-slate-500 font-bold">({formatAmountInWords(vicePremierMinistre.budget_fcfa)})</span>
+                        </>
+                      ) : (
+                        <span className="text-slate-400 font-semibold italic">Montant à confirmer</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -401,7 +415,13 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                       </h3>
                       <p className="text-[11px] text-slate-500 line-clamp-2 leading-tight">{official.department_ministry}</p>
                       <div className="text-[11px] font-bold text-slate-800 pt-0.5 whitespace-nowrap">
-                        Budget : <span className="text-brand-blue">{formatFCFA(official.budget_fcfa || 0)}</span> <span className="text-slate-500 font-semibold text-[10px] break-words">({formatAmountInWords(official.budget_fcfa || 0)})</span>
+                        Budget : {official.budget_fcfa ? (
+                          <>
+                            <span className="text-brand-blue">{formatFCFA(official.budget_fcfa)}</span> <span className="text-slate-500 font-semibold text-[10px] break-words">({formatAmountInWords(official.budget_fcfa)})</span>
+                          </>
+                        ) : (
+                          <span className="text-slate-400 font-semibold italic text-[10px]">Montant à confirmer</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -446,7 +466,13 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                     </h3>
                     <p className="text-[11px] text-slate-600 font-medium line-clamp-2 leading-tight">{official.department_ministry}</p>
                     <div className="text-[11px] font-bold text-slate-800 pt-0.5 whitespace-nowrap">
-                      Budget : <span className="text-brand-blue">{formatFCFA(official.budget_fcfa || 0)}</span> <span className="text-slate-500 font-semibold text-[10px] break-words">({formatAmountInWords(official.budget_fcfa || 0)})</span>
+                      Budget : {official.budget_fcfa ? (
+                        <>
+                          <span className="text-brand-blue">{formatFCFA(official.budget_fcfa)}</span> <span className="text-slate-500 font-semibold text-[10px] break-words">({formatAmountInWords(official.budget_fcfa)})</span>
+                        </>
+                      ) : (
+                        <span className="text-slate-400 font-semibold italic text-[10px]">Montant à confirmer</span>
+                      )}
                     </div>
                   </div>
                 </div>

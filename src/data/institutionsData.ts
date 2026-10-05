@@ -32,9 +32,9 @@ export const ALL_MINISTRIES_DATA: Institution[] = GOVERNMENT_OFFICIALS.map(offic
   info_officer_title: official.info_officer_title || "Service d'Accès aux Documents Publics (Loi n°2013-867)",
   info_officer_email: official.info_officer_email,
   info_officer_phone: official.info_officer_phone,
-  budget_functioning_fcfa: Math.round((official.budget_fcfa || 32500000000) * 0.7),
-  budget_investment_fcfa: Math.round((official.budget_fcfa || 32500000000) * 0.3),
-  total_budget_fcfa: official.budget_fcfa || 32500000000,
+  budget_functioning_fcfa: null,
+  budget_investment_fcfa: null,
+  total_budget_fcfa: official.budget_fcfa ?? null,
 }));
 
 export { NATIONAL_INSTITUTIONS_DATA, REGULATORY_AUTHORITIES_DATA };

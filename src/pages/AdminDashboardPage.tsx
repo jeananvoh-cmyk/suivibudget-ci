@@ -769,12 +769,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
     let primitive: PrimitiveBudgetInfo | undefined = quickWebInst.primitive_budget;
     if (quickWebForm.primitive_total_fcfa > 0 || cleanSourceUrl) {
-      let inv = quickWebForm.primitive_investment_fcfa;
-      let func = quickWebForm.primitive_functioning_fcfa;
-      if (quickWebForm.primitive_total_fcfa > 0 && inv === 0 && func === 0) {
-        inv = Math.round(quickWebForm.primitive_total_fcfa * 0.55);
-        func = quickWebForm.primitive_total_fcfa - inv;
-      }
+      const inv = quickWebForm.primitive_investment_fcfa > 0 ? quickWebForm.primitive_investment_fcfa : null;
+      const func = quickWebForm.primitive_functioning_fcfa > 0 ? quickWebForm.primitive_functioning_fcfa : null;
       primitive = {
         total_voted_fcfa: quickWebForm.primitive_total_fcfa,
         investment_voted_fcfa: inv,
@@ -889,12 +885,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
     let primitive: PrimitiveBudgetInfo | undefined = editingInst?.primitive_budget;
     if (instForm.primitive_total_fcfa > 0 || cleanSourceUrl) {
-      let inv = instForm.primitive_investment_fcfa;
-      let func = instForm.primitive_functioning_fcfa;
-      if (instForm.primitive_total_fcfa > 0 && inv === 0 && func === 0) {
-        inv = Math.round(instForm.primitive_total_fcfa * 0.55);
-        func = instForm.primitive_total_fcfa - inv;
-      }
+      const inv = instForm.primitive_investment_fcfa > 0 ? instForm.primitive_investment_fcfa : null;
+      const func = instForm.primitive_functioning_fcfa > 0 ? instForm.primitive_functioning_fcfa : null;
       primitive = {
         total_voted_fcfa: instForm.primitive_total_fcfa,
         investment_voted_fcfa: inv,
@@ -1847,7 +1839,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                                 )}
                               </div>
                             </div>
-                          ) : inst.total_budget_fcfa > 0 ? (
+                          ) : (inst.total_budget_fcfa != null && inst.total_budget_fcfa > 0) ? (
                             <span className="font-bold text-slate-900 text-xs">
                               {formatFCFA(inst.total_budget_fcfa)}
                             </span>
@@ -3815,13 +3807,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       onChange={(e) => {
                         const total = Number(e.target.value);
                         setInstForm(prev => {
-                          // Auto split 55% invest / 45% func if both are 0
-                          const shouldAutoSplit = prev.primitive_investment_fcfa === 0 && prev.primitive_functioning_fcfa === 0;
                           return {
                             ...prev,
                             primitive_total_fcfa: total,
-                            primitive_investment_fcfa: shouldAutoSplit ? Math.round(total * 0.55) : prev.primitive_investment_fcfa,
-                            primitive_functioning_fcfa: shouldAutoSplit ? Math.round(total * 0.45) : prev.primitive_functioning_fcfa,
                           };
                         });
                       }}
@@ -4682,15 +4670,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       value={quickWebForm.primitive_total_fcfa || ''}
                       onChange={(e) => {
                         const total = Number(e.target.value);
-                        setQuickWebForm(prev => {
-                          const autoSplit = prev.primitive_investment_fcfa === 0 && prev.primitive_functioning_fcfa === 0;
-                          return {
-                            ...prev,
-                            primitive_total_fcfa: total,
-                            primitive_investment_fcfa: autoSplit ? Math.round(total * 0.55) : prev.primitive_investment_fcfa,
-                            primitive_functioning_fcfa: autoSplit ? Math.round(total * 0.45) : prev.primitive_functioning_fcfa,
-                          };
-                        });
+                        setQuickWebForm(prev => ({
+                          ...prev,
+                          primitive_total_fcfa: total,
+                        }));
                       }}
                       placeholder="Ex: 1450000000"
                       className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-bold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500"

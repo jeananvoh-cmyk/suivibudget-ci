@@ -762,7 +762,7 @@ class DataStore {
           investment_voted_fcfa: current.investment_amount ?? null,
           functioning_voted_fcfa: current.operating_amount ?? null,
           voted_date: current.adoption_date || '2026',
-          source: current.primary_source_label || 'SuiviBudget',
+          source: current.primary_source_label || (current as any).import_provenance?.source?.name || 'Source officielle',
           source_url: current.primary_source_url,
           precision: current.amount_precision,
           session_notes: current.session_notes || current.notes,
@@ -1073,7 +1073,7 @@ class DataStore {
     const totalCommunes = 201;
     const totalRegions = 31;
     const totalCollectivites = 232;
-    const totalBudgetLines = this.projects.length > 0 ? this.projects.length : 4354;
+    const totalBudgetLines = this.projects.length;
     const totalInvestmentsFcfa = this.projects.reduce((sum, p) => sum + p.budget_amount_fcfa, 0);
     const verifiedProofs = this.proofs.filter(p => p.verification_status === 'APPROVED').length;
     const totalProofs = this.proofs.length;

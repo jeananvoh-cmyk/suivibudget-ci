@@ -232,7 +232,7 @@ export const RegulatoryAuthoritiesPage: React.FC<RegulatoryAuthoritiesPageProps>
                 </div>
 
                 {/* Operating vs Investment mini-bar */}
-                {item.total_budget_fcfa > 0 && (
+                {item.total_budget_fcfa != null && item.total_budget_fcfa > 0 && item.budget_functioning_fcfa != null && item.budget_investment_fcfa != null && (
                   <div className="space-y-1 pt-1">
                     <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden flex">
                       <div 

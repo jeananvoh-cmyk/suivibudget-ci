@@ -51,13 +51,17 @@ export const CommuneComparatorModal: React.FC<CommuneComparatorModalProps> = ({
   const projectsA = getProjectsCount(communeA);
   const projectsB = getProjectsCount(communeB);
 
-  const functioningPctA = communeA.total_budget_fcfa > 0 ? Math.round((communeA.budget_functioning_fcfa / communeA.total_budget_fcfa) * 100) : 0;
-  const investmentPctA = communeA.total_budget_fcfa > 0 ? (100 - functioningPctA) : 0;
+  const hasBreakdownA = communeA.budget_functioning_fcfa != null && communeA.budget_investment_fcfa != null && (communeA.total_budget_fcfa ?? 0) > 0;
+  const functioningPctA = hasBreakdownA ? Math.round((communeA.budget_functioning_fcfa! / communeA.total_budget_fcfa!) * 100) : 0;
+  const investmentPctA = hasBreakdownA ? (100 - functioningPctA) : 0;
 
-  const functioningPctB = communeB.total_budget_fcfa > 0 ? Math.round((communeB.budget_functioning_fcfa / communeB.total_budget_fcfa) * 100) : 0;
-  const investmentPctB = communeB.total_budget_fcfa > 0 ? (100 - functioningPctB) : 0;
+  const hasBreakdownB = communeB.budget_functioning_fcfa != null && communeB.budget_investment_fcfa != null && (communeB.total_budget_fcfa ?? 0) > 0;
+  const functioningPctB = hasBreakdownB ? Math.round((communeB.budget_functioning_fcfa! / communeB.total_budget_fcfa!) * 100) : 0;
+  const investmentPctB = hasBreakdownB ? (100 - functioningPctB) : 0;
 
-  const budgetDiff = Math.abs(communeA.total_budget_fcfa - communeB.total_budget_fcfa);
+  const totalA = communeA.total_budget_fcfa ?? 0;
+  const totalB = communeB.total_budget_fcfa ?? 0;
+  const budgetDiff = Math.abs(totalA - totalB);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
@@ -162,16 +166,20 @@ export const CommuneComparatorModal: React.FC<CommuneComparatorModalProps> = ({
 
               {/* Ratios Breakdown */}
               {!communeA.is_tax_quota_commune && (
-                <div className="space-y-2">
-                  <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden flex">
-                    <div className="bg-brand-blue h-full" style={{ width: `${functioningPctA}%` }}></div>
-                    <div className="bg-emerald-500 h-full" style={{ width: `${investmentPctA}%` }}></div>
+                hasBreakdownA ? (
+                  <div className="space-y-2">
+                    <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden flex">
+                      <div className="bg-brand-blue h-full" style={{ width: `${functioningPctA}%` }}></div>
+                      <div className="bg-emerald-500 h-full" style={{ width: `${investmentPctA}%` }}></div>
+                    </div>
+                    <div className="flex justify-between text-xs font-semibold">
+                      <span className="text-brand-blue">Fonctionnement : {functioningPctA}%</span>
+                      <span className="text-emerald-700">Investissement : {investmentPctA}%</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span className="text-brand-blue">Fonctionnement : {functioningPctA}%</span>
-                    <span className="text-emerald-700">Investissement : {investmentPctA}%</span>
-                  </div>
-                </div>
+                ) : (
+                  <div className="text-xs text-slate-400 italic">Ventilation non disponible</div>
+                )
               )}
 
               {/* Chantiers liés */}
@@ -226,16 +234,20 @@ export const CommuneComparatorModal: React.FC<CommuneComparatorModalProps> = ({
 
               {/* Ratios Breakdown */}
               {!communeB.is_tax_quota_commune && (
-                <div className="space-y-2">
-                  <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden flex">
-                    <div className="bg-brand-blue h-full" style={{ width: `${functioningPctB}%` }}></div>
-                    <div className="bg-emerald-500 h-full" style={{ width: `${investmentPctB}%` }}></div>
+                hasBreakdownB ? (
+                  <div className="space-y-2">
+                    <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden flex">
+                      <div className="bg-brand-blue h-full" style={{ width: `${functioningPctB}%` }}></div>
+                      <div className="bg-emerald-500 h-full" style={{ width: `${investmentPctB}%` }}></div>
+                    </div>
+                    <div className="flex justify-between text-xs font-semibold">
+                      <span className="text-brand-blue">Fonctionnement : {functioningPctB}%</span>
+                      <span className="text-emerald-700">Investissement : {investmentPctB}%</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span className="text-brand-blue">Fonctionnement : {functioningPctB}%</span>
-                    <span className="text-emerald-700">Investissement : {investmentPctB}%</span>
-                  </div>
-                </div>
+                ) : (
+                  <div className="text-xs text-slate-400 italic">Ventilation non disponible</div>
+                )
               )}
 
               {/* Chantiers liés */}

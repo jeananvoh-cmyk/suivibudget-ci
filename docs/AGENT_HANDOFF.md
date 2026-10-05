@@ -1,15 +1,38 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- LAST_UPDATED : 2026-10-04
+- LAST_UPDATED : 2026-10-05
 - LAST_AGENT : Antigravity
-- CURRENT_BRANCH : `antigravity/budget-cycle-document-console`
-- HANDOFF_BASE_SHA : `46c4f1753a1c6d5aa564a70f082f859141d58fd0` (HEAD de PR #13 `antigravity/tiassale-ca-2024-reconciliation`)
-- CURRENT_HEAD : `9f57001` fix(cycle): seal human gate at import boundary, eliminate version fallbacks, clean API ; 244 tests PASS (15 suites), build PASS.
-- PR : PR #14 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/14) ouverte sur `antigravity/budget-cycle-document-console` vers `master` (dépendance explicite sur PR #13, NON FUSIONNÉE, soumise au contrôle externe de l'orchestrateur).
-- SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : Durcissement Ultime PR #14 — Fermeture Étanche du Gate Humain à la Frontière d'Import & Élimination des Fallbacks de Version (Validation humaine étanche à la frontière d'import `buildStandardImportEnvelope` via `isImportableValue` : rejet bloquant de PENDING avec Error explicite, rejet de MARKED_UNKNOWN avec montant non-null, exclusion de REJECTED, rejet des lots vides avec 0 valeur importable ; Matrice de conflits BP publié à 4 cas stricts sans aucun fallback artificiel `|| 1` ou `?? 1` ; Suppression du paramètre mort `existingBudgetsCount` ; Zéro régression Bingerville, Cocody, Tiassalé ; 244 tests PASS sur 15 suites, build PASS).
+- CURRENT_BRANCH : `antigravity/lot1-financial-integrity-cleanup`
+- BASE_MASTER_SHA : `0849bc5ee2cc292f5565f705c917b04ffe2afa1e`
+- CURRENT_HEAD : En attente de commit atomique pour LOT 1
+- PR : En attente de création via `gh pr create` (NON FUSIONNÉE, `MERGE_STATUS: NOT_MERGED`)
+- SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée)
+- CURRENT_MILESTONE : LOT 1 — Assainissement de l'Intégrité Financière de SuiviBudget (Élimination intégrale des valeurs financières artificielles, estimations silencieuses, ventilations arbitraires 65/35, 70/30, 55/45, fallbacks 32.5B, 175.6B, 4354 et faux zéros ; verrouillage par suite de tests financialIntegrity.test.ts ; 16/16 test suites PASS, 257/257 tests PASS, build PASS).
 - FOUNDATION_READY : TRUE.
+
+## LOT 1 : ASSAINISSEMENT DE L'INTÉGRITÉ FINANCIÈRE (RÉALISÉ)
+- **1. Élimination des Ventilations Arbitraires (Class D -> Éliminées)** :
+  - **Ministères (65/35 et 70/30)** :
+    - `src/pages/institutions/MinistriesPage.tsx` : Suppression de `* 0.65` et `* 0.35`. Les ministères sans ventilation officielle disposent désormais de `budget_functioning_fcfa: null` et `budget_investment_fcfa: null`.
+    - `src/data/institutionsData.ts` : Suppression de `* 0.7` et `* 0.3` ainsi que du fallback de 32,5 Milliards FCFA (`32500000000`).
+  - **Mairies & Conseils Régionaux (55/45 et 35%)** :
+    - `src/components/PrimitiveBudgetImporterModal.tsx` : Suppression de la moyenne municipale fictive 55% investissement / 45% fonctionnement. `investmentVoted` et `functioningVoted` restent strictement `null` si non fournis.
+    - `src/pages/AdminDashboardPage.tsx` : Suppression de l'auto-split 55%/45% dans `handleSaveQuickWeb`, `handleSaveInstitution` et dans les `onChange` des formulaires de saisie de budget primitif.
+    - `src/data/communesData.ts` : Suppression du fallback `c.functioningRatio || 0.35` affecté arbitrairement aux 188 communes hors Abidjan. Les communes sans ratio documenté ont désormais `budget_functioning_fcfa: null` et `budget_investment_fcfa: null`.
+- **2. Élimination des Fallbacks de Montants & Données Globales** :
+  - `src/components/StatImpactBanner.tsx` : Suppression du montant de secours de 175,6 Milliards FCFA (`175648952140`). Affichage neutre de `"Montant à confirmer"` si le total n'est pas consolidé.
+  - `src/services/dataStore.ts` : Suppression du fallback de 4 354 projets (`4354`) dans `getImpactStats()`. `totalBudgetLines` reflète rigoureusement `this.projects.length`.
+  - `src/services/dataStore.ts` : Remplacement du faux label de source `'SuiviBudget'` par la source officielle de provenance (`current.primary_source_label || current.import_provenance?.source?.name || 'Source officielle'`).
+  - `src/data/nationalBudgetData.ts` : Correction de la Cour Suprême (qui affichait des budgets à 0 alors que non publiés) vers `null`.
+- **3. Respect Strict de l'Invariant "UNKNOWN != 0"** :
+  - `src/utils/formatters.ts` : `formatAmountInWords`, `formatCompactFCFA`, et `formatFCFAWithWords` renvoient désormais `'Montant à confirmer'` pour les montants `null` ou `undefined`, et préservent `'0 FCFA'` uniquement pour les vrais zéros documentés (`0`).
+  - `src/components/Footer.tsx` : Remplacement des fallbacks `|| 0` par `?? ''` pour l'export CSV des budgets, évitant de faire passer des montants inconnus pour des budgets nuls.
+  - `src/components/InstitutionDetailModal.tsx`, `MunicipalitiesPage.tsx`, `RegionalCouncilsPage.tsx`, `CommuneComparatorModal.tsx`, `NationalInstitutionsPage.tsx`, `RegulatoryAuthoritiesPage.tsx` : La jauge bicolore et les pourcentages fonctionnement/investissement ne sont affichés QUE si les deux composantes sont réellement documentées et non nulles (`hasBreakdown`). Si non disponibles, mention explicite que la ventilation est à confirmer via l'acte budgétaire.
+- **4. Tests & Validation** :
+  - Nouvelle suite `src/utils/__tests__/financialIntegrity.test.ts` (11 tests unitaires validant l'absence de ratios fabriqués, l'absence de fallbacks, le respect de `UNKNOWN != 0`, et la non-régression sur Bingerville BP 2026, Cocody BP 2026 et Tiassalé CA 2024).
+  - 16 suites de tests exécutées : 257 tests unitaires PASS.
+  - TypeScript & Vite build : PASS (0 erreur).
 
 ## INDUSTRIALISATION DU CYCLE BUDGÉTAIRE & CONSOLE DOCUMENTAIRE (DURCIE PR #14 — GATE FINAL QUALITÉ)
 - **GATE QUALITÉ FINAL VALIDÉ SUR PR #14** :
