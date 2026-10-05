@@ -275,3 +275,6 @@ export * from './administrativeAccount';
 
 // Exportation du domaine Cycle Budgétaire & Console Documentaire
 export * from './budgetCycle';
+
+// Exportation du domaine Budgets Ministériels & Budget-Programmes (LOT 2)
+export * from './ministryBudget';

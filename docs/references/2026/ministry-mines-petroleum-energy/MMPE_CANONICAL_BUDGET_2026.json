@@ -1,0 +1,820 @@
+{
+  "institution_code": "348",
+  "institution_name": "Ministère des Mines, du Pétrole et de l'Energie",
+  "fiscal_year": 2026,
+  "extraction_date": "2026-10-05",
+  "source": {
+    "publisher": "Direction Générale du Budget et des Finances (DGBF)",
+    "document": "Annexe 4 — Documents de Programmation Pluriannuelle des Dépenses - Projets Annuels de Performance (DPPD-PAP) 2026-2028",
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+    "section_reference": "SECTION 348 : MINISTERE DES MINES, DU PETROLE ET DE L'ENERGIE",
+    "page_range": "PDF pages 799-832 (Document pages 797-830 sur 1227)",
+    "accessed_at": "2026-10-05"
+  },
+  "control_source": {
+    "publisher": "DGBF",
+    "document": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+    "section_reference": "Ministère code 348"
+  },
+  "totals": {
+    "total_ministry_2026_fcfa": 706060209015,
+    "programs_sum_2026_fcfa": 706060209015,
+    "programs_delta": 0,
+    "actions_sum_2026_fcfa": 706060209015,
+    "actions_delta": 0,
+    "reconciliation_status": "RECONCILED"
+  },
+  "programs": [
+    {
+      "program_code": "21106",
+      "official_name": "Administration Générale",
+      "program_amount_2026_fcfa": 8701872126,
+      "page_reference": "PDF p. 813 / Document p. 811",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2110601",
+          "official_name": "Coordination et animation du ministère",
+          "amount_2026_fcfa": 2315615656,
+          "page_reference": "PDF p. 813 / Document p. 811",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2110602",
+          "official_name": "Planification, programmation et suivi-évaluation des activités du ministère",
+          "amount_2026_fcfa": 86760000,
+          "page_reference": "PDF p. 815 / Document p. 813",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2110603",
+          "official_name": "Gestion des ressources humaines, matérielles et financières",
+          "amount_2026_fcfa": 6266806470,
+          "page_reference": "PDF p. 815 / Document p. 813",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2110604",
+          "official_name": "Information et communication",
+          "amount_2026_fcfa": 32690000,
+          "page_reference": "PDF p. 815 / Document p. 813",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "22036",
+      "official_name": "Hydrocarbures",
+      "program_amount_2026_fcfa": 116054336,
+      "page_reference": "PDF p. 817 / Document p. 815",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2203601",
+          "official_name": "Renforcement du cadre institutionnel, légal et réglementaire du secteur des hydrocarbures",
+          "amount_2026_fcfa": 82754336,
+          "page_reference": "PDF p. 817 / Document p. 815",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2203602",
+          "official_name": "Sécurisation de l'approvisionnement des marchés locaux et sous régionaux en produits pétroliers",
+          "amount_2026_fcfa": 17800000,
+          "page_reference": "PDF p. 817 / Document p. 815",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2203603",
+          "official_name": "Promotion des investissements nationaux et étrangers dans le secteur pétrolier et gazier",
+          "amount_2026_fcfa": 15500000,
+          "page_reference": "PDF p. 817 / Document p. 815",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "22037",
+      "official_name": "Energie",
+      "program_amount_2026_fcfa": 320914619601,
+      "page_reference": "PDF pp. 820-821 / Document pp. 818-819",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2203701",
+          "official_name": "Renforcement du cadre institutionnel, légal et réglementaire du secteur de l'énergie",
+          "amount_2026_fcfa": 16875242446,
+          "page_reference": "PDF p. 820 / Document p. 818",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2203702",
+          "official_name": "Renforcement des infrastructures de production, du transport et de distribution de l'énergie électrique",
+          "amount_2026_fcfa": 272285127246,
+          "page_reference": "PDF pp. 820-821 / Document pp. 818-819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2203703",
+          "official_name": "Vulgarisation des technologies modernes d'exploitation des sources d'énergie",
+          "amount_2026_fcfa": 22204949909,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2203704",
+          "official_name": "Amélioration de l'accessibilité financière aux services énergétiques",
+          "amount_2026_fcfa": 9549300000,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "22107",
+      "official_name": "Mines et géologie",
+      "program_amount_2026_fcfa": 783321335,
+      "page_reference": "PDF pp. 824-825 / Document pp. 822-823",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2210701",
+          "official_name": "Contrôle et suivi de l'application de la législation minière",
+          "amount_2026_fcfa": 64551589,
+          "page_reference": "PDF p. 824 / Document p. 822",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2210702",
+          "official_name": "Gestion des informations géologiques et minières",
+          "amount_2026_fcfa": 492511295,
+          "page_reference": "PDF p. 824 / Document p. 822",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2210703",
+          "official_name": "Assainissement de l'exploitation minière",
+          "amount_2026_fcfa": 13428480,
+          "page_reference": "PDF p. 824 / Document p. 822",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2210705",
+          "official_name": "Renforcement du cadre institutionnel, légal et réglementaire du secteur des mines et géologie",
+          "amount_2026_fcfa": 212829971,
+          "page_reference": "PDF p. 825 / Document p. 823",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "23230",
+      "official_name": "Appui au financement du secteur de l'électricité",
+      "program_amount_2026_fcfa": 70368000000,
+      "page_reference": "PDF p. 826 / Document p. 824",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2323001",
+          "official_name": "Electrification",
+          "amount_2026_fcfa": 70368000000,
+          "page_reference": "PDF p. 826 / Document p. 824",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "23231",
+      "official_name": "Appui au financement de la Société Ivoirienne de Raffinage (SIR)",
+      "program_amount_2026_fcfa": 57906341617,
+      "page_reference": "PDF p. 827 / Document p. 825",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2323101",
+          "official_name": "Collecter mensuellement la TSU SIR auprès de chaque marketeur",
+          "amount_2026_fcfa": 57906341617,
+          "page_reference": "PDF p. 827 / Document p. 825",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "23232",
+      "official_name": "Appui au financement du secteur minier",
+      "program_amount_2026_fcfa": 28500000000,
+      "page_reference": "PDF p. 829 / Document p. 827",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2323201",
+          "official_name": "Gestion des taxes ad valorem",
+          "amount_2026_fcfa": 28500000000,
+          "page_reference": "PDF p. 829 / Document p. 827",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "23233",
+      "official_name": "Péréquation produit à la Société Ivoirienne de Raffinage (SIR)",
+      "program_amount_2026_fcfa": 105000000000,
+      "page_reference": "PDF p. 830 / Document p. 828",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2323301",
+          "official_name": "Règlement des subventions de gaz butane ordonnancées au titre des ventes mensuelles",
+          "amount_2026_fcfa": 105000000000,
+          "page_reference": "PDF p. 830 / Document p. 828",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "23234",
+      "official_name": "Péréquation transport à la Société d'Etudes et de Gestion en Hydrocarbures (SEGH)",
+      "program_amount_2026_fcfa": 70000000000,
+      "page_reference": "PDF p. 831 / Document p. 829",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2323401",
+          "official_name": "Règlement mensuel des transports dus aux distribution (Marketeurs)",
+          "amount_2026_fcfa": 70000000000,
+          "page_reference": "PDF p. 831 / Document p. 829",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "23251",
+      "official_name": "Appui au financement à Côte d'Ivoire ENERGIE",
+      "program_amount_2026_fcfa": 43770000000,
+      "page_reference": "PDF p. 832 / Document p. 830",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2325101",
+          "official_name": "Renforcement de l'accès à l'électricité",
+          "amount_2026_fcfa": 43770000000,
+          "page_reference": "PDF p. 832 / Document p. 830",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "official_code": "78043200113",
+      "official_name": "Mise en œuvre du nouveau Schéma Directeur du Système d'Information du Ministère des Mines, du Pétrole et de l'Energie",
+      "program_code": "21106",
+      "action_code": "2110601",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "78043200113",
+          "financing_type": "TRESOR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 300000000,
+          "page_reference": "PDF p. 815 / Document p. 813",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 300000000,
+      "amount_derivation": "DIRECT_SOURCE_LINE",
+      "page_reference": "PDF p. 815 / Document p. 813",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "90043500023",
+      "official_name": "Projet Dorsale 400 KV EST Liaison Anyama-Ferké et Extension des postes sources",
+      "program_code": "22037",
+      "action_code": "2203702",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "90043500023",
+          "financing_type": "TRESOR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 4666149624,
+          "page_reference": "PDF p. 820 / Document p. 818",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        },
+        {
+          "official_code": "90043500023",
+          "financing_type": "FINANCEMENT_EXTERIEUR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 47330319475,
+          "page_reference": "PDF p. 820 / Document p. 818",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        },
+        {
+          "official_code": "90043500023",
+          "financing_type": "FINANCEMENT_EXTERIEUR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 8562430800,
+          "page_reference": "PDF p. 820 / Document p. 818",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 60558899899,
+      "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+      "page_reference": "PDF p. 820 / Document p. 818",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "90043500021",
+      "official_name": "Programme Intégré de Développement de l'Est (PIDE)",
+      "program_code": "22037",
+      "action_code": "2203702",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "90043500021",
+          "financing_type": "TRESOR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 2877134400,
+          "page_reference": "PDF p. 820 / Document p. 818",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        },
+        {
+          "official_code": "90043500021",
+          "financing_type": "FINANCEMENT_EXTERIEUR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 6688352160,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        },
+        {
+          "official_code": "90043500021",
+          "financing_type": "FINANCEMENT_EXTERIEUR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 2483006400,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 12048492960,
+      "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+      "page_reference": "PDF pp. 820-821 / Document pp. 818-819",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "90043500017",
+      "official_name": "Projet Corridor Nord",
+      "program_code": "22037",
+      "action_code": "2203702",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "90043500017",
+          "financing_type": "TRESOR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 6000000000,
+          "page_reference": "PDF p. 820 / Document p. 818",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        },
+        {
+          "official_code": "90043500017",
+          "financing_type": "FINANCEMENT_EXTERIEUR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 40000000000,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 46000000000,
+      "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+      "page_reference": "PDF pp. 820-821 / Document pp. 818-819",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "90043500010",
+      "official_name": "Projet National de Numérisation et d'Accès à l'Electricité en Côte d'Ivoire",
+      "program_code": "22037",
+      "action_code": "2203702",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "90043500010",
+          "financing_type": "TRESOR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 10000000000,
+          "page_reference": "PDF p. 820 / Document p. 818",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        },
+        {
+          "official_code": "90043500010",
+          "financing_type": "FINANCEMENT_EXTERIEUR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 50000000000,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 60000000000,
+      "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+      "page_reference": "PDF pp. 820-821 / Document pp. 818-819",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "78043500065",
+      "official_name": "Projet Dorsale Abidjan 400 KV Liaison PK 24 - Bingerville",
+      "program_code": "22037",
+      "action_code": "2203702",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "78043500065",
+          "financing_type": "TRESOR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 6456715976,
+          "page_reference": "PDF p. 820 / Document p. 818",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        },
+        {
+          "official_code": "78043500065",
+          "financing_type": "FINANCEMENT_EXTERIEUR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 28534129685,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 34990845661,
+      "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+      "page_reference": "PDF pp. 820-821 / Document pp. 818-819",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "90043500022",
+      "official_name": "Projet Renforcement Interconnexion CI-GHANA (REMP) 330 KV Liaison Bingerville - Dunkwa II",
+      "program_code": "22037",
+      "action_code": "2203702",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "90043500022",
+          "financing_type": "FINANCEMENT_EXTERIEUR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 35328107430,
+          "page_reference": "PDF p. 820 / Document p. 818",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 35328107430,
+      "amount_derivation": "DIRECT_SOURCE_LINE",
+      "page_reference": "PDF p. 820 / Document p. 818",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "90043500007",
+      "official_name": "Projet régional d'accès à l'électricité et de technologie de stockage d'énergie par batteries (BEST)",
+      "program_code": "22037",
+      "action_code": "2203702",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "90043500007",
+          "financing_type": "FINANCEMENT_EXTERIEUR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 4184006796,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 4184006796,
+      "amount_derivation": "DIRECT_SOURCE_LINE",
+      "page_reference": "PDF p. 821 / Document p. 819",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "26043500002",
+      "official_name": "Projet de construction de la centrale solaire de Boundiali Phase 2",
+      "program_code": "22037",
+      "action_code": "2203702",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "26043500002",
+          "financing_type": "FINANCEMENT_EXTERIEUR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 18694774500,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 18694774500,
+      "amount_derivation": "DIRECT_SOURCE_LINE",
+      "page_reference": "PDF p. 821 / Document p. 819",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "90043200012",
+      "official_name": "Programme de Maitrise de l'Energie",
+      "program_code": "22037",
+      "action_code": "2203703",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "90043200012",
+          "financing_type": "TRESOR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 182486445,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        },
+        {
+          "official_code": "90043200012",
+          "financing_type": "FINANCEMENT_EXTERIEUR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 10000000000,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 10182486445,
+      "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+      "page_reference": "PDF p. 821 / Document p. 819",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "90043200011",
+      "official_name": "Projet Mesure d'Accompagnement au programme Energie Renouvelable et Efficacité énergétique",
+      "program_code": "22037",
+      "action_code": "2203703",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "90043200011",
+          "financing_type": "TRESOR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 248000000,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        },
+        {
+          "official_code": "90043200011",
+          "financing_type": "FINANCEMENT_EXTERIEUR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 1792956240,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 2040956240,
+      "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+      "page_reference": "PDF p. 821 / Document p. 819",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "90043200010",
+      "official_name": "Projet Valorisation de Biomasse Energie et Cuisson propre en CI (VABICUI)",
+      "program_code": "22037",
+      "action_code": "2203703",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "90043200010",
+          "financing_type": "TRESOR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 150000000,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        },
+        {
+          "official_code": "90043200010",
+          "financing_type": "FINANCEMENT_EXTERIEUR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 995957224,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 1145957224,
+      "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+      "page_reference": "PDF p. 821 / Document p. 819",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "78043500057",
+      "official_name": "Fonds National de Maitrise de l'Energie (FONAME)",
+      "program_code": "22037",
+      "action_code": "2203703",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "78043500057",
+          "financing_type": "TRESOR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 150000000,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 150000000,
+      "amount_derivation": "DIRECT_SOURCE_LINE",
+      "page_reference": "PDF p. 821 / Document p. 819",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "78043500062",
+      "official_name": "Promotion de l'accès, des Réseaux Intelligents et de l'Energie Solaire (PARIS)",
+      "program_code": "22037",
+      "action_code": "2203703",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "78043500062",
+          "financing_type": "FINANCEMENT_EXTERIEUR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 8582400000,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 8582400000,
+      "amount_derivation": "DIRECT_SOURCE_LINE",
+      "page_reference": "PDF p. 821 / Document p. 819",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "90043500001",
+      "official_name": "Programme National d'Extension de Réseaux Electriques (PRONEX)",
+      "program_code": "22037",
+      "action_code": "2203704",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "90043500001",
+          "financing_type": "TRESOR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 3500000000,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 3500000000,
+      "amount_derivation": "DIRECT_SOURCE_LINE",
+      "page_reference": "PDF p. 821 / Document p. 819",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "78043500047",
+      "official_name": "Programme d'Electrification Pour Tous (PEPT)",
+      "program_code": "22037",
+      "action_code": "2203704",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "78043500047",
+          "financing_type": "TRESOR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 6000000000,
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 6000000000,
+      "amount_derivation": "DIRECT_SOURCE_LINE",
+      "page_reference": "PDF p. 821 / Document p. 819",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "90043500009",
+      "official_name": "Equipement du Laboratoire d'Analyse Géologique",
+      "program_code": "22107",
+      "action_code": "2210702",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "90043500009",
+          "financing_type": "TRESOR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 152064222,
+          "page_reference": "PDF p. 824 / Document p. 822",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 152064222,
+      "amount_derivation": "DIRECT_SOURCE_LINE",
+      "page_reference": "PDF p. 824 / Document p. 822",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    },
+    {
+      "official_code": "78044100097",
+      "official_name": "Construction du Laboratoire d'Analyse Géologique",
+      "program_code": "22107",
+      "action_code": "2210702",
+      "economic_nature": "INVESTISSEMENTS",
+      "source_lines": [
+        {
+          "official_code": "78044100097",
+          "financing_type": "TRESOR",
+          "economic_nature": "INVESTISSEMENTS",
+          "amount_2026_fcfa": 300000000,
+          "page_reference": "PDF p. 824 / Document p. 822",
+          "table_reference": "Tableau 7 : Budget détaillé du programme"
+        }
+      ],
+      "consolidated_amount_2026_fcfa": 300000000,
+      "amount_derivation": "DIRECT_SOURCE_LINE",
+      "page_reference": "PDF p. 824 / Document p. 822",
+      "evidence_status": "DIRECTLY_VERIFIED"
+    }
+  ],
+  "projects_zero_in_2026": [
+    {
+      "official_code": "90043500027",
+      "official_name": "Provision pour investissement / Energie",
+      "program_code": "22037",
+      "action_code": "2203702",
+      "amount_2026_fcfa": 0,
+      "amount_2027_fcfa": 200495279642,
+      "amount_2028_fcfa": 297662984646,
+      "page_reference": "PDF p. 820 / Document p. 818"
+    },
+    {
+      "official_code": "90043500015",
+      "official_name": "Projet de Renforcement du Système Electrique (PROSER phase 2)",
+      "program_code": "22037",
+      "action_code": "2203702",
+      "amount_2026_fcfa": 0,
+      "amount_2027_fcfa": 7353080000,
+      "amount_2028_fcfa": 7878300000,
+      "page_reference": "PDF p. 820 / Document p. 818"
+    },
+    {
+      "official_code": "90043500013",
+      "official_name": "Projet Dorsale 400 KV EST Liaison Anyama-Ferké et Extension des postes sources",
+      "program_code": "22037",
+      "action_code": "2203702",
+      "amount_2026_fcfa": 0,
+      "amount_2027_fcfa": 27619060569,
+      "amount_2028_fcfa": 0,
+      "page_reference": "PDF p. 820 / Document p. 818"
+    },
+    {
+      "official_code": "57043500001",
+      "official_name": "Aménagement Hydroélectrique de Boutoubre (Projet)",
+      "program_code": "22037",
+      "action_code": "2203702",
+      "amount_2026_fcfa": 0,
+      "amount_2027_fcfa": 18000000000,
+      "amount_2028_fcfa": 18500000000,
+      "page_reference": "PDF p. 820 / Document p. 818"
+    },
+    {
+      "official_code": "78044100111",
+      "official_name": "Construction de l'Infrastructure Géologique et du Système d'Information Géophysique",
+      "program_code": "22107",
+      "action_code": "2210702",
+      "amount_2026_fcfa": 0,
+      "amount_2027_fcfa": 700000000,
+      "amount_2028_fcfa": 1000000000,
+      "page_reference": "PDF p. 824 / Document p. 822"
+    },
+    {
+      "official_code": "90043500025",
+      "official_name": "Programme Electricité pour Tous (PEPT)",
+      "program_code": "23251",
+      "action_code": "2325101",
+      "amount_2026_fcfa": 0,
+      "amount_2027_fcfa": 10000000000,
+      "amount_2028_fcfa": 10000000000,
+      "page_reference": "PDF p. 832 / Document p. 830"
+    }
+  ]
+}

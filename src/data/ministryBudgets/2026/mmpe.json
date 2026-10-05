@@ -1,0 +1,1113 @@
+{
+  "id": "min-budget-2026-mmpe",
+  "institution_id": "gov-008",
+  "institution_code": "348",
+  "institution_name": "Ministère des Mines, du Pétrole et de l'Energie",
+  "minister_name": "M. MAMADOU SANGAFOWA COULIBALY",
+  "fiscal_year": 2026,
+  "total_budget_fcfa": 706060209015,
+  "amount_precision": "EXACT",
+  "reconciliation_status": "RECONCILED",
+  "source": "Loi de Finances n° 2025-987 du 19 décembre 2025 & Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+  "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+  "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT",
+  "document_reference": "Loi n° 2025-987 • DGBF SIGOBE • Annexe 4 DPPD-PAP 2026-2028",
+  "page_reference": "LFI 2026 p. Ministère 348 / DPPD-PAP 2026-2028 pp. 799-832",
+  "created_at": "2026-01-02T00:00:00Z",
+  "updated_at": "2026-10-05T14:30:00Z",
+  "programs": [
+    {
+      "id": "prog-21106",
+      "ministry_id": "gov-008",
+      "code": "21106",
+      "official_code": "21106",
+      "name": "Administration Générale",
+      "description": "Pilotage stratégique, coordination administrative, modernisation du système d'information et gestion des ressources humaines et financières du ministère.",
+      "amount_fcfa": 8701872126,
+      "percentage_of_ministry": 1.23,
+      "responsible_title": "Directeur de Cabinet / Directeur des Affaires Financières",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "PDF p. 813 / Document p. 811",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-2110601",
+          "program_id": "prog-21106",
+          "code": "2110601",
+          "official_code": "2110601",
+          "name": "Coordination et animation du ministère",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 813 / Document p. 811).",
+          "citizen_description": "Crédits budgétaires alloués pour Coordination et animation du ministère.",
+          "amount_fcfa": 2315615656,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 813 / Document p. 811",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT",
+          "linked_projects": [
+            {
+              "id": "proj-78043200113",
+              "internal_id": "proj-78043200113",
+              "code": "78043200113",
+              "official_code": "78043200113",
+              "title": "Mise en œuvre du nouveau Schéma Directeur du Système d'Information du Ministère des Mines, du Pétrole et de l'Energie",
+              "budget_amount_fcfa": 300000000,
+              "program_id": "prog-21106",
+              "action_id": "act-2110601",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "PDF p. 815 / Document p. 813",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "78043200113",
+                  "amount_fcfa": 300000000,
+                  "financing_type": "TRESOR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 815 / Document p. 813",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "DIRECT_SOURCE_LINE",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 300,000,000 FCFA.",
+              "is_funded_within_action": true
+            }
+          ]
+        },
+        {
+          "id": "act-2110602",
+          "program_id": "prog-21106",
+          "code": "2110602",
+          "official_code": "2110602",
+          "name": "Planification, programmation et suivi-évaluation des activités du ministère",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 815 / Document p. 813).",
+          "citizen_description": "Crédits budgétaires alloués pour Planification, programmation et suivi-évaluation des activités du ministère.",
+          "amount_fcfa": 86760000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 815 / Document p. 813",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        },
+        {
+          "id": "act-2110603",
+          "program_id": "prog-21106",
+          "code": "2110603",
+          "official_code": "2110603",
+          "name": "Gestion des ressources humaines, matérielles et financières",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 815 / Document p. 813).",
+          "citizen_description": "Crédits budgétaires alloués pour Gestion des ressources humaines, matérielles et financières.",
+          "amount_fcfa": 6266806470,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 815 / Document p. 813",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        },
+        {
+          "id": "act-2110604",
+          "program_id": "prog-21106",
+          "code": "2110604",
+          "official_code": "2110604",
+          "name": "Information et communication",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 815 / Document p. 813).",
+          "citizen_description": "Crédits budgétaires alloués pour Information et communication.",
+          "amount_fcfa": 32690000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 815 / Document p. 813",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        }
+      ]
+    },
+    {
+      "id": "prog-22036",
+      "ministry_id": "gov-008",
+      "code": "22036",
+      "official_code": "22036",
+      "name": "Hydrocarbures",
+      "description": "Promotion de la recherche pétrolière et gazière, valorisation des découvertes majeures (gisements Baleine et Calao) et régulation de la distribution des produits pétroliers.",
+      "amount_fcfa": 116054336,
+      "percentage_of_ministry": 0.02,
+      "responsible_title": "Directeur Général des Hydrocarbures",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "PDF p. 817 / Document p. 815",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-2203601",
+          "program_id": "prog-22036",
+          "code": "2203601",
+          "official_code": "2203601",
+          "name": "Renforcement du cadre institutionnel, légal et réglementaire du secteur des hydrocarbures",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 817 / Document p. 815).",
+          "citizen_description": "Crédits budgétaires alloués pour Renforcement du cadre institutionnel, légal et réglementaire du secteur des hydrocarbures.",
+          "amount_fcfa": 82754336,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 817 / Document p. 815",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        },
+        {
+          "id": "act-2203602",
+          "program_id": "prog-22036",
+          "code": "2203602",
+          "official_code": "2203602",
+          "name": "Sécurisation de l'approvisionnement des marchés locaux et sous régionaux en produits pétroliers",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 817 / Document p. 815).",
+          "citizen_description": "Crédits budgétaires alloués pour Sécurisation de l'approvisionnement des marchés locaux et sous régionaux en produits pétroliers.",
+          "amount_fcfa": 17800000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 817 / Document p. 815",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        },
+        {
+          "id": "act-2203603",
+          "program_id": "prog-22036",
+          "code": "2203603",
+          "official_code": "2203603",
+          "name": "Promotion des investissements nationaux et étrangers dans le secteur pétrolier et gazier",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 817 / Document p. 815).",
+          "citizen_description": "Crédits budgétaires alloués pour Promotion des investissements nationaux et étrangers dans le secteur pétrolier et gazier.",
+          "amount_fcfa": 15500000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 817 / Document p. 815",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        }
+      ]
+    },
+    {
+      "id": "prog-22037",
+      "ministry_id": "gov-008",
+      "code": "22037",
+      "official_code": "22037",
+      "name": "Energie",
+      "description": "Production, transport et distribution de l'énergie électrique, électrification rurale (PRONER), développement des énergies renouvelables et efficacité énergétique.",
+      "amount_fcfa": 320914619601,
+      "percentage_of_ministry": 45.45,
+      "responsible_title": "Directeur Général de l'Énergie",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "PDF pp. 820-821 / Document pp. 818-819",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-2203701",
+          "program_id": "prog-22037",
+          "code": "2203701",
+          "official_code": "2203701",
+          "name": "Renforcement du cadre institutionnel, légal et réglementaire du secteur de l'énergie",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 820 / Document p. 818).",
+          "citizen_description": "Crédits budgétaires alloués pour Renforcement du cadre institutionnel, légal et réglementaire du secteur de l'énergie.",
+          "amount_fcfa": 16875242446,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 820 / Document p. 818",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        },
+        {
+          "id": "act-2203702",
+          "program_id": "prog-22037",
+          "code": "2203702",
+          "official_code": "2203702",
+          "name": "Renforcement des infrastructures de production, du transport et de distribution de l'énergie électrique",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF pp. 820-821 / Document pp. 818-819).",
+          "citizen_description": "Crédits budgétaires alloués pour Renforcement des infrastructures de production, du transport et de distribution de l'énergie électrique.",
+          "amount_fcfa": 272285127246,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF pp. 820-821 / Document pp. 818-819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT",
+          "linked_projects": [
+            {
+              "id": "proj-90043500023",
+              "internal_id": "proj-90043500023",
+              "code": "90043500023",
+              "official_code": "90043500023",
+              "title": "Projet Dorsale 400 KV EST Liaison Anyama-Ferké et Extension des postes sources",
+              "budget_amount_fcfa": 60558899899,
+              "program_id": "prog-22037",
+              "action_id": "act-2203702",
+              "current_status": "VOTE",
+              "region_name": "Anyama - Ferké (National / Interurbain)",
+              "page_reference": "PDF p. 820 / Document p. 818",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "90043500023",
+                  "amount_fcfa": 4666149624,
+                  "financing_type": "TRESOR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 820 / Document p. 818",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                },
+                {
+                  "official_code": "90043500023",
+                  "amount_fcfa": 47330319475,
+                  "financing_type": "FINANCEMENT_EXTERIEUR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 820 / Document p. 818",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                },
+                {
+                  "official_code": "90043500023",
+                  "amount_fcfa": 8562430800,
+                  "financing_type": "FINANCEMENT_EXTERIEUR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 820 / Document p. 818",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 60,558,899,899 FCFA.",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "proj-90043500021",
+              "internal_id": "proj-90043500021",
+              "code": "90043500021",
+              "official_code": "90043500021",
+              "title": "Programme Intégré de Développement de l'Est (PIDE)",
+              "budget_amount_fcfa": 12048492960,
+              "program_id": "prog-22037",
+              "action_id": "act-2203702",
+              "current_status": "VOTE",
+              "region_name": "Est (Indénié-Djuablin, Gontougo, Bounkani)",
+              "page_reference": "PDF pp. 820-821 / Document pp. 818-819",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "90043500021",
+                  "amount_fcfa": 2877134400,
+                  "financing_type": "TRESOR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 820 / Document p. 818",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                },
+                {
+                  "official_code": "90043500021",
+                  "amount_fcfa": 6688352160,
+                  "financing_type": "FINANCEMENT_EXTERIEUR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                },
+                {
+                  "official_code": "90043500021",
+                  "amount_fcfa": 2483006400,
+                  "financing_type": "FINANCEMENT_EXTERIEUR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 12,048,492,960 FCFA.",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "proj-90043500017",
+              "internal_id": "proj-90043500017",
+              "code": "90043500017",
+              "official_code": "90043500017",
+              "title": "Projet Corridor Nord",
+              "budget_amount_fcfa": 46000000000,
+              "program_id": "prog-22037",
+              "action_id": "act-2203702",
+              "current_status": "VOTE",
+              "region_name": "Nord (Poro, Tchologo, Bagoué)",
+              "page_reference": "PDF pp. 820-821 / Document pp. 818-819",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "90043500017",
+                  "amount_fcfa": 6000000000,
+                  "financing_type": "TRESOR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 820 / Document p. 818",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                },
+                {
+                  "official_code": "90043500017",
+                  "amount_fcfa": 40000000000,
+                  "financing_type": "FINANCEMENT_EXTERIEUR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 46,000,000,000 FCFA.",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "proj-90043500010",
+              "internal_id": "proj-90043500010",
+              "code": "90043500010",
+              "official_code": "90043500010",
+              "title": "Projet National de Numérisation et d'Accès à l'Electricité en Côte d'Ivoire",
+              "budget_amount_fcfa": 60000000000,
+              "program_id": "prog-22037",
+              "action_id": "act-2203702",
+              "current_status": "VOTE",
+              "region_name": "National (Zones rurales et périurbaines)",
+              "page_reference": "PDF pp. 820-821 / Document pp. 818-819",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "90043500010",
+                  "amount_fcfa": 10000000000,
+                  "financing_type": "TRESOR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 820 / Document p. 818",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                },
+                {
+                  "official_code": "90043500010",
+                  "amount_fcfa": 50000000000,
+                  "financing_type": "FINANCEMENT_EXTERIEUR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 60,000,000,000 FCFA.",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "proj-78043500065",
+              "internal_id": "proj-78043500065",
+              "code": "78043500065",
+              "official_code": "78043500065",
+              "title": "Projet Dorsale Abidjan 400 KV Liaison PK 24 - Bingerville",
+              "budget_amount_fcfa": 34990845661,
+              "program_id": "prog-22037",
+              "action_id": "act-2203702",
+              "current_status": "VOTE",
+              "region_name": "Abidjan (PK 24 - Bingerville)",
+              "page_reference": "PDF pp. 820-821 / Document pp. 818-819",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "78043500065",
+                  "amount_fcfa": 6456715976,
+                  "financing_type": "TRESOR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 820 / Document p. 818",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                },
+                {
+                  "official_code": "78043500065",
+                  "amount_fcfa": 28534129685,
+                  "financing_type": "FINANCEMENT_EXTERIEUR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 34,990,845,661 FCFA.",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "proj-90043500022",
+              "internal_id": "proj-90043500022",
+              "code": "90043500022",
+              "official_code": "90043500022",
+              "title": "Projet Renforcement Interconnexion CI-GHANA (REMP) 330 KV Liaison Bingerville - Dunkwa II",
+              "budget_amount_fcfa": 35328107430,
+              "program_id": "prog-22037",
+              "action_id": "act-2203702",
+              "current_status": "VOTE",
+              "region_name": "Interconnexion CI-Ghana (Frontière Est)",
+              "page_reference": "PDF p. 820 / Document p. 818",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "90043500022",
+                  "amount_fcfa": 35328107430,
+                  "financing_type": "FINANCEMENT_EXTERIEUR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 820 / Document p. 818",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "DIRECT_SOURCE_LINE",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 35,328,107,430 FCFA.",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "proj-90043500007",
+              "internal_id": "proj-90043500007",
+              "code": "90043500007",
+              "official_code": "90043500007",
+              "title": "Projet régional d'accès à l'électricité et de technologie de stockage d'énergie par batteries (BEST)",
+              "budget_amount_fcfa": 4184006796,
+              "program_id": "prog-22037",
+              "action_id": "act-2203702",
+              "current_status": "VOTE",
+              "region_name": "Régional (CEDEAO / Ouest)",
+              "page_reference": "PDF p. 821 / Document p. 819",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "90043500007",
+                  "amount_fcfa": 4184006796,
+                  "financing_type": "FINANCEMENT_EXTERIEUR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "DIRECT_SOURCE_LINE",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 4,184,006,796 FCFA.",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "proj-26043500002",
+              "internal_id": "proj-26043500002",
+              "code": "26043500002",
+              "official_code": "26043500002",
+              "title": "Projet de construction de la centrale solaire de Boundiali Phase 2",
+              "budget_amount_fcfa": 18694774500,
+              "program_id": "prog-22037",
+              "action_id": "act-2203702",
+              "current_status": "VOTE",
+              "region_name": "Boundiali (Région de la Bagoué)",
+              "page_reference": "PDF p. 821 / Document p. 819",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "26043500002",
+                  "amount_fcfa": 18694774500,
+                  "financing_type": "FINANCEMENT_EXTERIEUR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "DIRECT_SOURCE_LINE",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 18,694,774,500 FCFA.",
+              "is_funded_within_action": true
+            }
+          ]
+        },
+        {
+          "id": "act-2203703",
+          "program_id": "prog-22037",
+          "code": "2203703",
+          "official_code": "2203703",
+          "name": "Vulgarisation des technologies modernes d'exploitation des sources d'énergie",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 821 / Document p. 819).",
+          "citizen_description": "Crédits budgétaires alloués pour Vulgarisation des technologies modernes d'exploitation des sources d'énergie.",
+          "amount_fcfa": 22204949909,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT",
+          "linked_projects": [
+            {
+              "id": "proj-90043200012",
+              "internal_id": "proj-90043200012",
+              "code": "90043200012",
+              "official_code": "90043200012",
+              "title": "Programme de Maitrise de l'Energie",
+              "budget_amount_fcfa": 10182486445,
+              "program_id": "prog-22037",
+              "action_id": "act-2203703",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "PDF p. 821 / Document p. 819",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "90043200012",
+                  "amount_fcfa": 182486445,
+                  "financing_type": "TRESOR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                },
+                {
+                  "official_code": "90043200012",
+                  "amount_fcfa": 10000000000,
+                  "financing_type": "FINANCEMENT_EXTERIEUR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 10,182,486,445 FCFA.",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "proj-90043200011",
+              "internal_id": "proj-90043200011",
+              "code": "90043200011",
+              "official_code": "90043200011",
+              "title": "Projet Mesure d'Accompagnement au programme Energie Renouvelable et Efficacité énergétique",
+              "budget_amount_fcfa": 2040956240,
+              "program_id": "prog-22037",
+              "action_id": "act-2203703",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "PDF p. 821 / Document p. 819",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "90043200011",
+                  "amount_fcfa": 248000000,
+                  "financing_type": "TRESOR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                },
+                {
+                  "official_code": "90043200011",
+                  "amount_fcfa": 1792956240,
+                  "financing_type": "FINANCEMENT_EXTERIEUR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 2,040,956,240 FCFA.",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "proj-90043200010",
+              "internal_id": "proj-90043200010",
+              "code": "90043200010",
+              "official_code": "90043200010",
+              "title": "Projet Valorisation de Biomasse Energie et Cuisson propre en CI (VABICUI)",
+              "budget_amount_fcfa": 1145957224,
+              "program_id": "prog-22037",
+              "action_id": "act-2203703",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "PDF p. 821 / Document p. 819",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "90043200010",
+                  "amount_fcfa": 150000000,
+                  "financing_type": "TRESOR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                },
+                {
+                  "official_code": "90043200010",
+                  "amount_fcfa": 995957224,
+                  "financing_type": "FINANCEMENT_EXTERIEUR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "SUM_OF_OFFICIAL_SOURCE_LINES",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 1,145,957,224 FCFA.",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "proj-78043500057",
+              "internal_id": "proj-78043500057",
+              "code": "78043500057",
+              "official_code": "78043500057",
+              "title": "Fonds National de Maitrise de l'Energie (FONAME)",
+              "budget_amount_fcfa": 150000000,
+              "program_id": "prog-22037",
+              "action_id": "act-2203703",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "PDF p. 821 / Document p. 819",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "78043500057",
+                  "amount_fcfa": 150000000,
+                  "financing_type": "TRESOR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "DIRECT_SOURCE_LINE",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 150,000,000 FCFA.",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "proj-78043500062",
+              "internal_id": "proj-78043500062",
+              "code": "78043500062",
+              "official_code": "78043500062",
+              "title": "Promotion de l'accès, des Réseaux Intelligents et de l'Energie Solaire (PARIS)",
+              "budget_amount_fcfa": 8582400000,
+              "program_id": "prog-22037",
+              "action_id": "act-2203703",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "PDF p. 821 / Document p. 819",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "78043500062",
+                  "amount_fcfa": 8582400000,
+                  "financing_type": "FINANCEMENT_EXTERIEUR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "DIRECT_SOURCE_LINE",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 8,582,400,000 FCFA.",
+              "is_funded_within_action": true
+            }
+          ]
+        },
+        {
+          "id": "act-2203704",
+          "program_id": "prog-22037",
+          "code": "2203704",
+          "official_code": "2203704",
+          "name": "Amélioration de l'accessibilité financière aux services énergétiques",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 821 / Document p. 819).",
+          "citizen_description": "Crédits budgétaires alloués pour Amélioration de l'accessibilité financière aux services énergétiques.",
+          "amount_fcfa": 9549300000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 821 / Document p. 819",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT",
+          "linked_projects": [
+            {
+              "id": "proj-90043500001",
+              "internal_id": "proj-90043500001",
+              "code": "90043500001",
+              "official_code": "90043500001",
+              "title": "Programme National d'Extension de Réseaux Electriques (PRONEX)",
+              "budget_amount_fcfa": 3500000000,
+              "program_id": "prog-22037",
+              "action_id": "act-2203704",
+              "current_status": "VOTE",
+              "region_name": "National (PRONER)",
+              "page_reference": "PDF p. 821 / Document p. 819",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "90043500001",
+                  "amount_fcfa": 3500000000,
+                  "financing_type": "TRESOR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "DIRECT_SOURCE_LINE",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 3,500,000,000 FCFA.",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "proj-78043500047",
+              "internal_id": "proj-78043500047",
+              "code": "78043500047",
+              "official_code": "78043500047",
+              "title": "Programme d'Electrification Pour Tous (PEPT)",
+              "budget_amount_fcfa": 6000000000,
+              "program_id": "prog-22037",
+              "action_id": "act-2203704",
+              "current_status": "VOTE",
+              "region_name": "National (PEPT)",
+              "page_reference": "PDF p. 821 / Document p. 819",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "78043500047",
+                  "amount_fcfa": 6000000000,
+                  "financing_type": "TRESOR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 821 / Document p. 819",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "DIRECT_SOURCE_LINE",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 6,000,000,000 FCFA.",
+              "is_funded_within_action": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "prog-22107",
+      "ministry_id": "gov-008",
+      "code": "22107",
+      "official_code": "22107",
+      "name": "Mines et géologie",
+      "description": "Cartographie géologique, promotion du potentiel minier (or, manganèse, nickel, lithium), encadrement de l'artisanat minier et lutte contre l'orpaillage clandestin.",
+      "amount_fcfa": 783321335,
+      "percentage_of_ministry": 0.11,
+      "responsible_title": "Directeur Général des Mines et de la Géologie",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "PDF pp. 824-825 / Document pp. 822-823",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-2210701",
+          "program_id": "prog-22107",
+          "code": "2210701",
+          "official_code": "2210701",
+          "name": "Contrôle et suivi de l'application de la législation minière",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 824 / Document p. 822).",
+          "citizen_description": "Crédits budgétaires alloués pour Contrôle et suivi de l'application de la législation minière.",
+          "amount_fcfa": 64551589,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 824 / Document p. 822",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        },
+        {
+          "id": "act-2210702",
+          "program_id": "prog-22107",
+          "code": "2210702",
+          "official_code": "2210702",
+          "name": "Gestion des informations géologiques et minières",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 824 / Document p. 822).",
+          "citizen_description": "Crédits budgétaires alloués pour Gestion des informations géologiques et minières.",
+          "amount_fcfa": 492511295,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 824 / Document p. 822",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT",
+          "linked_projects": [
+            {
+              "id": "proj-90043500009",
+              "internal_id": "proj-90043500009",
+              "code": "90043500009",
+              "official_code": "90043500009",
+              "title": "Equipement du Laboratoire d'Analyse Géologique",
+              "budget_amount_fcfa": 152064222,
+              "program_id": "prog-22107",
+              "action_id": "act-2210702",
+              "current_status": "VOTE",
+              "region_name": "Abidjan (Cocody / DGMG)",
+              "page_reference": "PDF p. 824 / Document p. 822",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "90043500009",
+                  "amount_fcfa": 152064222,
+                  "financing_type": "TRESOR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 824 / Document p. 822",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "DIRECT_SOURCE_LINE",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 152,064,222 FCFA.",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "proj-78044100097",
+              "internal_id": "proj-78044100097",
+              "code": "78044100097",
+              "official_code": "78044100097",
+              "title": "Construction du Laboratoire d'Analyse Géologique",
+              "budget_amount_fcfa": 300000000,
+              "program_id": "prog-22107",
+              "action_id": "act-2210702",
+              "current_status": "VOTE",
+              "region_name": "Abidjan (Cocody / DGMG)",
+              "page_reference": "PDF p. 824 / Document p. 822",
+              "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+              "source_lines": [
+                {
+                  "official_code": "78044100097",
+                  "amount_fcfa": 300000000,
+                  "financing_type": "TRESOR",
+                  "economic_nature": "INVESTISSEMENTS",
+                  "page_reference": "PDF p. 824 / Document p. 822",
+                  "table_reference": "Tableau 7 : Budget détaillé du programme"
+                }
+              ],
+              "amount_derivation": "DIRECT_SOURCE_LINE",
+              "citizen_description": "Projet d'investissement public voté au titre du budget de l'État 2026. Dotation 2026 : 300,000,000 FCFA.",
+              "is_funded_within_action": true
+            }
+          ]
+        },
+        {
+          "id": "act-2210703",
+          "program_id": "prog-22107",
+          "code": "2210703",
+          "official_code": "2210703",
+          "name": "Assainissement de l'exploitation minière",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 824 / Document p. 822).",
+          "citizen_description": "Crédits budgétaires alloués pour Assainissement de l'exploitation minière.",
+          "amount_fcfa": 13428480,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 824 / Document p. 822",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        },
+        {
+          "id": "act-2210705",
+          "program_id": "prog-22107",
+          "code": "2210705",
+          "official_code": "2210705",
+          "name": "Renforcement du cadre institutionnel, légal et réglementaire du secteur des mines et géologie",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 825 / Document p. 823).",
+          "citizen_description": "Crédits budgétaires alloués pour Renforcement du cadre institutionnel, légal et réglementaire du secteur des mines et géologie.",
+          "amount_fcfa": 212829971,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 825 / Document p. 823",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        }
+      ]
+    },
+    {
+      "id": "prog-23230",
+      "ministry_id": "gov-008",
+      "code": "23230",
+      "official_code": "23230",
+      "name": "Appui au financement du secteur de l'électricité",
+      "description": "Crédits de transferts budgétaires de l'État pour l'appui à l'équilibre financier et au développement du sous-secteur électrique national.",
+      "amount_fcfa": 70368000000,
+      "percentage_of_ministry": 9.97,
+      "responsible_title": "Ministère des Finances et du Budget / MMPE",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "PDF p. 826 / Document p. 824",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-2323001",
+          "program_id": "prog-23230",
+          "code": "2323001",
+          "official_code": "2323001",
+          "name": "Electrification",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 826 / Document p. 824).",
+          "citizen_description": "Crédits budgétaires alloués pour Electrification.",
+          "amount_fcfa": 70368000000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 826 / Document p. 824",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        }
+      ]
+    },
+    {
+      "id": "prog-23231",
+      "ministry_id": "gov-008",
+      "code": "23231",
+      "official_code": "23231",
+      "name": "Appui au financement de la Société Ivoirienne de Raffinage (SIR)",
+      "description": "Dotation publique de soutien à l'outil industriel national de raffinage et à la consolidation de la souveraineté en approvisionnement énergétique.",
+      "amount_fcfa": 57906341617,
+      "percentage_of_ministry": 8.2,
+      "responsible_title": "Direction Générale des Hydrocarbures / DGBF",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "PDF p. 827 / Document p. 825",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-2323101",
+          "program_id": "prog-23231",
+          "code": "2323101",
+          "official_code": "2323101",
+          "name": "Collecter mensuellement la TSU SIR auprès de chaque marketeur",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 827 / Document p. 825).",
+          "citizen_description": "Crédits budgétaires alloués pour Collecter mensuellement la TSU SIR auprès de chaque marketeur.",
+          "amount_fcfa": 57906341617,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 827 / Document p. 825",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        }
+      ]
+    },
+    {
+      "id": "prog-23232",
+      "ministry_id": "gov-008",
+      "code": "23232",
+      "official_code": "23232",
+      "name": "Appui au financement du secteur minier",
+      "description": "Fonds de développement minier, appui aux infrastructures géologiques et soutien à la formalisation des exploitants artisanaux.",
+      "amount_fcfa": 28500000000,
+      "percentage_of_ministry": 4.04,
+      "responsible_title": "Direction Générale des Mines et de la Géologie",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "PDF p. 829 / Document p. 827",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-2323201",
+          "program_id": "prog-23232",
+          "code": "2323201",
+          "official_code": "2323201",
+          "name": "Gestion des taxes ad valorem",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 829 / Document p. 827).",
+          "citizen_description": "Crédits budgétaires alloués pour Gestion des taxes ad valorem.",
+          "amount_fcfa": 28500000000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 829 / Document p. 827",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        }
+      ]
+    },
+    {
+      "id": "prog-23233",
+      "ministry_id": "gov-008",
+      "code": "23233",
+      "official_code": "23233",
+      "name": "Péréquation produit à la Société Ivoirienne de Raffinage (SIR)",
+      "description": "Mécanisme budgétaire de stabilisation et de péréquation des prix des carburants à la pompe sur l'ensemble du territoire national.",
+      "amount_fcfa": 105000000000,
+      "percentage_of_ministry": 14.87,
+      "responsible_title": "Commission de Régulation et Péréquation des Prix des Produits Pétroliers",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "PDF p. 830 / Document p. 828",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-2323301",
+          "program_id": "prog-23233",
+          "code": "2323301",
+          "official_code": "2323301",
+          "name": "Règlement des subventions de gaz butane ordonnancées au titre des ventes mensuelles",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 830 / Document p. 828).",
+          "citizen_description": "Crédits budgétaires alloués pour Règlement des subventions de gaz butane ordonnancées au titre des ventes mensuelles.",
+          "amount_fcfa": 105000000000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 830 / Document p. 828",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        }
+      ]
+    },
+    {
+      "id": "prog-23234",
+      "ministry_id": "gov-008",
+      "code": "23234",
+      "official_code": "23234",
+      "name": "Péréquation transport à la Société d'Etudes et de Gestion en Hydrocarbures (SEGH)",
+      "description": "Prise en charge de la péréquation des coûts de transport des produits pétroliers entre le terminal d'Abidjan et les dépôts de l'intérieur.",
+      "amount_fcfa": 70000000000,
+      "percentage_of_ministry": 9.91,
+      "responsible_title": "Direction Générale des Hydrocarbures",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "PDF p. 831 / Document p. 829",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-2323401",
+          "program_id": "prog-23234",
+          "code": "2323401",
+          "official_code": "2323401",
+          "name": "Règlement mensuel des transports dus aux distribution (Marketeurs)",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 831 / Document p. 829).",
+          "citizen_description": "Crédits budgétaires alloués pour Règlement mensuel des transports dus aux distribution (Marketeurs).",
+          "amount_fcfa": 70000000000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 831 / Document p. 829",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        }
+      ]
+    },
+    {
+      "id": "prog-23251",
+      "ministry_id": "gov-008",
+      "code": "23251",
+      "official_code": "23251",
+      "name": "Appui au financement à Côte d'Ivoire ENERGIE",
+      "description": "Concours financier de l'État à CI-ENERGIES pour les programmes structurants de qualité du réseau et l'électrification rurale décentralisée.",
+      "amount_fcfa": 43770000000,
+      "percentage_of_ministry": 6.2,
+      "responsible_title": "Direction Générale de CI-ENERGIES / MMPE",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "PDF p. 832 / Document p. 830",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-2325101",
+          "program_id": "prog-23251",
+          "code": "2325101",
+          "official_code": "2325101",
+          "name": "Renforcement de l'accès à l'électricité",
+          "description": "Action budgétaire officielle DGBF inscrite au DPPD-PAP 2026-2028 (Réf: PDF p. 832 / Document p. 830).",
+          "citizen_description": "Crédits budgétaires alloués pour Renforcement de l'accès à l'électricité.",
+          "amount_fcfa": 43770000000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "PDF p. 832 / Document p. 830",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "source": "Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+          "evidence_status": "DIRECTLY_VERIFIED",
+          "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT"
+        }
+      ]
+    }
+  ]
+}

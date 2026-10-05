@@ -1,0 +1,40 @@
+{
+  "institution": {
+    "code": "348",
+    "name": "Ministère des Mines, du Pétrole et de l'Energie",
+    "fiscal_year": 2026,
+    "total_fcfa": 706060209015
+  },
+  "reconciliation_status": "RECONCILED",
+  "programs": [
+    {"code":"21106","name":"Administration Générale","amount_fcfa":8701872126},
+    {"code":"22036","name":"Hydrocarbures","amount_fcfa":116054336},
+    {"code":"22037","name":"Energie","amount_fcfa":320914619601},
+    {"code":"22107","name":"Mines et géologie","amount_fcfa":783321335},
+    {"code":"23230","name":"Appui au financement du secteur de l'électricité","amount_fcfa":70368000000},
+    {"code":"23231","name":"Appui au financement de la Société Ivoirienne de Raffinage (SIR)","amount_fcfa":57906341617},
+    {"code":"23232","name":"Appui au financement du secteur minier","amount_fcfa":28500000000},
+    {"code":"23233","name":"Péréquation produit à la Société Ivoirienne de Raffinage (SIR)","amount_fcfa":105000000000},
+    {"code":"23234","name":"Péréquation transport à la Société d'Etudes et de Gestion en Hydrocarbures (SEGH)","amount_fcfa":70000000000},
+    {"code":"23251","name":"Appui au financement à Côte d'Ivoire ENERGIE","amount_fcfa":43770000000}
+  ],
+  "sources": [
+    {
+      "id":"S1",
+      "evidence_type":"PRIMARY_OFFICIAL_DOCUMENT",
+      "title":"Loi de Finances Initiale 2026",
+      "publisher":"DGBF",
+      "url":"https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf"
+    },
+    {
+      "id":"S2",
+      "evidence_type":"PRIMARY_OFFICIAL_DOCUMENT",
+      "title":"Annexe 4 — DPPD-PAP 2026-2028",
+      "publisher":"DGBF",
+      "url":"https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "ministry_pages_hint":"802-830"
+    }
+  ],
+  "accessed_at":"2026-10-05",
+  "purpose":"Independent orchestrator reference for cross-checking LOT 2. Not application runtime data."
+}
