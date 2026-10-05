@@ -5,10 +5,10 @@
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/lot1-financial-integrity-cleanup`
 - BASE_MASTER_SHA : `0849bc5ee2cc292f5565f705c917b04ffe2afa1e`
-- CURRENT_HEAD : `8b40b06`
+- CURRENT_HEAD : `6d6571b`
 - PR : PR #24 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/24) — Quality CI: SUCCESS, Vercel: SUCCESS, Mergeable: MERGEABLE (`MERGE_STATUS: NOT_MERGED`)
-- SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée)
-- CURRENT_MILESTONE : LOT 1 — Assainissement de l'Intégrité Financière de SuiviBudget (Élimination intégrale des valeurs financières artificielles, estimations silencieuses, ventilations arbitraires 65/35, 70/30, 55/45, fallbacks 32.5B, 175.6B, 4354 et faux zéros ; verrouillage par suite de tests financialIntegrity.test.ts ; 16/16 test suites PASS, 257/257 tests PASS, build PASS).
+- SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée, REMOTE_MIGRATION_STATUS: PENDING_ORCHESTRATOR)
+- CURRENT_MILESTONE : LOT 1 — Assainissement de l'Intégrité Financière de SuiviBudget (Élimination intégrale des valeurs financières artificielles, estimations silencieuses, ventilations arbitraires 65/35, 70/30, 55/45, fallbacks 32.5B, 175.6B, 4354 et faux zéros ; DROP DEFAULT sur les 5 colonnes budgétaires institutions et local_budgets ; verrouillage par suite de tests financialIntegrity.test.ts ; 16/16 test suites PASS, 266/266 tests PASS, build PASS).
 - FOUNDATION_READY : TRUE.
 
 ## LOT 1 : ASSAINISSEMENT DE L'INTÉGRITÉ FINANCIÈRE (RÉALISÉ & DURCI CORRECTIF FINAL PR #24)
@@ -20,26 +20,38 @@
     - `src/components/PrimitiveBudgetImporterModal.tsx` : Suppression de la moyenne municipale fictive 55% investissement / 45% fonctionnement. `investmentVoted` et `functioningVoted` restent strictement `null` si non fournis.
     - `src/pages/AdminDashboardPage.tsx` : Suppression de l'auto-split 55%/45% dans `handleSaveQuickWeb`, `handleSaveInstitution` et dans les formulaires de saisie de budget primitif.
     - `src/data/communesData.ts` : Suppression du fallback `c.functioningRatio || 0.35` affecté arbitrairement aux 188 communes hors Abidjan. Les communes sans ratio documenté ont désormais `budget_functioning_fcfa: null` et `budget_investment_fcfa: null`.
-- **2. Schéma Supabase & Suppression de DEFAULT 0** :
-  - Nouvelle migration `supabase/migrations/20261005100000_drop_default_zero_institutions_budget.sql` : applique `ALTER TABLE public.institutions ALTER COLUMN ... DROP DEFAULT;` sur `total_budget_fcfa`, `budget_functioning_fcfa` et `budget_investment_fcfa` sans écriture destructive ni altération des lignes existantes.
-  - Mise à jour de `supabase/schema.sql` et `supabase_schema.sql` pour retirer `DEFAULT 0` de ces trois colonnes budgétaires.
-- **3. AdminDashboardPage — Support Strict des Trois États Budgétaires** :
+- **2. Schéma Supabase & Suppression de DEFAULT 0 (5 colonnes couvertes, CA executed_amount hors périmètre)** :
+  - Migration locale complétée : `supabase/migrations/20261005100000_drop_default_zero_institutions_budget.sql` :
+    - `ALTER TABLE public.institutions ALTER COLUMN total_budget_fcfa DROP DEFAULT;`
+    - `ALTER TABLE public.institutions ALTER COLUMN budget_functioning_fcfa DROP DEFAULT;`
+    - `ALTER TABLE public.institutions ALTER COLUMN budget_investment_fcfa DROP DEFAULT;`
+    - `ALTER TABLE public.local_budgets ALTER COLUMN operating_amount DROP DEFAULT;`
+    - `ALTER TABLE public.local_budgets ALTER COLUMN investment_amount DROP DEFAULT;`
+    - Invariant respecté : `public.ca_investment_operations.executed_amount` conservé intact et STRICTEMENT HORS PÉRIMÈTRE.
+    - Zéro écriture distante : la migration locale est prête pour application ultérieure par l'orchestrateur.
+  - Alignement des schémas déclaratifs du dépôt (`supabase/schema.sql` et `supabase_schema.sql`) pour garantir l'absence de `DEFAULT 0` sur ces colonnes budgétaires.
+- **3. Pipeline de bout en bout sur `local_budgets`** :
+  - `src/utils/budgetValidation.ts` : somme arithmétique protégée sans fallback `|| 0` ; les budgets partiels (total connu mais ventilation inconnue) sont 100% valides.
+  - `src/components/InstitutionDetailModal.tsx` : fiabilisation des messages et jauges en cas de ventilation inconnue (`hasInstBreakdown`), élimination de tout affichage trompeur "0%" ou "(0% du budget total)".
+  - Export CSV (`exportLocalBudgetsToCsv`) : produit une cellule vide pour les montants inconnus (`null`), et conserve `"0"` pour les vrais zéros documentés.
+- **4. AdminDashboardPage — Support Strict des Trois États Budgétaires** :
   - Élimination des conversions `null -> 0` (`inst.budget_functioning_fcfa || 0`, `inst.budget_investment_fcfa || 0`, `inst.total_budget_fcfa || 0`) dans l'état initial, `handleEditInstitution`, `handleOpenCreateInst`, `handleOpenQuickWebEdit`.
   - Logique de calcul du total révisée : si les deux composantes sont null, le total n'est pas faussement calculé à 0.
   - Formulaires d'édition adaptés avec `e.target.value.trim() === '' ? null : Number(e.target.value)` et `value={val != null ? val : ''}`, gérant parfaitement les 3 états : montant renseigné, vrai zéro documenté (0), montant inconnu (null).
-- **4. Export Admin & Élimination des Faux Zéros** :
+- **5. Export Admin & Élimination des Faux Zéros** :
   - `handleExportProspectsCsv` et `handleExportCSV` : remplacement de `p.total_budget_fcfa || 0` et `p.budget_amount_fcfa` par un contrôle null-safe produisant une cellule vide `""` pour les montants inconnus, et préservant `"0"` uniquement pour les vrais zéros documentés.
-- **5. Provenance & Élimination du Fallback Fictif** :
+- **6. Provenance & Élimination du Fallback Fictif** :
   - Suppression intégrale du fallback `'Conseil Municipal / Délibération officielle'` dans `AdminDashboardPage.tsx` et `PrimitiveBudgetImporterModal.tsx`. Une source absente produit `'Source à confirmer'`, jamais un acte délibérant fictif.
-- **6. Tests & Validation Renforcée** :
-  - Suite `src/utils/__tests__/financialIntegrity.test.ts` renforcée (16 tests unitaires) :
-    - Roundtrip d'ouverture / édition / sauvegarde préservant strictement `null`.
-    - Préservation du vrai zéro documenté `0`.
-    - Export CSV produisant une cellule vide et non `"0"`.
-    - Source vide produisant `'Source à confirmer'` sans fallback délibérant.
-    - Contrôle du schéma et de la migration sans `DEFAULT 0`.
-    - Remplacement du test fragile `not.toBe(32_500_000_000)` par le test de contrat réel du mapping ministériel.
-  - 16 suites de tests exécutées : 262/262 tests PASS.
+- **7. Tests & Validation Renforcée (Tests A à G)** :
+  - Suite `src/utils/__tests__/financialIntegrity.test.ts` renforcée (20 tests unitaires, tous PASS) :
+    - Test A : Null operating/investment amounts (valide, conserve null, n'injecte pas 0).
+    - Test B : Genuine documented zero (préserve 0, ne transforme pas en null, exporte 0).
+    - Test C : Partial budget validity (total connu avec ventilation inconnue valide, sans répartition arbitraire).
+    - Test D : Schema verification (DROP DEFAULT sur 5 colonnes cibles, executed_amount hors périmètre, schémas déclaratifs sans DEFAULT 0).
+    - Test E : Bingerville non-regression (4 046 222 000 FCFA = 1 877 888 000 + 2 168 334 000 FCFA, EXACT, AIP_VERIFIED, HIGH).
+    - Test F : Tiassalé non-regression (CA 2024 SOURCE_ANOMALY, BP 2026 unventilated, pas de ventilation inventée).
+    - Test G : Zero arbitrary split (aucun ratio 65/35, 70/30 ou multiplicateur inventé dans le code source ni les données).
+  - 16 suites de tests exécutées : 266/266 tests PASS.
   - TypeScript & Vite build : PASS (0 erreur).
 
 ## INDUSTRIALISATION DU CYCLE BUDGÉTAIRE & CONSOLE DOCUMENTAIRE (DURCIE PR #14 — GATE FINAL QUALITÉ)

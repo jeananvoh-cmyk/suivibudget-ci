@@ -68,7 +68,7 @@ export function validateBudgetRecord(budget: Partial<LocalBudget>): BudgetCohere
     budget.operating_amount != null &&
     budget.investment_amount != null
   ) {
-    const sum = (budget.operating_amount || 0) + (budget.investment_amount || 0);
+    const sum = budget.operating_amount + budget.investment_amount;
     // On tolère un écart uniquement si l'un des deux montants est 0 (ex: ventilation non ventilée dans la source)
     if (budget.operating_amount > 0 && budget.investment_amount > 0 && Math.abs(sum - budget.total_amount) > 1000) {
       const diff = sum - budget.total_amount;

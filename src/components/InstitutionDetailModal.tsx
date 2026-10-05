@@ -1453,7 +1453,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     <div className="flex items-center gap-1.5">
                       <Info className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
                       <span>
-                        {isPeripheralAbidjan
+                        {isPeripheralAbidjan && hasInstBreakdown && investmentPct > 0
                           ? `Ce montant correspond aux concours directs de l'État (DGF + DGE). Avec ${investmentPct}% alloués à l'équipement, ces crédits financent directement les ${relatedProjects.length} chantiers physiques de proximité de ${institution.name}.`
                           : "Ce montant correspond aux concours directs de l'État (DGF + DGE). Le budget primitif consolidé intégrant les impôts locaux propres est en cours de centralisation."}
                       </span>
@@ -1512,7 +1512,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     </h4>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                    Cette enveloppe de <strong className="text-slate-900">{formatAmountInWords(institution.budget_investment_fcfa)}</strong> ({investmentPct}% du budget total) est inscrite à la Loi de Finances 2026 pour les investissements matériels, logistiques, numériques et d'aménagement de <strong className="text-slate-900">{institution.name}</strong>.
+                    Cette enveloppe de <strong className="text-slate-900">{formatAmountInWords(institution.budget_investment_fcfa)}</strong>{investmentPct > 0 ? ` (${investmentPct}% du budget total)` : ''} est inscrite à la Loi de Finances 2026 pour les investissements matériels, logistiques, numériques et d'aménagement de <strong className="text-slate-900">{institution.name}</strong>.
                   </p>
                   <div className="pt-1">
                     <button
@@ -1636,7 +1636,15 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                       Ventilation Officielle du Budget 2026 (Loi de Finances)
                     </h5>
                     <p className="text-xs text-slate-500 max-w-md mx-auto">
-                      Les montants officiels votés pour <strong>{institution.name}</strong> s'élèvent à <strong>{formatFCFA(institution.budget_functioning_fcfa)}</strong> ({formatAmountInWords(institution.budget_functioning_fcfa)} — {functioningPct}%) en fonctionnement et <strong>{formatFCFA(institution.budget_investment_fcfa)}</strong> ({formatAmountInWords(institution.budget_investment_fcfa)} — {investmentPct}%) en investissements publics.
+                      {hasInstBreakdown ? (
+                        <>
+                          Les montants officiels votés pour <strong>{institution.name}</strong> s'élèvent à <strong>{formatFCFA(institution.budget_functioning_fcfa)}</strong> ({formatAmountInWords(institution.budget_functioning_fcfa)} — {functioningPct}%) en fonctionnement et <strong>{formatFCFA(institution.budget_investment_fcfa)}</strong> ({formatAmountInWords(institution.budget_investment_fcfa)} — {investmentPct}%) en investissements publics.
+                        </>
+                      ) : (
+                        <>
+                          La ventilation officielle entre dépenses de fonctionnement et investissements pour <strong>{institution.name}</strong> est en cours de centralisation via les documents budgétaires officiels.
+                        </>
+                      )}
                     </p>
                   </div>
                   <button
