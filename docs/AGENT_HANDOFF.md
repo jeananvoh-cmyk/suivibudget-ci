@@ -63,6 +63,12 @@
   - Contrôle arithmétique exact Somme(Actions) = Total Programme pour chaque programme (delta = 0).
   - Contrôle du non-double comptage des 18 projets liés (304 158 991 377 FCFA financés dans les actions).
   - Non-régression sur communes décentralisées (Bingerville, Cocody, Tiassalé).
+- **7. Phase Documentaire Contrôlée — Extraction Canonique Indépendante DGBF (2026-10-05)** :
+  - Extraction stricte depuis l'Annexe 4 DPPD-PAP 2026-2028 (`https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf`, 1229 pages, Section 348 MMPE pp. 799-832 / doc pp. 797-830).
+  - Aucun montant inventé, redistribué ou déduit par différence. UNKNOWN reste NULL.
+  - Production du jeu candidat canonique : `docs/references/2026/ministry-mines-petroleum-energy/ANTIGRAVITY_CANONICAL_EXTRACTION_CANDIDATE.json`.
+  - Production du rapport des divergences vs modèle applicatif actuel : `docs/references/2026/ministry-mines-petroleum-energy/ANTIGRAVITY_EXTRACTION_DIFF.md` (112 divergences recensées, dont 16 critiques sur les actions et projets).
+  - Sanctuaire du code respecté : 0 fichier dans `src/` modifié (`SRC_FILES_MODIFIED = 0`). Séparation absolue entre extraction et implémentation.
 
 ## LOT 1 : ASSAINISSEMENT DE L'INTÉGRITÉ FINANCIÈRE (CLÔTURE DÉFINITIVE PR #24)
 - **1. Élimination des Ventilations Arbitraires (Class D -> Éliminées)** :
@@ -496,9 +502,9 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Contrôle externe et indépendant de PR #25 (`antigravity/lot2-ministry-budget-architecture-pilot`) par l'orchestrateur (vérification des 10 programmes DGBF officiels, zéro double comptage des projets, Golden Reference Test, tests PASS, build PASS).
-2. Contrôle CI GitHub Actions (Quality / verify) et Vercel Preview sur PR #25.
-3. Décision GO / NO-GO et fusion de PR #25 vers master par l'orchestrateur.
+1. Contrôle par l'orchestrateur de l'extraction documentaire canonique candidate (`docs/references/2026/ministry-mines-petroleum-energy/ANTIGRAVITY_CANONICAL_EXTRACTION_CANDIDATE.json`) et du rapport des divergences (`ANTIGRAVITY_EXTRACTION_DIFF.md`).
+2. Décision d'arbitrage de l'orchestrateur sur l'alignement des actions et libellés dans le modèle applicatif `mmpe.json` (séparation stricte Extraction vs Implémentation respectée, 0 fichier `src/` modifié).
+3. Contrôle indépendant et validation globale du LOT 2 avant autorisation de merge.
 
 ## COCODY_REMOTE_CLOSEOUT — ORCHESTRATEUR 2026-10-02
 - Institution canonique ajoutée à `public.institutions` : `inst-com-cocody`, `Mairie de Cocody`, type applicatif `MAIRIE`, région Abidjan, District Autonome d'Abidjan.
