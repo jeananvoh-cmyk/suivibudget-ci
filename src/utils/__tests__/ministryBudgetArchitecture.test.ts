@@ -7,6 +7,7 @@ import {
   getMinistryBudget,
   isPilotMinistry,
   performMinistryArithmeticCheck,
+  validateMinistryBudget,
 } from '../../data/ministryPilotReferential';
 import { GOVERNMENT_OFFICIALS } from '../../data/governmentData';
 import { OFFICIAL_PRIMITIVE_BUDGETS } from '../../data/officialPrimitiveBudgets';
@@ -191,18 +192,37 @@ describe('Lot 2 — Architecture Pilote des Budgets Ministériels (MMPE gov-008)
   // 4. PROVENANCE ET SOURCES PRIMAIRES DGBF
   // -------------------------------------------------------------------------
   describe('Provenance et Sources Primaires DGBF', () => {
-    it('uses verified DGBF primary URLs and valid page references', () => {
+    const CANONICAL_DPPD_URL = 'https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf';
+
+    it('uses verified DGBF primary URLs and valid page references across all hierarchy levels', () => {
       expect(MMPE_MINISTRY_BUDGET_2026.source).toBeTruthy();
       expect(MMPE_MINISTRY_BUDGET_2026.document_reference).toContain('Loi n° 2025-987');
       expect(MMPE_MINISTRY_BUDGET_2026.evidence_type).toBe('PRIMARY_OFFICIAL_DOCUMENT');
-      expect(MMPE_MINISTRY_BUDGET_2026.source_url).toMatch(/^https:\/\/www\.dgbf\.ci\/.+/);
+      expect(MMPE_MINISTRY_BUDGET_2026.source_url).toBe('https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf');
       expect(MMPE_MINISTRY_BUDGET_2026.fiscal_year).toBe(2026);
       expect(MMPE_MINISTRY_BUDGET_2026.institution_code).toBe('348');
 
-      // Chaque programme a une référence de page dans le DPPD-PAP
+      // 10 programmes ont l'URL officielle et leur référence de page préservée
+      expect(MMPE_MINISTRY_BUDGET_2026.programs.length).toBe(10);
       MMPE_MINISTRY_BUDGET_2026.programs.forEach(prog => {
-        expect(prog.page_reference).toBeTruthy();
-        expect(prog.source_url).toMatch(/^https:\/\/www\.dgbf\.ci\/.+/);
+        expect(prog.source_url).toBe(CANONICAL_DPPD_URL);
+        expect(prog.page_reference).toMatch(/p\.\s*\d+/);
+      });
+
+      // 21 actions ont l'URL officielle et leur référence de page préservée
+      const allActions = MMPE_MINISTRY_BUDGET_2026.programs.flatMap(p => p.actions);
+      expect(allActions.length).toBe(21);
+      allActions.forEach(act => {
+        expect(act.source_url).toBe(CANONICAL_DPPD_URL);
+        expect(act.page_reference).toMatch(/p\.\s*\d+/);
+      });
+
+      // 18 projets ont l'URL officielle et leur référence de page préservée
+      const allProjects = allActions.flatMap(a => a.linked_projects || []);
+      expect(allProjects.length).toBe(18);
+      allProjects.forEach(proj => {
+        expect(proj.source_url).toBe(CANONICAL_DPPD_URL);
+        expect(proj.page_reference).toMatch(/p\.\s*\d+/);
       });
     });
   });
@@ -259,6 +279,29 @@ describe('Lot 2 — Architecture Pilote des Budgets Ministériels (MMPE gov-008)
       expect(tiassale).toBeDefined();
       expect(tiassale!.operating_planned).toBe(618_000_000);
       expect(tiassale!.total_realized).toBe(1_059_255_758);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // 7. VALIDATION RUNTIME TYPÉE DU BUDGET MINISTÉRIEL (ZÉRO ANY, SÉCURITÉ RUNTIME)
+  // -------------------------------------------------------------------------
+  describe('Validation Runtime (validateMinistryBudget)', () => {
+    it('accepts valid MMPE ministry budget structure and throws on corrupt payloads', () => {
+      // Structure valide acceptée
+      expect(() => validateMinistryBudget(MMPE_MINISTRY_BUDGET_2026)).not.toThrow();
+
+      // Rejette null ou non-objet
+      expect(() => validateMinistryBudget(null)).toThrow(/doit être un objet JSON valide/);
+      expect(() => validateMinistryBudget('not-an-object')).toThrow(/doit être un objet JSON valide/);
+
+      // Rejette fiscal_year invalide
+      expect(() => validateMinistryBudget({ ...MMPE_MINISTRY_BUDGET_2026, fiscal_year: 1999 })).toThrow(/fiscal_year invalide/);
+
+      // Rejette total_budget_fcfa négatif
+      expect(() => validateMinistryBudget({ ...MMPE_MINISTRY_BUDGET_2026, total_budget_fcfa: -500 })).toThrow(/total_budget_fcfa doit être un nombre positif/);
+
+      // Rejette programs vide
+      expect(() => validateMinistryBudget({ ...MMPE_MINISTRY_BUDGET_2026, programs: [] })).toThrow(/programs doit être un tableau non vide/);
     });
   });
 });

@@ -54,6 +54,7 @@ export interface MinistryLinkedProject {
   region_name?: string;
   page_reference?: string;
   table_reference?: string;
+  source_url?: string;
   source_lines?: ProjectSourceLine[];
   amount_derivation?: 'DIRECT_SOURCE_LINE' | 'SUM_OF_OFFICIAL_SOURCE_LINES';
   citizen_description?: string;

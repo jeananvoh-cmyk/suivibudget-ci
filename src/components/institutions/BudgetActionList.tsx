@@ -3,6 +3,7 @@ import { Target, FolderGit2 } from 'lucide-react';
 import { BudgetAction, MinistryLinkedProject } from '../../types/ministryBudget';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
 import { LinkedProjectCard } from './LinkedProjectCard';
+import { ProvenanceLink } from '../common/ProvenanceLink';
 
 interface BudgetActionListProps {
   actions: BudgetAction[];
@@ -33,9 +34,12 @@ export const BudgetActionList: React.FC<BudgetActionListProps> = ({
                     Action {act.official_code || act.code}
                   </span>
                   {act.page_reference && (
-                    <span className="text-[10px] text-slate-400">
-                      Réf : {act.page_reference}
-                    </span>
+                    <ProvenanceLink
+                      source="Source officielle DGBF"
+                      sourceUrl={act.source_url}
+                      pageReference={act.page_reference}
+                      citation
+                    />
                   )}
                 </div>
                 <h5 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">

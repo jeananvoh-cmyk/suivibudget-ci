@@ -10,6 +10,7 @@ interface ProvenanceLinkProps {
   evidenceType?: EvidenceType;
   fiscalYear?: number;
   compact?: boolean;
+  citation?: boolean;
   className?: string;
 }
 
@@ -21,8 +22,33 @@ export const ProvenanceLink: React.FC<ProvenanceLinkProps> = ({
   evidenceType = 'PRIMARY_OFFICIAL_DOCUMENT',
   fiscalYear = 2026,
   compact = false,
+  citation = false,
   className = '',
 }) => {
+  if (citation) {
+    if (!sourceUrl) {
+      return pageReference ? (
+        <span className={`text-[10px] text-slate-500 font-medium ${className}`}>
+          {pageReference}
+        </span>
+      ) : null;
+    }
+
+    return (
+      <a
+        href={sourceUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => e.stopPropagation()}
+        className={`inline-flex items-center gap-1 text-[10px] text-slate-500 hover:text-brand-blue hover:underline font-medium transition-colors focus:outline-hidden focus:ring-1 focus:ring-brand-blue rounded ${className}`}
+        title={`Consulter le document source officiel (${source})`}
+      >
+        <span>{source}</span>
+        {pageReference && <span>· {pageReference}</span>}
+        <ExternalLink className="w-2.5 h-2.5 flex-shrink-0 text-slate-400" />
+      </a>
+    );
+  }
   const getBadgeStyle = () => {
     switch (evidenceType) {
       case 'PRIMARY_OFFICIAL_DOCUMENT':

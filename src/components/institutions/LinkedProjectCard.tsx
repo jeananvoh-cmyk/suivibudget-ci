@@ -2,6 +2,7 @@ import React from 'react';
 import { MapPin, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { MinistryLinkedProject } from '../../types/ministryBudget';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
+import { ProvenanceLink } from '../common/ProvenanceLink';
 
 interface LinkedProjectCardProps {
   project: MinistryLinkedProject;
@@ -41,9 +42,14 @@ export const LinkedProjectCard: React.FC<LinkedProjectCardProps> = ({
           </h5>
 
           {project.page_reference && (
-            <span className="text-[10px] text-slate-400 block">
-              Réf : {project.page_reference}
-            </span>
+            <div className="pt-0.5">
+              <ProvenanceLink
+                source="Source officielle DGBF"
+                sourceUrl={project.source_url}
+                pageReference={project.page_reference}
+                citation
+              />
+            </div>
           )}
         </div>
 

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { BudgetProgram, MinistryLinkedProject } from '../../types/ministryBudget';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
+import { ProvenanceLink } from '../common/ProvenanceLink';
 import { BudgetActionList } from './BudgetActionList';
 
 interface BudgetProgramCardProps {
@@ -117,9 +118,12 @@ export const BudgetProgramCard: React.FC<BudgetProgramCardProps> = ({
                 {program.percentage_of_ministry}% du ministère
               </span>
               {program.page_reference && (
-                <span className="text-[10px] text-slate-400">
-                  {program.page_reference}
-                </span>
+                <ProvenanceLink
+                  source="Source officielle DGBF"
+                  sourceUrl={program.source_url}
+                  pageReference={program.page_reference}
+                  citation
+                />
               )}
             </div>
 

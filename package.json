@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "vitest run --fileParallelism=false",
+    "test": "vitest run",
     "ingest:budget": "node scripts/import-data.mjs",
     "import:data": "node scripts/import-data.mjs"
   },
