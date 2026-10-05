@@ -5,8 +5,8 @@
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/lot1-financial-integrity-cleanup`
 - BASE_MASTER_SHA : `0849bc5ee2cc292f5565f705c917b04ffe2afa1e`
-- CURRENT_HEAD : En attente de commit atomique pour LOT 1
-- PR : En attente de création via `gh pr create` (NON FUSIONNÉE, `MERGE_STATUS: NOT_MERGED`)
+- CURRENT_HEAD : `8b40b06`
+- PR : PR #24 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/24) — Quality CI: SUCCESS, Vercel: SUCCESS, Mergeable: MERGEABLE (`MERGE_STATUS: NOT_MERGED`)
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée)
 - CURRENT_MILESTONE : LOT 1 — Assainissement de l'Intégrité Financière de SuiviBudget (Élimination intégrale des valeurs financières artificielles, estimations silencieuses, ventilations arbitraires 65/35, 70/30, 55/45, fallbacks 32.5B, 175.6B, 4354 et faux zéros ; verrouillage par suite de tests financialIntegrity.test.ts ; 16/16 test suites PASS, 257/257 tests PASS, build PASS).
 - FOUNDATION_READY : TRUE.
