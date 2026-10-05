@@ -465,7 +465,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                       </span>
                       {isPilotMinistry(official.id) && (
                         <span className="text-[9px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded">
-                          Pilote 5 Programmes
+                          10 Programmes DGBF
                         </span>
                       )}
                     </div>

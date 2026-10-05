@@ -535,7 +535,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
               id: 'FINANCES', 
               label: institution.type === 'MINISTERE' ? 'Budget 2026 (Budget-Programmes)' : 'Budget & Finances',
               badge: institution.type === 'MINISTERE'
-                ? (isPilotMinistry(institution.id) ? '5 Programmes' : 'Exercice 2026')
+                ? (isPilotMinistry(institution.id) ? '10 Programmes' : 'Exercice 2026')
                 : (isLoadingLines ? 'Chargement...' : (entityBudgetLines.length > 0 ? `${entityBudgetLines.length} lignes` : 'Exercice 2026'))
             },
             { 

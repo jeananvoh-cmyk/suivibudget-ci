@@ -1,0 +1,673 @@
+{
+  "id": "min-budget-2026-mmpe",
+  "institution_id": "gov-008",
+  "institution_code": "348",
+  "institution_name": "Ministère des Mines, du Pétrole et de l'Energie",
+  "minister_name": "M. MAMADOU SANGAFOWA COULIBALY",
+  "fiscal_year": 2026,
+  "total_budget_fcfa": 706060209015,
+  "amount_precision": "EXACT",
+  "reconciliation_status": "RECONCILED",
+  "source": "Loi de Finances n° 2025-987 du 19 décembre 2025 & Annexe 4 DPPD-PAP 2026-2028 (DGBF)",
+  "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+  "evidence_type": "PRIMARY_OFFICIAL_DOCUMENT",
+  "document_reference": "Loi n° 2025-987 • DGBF SIGOBE",
+  "page_reference": "LFI 2026 p. Ministère 348 / DPPD-PAP 2026-2028 pp. 802-830",
+  "created_at": "2026-01-02T00:00:00Z",
+  "updated_at": "2026-10-05T13:30:00Z",
+  "programs": [
+    {
+      "id": "prog-21106",
+      "ministry_id": "gov-008",
+      "code": "21106",
+      "official_code": "21106",
+      "name": "Administration Générale",
+      "description": "Pilotage stratégique, coordination administrative, modernisation du système d'information et gestion des ressources humaines et financières du ministère.",
+      "amount_fcfa": 8701872126,
+      "percentage_of_ministry": 1.23,
+      "responsible_title": "Directeur de Cabinet / Directeur des Affaires Financières",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "DPPD-PAP 2026-2028, p. 810",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-21106-01",
+          "program_id": "prog-21106",
+          "code": "2110601",
+          "official_code": "2110601",
+          "name": "Direction et coordination",
+          "description": "Gouvernance sectorielle, cabinet ministériel, inspection générale et relations institutionnelles.",
+          "amount_fcfa": 5450635152,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 810"
+        },
+        {
+          "id": "act-21106-02",
+          "program_id": "prog-21106",
+          "code": "2110602",
+          "official_code": "2110602",
+          "name": "Gestion des ressources humaines",
+          "description": "Administration du personnel, plan de formation continue et dialogue social.",
+          "amount_fcfa": 880412900,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 811"
+        },
+        {
+          "id": "act-21106-03",
+          "program_id": "prog-21106",
+          "code": "2110603",
+          "official_code": "2110603",
+          "name": "Affaires financières et patrimoine",
+          "description": "Exécution budgétaire, passation des marchés publics et gestion du parc immobilier et mobilier.",
+          "amount_fcfa": 1730544074,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 812"
+        },
+        {
+          "id": "act-21106-04",
+          "program_id": "prog-21106",
+          "code": "2110604",
+          "official_code": "2110604",
+          "name": "Systèmes d'information et statistiques",
+          "description": "Schéma directeur informatique, sécurité des données et observatoire statistique du secteur.",
+          "amount_fcfa": 640280000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 813",
+          "linked_projects": [
+            {
+              "id": "nat-proj-2026-2597",
+              "internal_id": "nat-proj-2026-2597",
+              "code": "PROJ-MMPE-2597",
+              "official_code": "PROJ-MMPE-2597",
+              "title": "Mise en oeuvre du nouveau Schéma Directeur du Système d'Information du Ministère des Mines, du Pétrole et de l'En",
+              "budget_amount_fcfa": 300000000,
+              "program_id": "prog-21106",
+              "action_id": "act-21106-04",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "prog-22036",
+      "ministry_id": "gov-008",
+      "code": "22036",
+      "official_code": "22036",
+      "name": "Hydrocarbures",
+      "description": "Promotion de la recherche pétrolière et gazière, valorisation des découvertes majeures (gisements Baleine et Calao) et régulation de la distribution des produits pétroliers.",
+      "amount_fcfa": 116054336,
+      "percentage_of_ministry": 0.02,
+      "responsible_title": "Directeur Général des Hydrocarbures",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "DPPD-PAP 2026-2028, p. 815",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-22036-01",
+          "program_id": "prog-22036",
+          "code": "2203601",
+          "official_code": "2203601",
+          "name": "Promotion et développement de l'exploration-production pétrolière et gazière",
+          "description": "Attribution des blocs pétroliers, suivi des contrats de partage de production et supervision des forages.",
+          "amount_fcfa": 45200000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 815"
+        },
+        {
+          "id": "act-22036-02",
+          "program_id": "prog-22036",
+          "code": "2203602",
+          "official_code": "2203602",
+          "name": "Suivi et régulation du raffinage, stockage et distribution des produits pétroliers",
+          "description": "Surveillance des dépôts stratégiques, conformité des installations et approvisionnement régulier du marché intérieur.",
+          "amount_fcfa": 42854336,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 816"
+        },
+        {
+          "id": "act-22036-03",
+          "program_id": "prog-22036",
+          "code": "2203603",
+          "official_code": "2203603",
+          "name": "Sécurité des approvisionnements et contrôle qualité",
+          "description": "Lutte contre la fraude pétrolière, contrôle de la conformité des carburants et respect des normes environnementales.",
+          "amount_fcfa": 28000000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 816"
+        }
+      ]
+    },
+    {
+      "id": "prog-22037",
+      "ministry_id": "gov-008",
+      "code": "22037",
+      "official_code": "22037",
+      "name": "Energie",
+      "description": "Production, transport et distribution de l'énergie électrique, électrification rurale (PRONER), développement des énergies renouvelables et efficacité énergétique.",
+      "amount_fcfa": 320914619601,
+      "percentage_of_ministry": 45.45,
+      "responsible_title": "Directeur Général de l'Énergie",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "DPPD-PAP 2026-2028, p. 817",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-22037-01",
+          "program_id": "prog-22037",
+          "code": "2203701",
+          "official_code": "2203701",
+          "name": "Pilotage et régulation du sous-secteur électricité",
+          "description": "Suivi des concessions de service public, régulation économique et coordination des opérateurs délégués.",
+          "amount_fcfa": 4120480340,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 817"
+        },
+        {
+          "id": "act-22037-02",
+          "program_id": "prog-22037",
+          "code": "2203702",
+          "official_code": "2203702",
+          "name": "Développement des infrastructures de production, transport et distribution électrique",
+          "description": "Construction et renforcement des centrales, liaisons haute tension (dorsales 400 KV) et postes sources.",
+          "amount_fcfa": 285450710261,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, pp. 818-820",
+          "linked_projects": [
+            {
+              "id": "nat-proj-2026-2598",
+              "internal_id": "nat-proj-2026-2598",
+              "code": "PROJ-MMPE-2598",
+              "official_code": "PROJ-MMPE-2598",
+              "title": "Projet de construction de la centrale solaire de Boundiali Phase 2",
+              "budget_amount_fcfa": 18694774500,
+              "program_id": "prog-22037",
+              "action_id": "act-22037-02",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "nat-proj-2026-2599",
+              "internal_id": "nat-proj-2026-2599",
+              "code": "PROJ-MMPE-2599",
+              "official_code": "PROJ-MMPE-2599",
+              "title": "Projet Dorsale Abidjan 400 KV Liaison PK 24 - Bingerville",
+              "budget_amount_fcfa": 34990845661,
+              "program_id": "prog-22037",
+              "action_id": "act-22037-02",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "nat-proj-2026-2600",
+              "internal_id": "nat-proj-2026-2600",
+              "code": "PROJ-MMPE-2600",
+              "official_code": "PROJ-MMPE-2600",
+              "title": "Projet régional d'accès à l'électricité et de technologie de stockage d'énergie par batteries (BEST)",
+              "budget_amount_fcfa": 4184006796,
+              "program_id": "prog-22037",
+              "action_id": "act-22037-02",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "nat-proj-2026-2601",
+              "internal_id": "nat-proj-2026-2601",
+              "code": "PROJ-MMPE-2601",
+              "official_code": "PROJ-MMPE-2601",
+              "title": "Projet National de Numérisation et d'Accès à l'Electricité en Côte d'Ivoire",
+              "budget_amount_fcfa": 60000000000,
+              "program_id": "prog-22037",
+              "action_id": "act-22037-02",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "nat-proj-2026-2602",
+              "internal_id": "nat-proj-2026-2602",
+              "code": "PROJ-MMPE-2602",
+              "official_code": "PROJ-MMPE-2602",
+              "title": "Projet Corridor Nord",
+              "budget_amount_fcfa": 46000000000,
+              "program_id": "prog-22037",
+              "action_id": "act-22037-02",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "nat-proj-2026-2603",
+              "internal_id": "nat-proj-2026-2603",
+              "code": "PROJ-MMPE-2603",
+              "official_code": "PROJ-MMPE-2603",
+              "title": "Programme Intégré de Développement de l'Est (PIDE)",
+              "budget_amount_fcfa": 12048492960,
+              "program_id": "prog-22037",
+              "action_id": "act-22037-02",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "nat-proj-2026-2604",
+              "internal_id": "nat-proj-2026-2604",
+              "code": "PROJ-MMPE-2604",
+              "official_code": "PROJ-MMPE-2604",
+              "title": "Projet Renforcement Interconnexio CI-GHANA (REMP) 330 KV Liaison Bingerville - Dunkwa II",
+              "budget_amount_fcfa": 35328107430,
+              "program_id": "prog-22037",
+              "action_id": "act-22037-02",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "nat-proj-2026-2605",
+              "internal_id": "nat-proj-2026-2605",
+              "code": "PROJ-MMPE-2605",
+              "official_code": "PROJ-MMPE-2605",
+              "title": "Projet Dorsale 400 KV EST Liaison Anyama-Ferké et Extension des postes sources",
+              "budget_amount_fcfa": 60558899899,
+              "program_id": "prog-22037",
+              "action_id": "act-22037-02",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            }
+          ]
+        },
+        {
+          "id": "act-22037-03",
+          "program_id": "prog-22037",
+          "code": "2203703",
+          "official_code": "2203703",
+          "name": "Électrification rurale et accès universel à l'électricité",
+          "description": "Raccordement des localités de plus de 500 habitants au réseau interconnecté national et compteurs sociaux.",
+          "amount_fcfa": 22840929000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 821",
+          "linked_projects": [
+            {
+              "id": "nat-proj-2026-2611",
+              "internal_id": "nat-proj-2026-2611",
+              "code": "PROJ-MMPE-2611",
+              "official_code": "PROJ-MMPE-2611",
+              "title": "Programme d'Electrification Pour Tous (PEPT)",
+              "budget_amount_fcfa": 6000000000,
+              "program_id": "prog-22037",
+              "action_id": "act-22037-03",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "nat-proj-2026-2612",
+              "internal_id": "nat-proj-2026-2612",
+              "code": "PROJ-MMPE-2612",
+              "official_code": "PROJ-MMPE-2612",
+              "title": "Programme National d'Extension de Réseaux Electriques (PRONEX)",
+              "budget_amount_fcfa": 3500000000,
+              "program_id": "prog-22037",
+              "action_id": "act-22037-03",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            }
+          ]
+        },
+        {
+          "id": "act-22037-04",
+          "program_id": "prog-22037",
+          "code": "2203704",
+          "official_code": "2203704",
+          "name": "Maîtrise de l'énergie et énergies renouvelables",
+          "description": "Efficacité énergétique des bâtiments publics, éclairage public basse consommation et centrales solaires hors réseau.",
+          "amount_fcfa": 8502500000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 821",
+          "linked_projects": [
+            {
+              "id": "nat-proj-2026-2606",
+              "internal_id": "nat-proj-2026-2606",
+              "code": "PROJ-MMPE-2606",
+              "official_code": "PROJ-MMPE-2606",
+              "title": "Fonds National de Maitrise de l'Energie (FONAME)",
+              "budget_amount_fcfa": 150000000,
+              "program_id": "prog-22037",
+              "action_id": "act-22037-04",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "nat-proj-2026-2607",
+              "internal_id": "nat-proj-2026-2607",
+              "code": "PROJ-MMPE-2607",
+              "official_code": "PROJ-MMPE-2607",
+              "title": "Promotion de l'accès, des Réseaux Intelligents et de l'Energie Solaire (PARIS)",
+              "budget_amount_fcfa": 8582400000,
+              "program_id": "prog-22037",
+              "action_id": "act-22037-04",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "nat-proj-2026-2608",
+              "internal_id": "nat-proj-2026-2608",
+              "code": "PROJ-MMPE-2608",
+              "official_code": "PROJ-MMPE-2608",
+              "title": "Projet Valoristation de Biomasse Energie et Cuisson propre en CI (VABICUI)",
+              "budget_amount_fcfa": 1145957224,
+              "program_id": "prog-22037",
+              "action_id": "act-22037-04",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "nat-proj-2026-2609",
+              "internal_id": "nat-proj-2026-2609",
+              "code": "PROJ-MMPE-2609",
+              "official_code": "PROJ-MMPE-2609",
+              "title": "Projet Mesure d'Accompagnement au programme Energie Renouvelable et Efficacité énergétique",
+              "budget_amount_fcfa": 2040956240,
+              "program_id": "prog-22037",
+              "action_id": "act-22037-04",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "nat-proj-2026-2610",
+              "internal_id": "nat-proj-2026-2610",
+              "code": "PROJ-MMPE-2610",
+              "official_code": "PROJ-MMPE-2610",
+              "title": "Programme de Maitrise de l'Energie",
+              "budget_amount_fcfa": 10182486445,
+              "program_id": "prog-22037",
+              "action_id": "act-22037-04",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "prog-22107",
+      "ministry_id": "gov-008",
+      "code": "22107",
+      "official_code": "22107",
+      "name": "Mines et géologie",
+      "description": "Cartographie géologique, promotion du potentiel minier (or, manganèse, nickel, lithium), encadrement de l'artisanat minier et lutte contre l'orpaillage clandestin.",
+      "amount_fcfa": 783321335,
+      "percentage_of_ministry": 0.11,
+      "responsible_title": "Directeur Général des Mines et de la Géologie",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "DPPD-PAP 2026-2028, p. 821",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-22107-01",
+          "program_id": "prog-22107",
+          "code": "2210701",
+          "official_code": "2210701",
+          "name": "Développement de la cartographie géologique et des infrastructures minières",
+          "description": "Levés géophysiques, inventaire minier national et équipement du laboratoire d'analyses géologiques.",
+          "amount_fcfa": 350421335,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 822",
+          "linked_projects": [
+            {
+              "id": "nat-proj-2026-2613",
+              "internal_id": "nat-proj-2026-2613",
+              "code": "PROJ-MMPE-2613",
+              "official_code": "PROJ-MMPE-2613",
+              "title": "Construction du Laboratoire d'Analyse Géologique",
+              "budget_amount_fcfa": 300000000,
+              "program_id": "prog-22107",
+              "action_id": "act-22107-01",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            },
+            {
+              "id": "nat-proj-2026-2614",
+              "internal_id": "nat-proj-2026-2614",
+              "code": "PROJ-MMPE-2614",
+              "official_code": "PROJ-MMPE-2614",
+              "title": "Equipement du Laboratoire d'Analyse Géologique",
+              "budget_amount_fcfa": 152064222,
+              "program_id": "prog-22107",
+              "action_id": "act-22107-01",
+              "current_status": "VOTE",
+              "region_name": "National",
+              "page_reference": "DPPD-PAP 2026-2028 / Section Investissements",
+              "is_funded_within_action": true
+            }
+          ]
+        },
+        {
+          "id": "act-22107-02",
+          "program_id": "prog-22107",
+          "code": "2210702",
+          "official_code": "2210702",
+          "name": "Régulation, contrôle et assainissement de l'activité minière",
+          "description": "Instruction des permis d'exploitation, brigades de répression des infractions minières et traçabilité des minerais.",
+          "amount_fcfa": 210500000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 822"
+        },
+        {
+          "id": "act-22107-03",
+          "program_id": "prog-22107",
+          "code": "2210703",
+          "official_code": "2210703",
+          "name": "Promotion de la petite mine et encadrement de l'artisanat minier",
+          "description": "Création de couloirs d'orpaillage légalisé, formation aux techniques non polluantes (sans mercure) et coopératives minières.",
+          "amount_fcfa": 120400000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 823"
+        },
+        {
+          "id": "act-22107-04",
+          "program_id": "prog-22107",
+          "code": "2210704",
+          "official_code": "2210704",
+          "name": "Surveillance de l'impact environnemental et sociétal des exploitations",
+          "description": "Contrôle des plans de réhabilitation des sites miniers et suivi des Comités de Développement Local Minier (CDLM).",
+          "amount_fcfa": 102000000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 823"
+        }
+      ]
+    },
+    {
+      "id": "prog-23230",
+      "ministry_id": "gov-008",
+      "code": "23230",
+      "official_code": "23230",
+      "name": "Appui au financement du secteur de l'électricité",
+      "description": "Crédits de transferts budgétaires de l'État pour l'appui à l'équilibre financier et au développement du sous-secteur électrique national.",
+      "amount_fcfa": 70368000000,
+      "percentage_of_ministry": 9.97,
+      "responsible_title": "Ministère des Finances et du Budget / MMPE",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "DPPD-PAP 2026-2028, p. 824",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-23230-01",
+          "program_id": "prog-23230",
+          "code": "2323001",
+          "official_code": "2323001",
+          "name": "Électrification et appui financier au secteur de l'électricité",
+          "description": "Transferts affectés au financement des programmes d'électrification et de soutien aux charges sectorielles de l'électricité.",
+          "amount_fcfa": 70368000000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 824"
+        }
+      ]
+    },
+    {
+      "id": "prog-23231",
+      "ministry_id": "gov-008",
+      "code": "23231",
+      "official_code": "23231",
+      "name": "Appui au financement de la Société Ivoirienne de Raffinage (SIR)",
+      "description": "Dotation publique de soutien à l'outil industriel national de raffinage et à la consolidation de la souveraineté en approvisionnement énergétique.",
+      "amount_fcfa": 57906341617,
+      "percentage_of_ministry": 8.2,
+      "responsible_title": "Direction Générale des Hydrocarbures / DGBF",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "DPPD-PAP 2026-2028, p. 824",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-23231-01",
+          "program_id": "prog-23231",
+          "code": "2323101",
+          "official_code": "2323101",
+          "name": "Appui financier et restructuration de la Société Ivoirienne de Raffinage (SIR)",
+          "description": "Transferts financiers pour le refinancement de la dette de restructuration et la modernisation des unités de désulfuration.",
+          "amount_fcfa": 57906341617,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 824"
+        }
+      ]
+    },
+    {
+      "id": "prog-23232",
+      "ministry_id": "gov-008",
+      "code": "23232",
+      "official_code": "23232",
+      "name": "Appui au financement du secteur minier",
+      "description": "Fonds de développement minier, appui aux infrastructures géologiques et soutien à la formalisation des exploitants artisanaux.",
+      "amount_fcfa": 28500000000,
+      "percentage_of_ministry": 4.04,
+      "responsible_title": "Direction Générale des Mines et de la Géologie",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "DPPD-PAP 2026-2028, p. 826",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-23232-01",
+          "program_id": "prog-23232",
+          "code": "2323201",
+          "official_code": "2323201",
+          "name": "Appui au développement et à la valorisation du potentiel minier",
+          "description": "Transferts pour la promotion des investissements miniers et le fonds de réhabilitation des sites miniers dégradés.",
+          "amount_fcfa": 28500000000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 826"
+        }
+      ]
+    },
+    {
+      "id": "prog-23233",
+      "ministry_id": "gov-008",
+      "code": "23233",
+      "official_code": "23233",
+      "name": "Péréquation produit à la Société Ivoirienne de Raffinage (SIR)",
+      "description": "Mécanisme budgétaire de stabilisation et de péréquation des prix des carburants à la pompe sur l'ensemble du territoire national.",
+      "amount_fcfa": 105000000000,
+      "percentage_of_ministry": 14.87,
+      "responsible_title": "Commission de Régulation et Péréquation des Prix des Produits Pétroliers",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "DPPD-PAP 2026-2028, p. 827",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-23233-01",
+          "program_id": "prog-23233",
+          "code": "2323301",
+          "official_code": "2323301",
+          "name": "Péréquation des prix des produits pétroliers à la SIR",
+          "description": "Transferts de péréquation pour absorber la volatilité des cours mondiaux du pétrole brut et garantir des prix uniformes.",
+          "amount_fcfa": 105000000000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 827"
+        }
+      ]
+    },
+    {
+      "id": "prog-23234",
+      "ministry_id": "gov-008",
+      "code": "23234",
+      "official_code": "23234",
+      "name": "Péréquation transport à la Société d'Etudes et de Gestion en Hydrocarbures (SEGH)",
+      "description": "Prise en charge de la péréquation des coûts de transport des produits pétroliers entre le terminal d'Abidjan et les dépôts de l'intérieur.",
+      "amount_fcfa": 70000000000,
+      "percentage_of_ministry": 9.91,
+      "responsible_title": "Direction Générale des Hydrocarbures",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "DPPD-PAP 2026-2028, p. 828",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-23234-01",
+          "program_id": "prog-23234",
+          "code": "2323401",
+          "official_code": "2323401",
+          "name": "Péréquation des frais de transport des hydrocarbures à la SEGH",
+          "description": "Transferts affectés à la compensation des transporteurs routiers d'hydrocarbures vers les stations-service de l'intérieur.",
+          "amount_fcfa": 70000000000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 828"
+        }
+      ]
+    },
+    {
+      "id": "prog-23251",
+      "ministry_id": "gov-008",
+      "code": "23251",
+      "official_code": "23251",
+      "name": "Appui au financement à Côte d'Ivoire ENERGIE",
+      "description": "Concours financier de l'État à CI-ENERGIES pour les programmes structurants de qualité du réseau et l'électrification rurale décentralisée.",
+      "amount_fcfa": 43770000000,
+      "percentage_of_ministry": 6.2,
+      "responsible_title": "Direction Générale de CI-ENERGIES / MMPE",
+      "reconciliation_status": "RECONCILED",
+      "page_reference": "DPPD-PAP 2026-2028, p. 830",
+      "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "actions": [
+        {
+          "id": "act-23251-01",
+          "program_id": "prog-23251",
+          "code": "2325101",
+          "official_code": "2325101",
+          "name": "Appui aux programmes qualité réseau et électrification rurale (CI-ENERGIES)",
+          "description": "Transferts financiers pour le projet qualité du réseau électrique (43 milliards FCFA) et l'électrification rurale décentralisée (770 millions FCFA).",
+          "amount_fcfa": 43770000000,
+          "reconciliation_status": "RECONCILED",
+          "page_reference": "DPPD-PAP 2026-2028, p. 830"
+        }
+      ]
+    }
+  ]
+}

@@ -1,25 +1,9 @@
 import React, { useState } from 'react';
-import {
-  Layers,
-  ChevronDown,
-  ChevronUp,
-  ShieldCheck,
-  Zap,
-  Flame,
-  Pickaxe,
-  Briefcase,
-  Landmark,
-  ExternalLink,
-  Info,
-  CheckCircle2,
-  FolderGit2,
-  Sparkles,
-} from 'lucide-react';
+import { Layers, Info, FolderGit2 } from 'lucide-react';
 import { Institution, BudgetProject } from '../../types';
 import {
   MinistryBudget,
-  BudgetProgram,
-  BudgetAction,
+  MinistryLinkedProject,
 } from '../../types/ministryBudget';
 import {
   getMinistryBudget,
@@ -27,7 +11,9 @@ import {
   MMPE_MINISTRY_BUDGET_2026,
 } from '../../data/ministryPilotReferential';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
-import { ProvenanceLink } from '../common/ProvenanceLink';
+import { MinistryBudgetHeader } from './MinistryBudgetHeader';
+import { ProgramDistribution } from './ProgramDistribution';
+import { BudgetProgramCard } from './BudgetProgramCard';
 
 interface MinistryBudgetProgramViewProps {
   institution: Institution;
@@ -43,74 +29,25 @@ export const MinistryBudgetProgramView: React.FC<MinistryBudgetProgramViewProps>
   const isPilot = isPilotMinistry(institution.id);
   const pilotBudget: MinistryBudget | null = isPilot ? MMPE_MINISTRY_BUDGET_2026 : null;
 
+  // Par défaut, le Programme Énergie (22037) est ouvert (le plus important en volume)
   const [expandedProgramId, setExpandedProgramId] = useState<string | null>(
-    isPilot ? 'prog-mmpe-02' : null // Programme Énergie ouvert par défaut (le plus emblématique)
+    isPilot ? 'prog-22037' : null
   );
 
-  const getProgramIcon = (code: string) => {
-    switch (code) {
-      case 'P1':
-        return Briefcase;
-      case 'P2':
-        return Zap;
-      case 'P3':
-        return Flame;
-      case 'P4':
-        return Pickaxe;
-      case 'CAS':
-      default:
-        return Landmark;
-    }
+  const toggleProgram = (programId: string) => {
+    setExpandedProgramId(prev => (prev === programId ? null : programId));
   };
 
-  const getProgramColor = (code: string) => {
-    switch (code) {
-      case 'P1':
-        return {
-          bg: 'bg-indigo-50',
-          border: 'border-indigo-200',
-          text: 'text-indigo-900',
-          bar: 'bg-indigo-500',
-          iconBg: 'bg-indigo-100 text-indigo-700',
-        };
-      case 'P2':
-        return {
-          bg: 'bg-amber-50',
-          border: 'border-amber-200',
-          text: 'text-amber-900',
-          bar: 'bg-amber-500',
-          iconBg: 'bg-amber-100 text-amber-700',
-        };
-      case 'P3':
-        return {
-          bg: 'bg-rose-50',
-          border: 'border-rose-200',
-          text: 'text-rose-900',
-          bar: 'bg-rose-500',
-          iconBg: 'bg-rose-100 text-rose-700',
-        };
-      case 'P4':
-        return {
-          bg: 'bg-emerald-50',
-          border: 'border-emerald-200',
-          text: 'text-emerald-900',
-          bar: 'bg-emerald-500',
-          iconBg: 'bg-emerald-100 text-emerald-700',
-        };
-      case 'CAS':
-      default:
-        return {
-          bg: 'bg-blue-50',
-          border: 'border-blue-200',
-          text: 'text-blue-900',
-          bar: 'bg-brand-blue',
-          iconBg: 'bg-blue-100 text-brand-blue',
-        };
+  // Convertit un projet rattaché pour l'interface de navigation si cliqué
+  const handleSelectLinkedProject = (linkedProj: MinistryLinkedProject) => {
+    const matched = relatedProjects.find(p => p.id === linkedProj.id);
+    if (matched && onSelectProject) {
+      onSelectProject(matched);
     }
   };
 
   // =========================================================================
-  // CAS 1 : MINISTÈRE NON PILOTÉ (Transition vers le mode budget-programmes)
+  // CAS 1 : MINISTÈRE EN TRANSITION (NON ENCORE MODÉLISÉ EN 10 PROGRAMMES)
   // =========================================================================
   if (!isPilot || !pilotBudget) {
     const totalBudget = institution.total_budget_fcfa;
@@ -148,12 +85,12 @@ export const MinistryBudgetProgramView: React.FC<MinistryBudgetProgramViewProps>
             <span>Nomenclature Budgétaire de l'État (Budget-Programmes)</span>
           </div>
           <p>
-            La gestion financière des ministères de la République de Côte d'Ivoire s'opère selon la nomenclature en 
+            La gestion financière des départements ministériels s'exécute selon la nomenclature officielle DGBF en 
             <strong> budget-programmes</strong> (Programmes, Actions, Activités et Crédits).
           </p>
           <p className="text-[11px] text-sky-800">
             La modélisation détaillée multi-niveaux est en cours de déploiement progressif, initiée sur le 
-            <strong> Ministère des Mines, du Pétrole et de l'Énergie</strong> comme ministère pilote de référence.
+            <strong> Ministère des Mines, du Pétrole et de l'Énergie</strong> (10 programmes officiels).
           </p>
         </div>
 
@@ -189,248 +126,46 @@ export const MinistryBudgetProgramView: React.FC<MinistryBudgetProgramViewProps>
   }
 
   // =========================================================================
-  // CAS 2 : MINISTÈRE PILOTE (MINES, PÉTROLE ET ÉNERGIE — LOT 2 COMPLET)
+  // CAS 2 : MINISTÈRE PILOTE (10 PROGRAMMES OFFICIELS DGBF)
   // =========================================================================
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      
-      {/* 1. EN-TÊTE BUDGÉTAIRE OFFICIEL */}
-      <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-brand-blue text-white rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs text-[11px] font-bold text-emerald-300 border border-white/15">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Nomenclature Officielle Budget-Programmes • DGBF</span>
-          </div>
-          <span className="text-xs font-semibold text-slate-300">
-            Exercice Budgétaire 2026
-          </span>
-        </div>
+      {/* 1. En-tête budgétaire officiel */}
+      <MinistryBudgetHeader budget={pilotBudget} />
 
-        <div>
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-            Crédits Budgétaires Ouverts (Loi de Finances 2026)
-          </div>
-          <div className="text-2xl sm:text-4xl font-black font-mono tracking-tight text-white mt-1">
-            {formatFCFA(pilotBudget.total_budget_fcfa)}
-          </div>
-          <div className="text-xs sm:text-sm text-slate-200 font-medium mt-1 leading-snug">
-            {formatAmountInWords(pilotBudget.total_budget_fcfa)}
-          </div>
-        </div>
+      {/* 2. Jauge proportionnelle des 10 programmes */}
+      <ProgramDistribution
+        programs={pilotBudget.programs}
+        activeProgramId={expandedProgramId}
+        onSelectProgram={(id) => setExpandedProgramId(id)}
+      />
 
-        {/* PROVENANCE OFFICIELLE VÉRIFIABLE */}
-        <ProvenanceLink
-          source={pilotBudget.source}
-          sourceUrl={pilotBudget.source_url}
-          documentReference={pilotBudget.document_reference}
-          pageReference={pilotBudget.page_reference}
-          evidenceType={pilotBudget.evidence_type}
-          fiscalYear={pilotBudget.fiscal_year}
-          className="bg-white/10 border-white/15 text-white"
-        />
-      </div>
-
-      {/* 2. RÉPARTITION DES PROGRAMMES BUDGÉTAIRES */}
+      {/* 3. Liste des 10 programmes budgétaires officiels */}
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-brand-blue" />
             <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">
-              Programmes Budgétaires de l'Action Publique ({pilotBudget.programs.length})
+              10 Programmes Budgétaires de l'Action Publique
             </h3>
           </div>
           <span className="text-[11px] text-slate-500 font-medium">
-            Cliquez sur un programme pour explorer ses actions et projets
+            Cliquez sur un programme pour explorer ses actions et crédits
           </span>
         </div>
 
-        {/* JAUGE DE VENTILATION MULTI-PROGRAMMES */}
-        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-2xs space-y-3">
-          <div className="h-3 w-full rounded-full overflow-hidden flex bg-slate-100 p-0.5 gap-0.5">
-            {pilotBudget.programs.map(prog => {
-              const color = getProgramColor(prog.code);
-              return (
-                <div
-                  key={prog.id}
-                  style={{ width: `${Math.max(prog.percentage_of_ministry ?? 1, 1.5)}%` }}
-                  className={`h-full rounded-full ${color.bar} transition-all duration-300`}
-                  title={`${prog.name} : ${prog.percentage_of_ministry}%`}
-                />
-              );
-            })}
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-[11px]">
-            {pilotBudget.programs.map(prog => {
-              const color = getProgramColor(prog.code);
-              return (
-                <div
-                  key={prog.id}
-                  onClick={() => setExpandedProgramId(expandedProgramId === prog.id ? null : prog.id)}
-                  className={`p-2 rounded-xl border transition-all cursor-pointer ${
-                    expandedProgramId === prog.id
-                      ? `${color.bg} ${color.border} shadow-2xs`
-                      : 'bg-slate-50/70 border-slate-200 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span className={`w-2 h-2 rounded-full ${color.bar} flex-shrink-0`} />
-                    <span className="font-bold text-slate-900 truncate">{prog.code}</span>
-                  </div>
-                  <div className="text-[10px] text-slate-500 truncate mt-0.5">{prog.name}</div>
-                  <div className="font-black text-slate-900 mt-1 font-mono text-[10px]">
-                    {prog.percentage_of_ministry}%
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ACCORDÉON DES PROGRAMMES & ACTIONS */}
-        <div className="space-y-3 pt-1">
-          {pilotBudget.programs.map(prog => {
-            const isExpanded = expandedProgramId === prog.id;
-            const color = getProgramColor(prog.code);
-            const Icon = getProgramIcon(prog.code);
-
-            return (
-              <div
-                key={prog.id}
-                className={`bg-white rounded-2xl border transition-all shadow-2xs overflow-hidden ${
-                  isExpanded ? `${color.border} ring-1 ring-brand-blue/20` : 'border-slate-200 hover:border-slate-300'
-                }`}
-              >
-                {/* En-tête de programme */}
-                <div
-                  onClick={() => setExpandedProgramId(isExpanded ? null : prog.id)}
-                  className="p-4 sm:p-5 flex items-start justify-between gap-3 cursor-pointer select-none"
-                >
-                  <div className="flex items-start gap-3 min-w-0">
-                    <div className={`w-10 h-10 rounded-xl ${color.iconBg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
-                          {prog.code}
-                        </span>
-                        <h4 className="text-sm sm:text-base font-black text-slate-900 leading-snug">
-                          {prog.name}
-                        </h4>
-                      </div>
-                      <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                        {prog.description}
-                      </p>
-                      {prog.responsible_title && (
-                        <div className="text-[11px] text-slate-600 font-medium mt-1">
-                          <strong className="text-slate-700">Responsable opérationnel :</strong> {prog.responsible_title}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 flex-shrink-0 text-right">
-                    <div>
-                      <div className="text-sm sm:text-base font-black text-slate-900 font-mono">
-                        {formatFCFA(prog.amount_fcfa)}
-                      </div>
-                      <div className="text-[11px] font-bold text-slate-500">
-                        {prog.percentage_of_ministry}% du budget
-                      </div>
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
-                      {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Détail déroulant des Actions */}
-                {isExpanded && (
-                  <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-2 border-t border-slate-100 space-y-3 bg-slate-50/40">
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-700 pt-1">
-                      <span>Actions Opérationnelles rattachées ({prog.actions.length})</span>
-                      <span className="text-[11px] text-slate-500 font-normal">
-                        Nomenclature DGBF • Programmation budgétaire
-                      </span>
-                    </div>
-
-                    <div className="space-y-2.5">
-                      {prog.actions.map(action => (
-                        <div
-                          key={action.id}
-                          className="bg-white rounded-xl p-3.5 border border-slate-200 shadow-2xs space-y-2"
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">
-                                  {action.code}
-                                </span>
-                                <span className="text-xs font-bold text-slate-900 leading-snug">
-                                  {action.name}
-                                </span>
-                              </div>
-                              {action.description && (
-                                <p className="text-[11px] text-slate-500 mt-1 pl-0.5">
-                                  {action.description}
-                                </p>
-                              )}
-                            </div>
-
-                            <div className="text-right flex-shrink-0">
-                              <span className="text-xs font-black font-mono text-slate-900">
-                                {formatFCFA(action.amount_fcfa)}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* PROJETS D'INVESTISSEMENTS PUBLICS RATTACHÉS (AUCUN DOUBLE COMPTAGE) */}
-                          {action.linked_projects && action.linked_projects.length > 0 && (
-                            <div className="mt-2 pt-2 border-t border-slate-100 space-y-1.5">
-                              <div className="flex items-center justify-between text-[11px] font-bold text-brand-blue">
-                                <div className="flex items-center gap-1.5">
-                                  <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
-                                  <span>{action.linked_projects.length} projet(s) d'investissements publics financés</span>
-                                </div>
-                                <span className="text-[10px] text-slate-500 font-normal italic">
-                                  Financés au sein de ces crédits (aucun double comptage)
-                                </span>
-                              </div>
-
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                                {action.linked_projects.map(proj => (
-                                  <div
-                                    key={proj.id}
-                                    className="p-2.5 bg-blue-50/40 rounded-lg border border-blue-100 hover:border-brand-blue/40 transition-colors text-xs space-y-1"
-                                  >
-                                    <div className="font-bold text-slate-900 text-[11px] leading-snug line-clamp-2">
-                                      {proj.title}
-                                    </div>
-                                    <div className="flex items-center justify-between text-[10px]">
-                                      <span className="font-black font-mono text-brand-blue">
-                                        {formatFCFA(proj.budget_amount_fcfa)}
-                                      </span>
-                                      <span className="text-slate-500">
-                                        {proj.region_name || 'National'}
-                                      </span>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        <div className="space-y-3">
+          {pilotBudget.programs.map((prog) => (
+            <BudgetProgramCard
+              key={prog.id}
+              program={prog}
+              isExpanded={expandedProgramId === prog.id}
+              onToggle={() => toggleProgram(prog.id)}
+              onSelectProject={handleSelectLinkedProject}
+            />
+          ))}
         </div>
       </div>
-
     </div>
   );
 };
