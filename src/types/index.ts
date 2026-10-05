@@ -28,9 +28,9 @@ export interface Institution {
   info_officer_title?: string;
   green_line_number?: string;
   // Budget annuel (Dotation État / Loi de Finances)
-  budget_functioning_fcfa: number;
-  budget_investment_fcfa: number;
-  total_budget_fcfa: number;
+  budget_functioning_fcfa: number | null;
+  budget_investment_fcfa: number | null;
+  total_budget_fcfa: number | null;
   budget_not_published?: boolean;
   is_tax_quota_commune?: boolean;
   tax_quota_note?: string;

@@ -50,7 +50,7 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
           </div>
           <div>
             <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              {formatCompactFCFA(stats.totalInvestmentsFcfa || 175648952140)}
+              {stats.totalInvestmentsFcfa ? formatCompactFCFA(stats.totalInvestmentsFcfa) : 'Montant à confirmer'}
             </div>
             <p className="text-xs text-slate-600 font-semibold mt-1.5 leading-snug">
               Montant voté Loi de Finances

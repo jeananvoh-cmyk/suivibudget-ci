@@ -280,9 +280,9 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
       }
     ],
     "info_officer_title": "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    "budget_functioning_fcfa": 0,
-    "budget_investment_fcfa": 0,
-    "total_budget_fcfa": 0,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
+    "total_budget_fcfa": null,
     "budget_not_published": true
   },
   {

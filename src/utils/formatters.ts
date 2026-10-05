@@ -37,7 +37,10 @@ export function formatFCFA(amount: number | null | undefined): string {
 /**
  * Format a large amount in Millions or Billions FCFA for badges and statistics
  */
-export function formatCompactFCFA(amount: number): string {
+export function formatCompactFCFA(amount: number | null | undefined): string {
+  if (amount == null || !Number.isFinite(amount)) {
+    return 'Montant à confirmer';
+  }
   if (amount >= 1_000_000_000) {
     const milliards = (amount / 1_000_000_000).toFixed(1).replace('.', ',');
     return `${milliards} Milliards FCFA`;
@@ -52,8 +55,11 @@ export function formatCompactFCFA(amount: number): string {
 /**
  * Format an amount in human words in French (e.g. "98 Milliards", "4,9 Milliards", "700 Millions", "542,56 Millions")
  */
-export function formatAmountInWords(amount: number): string {
-  if (isNaN(amount) || amount === null || amount === undefined || amount === 0) {
+export function formatAmountInWords(amount: number | null | undefined): string {
+  if (amount == null || !Number.isFinite(amount)) {
+    return 'Montant à confirmer';
+  }
+  if (amount === 0) {
     return '0 FCFA';
   }
   if (amount >= 1_000_000_000) {
@@ -74,8 +80,11 @@ export function formatAmountInWords(amount: number): string {
 /**
  * Format full FCFA with human words in parentheses (e.g., "98 000 000 000 FCFA (98 Milliards)")
  */
-export function formatFCFAWithWords(amount: number): string {
-  if (isNaN(amount) || amount === null || amount === undefined || amount === 0) {
+export function formatFCFAWithWords(amount: number | null | undefined): string {
+  if (amount == null || !Number.isFinite(amount)) {
+    return 'Montant à confirmer';
+  }
+  if (amount === 0) {
     return '0 FCFA';
   }
   const formattedNumber = formatFCFA(amount);

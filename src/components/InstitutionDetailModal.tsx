@@ -233,20 +233,21 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
 
   // Budget ratios (Safe zero & exact proportion handling)
   const primInfo = institution.primitive_budget || OFFICIAL_PRIMITIVE_BUDGETS[institution.id];
-  const functioningBudget = (institution.total_budget_fcfa === 0 && primInfo?.functioning_voted_fcfa)
+  const hasInstBreakdown = institution.budget_functioning_fcfa != null && institution.budget_investment_fcfa != null;
+  const functioningBudget = (institution.total_budget_fcfa === 0 && primInfo?.functioning_voted_fcfa != null)
     ? primInfo.functioning_voted_fcfa
-    : (institution.budget_functioning_fcfa || 0);
-  const investmentBudget = (institution.total_budget_fcfa === 0 && primInfo?.investment_voted_fcfa)
+    : institution.budget_functioning_fcfa;
+  const investmentBudget = (institution.total_budget_fcfa === 0 && primInfo?.investment_voted_fcfa != null)
     ? primInfo.investment_voted_fcfa
-    : (institution.budget_investment_fcfa || 0);
-  const totalBudget = (institution.total_budget_fcfa === 0 && primInfo?.total_voted_fcfa)
+    : institution.budget_investment_fcfa;
+  const totalBudget = (institution.total_budget_fcfa === 0 && primInfo?.total_voted_fcfa != null)
     ? primInfo.total_voted_fcfa
-    : (institution.total_budget_fcfa || (functioningBudget + investmentBudget) || 0);
+    : (institution.total_budget_fcfa ?? (functioningBudget != null && investmentBudget != null ? functioningBudget + investmentBudget : null));
 
   let functioningPct = 0;
   let investmentPct = 0;
 
-  if (totalBudget > 0 && (functioningBudget > 0 || investmentBudget > 0)) {
+  if (totalBudget != null && totalBudget > 0 && functioningBudget != null && investmentBudget != null) {
     if (investmentBudget === 0 && functioningBudget > 0) {
       functioningPct = 100;
       investmentPct = 0;
@@ -1016,10 +1017,11 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   const isDistrict = institution.type === 'DISTRICT';
                   const primTotal = prim.total_voted_fcfa;
                   const exactPrimitive = !prim.precision || prim.precision === 'EXACT';
-                  const stateTotal = institution.total_budget_fcfa || 0;
-                  const localRev = Math.max(0, primTotal - stateTotal);
-                  const statePct = primTotal > 0 ? Math.round((stateTotal / primTotal) * 100) : 0;
-                  const localPct = 100 - statePct;
+                  const stateTotal = institution.total_budget_fcfa ?? null;
+                  const hasStateTotal = stateTotal !== null;
+                  const localRev = (hasStateTotal && primTotal > 0) ? Math.max(0, primTotal - stateTotal) : null;
+                  const statePct = (hasStateTotal && primTotal > 0) ? Math.round((stateTotal / primTotal) * 100) : null;
+                  const localPct = statePct !== null ? 100 - statePct : null;
                   const hasBreakdown = prim.investment_voted_fcfa != null && prim.functioning_voted_fcfa != null;
                   const primInvPct = (hasBreakdown && primTotal > 0) ? Math.round((prim.investment_voted_fcfa! / primTotal) * 100) : null;
                   const primFonctPct = primInvPct !== null ? 100 - primInvPct : null;
@@ -1073,7 +1075,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                             <strong className="text-slate-800">{prim.voted_date}</strong>
                           </div>
                           <div className="flex sm:justify-end items-center gap-1 text-[11px] text-slate-500">
-                            <span>Source : {prim.source}</span>
+                            <span>Source : {prim.source || 'Source à confirmer'}</span>
                             {prim.source_url && (
                               <a
                                 href={prim.source_url}
@@ -1115,7 +1117,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                                   1. Subvention & Financement de l'État
                                 </span>
                                 <span className="text-xs font-black text-brand-blue bg-white px-2.5 py-0.5 rounded-full border border-blue-200 shadow-2xs">
-                                  {exactPrimitive ? `${statePct}% du total` : 'Part non calculée'}
+                                  {exactPrimitive && statePct !== null ? `${statePct}% du total` : 'Part non calculée'}
                                 </span>
                               </div>
 
@@ -1128,7 +1130,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                                 </span>
                               </div>
 
-                              {stateTotal > 0 ? (
+                              {stateTotal != null && stateTotal > 0 ? (
                                 <div className="p-2.5 bg-white rounded-xl border border-blue-100 text-xs space-y-1.5 shadow-2xs">
                                   <div className="flex justify-between text-[11px]">
                                     <span className="text-slate-600">• Fonctionnement (DGF) :</span>
@@ -1139,9 +1141,13 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                                     <strong className="text-slate-900">{formatFCFA(institution.budget_investment_fcfa)} ({formatAmountInWords(institution.budget_investment_fcfa)})</strong>
                                   </div>
                                 </div>
+                              ) : stateTotal === null ? (
+                                <div className="p-2.5 bg-amber-50/70 rounded-xl border border-amber-200 text-[11px] text-amber-900 shadow-2xs leading-snug">
+                                  Dotation globale de l'État non consolidée pour cet exercice. En attente de publication des répartitions DGF/DGE.
+                                </div>
                               ) : (
                                 <div className="p-2.5 bg-white rounded-xl border border-blue-100 text-[11px] text-slate-600 shadow-2xs leading-snug">
-                                  Collectivité à forte autonomie fiscale : les dépenses sont couvertes sans dotation directe de l'État, grâce aux quotes-parts de fiscalité locale directe reversées par la DGI.
+                                  Aucune dotation directe de l'État n'est renseignée pour cette composante dans les données actuellement disponibles.
                                 </div>
                               )}
                             </div>
@@ -1167,16 +1173,16 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                                   2. Recettes Propres {isDistrict ? 'du District' : isRegion ? 'de la Région' : 'de la Mairie'}
                                 </span>
                                 <span className="text-xs font-black text-white bg-navy-900 px-2.5 py-0.5 rounded-full shadow-2xs">
-                                  {exactPrimitive ? `${localPct}% du total` : 'Part non calculée'}
+                                  {exactPrimitive && localPct !== null ? `${localPct}% du total` : 'Part non calculée'}
                                 </span>
                               </div>
 
                               <div>
                                 <span className="text-xl sm:text-2xl font-black text-slate-900 block">
-                                  {exactPrimitive ? formatFCFA(localRev) : 'Montant non calculé'}
+                                  {exactPrimitive && localRev !== null ? formatFCFA(localRev) : 'Montant non calculé'}
                                 </span>
                                 <span className="text-[11px] font-bold text-slate-600 block">
-                                  {exactPrimitive ? `(${formatAmountInWords(localRev)})` : ''}
+                                  {exactPrimitive && localRev !== null ? `(${formatAmountInWords(localRev)})` : ''}
                                 </span>
                               </div>
 
@@ -1400,43 +1406,54 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Blocs Fonctionnement vs Investissement */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="p-3.5 bg-sky-50 rounded-xl border border-sky-200 space-y-1">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-sky-700 block">Dépenses de Fonctionnement (DGF)</span>
-                      <span className="text-lg font-black text-slate-900 block break-words">{formatFCFA(institution.budget_functioning_fcfa)}</span>
-                      <span className="text-xs font-bold text-sky-800 block">({functioningPct}% de la dotation)</span>
-                      <span className="text-[10px] font-semibold text-sky-900 block">({formatAmountInWords(institution.budget_functioning_fcfa)})</span>
-                    </div>
+                  {hasInstBreakdown ? (
+                    <>
+                      {/* Blocs Fonctionnement vs Investissement */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="p-3.5 bg-sky-50 rounded-xl border border-sky-200 space-y-1">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-sky-700 block">Dépenses de Fonctionnement (DGF)</span>
+                          <span className="text-lg font-black text-slate-900 block break-words">{formatFCFA(institution.budget_functioning_fcfa)}</span>
+                          <span className="text-xs font-bold text-sky-800 block">({functioningPct}% de la dotation)</span>
+                          <span className="text-[10px] font-semibold text-sky-900 block">({formatAmountInWords(institution.budget_functioning_fcfa)})</span>
+                        </div>
 
-                    <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 space-y-1">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 block">Dépenses d'Investissement Public (DGE)</span>
-                      <span className="text-lg font-black text-slate-900 block break-words">{formatFCFA(institution.budget_investment_fcfa)}</span>
-                      <span className="text-xs font-bold text-emerald-800 block">({investmentPct}% de la dotation)</span>
-                      <span className="text-[10px] font-semibold text-emerald-900 block">({formatAmountInWords(institution.budget_investment_fcfa)})</span>
-                      {investmentBudget === 0 && (
-                        <span className="text-[10px] text-slate-500 block pt-0.5 italic">
-                          Crédits d'investissement portés par les ministères sectoriels
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                        <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 space-y-1">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 block">Dépenses d'Investissement Public (DGE)</span>
+                          <span className="text-lg font-black text-slate-900 block break-words">{formatFCFA(institution.budget_investment_fcfa)}</span>
+                          <span className="text-xs font-bold text-emerald-800 block">({investmentPct}% de la dotation)</span>
+                          <span className="text-[10px] font-semibold text-emerald-900 block">({formatAmountInWords(institution.budget_investment_fcfa)})</span>
+                          {investmentBudget === 0 && (
+                            <span className="text-[10px] text-slate-500 block pt-0.5 italic">
+                              Crédits d'investissement portés par les ministères sectoriels
+                            </span>
+                          )}
+                        </div>
+                      </div>
 
-                  {/* Jauge Bicolore */}
-                  <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden flex">
-                    {functioningPct > 0 && (
-                      <div className="bg-sky-600 h-full transition-all duration-500" style={{ width: `${functioningPct}%` }} title={`Fonctionnement: ${functioningPct}%`}></div>
-                    )}
-                    {investmentPct > 0 && (
-                      <div className="bg-emerald-500 h-full transition-all duration-500" style={{ width: `${investmentPct}%` }} title={`Investissement: ${investmentPct}%`}></div>
-                    )}
-                  </div>
+                      {/* Jauge Bicolore */}
+                      <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden flex">
+                        {functioningPct > 0 && (
+                          <div className="bg-sky-600 h-full transition-all duration-500" style={{ width: `${functioningPct}%` }} title={`Fonctionnement: ${functioningPct}%`}></div>
+                        )}
+                        {investmentPct > 0 && (
+                          <div className="bg-emerald-500 h-full transition-all duration-500" style={{ width: `${investmentPct}%` }} title={`Investissement: ${investmentPct}%`}></div>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 flex items-start gap-2">
+                      <Info className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
+                      <span>
+                        Ventilation détaillée entre dépenses de fonctionnement et dépenses d'investissement non disponible dans les données actuellement publiées.
+                      </span>
+                    </div>
+                  )}
 
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
                       <Info className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
                       <span>
-                        {isPeripheralAbidjan
+                        {isPeripheralAbidjan && hasInstBreakdown && investmentPct > 0
                           ? `Ce montant correspond aux concours directs de l'État (DGF + DGE). Avec ${investmentPct}% alloués à l'équipement, ces crédits financent directement les ${relatedProjects.length} chantiers physiques de proximité de ${institution.name}.`
                           : "Ce montant correspond aux concours directs de l'État (DGF + DGE). Le budget primitif consolidé intégrant les impôts locaux propres est en cours de centralisation."}
                       </span>
@@ -1465,7 +1482,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                         </h4>
                       </div>
                       <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                        {institution.budget_investment_fcfa > 0 ? (
+                        {institution.budget_investment_fcfa != null && institution.budget_investment_fcfa > 0 ? (
                           <>
                             Tranche financée par la <strong className="text-slate-900">Dotation Globale d'Équipement (DGE) de l'État</strong> à hauteur de <strong className="text-slate-900">{formatFCFA(institution.budget_investment_fcfa)}</strong> ({formatAmountInWords(institution.budget_investment_fcfa)}). Les {relatedProjects.length} chantiers physiques correspondants sont détaillés dans l'onglet dédié.
                           </>
@@ -1486,7 +1503,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     </button>
                   </div>
                 </div>
-              ) : institution.budget_investment_fcfa > 0 ? (
+              ) : (institution.budget_investment_fcfa != null && institution.budget_investment_fcfa > 0) ? (
                 <div className="bg-white border-l-4 border-l-emerald-500 border-y border-r border-slate-200 rounded-2xl p-4 sm:p-5 space-y-2.5 shadow-2xs">
                   <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
@@ -1495,7 +1512,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     </h4>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                    Cette enveloppe de <strong className="text-slate-900">{formatAmountInWords(institution.budget_investment_fcfa)}</strong> ({investmentPct}% du budget total) est inscrite à la Loi de Finances 2026 pour les investissements matériels, logistiques, numériques et d'aménagement de <strong className="text-slate-900">{institution.name}</strong>.
+                    Cette enveloppe de <strong className="text-slate-900">{formatAmountInWords(institution.budget_investment_fcfa)}</strong>{investmentPct > 0 ? ` (${investmentPct}% du budget total)` : ''} est inscrite à la Loi de Finances 2026 pour les investissements matériels, logistiques, numériques et d'aménagement de <strong className="text-slate-900">{institution.name}</strong>.
                   </p>
                   <div className="pt-1">
                     <button
@@ -1619,7 +1636,15 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                       Ventilation Officielle du Budget 2026 (Loi de Finances)
                     </h5>
                     <p className="text-xs text-slate-500 max-w-md mx-auto">
-                      Les montants officiels votés pour <strong>{institution.name}</strong> s'élèvent à <strong>{formatFCFA(institution.budget_functioning_fcfa)}</strong> ({formatAmountInWords(institution.budget_functioning_fcfa)} — {functioningPct}%) en fonctionnement et <strong>{formatFCFA(institution.budget_investment_fcfa)}</strong> ({formatAmountInWords(institution.budget_investment_fcfa)} — {investmentPct}%) en investissements publics.
+                      {hasInstBreakdown ? (
+                        <>
+                          Les montants officiels votés pour <strong>{institution.name}</strong> s'élèvent à <strong>{formatFCFA(institution.budget_functioning_fcfa)}</strong> ({formatAmountInWords(institution.budget_functioning_fcfa)} — {functioningPct}%) en fonctionnement et <strong>{formatFCFA(institution.budget_investment_fcfa)}</strong> ({formatAmountInWords(institution.budget_investment_fcfa)} — {investmentPct}%) en investissements publics.
+                        </>
+                      ) : (
+                        <>
+                          La ventilation officielle entre dépenses de fonctionnement et investissements pour <strong>{institution.name}</strong> est en cours de centralisation via les documents budgétaires officiels.
+                        </>
+                      )}
                     </p>
                   </div>
                   <button

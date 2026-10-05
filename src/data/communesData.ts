@@ -297,9 +297,9 @@ const RAW_COMMUNES: RawCommune[] = [
 ];
 
 function buildCommuneInstitution(c: RawCommune, index: number): Institution {
-  const funcRatio = c.functioningRatio || 0.35;
-  const budgetFunc = Math.round(c.budgetTotal * funcRatio);
-  const budgetInv = c.budgetTotal - budgetFunc;
+  const funcRatio = c.functioningRatio;
+  const budgetFunc = funcRatio != null ? Math.round(c.budgetTotal * funcRatio) : null;
+  const budgetInv = budgetFunc != null ? c.budgetTotal - budgetFunc : null;
 
   const idSlug = c.name
     .toLowerCase()

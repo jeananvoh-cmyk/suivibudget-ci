@@ -216,10 +216,11 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
       {/* Grid of Regions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {paginatedRegions.map((inst) => {
-          const functioningPct = inst.total_budget_fcfa > 0 
-            ? Math.round((inst.budget_functioning_fcfa / inst.total_budget_fcfa) * 100) 
+          const hasBreakdown = inst.budget_functioning_fcfa != null && inst.budget_investment_fcfa != null && (inst.total_budget_fcfa ?? 0) > 0;
+          const functioningPct = hasBreakdown 
+            ? Math.round((inst.budget_functioning_fcfa! / inst.total_budget_fcfa!) * 100) 
             : 0;
-          const investmentPct = inst.total_budget_fcfa > 0 ? (100 - functioningPct) : 0;
+          const investmentPct = hasBreakdown ? (100 - functioningPct) : 0;
           const relatedProjects = getProjectsForInstitution(inst, allProjects);
           const relatedProjectsCount = relatedProjects.length;
 
@@ -282,7 +283,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                   (() => {
                     const prim = (inst.primitive_budget || OFFICIAL_PRIMITIVE_BUDGETS[inst.id])!;
                     const primTotal = prim.total_voted_fcfa;
-                    const stateTotal = inst.total_budget_fcfa;
+                    const stateTotal = inst.total_budget_fcfa ?? 0;
                     const localRev = Math.max(0, primTotal - stateTotal);
                     const statePct = primTotal > 0 ? Math.round((stateTotal / primTotal) * 100) : 0;
                     const localPct = 100 - statePct;
@@ -339,18 +340,26 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                         {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold">({formatAmountInWords(inst.total_budget_fcfa)})</span>
                       </span>
                     </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden flex">
-                      <div className="bg-brand-blue h-full" style={{ width: `${functioningPct}%` }}></div>
-                      <div className="bg-emerald-500 h-full" style={{ width: `${investmentPct}%` }}></div>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-semibold text-slate-600 gap-1 pt-1">
-                      <span className="text-brand-blue">
-                        Fonct. : <strong className="font-bold">{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
-                      </span>
-                      <span className="text-emerald-700">
-                        Invest. : <strong className="font-bold">{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
-                      </span>
-                    </div>
+                    {hasBreakdown ? (
+                      <>
+                        <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden flex">
+                          <div className="bg-brand-blue h-full" style={{ width: `${functioningPct}%` }}></div>
+                          <div className="bg-emerald-500 h-full" style={{ width: `${investmentPct}%` }}></div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-semibold text-slate-600 gap-1 pt-1">
+                          <span className="text-brand-blue">
+                            Fonct. : <strong className="font-bold">{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
+                          </span>
+                          <span className="text-emerald-700">
+                            Invest. : <strong className="font-bold">{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="p-2 bg-slate-50 rounded-xl border border-slate-200 text-[10px] text-slate-500 italic">
+                        Ventilation Fonctionnement / Investissement à corroborer via l'annexe budgétaire.
+                      </div>
+                    )}
                   </div>
                 )}
 

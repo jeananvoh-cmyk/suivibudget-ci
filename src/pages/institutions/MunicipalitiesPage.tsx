@@ -135,12 +135,18 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
     } else if (sortBy === 'NAME_DESC') {
       return nameB.localeCompare(nameA, 'fr', { sensitivity: 'base' });
     } else if (sortBy === 'BUDGET_DESC') {
-      const budgetA = a.primitive_budget?.total_voted_fcfa || OFFICIAL_PRIMITIVE_BUDGETS[a.id]?.total_voted_fcfa || a.total_budget_fcfa || 0;
-      const budgetB = b.primitive_budget?.total_voted_fcfa || OFFICIAL_PRIMITIVE_BUDGETS[b.id]?.total_voted_fcfa || b.total_budget_fcfa || 0;
+      const budgetA = a.primitive_budget?.total_voted_fcfa ?? OFFICIAL_PRIMITIVE_BUDGETS[a.id]?.total_voted_fcfa ?? a.total_budget_fcfa ?? null;
+      const budgetB = b.primitive_budget?.total_voted_fcfa ?? OFFICIAL_PRIMITIVE_BUDGETS[b.id]?.total_voted_fcfa ?? b.total_budget_fcfa ?? null;
+      if (budgetA === null && budgetB === null) return 0;
+      if (budgetA === null) return 1;
+      if (budgetB === null) return -1;
       return budgetB - budgetA;
     } else if (sortBy === 'BUDGET_ASC') {
-      const budgetA = a.primitive_budget?.total_voted_fcfa || OFFICIAL_PRIMITIVE_BUDGETS[a.id]?.total_voted_fcfa || a.total_budget_fcfa || 0;
-      const budgetB = b.primitive_budget?.total_voted_fcfa || OFFICIAL_PRIMITIVE_BUDGETS[b.id]?.total_voted_fcfa || b.total_budget_fcfa || 0;
+      const budgetA = a.primitive_budget?.total_voted_fcfa ?? OFFICIAL_PRIMITIVE_BUDGETS[a.id]?.total_voted_fcfa ?? a.total_budget_fcfa ?? null;
+      const budgetB = b.primitive_budget?.total_voted_fcfa ?? OFFICIAL_PRIMITIVE_BUDGETS[b.id]?.total_voted_fcfa ?? b.total_budget_fcfa ?? null;
+      if (budgetA === null && budgetB === null) return 0;
+      if (budgetA === null) return 1;
+      if (budgetB === null) return -1;
       return budgetA - budgetB;
     }
     return nameA.localeCompare(nameB, 'fr', { sensitivity: 'base' });
@@ -418,10 +424,11 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
       {/* Grid of Mairies (Paginated) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {paginatedMairies.map((inst) => {
-          const functioningPct = inst.total_budget_fcfa > 0 
-            ? Math.round((inst.budget_functioning_fcfa / inst.total_budget_fcfa) * 100) 
+          const hasBreakdown = inst.budget_functioning_fcfa != null && inst.budget_investment_fcfa != null && (inst.total_budget_fcfa ?? 0) > 0;
+          const functioningPct = hasBreakdown 
+            ? Math.round((inst.budget_functioning_fcfa! / inst.total_budget_fcfa!) * 100) 
             : 0;
-          const investmentPct = inst.total_budget_fcfa > 0 ? (100 - functioningPct) : 0;
+          const investmentPct = hasBreakdown ? (100 - functioningPct) : 0;
           const cleanName = getCleanCommuneName(inst.name);
           const relatedProjects = getProjectsForInstitution(inst, allProjects);
           const relatedProjectsCount = relatedProjects.length;
@@ -511,7 +518,7 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                   const prim = inst.primitive_budget || OFFICIAL_PRIMITIVE_BUDGETS[inst.id];
                   if (prim) {
                     const primTotal = prim.total_voted_fcfa;
-                    const stateTotal = inst.total_budget_fcfa;
+                    const stateTotal = inst.total_budget_fcfa ?? 0;
                     const localRev = Math.max(0, primTotal - stateTotal);
                     const statePct = primTotal > 0 ? Math.round((stateTotal / primTotal) * 100) : 0;
                     const localPct = 100 - statePct;
@@ -602,18 +609,26 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                           {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold">({formatAmountInWords(inst.total_budget_fcfa)})</span>
                         </span>
                       </div>
-                      <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden flex">
-                        <div className="bg-brand-blue h-full" style={{ width: `${functioningPct}%` }}></div>
-                        <div className="bg-emerald-500 h-full" style={{ width: `${investmentPct}%` }}></div>
-                      </div>
-                      <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-semibold text-slate-600 gap-1 pt-1">
-                        <span className="text-brand-blue">
-                          Fonctionnement (DGF) : <strong>{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
-                        </span>
-                        <span className="text-emerald-700">
-                          Investissement (DGE) : <strong>{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
-                        </span>
-                      </div>
+                      {hasBreakdown ? (
+                        <>
+                          <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden flex">
+                            <div className="bg-brand-blue h-full" style={{ width: `${functioningPct}%` }}></div>
+                            <div className="bg-emerald-500 h-full" style={{ width: `${investmentPct}%` }}></div>
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-semibold text-slate-600 gap-1 pt-1">
+                            <span className="text-brand-blue">
+                              Fonctionnement (DGF) : <strong>{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
+                            </span>
+                            <span className="text-emerald-700">
+                              Investissement (DGE) : <strong>{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="p-2 bg-slate-50 rounded-xl border border-slate-200 text-[10px] text-slate-500 italic">
+                          Ventilation Fonctionnement / Investissement à confirmer via l'annexe budgétaire.
+                        </div>
+                      )}
                     </div>
                   );
                 })()}

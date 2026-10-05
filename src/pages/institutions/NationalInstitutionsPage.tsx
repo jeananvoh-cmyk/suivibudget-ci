@@ -255,16 +255,18 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
               </div>
 
               {/* Budget bar */}
-              <div className="space-y-1.5">
-                <div className="w-full bg-slate-900/50 rounded-full h-2 overflow-hidden flex">
-                  <div className="bg-sky-400 h-full" style={{ width: `${Math.round((presidence.budget_functioning_fcfa / presidence.total_budget_fcfa) * 100)}%` }} />
-                  <div className="bg-emerald-400 h-full" style={{ width: `${Math.round((presidence.budget_investment_fcfa / presidence.total_budget_fcfa) * 100)}%` }} />
+              {presidence.total_budget_fcfa != null && presidence.total_budget_fcfa > 0 && presidence.budget_functioning_fcfa != null && presidence.budget_investment_fcfa != null ? (
+                <div className="space-y-1.5">
+                  <div className="w-full bg-slate-900/50 rounded-full h-2 overflow-hidden flex">
+                    <div className="bg-sky-400 h-full" style={{ width: `${Math.round((presidence.budget_functioning_fcfa / presidence.total_budget_fcfa) * 100)}%` }} />
+                    <div className="bg-emerald-400 h-full" style={{ width: `${Math.round((presidence.budget_investment_fcfa / presidence.total_budget_fcfa) * 100)}%` }} />
+                  </div>
+                  <div className="flex justify-between text-[10px] font-bold text-sky-100">
+                    <span className="text-sky-300">Fonct. : {Math.round((presidence.budget_functioning_fcfa / presidence.total_budget_fcfa) * 100)}% ({formatAmountInWords(presidence.budget_functioning_fcfa)})</span>
+                    <span className="text-emerald-300">Invest. : {Math.round((presidence.budget_investment_fcfa / presidence.total_budget_fcfa) * 100)}% ({formatAmountInWords(presidence.budget_investment_fcfa)})</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-[10px] font-bold text-sky-100">
-                  <span className="text-sky-300">Fonct. : {Math.round((presidence.budget_functioning_fcfa / presidence.total_budget_fcfa) * 100)}% ({formatAmountInWords(presidence.budget_functioning_fcfa)})</span>
-                  <span className="text-emerald-300">Invest. : {Math.round((presidence.budget_investment_fcfa / presidence.total_budget_fcfa) * 100)}% ({formatAmountInWords(presidence.budget_investment_fcfa)})</span>
-                </div>
-              </div>
+              ) : null}
 
               <div className="pt-2 flex flex-col gap-2">
                 <button

@@ -1,15 +1,66 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- LAST_UPDATED : 2026-10-04
+- LAST_UPDATED : 2026-10-05
 - LAST_AGENT : Antigravity
-- CURRENT_BRANCH : `antigravity/budget-cycle-document-console`
-- HANDOFF_BASE_SHA : `46c4f1753a1c6d5aa564a70f082f859141d58fd0` (HEAD de PR #13 `antigravity/tiassale-ca-2024-reconciliation`)
-- CURRENT_HEAD : `9f57001` fix(cycle): seal human gate at import boundary, eliminate version fallbacks, clean API ; 244 tests PASS (15 suites), build PASS.
-- PR : PR #14 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/14) ouverte sur `antigravity/budget-cycle-document-console` vers `master` (dépendance explicite sur PR #13, NON FUSIONNÉE, soumise au contrôle externe de l'orchestrateur).
-- SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1
-- CURRENT_MILESTONE : Durcissement Ultime PR #14 — Fermeture Étanche du Gate Humain à la Frontière d'Import & Élimination des Fallbacks de Version (Validation humaine étanche à la frontière d'import `buildStandardImportEnvelope` via `isImportableValue` : rejet bloquant de PENDING avec Error explicite, rejet de MARKED_UNKNOWN avec montant non-null, exclusion de REJECTED, rejet des lots vides avec 0 valeur importable ; Matrice de conflits BP publié à 4 cas stricts sans aucun fallback artificiel `|| 1` ou `?? 1` ; Suppression du paramètre mort `existingBudgetsCount` ; Zéro régression Bingerville, Cocody, Tiassalé ; 244 tests PASS sur 15 suites, build PASS).
+- CURRENT_BRANCH : `antigravity/lot1-financial-integrity-cleanup`
+- BASE_MASTER_SHA : `0849bc5ee2cc292f5565f705c917b04ffe2afa1e`
+- CURRENT_HEAD : `b48c736` (Clôture Définitive LOT 1)
+- PR : PR #24 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/24) — Quality CI: SUCCESS, Vercel: SUCCESS, Mergeable: MERGEABLE (`MERGE_STATUS: NOT_MERGED`)
+- SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_MIGRATION_STATUS: PENDING_ORCHESTRATOR)
+- CURRENT_MILESTONE : LOT 1 — Clôture Définitive de l'Assainissement de l'Intégrité Financière (Élimination intégrale des valeurs financières artificielles, estimations silencieuses, ventilations arbitraires 65/35, 70/30, 55/45, fallbacks 32.5B, 175.6B, 4354 et faux zéros ; DROP DEFAULT sur les 5 colonnes budgétaires institutions et local_budgets ; assainissement legacy ciblé sur les 4 institutions historiques ; neutralisation des inférences civiques spéculatives dans l'UI ; verrouillage par suite de tests financialIntegrity.test.ts A à J ; 16/16 test suites PASS, 272/272 tests PASS, build PASS).
 - FOUNDATION_READY : TRUE.
+
+## LOT 1 : ASSAINISSEMENT DE L'INTÉGRITÉ FINANCIÈRE (CLÔTURE DÉFINITIVE PR #24)
+- **1. Élimination des Ventilations Arbitraires (Class D -> Éliminées)** :
+  - **Ministères (65/35 et 70/30)** :
+    - `src/pages/institutions/MinistriesPage.tsx` : Suppression de `* 0.65` et `* 0.35`. Les ministères sans ventilation officielle disposent désormais de `budget_functioning_fcfa: null` et `budget_investment_fcfa: null`.
+    - `src/data/institutionsData.ts` : Suppression de `* 0.7` et `* 0.3` ainsi que du fallback de 32,5 Milliards FCFA (`32500000000`).
+  - **Mairies & Conseils Régionaux (55/45 et 35%)** :
+    - `src/components/PrimitiveBudgetImporterModal.tsx` : Suppression de la moyenne municipale fictive 55% investissement / 45% fonctionnement. `investmentVoted` et `functioningVoted` restent strictement `null` si non fournis.
+    - `src/pages/AdminDashboardPage.tsx` : Suppression de l'auto-split 55%/45% dans `handleSaveQuickWeb`, `handleSaveInstitution` et dans les formulaires de saisie de budget primitif.
+    - `src/data/communesData.ts` : Suppression du fallback `c.functioningRatio || 0.35` affecté arbitrairement aux 188 communes hors Abidjan. Les communes sans ratio documenté ont désormais `budget_functioning_fcfa: null` et `budget_investment_fcfa: null`.
+- **2. Schéma Supabase, Suppression de DEFAULT 0 & Assainissement Legacy Ciblé** :
+  - Migration locale complétée : `supabase/migrations/20261005100000_drop_default_zero_institutions_budget.sql` :
+    - `ALTER TABLE public.institutions ALTER COLUMN total_budget_fcfa DROP DEFAULT;`
+    - `ALTER TABLE public.institutions ALTER COLUMN budget_functioning_fcfa DROP DEFAULT;`
+    - `ALTER TABLE public.institutions ALTER COLUMN budget_investment_fcfa DROP DEFAULT;`
+    - `ALTER TABLE public.local_budgets ALTER COLUMN operating_amount DROP DEFAULT;`
+    - `ALTER TABLE public.local_budgets ALTER COLUMN investment_amount DROP DEFAULT;`
+    - Assainissement ciblé historique strictement restreint aux 4 collectivités historiques (`inst-com-abobo`, `inst-com-bingerville`, `inst-com-cocody`, `inst-com-tiassale`) pour remettre à `NULL` uniquement les valeurs `0` issues de l'ancien `DEFAULT 0`. Utilise strictement `CASE WHEN col = 0 THEN NULL ELSE col END`.
+    - Aucun `UPDATE` global sans filtre, aucun `UPDATE` sur `local_budgets`.
+    - Invariant respecté : `public.ca_investment_operations.executed_amount` conservé intact et STRICTEMENT HORS PÉRIMÈTRE.
+    - Zéro écriture distante par l'agent : la migration locale est prête pour application ultérieure sécurisée par l'orchestrateur.
+  - Alignement des schémas déclaratifs du dépôt (`supabase/schema.sql` et `supabase_schema.sql`) pour garantir l'absence de `DEFAULT 0` sur ces colonnes budgétaires.
+- **3. Neutralité Civique & Nettoyage UI (`InstitutionDetailModal.tsx`)** :
+  - Suppression de l'affirmation spéculative *« Collectivité à forte autonomie fiscale... »* remplacée par la mention neutre et factuelle : *« Aucune dotation directe de l'État n'est renseignée pour cette composante dans les données actuellement disponibles. »*
+  - Suppression du jargon d'audit interne *« en cours de corroboration avec l'annexe officielle »* remplacé par la formulation civique claire : *« Ventilation détaillée entre dépenses de fonctionnement et dépenses d'investissement non disponible dans les données actuellement publiées. »*
+- **4. Pipeline de bout en bout sur `local_budgets`** :
+  - `src/utils/budgetValidation.ts` : somme arithmétique protégée sans fallback `|| 0` ; les budgets partiels (total connu mais ventilation inconnue) sont 100% valides.
+  - `src/components/InstitutionDetailModal.tsx` : fiabilisation des messages et jauges en cas de ventilation inconnue (`hasInstBreakdown`), élimination de tout affichage trompeur "0%" ou "(0% du budget total)".
+  - Export CSV (`exportLocalBudgetsToCsv`) : produit une cellule vide pour les montants inconnus (`null`), et conserve `"0"` pour les vrais zéros documentés.
+- **5. AdminDashboardPage — Support Strict des Trois États Budgétaires** :
+  - Élimination des conversions `null -> 0` (`inst.budget_functioning_fcfa || 0`, `inst.budget_investment_fcfa || 0`, `inst.total_budget_fcfa || 0`) dans l'état initial, `handleEditInstitution`, `handleOpenCreateInst`, `handleOpenQuickWebEdit`.
+  - Logique de calcul du total révisée : si les deux composantes sont null, le total n'est pas faussement calculé à 0.
+  - Formulaires d'édition adaptés avec `e.target.value.trim() === '' ? null : Number(e.target.value)` et `value={val != null ? val : ''}`, gérant parfaitement les 3 états : montant renseigné, vrai zéro documenté (0), montant inconnu (null).
+- **6. Export Admin & Élimination des Faux Zéros** :
+  - `handleExportProspectsCsv` et `handleExportCSV` : remplacement de `p.total_budget_fcfa || 0` et `p.budget_amount_fcfa` par un contrôle null-safe produisant une cellule vide `""` pour les montants inconnus, et préservant `"0"` uniquement pour les vrais zéros documentés.
+- **7. Provenance & Élimination du Fallback Fictif** :
+  - Suppression intégrale du fallback `'Conseil Municipal / Délibération officielle'` dans `AdminDashboardPage.tsx` et `PrimitiveBudgetImporterModal.tsx`. Une source absente produit `'Source à confirmer'`, jamais un acte délibérant fictif.
+- **8. Tests & Validation Renforcée (Tests A à J)** :
+  - Suite `src/utils/__tests__/financialIntegrity.test.ts` renforcée (26 tests unitaires, tous PASS) :
+    - Test A : Migration targets strictly the 4 legacy historical institutions (`inst-com-abobo`, `inst-com-bingerville`, `inst-com-cocody`, `inst-com-tiassale`).
+    - Test B : Migration uses `CASE WHEN col = 0 THEN NULL ELSE col END` for safe targeted sanitation.
+    - Test C : Migration forbids any global untargeted UPDATE on institutions.
+    - Test D : Migration executes NO data UPDATE on local_budgets and drops DEFAULT on 5 target columns (institutions x 3, local_budgets x 2).
+    - Test E : `ca_investment_operations.executed_amount` remains strictly out of scope.
+    - Test F : Eliminates speculative "forte autonomie fiscale" inference from citizen UI.
+    - Test G : Eliminates internal audit jargon "en cours de corroboration avec l'annexe officielle" from citizen UI.
+    - Test H : Preserves genuine documented zero (0 FCFA) across data and presentation layers.
+    - Test I : Preserves unknown amounts (NULL) without defaulting to 0 or arbitrary ratios.
+    - Test J : Non-regression on verified pilots: Bingerville (4 046 222 000 FCFA) and Tiassalé (CA 2024 SOURCE_ANOMALY, BP 2026 unventilated).
+  - 16 suites de tests exécutées : 272/272 tests PASS.
+  - TypeScript & Vite build : PASS (0 erreur).
 
 ## INDUSTRIALISATION DU CYCLE BUDGÉTAIRE & CONSOLE DOCUMENTAIRE (DURCIE PR #14 — GATE FINAL QUALITÉ)
 - **GATE QUALITÉ FINAL VALIDÉ SUR PR #14** :
@@ -392,9 +443,9 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Contrôle externe de PR #14 (`antigravity/budget-cycle-document-console`) par l'orchestrateur (244/244 tests PASS, build PASS, CI GitHub Quality SUCCESS, Vercel Preview SUCCESS).
-2. Autorisation de merge de PR #14 vers master par l'orchestrateur (aucune fusion non autorisée, aucun impact distant Supabase).
-3. Suite du cycle budgétaire et déploiement selon les directives de l'orchestrateur.
+1. Contrôle externe de PR #24 (`antigravity/lot1-financial-integrity-cleanup`) par l'orchestrateur (272/272 tests PASS, build PASS, CI GitHub Quality SUCCESS, Vercel Preview SUCCESS).
+2. Application contrôlée par l'orchestrateur de la migration locale `supabase/migrations/20261005100000_drop_default_zero_institutions_budget.sql` sur le projet Supabase distant `cdesuvcozcetdtvibgqs` (DROP DEFAULT sur les 5 colonnes budgétaires + assainissement legacy ciblé des 4 institutions historiques).
+3. Contrôle post-migration sur Supabase distant et autorisation de merge de PR #24 vers master par l'orchestrateur (passage ultérieur au LOT 2).
 
 ## COCODY_REMOTE_CLOSEOUT — ORCHESTRATEUR 2026-10-02
 - Institution canonique ajoutée à `public.institutions` : `inst-com-cocody`, `Mairie de Cocody`, type applicatif `MAIRIE`, région Abidjan, District Autonome d'Abidjan.

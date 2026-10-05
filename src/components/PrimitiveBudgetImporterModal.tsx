@@ -29,8 +29,8 @@ interface ParsedBudgetRow {
   queryName: string;
   matchedInstitution: Institution | null;
   totalVoted: number;
-  investmentVoted: number;
-  functioningVoted: number;
+  investmentVoted: number | null;
+  functioningVoted: number | null;
   votedDate: string;
   source: string;
   sourceUrl: string;
@@ -135,30 +135,27 @@ export const PrimitiveBudgetImporterModal: React.FC<PrimitiveBudgetImporterModal
       const invStr = tokens[2] || '';
       const funcStr = tokens[3] || '';
       const votedDate = tokens[4] || new Date().toLocaleDateString('fr-FR');
-      const source = tokens[5] || 'Conseil Municipal / Délibération officielle';
+      const source = tokens[5]?.trim() || 'Source à confirmer';
       const sourceUrl = tokens[6] || '';
       const notes = tokens[7] || '';
 
       // Clean numbers
-      const cleanNum = (str: string) => {
+      const cleanNum = (str: string | undefined): number | null => {
+        if (!str) return null;
         const cleaned = str.replace(/[^\d]/g, '');
-        return cleaned ? parseInt(cleaned, 10) : 0;
+        return cleaned ? parseInt(cleaned, 10) : null;
       };
 
-      const totalVoted = cleanNum(totalStr);
-      let investmentVoted = cleanNum(invStr);
-      let functioningVoted = cleanNum(funcStr);
+      const totalVoted = cleanNum(totalStr) ?? 0;
+      let investmentVoted: number | null = cleanNum(invStr);
+      let functioningVoted: number | null = cleanNum(funcStr);
 
-      // Auto-balance if one part is missing
+      // Auto-balance ONLY if exact math deduction is possible (e.g., total and 1 part known)
       if (totalVoted > 0) {
-        if (investmentVoted > 0 && functioningVoted === 0) {
+        if (investmentVoted !== null && investmentVoted > 0 && (functioningVoted === null || functioningVoted === 0)) {
           functioningVoted = Math.max(0, totalVoted - investmentVoted);
-        } else if (functioningVoted > 0 && investmentVoted === 0) {
+        } else if (functioningVoted !== null && functioningVoted > 0 && (investmentVoted === null || investmentVoted === 0)) {
           investmentVoted = Math.max(0, totalVoted - functioningVoted);
-        } else if (investmentVoted === 0 && functioningVoted === 0) {
-          // Default municipal average: 55% invest, 45% func
-          investmentVoted = Math.round(totalVoted * 0.55);
-          functioningVoted = totalVoted - investmentVoted;
         }
       }
 
@@ -483,7 +480,7 @@ export const PrimitiveBudgetImporterModal: React.FC<PrimitiveBudgetImporterModal
                         </td>
                         <td className="p-2.5 text-right text-emerald-700 font-bold whitespace-nowrap">
                           {formatFCFA(row.investmentVoted)}
-                          {row.totalVoted > 0 && (
+                          {row.totalVoted > 0 && row.investmentVoted !== null && (
                             <span className="text-[10px] text-slate-400 block font-normal">
                               ({Math.round((row.investmentVoted / row.totalVoted) * 100)}%)
                             </span>
@@ -491,7 +488,7 @@ export const PrimitiveBudgetImporterModal: React.FC<PrimitiveBudgetImporterModal
                         </td>
                         <td className="p-2.5 text-right text-slate-600 font-medium whitespace-nowrap">
                           {formatFCFA(row.functioningVoted)}
-                          {row.totalVoted > 0 && (
+                          {row.totalVoted > 0 && row.functioningVoted !== null && (
                             <span className="text-[10px] text-slate-400 block font-normal">
                               ({Math.round((row.functioningVoted / row.totalVoted) * 100)}%)
                             </span>
