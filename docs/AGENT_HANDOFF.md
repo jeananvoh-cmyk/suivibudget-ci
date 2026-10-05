@@ -3,13 +3,62 @@
 ## METADATA
 - LAST_UPDATED : 2026-10-05
 - LAST_AGENT : Antigravity
-- CURRENT_BRANCH : `antigravity/lot1-financial-integrity-cleanup`
-- BASE_MASTER_SHA : `0849bc5ee2cc292f5565f705c917b04ffe2afa1e`
-- CURRENT_HEAD : `b48c736` (Clôture Définitive LOT 1)
-- PR : PR #24 (https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/24) — Quality CI: SUCCESS, Vercel: SUCCESS, Mergeable: MERGEABLE (`MERGE_STATUS: NOT_MERGED`)
-- SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_MIGRATION_STATUS: PENDING_ORCHESTRATOR)
-- CURRENT_MILESTONE : LOT 1 — Clôture Définitive de l'Assainissement de l'Intégrité Financière (Élimination intégrale des valeurs financières artificielles, estimations silencieuses, ventilations arbitraires 65/35, 70/30, 55/45, fallbacks 32.5B, 175.6B, 4354 et faux zéros ; DROP DEFAULT sur les 5 colonnes budgétaires institutions et local_budgets ; assainissement legacy ciblé sur les 4 institutions historiques ; neutralisation des inférences civiques spéculatives dans l'UI ; verrouillage par suite de tests financialIntegrity.test.ts A à J ; 16/16 test suites PASS, 272/272 tests PASS, build PASS).
+- CURRENT_BRANCH : `antigravity/lot2-ministry-budget-architecture-pilot`
+- BASE_MASTER_SHA : `c8f2a955f1deecd50ebfb901fa570dc57974cfb8` (Merge commit de PR #24 sur master)
+- CURRENT_HEAD : en cours de finalisation PR Lot 2
+- PR : PR Lot 2 (à ouvrir) : `feat(budget): introduce ministry budget-program architecture pilot`
+- SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_SUPABASE_WRITES = 0)
+- CURRENT_MILESTONE : LOT 2 — Architecture Pilote des Ministères (Ministère des Mines, du Pétrole et de l'Énergie — gov-008). Nomenclature Budget-Programmes DGBF (5 Programmes, 21 Actions, 18 Projets d'investissements publics rattachés sans double comptage, réconciliation arithmétique exacte à 706 060 209 015 FCFA avec delta = 0, isolation stricte vs budgets communaux, suite de tests dédiés ministryBudgetArchitecture.test.ts A à N ; 17/17 test files PASS, 285/285 tests PASS, build PASS).
 - FOUNDATION_READY : TRUE.
+
+## LOT 2 : ARCHITECTURE PILOTE DES MINISTÈRES (MINISTÈRE DES MINES, DU PÉTROLE ET DE L'ÉNERGIE)
+- **1. Doctrine Républicaine & Périmètre Pilote Unique** :
+  - Un seul ministère pilote : **Ministère des Mines, du Pétrole et de l'Énergie (MMPE)** (`gov-008`, Ministre Mamadou Sangafowa-Coulibaly).
+  - Aucun autre ministère (sur les 34 restants) n'a été importé ou généralisé arbitrairement ; transition progressive formalisée.
+  - Invariants absolus appliqués : `UNKNOWN ≠ 0`, `UNKNOWN ≠ estimation`, `UNKNOWN ≠ fallback`.
+  - Pas de concepts communaux sur les ministères : aucun "Budget Primitif", aucune dotation DGF/DGE communale, aucune mention de Conseil Municipal, aucun compte administratif municipal.
+  - `Budget Line ≠ Project` : les 18 projets d'investissements publics majeurs rattachés sont financés *au sein* des actions correspondantes (`is_funded_within_action: true`) et ne s'additionnent JAMAIS par-dessus le budget total du ministère (zéro double comptage).
+- **2. Registre Documentaire Officiel (`docs/references/2026/ministry-mines-petroleum-energy/SOURCE_REGISTER.md`)** :
+  - **Source Primaire** : *Loi de finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026* (DGBF / Trésor Public), promulguée le 19 décembre 2025. Budget global de l'État : 17 350,2 Mds FCFA. Dotation budgétaire MMPE : **706 060 209 015 FCFA**.
+  - **Source Sectorielle** : *Rapport de Présentation Budgétaire & DPPD-PAP 2026-2028* présenté devant la Commission des Affaires Économiques et Financières (CAEF) du Sénat (12 décembre 2025) et de l'Assemblée Nationale (novembre 2025).
+  - **Source Investissements** : *Répertoire National des Projets d'Investissements Publics 2026* (18 projets nationaux individualisés totalisant 304 158 991 377 FCFA).
+- **3. Modèle de Données & Types TypeScript (`src/types/ministryBudget.ts`)** :
+  - Types : `EvidenceType`, `ReconciliationStatus`, `EconomicNature`, `BudgetActivity`, `MinistryLinkedProject`, `BudgetAction`, `BudgetProgram`, `MinistryBudget`.
+  - Exporté centralement dans `src/types/index.ts`.
+- **4. Référentiel Pilote Réconcilié (`src/data/ministryPilotReferential.ts`)** :
+  - **Total Ministère** : 706 060 209 015 FCFA (`RECONCILED`, delta = 0).
+  - **5 Programmes Officiels** :
+    1. `prog-mmpe-01` (P1 : Administration Générale) : 8 701 872 126 FCFA (4 actions, 1 projet lié SI, delta = 0, `RECONCILED`).
+    2. `prog-mmpe-02` (P2 : Énergie) : 320 914 619 601 FCFA (4 actions, 15 projets majeurs dont Boundiali Solaire 2, Dorsale PK24-Bingerville, PEPT, PRONEX, delta = 0, `RECONCILED`).
+    3. `prog-mmpe-03` (P3 : Hydrocarbures) : 116 054 336 FCFA (3 actions, delta = 0, `RECONCILED`).
+    4. `prog-mmpe-04` (P4 : Mines et Géologie) : 783 321 335 FCFA (4 actions, 2 projets majeurs dont Laboratoire Géologique, delta = 0, `RECONCILED`).
+    5. `prog-mmpe-cas` (CAS : Comptes Spéciaux du Trésor & Fonds de Soutien) : 375 544 341 617 FCFA (6 actions dont Fonds d'Électrification Rurale et Soutien aux Hydrocarbures, delta = 0, `RECONCILED`).
+  - Fonction de vérification arithmétique `performMinistryArithmeticCheck(budget)` exportée et validée.
+- **5. Composants UI Dédiés & Intégration Citoyenne** :
+  - `src/components/common/ProvenanceLink.tsx` : badge républicain cliquable pour la source officielle primaire avec mention explicite de la Loi de Finances.
+  - `src/components/institutions/MinistryBudgetProgramView.tsx` : vue complète avec jauge multi-programmes, accordéons des 5 programmes et 21 actions, cartes des 18 chantiers nationaux liés sans double comptage, et prise en charge neutre des ministères non encore pilotés.
+  - `src/components/InstitutionDetailModal.tsx` :
+    - Détection de `institution.type === 'MINISTERE'`.
+    - Onglet `FINANCES` adapté : libellé `Budget 2026 (Budget-Programmes)` (au lieu de `Budget 2026 (Primitif)`), badge dynamique `5 Programmes`.
+    - Rendu exclusif de `MinistryBudgetProgramView` sans aucun composant municipal (pas de CA municipal, pas de DGF/DGE, pas de recettes propres).
+  - `src/pages/institutions/MinistriesPage.tsx` : badge `Pilote 5 Programmes` sur la carte du MMPE (`gov-008`).
+- **6. Tests Unitaires Dédiés (`src/utils/__tests__/ministryBudgetArchitecture.test.ts`)** :
+  - 13 tests unitaires (tous PASS) :
+    - Test A & N : Pas de ventilation arbitraire (aucun 65/35, 70/30, 55/45).
+    - Test B : UNKNOWN reste null (jamais converti en 0 ou fallback).
+    - Test C : Documented zero reste 0 (vérification delta = 0).
+    - Test D : Tous les programmes appartiennent au MMPE (`gov-008`).
+    - Test E : Toutes les actions appartiennent à un programme valide (21 actions).
+    - Test F : Activités rattachées aux actions valides.
+    - Test G : Traçabilité et provenance explicite documentée.
+    - Test H : Validité syntaxique des URLs officielles (`https://...`).
+    - Test I : Zéro concept communal sur l'interface ministérielle.
+    - Test J : Pas de double comptabilisation (18 projets liés avec `is_funded_within_action: true`).
+    - Test K : Réconciliation arithmétique exacte Somme(Programmes) = Total Ministère (706 060 209 015 FCFA, delta = 0, statut `RECONCILED`).
+    - Test L : Réconciliation arithmétique exacte Somme(Actions) = Total Programme pour chaque programme (delta = 0).
+    - Test M : Non-régression sur communes décentralisées (Bingerville, Cocody).
+  - 17 suites de tests exécutées : 285/285 tests PASS.
+  - TypeScript & Vite build : PASS (0 erreur).
 
 ## LOT 1 : ASSAINISSEMENT DE L'INTÉGRITÉ FINANCIÈRE (CLÔTURE DÉFINITIVE PR #24)
 - **1. Élimination des Ventilations Arbitraires (Class D -> Éliminées)** :

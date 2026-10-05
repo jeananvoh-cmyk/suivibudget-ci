@@ -6,6 +6,7 @@ import { BudgetProject, Institution } from '../../types';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
+import { isPilotMinistry } from '../../data/ministryPilotReferential';
 
 const getInitials = (name: string) => {
   const clean = name.replace(/^(M\.|Mme|Prof\.|Gal\.|Dr)\s+/i, '').trim();
@@ -458,9 +459,16 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                     className="w-20 h-20 sm:w-24 sm:h-24"
                   />
                   <div className="space-y-1 min-w-0 flex-1">
-                    <span className="text-[9px] font-black uppercase tracking-wider text-brand-blue bg-blue-50 px-1.5 py-0.5 rounded">
-                      Ministère
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[9px] font-black uppercase tracking-wider text-brand-blue bg-blue-50 px-1.5 py-0.5 rounded">
+                        Ministère
+                      </span>
+                      {isPilotMinistry(official.id) && (
+                        <span className="text-[9px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded">
+                          Pilote 5 Programmes
+                        </span>
+                      )}
+                    </div>
                     <h3 className="text-sm font-black text-slate-900 group-hover:text-brand-blue transition-colors line-clamp-1">
                       {official.name}
                     </h3>

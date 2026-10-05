@@ -38,6 +38,8 @@ import { LocalBudgetHistoryView } from './LocalBudgetHistoryView';
 import { getLatestAvailableCA, hasCA } from '../data/administrativeAccountsData';
 import { OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
 import { ApecParticipation } from './ApecParticipation';
+import { MinistryBudgetProgramView } from './institutions/MinistryBudgetProgramView';
+import { isPilotMinistry } from '../data/ministryPilotReferential';
 
 interface InstitutionDetailModalProps {
   isOpen: boolean;
@@ -531,8 +533,10 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
             },
             { 
               id: 'FINANCES', 
-              label: 'Budget & Finances',
-              badge: isLoadingLines ? 'Chargement...' : (entityBudgetLines.length > 0 ? `${entityBudgetLines.length} lignes` : 'Exercice 2026')
+              label: institution.type === 'MINISTERE' ? 'Budget 2026 (Budget-Programmes)' : 'Budget & Finances',
+              badge: institution.type === 'MINISTERE'
+                ? (isPilotMinistry(institution.id) ? '5 Programmes' : 'Exercice 2026')
+                : (isLoadingLines ? 'Chargement...' : (entityBudgetLines.length > 0 ? `${entityBudgetLines.length} lignes` : 'Exercice 2026'))
             },
             { 
               id: 'LEADER_MISSIONS', 
@@ -952,8 +956,17 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
           {/* ========================================================= */}
           {activeTab === 'FINANCES' && (
             <div className="space-y-5">
-              {(() => {
-                const latestCA = getLatestAvailableCA(institution.id) || getLatestAvailableCA(institution.name);
+              {institution.type === 'MINISTERE' ? (
+                <MinistryBudgetProgramView
+                  institution={institution}
+                  relatedProjects={relatedProjects}
+                  onSelectProject={(_proj) => {
+                    setActiveTab('PROJECTS');
+                  }}
+                />
+              ) : (
+                (() => {
+                  const latestCA = getLatestAvailableCA(institution.id) || getLatestAvailableCA(institution.name);
 
                 return (
                   <>
@@ -1683,7 +1696,8 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     )}
                   </>
                 );
-              })()}
+              })()
+            )}
             </div>
           )}
 
