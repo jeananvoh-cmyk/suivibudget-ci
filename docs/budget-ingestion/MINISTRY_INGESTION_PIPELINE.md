@@ -67,8 +67,12 @@ flowchart TD
 5. **`Budget Line ≠ Project`** :
    Les projets d'investissements s'inscrivent à l'intérieur des crédits alloués aux actions (`is_funded_within_actions = true`). Ils ne s'additionnent jamais par-dessus les actions ni par-dessus le budget ministériel.
 6. **Consolidation Multi-Lignes Déterministe & Lignes Null-Safe** :
-   - Les lignes de financement d'un projet (`source_lines`) acceptent `amount_fcfa: number | null`. Zéro fallback silencieux `?? 0` ou `|| 0`.
-   - Lorsqu'un projet présente une décomposition multi-lignes de financement (`amount_derivation = 'SUM_OF_OFFICIAL_SOURCE_LINES'`), chaque ligne de source doit obligatoirement avoir un montant numérique documenté non-nul (erreur `MULTI_LINE_AMOUNT_REQUIRED` si `null` ou indéfini).
+   - Les lignes de financement d'un projet (`source_lines`) acceptent `amount_fcfa: number | null` :
+     - `number >= 0` si le montant est officiellement documenté ;
+     - `0` est une valeur valide lorsqu'elle est officiellement documentée ;
+     - `null` signifie `UNKNOWN` ;
+     - `UNKNOWN` ne doit jamais être converti en `0` (zéro fallback silencieux `?? 0` ou `|| 0`).
+   - Lorsqu'un projet présente une décomposition multi-lignes de financement (`amount_derivation = 'SUM_OF_OFFICIAL_SOURCE_LINES'`), chaque ligne de source doit obligatoirement avoir un montant numérique officiellement documenté (`number >= 0` ; erreur `MULTI_LINE_AMOUNT_REQUIRED` si `null` ou indéfini).
    - La règle :
    $$\text{consolidated\_amount\_2026\_fcfa} == \sum \text{source\_lines.amount}$$
    est strictement vérifiée au franc près. Tout écart lève une erreur bloquante `MULTI_LINE_SUM_MISMATCH`.

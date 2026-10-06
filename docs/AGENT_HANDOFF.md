@@ -1,11 +1,12 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- LAST_UPDATED : 2026-10-05
+- LAST_UPDATED : 2026-10-06
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/lot3-ministry-ingestion-engine`
 - BASE_MASTER_SHA : `e188fde5c7f1db973907a45f9301e20080f4e2bf` (Merge commit de PR #25 sur master)
-- CURRENT_HEAD : `f6bba8e367d9f9614f4d763cb909010b97f23fc7` (correctif post-audit indépendant orchestrateur)
+- CURRENT_HEAD : voir HEAD courante de PR #26
+- LAST_VERIFIED_CODE_HEAD : `131cf11944cc14c01eb83b306e3ae322d88912c3`
 - PR : #26 (`feat(pipeline): industrial ministerial budget ingestion engine` - LOT 3)
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_SUPABASE_WRITES = 0)
 - CURRENT_MILESTONE : LOT 3 — Industrialisation du pipeline budgétaire ministériel. Moteur d'ingestion déterministe, pur et typé (`src/budget-ingestion/`) validé par le Golden Reference Test MMPE 2026 (10 programmes, 21 actions, 18 projets, 706 060 209 015 FCFA, delta = 0, RECONCILED), publication gate hermétique avec blocage strict de `NOT_COMPARABLE` (`NOT_COMPARABLE != RECONCILED`), null-safety sur activités et lignes de sources, éradication totale des fallbacks financiers `UNKNOWN -> 0`, registre central des 35 ministères 2026 avec MMPE seul publié et 34 en attente documentaire (18/18 test files PASS, 314/314 tests PASS, build PASS).
