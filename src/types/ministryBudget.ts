@@ -34,7 +34,7 @@ export interface BudgetActivity {
 
 export interface ProjectSourceLine {
   official_code?: string;
-  amount_fcfa: number;
+  amount_fcfa: number | null;
   financing_type?: 'TRESOR' | 'FINANCEMENT_EXTERIEUR' | 'OTHER' | string;
   economic_nature?: 'INVESTISSEMENTS' | string;
   page_reference?: string;
