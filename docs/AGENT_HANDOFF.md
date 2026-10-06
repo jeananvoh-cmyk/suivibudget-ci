@@ -3,40 +3,52 @@
 ## METADATA
 - LAST_UPDATED : 2026-10-06
 - LAST_AGENT : Antigravity
-- CURRENT_BRANCH : `antigravity/lot3-ministry-ingestion-engine`
-- BASE_MASTER_SHA : `e188fde5c7f1db973907a45f9301e20080f4e2bf` (Merge commit de PR #25 sur master)
-- CURRENT_HEAD : voir HEAD courante de PR #26
-- LAST_VERIFIED_CODE_HEAD : `131cf11944cc14c01eb83b306e3ae322d88912c3`
-- PR : #26 (`feat(pipeline): industrial ministerial budget ingestion engine` - LOT 3)
+- CURRENT_BRANCH : `antigravity/lot4-ministry-documentary-industrialization`
+- BASE_MASTER_SHA : `665bcdfc1061dbc69485c8748a6962fcd764c130` (Merge commit de PR #26 sur master)
+- CURRENT_HEAD : voir HEAD courante de PR LOT 4
+- LAST_VERIFIED_CODE_HEAD : voir HEAD courante de PR LOT 4
+- PR : (en cours de création — LOT 4)
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_SUPABASE_WRITES = 0)
-- CURRENT_MILESTONE : LOT 3 — Industrialisation du pipeline budgétaire ministériel. Moteur d'ingestion déterministe, pur et typé (`src/budget-ingestion/`) validé par le Golden Reference Test MMPE 2026 (10 programmes, 21 actions, 18 projets, 706 060 209 015 FCFA, delta = 0, RECONCILED), publication gate hermétique avec blocage strict de `NOT_COMPARABLE` (`NOT_COMPARABLE != RECONCILED`), null-safety sur activités et lignes de sources, éradication totale des fallbacks financiers `UNKNOWN -> 0`, registre central des 35 ministères 2026 avec MMPE seul publié et 34 en attente documentaire (18/18 test files PASS, 314/314 tests PASS, build PASS).
+- CURRENT_MILESTONE : LOT 4 — Industrialisation documentaire et onboarding ministériel. 4 ministères pilotes additionnels documentés et réconciliés (MJDH, MEER, MINEDDTE, MINEF) formant un panel pilote diversifié de 5 ministères avec MMPE. Registre central machine-readable des 35 ministères 2026 (`MINISTRY_DOCUMENTATION_REGISTRY_2026.json`) indexé avec codes DGBF officiels et plages de pagination de l'Annexe 4 DPPD-PAP. Protocole d'onboarding reproductible et standardisé (`LOT4_MINISTRY_ONBOARDING_PROTOCOL.md`). Tests de référence Golden Reference Tests (19/19 test files PASS, 322/322 tests PASS, build PASS).
 - FOUNDATION_READY : TRUE.
 
-## LOT 3 : INDUSTRIALISATION DU PIPELINE BUDGÉTAIRE MINISTÉRIEL
-- **1. Objectif & Principes d'Ingénierie** :
-  - Industrialisation générique du pipeline budgétaire de l'État de Côte d'Ivoire (Nomenclature Budget-Programmes DGBF 2026).
-  - Sanctuaire des données réelles : Zéro extrapolation arbitraire, zéro devinette, zéro cast permissif (`0 any`).
-  - Invariants stricts : `UNKNOWN ≠ 0`, `UNKNOWN ≠ estimation`, `UNKNOWN ≠ fallback`, `SOURCE_GAP ≠ RECONCILED`, `NOT_COMPARABLE ≠ RECONCILED`, `Budget Line ≠ Project`.
-  - MMPE (`MMPE_CANONICAL_BUDGET_2026.json`) maintenu comme Golden Reference absolue verrouillée.
-  - Aucun import précipité des 34 autres ministères sans validation documentaire préalable.
-- **2. Architecture Modulaire (`src/budget-ingestion/`)** :
-  - `types/index.ts` : Typage TypeScript exhaustif des structures canoniques (`CanonicalMinistryExtraction`, `CanonicalProgram`, `CanonicalAction`, `CanonicalProject`, `CanonicalSourceLine`), résultats de validation, réconciliation (`observed_sum_fcfa: number | null`, `delta_fcfa: number | null`), audit et registre.
-  - `validators/genericMinistryValidator.ts` : Validateur pur et déterministe sans effet de bord vérifiant la complétude structurelle, l'absence de montants négatifs, l'unicité des codes, l'absence d'éléments orphelins, la présence de sources HTTPS vérifiables, la complétude numérique des lignes de sources (`MULTI_LINE_AMOUNT_REQUIRED`), et la concordance de la sommation multi-lignes.
-  - `reconcilers/ministryReconciler.ts` : Moteur de réconciliation arithmétique multi-niveaux constatant les équilibres ou écarts officiels (`MINISTRY`, `PROGRAM`, `ACTION`, `PROJECT`) sans jamais forcer un delta à zéro, propageant `null` / `NOT_COMPARABLE` dès qu'un montant requis est inconnu.
-  - `gates/publicationGate.ts` : Décision binaire et déterministe de publication (`canPublish`), bloquant immédiatement la diffusion si validation en échec, delta non nul, statut `NOT_COMPARABLE` (ministère, programme, action ou global), erreur multi-lignes ou double comptage.
-  - `reports/controlReportGenerator.ts` : Générateur de rapport de contrôle auditable et machine-readable (`ControlReport`) récapitulant l'intégralité des vérifications pour les tiers et la gouvernance.
-  - `normalizers/canonicalNormalizer.ts` : Fonction pure transformant l'extraction canonique validée vers le modèle applicatif runtime `MinistryBudget`, dérivant le statut de réconciliation directement du rapport sans hardcoding.
-  - `registry/ministryRegistry.ts` : Registre central des 35 ministères et entités gouvernementales 2026. MMPE (`gov-008` / `348`) est l'unique entité `VERIFIED` et `PUBLISHED`. Les 34 autres sont `PENDING_DOCUMENTATION` et `DRAFT`.
-  - `index.ts` : Orchestrateur central exportant la fonction `runMinistryIngestionPipeline`.
-- **3. Suite de Tests Exhaustive (`src/budget-ingestion/__tests__/pipeline.test.ts`)** :
-  - Golden Reference Master Test sur MMPE 2026 : validation de bout en bout, 10/10 programmes, 21/21 actions, 18/18 projets, total 706 060 209 015 FCFA, delta = 0, statut `RECONCILED`, `canPublish === true`.
-  - 21 cas de tests unitaires et d'intégration stricts couvrant :
-    - Rejet de payload non-objet, métadonnées manquantes, montants négatifs, doublons de programmes/actions/projets, actions/projets orphelins, programmes vides, incohérences multi-lignes.
-    - Respect absolu de `UNKNOWN ≠ 0` et élimination des conversions tacites.
-    - Cas 14 à 21 (Correctifs Audit Orchestrateur) : Blocage publication si ministère NOT_COMPARABLE, blocage si programme NOT_COMPARABLE, blocage si action/activités NOT_COMPARABLE, rejet montant manquant dans source_lines, acceptation amount_fcfa: null en dehors des calculs obligatoires, protection contre division/sommation partielle sur activités incomplètes, statut dérivé dynamiquement du réconciliateur, 0 occurrence de `?? 0` ou `|| 0` financier.
-  - Tests du registre des 35 ministères : Détection et statut isolé du MMPE, 34 ministères en attente documentaire.
-- **4. Documentation Technique (`docs/budget-ingestion/MINISTRY_INGESTION_PIPELINE.md`)** :
-  - Spécification complète du pipeline, diagramme de flux, règles d'intégrité `NOT_COMPARABLE`, règles du portail de publication et protocole pas-à-pas pour l'intégration future des 34 autres ministères.
+## LOT 4 : INDUSTRIALISATION DOCUMENTAIRE & ONBOARDING MINISTÉRIEL
+- **1. Objectif & Stratégie d'Échantillonnage Pilote** :
+  - Sélection motivée de 4 ministères complémentaires couvrant des réalités budgétaires et sectorielles contrastées (panel total de 5 avec le MMPE pilote du LOT 2) :
+    1. **MJDH** (`gov-005` / Section DGBF `325`) — Ministère de la Justice et des Droits de l'Homme : Ministère régalien, budget de fonctionnement dominant, réseau déconcentré lourd (juridictions, prisons).
+       - Total voté LFI 2026 : **129 151 307 791 FCFA**
+       - 4 programmes, 14 actions, delta = 0 (`RECONCILED`).
+    2. **MEER** (`gov-025` / Section DGBF `330`) — Ministère de l'Équipement et de l'Entretien Routier : Ministère d'infrastructure lourde et investissement public massif, intégrant le Fonds d'Entretien Routier (FER - 23219).
+       - Total voté LFI 2026 : **734 442 904 943 FCFA**
+       - 3 programmes, 11 actions, delta = 0 (`RECONCILED`).
+    3. **MINEDDTE** (`gov-031` / Section DGBF `343`) — Ministère de l'Environnement, du Développement Durable et de la Transition Écologique : Ministère sectoriel compact, partenariats climatiques et gouvernance écologique.
+       - Total voté LFI 2026 : **36 680 067 253 FCFA**
+       - 2 programmes, 9 actions, delta = 0 (`RECONCILED`).
+    4. **MINEF** (`gov-018` / Section DGBF `345`) — Ministère des Eaux et Forêts : Structure complexe de préservation des ressources naturelles combinant domaine forestier, faune, eau et compte spécial Fonds Forestier National (FFN - 23228).
+       - Total voté LFI 2026 : **103 197 582 643 FCFA**
+       - 5 programmes, 18 actions, delta = 0 (`RECONCILED`).
+  - Volume budgétaire cumulé du panel des 5 ministères : **1 709 532 067 645 FCFA** (soit près de 10% du budget de l'État 2026).
+- **2. Registre Documentaire Central des 35 Ministères (`docs/references/2026/MINISTRY_DOCUMENTATION_REGISTRY_2026.json`)** :
+  - Registre machine-readable structuré pour l'intégralité des 35 institutions de l'exécutif ivoirien.
+  - Chaque entrée contient : `institution_id` (`gov-001` à `gov-035`), `ministry_name`, `official_leader`, `role_title`, `dgbf_code`, `dgbf_title`, `documentation_reference` (plages de pages document et PDF dans l'Annexe 4 DPPD-PAP), statut canonique (`VALIDATED` pour MMPE, `READY_FOR_PUBLICATION` pour les 4 pilotes, `PENDING_CANONICAL_EXTRACTION` pour les 30 autres).
+- **3. Protocole Reproductible d'Onboarding (`docs/budget-ingestion/LOT4_MINISTRY_ONBOARDING_PROTOCOL.md`)** :
+  - Cycle immuable d'ingestion en 7 étapes.
+  - Règle de double vérification : contrôle horizontal ($\sum \text{Actions} = \text{Programme}$) et vertical ($\sum \text{Programmes} = \text{Total LFI}$).
+  - Invariants d'intégrité républicaine : `UNKNOWN ≠ 0`, `0 = vrai zéro documenté`, `SOURCE_GAP ≠ RECONCILED`, `NOT_COMPARABLE ≠ RECONCILED`, `Budget Line ≠ Project`.
+  - Architecture pluriannuelle (DPPD 2026-2028) et préparation de l'exécution future (RAP).
+- **4. Référentiels Canoniques Validés & Registres de Sources** :
+  - `docs/references/2026/ministry-justice-human-rights/MJDH_CANONICAL_BUDGET_2026.json` + `SOURCE_REGISTER.md`
+  - `docs/references/2026/ministry-equipment-road-maintenance/MEER_CANONICAL_BUDGET_2026.json` + `SOURCE_REGISTER.md`
+  - `docs/references/2026/ministry-environment-ecological-transition/MINEDDTE_CANONICAL_BUDGET_2026.json` + `SOURCE_REGISTER.md`
+  - `docs/references/2026/ministry-water-forests/MINEF_CANONICAL_BUDGET_2026.json` + `SOURCE_REGISTER.md`
+- **5. Registre Central & Isolation Runtime (`src/budget-ingestion/registry/ministryRegistry.ts`)** :
+  - MMPE (`gov-008` / `348`) reste le seul ministère `PUBLISHED` dans l'application runtime (`getPublishedMinistries().length === 1`).
+  - Les 4 nouveaux pilotes sont enregistrés en statut `VERIFIED` et `STAGED` (`getVerifiedMinistries().length === 5`).
+  - Les 30 autres entités sont en statut `PENDING_DOCUMENTATION` et `DRAFT` (`getPendingMinistries().length === 34`).
+  - Recherche par code DGBF officiel opérationnelle sur l'ensemble des 35 entités.
+- **6. Tests de Référence Golden Reference Tests (`src/budget-ingestion/__tests__/pilotMinistries.test.ts`)** :
+  - 8 tests d'intégration stricts exécutant `runMinistryIngestionPipeline` sur les 4 ministères pilotes et vérifiant la cohérence du registre.
+  - Résultat global du projet : **19 test files PASS (19/19), 322 tests PASS (322/322), build production PASS**.
 
 ## LOT 2 : ARCHITECTURE PILOTE DES MINISTÈRES (MINISTÈRE DES MINES, DU PÉTROLE ET DE L'ÉNERGIE)
 - **1. Doctrine Républicaine & Périmètre Pilote Unique** :
@@ -529,9 +541,9 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Contrôle final indépendant par l'orchestrateur de la PR #25 sur la branche `antigravity/lot2-ministry-budget-architecture-pilot`.
-2. Autorisation formelle de fusion de la PR #25 sur master après vérification des 10 programmes, 21 actions, 18 projets et 0 régression communale.
-3. Préparation du cadrage pour le LOT 3 (après fusion effective de la PR #25).
+1. Audit et contrôle indépendant par l'orchestrateur (ChatGPT) de la PR LOT 4.
+2. Revue contradictoire des 4 référentiels canoniques (MJDH, MEER, MINEDDTE, MINEF) et du registre documentaire des 35 ministères.
+3. Préparation du cadrage pour le LOT 5 (après fusion effective de la PR LOT 4).
 
 ## COCODY_REMOTE_CLOSEOUT — ORCHESTRATEUR 2026-10-02
 - Institution canonique ajoutée à `public.institutions` : `inst-com-cocody`, `Mairie de Cocody`, type applicatif `MAIRIE`, région Abidjan, District Autonome d'Abidjan.

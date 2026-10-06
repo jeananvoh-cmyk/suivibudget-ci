@@ -1,0 +1,149 @@
+{
+  "institution_code": "330",
+  "institution_name": "Ministère de l'Equipement et de l'Entretien Routier",
+  "fiscal_year": 2026,
+  "extraction_date": "2026-10-06",
+  "source": {
+    "publisher": "Direction Générale du Budget et des Finances (DGBF)",
+    "document": "Annexe 4 — Documents de Programmation Pluriannuelle des Dépenses - Projets Annuels de Performance (DPPD-PAP) 2026-2028",
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+    "section_reference": "SECTION 330 : MINISTERE DE L'EQUIPEMENT ET DE L'ENTRETIEN ROUTIER",
+    "page_range": "PDF pages 421-444 (Document pages 419-442 sur 1227)",
+    "accessed_at": "2026-10-06"
+  },
+  "control_source": {
+    "publisher": "DGBF",
+    "document": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+    "section_reference": "Ministère code 330"
+  },
+  "totals": {
+    "total_ministry_2026_fcfa": 734442904943,
+    "programs_sum_2026_fcfa": 734442904943,
+    "programs_delta": 0,
+    "actions_sum_2026_fcfa": 734442904943,
+    "actions_delta": 0,
+    "reconciliation_status": "RECONCILED"
+  },
+  "programs": [
+    {
+      "program_code": "21058",
+      "official_name": "Administration Générale",
+      "program_amount_2026_fcfa": 7964881215,
+      "page_reference": "PDF pp. 425-426 / Document pp. 423-424",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2105801",
+          "official_name": "Coordination et gestion administrative",
+          "amount_2026_fcfa": 1372300000,
+          "page_reference": "PDF p. 425 / Document p. 423",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2105802",
+          "official_name": "Gestion des ressources humaines, matérielles et financières",
+          "amount_2026_fcfa": 5937996731,
+          "page_reference": "PDF p. 425 / Document p. 423",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2105803",
+          "official_name": "Planification, programmation et suivi-évaluation",
+          "amount_2026_fcfa": 545245730,
+          "page_reference": "PDF p. 426 / Document p. 424",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2105804",
+          "official_name": "Communication et relations publiques",
+          "amount_2026_fcfa": 26000000,
+          "page_reference": "PDF p. 426 / Document p. 424",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2105805",
+          "official_name": "Technologies de l'information et de la communication",
+          "amount_2026_fcfa": 83338754,
+          "page_reference": "PDF p. 426 / Document p. 424",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "22059",
+      "official_name": "Infrastructures Routières",
+      "program_amount_2026_fcfa": 446634263710,
+      "page_reference": "PDF pp. 431-432 / Document pp. 429-430",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2205901",
+          "official_name": "Développement et modernisation du réseau routier classé",
+          "amount_2026_fcfa": 2053360830,
+          "page_reference": "PDF p. 431 / Document p. 429",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2205902",
+          "official_name": "Aménagement des routes et voiries urbaines",
+          "amount_2026_fcfa": 325550231702,
+          "page_reference": "PDF p. 431 / Document p. 429",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2205903",
+          "official_name": "Construction, réhabilitation et renforcement des ponts et ouvrages d'art",
+          "amount_2026_fcfa": 73157239083,
+          "page_reference": "PDF p. 432 / Document p. 430",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2205904",
+          "official_name": "Préservation et sauvegarde du patrimoine routier",
+          "amount_2026_fcfa": 45873432095,
+          "page_reference": "PDF p. 432 / Document p. 430",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "23219",
+      "official_name": "Fonds d'Entretien Routier (FER)",
+      "program_amount_2026_fcfa": 279843760018,
+      "page_reference": "PDF p. 436 / Document p. 434",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2321901",
+          "official_name": "Entretien du réseau routier bitumé",
+          "amount_2026_fcfa": 64904000000,
+          "page_reference": "PDF p. 436 / Document p. 434",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2321902",
+          "official_name": "Entretien du réseau routier en terre et pistes rurales",
+          "amount_2026_fcfa": 214939760018,
+          "page_reference": "PDF p. 436 / Document p. 434",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    }
+  ],
+  "projects": []
+}

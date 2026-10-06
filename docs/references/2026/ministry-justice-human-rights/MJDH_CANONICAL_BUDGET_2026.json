@@ -1,0 +1,183 @@
+{
+  "institution_code": "325",
+  "institution_name": "Ministère de la Justice et des Droits de l'Homme",
+  "fiscal_year": 2026,
+  "extraction_date": "2026-10-06",
+  "source": {
+    "publisher": "Direction Générale du Budget et des Finances (DGBF)",
+    "document": "Annexe 4 — Documents de Programmation Pluriannuelle des Dépenses - Projets Annuels de Performance (DPPD-PAP) 2026-2028",
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+    "section_reference": "SECTION 325 : MINISTERE DE LA JUSTICE ET DES DROITS DE L'HOMME",
+    "page_range": "PDF pages 367-390 (Document pages 365-388 sur 1227)",
+    "accessed_at": "2026-10-06"
+  },
+  "control_source": {
+    "publisher": "DGBF",
+    "document": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+    "section_reference": "Ministère code 325"
+  },
+  "totals": {
+    "total_ministry_2026_fcfa": 129151307791,
+    "programs_sum_2026_fcfa": 129151307791,
+    "programs_delta": 0,
+    "actions_sum_2026_fcfa": 129151307791,
+    "actions_delta": 0,
+    "reconciliation_status": "RECONCILED"
+  },
+  "programs": [
+    {
+      "program_code": "21044",
+      "official_name": "Administration Générale",
+      "program_amount_2026_fcfa": 94913084375,
+      "page_reference": "PDF pp. 370-371 / Document pp. 368-369",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2104401",
+          "official_name": "Coordination et animation du ministère",
+          "amount_2026_fcfa": 3129168169,
+          "page_reference": "PDF p. 370 / Document p. 368",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2104402",
+          "official_name": "Gestion des ressources humaines, matérielles et financières",
+          "amount_2026_fcfa": 90953875528,
+          "page_reference": "PDF p. 370 / Document p. 368",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2104403",
+          "official_name": "Planification, programmation et suivi-évaluation",
+          "amount_2026_fcfa": 644674775,
+          "page_reference": "PDF p. 371 / Document p. 369",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2104404",
+          "official_name": "Information, communication et technologies de l'information",
+          "amount_2026_fcfa": 185365903,
+          "page_reference": "PDF p. 371 / Document p. 369",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "22045",
+      "official_name": "Juridictions",
+      "program_amount_2026_fcfa": 11202593764,
+      "page_reference": "PDF pp. 375-376 / Document pp. 373-374",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2204501",
+          "official_name": "Gestion des juridictions d'instance",
+          "amount_2026_fcfa": 4799645429,
+          "page_reference": "PDF p. 375 / Document p. 373",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2204502",
+          "official_name": "Gestion des juridictions d'appel",
+          "amount_2026_fcfa": 1702214133,
+          "page_reference": "PDF p. 375 / Document p. 373",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2204503",
+          "official_name": "Gestion de l'accès au droit et à la justice",
+          "amount_2026_fcfa": 4428820652,
+          "page_reference": "PDF p. 376 / Document p. 374",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2204504",
+          "official_name": "Affaires civiles, pénales et des grâces",
+          "amount_2026_fcfa": 271913550,
+          "page_reference": "PDF p. 376 / Document p. 374",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "22046",
+      "official_name": "Etablissements pénitentiaires",
+      "program_amount_2026_fcfa": 20882892824,
+      "page_reference": "PDF pp. 381-382 / Document pp. 379-380",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2204601",
+          "official_name": "Gestion et sécurisation des établissements pénitentiaires",
+          "amount_2026_fcfa": 16580539172,
+          "page_reference": "PDF p. 381 / Document p. 379",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2204602",
+          "official_name": "Amélioration des conditions de détention",
+          "amount_2026_fcfa": 2440340486,
+          "page_reference": "PDF p. 381 / Document p. 379",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2204603",
+          "official_name": "Réinsertion sociale des détenus",
+          "amount_2026_fcfa": 288022784,
+          "page_reference": "PDF p. 382 / Document p. 380",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2204604",
+          "official_name": "Protection judiciaire de la jeunesse",
+          "amount_2026_fcfa": 1573990382,
+          "page_reference": "PDF p. 382 / Document p. 380",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "22143",
+      "official_name": "Droits de l'Homme",
+      "program_amount_2026_fcfa": 2152736828,
+      "page_reference": "PDF p. 386 / Document p. 384",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2214301",
+          "official_name": "Promotion et protection des droits de l'homme",
+          "amount_2026_fcfa": 772575987,
+          "page_reference": "PDF p. 386 / Document p. 384",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2214302",
+          "official_name": "Gestion des relations avec les institutions des droits de l'homme",
+          "amount_2026_fcfa": 1380160841,
+          "page_reference": "PDF p. 386 / Document p. 384",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    }
+  ],
+  "projects": []
+}

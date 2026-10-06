@@ -1,0 +1,123 @@
+{
+  "institution_code": "343",
+  "institution_name": "Ministère de l'Environnement, du Développement Durable et de la Transition Ecologique",
+  "fiscal_year": 2026,
+  "extraction_date": "2026-10-06",
+  "source": {
+    "publisher": "Direction Générale du Budget et des Finances (DGBF)",
+    "document": "Annexe 4 — Documents de Programmation Pluriannuelle des Dépenses - Projets Annuels de Performance (DPPD-PAP) 2026-2028",
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+    "section_reference": "SECTION 343 : MINISTERE DE L'ENVIRONNEMENT, DU DEVELOPPEMENT DURABLE ET DE LA TRANSITION ECOLOGIQUE",
+    "page_range": "PDF pages 679-698 (Document pages 677-696 sur 1227)",
+    "accessed_at": "2026-10-06"
+  },
+  "control_source": {
+    "publisher": "DGBF",
+    "document": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+    "section_reference": "Ministère code 343"
+  },
+  "totals": {
+    "total_ministry_2026_fcfa": 36680067253,
+    "programs_sum_2026_fcfa": 36680067253,
+    "programs_delta": 0,
+    "actions_sum_2026_fcfa": 36680067253,
+    "actions_delta": 0,
+    "reconciliation_status": "RECONCILED"
+  },
+  "programs": [
+    {
+      "program_code": "21079",
+      "official_name": "Administration Générale",
+      "program_amount_2026_fcfa": 7918536211,
+      "page_reference": "PDF pp. 683-684 / Document pp. 681-682",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2107901",
+          "official_name": "Coordination et gestion des services",
+          "amount_2026_fcfa": 1770907974,
+          "page_reference": "PDF p. 683 / Document p. 681",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2107902",
+          "official_name": "Gestion des ressources humaines, matérielles et financières",
+          "amount_2026_fcfa": 5922146067,
+          "page_reference": "PDF p. 683 / Document p. 681",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2107903",
+          "official_name": "Planification, suivi-évaluation et statistiques",
+          "amount_2026_fcfa": 124733000,
+          "page_reference": "PDF p. 684 / Document p. 682",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2107905",
+          "official_name": "Information, éducation et communication environnementale",
+          "amount_2026_fcfa": 100749170,
+          "page_reference": "PDF p. 684 / Document p. 682",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "22080",
+      "official_name": "Environnement et Développement Durable",
+      "program_amount_2026_fcfa": 28761531042,
+      "page_reference": "PDF pp. 688-689 / Document pp. 686-687",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2208001",
+          "official_name": "Préservation de la biodiversité et lutte contre le changement climatique",
+          "amount_2026_fcfa": 15760649501,
+          "page_reference": "PDF p. 688 / Document p. 686",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2208002",
+          "official_name": "Promotion du développement durable et de l'économie verte",
+          "amount_2026_fcfa": 172532000,
+          "page_reference": "PDF p. 688 / Document p. 686",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2208003",
+          "official_name": "Prévention et gestion des risques et pollutions industrielles",
+          "amount_2026_fcfa": 10433927522,
+          "page_reference": "PDF p. 689 / Document p. 687",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2208004",
+          "official_name": "Protection et valorisation du littoral et des zones humides",
+          "amount_2026_fcfa": 296422019,
+          "page_reference": "PDF p. 689 / Document p. 687",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2208005",
+          "official_name": "Renforcement de la gouvernance environnementale",
+          "amount_2026_fcfa": 2098000000,
+          "page_reference": "PDF p. 689 / Document p. 687",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    }
+  ],
+  "projects": []
+}
