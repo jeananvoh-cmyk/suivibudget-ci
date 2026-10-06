@@ -792,16 +792,16 @@
       "ministry_name": "MINISTÈRE DÉLÉGUÉ CHARGÉ DE L'INTÉGRATION AFRICAINE",
       "official_leader": "M. ADAMA DOSSO",
       "role_title": "Ministre Délégué auprès du Ministre d'État, Ministre des Affaires Étrangères et de la Coopération Internationale, chargé de l'Intégration Africaine et des Ivoiriens de l'Extérieur",
-      "dgbf_code": "321",
-      "dgbf_title": "MINISTERE DES AFFAIRES ETRANGERES, DE L'INTEGRATION AFRICAINE ET DES IVOIRIENS DE L'EXTERIEUR",
+      "dgbf_code": "439",
+      "dgbf_title": "MINISTERE DELEGUE AUPRES DU MINISTRE DES AFFAIRES ETRANGERES, DE L'INTEGRATION AFRICAINE ET DES IVOIRIENS DE L'EXTERIEUR, CHARGE DE L'INTEGRATION AFRICAINE ET DES IVOIRIENS DE L'EXTERIEUR",
       "source_status": "AVAILABLE",
       "documentation_reference": {
-        "dppd_pap_doc_pages": "pp. 111-138",
-        "dppd_pap_pdf_pages": "pp. 113-140",
-        "page_doc_start": 111,
-        "page_doc_end": 138,
-        "page_pdf_start": 113,
-        "page_pdf_end": 140
+        "dppd_pap_doc_pages": "pp. 1085-1100",
+        "dppd_pap_pdf_pages": "pp. 1087-1102",
+        "page_doc_start": 1085,
+        "page_doc_end": 1100,
+        "page_pdf_start": 1087,
+        "page_pdf_end": 1102
       },
       "canonical_status": "PENDING_CANONICAL_EXTRACTION",
       "programs_count": null,
@@ -809,7 +809,7 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Ministère délégué autonome doté de sa propre section budgétaire (439) en LFI 2026 et DPPD-PAP 2026-2028 (pp. 1085-1100). En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
     },
     {
       "institution_id": "gov-034",
@@ -857,7 +857,7 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Ministre Délégué rattaché budgétairement à la section 229 unifiée (Agriculture, Développement Rural et Productions Vivrières) en LFI 2026. Aucune section autonome 4XX n'a été créée pour les Productions Vivrières."
     }
   ]
 }

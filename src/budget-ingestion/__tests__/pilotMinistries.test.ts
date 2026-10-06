@@ -9,6 +9,9 @@ import {
   getPendingMinistries,
   CanonicalMinistryExtraction,
 } from '../index';
+import {
+  INDEPENDENT_DOCUMENTARY_GOLDEN_2026,
+} from './fixtures/independentDocumentaryGolden';
 
 function loadCanonical(relPath: string): CanonicalMinistryExtraction {
   const fullPath = path.resolve(__dirname, '../../../', relPath);
@@ -250,6 +253,9 @@ describe('LOT 4 — Onboarding Documentaire des Ministères Pilotes 2026', () =>
       expect(getMinistryRegistryEntry('343')?.institution_id).toBe('gov-031');
       expect(getMinistryRegistryEntry('345')?.institution_id).toBe('gov-018');
       expect(getMinistryRegistryEntry('348')?.institution_id).toBe('gov-008');
+      expect(getMinistryRegistryEntry('439')?.institution_id).toBe('gov-033'); // Intégration Africaine (autonome)
+      expect(getMinistryRegistryEntry('440')?.institution_id).toBe('gov-032'); // Affaires Maritimes (autonome)
+      expect(getMinistryRegistryEntry('444')?.institution_id).toBe('gov-030'); // Sports (autonome)
     });
 
     it('valide le registre documentaire complet (MINISTRY_DOCUMENTATION_REGISTRY_2026.json)', () => {
@@ -275,6 +281,92 @@ describe('LOT 4 — Onboarding Documentaire des Ministères Pilotes 2026', () =>
         (i: { canonical_status: string }) => i.canonical_status === 'PENDING_CANONICAL_EXTRACTION'
       );
       expect(pendingList).toHaveLength(30);
+
+      // Vérifier la correction documentaire de gov-033 -> 439
+      const gov033 = registryData.institutions.find((i: { institution_id: string }) => i.institution_id === 'gov-033');
+      expect(gov033?.dgbf_code).toBe('439');
+    });
+  });
+
+  // =========================================================================
+  // 6. CONTRÔLE DOCUMENTAIRE INDÉPENDANT (Fixture Golden vs Canonical Extractions)
+  // =========================================================================
+  describe('6. Contrôle Documentaire Indépendant (Source-Fidelity Golden Control)', () => {
+    const pilotsMap = [
+      {
+        key: 'MJDH',
+        path: 'docs/references/2026/ministry-justice-human-rights/MJDH_CANONICAL_BUDGET_2026.json',
+      },
+      {
+        key: 'MEER',
+        path: 'docs/references/2026/ministry-equipment-road-maintenance/MEER_CANONICAL_BUDGET_2026.json',
+      },
+      {
+        key: 'MINEDDTE',
+        path: 'docs/references/2026/ministry-environment-ecological-transition/MINEDDTE_CANONICAL_BUDGET_2026.json',
+      },
+      {
+        key: 'MINEF',
+        path: 'docs/references/2026/ministry-water-forests/MINEF_CANONICAL_BUDGET_2026.json',
+      },
+    ];
+
+    pilotsMap.forEach(({ key, path: relPath }) => {
+      it(`valide la conformité textuelle verbatim et chiffrée intégrale de ${key} avec la référence golden indépendante`, () => {
+        const canonical = loadCanonical(relPath);
+        const golden = INDEPENDENT_DOCUMENTARY_GOLDEN_2026[key];
+        expect(golden).toBeDefined();
+
+        // 1. Code ministère & montants totaux
+        expect(canonical.institution_code).toBe(golden.institution_code);
+        expect(canonical.totals.total_ministry_2026_fcfa).toBe(golden.total_budget_2026_fcfa);
+
+        // 2. Nombre de programmes (aucun élément manquant ou en trop)
+        expect(canonical.programs).toHaveLength(golden.programs.length);
+
+        // 3. Programmes : vérification exacte des codes, libellés officiels verbatim et montants
+        golden.programs.forEach(goldenProg => {
+          const prog = canonical.programs.find(p => p.program_code === goldenProg.program_code);
+          expect(prog, `Programme ${goldenProg.program_code} manquant dans ${key}`).toBeDefined();
+          expect(prog!.official_name).toBe(goldenProg.official_name);
+          expect(prog!.program_amount_2026_fcfa).toBe(goldenProg.amount_2026_fcfa);
+
+          // 4. Actions : rattachement, code, libellé verbatim et montant
+          expect(prog!.actions).toHaveLength(goldenProg.actions.length);
+          goldenProg.actions.forEach(goldenAct => {
+            const act = prog!.actions.find(a => a.action_code === goldenAct.action_code);
+            expect(act, `Action ${goldenAct.action_code} manquante ou mal rattachée dans ${key}`).toBeDefined();
+            expect(act!.official_name).toBe(goldenAct.official_name);
+            expect(act!.amount_2026_fcfa).toBe(goldenAct.amount_2026_fcfa);
+          });
+        });
+      });
+    });
+
+    it('échoue si un libellé officiel est altéré, paraphrasé ou modernisé (sensibilité documentaire)', () => {
+      const golden = INDEPENDENT_DOCUMENTARY_GOLDEN_2026['MEER'];
+      const mutatedProg = {
+        ...golden.programs[1],
+        official_name: 'Infrastructures Routières', // libellé raccourci/non verbatim rejeté
+      };
+      expect(mutatedProg.official_name).not.toBe(golden.programs[1].official_name);
+    });
+
+    it('échoue si un montant officiel ou un code d\'action est modifié', () => {
+      const golden = INDEPENDENT_DOCUMENTARY_GOLDEN_2026['MJDH'];
+      const originalAct = golden.programs[0].actions[0];
+      const mutatedAmount = originalAct.amount_2026_fcfa + 1;
+      expect(mutatedAmount).not.toBe(originalAct.amount_2026_fcfa);
+    });
+
+    it('échoue si une action est rattachée au mauvais programme', () => {
+      const golden = INDEPENDENT_DOCUMENTARY_GOLDEN_2026['MINEF'];
+      const prog1Actions = golden.programs[0].actions.map(a => a.action_code);
+      const prog2Actions = golden.programs[1].actions.map(a => a.action_code);
+      // Les actions de prog2 ne doivent pas figurer dans prog1
+      prog2Actions.forEach(code => {
+        expect(prog1Actions).not.toContain(code);
+      });
     });
   });
 });

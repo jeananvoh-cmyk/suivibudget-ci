@@ -60,7 +60,7 @@
         },
         {
           "action_code": "2104404",
-          "official_name": "Information, communication et technologies de l'information",
+          "official_name": "Documentation, gestion des systèmes d'informations et de communication",
           "amount_2026_fcfa": 185365903,
           "page_reference": "PDF p. 371 / Document p. 369",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -78,7 +78,7 @@
       "actions": [
         {
           "action_code": "2204501",
-          "official_name": "Gestion des juridictions d'instance",
+          "official_name": "Renforcement de l'accès au système judiciaire",
           "amount_2026_fcfa": 4799645429,
           "page_reference": "PDF p. 375 / Document p. 373",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -86,7 +86,7 @@
         },
         {
           "action_code": "2204502",
-          "official_name": "Gestion des juridictions d'appel",
+          "official_name": "Optimisation de la bonne application de la législation en matière civile et pénale",
           "amount_2026_fcfa": 1702214133,
           "page_reference": "PDF p. 375 / Document p. 373",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -94,7 +94,7 @@
         },
         {
           "action_code": "2204503",
-          "official_name": "Gestion de l'accès au droit et à la justice",
+          "official_name": "Gestion de la formation et de la documentation",
           "amount_2026_fcfa": 4428820652,
           "page_reference": "PDF p. 376 / Document p. 374",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -102,7 +102,7 @@
         },
         {
           "action_code": "2204504",
-          "official_name": "Affaires civiles, pénales et des grâces",
+          "official_name": "Renforcement de la prise en charge des mineurs en contact avec le système judiciaire",
           "amount_2026_fcfa": 271913550,
           "page_reference": "PDF p. 376 / Document p. 374",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -112,7 +112,7 @@
     },
     {
       "program_code": "22046",
-      "official_name": "Etablissements pénitentiaires",
+      "official_name": "Etablissements pénitentiaires, centres d'observation et de rééducation des mineurs",
       "program_amount_2026_fcfa": 20882892824,
       "page_reference": "PDF pp. 381-382 / Document pp. 379-380",
       "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -120,7 +120,7 @@
       "actions": [
         {
           "action_code": "2204601",
-          "official_name": "Gestion et sécurisation des établissements pénitentiaires",
+          "official_name": "Optimisation des conditions de détention",
           "amount_2026_fcfa": 16580539172,
           "page_reference": "PDF p. 381 / Document p. 379",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -128,7 +128,7 @@
         },
         {
           "action_code": "2204602",
-          "official_name": "Amélioration des conditions de détention",
+          "official_name": "Amélioration de l'alimentation et de la santé des détenus et des mineurs",
           "amount_2026_fcfa": 2440340486,
           "page_reference": "PDF p. 381 / Document p. 379",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -136,7 +136,7 @@
         },
         {
           "action_code": "2204603",
-          "official_name": "Réinsertion sociale des détenus",
+          "official_name": "Renforcement du volet apprentissage des détenus et des mineurs",
           "amount_2026_fcfa": 288022784,
           "page_reference": "PDF p. 382 / Document p. 380",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -144,7 +144,7 @@
         },
         {
           "action_code": "2204604",
-          "official_name": "Protection judiciaire de la jeunesse",
+          "official_name": "Coordination et suivi de l'exécution des décisions privatives de liberté et amélioration des conditions et du cadre de vie des gardes pénitentiaires et des détenus",
           "amount_2026_fcfa": 1573990382,
           "page_reference": "PDF p. 382 / Document p. 380",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -162,7 +162,7 @@
       "actions": [
         {
           "action_code": "2214301",
-          "official_name": "Promotion et protection des droits de l'homme",
+          "official_name": "Promotion des droits de l'homme",
           "amount_2026_fcfa": 772575987,
           "page_reference": "PDF p. 386 / Document p. 384",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -170,7 +170,7 @@
         },
         {
           "action_code": "2214302",
-          "official_name": "Gestion des relations avec les institutions des droits de l'homme",
+          "official_name": "Suivi et protection des droits de l'homme",
           "amount_2026_fcfa": 1380160841,
           "page_reference": "PDF p. 386 / Document p. 384",
           "table_reference": "Tableau 7 : Budget détaillé du programme",

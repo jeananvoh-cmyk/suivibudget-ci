@@ -47,10 +47,10 @@ export const OFFICIAL_DGBF_CODES: Record<string, string> = {
   'gov-029': '346', // Culture et Francophonie
   'gov-030': '444', // Sports et Cadre de Vie
   'gov-031': '343', // Environnement et Transition Écologique
-  'gov-032': '440', // Affaires Maritimes
-  'gov-033': '321', // Intégration Africaine
-  'gov-034': '334', // Enseignement Technique
-  'gov-035': '229', // Productions Vivrières
+  'gov-032': '440', // Affaires Maritimes (Ministère Délégué autonome — LFI 2026 section 440)
+  'gov-033': '439', // Intégration Africaine (Ministère Délégué autonome — LFI 2026 section 439 / DPPD-PAP p. 1085)
+  'gov-034': '334', // Enseignement Technique (Ministère Délégué autonome — LFI 2026 section 334)
+  'gov-035': '229', // Productions Vivrières (Ministre Délégué rattaché budgétairement à la section 229 unifiée Agriculture — seul doublon officiel LFI)
 };
 
 /**

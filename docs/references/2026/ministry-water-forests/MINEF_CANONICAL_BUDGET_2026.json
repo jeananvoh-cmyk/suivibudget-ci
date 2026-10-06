@@ -36,7 +36,7 @@
       "actions": [
         {
           "action_code": "2108801",
-          "official_name": "Coordination et gestion administrative",
+          "official_name": "Coordination et animation",
           "amount_2026_fcfa": 25361221622,
           "page_reference": "PDF p. 703 / Document p. 701",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -44,7 +44,7 @@
         },
         {
           "action_code": "2108802",
-          "official_name": "Gestion des affaires juridiques et du contentieux",
+          "official_name": "Planification et suivi-évaluation",
           "amount_2026_fcfa": 10000000,
           "page_reference": "PDF p. 703 / Document p. 701",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -60,7 +60,7 @@
         },
         {
           "action_code": "2108804",
-          "official_name": "Planification, programmation et suivi-évaluation",
+          "official_name": "Information et communication",
           "amount_2026_fcfa": 85000000,
           "page_reference": "PDF p. 704 / Document p. 702",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -68,7 +68,7 @@
         },
         {
           "action_code": "2108805",
-          "official_name": "Communication et documentation",
+          "official_name": "Protection, contrôle et surveillance des ressources forestières, fauniques et ressources en eau.",
           "amount_2026_fcfa": 738650000,
           "page_reference": "PDF p. 704 / Document p. 702",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -78,7 +78,7 @@
     },
     {
       "program_code": "22089",
-      "official_name": "Forêts",
+      "official_name": "Gestion durable des ressources forestières",
       "program_amount_2026_fcfa": 58463516601,
       "page_reference": "PDF pp. 710-711 / Document pp. 708-709",
       "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -86,7 +86,7 @@
       "actions": [
         {
           "action_code": "2208901",
-          "official_name": "Protection et restauration du domaine forestier permanent",
+          "official_name": "Gestion différentielle des forêts du domaine permanent de l'Etat",
           "amount_2026_fcfa": 56888366601,
           "page_reference": "PDF p. 710 / Document p. 708",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -94,7 +94,7 @@
         },
         {
           "action_code": "2208902",
-          "official_name": "Développement de la foresterie privée et communautaire",
+          "official_name": "Développement du reboisement et reconstitution des forêts du domaine rural",
           "amount_2026_fcfa": 727400000,
           "page_reference": "PDF p. 710 / Document p. 708",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -102,7 +102,7 @@
         },
         {
           "action_code": "2208903",
-          "official_name": "Aménagement et gestion durable des forêts classées",
+          "official_name": "Protection, contrôle et surveillance des forêts et des activités forestières.",
           "amount_2026_fcfa": 659750000,
           "page_reference": "PDF p. 711 / Document p. 709",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -110,7 +110,7 @@
         },
         {
           "action_code": "2208904",
-          "official_name": "Valorisation des produits forestiers et transformation du bois",
+          "official_name": "Renforcement du cadre d'exploitation rationnelle, de transformation et de commercialisation des produits forestiers",
           "amount_2026_fcfa": 152000000,
           "page_reference": "PDF p. 711 / Document p. 709",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -118,7 +118,7 @@
         },
         {
           "action_code": "2208905",
-          "official_name": "Surveillance et police forestière",
+          "official_name": "Mise en oeuvre des activités du programme gestion durable des ressources forestières",
           "amount_2026_fcfa": 36000000,
           "page_reference": "PDF p. 711 / Document p. 709",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -128,7 +128,7 @@
     },
     {
       "program_code": "22090",
-      "official_name": "Faune et Chasse",
+      "official_name": "Gestion durable des ressources fauniques",
       "program_amount_2026_fcfa": 917332688,
       "page_reference": "PDF p. 716 / Document p. 714",
       "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -136,7 +136,7 @@
       "actions": [
         {
           "action_code": "2209001",
-          "official_name": "Protection et gestion de la faune sauvage et des habitats",
+          "official_name": "Renforcement du dispositif de protection des ressources fauniques",
           "amount_2026_fcfa": 116672500,
           "page_reference": "PDF p. 716 / Document p. 714",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -144,7 +144,7 @@
         },
         {
           "action_code": "2209002",
-          "official_name": "Valorisation et promotion des ressources cynégétiques",
+          "official_name": "Aménagement du zoo, prévention et éradication des zoonoses",
           "amount_2026_fcfa": 768410188,
           "page_reference": "PDF p. 716 / Document p. 714",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -152,7 +152,7 @@
         },
         {
           "action_code": "2209003",
-          "official_name": "Lutte contre le braconnage et le commerce illicite des espèces",
+          "official_name": "Mise en œuvre des activités du programme gestion durable des ressources fauniques",
           "amount_2026_fcfa": 32250000,
           "page_reference": "PDF p. 716 / Document p. 714",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -162,7 +162,7 @@
     },
     {
       "program_code": "22091",
-      "official_name": "Ressources en Eau",
+      "official_name": "Gestion intégrée des ressources en eau",
       "program_amount_2026_fcfa": 5092018667,
       "page_reference": "PDF pp. 720-721 / Document pp. 718-719",
       "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -170,7 +170,7 @@
       "actions": [
         {
           "action_code": "2209101",
-          "official_name": "Gestion intégrée des ressources en eau (GIRE)",
+          "official_name": "Instruction de dossiers de demande d'autorisation de prélèvement d'eau",
           "amount_2026_fcfa": 519237737,
           "page_reference": "PDF p. 720 / Document p. 718",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -178,7 +178,7 @@
         },
         {
           "action_code": "2209102",
-          "official_name": "Protection et suivi quantitatif et qualitatif des eaux",
+          "official_name": "Élaboration d'une carte de dégradation des états de surface",
           "amount_2026_fcfa": 4572780930,
           "page_reference": "PDF p. 721 / Document p. 719",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -188,7 +188,7 @@
     },
     {
       "program_code": "23228",
-      "official_name": "Fonds Forestier National (FFN)",
+      "official_name": "Fonds Forestier National",
       "program_amount_2026_fcfa": 900000000,
       "page_reference": "PDF p. 724 / Document p. 722",
       "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -196,7 +196,7 @@
       "actions": [
         {
           "action_code": "2322801",
-          "official_name": "Financement des activités de reboisement et d'aménagement forestier",
+          "official_name": "Coordination et gestion des activités du Fonds",
           "amount_2026_fcfa": 299250000,
           "page_reference": "PDF p. 724 / Document p. 722",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -204,7 +204,7 @@
         },
         {
           "action_code": "2322802",
-          "official_name": "Appui à la gestion et au fonctionnement du Fonds Forestier",
+          "official_name": "Développement de l'activité forestière",
           "amount_2026_fcfa": 472500000,
           "page_reference": "PDF p. 724 / Document p. 722",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -212,7 +212,7 @@
         },
         {
           "action_code": "2322803",
-          "official_name": "Suivi, contrôle et audit des opérations financées",
+          "official_name": "Renforcement des capacités opérationnelles des structures du MINEF",
           "amount_2026_fcfa": 128250000,
           "page_reference": "PDF p. 724 / Document p. 722",
           "table_reference": "Tableau 7 : Budget détaillé du programme",

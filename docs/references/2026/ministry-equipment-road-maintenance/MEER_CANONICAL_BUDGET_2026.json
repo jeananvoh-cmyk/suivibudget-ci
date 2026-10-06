@@ -36,7 +36,7 @@
       "actions": [
         {
           "action_code": "2105801",
-          "official_name": "Coordination et gestion administrative",
+          "official_name": "Coordination et animation du ministère",
           "amount_2026_fcfa": 1372300000,
           "page_reference": "PDF p. 425 / Document p. 423",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -44,7 +44,7 @@
         },
         {
           "action_code": "2105802",
-          "official_name": "Gestion des ressources humaines, matérielles et financières",
+          "official_name": "Gestion des ressources financières, matérielles et humaines",
           "amount_2026_fcfa": 5937996731,
           "page_reference": "PDF p. 425 / Document p. 423",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -60,7 +60,7 @@
         },
         {
           "action_code": "2105804",
-          "official_name": "Communication et relations publiques",
+          "official_name": "Gestion du domaine public de l'Etat",
           "amount_2026_fcfa": 26000000,
           "page_reference": "PDF p. 426 / Document p. 424",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -68,7 +68,7 @@
         },
         {
           "action_code": "2105805",
-          "official_name": "Technologies de l'information et de la communication",
+          "official_name": "Information et communication",
           "amount_2026_fcfa": 83338754,
           "page_reference": "PDF p. 426 / Document p. 424",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -78,7 +78,7 @@
     },
     {
       "program_code": "22059",
-      "official_name": "Infrastructures Routières",
+      "official_name": "Infrastructures routières et ouvrages d'arts",
       "program_amount_2026_fcfa": 446634263710,
       "page_reference": "PDF pp. 431-432 / Document pp. 429-430",
       "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -86,7 +86,7 @@
       "actions": [
         {
           "action_code": "2205901",
-          "official_name": "Développement et modernisation du réseau routier classé",
+          "official_name": "Coordination de la mise en œuvre du programme des infrastructures routières et ouvrages d'art",
           "amount_2026_fcfa": 2053360830,
           "page_reference": "PDF p. 431 / Document p. 429",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -94,7 +94,7 @@
         },
         {
           "action_code": "2205902",
-          "official_name": "Aménagement des routes et voiries urbaines",
+          "official_name": "Construction de nouvelles routes",
           "amount_2026_fcfa": 325550231702,
           "page_reference": "PDF p. 431 / Document p. 429",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -102,7 +102,7 @@
         },
         {
           "action_code": "2205903",
-          "official_name": "Construction, réhabilitation et renforcement des ponts et ouvrages d'art",
+          "official_name": "Réhabilitation et entretien des infrastructures routières et ouvrages d'art",
           "amount_2026_fcfa": 73157239083,
           "page_reference": "PDF p. 432 / Document p. 430",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -110,7 +110,7 @@
         },
         {
           "action_code": "2205904",
-          "official_name": "Préservation et sauvegarde du patrimoine routier",
+          "official_name": "Construction des ouvrages d'arts",
           "amount_2026_fcfa": 45873432095,
           "page_reference": "PDF p. 432 / Document p. 430",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -128,7 +128,7 @@
       "actions": [
         {
           "action_code": "2321901",
-          "official_name": "Entretien du réseau routier bitumé",
+          "official_name": "Mobilisation des Ressources Financières du FER",
           "amount_2026_fcfa": 64904000000,
           "page_reference": "PDF p. 436 / Document p. 434",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -136,7 +136,7 @@
         },
         {
           "action_code": "2321902",
-          "official_name": "Entretien du réseau routier en terre et pistes rurales",
+          "official_name": "Financement des Travaux d'entretien du réseau Routier National",
           "amount_2026_fcfa": 214939760018,
           "page_reference": "PDF p. 436 / Document p. 434",
           "table_reference": "Tableau 7 : Budget détaillé du programme",

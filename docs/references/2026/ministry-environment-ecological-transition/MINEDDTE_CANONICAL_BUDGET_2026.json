@@ -36,7 +36,7 @@
       "actions": [
         {
           "action_code": "2107901",
-          "official_name": "Coordination et gestion des services",
+          "official_name": "Coordination et animation des activités du ministère",
           "amount_2026_fcfa": 1770907974,
           "page_reference": "PDF p. 683 / Document p. 681",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -52,7 +52,7 @@
         },
         {
           "action_code": "2107903",
-          "official_name": "Planification, suivi-évaluation et statistiques",
+          "official_name": "Gestion des systèmes d'information, de la communication et de la documentation",
           "amount_2026_fcfa": 124733000,
           "page_reference": "PDF p. 684 / Document p. 682",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -60,7 +60,7 @@
         },
         {
           "action_code": "2107905",
-          "official_name": "Information, éducation et communication environnementale",
+          "official_name": "Planification, programmation, suivi évaluation et statistiques",
           "amount_2026_fcfa": 100749170,
           "page_reference": "PDF p. 684 / Document p. 682",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -70,7 +70,7 @@
     },
     {
       "program_code": "22080",
-      "official_name": "Environnement et Développement Durable",
+      "official_name": "Environnement et développement durable",
       "program_amount_2026_fcfa": 28761531042,
       "page_reference": "PDF pp. 688-689 / Document pp. 686-687",
       "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -78,7 +78,7 @@
       "actions": [
         {
           "action_code": "2208001",
-          "official_name": "Préservation de la biodiversité et lutte contre le changement climatique",
+          "official_name": "Renforcement de la lutte contre la pollution des matrice environnementale",
           "amount_2026_fcfa": 15760649501,
           "page_reference": "PDF p. 688 / Document p. 686",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -86,7 +86,7 @@
         },
         {
           "action_code": "2208002",
-          "official_name": "Promotion du développement durable et de l'économie verte",
+          "official_name": "Promotion du Développement Durable",
           "amount_2026_fcfa": 172532000,
           "page_reference": "PDF p. 688 / Document p. 686",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -94,7 +94,7 @@
         },
         {
           "action_code": "2208003",
-          "official_name": "Prévention et gestion des risques et pollutions industrielles",
+          "official_name": "Gestion durable des Aires Protégées et de la Biodiversité",
           "amount_2026_fcfa": 10433927522,
           "page_reference": "PDF p. 689 / Document p. 687",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -102,7 +102,7 @@
         },
         {
           "action_code": "2208004",
-          "official_name": "Protection et valorisation du littoral et des zones humides",
+          "official_name": "Évaluation environnementale des politiques, plans et programmes sectoriels des projets et organisations",
           "amount_2026_fcfa": 296422019,
           "page_reference": "PDF p. 689 / Document p. 687",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
@@ -110,7 +110,7 @@
         },
         {
           "action_code": "2208005",
-          "official_name": "Renforcement de la gouvernance environnementale",
+          "official_name": "Renforcement de la lutte contre le changement climatique et la résilience des populations",
           "amount_2026_fcfa": 2098000000,
           "page_reference": "PDF p. 689 / Document p. 687",
           "table_reference": "Tableau 7 : Budget détaillé du programme",

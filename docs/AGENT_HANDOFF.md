@@ -6,10 +6,10 @@
 - CURRENT_BRANCH : `antigravity/lot4-ministry-documentary-industrialization`
 - BASE_MASTER_SHA : `665bcdfc1061dbc69485c8748a6962fcd764c130` (Merge commit de PR #26 sur master)
 - CURRENT_HEAD : voir HEAD courante de PR #27
-- LAST_VERIFIED_CODE_HEAD : `09d44195a003e640682df4f107018420cc3213a2`
+- LAST_VERIFIED_CODE_HEAD : c19050708b0ca809f10bf58a5d177feacfe20fa0
 - PR : #27 (`feat(lot4): industrialize ministry documentary onboarding with 4 additional pilot ministries`)
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_SUPABASE_WRITES = 0)
-- CURRENT_MILESTONE : LOT 4 — Industrialisation documentaire et onboarding ministériel. 4 ministères pilotes additionnels documentés et réconciliés (MJDH, MEER, MINEDDTE, MINEF) formant un panel pilote diversifié de 5 ministères avec MMPE. Registre central machine-readable des 35 ministères 2026 (`MINISTRY_DOCUMENTATION_REGISTRY_2026.json`) indexé avec codes DGBF officiels et plages de pagination de l'Annexe 4 DPPD-PAP. Protocole d'onboarding reproductible et standardisé (`LOT4_MINISTRY_ONBOARDING_PROTOCOL.md`). Tests de référence Golden Reference Tests (19/19 test files PASS, 322/322 tests PASS, build PASS).
+- CURRENT_MILESTONE : LOT 4 — Audit documentaire de fidélité aux sources achevé avec succès. 100% des libellés officiels transcrits verbatim d'après l'Annexe 4 DPPD-PAP (Tableau 7) pour MJDH, MEER, MINEDDTE, MINEF (53 divergences corrigées, 0 mismatch restant). Fixture golden de contrôle documentaire indépendante (`independentDocumentaryGolden.ts`). Audit du registre des 35 ministères : correction de gov-033 vers la section autonome 439 (LFI 2026 / DPPD-PAP) et explication constitutionnelle/budgétaire de l'unique doublon légitime (section 229 unifiée pour gov-009 et gov-035). Tests : 19/19 files PASS, 329/329 tests PASS, build PASS.
 - FOUNDATION_READY : TRUE.
 
 ## LOT 4 : INDUSTRIALISATION DOCUMENTAIRE & ONBOARDING MINISTÉRIEL
