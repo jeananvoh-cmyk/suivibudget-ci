@@ -33,14 +33,20 @@ export interface ReviewValue {
 
 /** Explicit unresolved dependencies, not inferred from the inaccurate LOT 5 VERIFIED flags. */
 export function lot5Blocked(institutionId: string, sectionCode: string | null, year: number): boolean {
-  return year === 2026 && (['gov-017', 'gov-030', 'gov-034'].includes(institutionId)
-    || ['336', '444', '334'].includes(sectionCode ?? ''));
+  return year === 2026 && (['gov-017', 'gov-030', 'gov-034'].includes(institutionId.trim())
+    || ['336', '444', '334'].includes(sectionCode?.trim() ?? ''));
 }
 
 export function hasEvidence(evidence: EvidenceRef | null, year: number): boolean {
   return !!evidence && evidence.verification === 'VERIFIED' && evidence.fiscalYear === year
     && !!evidence.documentId.trim()
+    && (evidence.page === null || (Number.isInteger(evidence.page) && evidence.page > 0))
     && ((Number.isInteger(evidence.page) && (evidence.page ?? 0) > 0) || !!evidence.reference?.trim());
+}
+
+export function isCalendarDate(date: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) && Number.isFinite(Date.parse(date))
+    && new Date(date).toISOString().slice(0, 10) === date;
 }
 
 export function assessObservation(observation: FinancialObservation): ReviewValue {
@@ -49,8 +55,8 @@ export function assessObservation(observation: FinancialObservation): ReviewValu
   }
   if (!observation.institutionId.trim() || !observation.scope.trim()
     || !Number.isInteger(observation.fiscalYear)
-    || !/^\d{4}-\d{2}-\d{2}$/.test(observation.periodEnd)
-    || !Number.isFinite(Date.parse(observation.periodEnd))
+    || observation.currency !== 'XOF'
+    || !isCalendarDate(observation.periodEnd)
     || Number(observation.periodEnd.slice(0, 4)) !== observation.fiscalYear) {
     return { value: null, status: 'NOT_COMPARABLE', reasons: ['INVALID_SCOPE_OR_PERIOD'] };
   }

@@ -24,7 +24,7 @@ export function openDataRows(observations: readonly FinancialObservation[], docu
   return observations.map(o => {
     const assessment = assessObservation(o);
     const citation = resolveCitation(o.evidence, documents);
-    const status = assessment.status === 'BLOCKED' ? 'BLOCKED' : citation ? assessment.status : 'UNKNOWN';
+    const status = assessment.status !== 'AVAILABLE' ? assessment.status : citation ? 'AVAILABLE' : 'UNKNOWN';
     return { institution_id: o.institutionId, section_code: o.sectionCode, fiscal_year: o.fiscalYear,
       scope: o.scope, period_end: o.periodEnd, measure: o.measure, basis: o.basis, currency: o.currency,
       amount: status === 'AVAILABLE' ? assessment.value : null, status,

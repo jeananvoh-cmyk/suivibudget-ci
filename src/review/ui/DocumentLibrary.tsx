@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import type { SourceDocument } from '../domain/documents';
+import { publicDocumentMetadata, type SourceDocument } from '../domain/documents';
 import { EvidenceDetails, EmptyState } from './Primitives';
 
 export function DocumentLibrary({ documents, year }: { documents: readonly SourceDocument[]; year: number }) {
   const [query, setQuery] = useState('');
-  const filtered = documents.filter(d => d.fiscalYear === year && d.visibility === 'PUBLIC' && d.verification === 'VERIFIED'
-    && `${d.title} ${d.publisher}`.toLocaleLowerCase('fr').includes(query.toLocaleLowerCase('fr').trim()));
+  const filtered = publicDocumentMetadata(documents, year).filter(d =>
+    `${d.title} ${d.publisher}`.toLocaleLowerCase('fr').includes(query.toLocaleLowerCase('fr').trim()));
   function downloadCatalog() {
     const blob = new Blob([JSON.stringify({ schema_version: 1, fiscal_year: year, documents: filtered }, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);

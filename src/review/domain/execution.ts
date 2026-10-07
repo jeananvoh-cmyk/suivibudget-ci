@@ -1,4 +1,5 @@
-import { assessObservation, type FinancialObservation, type ReviewValue } from './evidence';
+import { assessObservation, hasEvidence, isCalendarDate, lot5Blocked, type EvidenceRef, type FinancialObservation, type ReviewValue } from './evidence';
+import { resolveCitation, type SourceDocument } from './documents';
 
 /** A financial rate never establishes physical completion or performance. */
 export function executionRate(credits: FinancialObservation, execution: FinancialObservation): ReviewValue {
@@ -17,13 +18,32 @@ export function executionRate(credits: FinancialObservation, execution: Financia
 }
 
 export interface PerformanceIndicator {
+  institutionId: string;
+  sectionCode: string | null;
+  fiscalYear: number;
   label: string;
   unit: string;
-  target: FinancialObservation | null;
-  observed: FinancialObservation | null;
+  periodEnd: string;
+  target: { value: number | null; evidence: EvidenceRef | null } | null;
+  observed: { value: number | null; evidence: EvidenceRef | null } | null;
 }
 
-/** No default target, estimate or inference from a financial execution rate. */
-export function performanceAvailability(indicator: PerformanceIndicator): 'UNKNOWN' | 'REQUIRES_INDICATOR_REVIEW' {
-  return indicator.target && indicator.observed ? 'REQUIRES_INDICATOR_REVIEW' : 'UNKNOWN';
+/** Indicator units are not FCFA. A gap does not establish success without a documented interpretation. */
+export function performanceGap(indicator: PerformanceIndicator, documents: readonly SourceDocument[]): ReviewValue {
+  if (lot5Blocked(indicator.institutionId, indicator.sectionCode, indicator.fiscalYear)) {
+    return { value: null, status: 'BLOCKED', reasons: ['LOT5_INCOMPLETE_LFI'] };
+  }
+  if (!indicator.institutionId.trim() || !indicator.label.trim() || !indicator.unit.trim()
+    || !isCalendarDate(indicator.periodEnd) || Number(indicator.periodEnd.slice(0, 4)) !== indicator.fiscalYear) {
+    return { value: null, status: 'NOT_COMPARABLE', reasons: ['INDICATOR_SCOPE_REQUIRED'] };
+  }
+  for (const reading of [indicator.target, indicator.observed]) {
+    if (!reading || reading.value === null || !Number.isFinite(reading.value)
+      || !hasEvidence(reading.evidence, indicator.fiscalYear) || !resolveCitation(reading.evidence, documents)) {
+      return { value: null, status: 'UNKNOWN', reasons: ['DOCUMENTED_INDICATOR_VALUES_REQUIRED'] };
+    }
+  }
+  const gap = indicator.observed!.value! - indicator.target!.value!;
+  return Number.isFinite(gap) ? { value: gap, status: 'AVAILABLE', reasons: ['GAP_ONLY_NO_SUCCESS_INFERENCE'] }
+    : { value: null, status: 'BLOCKED', reasons: ['INVALID_INDICATOR_VALUE'] };
 }

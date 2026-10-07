@@ -1,5 +1,13 @@
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
+## 7 octobre 2026 — continuation autorisée, LOTS 6 à 15 soumis à revue
+
+État courant : `overnight/lots-5-15`, dix commits techniques isolés locaux, sans push, merge ni publication. Les LOTS6–15 sont PARTIAL : contrats purs, provenance, inconnues null, comparaisons, exports et interface locale isolée. Les dépendances documentaires et raccordements non réalisés sont explicités dans chaque rapport. LOT5 reste BLOCKED et les six omissions ne sont pas corrigées fictivement.
+
+412/412 tests dans 30 fichiers PASS, build production et build séparé du candidat PASS. Navigateur : 56 contrôles de débordement sur 7 vues × 8 largeurs, zéro erreur JS, zéro tentative externe ; états bloqués, recherche, export local et clavier contrôlés. Aucun audit global WCAG revendiqué. Sources acquises : LFI2026, DPPD-PAP2026-2028 et RAP2022, sans chiffres de substitution ni série interannuelle inventée.
+
+Données protégées, canoniques LOT5, contrôles indépendants et migrations inchangés depuis `9730ab8`. MASTER_MODIFIED=FALSE ; MERGE_PERFORMED=FALSE ; REMOTE_SUPABASE_WRITES=0 ; FINAL_STATUS=READY_FOR_INDEPENDENT_REVIEW. Prochaine tâche : revue indépendante à partir de [FINAL_REPORT.md](overnight/FINAL_REPORT.md), puis résolution séparée des dépendances. L'arrêt global décrit dans la section historique suivante a été remplacé par l'autorisation utilisateur de continuation technique.
+
 ## 7 octobre 2026 — reprise LOT 5, arrêt BLOCKED
 
 Branche `overnight/lots-5-15` créée depuis le commit LOT 5 existant `9512311618ed0d5af39ea47f98fd7d2485e9607f` de la PR #28, descendant de la baseline `8145c0423482438cc4cc2fc89af68cb399b06ebc`. Aucun merge, aucune réimplémentation concurrente ni modification de la branche de l'autre agent.
@@ -147,4 +155,3 @@ GitHub : master distant `529db22012848e34afdf8b286983eebfc917b9f7`. Branche PR a
 - **Composant Visuel & UX** : Composant `ProjectAccountabilityPassport.tsx` avec cartes d'étapes expansibles, badges de provenance explicites, gestion du principe 9 (`NOT_FOUND_PUBLICLY`), et actions citoyennes directes (demande CAIDP, envoi de preuve terrain).
 - **Intégration & Accessibilité** : 3e onglet « Passeport Redevabilité » dans `ProjectDetailModal.tsx` avec pastille dynamique (« Lié DGMP/CA » ou « 6 étapes »), cibles tactiles WCAG AA (>= 44px).
 - **Validation** : 10 fichiers de test validés (**116/116 tests réussis**), `npm run build` propre (0 erreur, 1722 modules). Validation visuelle multi-viewports (375px mobile et 1440px desktop) avec zéro overflow horizontal.
-

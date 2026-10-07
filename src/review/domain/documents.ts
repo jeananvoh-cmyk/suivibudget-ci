@@ -1,4 +1,4 @@
-import { hasEvidence, type EvidenceRef } from './evidence';
+import { hasEvidence, isCalendarDate, type EvidenceRef } from './evidence';
 
 export interface SourceDocument {
   id: string;
@@ -20,6 +20,7 @@ export function safeOfficialUrl(value: string | null): string | null {
   if (!value) return null;
   try {
     const url = new URL(value);
+    url.hash = '';
     return url.protocol === 'https:' && !url.username && !url.password && !url.search ? url.href : null;
   } catch { return null; }
 }
@@ -37,6 +38,7 @@ export function catalogProblems(documents: readonly SourceDocument[]): string[] 
       visited.add(previous);
       const parent = documents.find(d => d.id === previous);
       if (!parent) { problems.add('MISSING_PREVIOUS_VERSION'); break; }
+      if (parent.fiscalYear !== doc.fiscalYear) problems.add('VERSION_EXERCISE_CONFLICT');
       previous = parent.previousVersionId;
     }
   }
@@ -48,7 +50,7 @@ export function resolveCitation(ref: EvidenceRef | null, documents: readonly Sou
   const doc = documents.find(d => d.id === ref.documentId);
   if (!doc || doc.verification !== 'VERIFIED' || doc.visibility !== 'PUBLIC'
     || doc.fiscalYear !== ref.fiscalYear || doc.httpStatus !== 200
-    || !doc.sha256 || !/^[a-f0-9]{64}$/i.test(doc.sha256) || !doc.accessedAt
+    || !doc.sha256 || !/^[a-f0-9]{64}$/i.test(doc.sha256) || !doc.accessedAt || !isCalendarDate(doc.accessedAt)
     || !doc.title.trim() || !doc.publisher.trim()) return null;
   if (ref.page !== null && (!Number.isInteger(doc.pageCount) || ref.page > doc.pageCount! || ref.page < 1)) return null;
   const url = safeOfficialUrl(doc.officialUrl);
@@ -57,4 +59,14 @@ export function resolveCitation(ref: EvidenceRef | null, documents: readonly Sou
   if (ref.page !== null) target.hash = `page=${ref.page}`;
   return { documentId: doc.id, title: doc.title, publisher: doc.publisher, url: target.href,
     fiscalYear: doc.fiscalYear, page: ref.page, reference: ref.reference, sha256: doc.sha256 };
+}
+
+/** Public PDF metadata projection; strips arbitrary/private properties on incoming objects. */
+export function publicDocumentMetadata(documents: readonly SourceDocument[], year: number): SourceDocument[] {
+  return documents.flatMap(doc => {
+    const citation = resolveCitation({ documentId: doc.id, page: 1, reference: null, fiscalYear: year, verification: 'VERIFIED' }, documents);
+    return citation ? [{ id: doc.id, title: doc.title, publisher: doc.publisher, officialUrl: safeOfficialUrl(doc.officialUrl),
+      fiscalYear: doc.fiscalYear, accessedAt: doc.accessedAt, httpStatus: doc.httpStatus, sha256: doc.sha256,
+      pageCount: doc.pageCount, verification: doc.verification, visibility: doc.visibility, previousVersionId: doc.previousVersionId }] : [];
+  });
 }

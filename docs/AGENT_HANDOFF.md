@@ -6,9 +6,11 @@ Le mandat utilisateur du 7 octobre autorise explicitement la continuation techni
 
 Branche : `overnight/lots-5-15`. Périmètre et dépendances : [exigences](overnight/REQUIREMENTS.md), [inventaire](overnight/DOCUMENTS.json). Les rapports `docs/overnight/LOT<n>_REPORT.md` et les commits isolés décrivent les lots effectivement réalisés. Les modules sont exclusivement en lecture seule, préparés pour revue locale, sans Supabase, import ou déploiement.
 
-NEXT_EXECUTABLE_TASK : poursuivre les LOTS 6 à 15 selon cette autorisation, puis contrôle indépendant. MASTER_MODIFIED=FALSE ; MERGE_PERFORMED=FALSE ; REMOTE_SUPABASE_WRITES=0.
+LOTS 6 à 15 : dix périmètres techniques PARTIAL livrés par commits isolés locaux, sans push ni publication. 412/412 tests, build production et build de revue PASS ; 56 contrôles navigateur sur le candidat. [Rapport final](overnight/FINAL_REPORT.md). Les données et contrôles LOT5 restent inchangés.
 
-## REPRISE COURANTE — 7 octobre 2026 — LOT 5 BLOCKED
+NEXT_EXECUTABLE_TASK : revue indépendante des contrats, composants, sources et limites décrits dans le rapport final. Résolution documentaire LOT5 distincte avant toute validation ou publication des ministères concernés. MASTER_MODIFIED=FALSE ; MERGE_PERFORMED=FALSE ; REMOTE_SUPABASE_WRITES=0 ; FINAL_STATUS=READY_FOR_INDEPENDENT_REVIEW.
+
+## HISTORIQUE DE REPRISE — 7 octobre 2026 — LOT 5 BLOCKED
 
 - LAST_AGENT : Codex.
 - CURRENT_BRANCH : `overnight/lots-5-15`.

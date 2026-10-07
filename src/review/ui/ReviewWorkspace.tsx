@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { lot5Blocked, type ReviewValue } from '../domain/evidence';
+import type { ReviewValue } from '../domain/evidence';
+import { buildReviewSnapshot } from '../domain/snapshot';
 import { reviewDocuments } from '../catalog';
 import { AmountFact, EmptyState, StatusBadge } from './Primitives';
 import { DocumentLibrary } from './DocumentLibrary';
@@ -29,8 +30,9 @@ export function ReviewWorkspace() {
   const [year, setYear] = useState(2026);
   const [institutionId, setInstitutionId] = useState('');
   const scope = scopes.find(s => s.id === institutionId) ?? scopes[0];
-  const blocked = lot5Blocked(scope.id, scope.section, year);
-  const result: ReviewValue = { value: null, status: blocked ? 'BLOCKED' : 'UNKNOWN', reasons: [blocked ? 'LOT5_INCOMPLETE_LFI' : 'NO_VERIFIED_DATA_LOADED'] };
+  const snapshot = buildReviewSnapshot({ institutionId: scope.id, sectionCode: scope.section, fiscalYear: year }, [], reviewDocuments);
+  const blocked = snapshot.dependenciesBlocked.length > 0;
+  const result: ReviewValue = { value: null, status: snapshot.status, reasons: snapshot.dependenciesBlocked };
   return <div className="review-app">
     <a className="review-skip" href="#review-content">Aller au contenu</a>
     <header className="review-header"><a href="#review-content" className="review-logo">SuiviBudget <span>Côte d’Ivoire</span></a>
