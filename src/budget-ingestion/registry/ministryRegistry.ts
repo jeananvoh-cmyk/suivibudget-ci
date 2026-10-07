@@ -82,6 +82,35 @@ export const PILOT_CANONICAL_REFERENCES: Record<string, {
     canonicalPath: 'docs/references/2026/ministry-water-forests/MINEF_CANONICAL_BUDGET_2026.json',
     publicationStatus: 'STAGED',
   },
+  // LOT 5 BATCH 1 : 7 ministères supplémentaires vérifiés et stagés
+  'gov-033': {
+    canonicalPath: 'docs/references/2026/ministry-african-integration-diaspora/MAIED_CANONICAL_BUDGET_2026.json',
+    publicationStatus: 'STAGED',
+  },
+  'gov-032': {
+    canonicalPath: 'docs/references/2026/ministry-maritime-affairs/MAM_CANONICAL_BUDGET_2026.json',
+    publicationStatus: 'STAGED',
+  },
+  'gov-003': {
+    canonicalPath: 'docs/references/2026/ministry-civil-service/MFPMA_CANONICAL_BUDGET_2026.json',
+    publicationStatus: 'STAGED',
+  },
+  'gov-023': {
+    canonicalPath: 'docs/references/2026/ministry-employment-social-protection/MEPS_CANONICAL_BUDGET_2026.json',
+    publicationStatus: 'STAGED',
+  },
+  'gov-030': {
+    canonicalPath: 'docs/references/2026/ministry-sports/MSCV_CANONICAL_BUDGET_2026.json',
+    publicationStatus: 'STAGED',
+  },
+  'gov-017': {
+    canonicalPath: 'docs/references/2026/ministry-communication/MICOM_CANONICAL_BUDGET_2026.json',
+    publicationStatus: 'STAGED',
+  },
+  'gov-034': {
+    canonicalPath: 'docs/references/2026/ministry-technical-vocational-education/METFPA_CANONICAL_BUDGET_2026.json',
+    publicationStatus: 'STAGED',
+  },
 };
 
 /**

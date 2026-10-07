@@ -1,0 +1,132 @@
+{
+  "institution_code": "334",
+  "institution_name": "MINISTERE DE L'ENSEIGNEMENT TECHNIQUE, DE LA FORMATION PROFESSIONNELLE ET DE L'APPRENTISSAGE",
+  "fiscal_year": 2026,
+  "extraction_date": "2026-10-07",
+  "source": {
+    "publisher": "Direction Générale du Budget et des Finances (DGBF)",
+    "document": "Annexe 4 — Documents de Programmation Pluriannuelle des Dépenses - Projets Annuels de Performance (DPPD-PAP) 2026-2028",
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+    "section_reference": "SECTION 334 : MINISTERE DE L'ENSEIGNEMENT TECHNIQUE, DE LA FORMATION PROFESSIONNELLE ET DE L'APPRENTISSAGE",
+    "page_range": "PDF pp. 539-564 (Document pp. 537-562 sur 1227)",
+    "accessed_at": "2026-10-07"
+  },
+  "control_source": {
+    "publisher": "DGBF",
+    "document": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+    "section_reference": "Section code 334"
+  },
+  "totals": {
+    "total_ministry_2026_fcfa": 136301855312,
+    "programs_sum_2026_fcfa": 136301855312,
+    "programs_delta": 0,
+    "actions_sum_2026_fcfa": 136301855312,
+    "actions_delta": 0,
+    "reconciliation_status": "RECONCILED"
+  },
+  "programs": [
+    {
+      "program_code": "21210",
+      "official_name": "Administration Générale",
+      "program_amount_2026_fcfa": 14408855796,
+      "page_reference": "PDF p. 548",
+      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2121001",
+          "official_name": "Coordination et animation",
+          "program_code": "21210",
+          "amount_2026_fcfa": 12104810898,
+          "page_reference": "PDF p. 548",
+          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2121002",
+          "official_name": "Gestion des ressources humaines financières et matérielles",
+          "program_code": "21210",
+          "amount_2026_fcfa": 2192007247,
+          "page_reference": "PDF p. 549",
+          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2121003",
+          "official_name": "Information et communication",
+          "program_code": "21210",
+          "amount_2026_fcfa": 71446453,
+          "page_reference": "PDF p. 550",
+          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2121004",
+          "official_name": "Planification, programmation et suivie -évaluation",
+          "program_code": "21210",
+          "amount_2026_fcfa": 40591198,
+          "page_reference": "PDF p. 550",
+          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "22063",
+      "official_name": "Formation professionnelle et apprentissage",
+      "program_amount_2026_fcfa": 111002347046,
+      "page_reference": "PDF p. 552",
+      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2206301",
+          "official_name": "Modernisation de la formation professionnelle initiale et continue",
+          "program_code": "22063",
+          "amount_2026_fcfa": 76997712480,
+          "page_reference": "PDF p. 552",
+          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2206302",
+          "official_name": "Construction, réhabilitation et équipement des structures de formation professionnelle",
+          "program_code": "22063",
+          "amount_2026_fcfa": 29526339261,
+          "page_reference": "PDF p. 558",
+          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2206303",
+          "official_name": "Développement de la formation professionnelle qualifiante et de l'apprentissage",
+          "program_code": "22063",
+          "amount_2026_fcfa": 4478295305,
+          "page_reference": "PDF p. 558",
+          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "22219",
+      "official_name": "Enseignement secondaire technique",
+      "program_amount_2026_fcfa": 10890652470,
+      "page_reference": "PDF p. 561",
+      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2221901",
+          "official_name": "Gestion des établissements du secondaire technique",
+          "program_code": "22219",
+          "amount_2026_fcfa": 10890652470,
+          "page_reference": "PDF p. 561",
+          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    }
+  ]
+}
