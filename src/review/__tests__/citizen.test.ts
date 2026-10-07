@@ -24,8 +24,13 @@ describe('LOT 10 — citizen tracking projections', () => {
   it('blocks conflicting sequences instead of inventing a history', () => {
     expect(citizenTrack(need, null, [event, { ...event, id: 'collision' }], [])?.timelineStatus).toBe('BLOCKED');
   });
-  it('keeps an incomplete ministry link blocked', () => {
+  it('keeps an undocumented ministry link unknown after LOT 5 reconciliation', () => {
     expect(citizenTrack({ ...need, institution_id: 'gov-017' }, { id: 'test-target', kind: 'BUDGET', institutionId: 'gov-017',
-      sectionCode: '336', fiscalYear: 2026, evidence: null }, [], [])?.linkStatus).toBe('BLOCKED');
+      sectionCode: '336', fiscalYear: 2026, evidence: null }, [], [])?.linkStatus).toBe('UNKNOWN');
+  });
+  it('rejects non-ISO and impossible citizen dates', () => {
+    expect(citizenTrack({ ...need, source_date: '03/01/2026' }, null, [], [])).toBeNull();
+    expect(citizenTrack({ ...need, reviewed_at: '2026-02-30' }, null, [], [])).toBeNull();
+    expect(citizenTrack(need, null, [{ ...event, occurredAt: '2026-02-30' }], [])?.timelineStatus).toBe('BLOCKED');
   });
 });

@@ -26,8 +26,8 @@ describe('LOT 11 — institutional responses and official control', () => {
     expect(institutionalRecord(target, [{ ...response, publicationStatus: 'DRAFT' }], [doc]).responses).toEqual([]);
     expect(institutionalRecord(target, [{ ...response, evidence: null }], [doc]).responses).toEqual([]);
   });
-  it('preserves dependency blocking and rejects duplicate statements', () => {
-    expect(institutionalRecord({ ...target, sectionCode: '334' }, [response], [doc]).status).toBe('BLOCKED');
+  it('removes the resolved LOT 5 dependency and rejects duplicate statements', () => {
+    expect(institutionalRecord({ ...target, sectionCode: '334' }, [response], [doc]).status).toBe('AVAILABLE');
     expect(institutionalRecord(target, [response, response], [doc]).status).toBe('BLOCKED');
   });
 });

@@ -7,6 +7,7 @@
     "publisher": "Direction Générale du Budget et des Finances (DGBF)",
     "document": "Annexe 4 — Documents de Programmation Pluriannuelle des Dépenses - Projets Annuels de Performance (DPPD-PAP) 2026-2028",
     "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+    "sha256": "0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10",
     "section_reference": "SECTION 336 : MINISTERE DE LA COMMUNICATION",
     "page_range": "PDF pp. 633-654 (Document pp. 631-652 sur 1227)",
     "accessed_at": "2026-10-07"
@@ -15,13 +16,15 @@
     "publisher": "DGBF",
     "document": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
     "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-    "section_reference": "Section code 336"
+    "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+    "section_reference": "Section code 336",
+    "page_reference": "PDF pp. 49-50"
   },
   "totals": {
-    "total_ministry_2026_fcfa": 19606735297,
-    "programs_sum_2026_fcfa": 19606735297,
+    "total_ministry_2026_fcfa": 39806735298,
+    "programs_sum_2026_fcfa": 39806735298,
     "programs_delta": 0,
-    "actions_sum_2026_fcfa": 19606735297,
+    "actions_sum_2026_fcfa": 39806735298,
     "actions_delta": 0,
     "reconciliation_status": "RECONCILED"
   },
@@ -31,7 +34,7 @@
       "official_name": "Administration Générale",
       "program_amount_2026_fcfa": 7354634682,
       "page_reference": "PDF p. 644",
-      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
         {
@@ -40,7 +43,7 @@
           "program_code": "21077",
           "amount_2026_fcfa": 4295854165,
           "page_reference": "PDF p. 644",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
@@ -49,7 +52,7 @@
           "program_code": "21077",
           "amount_2026_fcfa": 2758780517,
           "page_reference": "PDF p. 645",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
@@ -58,7 +61,7 @@
           "program_code": "21077",
           "amount_2026_fcfa": 300000000,
           "page_reference": "PDF p. 646",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
       ]
@@ -68,7 +71,7 @@
       "official_name": "Communication et médias",
       "program_amount_2026_fcfa": 12252100615,
       "page_reference": "PDF p. 648",
-      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
         {
@@ -77,7 +80,7 @@
           "program_code": "22078",
           "amount_2026_fcfa": 5299291340,
           "page_reference": "PDF p. 648",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
@@ -86,7 +89,7 @@
           "program_code": "22078",
           "amount_2026_fcfa": 2448795262,
           "page_reference": "PDF p. 649",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
@@ -95,7 +98,64 @@
           "program_code": "22078",
           "amount_2026_fcfa": 4504014013,
           "page_reference": "PDF p. 649",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "23223",
+      "official_name": "Appui au financement de la Radiodiffusion Télévision Ivoirienne (RTI)",
+      "program_amount_2026_fcfa": 16465000001,
+      "page_reference": "PDF pp. 651-652",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2322301",
+          "official_name": "Gestion de la Redevance RTI",
+          "program_code": "23223",
+          "amount_2026_fcfa": 16465000001,
+          "page_reference": "PDF p. 651",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "23224",
+      "official_name": "Appui au financement de la Société Ivoirienne de Télédiffusion (IDT)",
+      "program_amount_2026_fcfa": 2035000000,
+      "page_reference": "PDF p. 653",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2322401",
+          "official_name": "Gestion des Centres de diffusion des programmes Télés et Radios nationales (Chaines TNT et Radios publiques)",
+          "program_code": "23224",
+          "amount_2026_fcfa": 2035000000,
+          "page_reference": "PDF p. 653",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "23225",
+      "official_name": "Appui au financement du secteur des médias",
+      "program_amount_2026_fcfa": 1700000000,
+      "page_reference": "PDF p. 654",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2322501",
+          "official_name": "Gestion de la taxe sur la publicité",
+          "program_code": "23225",
+          "amount_2026_fcfa": 1700000000,
+          "page_reference": "PDF p. 654",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
       ]

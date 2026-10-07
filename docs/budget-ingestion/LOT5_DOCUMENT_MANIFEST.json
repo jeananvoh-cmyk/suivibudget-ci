@@ -1,7 +1,7 @@
 {
   "lot": 5,
   "access_date": "2026-10-07",
-  "audited_commit": "9512311618ed0d5af39ea47f98fd7d2485e9607f",
+  "baseline_commit": "84277a791336e258331271843c772362061821d3",
   "documents": [
     {
       "DOCUMENT_ID": "DGBF-LFI-2026",
@@ -26,7 +26,7 @@
       ],
       "TABLE_REFERENCE": "Budget 2026 (Récapitulatif Par Section, Dotation et Programme)",
       "MEASURE": "Crédit de Paiement 2026",
-      "CONTROL_SCOPE": "Totaux de section et listes de programmes ; détails des actions des six programmes omis non contrôlés dans cette reprise."
+      "CONTROL_SCOPE": "Totaux de section et listes exhaustives de programmes pour les sept sections LOT5 ; contrôle détaillé des six programmes précédemment omis croisé avec l'Annexe 4 DPPD-PAP."
     },
     {
       "DOCUMENT_ID": "DGBF-DPPD-PAP-2026-2028-ANNEXE-4",
@@ -43,20 +43,20 @@
       "DOCUMENT_NUMBERED_PAGES": 1227,
       "PAGE_OR_SECTION_REFERENCES": [
         { "section": "237", "pdf_range": [95, 112], "document_range": [93, 110], "program_pdf_pages": [104, 108, 112] },
-        { "section": "334", "pdf_range": [539, 564], "document_range": [537, 562], "program_pdf_pages": [548, 552, 561] },
-        { "section": "336", "pdf_range": [633, 654], "document_range": [631, 652], "program_pdf_pages": [644, 648] },
+        { "section": "334", "pdf_range": [539, 564], "document_range": [537, 562], "program_pdf_pages": [548, 552, 561, 563] },
+        { "section": "336", "pdf_range": [633, 654], "document_range": [631, 652], "program_pdf_pages": [644, 648, 651, 652, 653, 654] },
         { "section": "362", "pdf_range": [987, 1016], "document_range": [985, 1014], "program_pdf_pages": [1000, 1003, 1005, 1009] },
         { "section": "439", "pdf_range": [1087, 1102], "document_range": [1085, 1100], "program_pdf_pages": [1097, 1099, 1102] },
         { "section": "440", "pdf_range": [1103, 1116], "document_range": [1101, 1114], "program_pdf_pages": [1111, 1114] },
-        { "section": "444", "pdf_range": [1117, 1142], "document_range": [1115, 1140], "program_pdf_pages": [1125, 1131] }
+        { "section": "444", "pdf_range": [1117, 1142], "document_range": [1115, 1140], "program_pdf_pages": [1125, 1131, 1134, 1135] }
       ],
       "TABLE_REFERENCE": "Tableau 7 : Budget détaillé du programme",
-      "CONTROL_SCOPE": "Présence du code et montant sur la ligne de la page citée pour 19 programmes et 57 actions existants ; ce contrôle partiel ne prouve ni la fidélité intégrale des libellés ni la complétude LFI."
+      "CONTROL_SCOPE": "Codes, libellés, montants et pages des 25 programmes et 66 actions des sept canoniques LOT5, croisés avec les listes exhaustives et totaux de section LFI."
     }
   ],
   "limitations": [
     "Les PDF restent dans l'espace temporaire ; ils ne sont pas ajoutés à Git.",
-    "Aucun document futur, RAP, LFR ou document des LOTS 6 à 15 n'est déclaré disponible : progression arrêtée au LOT 5.",
+    "Les sources d'exécution 2026, BP/CA locaux, marchés, contributions et réponses institutionnelles restent indisponibles ; aucune valeur n'est substituée.",
     "Les données primaires et les totaux de contrôle ne sont pas extraits d'un rapport d'agent ou d'un canonical candidat."
   ]
 }

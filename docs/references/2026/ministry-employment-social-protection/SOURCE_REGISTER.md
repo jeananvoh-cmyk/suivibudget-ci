@@ -5,7 +5,7 @@
 1. **Annexe 4 — DPPD-PAP 2026-2028 (DGBF)** :
    - URL officielle : `https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf`
    - Plage documentaire : pp. 985-1014 (document), pp. 987-1016 (PDF)
-   - Table de référence : Tableau 7 (« Déclinaison des crédits par action » de chaque programme)
+   - Table de référence : « Tableau 7 : Budget détaillé du programme »
 2. **Loi de Finances Initiale (LFI) 2026** :
    - URL officielle : `https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf`
    - Référence : Page 53 (Récapitulatif par Section, Dotation et Programme)

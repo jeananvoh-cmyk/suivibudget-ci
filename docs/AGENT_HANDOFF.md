@@ -1,14 +1,14 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
-## AUTORISATION COURANTE — continuation technique LOTS 6 à 15
+## ÉTAT COURANT — validation documentaire LOT5, contrôle LOT15 bloqué
 
-Le mandat utilisateur du 7 octobre autorise explicitement la continuation technique malgré le LOT 5 BLOCKED. Il remplace l'arrêt global indiqué dans le compte rendu historique ci-dessous. Le LOT 5 et les sections 334/336/444 restent BLOCKED, sans correction fictive ni publication.
+Le LOT5 est maintenant VALIDATED sur son périmètre documentaire : les six programmes manquants et leurs neuf actions sont transcrits depuis la LFI et le DPPD-PAP, avec somme des programmes égale au total officiel pour 334, 336 et 444. Aucun montant par différence, aucune publication.
 
-Branche : `overnight/lots-5-15`. Périmètre et dépendances : [exigences](overnight/REQUIREMENTS.md), [inventaire](overnight/DOCUMENTS.json). Les rapports `docs/overnight/LOT<n>_REPORT.md` et les commits isolés décrivent les lots effectivement réalisés. Les modules sont exclusivement en lecture seule, préparés pour revue locale, sans Supabase, import ou déploiement.
+Branche : `overnight/lots-5-15`. Rapport LOT5 : [validation](budget-ingestion/LOT5_VALIDATION_REPORT.md). État LOTS5–15 : [rapport final](overnight/FINAL_REPORT.md). Les LOTS6–14 restent PARTIAL faute de sources métier ou d'audit complet.
 
-LOTS 6 à 15 : dix périmètres techniques PARTIAL livrés par commits isolés locaux, sans push ni publication. 412/412 tests, build production et build de revue PASS ; 56 contrôles navigateur sur le candidat. [Rapport final](overnight/FINAL_REPORT.md). Les données et contrôles LOT5 restent inchangés.
+423/423 tests, build production et build de revue PASS ; contrôle PDF indépendant PASS ; 56 contrôles navigateur PASS. Les données protégées et migrations sont inchangées. Le RAP2022 local n'est plus exposé dans le catalogue car son URL officielle répond 404.
 
-NEXT_EXECUTABLE_TASK : revue indépendante des contrats, composants, sources et limites décrits dans le rapport final. Résolution documentaire LOT5 distincte avant toute validation ou publication des ministères concernés. MASTER_MODIFIED=FALSE ; MERGE_PERFORMED=FALSE ; REMOTE_SUPABASE_WRITES=0 ; FINAL_STATUS=READY_FOR_INDEPENDENT_REVIEW.
+La vérification Supabase avec le client anon borné à GET/HEAD est BLOCKED : trois lectures limitées échouent et le GET REST de contrôle répond `401 Invalid API key`. NEXT_EXECUTABLE_TASK : corriger la variable anon du projet autorisé, puis rejouer `npm run verify:supabase:read-only`. MASTER_MODIFIED=FALSE ; MERGE_PERFORMED=FALSE ; REMOTE_SUPABASE_WRITES=0 ; FINAL_STATUS=BLOCKED_SUPABASE_READ_ONLY_AUTH.
 
 ## HISTORIQUE DE REPRISE — 7 octobre 2026 — LOT 5 BLOCKED
 
@@ -24,7 +24,7 @@ NEXT_EXECUTABLE_TASK : revue indépendante des contrats, composants, sources et 
 - REMOTE_SUPABASE_WRITES : 0 ; MASTER_MODIFIED : FALSE ; MERGE_PERFORMED : FALSE.
 - NEXT_EXECUTABLE_TASK : résoudre les écarts LFI/canoniques et contrôler indépendamment les programmes/actions manquants avant toute reprise du LOT 6. Aucun merge autorisé dans ce mandat.
 
-Les métadonnées et descriptions ci-dessous sont le compte rendu **historique de l'agent LOT 5**, conservé pour le contrôle contradictoire. Ses affirmations de validation, de complétude LFI et de fidélité à 100 % ne sont pas confirmées et ne remplacent pas le statut BLOCKED ci-dessus.
+Les métadonnées et descriptions ci-dessous sont le compte rendu **historique de l'agent LOT 5**, conservé pour le contrôle contradictoire. Leurs anciens totaux restent faux ; le statut courant et les corrections sont ceux de la section d'état courant ci-dessus et du rapport de validation.
 
 ## METADATA
 - LAST_UPDATED : 2026-10-07

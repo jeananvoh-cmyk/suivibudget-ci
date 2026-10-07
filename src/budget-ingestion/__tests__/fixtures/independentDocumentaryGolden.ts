@@ -722,7 +722,7 @@ export const INDEPENDENT_DOCUMENTARY_GOLDEN_2026: Record<string, IndependentGold
     institution_code: '444',
     institution_id: 'gov-030',
     institution_name: "MINISTERE DELEGUE AUPRES DU PREMIER MINISTRE, MINISTRE DES SPORTS ET DU CADRE DE VIE, CHARGE DES SPORTS ET DU CADRE DE VIE",
-    total_budget_2026_fcfa: 57807777385,
+    total_budget_2026_fcfa: 70427777385,
     programs: [
       {
         program_code: '21081',
@@ -773,13 +773,47 @@ export const INDEPENDENT_DOCUMENTARY_GOLDEN_2026: Record<string, IndependentGold
           },
         ],
       },
+      {
+        program_code: '23241',
+        official_name: "Appui au développement durable du sport",
+        amount_2026_fcfa: 10900000000,
+        actions: [
+          {
+            action_code: '2324101',
+            official_name: "Développement des activités fédérales",
+            amount_2026_fcfa: 7430000000,
+          },
+          {
+            action_code: '2324102',
+            official_name: "Promotion sociale et sanitaire du secteur sport",
+            amount_2026_fcfa: 200000000,
+          },
+          {
+            action_code: '2324103',
+            official_name: "Construction, réhabilitation et équipement d'infrastructure socio-sportive",
+            amount_2026_fcfa: 3270000000,
+          },
+        ],
+      },
+      {
+        program_code: '23249',
+        official_name: "Appui à l'entretien et à la sécurisation des infrastructures",
+        amount_2026_fcfa: 1720000000,
+        actions: [
+          {
+            action_code: '2324901',
+            official_name: "Entretien, maintenance et sécurisation des infrastructures",
+            amount_2026_fcfa: 1720000000,
+          },
+        ],
+      },
     ],
   },
   'MICOM': {
     institution_code: '336',
     institution_id: 'gov-017',
     institution_name: "MINISTERE DE LA COMMUNICATION",
-    total_budget_2026_fcfa: 19606735297,
+    total_budget_2026_fcfa: 39806735298,
     programs: [
       {
         program_code: '21077',
@@ -825,13 +859,49 @@ export const INDEPENDENT_DOCUMENTARY_GOLDEN_2026: Record<string, IndependentGold
           },
         ],
       },
+      {
+        program_code: '23223',
+        official_name: "Appui au financement de la Radiodiffusion Télévision Ivoirienne (RTI)",
+        amount_2026_fcfa: 16465000001,
+        actions: [
+          {
+            action_code: '2322301',
+            official_name: "Gestion de la Redevance RTI",
+            amount_2026_fcfa: 16465000001,
+          },
+        ],
+      },
+      {
+        program_code: '23224',
+        official_name: "Appui au financement de la Société Ivoirienne de Télédiffusion (IDT)",
+        amount_2026_fcfa: 2035000000,
+        actions: [
+          {
+            action_code: '2322401',
+            official_name: "Gestion des Centres de diffusion des programmes Télés et Radios nationales (Chaines TNT et Radios publiques)",
+            amount_2026_fcfa: 2035000000,
+          },
+        ],
+      },
+      {
+        program_code: '23225',
+        official_name: "Appui au financement du secteur des médias",
+        amount_2026_fcfa: 1700000000,
+        actions: [
+          {
+            action_code: '2322501',
+            official_name: "Gestion de la taxe sur la publicité",
+            amount_2026_fcfa: 1700000000,
+          },
+        ],
+      },
     ],
   },
   'METFPA': {
     institution_code: '334',
     institution_id: 'gov-034',
     institution_name: "MINISTERE DE L'ENSEIGNEMENT TECHNIQUE, DE LA FORMATION PROFESSIONNELLE ET DE L'APPRENTISSAGE",
-    total_budget_2026_fcfa: 136301855312,
+    total_budget_2026_fcfa: 182301855312,
     programs: [
       {
         program_code: '21210',
@@ -891,6 +961,23 @@ export const INDEPENDENT_DOCUMENTARY_GOLDEN_2026: Record<string, IndependentGold
             action_code: '2221901',
             official_name: "Gestion des établissements du secondaire technique",
             amount_2026_fcfa: 10890652470,
+          },
+        ],
+      },
+      {
+        program_code: '23220',
+        official_name: "Fonds de Développement de la Formation Professionnelle",
+        amount_2026_fcfa: 46000000000,
+        actions: [
+          {
+            action_code: '2322001',
+            official_name: "Gestion des ressources humaines, financières et matérielles",
+            amount_2026_fcfa: 17178600000,
+          },
+          {
+            action_code: '2322002',
+            official_name: "Accompagnement des entreprises dans l'élaboration et le financement des projets et des plans de formation de leurs travailleurs",
+            amount_2026_fcfa: 28821400000,
           },
         ],
       },

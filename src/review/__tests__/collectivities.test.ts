@@ -36,6 +36,11 @@ describe('LOT 7 — local budget dossiers', () => {
   it('rejects duplicated IDs even if one version is archived', () => {
     expect(collectivityDossier(scope, [budget, { ...budget, is_current_version: false }]).status).toBe('BLOCKED');
   });
+  it('rejects empty budget identifiers', () => {
+    expect(collectivityDossier(scope, [{ ...budget, id: '  ' }], [], [doc])).toMatchObject({
+      budgetId: null, initialBudget: null, status: 'BLOCKED', reasons: ['BUDGET_ID_REQUIRED'],
+    });
+  });
   it('does not accept a verification flag without an accessible public source', () => {
     expect(collectivityDossier(scope, [budget]).initialBudget).toBeNull();
     expect(collectivityDossier(scope, [budget], [], [{ ...doc, visibility: 'PRIVATE' }]).initialBudget).toBeNull();

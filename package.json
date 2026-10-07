@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "verify:supabase:read-only": "node scripts/verify-supabase-readonly.mjs",
     "ingest:budget": "node scripts/import-data.mjs",
     "import:data": "node scripts/import-data.mjs"
   },

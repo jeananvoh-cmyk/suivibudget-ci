@@ -1,5 +1,7 @@
 # Reprise LOT 5 — arrêt documentaire et financier du 7 octobre 2026
 
+> **Archive du blocage initial.** Les six programmes et leurs neuf actions ont depuis été contrôlés dans la LFI et le DPPD-PAP, puis réintégrés sans calcul par différence. Le statut courant est décrit dans [LOT5_VALIDATION_REPORT.md](LOT5_VALIDATION_REPORT.md) et [LOT5_MINISTRY_COVERAGE_REPORT.md](LOT5_MINISTRY_COVERAGE_REPORT.md). Les valeurs ci-dessous conservent la trace du diagnostic antérieur et ne représentent plus l'état courant de la branche.
+
 ```text
 LOT=5
 STATUS=BLOCKED

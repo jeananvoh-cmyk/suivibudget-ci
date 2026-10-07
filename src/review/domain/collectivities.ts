@@ -15,7 +15,8 @@ export function collectivityDossier(scope: LocalReviewScope, budgets: readonly B
     && b.institution_type === scope.institutionType && b.fiscal_year === scope.fiscalYear);
   const candidates = matching.filter(b => b.status === 'PUBLISHED' && b.is_current_version && isInitialBudget(b.budget_type));
   const duplicateIds = new Set(matching.map(b => b.id)).size !== matching.length;
-  const conflict = duplicateIds || candidates.length > 1;
+  const invalidBudgetId = matching.some(b => !b.id.trim());
+  const conflict = invalidBudgetId || duplicateIds || candidates.length > 1;
   const selected = !conflict && candidates.length === 1 ? candidates[0] : null;
   const sourceConfirmed = selected?.verification_status === 'OFFICIAL_DOCUMENT'
     && hasEvidence(selected.evidence, scope.fiscalYear) && resolveCitation(selected.evidence, documents);
@@ -31,7 +32,8 @@ export function collectivityDossier(scope: LocalReviewScope, budgets: readonly B
     finalCredits: null,
     executionRate: null,
     status: conflict ? 'BLOCKED' as const : usableAmount ? 'AVAILABLE' as const : 'UNKNOWN' as const,
-    reasons: conflict ? ['AMBIGUOUS_BUDGET_VERSION'] : !usableAmount ? ['OFFICIAL_EXACT_BUDGET_REQUIRED'] : [],
+    reasons: invalidBudgetId ? ['BUDGET_ID_REQUIRED'] : conflict ? ['AMBIGUOUS_BUDGET_VERSION']
+      : !usableAmount ? ['OFFICIAL_EXACT_BUDGET_REQUIRED'] : [],
     administrativeAccountIds: caCandidates.map(c => c.id).sort(),
     // A CA may contain revenues or ordered expenditure: do not infer a paid amount from total_realized.
     executionStatus: caCandidates.length > 1 ? 'BLOCKED' as const : 'UNKNOWN' as const,

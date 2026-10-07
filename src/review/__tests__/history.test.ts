@@ -18,9 +18,9 @@ describe('LOT 12 — history and portable public data', () => {
     expect(compareHistory(observation(2025, 0), observation(2026, 120), evidence(2026), documents)).toMatchObject({ nominalDelta: 120, value: null });
     expect(compareHistory(observation(2025, null), observation(2026, 120), evidence(2026), documents).nominalDelta).toBeNull();
   });
-  it('blocks incompatible scopes and incomplete ministries', () => {
+  it('preserves NOT_COMPARABLE for incompatible scopes and sections', () => {
     expect(compareHistory(observation(2025, 100), { ...observation(2026, 120), scope: 'other' }, evidence(2026), documents).status).toBe('NOT_COMPARABLE');
-    expect(compareHistory(observation(2025, 100), { ...observation(2026, 120), sectionCode: '444' }, evidence(2026), documents).status).toBe('BLOCKED');
+    expect(compareHistory(observation(2025, 100), { ...observation(2026, 120), sectionCode: '444' }, evidence(2026), documents).status).toBe('NOT_COMPARABLE');
   });
   it('exports literal null and excludes arbitrary private payload fields', () => {
     const input = { ...observation(2026, null), email: 'private-test' };
@@ -29,8 +29,8 @@ describe('LOT 12 — history and portable public data', () => {
     expect(json).not.toContain('private-test');
     expect(openDataCsv([input], documents)).toContain(',null,');
   });
-  it('does not export blocked or privately sourced amounts', () => {
-    expect(JSON.parse(openDataJson([{ ...observation(2026, 100), sectionCode: '336' }], documents)).records[0].amount).toBeNull();
+  it('does not export invalid or privately sourced amounts', () => {
+    expect(JSON.parse(openDataJson([{ ...observation(2026, -1) }], documents)).records[0].amount).toBeNull();
     expect(JSON.parse(openDataJson([observation(2026, 100)], documents.map(d => ({ ...d, visibility: 'PRIVATE' })))).records[0].source_url).toBeNull();
   });
   it('neutralizes spreadsheet formulas in string fields', () => {

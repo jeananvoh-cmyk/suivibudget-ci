@@ -3,7 +3,7 @@
 ```text
 LOT=11
 STATUS=PARTIAL
-DEPENDENCIES_BLOCKED=Réponses et rapports institutionnels primaires non chargés ; LOT5
+DEPENDENCIES_BLOCKED=Réponses et rapports institutionnels primaires non chargés
 DOCUMENTS_USED=Contrats de sources LOT8 ; exigences de pièces de contrôle ; aucune réponse officielle ajoutée
 FILES_CHANGED=src/review/domain/responses.ts ; src/review/__tests__/responses.test.ts ; docs/overnight/LOT11_REPORT.md
 TEST_TOTAL=391

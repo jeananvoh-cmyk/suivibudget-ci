@@ -1,6 +1,6 @@
 # LOTS 6 à 15 — périmètre technique autorisé le 7 octobre 2026
 
-La nouvelle autorisation permet de continuer malgré le LOT 5 BLOCKED. Aucun déploiement, aucune fusion, aucune écriture distante. La branche de travail est `overnight/lots-5-15`. Tous les composants sont préparés pour revue locale, sans raccordement automatique aux services distants ni changement des données protégées.
+Le mandat a d'abord autorisé la continuation malgré le blocage LOT5, désormais résolu par contrôle LFI/DPPD. Aucun déploiement, aucune fusion, aucune écriture distante. La branche de travail est `overnight/lots-5-15`. Tous les composants sont préparés pour revue locale, sans raccordement automatique aux services distants ni changement des données protégées.
 
 | Lot | Exigence relue / livrable technique | Documents nécessaires aux données réelles | Limite documentaire |
 |---|---|---|---|
@@ -17,10 +17,10 @@ La nouvelle autorisation permet de continuer malgré le LOT 5 BLOCKED. Aucun dé
 
 ## Règles de réalisation
 
-Les fonctions de `src/review/domain/` sont pures. Elles consomment des entrées explicites sans importer `dataStore`, les services Supabase ou les jeux canoniques incomplets. Les contrats réutilisent les types de précision, de mesures financières et d'institutions existants. Le blocage des sections 334/336/444 et institutions gov-034/gov-017/gov-030 pour 2026 est explicite et prioritaire sur les anciens statuts VERIFIED.
+Les fonctions de `src/review/domain/` sont pures. Elles consomment des entrées explicites sans importer `dataStore` ou les services Supabase. Les contrats réutilisent les types de précision, de mesures financières et d'institutions existants. Les anciens blocages des sections 334/336/444 ont été retirés après réintégration et contrôle indépendant des six programmes omis ; aucune donnée d'exécution n'en est déduite.
 
 Une trace de source exige un document et une page ou section, l'exercice et une vérification documentaire. Ce contrat suppose une vérification amont fiable ; ce n'est pas une autorisation de publication. Les exports et vues publiques exigent aussi des documents explicitement publics. Aucun rôle ou statut fourni par un client ne remplace Auth/RLS.
 
-Chaque lot fait l'objet d'un rapport distinct. `PARTIAL` signifie que le périmètre technique indiqué est livré, avec des données, raccordements ou validations non réalisés clairement recensés. `READY_FOR_INDEPENDENT_REVIEW` final qualifie le travail soumis à revue, jamais les trois budgets bloqués ni un déploiement de production.
+Chaque lot fait l'objet d'un rapport distinct. `PARTIAL` signifie que le périmètre technique indiqué est livré, avec des données, raccordements ou validations non réalisés clairement recensés. Aucun statut documentaire ne vaut autorisation de publication ou validation de données absentes.
 
 Les données numériques des tests sont des cas arithmétiques synthétiques identifiés `test-only`, exclusivement dans les tests. Elles ne sont ni des chiffres officiels, ni des substituts de données, ni des entrées de l'interface.

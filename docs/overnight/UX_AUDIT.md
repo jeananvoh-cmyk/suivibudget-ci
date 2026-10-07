@@ -18,4 +18,4 @@ Les trois niveaux sont Comprendre (valeur et statut), Explorer (périmètre et c
 
 ## Vérification à réaliser sur l'interface candidate
 
-Largeurs 360, 375, 390, 430, 768, 1280, 1440 et 1920 px ; navigation clavier, focus, absence de débordement, changement d'exercice et de section, statut bloqué des trois ministères, recherche documentaire, liens de source, retour à un état vide. Audit navigateur et captures au LOT 14/15. L'audit de chaque page historique et les essais avec technologies d'assistance réelles restent à effectuer avant validation globale.
+Largeurs 360, 375, 390, 430, 768, 1280, 1440 et 1920 px ; navigation clavier, focus, absence de débordement, changement d'exercice et de section, état UNKNOWN sans montant pour les trois ministères réconciliés, recherche documentaire, liens de source, retour à un état vide. L'audit de chaque page historique et les essais avec technologies d'assistance réelles restent à effectuer avant validation globale.

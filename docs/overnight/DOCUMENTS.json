@@ -9,13 +9,14 @@
       "OFFICIAL_URL": "https://www.dgbf.ci/wp-content/uploads/2024/04/Rapport-Annuel-de-Performance-2022.pdf",
       "FISCAL_YEAR": 2022,
       "ACCESS_DATE": "2026-10-07",
-      "HTTP_STATUS": 200,
+      "HTTP_STATUS_AT_ACQUISITION": 200,
+      "HTTP_STATUS_RECHECK_2026_10_07": 404,
       "SHA256": "b62b716caf5efe9ce8fa6f5edfa853e530f2fb183ff4530689950553ba346156",
-      "LOCAL_AVAILABILITY": "AVAILABLE",
+      "LOCAL_AVAILABILITY": "AVAILABLE_FROM_PRIOR_OFFICIAL_ACQUISITION",
       "LOCAL_PATH": "/tmp/suivibudget-lot5-documents/Rapport-Annuel-de-Performance-2022.pdf",
       "PAGE_OR_SECTION_REFERENCES": "PDF p. 3 titre/exercice ; p. 5 sommaire et sections institutionnelles",
       "PDF_PAGES": 1750,
-      "USE": "Type documentaire et exercice historique seulement ; aucune extraction de montant ni correspondance institutionnelle automatique avec 2026."
+      "USE": "Type documentaire et exercice historique seulement ; aucune extraction de montant ni correspondance institutionnelle automatique avec 2026. Le portail officiel le référence encore, mais son URL PDF répond 404 lors du dernier contrôle."
     },
     {
       "DOCUMENT_ID": "DGBF-RAP-INDEX",

@@ -3,15 +3,15 @@
 ```text
 LOT=8
 STATUS=PARTIAL
-DEPENDENCIES_BLOCKED=Originaux des collectivités/projets/réponses non acquis ; LOT5 incomplet
-DOCUMENTS_USED=LFI 2026, Annexe 4, RAP 2022 et leurs empreintes ; inventaire des pièces manquantes
+DEPENDENCIES_BLOCKED=Originaux des collectivités/projets/réponses non acquis ; URL du RAP 2022 désormais en erreur 404
+DOCUMENTS_USED=LFI 2026 et Annexe 4 accessibles ; RAP 2022 conservé depuis une acquisition officielle antérieure, non exposé après recontrôle 404
 FILES_CHANGED=src/review/domain/documents.ts ; src/review/__tests__/documents.test.ts ; docs/overnight/LOT8_REPORT.md
 TEST_TOTAL=376
 TEST_PASS=376
 TEST_FAIL=0
 BUILD=PASS
 ANOMALIES_FOUND=Doublons d'identité, cycles de version et URLs signées/avec identifiants doivent être refusés
-ANOMALIES_REMAINING=Inventaire documentaire des données futures ; contrôle intégral des libellés et sources LOT5
+ANOMALIES_REMAINING=Inventaire documentaire des données futures ; rétablissement éventuel de l'URL officielle RAP
 REMOTE_SUPABASE_WRITES=0
 ```
 

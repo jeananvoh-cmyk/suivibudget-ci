@@ -1,0 +1,81 @@
+{
+  "verified_at": "2026-10-07",
+  "rule": "Une source absente reste null/UNKNOWN. Aucun nombre, document, lien institutionnel ou rapprochement n'est créé depuis une exigence seule.",
+  "official_documents_available": [
+    {
+      "document_id": "DGBF-LFI-2026",
+      "fiscal_year": 2026,
+      "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+      "current_http_status": 200,
+      "allowed_uses": ["budget initial de l'État", "liste de programmes", "totaux de section"]
+    },
+    {
+      "document_id": "DGBF-DPPD-PAP-2026-2028-ANNEXE-4",
+      "fiscal_year": 2026,
+      "sha256": "0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10",
+      "current_http_status": 200,
+      "allowed_uses": ["programmation", "actions", "objectifs et indicateurs documentés"]
+    },
+    {
+      "document_id": "DGBF-RAP-2022",
+      "fiscal_year": 2022,
+      "sha256": "b62b716caf5efe9ce8fa6f5edfa853e530f2fb183ff4530689950553ba346156",
+      "current_http_status": 404,
+      "local_status": "AVAILABLE_FROM_PRIOR_OFFICIAL_ACQUISITION",
+      "portal_reference_status": 200,
+      "allowed_uses": ["type documentaire", "exercice 2022"],
+      "forbidden_uses": ["exécution 2026", "comparaison automatique 2022/2026", "montant sans extraction contrôlée"]
+    }
+  ],
+  "lot_controls": [
+    {
+      "lot": 7,
+      "required_sources": ["BP officiel par collectivité", "actes modificatifs", "CA officiel du même exercice"],
+      "available_source_ids": [],
+      "loaded_records": 0,
+      "data_status": "UNKNOWN",
+      "control": "Le dossier ne sélectionne qu'un BP courant publié avec ID non vide et citation publique ; le CA reste une pièce séparée."
+    },
+    {
+      "lot": 8,
+      "required_sources": ["document primaire cité"],
+      "available_source_ids": ["DGBF-LFI-2026", "DGBF-DPPD-PAP-2026-2028-ANNEXE-4", "DGBF-RAP-2022"],
+      "loaded_records": 3,
+      "data_status": "PARTIAL",
+      "control": "Catalogue de métadonnées en liste blanche ; le statut HTTP courant du RAP est conservé séparément de son acquisition antérieure."
+    },
+    {
+      "lot": 9,
+      "required_sources": ["fiche officielle de projet", "registre ou acte DGMP", "preuve de rattachement budgétaire"],
+      "available_source_ids": [],
+      "loaded_records": 0,
+      "data_status": "UNKNOWN",
+      "control": "Aucun projet ou marché n'est créé depuis une ligne budgétaire."
+    },
+    {
+      "lot": 10,
+      "required_sources": ["contribution publique modérée", "historique public relu"],
+      "available_source_ids": [],
+      "loaded_records": 0,
+      "data_status": "UNKNOWN",
+      "control": "Dates ISO calendaires obligatoires ; aucune donnée personnelle exportée."
+    },
+    {
+      "lot": 11,
+      "required_sources": ["réponse institutionnelle publiée", "rapport de contrôle distinct"],
+      "available_source_ids": [],
+      "loaded_records": 0,
+      "data_status": "UNKNOWN",
+      "control": "Une réponse ne devient jamais une conclusion d'audit indépendante."
+    },
+    {
+      "lot": 12,
+      "required_sources": ["sources primaires pour chaque exercice", "preuve d'équivalence de périmètre et mesure"],
+      "available_source_ids": ["DGBF-LFI-2026", "DGBF-DPPD-PAP-2026-2028-ANNEXE-4", "DGBF-RAP-2022"],
+      "loaded_records": 0,
+      "data_status": "NOT_COMPARABLE",
+      "control": "Les documents 2022 et 2026 portent des mesures différentes ; aucune série ni variation n'est produite."
+    }
+  ],
+  "remote_supabase_writes": 0
+}

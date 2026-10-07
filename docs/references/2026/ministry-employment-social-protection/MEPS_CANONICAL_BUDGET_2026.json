@@ -31,7 +31,7 @@
       "official_name": "Administration Générale",
       "program_amount_2026_fcfa": 35849618984,
       "page_reference": "PDF p. 1000",
-      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
         {
@@ -40,7 +40,7 @@
           "program_code": "21150",
           "amount_2026_fcfa": 5173570216,
           "page_reference": "PDF p. 1000",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
@@ -49,7 +49,7 @@
           "program_code": "21150",
           "amount_2026_fcfa": 6801811930,
           "page_reference": "PDF p. 1001",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
@@ -58,7 +58,7 @@
           "program_code": "21150",
           "amount_2026_fcfa": 23824247963,
           "page_reference": "PDF p. 1001",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
@@ -67,7 +67,7 @@
           "program_code": "21150",
           "amount_2026_fcfa": 49988875,
           "page_reference": "PDF p. 1001",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
       ]
@@ -77,7 +77,7 @@
       "official_name": "Emploi",
       "program_amount_2026_fcfa": 2451846262,
       "page_reference": "PDF p. 1003",
-      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
         {
@@ -86,7 +86,7 @@
           "program_code": "22151",
           "amount_2026_fcfa": 1801036262,
           "page_reference": "PDF p. 1003",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
@@ -95,7 +95,7 @@
           "program_code": "22151",
           "amount_2026_fcfa": 52000000,
           "page_reference": "PDF p. 1003",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
@@ -104,7 +104,7 @@
           "program_code": "22151",
           "amount_2026_fcfa": 598810000,
           "page_reference": "PDF p. 1004",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
       ]
@@ -114,7 +114,7 @@
       "official_name": "Travail",
       "program_amount_2026_fcfa": 6374402905,
       "page_reference": "PDF p. 1005",
-      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
         {
@@ -123,7 +123,7 @@
           "program_code": "22152",
           "amount_2026_fcfa": 504524900,
           "page_reference": "PDF p. 1005",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
@@ -132,7 +132,7 @@
           "program_code": "22152",
           "amount_2026_fcfa": 133500000,
           "page_reference": "PDF p. 1007",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
@@ -141,7 +141,7 @@
           "program_code": "22152",
           "amount_2026_fcfa": 19100000,
           "page_reference": "PDF p. 1007",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
@@ -150,7 +150,7 @@
           "program_code": "22152",
           "amount_2026_fcfa": 5717278005,
           "page_reference": "PDF p. 1007",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
       ]
@@ -160,7 +160,7 @@
       "official_name": "Protection sociale",
       "program_amount_2026_fcfa": 46735545893,
       "page_reference": "PDF p. 1009",
-      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
         {
@@ -169,7 +169,7 @@
           "program_code": "22153",
           "amount_2026_fcfa": 41893273616,
           "page_reference": "PDF p. 1009",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
@@ -178,7 +178,7 @@
           "program_code": "22153",
           "amount_2026_fcfa": 1764221356,
           "page_reference": "PDF p. 1010",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
@@ -187,7 +187,7 @@
           "program_code": "22153",
           "amount_2026_fcfa": 221580000,
           "page_reference": "PDF p. 1010",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
@@ -196,7 +196,7 @@
           "program_code": "22153",
           "amount_2026_fcfa": 2856470921,
           "page_reference": "PDF p. 1011",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
       ]

@@ -1,26 +1,19 @@
-# Registre des Sources Documentaires — MICOM 2026
-## MINISTERE DE LA COMMUNICATION (Section DGBF 336)
+# Registre des sources documentaires — section 336
 
-### 1. Documents Sources Primaires
-1. **Annexe 4 — DPPD-PAP 2026-2028 (DGBF)** :
-   - URL officielle : `https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf`
-   - Plage documentaire : pp. 631-652 (document), pp. 633-654 (PDF)
-   - Table de référence : Tableau 7 (« Déclinaison des crédits par action » de chaque programme)
-2. **Loi de Finances Initiale (LFI) 2026** :
-   - URL officielle : `https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf`
-   - Référence : Page 50 (Récapitulatif par Section, Dotation et Programme)
-   - Montant voté total : **19,606,735,297 FCFA**
+Identité officielle DGBF : **Ministère de la Communication**.
 
-### 2. Déclinaison et Réconciliation Documentaire
-| Code Programme | Libellé Officiel Verbatim | Montant Voté CP 2026 | Page Source DPPD | Actions Budgétaires Documentées |
+Sources primaires contrôlées le 7 octobre 2026 :
+
+- LFI 2026, PDF pp. 49–50, « Récapitulatif par Section, Dotation et Programme » : total section **39 806 735 298 FCFA**.
+- Annexe 4 DPPD-PAP 2026-2028, PDF pp. 633–654. L'intitulé exact des tables est « Tableau 7 : Budget détaillé du programme ».
+- URLs et empreintes SHA-256 : [manifeste LOT5](../../../budget-ingestion/LOT5_DOCUMENT_MANIFEST.json).
+
+| Programme | Libellé officiel | CP 2026 (FCFA) | Page PDF DPPD | Actions officielles |
 |---|---|---:|---|---|
-| `21077` | **Administration Générale** | 7,354,634,682 FCFA | p. 644 | • <code>2107701</code> Coordination et Animation (4,295,854,165 FCFA, p. 644)<br>• <code>2107702</code> Gestion des ressources humaines, financières et matérielles (2,758,780,517 FCFA, p. 645)<br>• <code>2107703</code> Gestion du système d'information et communication (300,000,000 FCFA, p. 646) |
-| `22078` | **Communication et médias** | 12,252,100,615 FCFA | p. 648 | • <code>2207801</code> Développement de la presse, de l'audiovisuel et de la communication publicitaire (5,299,291,340 FCFA, p. 648)<br>• <code>2207802</code> Formation et accès aux métiers de la presse et de l'audiovisuelle (2,448,795,262 FCFA, p. 649)<br>• <code>2207803</code> Régulation du secteur de la communication et des médias (4,504,014,013 FCFA, p. 649) |
+| 21077 | Administration Générale | 7 354 634 682 | 644 | 2107701, 2107702, 2107703 |
+| 22078 | Communication et médias | 12 252 100 615 | 648–649 | 2207801, 2207802, 2207803 |
+| 23223 | Appui au financement de la Radiodiffusion Télévision Ivoirienne (RTI) | 16 465 000 001 | 651–652 | 2322301 Gestion de la Redevance RTI — 16 465 000 001 |
+| 23224 | Appui au financement de la Société Ivoirienne de Télédiffusion (IDT) | 2 035 000 000 | 653 | 2322401 Gestion des Centres de diffusion des programmes Télés et Radios nationales (Chaines TNT et Radios publiques) — 2 035 000 000 |
+| 23225 | Appui au financement du secteur des médias | 1 700 000 000 | 654 | 2322501 Gestion de la taxe sur la publicité — 1 700 000 000 |
 
-### 3. Statut de Contrôle
-- **Total Programmes** : 19,606,735,297 FCFA
-- **Total Actions** : 19,606,735,297 FCFA
-- **Total Section LFI 2026** : 19,606,735,297 FCFA
-- **Écart de réconciliation** : **0 FCFA** (`RECONCILED`)
-- **Fidélité textuelle** : 100% transcription verbatim de l'Annexe 4 DPPD-PAP Tableau 7.
-- **Statut Runtime** : `VERIFIED` + `STAGED` (non publié publiquement sans autorisation orchestrateur).
+Somme des programmes = somme des actions = total LFI = **39 806 735 298 FCFA**. Les programmes 232xx sont inclus une seule fois ; leurs activités ne sont pas additionnées au montant de leur action. Statut runtime : STAGED, aucune publication créée.

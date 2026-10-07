@@ -12,14 +12,15 @@ describe('LOT 14 — local review workspace', () => {
     expect(html).toContain('Aller au contenu');
   });
   it('exposes only public original-document metadata', () => {
-    expect(reviewDocuments).toHaveLength(3);
+    expect(reviewDocuments).toHaveLength(2);
     expect(reviewDocuments.every(d => d.visibility === 'PUBLIC' && d.sha256?.length === 64)).toBe(true);
     expect(JSON.stringify(reviewDocuments)).not.toContain('/tmp/');
   });
-  it('keeps the 2022 RAP separate from 2026 sources', () => {
+  it('does not expose the 2022 RAP after its official URL starts returning 404', () => {
     const html = renderToStaticMarkup(<DocumentLibrary documents={reviewDocuments} year={2026} />);
     expect(html).toContain('2 documents');
     expect(html).not.toContain('Rapports annuels de performance');
+    expect(renderToStaticMarkup(<DocumentLibrary documents={reviewDocuments} year={2022} />)).toContain('Aucun document correspondant');
     expect(renderToStaticMarkup(<DocumentLibrary documents={reviewDocuments} year={2025} />)).toContain('Aucun document correspondant');
   });
 });

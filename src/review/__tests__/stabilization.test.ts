@@ -23,13 +23,13 @@ describe('LOT 15 — end-to-end documentary boundaries', () => {
     const result = publicDocumentMetadata([{ ...doc, privateContact: 'private-test' } as SourceDocument], 2026);
     expect(JSON.stringify(result)).not.toContain('private-test');
   });
-  it('keeps blocked candidate amounts null through composition and export', () => {
+  it('removes the resolved LOT 5 blocker without requesting publication', () => {
     const scope = { institutionId: 'gov-017', sectionCode: '336', fiscalYear: 2026 };
     const result = buildReviewSnapshot(scope, [{ ...observation, ...scope }], [doc]);
-    expect(result.status).toBe('BLOCKED');
-    expect(result.records[0].amount).toBeNull();
+    expect(result.status).toBe('AVAILABLE');
+    expect(result.records[0].amount).toBe(100);
     expect(result.publicationDecision).toBe('NOT_REQUESTED');
-    expect(buildReviewSnapshot(scope, [], [doc]).status).toBe('BLOCKED');
+    expect(buildReviewSnapshot(scope, [], [doc]).status).toBe('UNKNOWN');
   });
   it('keeps empty data unknown and filters unrelated institutional observations', () => {
     const scope = { institutionId: 'other-test', sectionCode: null, fiscalYear: 2026 };
@@ -48,6 +48,6 @@ describe('LOT 15 — end-to-end documentary boundaries', () => {
     expect(result.value).toBeCloseTo(-0.3);
     expect(result.reasons).toContain('GAP_ONLY_NO_SUCCESS_INFERENCE');
     expect(performanceGap({ ...indicator, observed: null }, [doc]).value).toBeNull();
-    expect(performanceGap({ ...indicator, sectionCode: '334' }, [doc]).status).toBe('BLOCKED');
+    expect(performanceGap({ ...indicator, sectionCode: '334' }, [doc]).status).toBe('AVAILABLE');
   });
 });

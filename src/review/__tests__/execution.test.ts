@@ -21,8 +21,8 @@ describe('LOT 6 — execution with explicit documentary boundaries', () => {
   it('never returns a zero or 100% rate for a zero denominator', () => {
     expect(executionRate(observation({ amount: 0 }), observation({ measure: 'PAID', basis: 'EXECUTION', amount: 0 })).value).toBeNull();
   });
-  it.each(['gov-017', 'gov-030', 'gov-034'])('blocks incomplete LOT 5 institution %s', institutionId => {
-    expect(assessObservation(observation({ institutionId })).status).toBe('BLOCKED');
+  it.each(['gov-017', 'gov-030', 'gov-034'])('does not retain a resolved LOT 5 blocker for %s', institutionId => {
+    expect(assessObservation(observation({ institutionId })).status).toBe('AVAILABLE');
   });
   it('requires same period, scope and financial measure', () => {
     for (const patch of [{ periodEnd: '2026-06-30' }, { scope: 'other' }, { measure: 'COLLECTED' as const }]) {

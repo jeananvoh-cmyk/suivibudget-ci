@@ -1,26 +1,18 @@
-# Registre des Sources Documentaires — MSCV 2026
-## MINISTERE DELEGUE AUPRES DU PREMIER MINISTRE, MINISTRE DES SPORTS ET DU CADRE DE VIE, CHARGE DES SPORTS ET DU CADRE DE VIE (Section DGBF 444)
+# Registre des sources documentaires — section 444
 
-### 1. Documents Sources Primaires
-1. **Annexe 4 — DPPD-PAP 2026-2028 (DGBF)** :
-   - URL officielle : `https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf`
-   - Plage documentaire : pp. 1115-1140 (document), pp. 1117-1142 (PDF)
-   - Table de référence : Tableau 7 (« Déclinaison des crédits par action » de chaque programme)
-2. **Loi de Finances Initiale (LFI) 2026** :
-   - URL officielle : `https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf`
-   - Référence : Page 54 (Récapitulatif par Section, Dotation et Programme)
-   - Montant voté total : **57,807,777,385 FCFA**
+Identité officielle DGBF : **Ministère Délégué auprès du Premier Ministre, Ministre des Sports et du Cadre de Vie, chargé des Sports et du Cadre de Vie**.
 
-### 2. Déclinaison et Réconciliation Documentaire
-| Code Programme | Libellé Officiel Verbatim | Montant Voté CP 2026 | Page Source DPPD | Actions Budgétaires Documentées |
+Sources primaires contrôlées le 7 octobre 2026 :
+
+- LFI 2026, PDF p. 54, « Récapitulatif par Section, Dotation et Programme » : total section **70 427 777 385 FCFA**.
+- Annexe 4 DPPD-PAP 2026-2028, PDF pp. 1117–1142. L'intitulé exact des tables est « Tableau 7 : Budget détaillé du programme ».
+- URLs et empreintes SHA-256 : [manifeste LOT5](../../../budget-ingestion/LOT5_DOCUMENT_MANIFEST.json).
+
+| Programme | Libellé officiel | CP 2026 (FCFA) | Page PDF DPPD | Actions officielles |
 |---|---|---:|---|---|
-| `21081` | **Administration Générale** | 17,906,782,766 FCFA | p. 1125 | • <code>2108101</code> Coordination de la politique du sport (6,094,819,416 FCFA, p. 1125)<br>• <code>2108102</code> Amélioration du système de planification, de suivi-évaluation et des statistiques (19,000,000 FCFA, p. 1129)<br>• <code>2108103</code> Amélioration du cadre de gestion des ressources humaines (62,706,205 FCFA, p. 1129)<br>• <code>2108104</code> Amélioration de la gestion des finances et du patrimoine (11,730,257,145 FCFA, p. 1129) |
-| `22082` | **Sport** | 39,900,994,619 FCFA | p. 1131 | • <code>2208201</code> Construction, réhabilitation et renforcement du parc des infrastructures sportives (21,949,210,665 FCFA, p. 1131)<br>• <code>2208202</code> Promotion des sports scolaires, universitaires, de masse et du sport pour tous (2,742,140,620 FCFA, p. 1131)<br>• <code>2208203</code> Encadrement de la vie fédérale et promotion des sports de haut niveau (15,209,643,334 FCFA, p. 1132) |
+| 21081 | Administration Générale | 17 906 782 766 | 1125–1129 | 2108101, 2108102, 2108103, 2108104 |
+| 22082 | Sport | 39 900 994 619 | 1131–1132 | 2208201, 2208202, 2208203 |
+| 23241 | Appui au développement durable du sport | 10 900 000 000 | 1134 | 2324101 Développement des activités fédérales — 7 430 000 000 ; 2324102 Promotion sociale et sanitaire du secteur sport — 200 000 000 ; 2324103 Construction, réhabilitation et équipement d'infrastructure socio-sportive — 3 270 000 000 |
+| 23249 | Appui à l'entretien et à la sécurisation des infrastructures | 1 720 000 000 | 1135 | 2324901 Entretien, maintenance et sécurisation des infrastructures — 1 720 000 000 |
 
-### 3. Statut de Contrôle
-- **Total Programmes** : 57,807,777,385 FCFA
-- **Total Actions** : 57,807,777,385 FCFA
-- **Total Section LFI 2026** : 57,807,777,385 FCFA
-- **Écart de réconciliation** : **0 FCFA** (`RECONCILED`)
-- **Fidélité textuelle** : 100% transcription verbatim de l'Annexe 4 DPPD-PAP Tableau 7.
-- **Statut Runtime** : `VERIFIED` + `STAGED` (non publié publiquement sans autorisation orchestrateur).
+Somme des programmes = somme des actions = total LFI = **70 427 777 385 FCFA**. Les programmes 232xx sont inclus une seule fois ; leurs activités ne sont pas additionnées au montant de leur action. Statut runtime : STAGED, aucune publication créée.

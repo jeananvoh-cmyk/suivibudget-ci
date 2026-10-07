@@ -2,16 +2,16 @@
 
 ```text
 LOT=15
-STATUS=PARTIAL
-DEPENDENCIES_BLOCKED=LOT5 incomplet ; sources métier et raccordements des LOTS6–12 non disponibles ; refonte historique et audit accessibilité complet non réalisés
-DOCUMENTS_USED=LFI2026 ; DPPD-PAP2026-2028 ; RAP2022 (métadonnées seulement) ; inventaires DOCUMENTS.json et LOT5_DOCUMENT_MANIFEST.json
+STATUS=BLOCKED
+DEPENDENCIES_BLOCKED=Authentification anon Supabase invalide pour la vérification en lecture seule ; sources métier des LOTS6–12 non disponibles ; audit accessibilité complet non réalisé
+DOCUMENTS_USED=LFI2026 ; DPPD-PAP2026-2028 ; RAP2022 local non exposé après recontrôle 404 ; inventaires et contrôles indépendants
 FILES_CHANGED=src/review/domain/{evidence,documents,execution,collectivities,history,snapshot}.ts ; src/review/ui/{DocumentLibrary,ReviewWorkspace}.tsx ; src/review/__tests__/{collectivities,stabilization}.test.ts ; docs/overnight/{LOT15_REPORT,FINAL_REPORT}.md ; docs/{AGENT_HANDOFF,CODEX_CHECKPOINT}.md
-TEST_TOTAL=412
-TEST_PASS=412
+TEST_TOTAL=423
+TEST_PASS=423
 TEST_FAIL=0
 BUILD=PASS
 ANOMALIES_FOUND=Dates impossibles acceptées ; référence pouvant masquer une page invalide ; métadonnées supplémentaires exportables ; provenance BP insuffisamment contrôlée ; statut NOT_COMPARABLE perdu ; contrat d'indicateur de performance à préciser
-ANOMALIES_REMAINING=Six programmes LOT5 non résolus ; aucune série métier nouvelle validée ; avertissement de taille du bundle historique ; audit WCAG complet non réalisé
+ANOMALIES_REMAINING=Vérification Supabase lecture seule bloquée par Invalid API key ; aucune série métier nouvelle validée ; avertissement de taille du bundle historique ; audit WCAG complet non réalisé
 REMOTE_SUPABASE_WRITES=0
 ```
 
@@ -19,8 +19,8 @@ Les anomalies techniques listées sont corrigées. Les dates sont contrôlées a
 
 `buildReviewSnapshot` compose le périmètre, les observations et les documents sans accès réseau. Il conserve null, UNKNOWN, NOT_COMPARABLE et BLOCKED, filtre les institutions étrangères au périmètre et ne décide aucune publication. L'interface consomme ce contrat avec des observations vides : aucun montant réel n'a été ajouté.
 
-Validation finale : 412/412 tests dans 30 fichiers, build production et build de revue séparé PASS. Chromium : 56 contrôles de débordement sur 7 vues et 8 largeurs (360–1920), aucune erreur JavaScript et aucune tentative de requête externe. Trois ministères bloqués, recherche documentaire, export JSON local, lien d'évitement au clavier et cibles de 44 px vérifiés. Le serveur local avait expiré au premier essai ; relancé sur la même adresse de boucle locale, le scénario complet a réussi. Captures et résultat détaillé : `/tmp/suivibudget-review-artifacts/`.
+Validation locale : 423/423 tests dans 31 fichiers, build production et build de revue séparé PASS. Chromium : 56 contrôles de débordement sur 7 vues et 8 largeurs (360–1920), aucune erreur JavaScript et aucune tentative de requête externe. Les trois ministères réconciliés restent UNKNOWN dans l'interface faute de données chargées ; recherche documentaire, export JSON local, lien d'évitement clavier et cibles de 44 px vérifiés. Captures et résultat détaillé : `/tmp/suivibudget-review-artifacts/`.
 
-Les chemins de données protégés, canoniques, contrôles indépendants et migrations sont identiques au commit `9730ab8`. Le build de production n'inclut pas `review.html`. Les nouveaux modules n'initialisent aucun service distant. Cette validation porte sur le périmètre technique local ; elle ne certifie ni les données absentes ni les pages historiques.
+Les données protégées et migrations restent inchangées. Les trois canoniques LOT5 et leurs contrôles indépendants sont corrigés. Le build de production n'inclut pas `review.html`. La vérification Supabase utilise un client séparé borné à GET/HEAD ; elle reste BLOCKED par la clé anon distante invalide. Cette validation locale ne certifie ni les données absentes ni les pages historiques.
 
 Reproduction : commandes et limites dans [LOT14_REPORT.md](LOT14_REPORT.md). Synthèse de livraison : [FINAL_REPORT.md](FINAL_REPORT.md).

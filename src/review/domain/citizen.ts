@@ -1,6 +1,7 @@
 import type { ApecPublicNeed } from '../../types';
 import { assessTarget, type DocumentedTarget } from './projects';
 import type { SourceDocument } from './documents';
+import { isCalendarDate } from './evidence';
 
 /** A projection provided by a trusted moderator, not a raw ApecEvent or private contribution. */
 export interface PublicTrackingEvent {
@@ -16,12 +17,13 @@ export interface PublicTrackingEvent {
 
 export function citizenTrack(need: ApecPublicNeed, target: DocumentedTarget | null,
   events: readonly PublicTrackingEvent[], documents: readonly SourceDocument[]) {
-  if (need.status !== 'PUBLISHED' || need.provenance !== 'CITIZEN_OBSERVATION' || !need.need_id.trim()) return null;
+  if (need.status !== 'PUBLISHED' || need.provenance !== 'CITIZEN_OBSERVATION' || !need.need_id.trim()
+    || !isCalendarDate(need.source_date) || !isCalendarDate(need.reviewed_at)) return null;
   const published = events.filter(e => e.needId === need.need_id && e.publicationStatus === 'PUBLISHED' && e.privacyReviewed);
   const conflict = new Set(published.map(e => e.id)).size !== published.length
     || new Set(published.map(e => e.sequence)).size !== published.length
     || published.some(e => !e.id.trim() || !Number.isSafeInteger(e.sequence) || e.sequence < 1
-      || !Number.isFinite(Date.parse(e.occurredAt)) || !e.publicSummary.trim());
+      || !isCalendarDate(e.occurredAt) || !e.publicSummary.trim());
   const targetMatches = target?.institutionId === need.institution_id && target.fiscalYear === need.fiscal_year;
   const linkStatus = target && targetMatches ? assessTarget(target, documents) : target ? 'BLOCKED' : 'UNKNOWN';
   return {

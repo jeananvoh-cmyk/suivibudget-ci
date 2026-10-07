@@ -31,10 +31,16 @@ export interface ReviewValue {
   reasons: string[];
 }
 
-/** Explicit unresolved dependencies, not inferred from the inaccurate LOT 5 VERIFIED flags. */
+/** Explicit unresolved dependencies. Empty after the independent LFI/DPPD reconciliation. */
+export const LOT5_UNRESOLVED_SCOPES: ReadonlyArray<{
+  institutionId: string;
+  sectionCode: string;
+  fiscalYear: number;
+}> = [];
+
 export function lot5Blocked(institutionId: string, sectionCode: string | null, year: number): boolean {
-  return year === 2026 && (['gov-017', 'gov-030', 'gov-034'].includes(institutionId.trim())
-    || ['336', '444', '334'].includes(sectionCode?.trim() ?? ''));
+  return LOT5_UNRESOLVED_SCOPES.some(scope => scope.fiscalYear === year
+    && (scope.institutionId === institutionId.trim() || scope.sectionCode === (sectionCode?.trim() ?? '')));
 }
 
 export function hasEvidence(evidence: EvidenceRef | null, year: number): boolean {

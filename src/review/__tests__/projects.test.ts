@@ -27,8 +27,8 @@ describe('LOT 9 — documented project relationships', () => {
   it('requires a source for a physical observation', () => {
     expect(projectDossier(project, [], [doc], { status: 'DOCUMENTED', description: 'test-only', evidence: null }).physical.description).toBeNull();
   });
-  it('propagates blocked ministries and missing primary documents', () => {
-    expect(projectDossier({ ...project, sectionCode: '336' }, [], [doc]).status).toBe('BLOCKED');
+  it('does not retain the resolved LOT 5 block and still rejects missing primary documents', () => {
+    expect(projectDossier({ ...project, sectionCode: '336' }, [], [doc]).status).toBe('AVAILABLE');
     expect(projectDossier(project, [link], []).status).toBe('BLOCKED');
   });
 });

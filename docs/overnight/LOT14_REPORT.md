@@ -3,8 +3,8 @@
 ```text
 LOT=14
 STATUS=PARTIAL
-DEPENDENCIES_BLOCKED=Données réelles non chargées ; LOT5 incomplet ; migration globale des pages historiques non réalisée
-DOCUMENTS_USED=Catalogue des 3 PDF officiels acquis ; UX_AUDIT.md (constats techniques, pas source métier)
+DEPENDENCIES_BLOCKED=Données réelles non chargées ; migration globale des pages historiques non réalisée
+DOCUMENTS_USED=Catalogue des 2 PDF officiels actuellement accessibles ; RAP 2022 local non exposé après recontrôle HTTP 404 ; UX_AUDIT.md
 FILES_CHANGED=review.html ; vite.review.config.ts ; src/review/catalog.ts, main.tsx, ui/* ; src/review/__tests__/workspace.test.tsx ; index.html ; src/index.css ; Header.tsx ; BottomNav.tsx ; scripts/verify-review-browser.cjs ; rapport LOT14
 TEST_TOTAL=404
 TEST_PASS=404

@@ -53,7 +53,7 @@ export function ReviewWorkspace() {
             {scopes.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}</select></label>
         </div>
         <div className="review-notice" role="status"><StatusBadge status={result.status} />
-          <p>{blocked ? 'Le budget de ce ministère pour 2026 reste incomplet. Les montants, taux et comparaisons qui en dépendent ne sont pas disponibles.'
+          <p>{blocked ? 'Ce périmètre comporte une dépendance documentaire non résolue. Les montants, taux et comparaisons qui en dépendent ne sont pas disponibles.'
             : 'Aucun montant vérifié n’est chargé pour ce périmètre dans cet espace. Les dossiers existants sont conservés ; aucune valeur de remplacement n’est utilisée.'}</p></div>
         {view === 'Sources' ? <DocumentLibrary documents={reviewDocuments} year={year} /> : view === 'Budgets' ? <>
           <div className="review-section-heading"><div><p className="review-eyebrow">Comprendre · {year}</p><h2>Trois questions, trois preuves</h2></div></div>

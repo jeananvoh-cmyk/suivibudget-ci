@@ -3,7 +3,7 @@
 ```text
 LOT=12
 STATUS=PARTIAL
-DEPENDENCIES_BLOCKED=Séries historiques et preuve d'équivalence des périmètres non acquises ; LOT5
+DEPENDENCIES_BLOCKED=Séries historiques et preuve d'équivalence des périmètres non acquises
 DOCUMENTS_USED=LFI/PAP 2026, RAP 2022 (exercices distincts, aucune concordance implicite)
 FILES_CHANGED=src/review/domain/history.ts ; src/review/__tests__/history.test.ts ; docs/overnight/LOT12_REPORT.md
 TEST_TOTAL=397
@@ -11,7 +11,7 @@ TEST_PASS=397
 TEST_FAIL=0
 BUILD=PASS
 ANOMALIES_FOUND=Périmètres non comparables, base zéro, export de valeurs bloquées et injection de formules CSV
-ANOMALIES_REMAINING=Jeux de données publics multi-exercices ; correspondances institutionnelles documentées ; LOT5
+ANOMALIES_REMAINING=Jeux de données publics multi-exercices ; correspondances institutionnelles documentées
 REMOTE_SUPABASE_WRITES=0
 ```
 

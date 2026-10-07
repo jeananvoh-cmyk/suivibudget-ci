@@ -1,5 +1,13 @@
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
+## 7 octobre 2026 — LOT5 corrigé, validation Supabase anon bloquée
+
+Les deux PDF DGBF ont été retéléchargés et leurs empreintes confirmées. Les programmes 23220, 23223, 23224, 23225, 23241 et 23249 et leurs neuf actions ont été extraits des pages officielles, puis ajoutés aux canoniques, goldens, registres et contrôles. Totaux corrigés : 334 = 182 301 855 312 ; 336 = 39 806 735 298 ; 444 = 70 427 777 385 FCFA. Contrôle anti-double-comptage et sommes actions/programmes/sections PASS. LOT5 = VALIDATED documentaire, toujours STAGED.
+
+LOTS7–12 : aucune donnée absente chargée. BP/CA, projets/marchés, contributions et réponses restent UNKNOWN ; comparaison 2022/2026 NOT_COMPARABLE. Le RAP2022 local garde son empreinte d'acquisition officielle, mais son URL répond désormais 404 et n'est plus exposée comme citation accessible. Dates citoyennes ISO calendaires, ID budget non vide et préservation de NOT_COMPARABLE testés.
+
+Résultats : 31 fichiers / 423 tests PASS ; builds production et revue PASS ; contrôle PDF indépendant PASS ; 56 contrôles navigateur PASS. Supabase : client anon initialisé, transport limité à GET/HEAD, trois SELECT LIMIT 1 échouent ; contrôle REST 401 `Invalid API key`. Aucun secret affiché, aucune mutation tentée. MASTER_MODIFIED=FALSE ; MERGE_PERFORMED=FALSE ; REMOTE_SUPABASE_WRITES=0 ; FINAL_STATUS=BLOCKED_SUPABASE_READ_ONLY_AUTH.
+
 ## 7 octobre 2026 — continuation autorisée, LOTS 6 à 15 soumis à revue
 
 État courant : `overnight/lots-5-15`, dix commits techniques isolés locaux, sans push, merge ni publication. Les LOTS6–15 sont PARTIAL : contrats purs, provenance, inconnues null, comparaisons, exports et interface locale isolée. Les dépendances documentaires et raccordements non réalisés sont explicités dans chaque rapport. LOT5 reste BLOCKED et les six omissions ne sont pas corrigées fictivement.

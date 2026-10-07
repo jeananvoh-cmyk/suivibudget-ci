@@ -1,45 +1,46 @@
-# Remise des LOTS 6 à 15 — 7 octobre 2026
+# État indépendant des LOTS 5 à 15 — 7 octobre 2026
 
-Les dix périmètres techniques sont livrés dans des commits isolés sur `overnight/lots-5-15`, prêts pour revue indépendante. Tous les lots restent PARTIAL : ils ne constituent pas une validation métier complète ou une autorisation de publication. Les dix commits de cette continuation sont locaux, sans push, merge ni déploiement.
+La branche contient une correction documentaire complète du LOT 5 et les architectures en lecture seule des LOTS 6 à 15. Elle n'est pas déclarée MERGEABLE : la validation Supabase anon en lecture seule échoue avec `Invalid API key`, et les sources métier requises par plusieurs lots restent absentes.
 
-| Lot | Commit | Statut | Tests PASS / total | Build production | Rapport |
-|---|---|---|---|---|---|
-| 6 | e11092c | PARTIAL | 362 / 362 | PASS | [Exécution et performance](LOT6_REPORT.md) |
-| 7 | 1364ae6 | PARTIAL | 368 / 368 | PASS | [Collectivités et versions](LOT7_REPORT.md) |
-| 8 | 4ec39b7 | PARTIAL | 376 / 376 | PASS | [Documents et citations](LOT8_REPORT.md) |
-| 9 | bdcd125 | PARTIAL | 381 / 381 | PASS | [Projets et liens documentés](LOT9_REPORT.md) |
-| 10 | 646bdc3 | PARTIAL | 386 / 386 | PASS | [Suivi citoyen](LOT10_REPORT.md) |
-| 11 | 5b54ccc | PARTIAL | 391 / 391 | PASS | [Réponses et audit](LOT11_REPORT.md) |
-| 12 | c82df5f | PARTIAL | 397 / 397 | PASS | [Historique et exports](LOT12_REPORT.md) |
-| 13 | d160757 | PARTIAL | 401 / 401 | PASS | [Audit UX et composants](LOT13_REPORT.md) |
-| 14 | 16b28b8 | PARTIAL | 404 / 404 | PASS | [Interface de revue](LOT14_REPORT.md) |
-| 15 | Commit contenant ce rapport | PARTIAL | 412 / 412 | PASS | [Stabilisation](LOT15_REPORT.md) |
+| Lot | Statut indépendant | Preuve acquise | Blocage restant |
+|---:|---|---|---|
+| 5 | VALIDATED | LFI et DPPD-PAP, 25 programmes, 66 actions, contrôles PDF et arithmétiques | Aucun pour le périmètre documentaire LOT5 ; publication toujours séparée |
+| 6 | PARTIAL | Contrats d'exécution/performance et tests | Exécution 2026, LFR/loi de règlement/RAP correspondant |
+| 7 | PARTIAL | Sélection de version, ID obligatoire, BP/CA séparés | Originaux BP, modificatifs et CA des collectivités |
+| 8 | PARTIAL | Catalogue public à liste blanche, deux PDF 2026 accessibles | Sources futures ; URL du RAP 2022 actuellement en 404 |
+| 9 | PARTIAL | Liens projet-budget sans agrégation | Fiches de projets et pièces DGMP officielles |
+| 10 | PARTIAL | Projection publique, dates ISO calendaires, confidentialité | Contributions publiques modérées réelles |
+| 11 | PARTIAL | Réponses et audits séparés par provenance | Réponses et rapports de contrôle officiels |
+| 12 | PARTIAL | NOT_COMPARABLE préservé, exports null | Sources multi-exercices et preuve d'équivalence |
+| 13 | PARTIAL | Composants accessibles et audit technique | Référence WCAG inaccessible, audit global et technologies d'assistance |
+| 14 | PARTIAL | Candidat local, 56 contrôles navigateur | Refonte de toutes les pages historiques et données réelles |
+| 15 | BLOCKED | 423 tests et deux builds PASS, contrôles documentaires/browser PASS | Authentification anon Supabase invalide pour les lectures demandées |
 
-Les totaux sont cumulatifs à chaque commit, pas des nombres de tests supplémentaires. Le commit LOT15 se retrouve par `git log --oneline -- docs/overnight/LOT15_REPORT.md`.
+## Sources officielles
 
-## Livrable et preuves
+- LFI 2026, 583 pages, SHA-256 `f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76`, HTTP 200.
+- Annexe 4 DPPD-PAP 2026-2028, 1 229 pages PDF, SHA-256 `0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10`, HTTP 200.
+- Portail RAP DGBF, HTTP 200. Le PDF RAP 2022 précédemment acquis garde son empreinte officielle, mais son URL répond désormais 404 ; il n'est plus exporté comme citation publique accessible.
 
-Les fonctions pures de `src/review/domain/` séparent exécution financière, performance, projets, contributions et réponses institutionnelles. Les inconnues restent null ; les comparaisons exigent un périmètre compatible et une provenance explicite. Aucun chiffre ministériel de remplacement n'a été créé. Les seuls nombres synthétiques sont des cas arithmétiques étiquetés test-only dans les tests.
+Les originaux BP/CA, projets/marchés, contributions et réponses institutionnelles n'ont pas été identifiés parmi les sources officielles disponibles dans ce périmètre. Les enregistrements correspondants restent à zéro et leur état métier reste UNKNOWN. Le RAP 2022 et les pièces 2026 ne sont pas combinés dans une série : leurs exercices et mesures ne sont pas comparables sans preuve supplémentaire.
 
-L'interface locale `review.html` propose sept vues et le catalogue de trois PDF officiels acquis. Aucune observation budgétaire, contribution ou réponse nouvelle n'y est chargée. Elle est construite séparément du site de production. Le code historique bénéficie de corrections ciblées pour le zoom, le focus et la navigation clavier ; sa refonte complète reste à faire.
+## Contrôles exécutés
 
-Validation finale : 30 fichiers / 412 tests PASS, zéro échec ; deux builds PASS. Le build historique conserve un avertissement de taille des bundles. Le navigateur vérifie 56 combinaisons vue/largeur sans débordement, zéro erreur JavaScript et zéro tentative réseau externe, plus les états bloqués, la recherche, l'export local et le clavier. Les captures 375/1440 px ont été inspectées. Cette couverture concerne le candidat, sans certification WCAG ni audit exhaustif des pages historiques.
+- Suite complète : 31 fichiers, 423 tests réussis, zéro échec.
+- Build production : PASS ; build de revue séparé : PASS. L'avertissement historique de taille de bundle reste présent.
+- Contrôle PDF indépendant : PASS pour les deux empreintes, six programmes, neuf actions, trois totaux de section et l'absence de doublons.
+- Chromium : 56 combinaisons sur 7 vues et 8 largeurs, zéro débordement, zéro erreur JavaScript et zéro requête externe ; états UNKNOWN sans zéro, recherche, export local, clavier et cibles tactiles vérifiés.
+- Données protégées et migrations : inchangées ; aucun fichier de migration ajouté ou modifié.
 
-Les PDF officiels et leurs empreintes figurent dans [DOCUMENTS.json](DOCUMENTS.json) et le [manifeste LOT5](../budget-ingestion/LOT5_DOCUMENT_MANIFEST.json). Le RAP acquis concerne 2022 ; aucune exécution 2026 n'en est déduite. L'accès à WCAG 2.2 a été refusé par la politique réseau ; cette source reste indisponible. Les documents officiels BP/CA/projets/marchés/réponses nécessaires aux nouvelles données restent à acquérir et contrôler.
+## Supabase en lecture seule
 
-## Blocages conservés et intégrité
+`VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` sont observées `ready` sans affichage de leur valeur. Le client Supabase a été initialisé avec session persistante et rafraîchissement désactivés. Son transport refuse toute méthode autre que GET/HEAD. Trois `SELECT id LIMIT 1` ont été tentés sur `institutions`, `public_documents` et `local_budgets` publié ; tous ont échoué. Un GET REST indépendant a confirmé `401 Invalid API key`.
 
-LOT5 reste BLOCKED : six programmes manquants pour MICOM/336, MSCV/444 et METFPA/334. Le [rapport indépendant](../budget-ingestion/LOT5_RESUMPTION_BLOCKED.md) et les [contrôles LFI](../budget-ingestion/LOT5_INDEPENDENT_LFI_CONTROLS.json) restent inchangés. Les anciens statuts VERIFIED/RECONCILED dans les canoniques hérités ne résolvent pas ces omissions. Les nouveaux contrats appliquent explicitement le blocage, même avec un montant candidat ou sans observation.
-
-`git diff --exit-code 9730ab8 -- src/data docs/imports docs/references/2026 src/budget-ingestion supabase` réussit. Bingerville, Cocody, Tiassalé, MMPE et les pilotes LOT4 sont préservés, sans réimport. Aucun fichier de migration ajouté ou modifié. La référence locale `origin/master` reste `8145c0423482438cc4cc2fc89af68cb399b06ebc` ; aucune commande de modification de master, merge, push ou déploiement n'a été exécutée pendant cette continuation.
-
-La revue suivante doit contrôler ces contrats et leurs limites, puis traiter séparément les sources manquantes et les raccordements autorisés. Aucun raccordement Supabase, contrôle RLS en production ou chargement métier ne fait partie de la validation présente. Le statut ci-dessous signifie « prêt pour revue », jamais « prêt à publier ».
+Aucun INSERT, UPDATE, DELETE, RPC, Storage, Auth, migration, seed ou service_role. La vérification de lecture reste BLOCKED jusqu'à mise à disposition d'une clé anon valide pour le projet autorisé.
 
 ```text
-LOT5_STATUS=BLOCKED
-LOTS6_15_STATUS=PARTIAL
 MASTER_MODIFIED=FALSE
 MERGE_PERFORMED=FALSE
 REMOTE_SUPABASE_WRITES=0
-FINAL_STATUS=READY_FOR_INDEPENDENT_REVIEW
+FINAL_STATUS=BLOCKED_SUPABASE_READ_ONLY_AUTH
 ```

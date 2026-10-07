@@ -3,7 +3,7 @@
 ```text
 LOT=9
 STATUS=PARTIAL
-DEPENDENCIES_BLOCKED=Fiches de projets et marchés DGMP non acquis ; LOT5 sections bloquées
+DEPENDENCIES_BLOCKED=Fiches de projets et marchés DGMP non acquis
 DOCUMENTS_USED=Exigences de sources primaires et catalogue LOT8 ; aucun nouveau projet officiel extrait
 FILES_CHANGED=src/review/domain/projects.ts ; src/review/__tests__/projects.test.ts ; docs/overnight/LOT9_REPORT.md
 TEST_TOTAL=381
