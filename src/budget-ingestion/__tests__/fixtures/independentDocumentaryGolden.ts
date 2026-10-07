@@ -722,7 +722,7 @@ export const INDEPENDENT_DOCUMENTARY_GOLDEN_2026: Record<string, IndependentGold
     institution_code: '444',
     institution_id: 'gov-030',
     institution_name: "MINISTERE DELEGUE AUPRES DU PREMIER MINISTRE, MINISTRE DES SPORTS ET DU CADRE DE VIE, CHARGE DES SPORTS ET DU CADRE DE VIE",
-    total_budget_2026_fcfa: 57807777385,
+    total_budget_2026_fcfa: 70427777385,
     programs: [
       {
         program_code: '21081',
@@ -773,13 +773,47 @@ export const INDEPENDENT_DOCUMENTARY_GOLDEN_2026: Record<string, IndependentGold
           },
         ],
       },
+      {
+        program_code: '23241',
+        official_name: "Appui au développement durable du sport",
+        amount_2026_fcfa: 10900000000,
+        actions: [
+          {
+            action_code: '2324101',
+            official_name: "Développement des activités fédérales",
+            amount_2026_fcfa: 7430000000,
+          },
+          {
+            action_code: '2324102',
+            official_name: "Promotion sociale et sanitaire du secteur sport",
+            amount_2026_fcfa: 200000000,
+          },
+          {
+            action_code: '2324103',
+            official_name: "Construction, réhabilitation et équipement d'infrastructure socio-sportive",
+            amount_2026_fcfa: 3270000000,
+          },
+        ],
+      },
+      {
+        program_code: '23249',
+        official_name: "Appui à l'entretien et à la sécurisation des infrastructures",
+        amount_2026_fcfa: 1720000000,
+        actions: [
+          {
+            action_code: '2324901',
+            official_name: "Entretien, maintenance et sécurisation des infrastructures",
+            amount_2026_fcfa: 1720000000,
+          },
+        ],
+      },
     ],
   },
   'MICOM': {
     institution_code: '336',
     institution_id: 'gov-017',
     institution_name: "MINISTERE DE LA COMMUNICATION",
-    total_budget_2026_fcfa: 19606735297,
+    total_budget_2026_fcfa: 39806735298,
     programs: [
       {
         program_code: '21077',
@@ -825,13 +859,49 @@ export const INDEPENDENT_DOCUMENTARY_GOLDEN_2026: Record<string, IndependentGold
           },
         ],
       },
+      {
+        program_code: '23223',
+        official_name: "Appui au financement de la Radiodiffusion Télévision Ivoirienne (RTI)",
+        amount_2026_fcfa: 16465000001,
+        actions: [
+          {
+            action_code: '2322301',
+            official_name: "Gestion de la Redevance RTI",
+            amount_2026_fcfa: 16465000001,
+          },
+        ],
+      },
+      {
+        program_code: '23224',
+        official_name: "Appui au financement de la Société Ivoirienne de Télédiffusion (IDT)",
+        amount_2026_fcfa: 2035000000,
+        actions: [
+          {
+            action_code: '2322401',
+            official_name: "Gestion des Centres de diffusion des programmes Télés et Radios nationales (Chaines TNT et Radios publiques)",
+            amount_2026_fcfa: 2035000000,
+          },
+        ],
+      },
+      {
+        program_code: '23225',
+        official_name: "Appui au financement du secteur des médias",
+        amount_2026_fcfa: 1700000000,
+        actions: [
+          {
+            action_code: '2322501',
+            official_name: "Gestion de la taxe sur la publicité",
+            amount_2026_fcfa: 1700000000,
+          },
+        ],
+      },
     ],
   },
   'METFPA': {
     institution_code: '334',
     institution_id: 'gov-034',
     institution_name: "MINISTERE DE L'ENSEIGNEMENT TECHNIQUE, DE LA FORMATION PROFESSIONNELLE ET DE L'APPRENTISSAGE",
-    total_budget_2026_fcfa: 136301855312,
+    total_budget_2026_fcfa: 182301855312,
     programs: [
       {
         program_code: '21210',
@@ -894,6 +964,178 @@ export const INDEPENDENT_DOCUMENTARY_GOLDEN_2026: Record<string, IndependentGold
           },
         ],
       },
+      {
+        program_code: '23220',
+        official_name: "Fonds de Développement de la Formation Professionnelle",
+        amount_2026_fcfa: 46000000000,
+        actions: [
+          {
+            action_code: '2322001',
+            official_name: "Gestion des ressources humaines, financières et matérielles",
+            amount_2026_fcfa: 17178600000,
+          },
+          {
+            action_code: '2322002',
+            official_name: "Accompagnement des entreprises dans l'élaboration et le financement des projets et des plans de formation de leurs travailleurs",
+            amount_2026_fcfa: 28821400000,
+          },
+        ],
+      },
     ],
+  },
+};
+
+// INDEPENDENT LFI 2026 BENCHMARK REFERENCES
+// Ce contrôle indépendant définit pour chaque ministère les grandeurs issues directement
+// de la Loi de Finances 2026 (Tableau récapitulatif par section, dotation et programme, pp. 45-54)
+export interface IndependentLfiReference {
+  institution_code: string;
+  institution_id: string;
+  lfi_total_fcfa: number;
+  program_count: number;
+  program_codes: string[];
+  program_amounts_fcfa: Record<string, number>;
+}
+
+export const INDEPENDENT_LFI_REFERENCES_2026: Record<string, IndependentLfiReference> = {
+  // LOT 4 PILOTS
+  'MJDH': {
+    institution_code: '325',
+    institution_id: 'gov-005',
+    lfi_total_fcfa: 129151307791,
+    program_count: 4,
+    program_codes: ['21044', '22045', '22046', '22143'],
+    program_amounts_fcfa: {
+      '21044': 94913084375,
+      '22045': 18880628287,
+      '22046': 14812595129,
+      '22143': 545000000,
+    },
+  },
+  'MEER': {
+    institution_code: '330',
+    institution_id: 'gov-025',
+    lfi_total_fcfa: 734442904943,
+    program_count: 3,
+    program_codes: ['21058', '22059', '23219'],
+    program_amounts_fcfa: {
+      '21058': 7964881215,
+      '22059': 446634263710,
+      '23219': 279843760018,
+    },
+  },
+  'MINEDDTE': {
+    institution_code: '343',
+    institution_id: 'gov-031',
+    lfi_total_fcfa: 36680067253,
+    program_count: 2,
+    program_codes: ['21079', '22080'],
+    program_amounts_fcfa: {
+      '21079': 7918536211,
+      '22080': 28761531042,
+    },
+  },
+  'MINEF': {
+    institution_code: '345',
+    institution_id: 'gov-018',
+    lfi_total_fcfa: 103197582643,
+    program_count: 5,
+    program_codes: ['21088', '22089', '22090', '22091', '23228'],
+    program_amounts_fcfa: {
+      '21088': 37824714687,
+      '22089': 58463516601,
+      '22090': 917332688,
+      '22091': 5092018667,
+      '23228': 900000000,
+    },
+  },
+  // LOT 5 BATCH 1 MINISTRIES
+  'MAIED': {
+    institution_code: '439',
+    institution_id: 'gov-033',
+    lfi_total_fcfa: 5122516889,
+    program_count: 3,
+    program_codes: ['21234', '22145', '22146'],
+    program_amounts_fcfa: {
+      '21234': 3743491132,
+      '22145': 1153795757,
+      '22146': 225230000,
+    },
+  },
+  'MAM': {
+    institution_code: '440',
+    institution_id: 'gov-032',
+    lfi_total_fcfa: 13746365872,
+    program_count: 2,
+    program_codes: ['21237', '22115'],
+    program_amounts_fcfa: {
+      '21237': 8311959782,
+      '22115': 5434406090,
+    },
+  },
+  'MFPMA': {
+    institution_code: '237',
+    institution_id: 'gov-003',
+    lfi_total_fcfa: 45121940916,
+    program_count: 3,
+    program_codes: ['21042', '22043', '22066'],
+    program_amounts_fcfa: {
+      '21042': 28450607800,
+      '22043': 14396485400,
+      '22066': 2274847716,
+    },
+  },
+  'MEPS': {
+    institution_code: '362',
+    institution_id: 'gov-023',
+    lfi_total_fcfa: 91411414044,
+    program_count: 4,
+    program_codes: ['21150', '22151', '22152', '22153'],
+    program_amounts_fcfa: {
+      '21150': 35849618984,
+      '22151': 2451846262,
+      '22152': 6374402905,
+      '22153': 46735545893,
+    },
+  },
+  'MSCV': {
+    institution_code: '444',
+    institution_id: 'gov-030',
+    lfi_total_fcfa: 70427777385,
+    program_count: 4,
+    program_codes: ['21081', '22082', '23241', '23249'],
+    program_amounts_fcfa: {
+      '21081': 17906782766,
+      '22082': 39900994619,
+      '23241': 10900000000,
+      '23249': 1720000000,
+    },
+  },
+  'MICOM': {
+    institution_code: '336',
+    institution_id: 'gov-017',
+    lfi_total_fcfa: 39806735298,
+    program_count: 5,
+    program_codes: ['21077', '22078', '23223', '23224', '23225'],
+    program_amounts_fcfa: {
+      '21077': 7354634682,
+      '22078': 12252100615,
+      '23223': 16465000001,
+      '23224': 2035000000,
+      '23225': 1700000000,
+    },
+  },
+  'METFPA': {
+    institution_code: '334',
+    institution_id: 'gov-034',
+    lfi_total_fcfa: 182301855312,
+    program_count: 4,
+    program_codes: ['21210', '22063', '22219', '23220'],
+    program_amounts_fcfa: {
+      '21210': 14408855796,
+      '22063': 111002347046,
+      '22219': 10890652470,
+      '23220': 46000000000,
+    },
   },
 };

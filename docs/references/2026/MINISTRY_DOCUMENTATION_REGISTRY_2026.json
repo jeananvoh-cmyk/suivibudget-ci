@@ -89,7 +89,8 @@
         "page_doc_start": 93,
         "page_doc_end": 110,
         "page_pdf_start": 95,
-        "page_pdf_end": 112
+        "page_pdf_end": 112,
+        "dppd_page_range": "pp. 103-113 (PDF pp. 95-125)"
       },
       "canonical_status": "READY_FOR_PUBLICATION",
       "programs_count": 3,
@@ -100,7 +101,11 @@
       "notes": "LOT 5 BATCH 1 — Référentiel canonique validé à 100% (delta = 0). Libellés transcrits verbatim de l'Annexe 4 DPPD-PAP Tableau 7. Statut VERIFIED / STAGED.",
       "documentary_status": "READY_FOR_CANONICAL",
       "reconciliation_status": "RECONCILED",
-      "publication_status": "STAGED"
+      "publication_status": "STAGED",
+      "budget_2026_fcfa": 45121940916,
+      "program_count": 3,
+      "action_count": 7,
+      "arithmetic_delta_fcfa": 0
     },
     {
       "institution_id": "gov-004",
@@ -478,7 +483,8 @@
         "page_doc_start": 631,
         "page_doc_end": 652,
         "page_pdf_start": 633,
-        "page_pdf_end": 654
+        "page_pdf_end": 654,
+        "dppd_page_range": "pp. 643-655 (PDF pp. 633-660)"
       },
       "canonical_status": "READY_FOR_PUBLICATION",
       "programs_count": 2,
@@ -489,7 +495,11 @@
       "notes": "LOT 5 BATCH 1 — Référentiel canonique validé à 100% (delta = 0). Libellés transcrits verbatim de l'Annexe 4 DPPD-PAP Tableau 7. Statut VERIFIED / STAGED.",
       "documentary_status": "READY_FOR_CANONICAL",
       "reconciliation_status": "RECONCILED",
-      "publication_status": "STAGED"
+      "publication_status": "STAGED",
+      "budget_2026_fcfa": 39806735298,
+      "program_count": 5,
+      "action_count": 9,
+      "arithmetic_delta_fcfa": 0
     },
     {
       "institution_id": "gov-018",
@@ -644,7 +654,8 @@
         "page_doc_start": 985,
         "page_doc_end": 1014,
         "page_pdf_start": 987,
-        "page_pdf_end": 1016
+        "page_pdf_end": 1016,
+        "dppd_page_range": "pp. 999-1011 (PDF pp. 987-1030)"
       },
       "canonical_status": "READY_FOR_PUBLICATION",
       "programs_count": 4,
@@ -655,7 +666,11 @@
       "notes": "LOT 5 BATCH 1 — Référentiel canonique validé à 100% (delta = 0). Libellés transcrits verbatim de l'Annexe 4 DPPD-PAP Tableau 7. Statut VERIFIED / STAGED.",
       "documentary_status": "READY_FOR_CANONICAL",
       "reconciliation_status": "RECONCILED",
-      "publication_status": "STAGED"
+      "publication_status": "STAGED",
+      "budget_2026_fcfa": 91411414044,
+      "program_count": 4,
+      "action_count": 15,
+      "arithmetic_delta_fcfa": 0
     },
     {
       "institution_id": "gov-024",
@@ -838,7 +853,8 @@
         "page_doc_start": 1115,
         "page_doc_end": 1140,
         "page_pdf_start": 1117,
-        "page_pdf_end": 1142
+        "page_pdf_end": 1142,
+        "dppd_page_range": "pp. 1127-1136 (PDF pp. 1117-1145)"
       },
       "canonical_status": "READY_FOR_PUBLICATION",
       "programs_count": 2,
@@ -849,7 +865,11 @@
       "notes": "LOT 5 BATCH 1 — Référentiel canonique validé à 100% (delta = 0). Libellés transcrits verbatim de l'Annexe 4 DPPD-PAP Tableau 7. Statut VERIFIED / STAGED.",
       "documentary_status": "READY_FOR_CANONICAL",
       "reconciliation_status": "RECONCILED",
-      "publication_status": "STAGED"
+      "publication_status": "STAGED",
+      "budget_2026_fcfa": 70427777385,
+      "program_count": 4,
+      "action_count": 11,
+      "arithmetic_delta_fcfa": 0
     },
     {
       "institution_id": "gov-031",
@@ -892,7 +912,8 @@
         "page_doc_start": 1101,
         "page_doc_end": 1114,
         "page_pdf_start": 1103,
-        "page_pdf_end": 1116
+        "page_pdf_end": 1116,
+        "dppd_page_range": "pp. 1110-1115 (PDF pp. 1103-1117)"
       },
       "canonical_status": "READY_FOR_PUBLICATION",
       "programs_count": 2,
@@ -903,7 +924,11 @@
       "notes": "LOT 5 BATCH 1 — Référentiel canonique validé à 100% (delta = 0). Libellés transcrits verbatim de l'Annexe 4 DPPD-PAP Tableau 7. Statut VERIFIED / STAGED.",
       "documentary_status": "READY_FOR_CANONICAL",
       "reconciliation_status": "RECONCILED",
-      "publication_status": "STAGED"
+      "publication_status": "STAGED",
+      "budget_2026_fcfa": 13746365872,
+      "program_count": 2,
+      "action_count": 7,
+      "arithmetic_delta_fcfa": 0
     },
     {
       "institution_id": "gov-033",
@@ -919,7 +944,8 @@
         "page_doc_start": 1085,
         "page_doc_end": 1100,
         "page_pdf_start": 1087,
-        "page_pdf_end": 1102
+        "page_pdf_end": 1102,
+        "dppd_page_range": "pp. 1095-1102 (PDF pp. 1087-1103)"
       },
       "canonical_status": "READY_FOR_PUBLICATION",
       "programs_count": 3,
@@ -930,7 +956,11 @@
       "notes": "LOT 5 BATCH 1 — Référentiel canonique validé à 100% (delta = 0). Libellés transcrits verbatim de l'Annexe 4 DPPD-PAP Tableau 7. Statut VERIFIED / STAGED.",
       "documentary_status": "READY_FOR_CANONICAL",
       "reconciliation_status": "RECONCILED",
-      "publication_status": "STAGED"
+      "publication_status": "STAGED",
+      "budget_2026_fcfa": 5122516889,
+      "program_count": 3,
+      "action_count": 7,
+      "arithmetic_delta_fcfa": 0
     },
     {
       "institution_id": "gov-034",
@@ -946,7 +976,8 @@
         "page_doc_start": 537,
         "page_doc_end": 562,
         "page_pdf_start": 539,
-        "page_pdf_end": 564
+        "page_pdf_end": 564,
+        "dppd_page_range": "pp. 547-564 (PDF pp. 539-580)"
       },
       "canonical_status": "READY_FOR_PUBLICATION",
       "programs_count": 3,
@@ -957,7 +988,11 @@
       "notes": "LOT 5 BATCH 1 — Référentiel canonique validé à 100% (delta = 0). Libellés transcrits verbatim de l'Annexe 4 DPPD-PAP Tableau 7. Statut VERIFIED / STAGED.",
       "documentary_status": "READY_FOR_CANONICAL",
       "reconciliation_status": "RECONCILED",
-      "publication_status": "STAGED"
+      "publication_status": "STAGED",
+      "budget_2026_fcfa": 182301855312,
+      "program_count": 4,
+      "action_count": 10,
+      "arithmetic_delta_fcfa": 0
     },
     {
       "institution_id": "gov-035",

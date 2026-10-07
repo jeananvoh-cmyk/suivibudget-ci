@@ -1,27 +1,27 @@
 {
   "institution_code": "334",
-  "institution_name": "MINISTERE DE L'ENSEIGNEMENT TECHNIQUE, DE LA FORMATION PROFESSIONNELLE ET DE L'APPRENTISSAGE",
+  "institution_name": "Ministère de l'Enseignement Technique, de la Formation Professionnelle et de l'Apprentissage",
   "fiscal_year": 2026,
-  "extraction_date": "2026-10-07",
+  "extraction_date": "2026-10-06",
   "source": {
     "publisher": "Direction Générale du Budget et des Finances (DGBF)",
     "document": "Annexe 4 — Documents de Programmation Pluriannuelle des Dépenses - Projets Annuels de Performance (DPPD-PAP) 2026-2028",
     "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
     "section_reference": "SECTION 334 : MINISTERE DE L'ENSEIGNEMENT TECHNIQUE, DE LA FORMATION PROFESSIONNELLE ET DE L'APPRENTISSAGE",
-    "page_range": "PDF pp. 539-564 (Document pp. 537-562 sur 1227)",
-    "accessed_at": "2026-10-07"
+    "page_range": "DPPD-PAP pp. 475-504 / LFI p. 49",
+    "accessed_at": "2026-10-06"
   },
   "control_source": {
     "publisher": "DGBF",
     "document": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
     "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-    "section_reference": "Section code 334"
+    "section_reference": "Ministère code 334"
   },
   "totals": {
-    "total_ministry_2026_fcfa": 136301855312,
-    "programs_sum_2026_fcfa": 136301855312,
+    "total_ministry_2026_fcfa": 182301855312,
+    "programs_sum_2026_fcfa": 182301855312,
     "programs_delta": 0,
-    "actions_sum_2026_fcfa": 136301855312,
+    "actions_sum_2026_fcfa": 182301855312,
     "actions_delta": 0,
     "reconciliation_status": "RECONCILED"
   },
@@ -30,44 +30,40 @@
       "program_code": "21210",
       "official_name": "Administration Générale",
       "program_amount_2026_fcfa": 14408855796,
-      "page_reference": "PDF p. 548",
-      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "page_reference": "DPPD-PAP pp. 475-504 / LFI p. 49 - Tableau 7",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
         {
           "action_code": "2121001",
           "official_name": "Coordination et animation",
-          "program_code": "21210",
           "amount_2026_fcfa": 12104810898,
-          "page_reference": "PDF p. 548",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 475-504 / LFI p. 49 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
           "action_code": "2121002",
           "official_name": "Gestion des ressources humaines financières et matérielles",
-          "program_code": "21210",
           "amount_2026_fcfa": 2192007247,
-          "page_reference": "PDF p. 549",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 475-504 / LFI p. 49 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
           "action_code": "2121003",
           "official_name": "Information et communication",
-          "program_code": "21210",
           "amount_2026_fcfa": 71446453,
-          "page_reference": "PDF p. 550",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 475-504 / LFI p. 49 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
           "action_code": "2121004",
           "official_name": "Planification, programmation et suivie -évaluation",
-          "program_code": "21210",
           "amount_2026_fcfa": 40591198,
-          "page_reference": "PDF p. 550",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 475-504 / LFI p. 49 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
       ]
@@ -76,35 +72,32 @@
       "program_code": "22063",
       "official_name": "Formation professionnelle et apprentissage",
       "program_amount_2026_fcfa": 111002347046,
-      "page_reference": "PDF p. 552",
-      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "page_reference": "DPPD-PAP pp. 475-504 / LFI p. 49 - Tableau 7",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
         {
           "action_code": "2206301",
           "official_name": "Modernisation de la formation professionnelle initiale et continue",
-          "program_code": "22063",
           "amount_2026_fcfa": 76997712480,
-          "page_reference": "PDF p. 552",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 475-504 / LFI p. 49 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
           "action_code": "2206302",
           "official_name": "Construction, réhabilitation et équipement des structures de formation professionnelle",
-          "program_code": "22063",
           "amount_2026_fcfa": 29526339261,
-          "page_reference": "PDF p. 558",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 475-504 / LFI p. 49 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
           "action_code": "2206303",
           "official_name": "Développement de la formation professionnelle qualifiante et de l'apprentissage",
-          "program_code": "22063",
           "amount_2026_fcfa": 4478295305,
-          "page_reference": "PDF p. 558",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 475-504 / LFI p. 49 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
       ]
@@ -113,17 +106,42 @@
       "program_code": "22219",
       "official_name": "Enseignement secondaire technique",
       "program_amount_2026_fcfa": 10890652470,
-      "page_reference": "PDF p. 561",
-      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "page_reference": "DPPD-PAP pp. 475-504 / LFI p. 49 - Tableau 7",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
         {
           "action_code": "2221901",
           "official_name": "Gestion des établissements du secondaire technique",
-          "program_code": "22219",
           "amount_2026_fcfa": 10890652470,
-          "page_reference": "PDF p. 561",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 475-504 / LFI p. 49 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "23220",
+      "official_name": "Fonds de Développement de la Formation Professionnelle",
+      "program_amount_2026_fcfa": 46000000000,
+      "page_reference": "DPPD-PAP pp. 475-504 / LFI p. 49 - Tableau 7",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2322001",
+          "official_name": "Gestion des ressources humaines, financières et matérielles",
+          "amount_2026_fcfa": 17178600000,
+          "page_reference": "DPPD-PAP pp. 475-504 / LFI p. 49 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2322002",
+          "official_name": "Accompagnement des entreprises dans l'élaboration et le financement des projets et des plans de formation de leurs travailleurs",
+          "amount_2026_fcfa": 28821400000,
+          "page_reference": "DPPD-PAP pp. 475-504 / LFI p. 49 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
       ]

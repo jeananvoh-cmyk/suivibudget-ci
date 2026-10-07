@@ -1,21 +1,21 @@
 {
   "institution_code": "237",
-  "institution_name": "MINISTERE D'ETAT, MINISTERE DE LA FONCTION PUBLIQUE ET DE LA MODERNISATION DE L'ADMINISTRATION",
+  "institution_name": "Ministère d'Etat, Ministère de la Fonction Publique et de la Modernisation de l'Administration",
   "fiscal_year": 2026,
-  "extraction_date": "2026-10-07",
+  "extraction_date": "2026-10-06",
   "source": {
     "publisher": "Direction Générale du Budget et des Finances (DGBF)",
     "document": "Annexe 4 — Documents de Programmation Pluriannuelle des Dépenses - Projets Annuels de Performance (DPPD-PAP) 2026-2028",
     "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
     "section_reference": "SECTION 237 : MINISTERE D'ETAT, MINISTERE DE LA FONCTION PUBLIQUE ET DE LA MODERNISATION DE L'ADMINISTRATION",
-    "page_range": "PDF pp. 95-112 (Document pp. 93-110 sur 1227)",
-    "accessed_at": "2026-10-07"
+    "page_range": "DPPD-PAP pp. 101-125 / LFI p. 46",
+    "accessed_at": "2026-10-06"
   },
   "control_source": {
     "publisher": "DGBF",
     "document": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
     "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-    "section_reference": "Section code 237"
+    "section_reference": "Ministère code 237"
   },
   "totals": {
     "total_ministry_2026_fcfa": 45121940916,
@@ -30,35 +30,32 @@
       "program_code": "21042",
       "official_name": "Administration Générale",
       "program_amount_2026_fcfa": 28450607800,
-      "page_reference": "PDF p. 104",
-      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "page_reference": "DPPD-PAP pp. 101-125 / LFI p. 46 - Tableau 7",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
         {
           "action_code": "2104201",
           "official_name": "Coordination et animation du ministère",
-          "program_code": "21042",
           "amount_2026_fcfa": 1040870000,
-          "page_reference": "PDF p. 104",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 101-125 / LFI p. 46 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
           "action_code": "2104202",
           "official_name": "Gestion des ressources (humaines, financières et matérielles)",
-          "program_code": "21042",
           "amount_2026_fcfa": 27215737800,
-          "page_reference": "PDF p. 105",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 101-125 / LFI p. 46 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
           "action_code": "2104206",
           "official_name": "Gestion de la communication, planification, programmation et suivi-évaluation",
-          "program_code": "21042",
           "amount_2026_fcfa": 194000000,
-          "page_reference": "PDF p. 105",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 101-125 / LFI p. 46 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
       ]
@@ -67,26 +64,24 @@
       "program_code": "22043",
       "official_name": "Fonction Publique",
       "program_amount_2026_fcfa": 14396485400,
-      "page_reference": "PDF p. 108",
-      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "page_reference": "DPPD-PAP pp. 101-125 / LFI p. 46 - Tableau 7",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
         {
           "action_code": "2204301",
           "official_name": "Amélioration du système de recrutement et de gestion de la carrière des fonctionnaires et agents de l'Etat",
-          "program_code": "22043",
           "amount_2026_fcfa": 7468283463,
-          "page_reference": "PDF p. 108",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 101-125 / LFI p. 46 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
           "action_code": "2204303",
           "official_name": "Formation et perfectionnement des cadres de l'administration publique et agents de l'Etat",
-          "program_code": "22043",
           "amount_2026_fcfa": 6928201937,
-          "page_reference": "PDF p. 110",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 101-125 / LFI p. 46 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
       ]
@@ -95,26 +90,24 @@
       "program_code": "22066",
       "official_name": "Modernisation de l'Administration",
       "program_amount_2026_fcfa": 2274847716,
-      "page_reference": "PDF p. 112",
-      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "page_reference": "DPPD-PAP pp. 101-125 / LFI p. 46 - Tableau 7",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
         {
           "action_code": "2206601",
           "official_name": "Conception et promotion des outils de Modernisation de l'Administration",
-          "program_code": "22066",
           "amount_2026_fcfa": 797776350,
-          "page_reference": "PDF p. 112",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 101-125 / LFI p. 46 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
           "action_code": "2206609",
           "official_name": "Renforcement de la politique de modernisation de l'Administration",
-          "program_code": "22066",
           "amount_2026_fcfa": 1477071366,
-          "page_reference": "PDF p. 112",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 101-125 / LFI p. 46 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
       ]

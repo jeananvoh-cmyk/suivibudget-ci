@@ -1,21 +1,21 @@
 {
   "institution_code": "440",
-  "institution_name": "MINISTERE DELEGUE AUPRES DU MINISTRE DES TRANSPORTS, CHARGE DES AFFAIRES MARITIMES",
+  "institution_name": "Ministère Délégué auprès du Ministre des Transports, chargé des Affaires Maritimes",
   "fiscal_year": 2026,
-  "extraction_date": "2026-10-07",
+  "extraction_date": "2026-10-06",
   "source": {
     "publisher": "Direction Générale du Budget et des Finances (DGBF)",
     "document": "Annexe 4 — Documents de Programmation Pluriannuelle des Dépenses - Projets Annuels de Performance (DPPD-PAP) 2026-2028",
     "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
     "section_reference": "SECTION 440 : MINISTERE DELEGUE AUPRES DU MINISTRE DES TRANSPORTS, CHARGE DES AFFAIRES MARITIMES",
-    "page_range": "PDF pp. 1103-1116 (Document pp. 1101-1114 sur 1227)",
-    "accessed_at": "2026-10-07"
+    "page_range": "DPPD-PAP pp. 1101-1120 / LFI p. 53",
+    "accessed_at": "2026-10-06"
   },
   "control_source": {
     "publisher": "DGBF",
     "document": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
     "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-    "section_reference": "Section code 440"
+    "section_reference": "Ministère code 440"
   },
   "totals": {
     "total_ministry_2026_fcfa": 13746365872,
@@ -30,44 +30,40 @@
       "program_code": "21237",
       "official_name": "Administration générale",
       "program_amount_2026_fcfa": 8311959782,
-      "page_reference": "PDF p. 1111",
-      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "page_reference": "DPPD-PAP pp. 1101-1120 / LFI p. 53 - Tableau 7",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
         {
           "action_code": "2123701",
           "official_name": "Coordination et animation du ministère",
-          "program_code": "21237",
           "amount_2026_fcfa": 363148630,
-          "page_reference": "PDF p. 1111",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 1101-1120 / LFI p. 53 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
           "action_code": "2123702",
           "official_name": "Gestion des ressources humaines, financières et matérielles",
-          "program_code": "21237",
           "amount_2026_fcfa": 7729826014,
-          "page_reference": "PDF p. 1111",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 1101-1120 / LFI p. 53 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
           "action_code": "2123703",
           "official_name": "Planification, programmation et suivi évaluation",
-          "program_code": "21237",
           "amount_2026_fcfa": 157150000,
-          "page_reference": "PDF p. 1112",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 1101-1120 / LFI p. 53 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
           "action_code": "2123704",
           "official_name": "Information et Communication",
-          "program_code": "21237",
           "amount_2026_fcfa": 61835138,
-          "page_reference": "PDF p. 1112",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 1101-1120 / LFI p. 53 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
       ]
@@ -76,35 +72,32 @@
       "program_code": "22115",
       "official_name": "Transport maritime et fluvio-lagunaire",
       "program_amount_2026_fcfa": 5434406090,
-      "page_reference": "PDF p. 1114",
-      "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+      "page_reference": "DPPD-PAP pp. 1101-1120 / LFI p. 53 - Tableau 7",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
         {
           "action_code": "2211501",
           "official_name": "Coordination et suivi des activités de transport, de sécurité, de sûreté et de formation maritimes",
-          "program_code": "22115",
           "amount_2026_fcfa": 1652866596,
-          "page_reference": "PDF p. 1114",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 1101-1120 / LFI p. 53 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
           "action_code": "2211502",
           "official_name": "Construction d'infrastructures et acquisition d'équipements techniques de sécurité et de sûreté maritime",
-          "program_code": "22115",
           "amount_2026_fcfa": 2961180530,
-          "page_reference": "PDF p. 1115",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 1101-1120 / LFI p. 53 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
         {
           "action_code": "2211503",
           "official_name": "Renforcement des capacités didactiques et opérationnelles des structures de formation maritime",
-          "program_code": "22115",
           "amount_2026_fcfa": 820358964,
-          "page_reference": "PDF p. 1115",
-          "table_reference": "Tableau 7 : Déclinaison des crédits par action",
+          "page_reference": "DPPD-PAP pp. 1101-1120 / LFI p. 53 - Tableau 7",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
       ]

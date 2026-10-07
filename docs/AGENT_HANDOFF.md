@@ -5,41 +5,41 @@
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/lot5-ministry-generalization-2026`
 - BASE_MASTER_SHA : `8145c0423482438cc4cc2fc89af68cb399b06ebc` (Merge commit de PR #27 sur master)
-- CURRENT_HEAD : voir HEAD courante de PR LOT 5
+- CURRENT_HEAD : voir HEAD courante de PR #28
 - LAST_VERIFIED_CODE_HEAD : voir commit courant LOT 5
-- PR : PR LOT 5 (`feat(lot5): controlled ministerial budget generalization with Batch 1 (7 ministries)`)
+- PR : PR #28 (`feat(lot5): controlled ministerial budget generalization with Batch 1 (7 ministries)`)
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_SUPABASE_WRITES = 0)
-- CURRENT_MILESTONE : LOT 5 — Généralisation ministérielle 2026 contrôlée. Batch 1 intégré avec succès (7 nouveaux ministères, 19 programmes, 57 actions, 369 118 605 715 FCFA, delta = 0). Volume budgétaire ministériel cumulé vérifié : 2 078 650 673 360 FCFA (12 ministères, représentant près de 12% du budget de l'État). Libellés officiels 100% conformes verbatim à l'Annexe 4 DPPD-PAP. Isolation stricte de publication : seul MMPE (gov-008) reste PUBLISHED, les 11 autres ministères vérifiés sont en statut VERIFIED / STAGED. Fixtures golden indépendantes mises à jour et 21 tests de généralisation PASS.
+- CURRENT_MILESTONE : LOT 5 — Généralisation ministérielle 2026 contrôlée. Réconciliation intégrale du périmètre LFI 2026 suite à l'audit bloquant indépendant de la PR #28. Batch 1 réconcilié avec 7 ministères complets (25 programmes, 66 actions, 447 938 605 716 FCFA, delta = 0). Volume budgétaire ministériel cumulé vérifié : 2 157 470 677 361 FCFA (12 ministères, représentant 12,43% du budget de l'État). Libellés officiels 100% conformes verbatim à la LFI 2026 et à l'Annexe 4 DPPD-PAP. Isolation stricte de publication : seul MMPE (gov-008) reste PUBLISHED, les 11 autres ministères vérifiés sont en statut VERIFIED / STAGED. Fixtures golden indépendantes avec INDEPENDENT_LFI_REFERENCES_2026 et 29 tests de généralisation PASS (358 tests PASS au total sur le repo).
 - FOUNDATION_READY : TRUE.
 
 ## LOT 5 : GÉNÉRALISATION MINISTÉRIELLE 2026 CONTRÔLÉE (BATCH 1)
 - **1. Objectif & Cadre du Batch 1** :
   - Généralisation industrielle progressive basée strictement sur l'architecture validée aux LOTS 2, 3 et 4.
-  - Sélection rigoureuse de 7 ministères à haute complétude documentaire et cohérence arithmétique vérifiable dans la LFI 2026 et l'Annexe 4 DPPD-PAP 2026-2028 (Tableau 7) :
+  - Réconciliation intégrale du périmètre officiel de la Loi de Finances 2026 (Tableau récapitulatif par section, dotation et programme, pp. 45–54) et de l'Annexe 4 DPPD-PAP 2026-2028 (Tableau 7) pour les 7 ministères du Batch 1 :
     1. **MAIED** (`gov-033` / Section DGBF `439`) — Intégration Africaine et Ivoiriens de l'Extérieur : **5 122 516 889 FCFA** (3 programmes, 7 actions, delta = 0).
     2. **MAM** (`gov-032` / Section DGBF `440`) — Affaires Maritimes : **13 746 365 872 FCFA** (2 programmes, 7 actions, delta = 0).
     3. **MFPMA** (`gov-003` / Section DGBF `237`) — Fonction Publique et Modernisation de l'Administration : **45 121 940 916 FCFA** (3 programmes, 7 actions, delta = 0).
     4. **MEPS** (`gov-023` / Section DGBF `362`) — Emploi et Protection Sociale : **91 411 414 044 FCFA** (4 programmes, 15 actions, delta = 0).
-    5. **MSCV** (`gov-030` / Section DGBF `444`) — Sports et Cadre de Vie : **57 807 777 385 FCFA** (2 programmes, 7 actions, delta = 0).
-    6. **MICOM** (`gov-017` / Section DGBF `336`) — Communication : **19 606 735 297 FCFA** (2 programmes, 6 actions, delta = 0).
-    7. **METFPA** (`gov-034` / Section DGBF `334`) — Enseignement Technique, Formation Professionnelle et Apprentissage : **136 301 855 312 FCFA** (3 programmes, 8 actions, delta = 0).
-  - Volume budgétaire Batch 1 : **369 118 605 715 FCFA** (19 programmes, 57 actions, delta = 0).
-  - Volume budgétaire cumulé vérifié (12 ministères) : **2 078 650 673 360 FCFA** (~12% du budget national 2026).
+    5. **MSCV** (`gov-030` / Section DGBF `444`) — Sports et Cadre de Vie : **70 427 777 385 FCFA** (4 programmes, 11 actions, delta = 0).
+    6. **MICOM** (`gov-017` / Section DGBF `336`) — Communication : **39 806 735 298 FCFA** (5 programmes, 9 actions, delta = 0).
+    7. **METFPA** (`gov-034` / Section DGBF `334`) — Enseignement Technique, Formation Professionnelle et Apprentissage : **182 301 855 312 FCFA** (4 programmes, 10 actions, delta = 0).
+  - Volume budgétaire Batch 1 : **447 938 605 716 FCFA** (25 programmes, 66 actions, delta = 0).
+  - Volume budgétaire cumulé vérifié (12 ministères) : **2 157 470 677 361 FCFA** (~12,43% du budget national 2026 de 17 350,2 Mds FCFA).
 - **2. Cartographie des 35 Institutions dans le Registre Documentaire Central** :
   - `docs/references/2026/MINISTRY_DOCUMENTATION_REGISTRY_2026.json` mis à jour :
-    - 12 ministères `VALIDATED` / `READY_FOR_PUBLICATION`.
+    - 12 ministères `VALIDATED` / `READY_FOR_PUBLICATION` (totaux et programmes réconciliés LFI 2026).
     - 23 ministères documentés avec motifs transparents de blocage ou différé (sections partagées 229, dotation globale sans tableau PAP 7 pour gov-001, cadrage étendu requis pour grands régaliens et pagination complexe).
 - **3. Isolation Stricte de Publication** :
   - Maintenue dans `src/budget-ingestion/registry/ministryRegistry.ts` :
     - `getPublishedMinistries()` retourne UNIQUEMENT MMPE (`gov-008`).
     - `getVerifiedMinistries()` retourne les 12 ministères vérifiés.
-    - `getPendingMinistries()` retourne les 23 institutions restantes.
+    - `getPendingMinistries()` retourne les 34 entités non-publiées (23 en attente de documentation).
 - **4. Fixtures Golden et Tests d'Intégration Indépendants** :
-  - `src/budget-ingestion/__tests__/fixtures/independentDocumentaryGolden.ts` : couvre désormais l'ensemble des 11 ministères non-MMPE vérifiés avec valeurs en dur strictes.
-  - `src/budget-ingestion/__tests__/lot5Generalization.test.ts` : 21 tests vérifiant ingestion, statut réconcilié, non-publication stricte et tests négatifs de sensibilité.
+  - `src/budget-ingestion/__tests__/fixtures/independentDocumentaryGolden.ts` : intègre `INDEPENDENT_LFI_REFERENCES_2026` et couvre l'intégralité des 11 ministères non-MMPE vérifiés avec valeurs en dur strictes.
+  - `src/budget-ingestion/__tests__/lot5Generalization.test.ts` : 29 tests vérifiant les contrôles indépendants LFI, ingestion, statut réconcilié, non-publication stricte et tests négatifs de sensibilité.
   - `src/budget-ingestion/__tests__/pilotMinistries.test.ts` : 15 tests validant l'intégrité intacte des pilotes LOT 4.
 - **5. Rapport de Couverture** :
-  - `docs/budget-ingestion/LOT5_MINISTRY_COVERAGE_REPORT.md` créé.
+  - `docs/budget-ingestion/LOT5_MINISTRY_COVERAGE_REPORT.md` mis à jour.
 
 ## LOT 4 : INDUSTRIALISATION DOCUMENTAIRE & ONBOARDING MINISTÉRIEL
 - **1. Objectif & Stratégie d'Échantillonnage Pilote** :

@@ -1,26 +1,28 @@
-# Registre des Sources Documentaires — MAM 2026
-## MINISTERE DELEGUE AUPRES DU MINISTRE DES TRANSPORTS, CHARGE DES AFFAIRES MARITIMES (Section DGBF 440)
+# Registre des Sources Documentaires — Ministère Délégué chargé des Affaires Maritimes (MAM / Section 440)
 
-### 1. Documents Sources Primaires
-1. **Annexe 4 — DPPD-PAP 2026-2028 (DGBF)** :
-   - URL officielle : `https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf`
-   - Plage documentaire : pp. 1101-1114 (document), pp. 1103-1116 (PDF)
-   - Table de référence : Tableau 7 (« Déclinaison des crédits par action » de chaque programme)
-2. **Loi de Finances Initiale (LFI) 2026** :
-   - URL officielle : `https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf`
-   - Référence : Page 54 (Récapitulatif par Section, Dotation et Programme)
-   - Montant voté total : **13,746,365,872 FCFA**
+## 1. Sources Primaires Officielles
+- **Source Primaire S1 (Loi de Finances)** :
+  - *Loi n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026*
+  - Section DGBF : **440**
+  - Dotation budgétaire votée LFI 2026 : **13 746 365 872 FCFA**
+  - Référence documentaire : Page 54 (Tableau récapitulatif par section, dotation et programme).
+  - URL officielle : `https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf`
+- **Source Sectorielle S2 (Programmes & Actions)** :
+  - *Annexe 4 — Documents de Programmation Pluriannuelle des Dépenses - Projets Annuels de Performance (DPPD-PAP 2026-2028)*
+  - Section 440 : Pages 1110–1115 (PDF pp. 1103–1117)
+  - URL officielle : `https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf`
 
-### 2. Déclinaison et Réconciliation Documentaire
-| Code Programme | Libellé Officiel Verbatim | Montant Voté CP 2026 | Page Source DPPD | Actions Budgétaires Documentées |
-|---|---|---:|---|---|
-| `21237` | **Administration générale** | 8,311,959,782 FCFA | p. 1111 | • <code>2123701</code> Coordination et animation du ministère (363,148,630 FCFA, p. 1111)<br>• <code>2123702</code> Gestion des ressources humaines, financières et matérielles (7,729,826,014 FCFA, p. 1111)<br>• <code>2123703</code> Planification, programmation et suivi évaluation (157,150,000 FCFA, p. 1112)<br>• <code>2123704</code> Information et Communication (61,835,138 FCFA, p. 1112) |
-| `22115` | **Transport maritime et fluvio-lagunaire** | 5,434,406,090 FCFA | p. 1114 | • <code>2211501</code> Coordination et suivi des activités de transport, de sécurité, de sûreté et de formation maritimes (1,652,866,596 FCFA, p. 1114)<br>• <code>2211502</code> Construction d'infrastructures et acquisition d'équipements techniques de sécurité et de sûreté maritime (2,961,180,530 FCFA, p. 1115)<br>• <code>2211503</code> Renforcement des capacités didactiques et opérationnelles des structures de formation maritime (820,358,964 FCFA, p. 1115) |
+## 2. Décomposition Budgétaire Réconciliée (Delta = 0)
+- **Programme 1 : `21237` Administration générale** — **8 311 959 782 FCFA**
+  - Action 1.1 : `2123701` Coordination et animation du ministère — 363 148 630 FCFA
+  - Action 1.2 : `2123702` Gestion des ressources humaines, financières et matérielles — 7 729 826 014 FCFA
+  - Action 1.3 : `2123703` Planification, programmation et suivi évaluation — 157 150 000 FCFA
+  - Action 1.4 : `2123704` Information et Communication — 61 835 138 FCFA
+  - *Somme des actions = 8 311 959 782 FCFA (delta = 0)*
+- **Programme 2 : `22115` Transport maritime et fluvio-lagunaire** — **5 434 406 090 FCFA**
+  - Action 2.1 : `2211501` Coordination et suivi des activités de transport, de sécurité, de sûreté et de formation maritimes — 1 652 866 596 FCFA
+  - Action 2.2 : `2211502` Construction d'infrastructures et acquisition d'équipements techniques de sécurité et de sûreté maritime — 2 961 180 530 FCFA
+  - Action 2.3 : `2211503` Renforcement des capacités didactiques et opérationnelles des structures de formation maritime — 820 358 964 FCFA
+  - *Somme des actions = 5 434 406 090 FCFA (delta = 0)*
 
-### 3. Statut de Contrôle
-- **Total Programmes** : 13,746,365,872 FCFA
-- **Total Actions** : 13,746,365,872 FCFA
-- **Total Section LFI 2026** : 13,746,365,872 FCFA
-- **Écart de réconciliation** : **0 FCFA** (`RECONCILED`)
-- **Fidélité textuelle** : 100% transcription verbatim de l'Annexe 4 DPPD-PAP Tableau 7.
-- **Statut Runtime** : `VERIFIED` + `STAGED` (non publié publiquement sans autorisation orchestrateur).
+**Total Général Ministère = 8 311 959 782 + 5 434 406 090 = 13 746 365 872 FCFA (delta = 0)**
