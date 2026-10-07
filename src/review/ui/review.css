@@ -1,0 +1,39 @@
+.review-app {
+  --review-ink: #0a2540;
+  --review-muted: #475569;
+  --review-blue: #004c99;
+  --review-line: #d5dde7;
+  --review-surface: #ffffff;
+  --review-backdrop: #f4f6f9;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--review-ink);
+  background: var(--review-backdrop);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+.review-app *, .review-app *::before, .review-app *::after { box-sizing: border-box; }
+.review-app :is(h1,h2,h3,p) { margin-top: 0; }
+.review-app h1 { font-size: clamp(1.7rem, 4vw, 2.65rem); line-height: 1.2; max-width: 28ch; }
+.review-app h2 { font-size: 1.4rem; line-height: 1.35; }
+.review-app h3 { font-size: 1rem; }
+.review-app a { color: var(--review-blue); text-underline-offset: .2em; overflow-wrap: anywhere; }
+.review-app :is(button, input, select, summary) { font: inherit; min-height: 44px; }
+.review-app :is(button, select, summary) { cursor: pointer; }
+.review-app :is(button,input,select,a,summary):focus-visible { outline: 3px solid var(--review-blue); outline-offset: 4px; }
+.review-app button:disabled { cursor: not-allowed; }
+.review-app .review-muted { color: var(--review-muted); }
+.review-card { padding: 1.5rem; border: 1px solid var(--review-line); background: var(--review-surface); border-radius: 1rem; min-width: 0; }
+.review-amount { font-size: clamp(1.3rem, 3vw, 1.8rem); font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.review-badge { display: inline-block; padding: .3rem .65rem; border-radius: .35rem; font-size: .85rem; font-weight: 600; margin-bottom: .75rem; }
+.review-badge--available { color: #14532d; background: #f0fdf4; }
+.review-badge--unknown { color: #334155; background: #f1f5f9; }
+.review-badge--blocked, .review-badge--not_comparable { color: #78350f; background: #fffbeb; }
+.review-empty { padding: 2rem; border: 1px dashed #94a3b8; border-radius: 1rem; background: white; }
+.review-empty p:last-child { margin-bottom: 0; }
+.review-evidence { border-top: 1px solid var(--review-line); margin-top: 1rem; padding-top: .5rem; }
+.review-evidence summary { padding-block: .55rem; font-weight: 650; }
+.review-hash { overflow-wrap: anywhere; font-family: ui-monospace, monospace; font-size: .78rem; margin-top: 1rem; }
+.review-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .review-app *, .review-app *::before, .review-app *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
