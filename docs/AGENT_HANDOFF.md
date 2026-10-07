@@ -1,5 +1,13 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
+## AUTORISATION COURANTE — continuation technique LOTS 6 à 15
+
+Le mandat utilisateur du 7 octobre autorise explicitement la continuation technique malgré le LOT 5 BLOCKED. Il remplace l'arrêt global indiqué dans le compte rendu historique ci-dessous. Le LOT 5 et les sections 334/336/444 restent BLOCKED, sans correction fictive ni publication.
+
+Branche : `overnight/lots-5-15`. Périmètre et dépendances : [exigences](overnight/REQUIREMENTS.md), [inventaire](overnight/DOCUMENTS.json). Les rapports `docs/overnight/LOT<n>_REPORT.md` et les commits isolés décrivent les lots effectivement réalisés. Les modules sont exclusivement en lecture seule, préparés pour revue locale, sans Supabase, import ou déploiement.
+
+NEXT_EXECUTABLE_TASK : poursuivre les LOTS 6 à 15 selon cette autorisation, puis contrôle indépendant. MASTER_MODIFIED=FALSE ; MERGE_PERFORMED=FALSE ; REMOTE_SUPABASE_WRITES=0.
+
 ## REPRISE COURANTE — 7 octobre 2026 — LOT 5 BLOCKED
 
 - LAST_AGENT : Codex.
