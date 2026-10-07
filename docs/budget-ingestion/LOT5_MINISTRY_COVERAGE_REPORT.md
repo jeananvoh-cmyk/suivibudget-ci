@@ -1,5 +1,7 @@
 # SuiviBudget Côte d’Ivoire — Rapport de Couverture et Généralisation Documentaire Ministérielle 2026 (LOT 5)
 
+> **Statut de reprise du 7 octobre 2026 : BLOCKED.** Ce rapport hérité du commit `9512311` contient des codes, pages, identités et affirmations de complétude LFI incorrects. Il est conservé comme pièce du contrôle contradictoire, sans valeur de source primaire ni de validation. Trois canoniques omettent six programmes LFI (78 820 000 001 FCFA). Le [rapport de reprise](LOT5_RESUMPTION_BLOCKED.md), le [manifeste documentaire](LOT5_DOCUMENT_MANIFEST.json) et les [contrôles LFI indépendants](LOT5_INDEPENDENT_LFI_CONTROLS.json) établissent les constats actuels. Les chiffres et statuts historiques ci-dessous ne permettent pas de poursuivre au LOT 6.
+
 ## 1. Contexte & Doctrine Républicaine
 
 Le **LOT 5** a pour mission d'étendre de manière contrôlée et industrielle l'ingestion documentaire des budgets ministériels 2026 de la République de Côte d'Ivoire, en réutilisant sans aucune dérogation l'architecture canonique et les barrières d'intégrité validées lors des LOTS 2, 3 et 4.

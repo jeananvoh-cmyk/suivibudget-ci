@@ -1,5 +1,21 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
+## REPRISE COURANTE — 7 octobre 2026 — LOT 5 BLOCKED
+
+- LAST_AGENT : Codex.
+- CURRENT_BRANCH : `overnight/lots-5-15`.
+- BASE_SHA : `8145c0423482438cc4cc2fc89af68cb399b06ebc`.
+- AUDITED_CODE_HEAD : `9512311618ed0d5af39ea47f98fd7d2485e9607f`, commit existant de la PR #28 préservé.
+- STATUS : `BLOCKED`, ni IMPLEMENTED ni VALIDATED ; LOTS 6 à 15 non commencés.
+- FINANCIAL_BLOCKER : MICOM / 336, MSCV / 444 et METFPA / 334 omettent six programmes LFI représentant 78 820 000 001 FCFA malgré les statuts de réconciliation hérités.
+- REPORT : [LOT5_RESUMPTION_BLOCKED.md](budget-ingestion/LOT5_RESUMPTION_BLOCKED.md).
+- DOCUMENTS : [inventaire et empreintes](budget-ingestion/LOT5_DOCUMENT_MANIFEST.json), [contrôles LFI indépendants](budget-ingestion/LOT5_INDEPENDENT_LFI_CONTROLS.json) ; deux PDF officiels disponibles dans `/tmp/suivibudget-lot5-documents/`.
+- VERIFICATION : 20 fichiers / 350 tests PASS ; production build PASS. Ces tests ne détectent pas la liste incomplète des programmes LFI.
+- REMOTE_SUPABASE_WRITES : 0 ; MASTER_MODIFIED : FALSE ; MERGE_PERFORMED : FALSE.
+- NEXT_EXECUTABLE_TASK : résoudre les écarts LFI/canoniques et contrôler indépendamment les programmes/actions manquants avant toute reprise du LOT 6. Aucun merge autorisé dans ce mandat.
+
+Les métadonnées et descriptions ci-dessous sont le compte rendu **historique de l'agent LOT 5**, conservé pour le contrôle contradictoire. Ses affirmations de validation, de complétude LFI et de fidélité à 100 % ne sont pas confirmées et ne remplacent pas le statut BLOCKED ci-dessus.
+
 ## METADATA
 - LAST_UPDATED : 2026-10-07
 - LAST_AGENT : Antigravity
@@ -570,9 +586,9 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Audit et contrôle indépendant par l'orchestrateur (ChatGPT) de la PR LOT 5.
-2. Revue contradictoire des 7 référentiels canoniques du Batch 1 (MAIED, MAM, MFPMA, MEPS, MSCV, MICOM, METFPA), des fixtures golden et du rapport de couverture.
-3. Autorisation formelle de merge de la PR LOT 5 et cadrage du Batch 2 (LOT 6).
+1. Traiter le blocage financier documenté dans `docs/budget-ingestion/LOT5_RESUMPTION_BLOCKED.md` : six programmes LFI manquent dans trois sections.
+2. Reprendre les contrôles indépendants des 7 canoniques, des fixtures et du rapport de couverture ; ne pas déclarer le LOT 5 VALIDATED.
+3. Continuer seulement après résolution du blocage vers le LOT 6 « Exécution budgétaire et performance », conformément au mandat courant. Aucun merge, aucune écriture Supabase ni migration distante.
 
 ## COCODY_REMOTE_CLOSEOUT — ORCHESTRATEUR 2026-10-02
 - Institution canonique ajoutée à `public.institutions` : `inst-com-cocody`, `Mairie de Cocody`, type applicatif `MAIRIE`, région Abidjan, District Autonome d'Abidjan.

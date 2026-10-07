@@ -1,5 +1,15 @@
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
+## 7 octobre 2026 — reprise LOT 5, arrêt BLOCKED
+
+Branche `overnight/lots-5-15` créée depuis le commit LOT 5 existant `9512311618ed0d5af39ea47f98fd7d2485e9607f` de la PR #28, descendant de la baseline `8145c0423482438cc4cc2fc89af68cb399b06ebc`. Aucun merge, aucune réimplémentation concurrente ni modification de la branche de l'autre agent.
+
+Les deux PDF officiels DGBF ont été téléchargés (HTTP 200), hachés et conservés dans `/tmp/suivibudget-lot5-documents/`. La LFI, pages PDF 49–50 et 54, établit six programmes omis dans les candidats MICOM, MSCV et METFPA, soit 78 820 000 001 FCFA. Les totaux attendus des tests existants reproduisent les sous-totaux incomplets. Le rapport hérité contient aussi des codes, pages et identités incompatibles avec les sources et les registres.
+
+20 fichiers / 350 tests PASS ; `npm run build` PASS (avertissement de taille des bundles). La réussite technique ne résout pas le blocage financier. Sources, contrôles LFI indépendants et rapport détaillé dans `docs/budget-ingestion/LOT5_DOCUMENT_MANIFEST.json`, `LOT5_INDEPENDENT_LFI_CONTROLS.json` et `LOT5_RESUMPTION_BLOCKED.md`.
+
+LOT 5 = BLOCKED ; LOTS 6 à 15 non commencés conformément à la condition d'arrêt. Données protégées et canoniques hérités conservés. REMOTE_SUPABASE_WRITES=0, MASTER_MODIFIED=FALSE, MERGE_PERFORMED=FALSE. Aucun contrôle humain intermédiaire demandé ; aucune validation finale du LOT 5 annoncée.
+
 ## 1er octobre — console données et montants qualifiés, après #8
 
 #8 fusionnée au SHA attendu, master synchronisé sans perte à `8e934d19dcdbf0172259d4028aa969cb29084918`. Post-merge ciblé : 16 tests PASS. Branche `codex/import-console-amount-precision`, nouvelle PR à laisser ouverte.
@@ -137,5 +147,4 @@ GitHub : master distant `529db22012848e34afdf8b286983eebfc917b9f7`. Branche PR a
 - **Composant Visuel & UX** : Composant `ProjectAccountabilityPassport.tsx` avec cartes d'étapes expansibles, badges de provenance explicites, gestion du principe 9 (`NOT_FOUND_PUBLICLY`), et actions citoyennes directes (demande CAIDP, envoi de preuve terrain).
 - **Intégration & Accessibilité** : 3e onglet « Passeport Redevabilité » dans `ProjectDetailModal.tsx` avec pastille dynamique (« Lié DGMP/CA » ou « 6 étapes »), cibles tactiles WCAG AA (>= 44px).
 - **Validation** : 10 fichiers de test validés (**116/116 tests réussis**), `npm run build` propre (0 erreur, 1722 modules). Validation visuelle multi-viewports (375px mobile et 1440px desktop) avec zéro overflow horizontal.
-
 

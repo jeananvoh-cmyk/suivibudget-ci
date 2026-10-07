@@ -1,0 +1,25 @@
+{
+  "source_document_id": "DGBF-LFI-2026",
+  "source_sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+  "method": "Transcription depuis les pages du PDF officiel téléchargé ; les valeurs attendues ne proviennent pas des fichiers canoniques ni de leurs fixtures.",
+  "measure": "Crédit de Paiement 2026",
+  "unit": "FCFA",
+  "controls": [
+    { "section": "237", "pdf_pages": [47], "section_total_fcfa": 45121940916, "program_codes": ["21042", "22043", "22066"] },
+    { "section": "334", "pdf_pages": [49], "section_total_fcfa": 182301855312, "program_codes": ["21210", "22063", "22219", "23220"] },
+    { "section": "336", "pdf_pages": [49, 50], "section_total_fcfa": 39806735298, "program_codes": ["21077", "22078", "23223", "23224", "23225"] },
+    { "section": "362", "pdf_pages": [53], "section_total_fcfa": 91411414044, "program_codes": ["21150", "22151", "22152", "22153"] },
+    { "section": "439", "pdf_pages": [53, 54], "section_total_fcfa": 5122516889, "program_codes": ["21234", "22145", "22146"] },
+    { "section": "440", "pdf_pages": [54], "section_total_fcfa": 13746365872, "program_codes": ["21237", "22115"] },
+    { "section": "444", "pdf_pages": [54], "section_total_fcfa": 70427777385, "program_codes": ["21081", "22082", "23241", "23249"] }
+  ],
+  "programs_requiring_further_documentation": [
+    { "section": "334", "code": "23220", "label": "Fonds de Développement de la Formation Professionnelle", "amount_fcfa": 46000000000, "pdf_page": 49, "actions": null },
+    { "section": "336", "code": "23223", "label": "Appui au financement de la Radiodiffusion Télévision Ivoirienne (RTI)", "amount_fcfa": 16465000001, "pdf_page": 50, "actions": null },
+    { "section": "336", "code": "23224", "label": "Appui au financement de la Société Ivoirienne de Télédiffusion (IDT)", "amount_fcfa": 2035000000, "pdf_page": 50, "actions": null },
+    { "section": "336", "code": "23225", "label": "Appui au financement du secteur des médias", "amount_fcfa": 1700000000, "pdf_page": 50, "actions": null },
+    { "section": "444", "code": "23241", "label": "Appui au développement durable du sport", "amount_fcfa": 10900000000, "pdf_page": 54, "actions": null },
+    { "section": "444", "code": "23249", "label": "Appui à l'entretien et à la sécurisation des infrastructures", "amount_fcfa": 1720000000, "pdf_page": 54, "actions": null }
+  ],
+  "scope_note": "actions=null signifie non contrôlé dans cette reprise ; cela ne signifie pas absence dans les sources. Ces contrôles sont des preuves d'audit, sans publication ni modification du canonical."
+}
