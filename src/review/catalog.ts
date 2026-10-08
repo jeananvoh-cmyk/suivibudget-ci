@@ -6,6 +6,9 @@ import {
   type DocumentAvailability,
   type SourceDocument,
 } from './domain/documents';
+import { OFFICIAL_FINANCIAL_AUDITS } from './domain/financialAudits';
+
+export { OFFICIAL_FINANCIAL_AUDITS };
 
 /**
  * Registre des contrôles documentaires indépendants traçables.

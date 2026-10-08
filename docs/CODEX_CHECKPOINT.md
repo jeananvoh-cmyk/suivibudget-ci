@@ -1,18 +1,20 @@
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
-## 8 octobre — Réconciliation contrôlée LOTS 6 à 15 et levée des réserves d'audit post-LOT5
+## 8 octobre — Réconciliation contrôlée LOTS 6 à 15, durcissement des preuves financières et levée définitive des réserves PR #29
 
 - **Base de travail** : `master` post-LOT5 (`707b3b688f23bd33dc0f3504e13b79c65908dd50`, PR #28 fusionnée).
 - **Branche** : `antigravity/reconcile-lots6-15-post-lot5` (PR #29).
 - **Réconciliation** : Intégration sous `src/review/` des contrats d'exécution budgétaire (LOT6), versions de collectivités (LOT7), catalogue documentaire et SHA-256 (LOT8), liens projets-budgets sans agrégation abusive (LOT9), suivi citoyen avec protection de la vie privée (LOT10), réponses institutionnelles et audits officiels séparés (LOT11), historique et exports Open Data avec protection injection CSV (LOT12), primitives UI orientées preuve (LOT13), workspace de revue isolé (LOT14), et stabilisation en composition read-only (LOT15).
 - **Suppression du blocage LOT5 obsolète** : Remplacement du filtre codé en dur par `LOT5_UNRESOLVED_SCOPES = []`. Les trois ministères (MICOM 336, MSCV 444, METFPA 334) sont évalués selon les règles normales du moteur (UNKNOWN sans source, AVAILABLE avec preuve officielle vérifiée).
-- **Résolution des réserves de l'audit indépendant** :
+- **Résolution définitive des réserves de l'audit indépendant** :
   1. Découplage strict des statuts documentaires et chemin financier (Réserve A) : disponibilité (`availability`), provenance officielle (`provenance`), vérification d'extraction financière (`extractionStatus`), et citation exacte (`resolveCitation`). Interdiction d'inférer la vérification d'un montant depuis la simple présence d'un PDF (`canPublishOfficialObservation`). Préservation de l'exact zéro (`amount: 0, precision: 'EXACT'`).
   2. Registre de contrôle documentaire traçable (Réserve B) : Contrat `DocumentaryAuditRecord` et `verifyDocumentaryAudit()` dans `src/review/domain/documents.ts`. Registre `OFFICIAL_DOCUMENTARY_AUDITS` reliant LFI 2026 et DPPD-PAP Annexe 4 aux contrôles traçables (`LOT5_INDEPENDENT_LFI_CONTROLS.json#section_controls`). Rejet des simples chaînes `CONTROL_SCOPE` sans enregistrement d'audit.
-  3. Distinction explicite entre fixtures synthétiques de tests unitaires (confinées aux suites `__tests__/`) et documents primaires officiels réels (LFI 2026, DPPD-PAP Annexe 4).
-  4. Garde-fou transport Supabase `guardedFetch` dans `scripts/verify-supabase-readonly.mjs` interdisant toute méthode non-GET/HEAD de façon synchrone avant le réseau, validé par 9 tests unitaires (`supabaseReadOnlyGuard.test.ts`). Sonde strictement limitée à ses propres requêtes avec fallback sécurisé `.env`, clé anon, aucun service_role, 0 écriture distante.
-  5. Validation visuelle Chromium `CHROMIUM_CHECK = PASS` via Chrome DevTools MCP sur `review.html` (0 erreur console, sources DGBF et SHA-256 exacts affichés).
-- **Suite de tests** : 33 fichiers de tests, 488 tests réussis (488/488 PASS, 0 FAIL, 100% PASS), dont 30 tests dédiés aux contrôles documentaires.
+  3. Moteur d'audit financier granulaire étanche (Réserve C / matchFinancialAudit) : module `src/review/domain/financialAudits.ts` avec le contrat `FinancialAuditRecord` et la fonction `matchFinancialAudit()`. Matching multidimensionnel strict (exercice, institution, section, scope, mesure, base, devise, montant exact, docId, SHA-256, page). Règle d'or : une preuve d'agrégat (`SECTION_TOTAL`, `PROGRAM_`) ne valide JAMAIS une ligne détaillée (`PROGRAM_`, `ACTION_`) sans audit explicite (`AGGREGATE_CANNOT_VALIDATE_PROGRAM`, `AGGREGATE_CANNOT_VALIDATE_ACTION`). Rejet immédiat de tout audit `SOURCE_CONFLICT` ou `TO_VERIFY`.
+  4. Suite de tests adversariaux dédiée (13 tests) : `src/review/__tests__/financialEvidenceHardening.test.ts` couvrant les 12 scénarios d'attaque et d'étanchéité requis.
+  5. Distinction explicite entre fixtures synthétiques de tests unitaires (confinées aux suites `__tests__/`) et documents primaires officiels réels (LFI 2026, DPPD-PAP Annexe 4).
+  6. Garde-fou transport Supabase `guardedFetch` dans `scripts/verify-supabase-readonly.mjs` interdisant toute méthode non-GET/HEAD de façon synchrone avant le réseau, validé par 9 tests unitaires (`supabaseReadOnlyGuard.test.ts`). Sonde strictement limitée à ses propres requêtes avec fallback sécurisé `.env`, clé anon, aucun service_role, 0 écriture distante.
+  7. Validation visuelle Chromium `CHROMIUM_CHECK = PASS` via Playwright / Chrome DevTools MCP sur `http://127.0.0.1:5174/review.html` (0 erreur console applicative, sources DGBF et SHA-256 exacts affichés).
+- **Suite de tests** : 34 fichiers de tests, 501 tests réussis (501/501 PASS, 0 FAIL, 100% PASS), dont 30 tests sur les contrôles documentaires et 13 tests adversariaux sur les preuves financières.
 - **Builds** : Build production `npm run build` PASS (tsc && vite build), build review `npm run build:review` PASS (vite build --config vite.review.config.ts).
 - **Données protégées & Supabase** : Inchangées (`src/data`, `docs/imports`, `docs/references/2026`, `src/budget-ingestion`, `supabase`). Zéro écriture distante Supabase (`REMOTE_SUPABASE_WRITES = 0`). Aucun merge effectué (`MERGE_PERFORMED = FALSE`). Statut : `READY_FOR_INDEPENDENT_REVIEW`.
 

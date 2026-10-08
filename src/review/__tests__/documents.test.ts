@@ -7,6 +7,7 @@ import {
   publicDocumentMetadata,
   verifyDocumentaryAudit,
   type SourceDocument,
+  type FinancialAuditRecord,
 } from '../domain/documents';
 import { reviewDocuments, OFFICIAL_DOCUMENTARY_AUDITS } from '../catalog';
 import type { FinancialObservation } from '../domain/evidence';
@@ -44,6 +45,41 @@ const observation: FinancialObservation = {
   precision: 'EXACT',
   evidence: ref,
 };
+
+const testAudits: readonly FinancialAuditRecord[] = [
+  {
+    controlId: 'AUDIT-TEST-ONLY-237',
+    documentId: 'test-only',
+    documentSha256: 'a'.repeat(64),
+    fiscalYear: 2026,
+    controlStatus: 'VERIFIED',
+    reportRef: 'test-report',
+    institutionId: 'gov-003',
+    sectionCode: '237',
+    scope: 'SECTION_TOTAL',
+    measure: 'ORDERED',
+    basis: 'INITIAL_BUDGET',
+    currency: 'XOF',
+    auditedAmount: 45121940916,
+    page: 1,
+  },
+  {
+    controlId: 'AUDIT-TEST-ONLY-ZERO',
+    documentId: 'test-only',
+    documentSha256: 'a'.repeat(64),
+    fiscalYear: 2026,
+    controlStatus: 'VERIFIED',
+    reportRef: 'test-report',
+    institutionId: 'gov-003',
+    sectionCode: '237',
+    scope: 'SECTION_TOTAL',
+    measure: 'ORDERED',
+    basis: 'INITIAL_BUDGET',
+    currency: 'XOF',
+    auditedAmount: 0,
+    page: 1,
+  },
+];
 
 describe('LOT 8 — documentary catalog', () => {
   it('resolves a page against a public verified original', () => {
@@ -245,7 +281,7 @@ describe('LOT 8 — documentary catalog', () => {
         amount: 0,
         precision: 'EXACT',
       };
-      const result = canPublishOfficialObservation(zeroObs, [doc]);
+      const result = canPublishOfficialObservation(zeroObs, [doc], testAudits);
       expect(result.status).toBe('AVAILABLE');
       expect(result.value).toBe(0);
       expect(result.reasons).toEqual([]);
@@ -310,10 +346,37 @@ describe('LOT 8 — documentary catalog', () => {
         verification: 'VERIFIED',
         extractionStatus: 'VERIFIED',
       };
-      const result = canPublishOfficialObservation(observation, [fullyVerified]);
+      const result = canPublishOfficialObservation(observation, [fullyVerified], testAudits);
       expect(result.status).toBe('AVAILABLE');
       expect(result.value).toBe(45121940916);
       expect(result.reasons).toEqual([]);
+
+      // Test avec les vrais documents de catalogue et le registre officiel d'audits financiers
+      const realLfiDoc = reviewDocuments.find(d => d.id === 'DGBF-LFI-2026');
+      expect(realLfiDoc).toBeDefined();
+      const realLfiObs: FinancialObservation = {
+        institutionId: 'gov-003',
+        sectionCode: '237',
+        fiscalYear: 2026,
+        scope: 'SECTION_TOTAL',
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 45121940916,
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'DGBF-LFI-2026',
+          page: 47,
+          reference: null,
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+      const realResult = canPublishOfficialObservation(realLfiObs, reviewDocuments);
+      expect(realResult.status).toBe('AVAILABLE');
+      expect(realResult.value).toBe(45121940916);
+      expect(realResult.reasons).toEqual([]);
     });
 
     it('preserves existing verified primary documents without arbitrary downgrades', () => {

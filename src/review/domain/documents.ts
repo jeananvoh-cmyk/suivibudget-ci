@@ -1,4 +1,13 @@
 import { assessObservation, hasEvidence, isCalendarDate, type EvidenceRef, type FinancialObservation, type ReviewValue } from './evidence';
+import {
+  matchFinancialAudit,
+  OFFICIAL_FINANCIAL_AUDITS,
+  type FinancialAuditRecord,
+  type FinancialAuditMatchResult,
+} from './financialAudits';
+
+export type { FinancialAuditRecord, FinancialAuditMatchResult };
+export { matchFinancialAudit, OFFICIAL_FINANCIAL_AUDITS };
 
 export type DocumentAvailability =
   | 'AVAILABLE'
@@ -164,6 +173,7 @@ export function resolveCitation(ref: EvidenceRef | null, documents: readonly Sou
     fiscalYear: doc.fiscalYear, page: ref.page, reference: ref.reference, sha256: doc.sha256 };
 }
 
+
 /**
  * Évalue si une observation financière satisfait à TOUTES les exigences républicaines
  * pour être publiée comme montant officiel.
@@ -177,13 +187,20 @@ export function resolveCitation(ref: EvidenceRef | null, documents: readonly Sou
  *    - extractionStatus: 'VERIFIED' (les extractions manquantes, 'TO_VERIFY', 'SOURCE_CONFLICT' ou 'NOT_EXTRACTED' sont REJETÉES).
  *    - availability: 'AVAILABLE' (les statuts manquants, 'PENDING', 'NOT_FOUND_PUBLICLY' sont REJETÉS).
  *    - verification: 'VERIFIED'.
- * 5. Si une seule preuve manque ou est ambiguë, la publication est REFUSÉE :
+ * 5. CONTRÔLE FINANCIER GRANULAIRE (Règle d'or républicaine) :
+ *    Un document officiel vérifié ne signifie pas que tous les montants contenus dans ce document sont vérifiés.
+ *    L'observation candidate doit correspondre exactement à un enregistrement d'audit financier
+ *    formellement vérifié dans `financialAudits` (institution, section, scope, mesure, base,
+ *    montant exact, devise, document, SHA-256, page).
+ *    Un contrôle d'agrégat (ex: SECTION_TOTAL) ne valide jamais des détails (programmes ou actions).
+ * 6. Si une seule preuve manque ou est ambiguë, la publication est REFUSÉE :
  *    - L'état renvoyé est 'UNKNOWN' (ou 'BLOCKED' / 'NOT_COMPARABLE' si l'observation l'exige).
  *    - La valeur financière renvoyée est null.
  */
 export function canPublishOfficialObservation(
   observation: FinancialObservation,
   documents: readonly SourceDocument[],
+  financialAudits: readonly FinancialAuditRecord[] = OFFICIAL_FINANCIAL_AUDITS,
 ): ReviewValue {
   const baseAssessment = assessObservation(observation);
   if (baseAssessment.status !== 'AVAILABLE') {
@@ -216,6 +233,17 @@ export function canPublishOfficialObservation(
   if (doc.verification !== 'VERIFIED') {
     return { value: null, status: 'UNKNOWN', reasons: ['UNVERIFIED_DOCUMENT_OR_EXTRACTION'] };
   }
+
+  // Contrôle financier granulaire étanche
+  const auditMatch = matchFinancialAudit(observation, financialAudits, doc);
+  if (!auditMatch.matched) {
+    return {
+      value: null,
+      status: 'UNKNOWN',
+      reasons: ['UNVERIFIED_DOCUMENT_OR_EXTRACTION', ...auditMatch.reasons],
+    };
+  }
+
   return baseAssessment;
 }
 
