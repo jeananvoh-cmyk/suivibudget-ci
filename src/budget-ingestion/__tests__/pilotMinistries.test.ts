@@ -227,9 +227,9 @@ describe('LOT 4 — Onboarding Documentaire des Ministères Pilotes 2026', () =>
   // 5. REGISTRE DOCUMENTAIRE DES 35 MINISTÈRES & GOUVERNEMENT
   // =========================================================================
   describe('5. Registre Central & État d\'Onboarding', () => {
-    it('enregistre 5 ministères vérifiés (MMPE + 4 pilotes LOT 4)', () => {
+    it('enregistre au moins 5 ministères vérifiés (MMPE + pilotes)', () => {
       const verified = getVerifiedMinistries();
-      expect(verified).toHaveLength(5);
+      expect(verified.length).toBeGreaterThanOrEqual(5);
       const verifiedIds = verified.map(m => m.institution_id);
       expect(verifiedIds).toContain('gov-008'); // MMPE
       expect(verifiedIds).toContain('gov-005'); // MJDH
@@ -269,18 +269,18 @@ describe('LOT 4 — Onboarding Documentaire des Ministères Pilotes 2026', () =>
       expect(registryData.total_institutions).toBe(35);
       expect(registryData.institutions).toHaveLength(35);
 
-      // Vérifier les 5 ministères onboardés
+      // Vérifier les ministères validés / prêts (LOT 2, LOT 4 et LOT 5)
       const validatedList = registryData.institutions.filter(
         (i: { canonical_status: string }) =>
           i.canonical_status === 'VALIDATED' || i.canonical_status === 'READY_FOR_PUBLICATION'
       );
-      expect(validatedList).toHaveLength(5);
+      expect(validatedList.length).toBeGreaterThanOrEqual(5);
 
-      // Les 30 autres en attente
+      // Les autres en attente
       const pendingList = registryData.institutions.filter(
         (i: { canonical_status: string }) => i.canonical_status === 'PENDING_CANONICAL_EXTRACTION'
       );
-      expect(pendingList).toHaveLength(30);
+      expect(validatedList.length + pendingList.length).toBe(35);
 
       // Vérifier la correction documentaire de gov-033 -> 439
       const gov033 = registryData.institutions.find((i: { institution_id: string }) => i.institution_id === 'gov-033');

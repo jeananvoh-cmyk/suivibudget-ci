@@ -1,0 +1,117 @@
+{
+  "institution_code": "439",
+  "institution_name": "Ministère Délégué auprès du Ministre des Affaires Etrangères, de l'Intégration Africaine et des Ivoiriens de l'Extérieur, chargé de l'Intégration Africaine et des Ivoiriens de l'Extérieur",
+  "fiscal_year": 2026,
+  "extraction_date": "2026-10-06",
+  "source": {
+    "publisher": "Direction Générale du Budget et des Finances (DGBF)",
+    "document": "Annexe 4 — Documents de Programmation Pluriannuelle des Dépenses - Projets Annuels de Performance (DPPD-PAP) 2026-2028",
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+    "section_reference": "SECTION 439 : MINISTERE DELEGUE AUPRES DU MINISTRE DES AFFAIRES ETRANGERES, DE L'INTEGRATION AFRICAINE ET DES IVOIRIENS DE L'EXTERIEUR, CHARGE DE L'INTEGRATION AFRICAINE ET DES IVOIRIENS DE L'EXTERIEUR",
+    "page_range": "PDF pages 1087-1102 (Document pages 1085-1100 sur 1227)",
+    "accessed_at": "2026-10-06"
+  },
+  "control_source": {
+    "publisher": "DGBF",
+    "document": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+    "section_reference": "Ministère code 439",
+    "page_range": "LFI PDF page 53 (Document page 51 sur 583)"
+  },
+  "totals": {
+    "total_ministry_2026_fcfa": 5122516889,
+    "programs_sum_2026_fcfa": 5122516889,
+    "programs_delta": 0,
+    "actions_sum_2026_fcfa": 5122516889,
+    "actions_delta": 0,
+    "reconciliation_status": "RECONCILED"
+  },
+  "programs": [
+    {
+      "program_code": "21234",
+      "official_name": "Administration Générale",
+      "program_amount_2026_fcfa": 3743491132,
+      "page_reference": "PDF p. 1097 / Document p. 1095",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2123401",
+          "official_name": "Coordination et animation du ministère",
+          "amount_2026_fcfa": 808104258,
+          "page_reference": "PDF p. 1097 / Document p. 1095",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2123402",
+          "official_name": "Gestion des ressources humaines financières et matérielles",
+          "amount_2026_fcfa": 2935386874,
+          "page_reference": "PDF p. 1097 / Document p. 1095",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "22145",
+      "official_name": "Intégration Africaine",
+      "program_amount_2026_fcfa": 1153795757,
+      "page_reference": "PDF p. 1099 / Document p. 1097",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2214501",
+          "official_name": "Coordination des politiques d'intégration africaine",
+          "amount_2026_fcfa": 276800000,
+          "page_reference": "PDF p. 1099 / Document p. 1097",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2214503",
+          "official_name": "Promotion des projets/programmes économiques et humains d'intégration africaine",
+          "amount_2026_fcfa": 876995757,
+          "page_reference": "PDF p. 1099 / Document p. 1097",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "22146",
+      "official_name": "Ivoiriens de l'extérieur",
+      "program_amount_2026_fcfa": 225230000,
+      "page_reference": "PDF p. 1102 / Document p. 1100",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2214601",
+          "official_name": "Renforcement de la lutte contre la migration irrégulière",
+          "amount_2026_fcfa": 83500000,
+          "page_reference": "PDF p. 1102 / Document p. 1100",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2214602",
+          "official_name": "Contribution de la diaspora au développement économique",
+          "amount_2026_fcfa": 45500000,
+          "page_reference": "PDF p. 1102 / Document p. 1100",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2214605",
+          "official_name": "Assistance aux ivoiriens de la diaspora",
+          "amount_2026_fcfa": 96230000,
+          "page_reference": "PDF p. 1102 / Document p. 1100",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    }
+  ]
+}

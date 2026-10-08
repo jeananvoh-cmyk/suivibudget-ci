@@ -1,0 +1,191 @@
+{
+  "institution_code": "362",
+  "institution_name": "Ministère de l'Emploi et de la Protection Sociale",
+  "fiscal_year": 2026,
+  "extraction_date": "2026-10-06",
+  "source": {
+    "publisher": "Direction Générale du Budget et des Finances (DGBF)",
+    "document": "Annexe 4 — Documents de Programmation Pluriannuelle des Dépenses - Projets Annuels de Performance (DPPD-PAP) 2026-2028",
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+    "section_reference": "SECTION 362 : MINISTERE DE L'EMPLOI ET DE LA PROTECTION SOCIALE",
+    "page_range": "PDF pages 987-1012 (Document pages 985-1010 sur 1227)",
+    "accessed_at": "2026-10-06"
+  },
+  "control_source": {
+    "publisher": "DGBF",
+    "document": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+    "section_reference": "Ministère code 362",
+    "page_range": "LFI PDF page 53 (Document page 51 sur 583)"
+  },
+  "totals": {
+    "total_ministry_2026_fcfa": 91411414044,
+    "programs_sum_2026_fcfa": 91411414044,
+    "programs_delta": 0,
+    "actions_sum_2026_fcfa": 91411414044,
+    "actions_delta": 0,
+    "reconciliation_status": "RECONCILED"
+  },
+  "programs": [
+    {
+      "program_code": "21150",
+      "official_name": "Administration Générale",
+      "program_amount_2026_fcfa": 35849618984,
+      "page_reference": "PDF p. 1000 / Document p. 998",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2115001",
+          "official_name": "Coordination et animation",
+          "amount_2026_fcfa": 5173570216,
+          "page_reference": "PDF p. 1000 / Document p. 998",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2115002",
+          "official_name": "Planification, programmation et suivi - évaluation",
+          "amount_2026_fcfa": 6801811930,
+          "page_reference": "PDF p. 1000 / Document p. 998",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2115003",
+          "official_name": "Gestion des ressources humaines matérielles et financières",
+          "amount_2026_fcfa": 23824247963,
+          "page_reference": "PDF p. 1000 / Document p. 998",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2115004",
+          "official_name": "Gestion des systèmes d'information et de communication",
+          "amount_2026_fcfa": 49988875,
+          "page_reference": "PDF p. 1000 / Document p. 998",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "22151",
+      "official_name": "Emploi",
+      "program_amount_2026_fcfa": 2451846262,
+      "page_reference": "PDF p. 1003 / Document p. 1001",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2215101",
+          "official_name": "Conception et suivi de la Politique d'Emploi",
+          "amount_2026_fcfa": 1801036262,
+          "page_reference": "PDF p. 1003 / Document p. 1001",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2215102",
+          "official_name": "Elaboration et suivi-évaluation des projets et programmes d'emploi",
+          "amount_2026_fcfa": 52000000,
+          "page_reference": "PDF p. 1003 / Document p. 1001",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2215103",
+          "official_name": "Insertion socio-économique et professionnelle des couches vulnérables",
+          "amount_2026_fcfa": 598810000,
+          "page_reference": "PDF p. 1003 / Document p. 1001",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "22152",
+      "official_name": "Travail",
+      "program_amount_2026_fcfa": 6374402905,
+      "page_reference": "PDF p. 1005 / Document p. 1003",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2215201",
+          "official_name": "Conception et suivi de la politique générale du Travail",
+          "amount_2026_fcfa": 504524900,
+          "page_reference": "PDF p. 1005 / Document p. 1003",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2215202",
+          "official_name": "Elaboration et suivi de la réglementation du travail",
+          "amount_2026_fcfa": 133500000,
+          "page_reference": "PDF p. 1005 / Document p. 1003",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2215203",
+          "official_name": "Dialogue social",
+          "amount_2026_fcfa": 19100000,
+          "page_reference": "PDF p. 1005 / Document p. 1003",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2215204",
+          "official_name": "Lutte contre le travail des enfants",
+          "amount_2026_fcfa": 5717278005,
+          "page_reference": "PDF p. 1005 / Document p. 1003",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    },
+    {
+      "program_code": "22153",
+      "official_name": "Protection sociale",
+      "program_amount_2026_fcfa": 46735545893,
+      "page_reference": "PDF p. 1009 / Document p. 1007",
+      "table_reference": "Tableau 7 : Budget détaillé du programme",
+      "reconciliation_status": "RECONCILED",
+      "actions": [
+        {
+          "action_code": "2215302",
+          "official_name": "Formation des étudiants de l'INSFS et des travailleurs sociaux",
+          "amount_2026_fcfa": 41893273616,
+          "page_reference": "PDF p. 1009 / Document p. 1007",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2215303",
+          "official_name": "Formation des travailleurs sociaux",
+          "amount_2026_fcfa": 1764221356,
+          "page_reference": "PDF p. 1009 / Document p. 1007",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2215304",
+          "official_name": "Conception et suivi de la politique générale de protection sociale",
+          "amount_2026_fcfa": 221580000,
+          "page_reference": "PDF p. 1009 / Document p. 1007",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        },
+        {
+          "action_code": "2215305",
+          "official_name": "Protection des groupes vulnérables",
+          "amount_2026_fcfa": 2856470921,
+          "page_reference": "PDF p. 1009 / Document p. 1007",
+          "table_reference": "Tableau 7 : Budget détaillé du programme",
+          "evidence_status": "DIRECTLY_VERIFIED"
+        }
+      ]
+    }
+  ]
+}

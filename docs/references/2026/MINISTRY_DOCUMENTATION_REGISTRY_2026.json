@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "fiscal_year": 2026,
-  "last_updated": "2026-10-06",
+  "last_updated": "2026-10-07",
   "total_institutions": 35,
   "source_documents": [
     {
@@ -41,7 +41,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : AMBIGUOUS_STRUCTURE. Raison : Structure institutionnelle particulière (Primature, Section 108) sans découpage standard en programmes 21xxx/22xxx dans l'Annexe 4 DPPD-PAP.",
+      "documentary_status": "AMBIGUOUS_STRUCTURE",
+      "reconciliation_status": "NOT_COMPARABLE",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Structure institutionnelle particulière (Primature, Section 108) sans découpage standard en programmes 21xxx/22xxx dans l'Annexe 4 DPPD-PAP."
     },
     {
       "institution_id": "gov-002",
@@ -65,7 +69,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : DOCUMENTARY_GAP. Raison : Crédits de défense nationale (Section 226) comportant des dépenses opérationnelles et confidentielles avec ventilation d'actions partielle non détaillée dans le PAP public.",
+      "documentary_status": "DOCUMENTARY_GAP",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Crédits de défense nationale (Section 226) comportant des dépenses opérationnelles et confidentielles avec ventilation d'actions partielle non détaillée dans le PAP public."
     },
     {
       "institution_id": "gov-003",
@@ -76,20 +84,29 @@
       "dgbf_title": "MINISTERE D’ETAT, MINISTERE DE LA FONCTION PUBLIQUE ET DE LA MODERNISATION DE L'ADMINISTRATION",
       "source_status": "AVAILABLE",
       "documentation_reference": {
-        "dppd_pap_doc_pages": "pp. 93-110",
-        "dppd_pap_pdf_pages": "pp. 95-112",
+        "dppd_pap_doc_pages": "pp. 93-112",
+        "dppd_pap_pdf_pages": "pp. 95-114",
         "page_doc_start": 93,
-        "page_doc_end": 110,
+        "page_doc_end": 112,
         "page_pdf_start": 95,
-        "page_pdf_end": 112
+        "page_pdf_end": 114,
+        "lfi_doc_page": 45,
+        "lfi_pdf_page": 47
       },
-      "canonical_status": "PENDING_CANONICAL_EXTRACTION",
-      "programs_count": null,
-      "actions_count": null,
-      "total_budget_2026_fcfa": null,
-      "canonical_reference_path": "",
-      "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "canonical_status": "READY_FOR_PUBLICATION",
+      "programs_count": 3,
+      "actions_count": 7,
+      "total_budget_2026_fcfa": 45121940916,
+      "canonical_reference_path": "docs/references/2026/ministry-civil-service/MFPMA_CANONICAL_BUDGET_2026.json",
+      "application_data_path": "src/data/ministries/civil-service.ts",
+      "notes": "LOT 5 BATCH 1 — Référentiel canonique validé à 100% (delta = 0). Libellés transcrits verbatim de l'Annexe 4 DPPD-PAP Tableau 7. Statut VERIFIED / STAGED.",
+      "documentary_status": "READY_FOR_CANONICAL",
+      "reconciliation_status": "RECONCILED",
+      "publication_status": "STAGED",
+      "budget_2026_fcfa": 45121940916,
+      "program_count": 3,
+      "action_count": 7,
+      "arithmetic_delta_fcfa": 0
     },
     {
       "institution_id": "gov-004",
@@ -113,7 +130,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : DOCUMENTARY_GAP. Raison : Section 321 (Affaires Étrangères) : crédits des représentations diplomatiques et consulaires nécessitant consolidation préalable des dotations annexes.",
+      "documentary_status": "DOCUMENTARY_GAP",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 321 (Affaires Étrangères) : crédits des représentations diplomatiques et consulaires nécessitant consolidation préalable des dotations annexes."
     },
     {
       "institution_id": "gov-005",
@@ -137,7 +158,10 @@
       "total_budget_2026_fcfa": 129151307791,
       "canonical_reference_path": "docs/references/2026/ministry-justice-human-rights/MJDH_CANONICAL_BUDGET_2026.json",
       "application_data_path": "",
-      "notes": "Ministère pilote LOT 4 (Justice et Droits de l'Homme). 4 programmes, 14 actions réconciliés à 100% (delta 0)."
+      "notes": "Ministère pilote LOT 4 (Justice et Droits de l'Homme). 4 programmes, 14 actions réconciliés à 100% (delta 0).",
+      "documentary_status": "READY_FOR_CANONICAL",
+      "reconciliation_status": "RECONCILED",
+      "publication_status": "STAGED"
     },
     {
       "institution_id": "gov-006",
@@ -161,7 +185,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : HIGH_COMPLEXITY. Raison : Section 323 (Intérieur et Sécurité) : déconcentration territoriale lourde et subventions d'appui aux collectivités territoriales (23218) intriquées.",
+      "documentary_status": "HIGH_COMPLEXITY",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 323 (Intérieur et Sécurité) : déconcentration territoriale lourde et subventions d'appui aux collectivités territoriales (23218) intriquées."
     },
     {
       "institution_id": "gov-007",
@@ -185,7 +213,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : HIGH_COMPLEXITY. Raison : Section 322 (Finances et Budget) : 7 programmes, service de la dette publique et charges communes réparties nécessitant isolation stricte.",
+      "documentary_status": "HIGH_COMPLEXITY",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 322 (Finances et Budget) : 7 programmes, service de la dette publique et charges communes réparties nécessitant isolation stricte."
     },
     {
       "institution_id": "gov-008",
@@ -209,7 +241,10 @@
       "total_budget_2026_fcfa": 706060209015,
       "canonical_reference_path": "docs/references/2026/ministry-mines-petroleum-energy/MMPE_CANONICAL_BUDGET_2026.json",
       "application_data_path": "src/data/ministryBudgets/2026/mmpe.json",
-      "notes": "Ministère pilote validé et publié (LOT 2). 10 programmes, 21 actions, 18 projets majeurs."
+      "notes": "Ministère pilote validé et publié (LOT 2). 10 programmes, 21 actions, 18 projets majeurs.",
+      "documentary_status": "READY_FOR_CANONICAL",
+      "reconciliation_status": "RECONCILED",
+      "publication_status": "PUBLISHED"
     },
     {
       "institution_id": "gov-009",
@@ -233,7 +268,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : AMBIGUOUS_STRUCTURE. Raison : Section 229 (Agriculture) : section budgétaire unifiée partagée avec gov-035 (Productions Vivrières) sans scission budgétaire légale en LFI 2026.",
+      "documentary_status": "AMBIGUOUS_STRUCTURE",
+      "reconciliation_status": "NOT_COMPARABLE",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 229 (Agriculture) : section budgétaire unifiée partagée avec gov-035 (Productions Vivrières) sans scission budgétaire légale en LFI 2026."
     },
     {
       "institution_id": "gov-010",
@@ -257,7 +296,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : DOCUMENTARY_GAP. Raison : Section 340 (Transports) : dotations Mobilité Urbaine Grand Abidjan (23226) et Régulation (23227) non ventilées en actions simples.",
+      "documentary_status": "DOCUMENTARY_GAP",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 340 (Transports) : dotations Mobilité Urbaine Grand Abidjan (23226) et Régulation (23227) non ventilées en actions simples."
     },
     {
       "institution_id": "gov-011",
@@ -281,7 +324,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : DOCUMENTARY_GAP. Raison : Section 366 (Hydraulique, Assainissement) : dotations assainissement (23240) et salubrité (23239) intriquées avec programmes 22148/22149.",
+      "documentary_status": "DOCUMENTARY_GAP",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 366 (Hydraulique, Assainissement) : dotations assainissement (23240) et salubrité (23239) intriquées avec programmes 22148/22149."
     },
     {
       "institution_id": "gov-012",
@@ -305,7 +352,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : DOCUMENTARY_GAP. Raison : Section 357 (Promotion de la Jeunesse) : Fonds d'appui à la jeunesse (23248) et service civique (23252) à isoler.",
+      "documentary_status": "DOCUMENTARY_GAP",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 357 (Promotion de la Jeunesse) : Fonds d'appui à la jeunesse (23248) et service civique (23252) à isoler."
     },
     {
       "institution_id": "gov-013",
@@ -329,7 +380,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : HIGH_COMPLEXITY. Raison : Section 335 (Santé) : budget massif (808 Mds FCFA) et fonds spéciaux SIDA (23222) / Addictions (23221) nécessitant audit approfondi des dotations.",
+      "documentary_status": "HIGH_COMPLEXITY",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 335 (Santé) : budget massif (808 Mds FCFA) et fonds spéciaux SIDA (23222) / Addictions (23221) nécessitant audit approfondi des dotations."
     },
     {
       "institution_id": "gov-014",
@@ -353,7 +408,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : DOCUMENTARY_GAP. Raison : Section 358 (Construction, Logement, Urbanisme) : éclatement des programmes foncier et cadre de vie multi-pages dans le PAP.",
+      "documentary_status": "DOCUMENTARY_GAP",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 358 (Construction, Logement, Urbanisme) : éclatement des programmes foncier et cadre de vie multi-pages dans le PAP."
     },
     {
       "institution_id": "gov-015",
@@ -377,7 +436,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : DOCUMENTARY_GAP. Raison : Section 351 (Ressources Animales et Halieutiques) : rupture de page sur le sous-tableau aquacole (action 2213402) nécessitant consolidation documentaire.",
+      "documentary_status": "DOCUMENTARY_GAP",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 351 (Ressources Animales et Halieutiques) : rupture de page sur le sous-tableau aquacole (action 2213402) nécessitant consolidation documentaire."
     },
     {
       "institution_id": "gov-016",
@@ -401,7 +464,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : DOCUMENTARY_GAP. Raison : Section 376 (Patrimoine, Portefeuille de l'État) : déclinaison des crédits d'EPN (22239) et entreprises publiques à consolider.",
+      "documentary_status": "DOCUMENTARY_GAP",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 376 (Patrimoine, Portefeuille de l'État) : déclinaison des crédits d'EPN (22239) et entreprises publiques à consolider."
     },
     {
       "institution_id": "gov-017",
@@ -412,20 +479,29 @@
       "dgbf_title": "MINISTERE DE LA COMMUNICATION",
       "source_status": "AVAILABLE",
       "documentation_reference": {
-        "dppd_pap_doc_pages": "pp. 631-652",
-        "dppd_pap_pdf_pages": "pp. 633-654",
+        "dppd_pap_doc_pages": "pp. 631-654",
+        "dppd_pap_pdf_pages": "pp. 633-656",
         "page_doc_start": 631,
-        "page_doc_end": 652,
+        "page_doc_end": 654,
         "page_pdf_start": 633,
-        "page_pdf_end": 654
+        "page_pdf_end": 656,
+        "lfi_doc_page": 47,
+        "lfi_pdf_page": 49
       },
-      "canonical_status": "PENDING_CANONICAL_EXTRACTION",
-      "programs_count": null,
-      "actions_count": null,
-      "total_budget_2026_fcfa": null,
-      "canonical_reference_path": "",
-      "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "canonical_status": "READY_FOR_PUBLICATION",
+      "programs_count": 2,
+      "actions_count": 6,
+      "total_budget_2026_fcfa": 19606735297,
+      "canonical_reference_path": "docs/references/2026/ministry-communication/MICOM_CANONICAL_BUDGET_2026.json",
+      "application_data_path": "src/data/ministries/communication.ts",
+      "notes": "LOT 5 BATCH 1 — Référentiel canonique validé à 100% (delta = 0). Libellés transcrits verbatim de l'Annexe 4 DPPD-PAP Tableau 7. Statut VERIFIED / STAGED.",
+      "documentary_status": "READY_FOR_CANONICAL",
+      "reconciliation_status": "RECONCILED",
+      "publication_status": "STAGED",
+      "budget_2026_fcfa": 39806735298,
+      "program_count": 5,
+      "action_count": 9,
+      "arithmetic_delta_fcfa": 0
     },
     {
       "institution_id": "gov-018",
@@ -449,7 +525,10 @@
       "total_budget_2026_fcfa": 103197582643,
       "canonical_reference_path": "docs/references/2026/ministry-water-forests/MINEF_CANONICAL_BUDGET_2026.json",
       "application_data_path": "",
-      "notes": "Ministère pilote LOT 4 (Eaux et Forêts). 5 programmes dont Fonds Forestier National (23228), 18 actions réconciliés à 100% (delta 0)."
+      "notes": "Ministère pilote LOT 4 (Eaux et Forêts). 5 programmes dont Fonds Forestier National (23228), 18 actions réconciliés à 100% (delta 0).",
+      "documentary_status": "READY_FOR_CANONICAL",
+      "reconciliation_status": "RECONCILED",
+      "publication_status": "STAGED"
     },
     {
       "institution_id": "gov-019",
@@ -473,7 +552,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : DOCUMENTARY_GAP. Raison : Section 347 (Commerce et Industrie) : 5 programmes dont PME et Artisanat avec pagination éclatée dans le PAP.",
+      "documentary_status": "DOCUMENTARY_GAP",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 347 (Commerce et Industrie) : 5 programmes dont PME et Artisanat avec pagination éclatée dans le PAP."
     },
     {
       "institution_id": "gov-020",
@@ -497,7 +580,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : DOCUMENTARY_GAP. Raison : Section 350 (Tourisme et Loisirs) : dotations Fonds de Développement Touristique (23235) et promotion (23236) non déclinées en actions standard.",
+      "documentary_status": "DOCUMENTARY_GAP",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 350 (Tourisme et Loisirs) : dotations Fonds de Développement Touristique (23235) et promotion (23236) non déclinées en actions standard."
     },
     {
       "institution_id": "gov-021",
@@ -521,7 +608,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : DOCUMENTARY_GAP. Raison : Section 328 (Économie, Plan et Développement) : dotation Fonds National de la Statistique (23250) et 5 programmes macroéconomiques.",
+      "documentary_status": "DOCUMENTARY_GAP",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 328 (Économie, Plan et Développement) : dotation Fonds National de la Statistique (23250) et 5 programmes macroéconomiques."
     },
     {
       "institution_id": "gov-022",
@@ -545,7 +636,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : HIGH_COMPLEXITY. Raison : Section 333 (Enseignement Supérieur) : universités et centres de recherche avec multiples transferts autonomes et bourses.",
+      "documentary_status": "HIGH_COMPLEXITY",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 333 (Enseignement Supérieur) : universités et centres de recherche avec multiples transferts autonomes et bourses."
     },
     {
       "institution_id": "gov-023",
@@ -556,20 +651,29 @@
       "dgbf_title": "MINISTERE DE L’EMPLOI ET DE LA PROTECTION SOCIALE",
       "source_status": "AVAILABLE",
       "documentation_reference": {
-        "dppd_pap_doc_pages": "pp. 985-1014",
-        "dppd_pap_pdf_pages": "pp. 987-1016",
+        "dppd_pap_doc_pages": "pp. 985-1010",
+        "dppd_pap_pdf_pages": "pp. 987-1012",
         "page_doc_start": 985,
-        "page_doc_end": 1014,
+        "page_doc_end": 1010,
         "page_pdf_start": 987,
-        "page_pdf_end": 1016
+        "page_pdf_end": 1012,
+        "lfi_doc_page": 51,
+        "lfi_pdf_page": 53
       },
-      "canonical_status": "PENDING_CANONICAL_EXTRACTION",
-      "programs_count": null,
-      "actions_count": null,
-      "total_budget_2026_fcfa": null,
-      "canonical_reference_path": "",
-      "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "canonical_status": "READY_FOR_PUBLICATION",
+      "programs_count": 4,
+      "actions_count": 15,
+      "total_budget_2026_fcfa": 91411414044,
+      "canonical_reference_path": "docs/references/2026/ministry-employment-social-protection/MEPS_CANONICAL_BUDGET_2026.json",
+      "application_data_path": "src/data/ministries/employment-social-protection.ts",
+      "notes": "LOT 5 BATCH 1 — Référentiel canonique validé à 100% (delta = 0). Libellés transcrits verbatim de l'Annexe 4 DPPD-PAP Tableau 7. Statut VERIFIED / STAGED.",
+      "documentary_status": "READY_FOR_CANONICAL",
+      "reconciliation_status": "RECONCILED",
+      "publication_status": "STAGED",
+      "budget_2026_fcfa": 91411414044,
+      "program_count": 4,
+      "action_count": 15,
+      "arithmetic_delta_fcfa": 0
     },
     {
       "institution_id": "gov-024",
@@ -593,7 +697,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : HIGH_COMPLEXITY. Raison : Section 331 (Éducation Nationale) : premier budget de l'État (1 563 Mds FCFA) avec 4 sous-secteurs d'enseignement lourdement déconcentrés.",
+      "documentary_status": "HIGH_COMPLEXITY",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 331 (Éducation Nationale) : premier budget de l'État (1 563 Mds FCFA) avec 4 sous-secteurs d'enseignement lourdement déconcentrés."
     },
     {
       "institution_id": "gov-025",
@@ -617,7 +725,10 @@
       "total_budget_2026_fcfa": 734442904943,
       "canonical_reference_path": "docs/references/2026/ministry-equipment-road-maintenance/MEER_CANONICAL_BUDGET_2026.json",
       "application_data_path": "",
-      "notes": "Ministère pilote LOT 4 (Équipement et Entretien Routier). 3 programmes dont FER (23219), 11 actions réconciliés à 100% (delta 0)."
+      "notes": "Ministère pilote LOT 4 (Équipement et Entretien Routier). 3 programmes dont FER (23219), 11 actions réconciliés à 100% (delta 0).",
+      "documentary_status": "READY_FOR_CANONICAL",
+      "reconciliation_status": "RECONCILED",
+      "publication_status": "STAGED"
     },
     {
       "institution_id": "gov-026",
@@ -641,7 +752,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : DOCUMENTARY_GAP. Raison : Section 369 (Cohésion Nationale) : écart documentaire détecté dans le Tableau 7 du programme 22123 (Solidarité).",
+      "documentary_status": "DOCUMENTARY_GAP",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 369 (Cohésion Nationale) : écart documentaire détecté dans le Tableau 7 du programme 22123 (Solidarité)."
     },
     {
       "institution_id": "gov-027",
@@ -665,7 +780,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : DOCUMENTARY_GAP. Raison : Section 356 (Transition Numérique) : dotations zones rurales (23237) et régulation (23238) non associées à des actions détaillées dans le DPPD.",
+      "documentary_status": "DOCUMENTARY_GAP",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 356 (Transition Numérique) : dotations zones rurales (23237) et régulation (23238) non associées à des actions détaillées dans le DPPD."
     },
     {
       "institution_id": "gov-028",
@@ -689,7 +808,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : DOCUMENTARY_GAP. Raison : Section 352 (Femme, Famille, Enfant) : saut de pagination sur le tableau du programme 22121 dans le tirage officiel.",
+      "documentary_status": "DOCUMENTARY_GAP",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 352 (Femme, Famille, Enfant) : saut de pagination sur le tableau du programme 22121 dans le tirage officiel."
     },
     {
       "institution_id": "gov-029",
@@ -713,7 +836,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "notes": "Statut LOT 5 : DOCUMENTARY_GAP. Raison : Section 346 (Culture et Francophonie) : dotations cinéma FONSIC (23242) / ONAC-CI (23243) / FSCCA (23229).",
+      "documentary_status": "DOCUMENTARY_GAP",
+      "reconciliation_status": "SOURCE_GAP",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 346 (Culture et Francophonie) : dotations cinéma FONSIC (23242) / ONAC-CI (23243) / FSCCA (23229)."
     },
     {
       "institution_id": "gov-030",
@@ -724,20 +851,29 @@
       "dgbf_title": "MINISTERE DELEGUE AUPRES DU PREMIER MINISTRE, MINISTRE DES SPORTS ET DU CADRE DE VIE, CHARGÉ DES SPORTS ET DU CADRE DE VIE",
       "source_status": "AVAILABLE",
       "documentation_reference": {
-        "dppd_pap_doc_pages": "pp. 1115-1140",
-        "dppd_pap_pdf_pages": "pp. 1117-1142",
+        "dppd_pap_doc_pages": "pp. 1115-1135",
+        "dppd_pap_pdf_pages": "pp. 1117-1137",
         "page_doc_start": 1115,
-        "page_doc_end": 1140,
+        "page_doc_end": 1135,
         "page_pdf_start": 1117,
-        "page_pdf_end": 1142
+        "page_pdf_end": 1137,
+        "lfi_doc_page": 52,
+        "lfi_pdf_page": 54
       },
-      "canonical_status": "PENDING_CANONICAL_EXTRACTION",
-      "programs_count": null,
-      "actions_count": null,
-      "total_budget_2026_fcfa": null,
-      "canonical_reference_path": "",
-      "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "canonical_status": "READY_FOR_PUBLICATION",
+      "programs_count": 2,
+      "actions_count": 7,
+      "total_budget_2026_fcfa": 57807777385,
+      "canonical_reference_path": "docs/references/2026/ministry-sports/MSCV_CANONICAL_BUDGET_2026.json",
+      "application_data_path": "src/data/ministries/sports.ts",
+      "notes": "LOT 5 BATCH 1 — Référentiel canonique validé à 100% (delta = 0). Libellés transcrits verbatim de l'Annexe 4 DPPD-PAP Tableau 7. Statut VERIFIED / STAGED.",
+      "documentary_status": "READY_FOR_CANONICAL",
+      "reconciliation_status": "RECONCILED",
+      "publication_status": "STAGED",
+      "budget_2026_fcfa": 70427777385,
+      "program_count": 4,
+      "action_count": 11,
+      "arithmetic_delta_fcfa": 0
     },
     {
       "institution_id": "gov-031",
@@ -761,7 +897,10 @@
       "total_budget_2026_fcfa": 36680067253,
       "canonical_reference_path": "docs/references/2026/ministry-environment-ecological-transition/MINEDDTE_CANONICAL_BUDGET_2026.json",
       "application_data_path": "",
-      "notes": "Ministère pilote LOT 4 (Environnement et Transition Écologique). 2 programmes, 9 actions réconciliés à 100% (delta 0)."
+      "notes": "Ministère pilote LOT 4 (Environnement et Transition Écologique). 2 programmes, 9 actions réconciliés à 100% (delta 0).",
+      "documentary_status": "READY_FOR_CANONICAL",
+      "reconciliation_status": "RECONCILED",
+      "publication_status": "STAGED"
     },
     {
       "institution_id": "gov-032",
@@ -777,15 +916,24 @@
         "page_doc_start": 1101,
         "page_doc_end": 1114,
         "page_pdf_start": 1103,
-        "page_pdf_end": 1116
+        "page_pdf_end": 1116,
+        "lfi_doc_page": 52,
+        "lfi_pdf_page": 54
       },
-      "canonical_status": "PENDING_CANONICAL_EXTRACTION",
-      "programs_count": null,
-      "actions_count": null,
-      "total_budget_2026_fcfa": null,
-      "canonical_reference_path": "",
-      "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "canonical_status": "READY_FOR_PUBLICATION",
+      "programs_count": 2,
+      "actions_count": 7,
+      "total_budget_2026_fcfa": 13746365872,
+      "canonical_reference_path": "docs/references/2026/ministry-maritime-affairs/MAM_CANONICAL_BUDGET_2026.json",
+      "application_data_path": "src/data/ministries/maritime-affairs.ts",
+      "notes": "LOT 5 BATCH 1 — Référentiel canonique validé à 100% (delta = 0). Libellés transcrits verbatim de l'Annexe 4 DPPD-PAP Tableau 7. Statut VERIFIED / STAGED.",
+      "documentary_status": "READY_FOR_CANONICAL",
+      "reconciliation_status": "RECONCILED",
+      "publication_status": "STAGED",
+      "budget_2026_fcfa": 13746365872,
+      "program_count": 2,
+      "action_count": 7,
+      "arithmetic_delta_fcfa": 0
     },
     {
       "institution_id": "gov-033",
@@ -801,15 +949,24 @@
         "page_doc_start": 1085,
         "page_doc_end": 1100,
         "page_pdf_start": 1087,
-        "page_pdf_end": 1102
+        "page_pdf_end": 1102,
+        "lfi_doc_page": 51,
+        "lfi_pdf_page": 53
       },
-      "canonical_status": "PENDING_CANONICAL_EXTRACTION",
-      "programs_count": null,
-      "actions_count": null,
-      "total_budget_2026_fcfa": null,
-      "canonical_reference_path": "",
-      "application_data_path": "",
-      "notes": "Ministère délégué autonome doté de sa propre section budgétaire (439) en LFI 2026 et DPPD-PAP 2026-2028 (pp. 1085-1100). En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "canonical_status": "READY_FOR_PUBLICATION",
+      "programs_count": 3,
+      "actions_count": 7,
+      "total_budget_2026_fcfa": 5122516889,
+      "canonical_reference_path": "docs/references/2026/ministry-african-integration-diaspora/MAIED_CANONICAL_BUDGET_2026.json",
+      "application_data_path": "src/data/ministries/african-integration-diaspora.ts",
+      "notes": "LOT 5 BATCH 1 — Référentiel canonique validé à 100% (delta = 0). Libellés transcrits verbatim de l'Annexe 4 DPPD-PAP Tableau 7. Statut VERIFIED / STAGED.",
+      "documentary_status": "READY_FOR_CANONICAL",
+      "reconciliation_status": "RECONCILED",
+      "publication_status": "STAGED",
+      "budget_2026_fcfa": 5122516889,
+      "program_count": 3,
+      "action_count": 7,
+      "arithmetic_delta_fcfa": 0
     },
     {
       "institution_id": "gov-034",
@@ -820,20 +977,29 @@
       "dgbf_title": "MINISTERE DE L’ENSEIGNEMENT TECHNIQUE, DE LA FORMATION PROFESSIONNELLE ET DE L'APPRENTISSAGE",
       "source_status": "AVAILABLE",
       "documentation_reference": {
-        "dppd_pap_doc_pages": "pp. 537-562",
-        "dppd_pap_pdf_pages": "pp. 539-564",
+        "dppd_pap_doc_pages": "pp. 537-563",
+        "dppd_pap_pdf_pages": "pp. 539-565",
         "page_doc_start": 537,
-        "page_doc_end": 562,
+        "page_doc_end": 563,
         "page_pdf_start": 539,
-        "page_pdf_end": 564
+        "page_pdf_end": 565,
+        "lfi_doc_page": 47,
+        "lfi_pdf_page": 49
       },
-      "canonical_status": "PENDING_CANONICAL_EXTRACTION",
-      "programs_count": null,
-      "actions_count": null,
-      "total_budget_2026_fcfa": null,
-      "canonical_reference_path": "",
-      "application_data_path": "",
-      "notes": "En attente d'extraction documentaire contrôlée lors des lots ultérieurs."
+      "canonical_status": "READY_FOR_PUBLICATION",
+      "programs_count": 3,
+      "actions_count": 8,
+      "total_budget_2026_fcfa": 136301855312,
+      "canonical_reference_path": "docs/references/2026/ministry-technical-vocational-education/METFPA_CANONICAL_BUDGET_2026.json",
+      "application_data_path": "src/data/ministries/technical-vocational-education.ts",
+      "notes": "LOT 5 BATCH 1 — Référentiel canonique validé à 100% (delta = 0). Libellés transcrits verbatim de l'Annexe 4 DPPD-PAP Tableau 7. Statut VERIFIED / STAGED.",
+      "documentary_status": "READY_FOR_CANONICAL",
+      "reconciliation_status": "RECONCILED",
+      "publication_status": "STAGED",
+      "budget_2026_fcfa": 182301855312,
+      "program_count": 4,
+      "action_count": 10,
+      "arithmetic_delta_fcfa": 0
     },
     {
       "institution_id": "gov-035",
@@ -857,7 +1023,11 @@
       "total_budget_2026_fcfa": null,
       "canonical_reference_path": "",
       "application_data_path": "",
-      "notes": "Ministre Délégué rattaché budgétairement à la section 229 unifiée (Agriculture, Développement Rural et Productions Vivrières) en LFI 2026. Aucune section autonome 4XX n'a été créée pour les Productions Vivrières."
+      "notes": "Statut LOT 5 : AMBIGUOUS_STRUCTURE. Raison : Section 229 (Productions Vivrières) : section budgétaire unifiée partagée avec gov-009 (Agriculture) en LFI 2026.",
+      "documentary_status": "AMBIGUOUS_STRUCTURE",
+      "reconciliation_status": "NOT_COMPARABLE",
+      "publication_status": "DRAFT",
+      "blocking_reason": "Section 229 (Productions Vivrières) : section budgétaire unifiée partagée avec gov-009 (Agriculture) en LFI 2026."
     }
   ]
 }

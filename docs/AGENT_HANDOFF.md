@@ -1,16 +1,53 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- LAST_UPDATED : 2026-10-06
+- LAST_UPDATED : 2026-10-07
 - LAST_AGENT : Antigravity
-- CURRENT_BRANCH : `antigravity/lot4-ministry-documentary-industrialization`
-- BASE_MASTER_SHA : `665bcdfc1061dbc69485c8748a6962fcd764c130` (Merge commit de PR #26 sur master)
-- CURRENT_HEAD : voir HEAD courante de PR #27
-- LAST_VERIFIED_CODE_HEAD : c19050708b0ca809f10bf58a5d177feacfe20fa0
-- PR : #27 (`feat(lot4): industrialize ministry documentary onboarding with 4 additional pilot ministries`)
+- CURRENT_BRANCH : `antigravity/lot5-ministry-generalization-2026`
+- BASE_MASTER_SHA : `8145c0423482438cc4cc2fc89af68cb399b06ebc` (Merge commit de PR #27 sur master)
+- CURRENT_HEAD : voir HEAD courante de PR #28
+- LAST_VERIFIED_CODE_HEAD : voir commit courant LOT 5
+- PR : PR #28 (`feat(lot5): controlled ministerial budget generalization with Batch 1 (7 ministries)`)
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_SUPABASE_WRITES = 0)
-- CURRENT_MILESTONE : LOT 4 — Audit documentaire de fidélité aux sources achevé avec succès. 100% des libellés officiels transcrits verbatim d'après l'Annexe 4 DPPD-PAP (Tableau 7) pour MJDH, MEER, MINEDDTE, MINEF (53 divergences corrigées, 0 mismatch restant). Fixture golden de contrôle documentaire indépendante (`independentDocumentaryGolden.ts`). Audit du registre des 35 ministères : correction de gov-033 vers la section autonome 439 (LFI 2026 / DPPD-PAP) et explication constitutionnelle/budgétaire de l'unique doublon légitime (section 229 unifiée pour gov-009 et gov-035). Tests : 19/19 files PASS, 329/329 tests PASS, build PASS.
+- CURRENT_MILESTONE : LOT 5 — Généralisation ministérielle 2026 contrôlée. Réconciliation intégrale du périmètre LFI 2026 suite à l'audit bloquant indépendant de la PR #28. Batch 1 réconcilié avec 7 ministères complets (25 programmes, 66 actions, 447 938 605 716 FCFA, delta = 0). Volume budgétaire ministériel cumulé vérifié : 2 157 470 677 361 FCFA (12 ministères, représentant 12,43% du budget de l'État). Libellés officiels 100% conformes verbatim à la LFI 2026 et à l'Annexe 4 DPPD-PAP. Isolation stricte de publication : seul MMPE (gov-008) reste PUBLISHED, les 11 autres ministères vérifiés sont en statut VERIFIED / STAGED. Fixtures golden indépendantes avec INDEPENDENT_LFI_REFERENCES_2026 et 29 tests de généralisation PASS (358 tests PASS au total sur le repo).
 - FOUNDATION_READY : TRUE.
+
+## LOT 5 : GÉNÉRALISATION MINISTÉRIELLE 2026 CONTRÔLÉE (BATCH 1)
+- **1. Objectif & Cadre du Batch 1** :
+  - Généralisation industrielle progressive basée strictement sur l'architecture validée aux LOTS 2, 3 et 4.
+  - Réconciliation intégrale du périmètre officiel de la Loi de Finances 2026 (Tableau récapitulatif par section, dotation et programme, pp. 45–54) et de l'Annexe 4 DPPD-PAP 2026-2028 (Tableau 7) pour les 7 ministères du Batch 1 :
+    1. **MAIED** (`gov-033` / Section DGBF `439`) — Intégration Africaine et Ivoiriens de l'Extérieur : **5 122 516 889 FCFA** (3 programmes, 7 actions, delta = 0).
+    2. **MAM** (`gov-032` / Section DGBF `440`) — Affaires Maritimes : **13 746 365 872 FCFA** (2 programmes, 7 actions, delta = 0).
+    3. **MFPMA** (`gov-003` / Section DGBF `237`) — Fonction Publique et Modernisation de l'Administration : **45 121 940 916 FCFA** (3 programmes, 7 actions, delta = 0).
+    4. **MEPS** (`gov-023` / Section DGBF `362`) — Emploi et Protection Sociale : **91 411 414 044 FCFA** (4 programmes, 15 actions, delta = 0).
+    5. **MSCV** (`gov-030` / Section DGBF `444`) — Sports et Cadre de Vie : **70 427 777 385 FCFA** (4 programmes, 11 actions, delta = 0).
+    6. **MICOM** (`gov-017` / Section DGBF `336`) — Communication : **39 806 735 298 FCFA** (5 programmes, 9 actions, delta = 0).
+    7. **METFPA** (`gov-034` / Section DGBF `334`) — Enseignement Technique, Formation Professionnelle et Apprentissage : **182 301 855 312 FCFA** (4 programmes, 10 actions, delta = 0).
+  - Volume budgétaire Batch 1 : **447 938 605 716 FCFA** (25 programmes, 66 actions, delta = 0).
+  - Volume budgétaire cumulé vérifié (12 ministères) : **2 157 470 677 361 FCFA** (~12,43% du budget national 2026 de 17 350,2 Mds FCFA).
+- **2. Cartographie des 35 Institutions dans le Registre Documentaire Central** :
+  - `docs/references/2026/MINISTRY_DOCUMENTATION_REGISTRY_2026.json` mis à jour :
+    - 12 ministères `VALIDATED` / `READY_FOR_PUBLICATION` (totaux et programmes réconciliés LFI 2026).
+    - 23 ministères documentés avec motifs transparents de blocage ou différé (sections partagées 229, dotation globale sans tableau PAP 7 pour gov-001, cadrage étendu requis pour grands régaliens et pagination complexe).
+- **3. Isolation Stricte de Publication** :
+  - Maintenue dans `src/budget-ingestion/registry/ministryRegistry.ts` :
+    - `getPublishedMinistries()` retourne UNIQUEMENT MMPE (`gov-008`).
+    - `getVerifiedMinistries()` retourne les 12 ministères vérifiés.
+    - `getPendingMinistries()` retourne les 34 entités non-publiées (23 en attente de documentation).
+- **4. Fixtures Golden et Tests d'Intégration Indépendants** :
+  - `src/budget-ingestion/__tests__/fixtures/independentDocumentaryGolden.ts` : intègre `INDEPENDENT_LFI_REFERENCES_2026` et couvre l'intégralité des 11 ministères non-MMPE vérifiés avec valeurs en dur strictes.
+  - `src/budget-ingestion/__tests__/lot5Generalization.test.ts` : 29 tests vérifiant les contrôles indépendants LFI, ingestion, statut réconcilié, non-publication stricte et tests négatifs de sensibilité.
+  - `src/budget-ingestion/__tests__/pilotMinistries.test.ts` : 15 tests validant l'intégrité intacte des pilotes LOT 4.
+- **5. Clôture Documentaire & Réconciliation de Pagination (Audit Indépendant)** :
+  - Audit systématique de pagination intégrale sur les deux documents sources primaires DGBF : *Annexe 4 DPPD-PAP 2026–2028* (1227 pages, règle stricte `PDF page = Document page + 2`) et *Loi de finances 2026* (583 pages, tableau récapitulatif).
+  - Alignement rigoureux avec double citation (ex: `PDF pages 633–656 (Document pages 631–654 sur 1227)`) et pagination exacte de chaque Tableau 7 par programme dans :
+    - Les 7 fichiers canoniques JSON (`docs/references/2026/ministry-*/`)
+    - Les 7 `SOURCE_REGISTER.md` normalisés (`docs/references/2026/ministry-*/`)
+    - `docs/references/2026/MINISTRY_DOCUMENTATION_REGISTRY_2026.json`
+    - `docs/budget-ingestion/LOT5_MINISTRY_COVERAGE_REPORT.md`
+  - Métadonnées et description GitHub de la PR #28 synchronisées avec les totaux réconciliés (Batch 1 : 447 938 605 716 FCFA, 25 programmes, 66 actions ; Cumulatif 12 ministères : 2 157 470 677 361 FCFA). Zero divergence arithmétique (delta = 0 partout).
+- **6. Rapport de Couverture** :
+  - `docs/budget-ingestion/LOT5_MINISTRY_COVERAGE_REPORT.md` mis à jour avec la double pagination officielle DGBF.
 
 ## LOT 4 : INDUSTRIALISATION DOCUMENTAIRE & ONBOARDING MINISTÉRIEL
 - **1. Objectif & Stratégie d'Échantillonnage Pilote** :
@@ -541,9 +578,9 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Audit et contrôle indépendant par l'orchestrateur (ChatGPT) de la PR LOT 4.
-2. Revue contradictoire des 4 référentiels canoniques (MJDH, MEER, MINEDDTE, MINEF) et du registre documentaire des 35 ministères.
-3. Préparation du cadrage pour le LOT 5 (après fusion effective de la PR LOT 4).
+1. Audit et contrôle indépendant par l'orchestrateur (ChatGPT) de la PR LOT 5.
+2. Revue contradictoire des 7 référentiels canoniques du Batch 1 (MAIED, MAM, MFPMA, MEPS, MSCV, MICOM, METFPA), des fixtures golden et du rapport de couverture.
+3. Autorisation formelle de merge de la PR LOT 5 et cadrage du Batch 2 (LOT 6).
 
 ## COCODY_REMOTE_CLOSEOUT — ORCHESTRATEUR 2026-10-02
 - Institution canonique ajoutée à `public.institutions` : `inst-com-cocody`, `Mairie de Cocody`, type applicatif `MAIRIE`, région Abidjan, District Autonome d'Abidjan.
