@@ -1,6 +1,7 @@
 import type { CAFinancialMeasure } from '../../types/administrativeAccount';
 import type { FinancialObservation } from './evidence';
 import type { SourceDocument } from './documents';
+import lot5Controls from '../../../docs/budget-ingestion/LOT5_INDEPENDENT_LFI_CONTROLS.json';
 
 /**
  * Enregistrement formel d'un contrôle d'audit financier indépendant.
@@ -60,20 +61,87 @@ export interface FinancialAuditMatchResult {
 }
 
 /**
+ * Normalisation et équivalence des identifiants documentaires officiels LFI et DPPD.
+ * Permet de reconnaître les alias légitimes (ex: suffixe -ANNEXE-4) adossés au même SHA-256.
+ */
+export function areDocumentIdsEquivalent(id1: string, id2: string): boolean {
+  if (id1 === id2) return true;
+  const normalize = (id: string) => id.replace(/-ANNEXE-4$/i, '').trim();
+  return normalize(id1) === normalize(id2);
+}
+
+/**
+ * Vérification stricte de la cohérence interne des codes budgétaires :
+ * - Une action doit appartenir au programme indiqué (les 5 premiers chiffres de l'action doivent être le code programme).
+ * - Le scope textuel et les codes structurés ne doivent présenter aucune contradiction.
+ * - Un scope de section total ne peut pas comporter de code programme ou action.
+ */
+export function validateCodeCoherence(record: {
+  scope: string;
+  sectionCode?: string | null;
+  programCode?: string | null;
+  actionCode?: string | null;
+}): { valid: boolean; reasons: string[] } {
+  const reasons: string[] = [];
+
+  // 1. Une action doit appartenir au programme indiqué
+  if (record.actionCode && record.programCode) {
+    if (!record.actionCode.startsWith(record.programCode)) {
+      reasons.push('ACTION_PROGRAM_MISMATCH');
+    }
+  }
+
+  // 2. Si scope est PROGRAM_<prog> :
+  if (record.scope.startsWith('PROGRAM_')) {
+    const scopeProg = record.scope.slice('PROGRAM_'.length);
+    if (record.programCode && record.programCode !== scopeProg) {
+      reasons.push('SCOPE_PROGRAM_CODE_MISMATCH');
+    }
+    if (record.actionCode) {
+      reasons.push('SCOPE_CODE_MISMATCH');
+    }
+  }
+
+  // 3. Si scope est ACTION_<act> :
+  if (record.scope.startsWith('ACTION_')) {
+    const scopeAct = record.scope.slice('ACTION_'.length);
+    if (record.actionCode && record.actionCode !== scopeAct) {
+      reasons.push('SCOPE_ACTION_CODE_MISMATCH');
+    }
+    if (record.programCode && !scopeAct.startsWith(record.programCode)) {
+      reasons.push('ACTION_PROGRAM_MISMATCH');
+    }
+  }
+
+  // 4. Si scope est SECTION_TOTAL :
+  if (record.scope === 'SECTION_TOTAL') {
+    if (record.programCode || record.actionCode) {
+      reasons.push('SCOPE_CODE_MISMATCH');
+    }
+  }
+
+  return { valid: reasons.length === 0, reasons };
+}
+
+/**
  * Confronte une observation financière candidate à la liste des contrôles d'audit enregistrés.
  *
  * Règles d'invariants et d'étanchéité :
- * 1. L'empreinte SHA-256 du document cité doit correspondre exactement à l'audit.
- * 2. L'exercice budgétaire doit correspondre exactement.
- * 3. L'institution et la section (si applicable) doivent correspondre exactement.
- * 4. La granularité de périmètre (scope) doit correspondre :
+ * 1. Cohérence stricte des codes (scope, programCode, actionCode, sectionCode).
+ * 2. L'empreinte SHA-256 du document cité doit correspondre exactement à l'audit.
+ * 3. L'exercice budgétaire doit correspondre exactement.
+ * 4. L'institution et la section (si applicable) doivent correspondre exactement.
+ * 5. La granularité de périmètre (scope) doit correspondre :
  *    - Un audit de SECTION_TOTAL ne valide JAMAIS un programme ou une action.
  *    - Un audit de PROGRAM ne valide JAMAIS une action détaillée.
- * 5. La nature du montant (measure), la base budgétaire et la devise doivent correspondre.
- * 6. Le montant exact (y compris le vrai zéro : amount === 0) doit correspondre.
- * 7. Si une page est spécifiée dans l'audit et l'observation, elle doit concorder.
- * 8. Le statut du contrôle doit être strictement 'VERIFIED'.
- *    Un statut 'SOURCE_CONFLICT' ou 'TO_VERIFY' provoque un rejet immédiat.
+ * 6. La nature du montant (measure), la base budgétaire et la devise doivent correspondre.
+ * 7. Aucune contradiction sur le périmètre : si un audit est en SOURCE_CONFLICT ou TO_VERIFY,
+ *    ou si deux audits pour le même montant divergent, rejet déterministe immédiat.
+ * 8. Le montant exact (y compris le vrai zéro : amount === 0) doit correspondre.
+ * 9. PAGE OBLIGATOIRE : Si un audit spécifie une page, l'observation DOIT fournir cette page
+ *    et celle-ci doit concorder exactement. Une page manquante ne contourne JAMAIS la vérification.
+ * 10. TABLEAU OBLIGATOIRE : Si l'audit spécifie un tableRef sans page, l'observation DOIT le fournir.
+ * 11. Aucun .find() arbitraire : tous les candidats applicables sont analysés pour garantir l'unanimité.
  */
 export function matchFinancialAudit(
   observation: FinancialObservation,
@@ -84,8 +152,14 @@ export function matchFinancialAudit(
     return { matched: false, matchingRecord: null, reasons: ['NO_EVIDENCE_PROVIDED'] };
   }
 
-  // 1. Filtrer les audits visant le document exact
-  const docAudits = audits.filter(a => a.documentId === observation.evidence!.documentId);
+  // 0. Vérification de la cohérence interne des codes de l'observation
+  const obsCoherence = validateCodeCoherence(observation);
+  if (!obsCoherence.valid) {
+    return { matched: false, matchingRecord: null, reasons: obsCoherence.reasons };
+  }
+
+  // 1. Filtrer les audits visant le document exact (avec équivalence d'identifiant documentaire)
+  const docAudits = audits.filter(a => areDocumentIdsEquivalent(a.documentId, observation.evidence!.documentId));
   if (docAudits.length === 0) {
     return { matched: false, matchingRecord: null, reasons: ['NO_FINANCIAL_AUDIT_FOR_DOCUMENT'] };
   }
@@ -145,26 +219,111 @@ export function matchFinancialAudit(
     return { matched: false, matchingRecord: null, reasons: ['BASIS_OR_CURRENCY_MISMATCH'] };
   }
 
-  // 6. Montant exact (y compris 0 exact)
-  const amountMatches = basisMatches.filter(a => a.auditedAmount === observation.amount);
+  // CORRECTION 1 : Détection déterministe des contradictions sur l'ensemble des audits applicables au périmètre
+  const scopeAudits = basisMatches;
+
+  // A. Si n'importe quel audit sur ce périmètre est en SOURCE_CONFLICT, rejet immédiat
+  if (scopeAudits.some(a => a.controlStatus === 'SOURCE_CONFLICT')) {
+    return { matched: false, matchingRecord: null, reasons: ['AUDIT_SOURCE_CONFLICT'] };
+  }
+
+  // B. Si n'importe quel audit sur ce périmètre n'est pas VERIFIED, rejet immédiat
+  if (scopeAudits.some(a => a.controlStatus !== 'VERIFIED')) {
+    return { matched: false, matchingRecord: null, reasons: ['AUDIT_STATUS_NOT_VERIFIED'] };
+  }
+
+  // C. Si les audits applicables sur ce périmètre portent des montants contradictoires
+  const distinctAmounts = new Set(scopeAudits.map(a => a.auditedAmount));
+  if (distinctAmounts.size > 1) {
+    return { matched: false, matchingRecord: null, reasons: ['CONTRADICTORY_AUDIT_AMOUNTS', 'CONTRADICTORY_AUDIT_RECORDS'] };
+  }
+
+  // 6. Montant exact (y compris 0 exact documenté)
+  const amountMatches = scopeAudits.filter(a => a.auditedAmount === observation.amount);
   if (amountMatches.length === 0) {
     return { matched: false, matchingRecord: null, reasons: ['AMOUNT_MISMATCH'] };
   }
 
-  // 7. Page (si applicable)
-  const evidence = observation.evidence;
-  const candidate = amountMatches.find(a => {
-    if (a.page !== null && a.page !== undefined && evidence?.page !== null && evidence?.page !== undefined) {
-      return a.page === evidence.page;
-    }
-    return true;
-  });
-
-  if (!candidate) {
-    return { matched: false, matchingRecord: null, reasons: ['PAGE_MISMATCH'] };
+  // CORRECTION 1 (suite) : Vérification d'audits contradictoires sur le même montant
+  // Si deux audits du même montant ont des statuts différents ou des pages conflictuelles
+  const distinctStatuses = new Set(amountMatches.map(a => a.controlStatus));
+  if (distinctStatuses.size > 1) {
+    return { matched: false, matchingRecord: null, reasons: ['CONTRADICTORY_AUDIT_STATUS', 'CONTRADICTORY_AUDIT_RECORDS'] };
+  }
+  const distinctPages = new Set(amountMatches.map(a => a.page).filter(p => p !== null && p !== undefined));
+  if (distinctPages.size > 1) {
+    return { matched: false, matchingRecord: null, reasons: ['CONTRADICTORY_AUDIT_PAGES', 'CONTRADICTORY_AUDIT_RECORDS'] };
   }
 
-  // 8. Statut d'audit
+  // CORRECTION 2 : Vérification obligatoire et déterministe de la page / tableau documentaire
+  const evidence = observation.evidence;
+  const matchingCandidates: FinancialAuditRecord[] = [];
+  const candidateErrors = new Set<string>();
+
+  for (const a of amountMatches) {
+    let matchesCriteria = true;
+
+    // A. Cohérence des codes de l'audit lui-même
+    const auditCoherence = validateCodeCoherence(a);
+    if (!auditCoherence.valid) {
+      matchesCriteria = false;
+      for (const r of auditCoherence.reasons) candidateErrors.add(r);
+    }
+
+    // B. Codes structurés croisés avec l'observation
+    if (observation.programCode && a.programCode && observation.programCode !== a.programCode) {
+      candidateErrors.add('SCOPE_PROGRAM_CODE_MISMATCH');
+      matchesCriteria = false;
+    }
+    if (observation.actionCode && a.actionCode && observation.actionCode !== a.actionCode) {
+      candidateErrors.add('SCOPE_ACTION_CODE_MISMATCH');
+      matchesCriteria = false;
+    }
+
+    // C. Page documentaire obligatoire : si l'audit est limité à une page, l'observation DOIT la fournir exactement
+    if (a.page !== null && a.page !== undefined) {
+      if (evidence.page === null || evidence.page === undefined) {
+        candidateErrors.add('PAGE_REQUIRED');
+        matchesCriteria = false;
+      } else if (evidence.page !== a.page) {
+        candidateErrors.add('PAGE_MISMATCH');
+        matchesCriteria = false;
+      }
+    }
+
+    // D. Tableau documentaire obligatoire : si l'audit spécifie un tableRef sans page, l'observation DOIT le fournir
+    if (a.tableRef !== null && a.tableRef !== undefined && (a.page === null || a.page === undefined)) {
+      if (!evidence.reference?.trim()) {
+        candidateErrors.add('TABLE_REF_REQUIRED');
+        matchesCriteria = false;
+      } else if (!evidence.reference.toLowerCase().includes(a.tableRef.toLowerCase())) {
+        candidateErrors.add('TABLE_REF_MISMATCH');
+        matchesCriteria = false;
+      }
+    }
+
+    if (matchesCriteria) {
+      matchingCandidates.push(a);
+    }
+  }
+
+  if (matchingCandidates.length === 0) {
+    return { matched: false, matchingRecord: null, reasons: Array.from(candidateErrors) };
+  }
+
+  // Ne plus faire de .find() arbitraire : vérifier l'unanimité absolue de tous les candidats
+  const candidate = matchingCandidates[0];
+  for (const other of matchingCandidates.slice(1)) {
+    if (
+      other.controlStatus !== candidate.controlStatus ||
+      other.auditedAmount !== candidate.auditedAmount ||
+      other.page !== candidate.page ||
+      other.tableRef !== candidate.tableRef
+    ) {
+      return { matched: false, matchingRecord: null, reasons: ['CONTRADICTORY_AUDIT_RECORDS'] };
+    }
+  }
+
   if (candidate.controlStatus === 'SOURCE_CONFLICT') {
     return { matched: false, matchingRecord: candidate, reasons: ['AUDIT_SOURCE_CONFLICT'] };
   }
@@ -175,402 +334,158 @@ export function matchFinancialAudit(
   return { matched: true, matchingRecord: candidate, reasons: [] };
 }
 
-const SHA_LFI_2026 = 'f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76';
-const SHA_DPPD_2026 = '0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10';
-const REF_LOT5_CONTROLS = 'docs/budget-ingestion/LOT5_INDEPENDENT_LFI_CONTROLS.json#section_controls';
-
 /**
- * Registre des contrôles financiers indépendants officiels vérifiés.
+ * Vérifie si un montant financier exact fait partie du référentiel officiel LOT 5.
  * Source de vérité : docs/budget-ingestion/LOT5_INDEPENDENT_LFI_CONTROLS.json
  */
-export const OFFICIAL_FINANCIAL_AUDITS: readonly FinancialAuditRecord[] = [
-  // SECTION 237 — MFPMA (gov-003)
-  {
-    controlId: 'AUDIT-LFI-2026-SEC-237',
-    documentId: 'DGBF-LFI-2026',
-    documentSha256: SHA_LFI_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-003',
-    sectionCode: '237',
-    scope: 'SECTION_TOTAL',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 45121940916,
-    page: 47,
-  },
+export function isReferentialAuditedAmount(amount: number, sectionCode?: string | null): boolean {
+  for (const sc of lot5Controls.section_controls) {
+    if (sectionCode && sc.section !== sectionCode) continue;
+    if (sc.section_total_fcfa === amount) return true;
+    if ('newly_verified_programs' in sc && Array.isArray(sc.newly_verified_programs)) {
+      for (const prog of sc.newly_verified_programs) {
+        if (prog.amount_fcfa === amount) return true;
+        if ('actions' in prog && Array.isArray(prog.actions)) {
+          for (const act of prog.actions) {
+            if (act.amount_fcfa === amount) return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
 
-  // SECTION 334 — METFPA (gov-034)
-  {
-    controlId: 'AUDIT-LFI-2026-SEC-334',
-    documentId: 'DGBF-LFI-2026',
-    documentSha256: SHA_LFI_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-034',
-    sectionCode: '334',
-    scope: 'SECTION_TOTAL',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 182301855312,
-    page: 49,
-  },
-  {
-    controlId: 'AUDIT-LFI-2026-PROG-23220',
-    documentId: 'DGBF-LFI-2026',
-    documentSha256: SHA_LFI_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-034',
-    sectionCode: '334',
-    scope: 'PROGRAM_23220',
-    programCode: '23220',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 46000000000,
-    page: 49,
-  },
-  {
-    controlId: 'AUDIT-DPPD-2026-ACT-2322001',
-    documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4',
-    documentSha256: SHA_DPPD_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-034',
-    sectionCode: '334',
-    scope: 'ACTION_2322001',
-    programCode: '23220',
-    actionCode: '2322001',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 17178600000,
-    page: 563,
-  },
-  {
-    controlId: 'AUDIT-DPPD-2026-ACT-2322002',
-    documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4',
-    documentSha256: SHA_DPPD_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-034',
-    sectionCode: '334',
-    scope: 'ACTION_2322002',
-    programCode: '23220',
-    actionCode: '2322002',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 28821400000,
-    page: 563,
-  },
+/**
+ * Valide un enregistrement d'audit par rapport au référentiel documentaire officiel LOT 5.
+ * Rejette toute présence de montant absent du référentiel documentaire.
+ */
+export function verifyAuditRecordAgainstReferential(record: FinancialAuditRecord): {
+  valid: boolean;
+  reasons: string[];
+} {
+  const reasons: string[] = [];
 
-  // SECTION 336 — MICOM (gov-017)
-  {
-    controlId: 'AUDIT-LFI-2026-SEC-336',
-    documentId: 'DGBF-LFI-2026',
-    documentSha256: SHA_LFI_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-017',
-    sectionCode: '336',
-    scope: 'SECTION_TOTAL',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 39806735298,
-    page: 49,
-  },
-  {
-    controlId: 'AUDIT-LFI-2026-PROG-23223',
-    documentId: 'DGBF-LFI-2026',
-    documentSha256: SHA_LFI_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-017',
-    sectionCode: '336',
-    scope: 'PROGRAM_23223',
-    programCode: '23223',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 16465000001,
-    page: 50,
-  },
-  {
-    controlId: 'AUDIT-DPPD-2026-ACT-2322301',
-    documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4',
-    documentSha256: SHA_DPPD_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-017',
-    sectionCode: '336',
-    scope: 'ACTION_2322301',
-    programCode: '23223',
-    actionCode: '2322301',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 16465000001,
-    page: 651,
-  },
-  {
-    controlId: 'AUDIT-LFI-2026-PROG-23224',
-    documentId: 'DGBF-LFI-2026',
-    documentSha256: SHA_LFI_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-017',
-    sectionCode: '336',
-    scope: 'PROGRAM_23224',
-    programCode: '23224',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 2035000000,
-    page: 50,
-  },
-  {
-    controlId: 'AUDIT-DPPD-2026-ACT-2322401',
-    documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4',
-    documentSha256: SHA_DPPD_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-017',
-    sectionCode: '336',
-    scope: 'ACTION_2322401',
-    programCode: '23224',
-    actionCode: '2322401',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 2035000000,
-    page: 653,
-  },
-  {
-    controlId: 'AUDIT-LFI-2026-PROG-23225',
-    documentId: 'DGBF-LFI-2026',
-    documentSha256: SHA_LFI_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-017',
-    sectionCode: '336',
-    scope: 'PROGRAM_23225',
-    programCode: '23225',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 1700000000,
-    page: 50,
-  },
-  {
-    controlId: 'AUDIT-DPPD-2026-ACT-2322501',
-    documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4',
-    documentSha256: SHA_DPPD_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-017',
-    sectionCode: '336',
-    scope: 'ACTION_2322501',
-    programCode: '23225',
-    actionCode: '2322501',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 1700000000,
-    page: 654,
-  },
+  // 1. Contrôle des sources et empreintes
+  const matchingSource = lot5Controls.sources.find(s =>
+    areDocumentIdsEquivalent(s.document_id, record.documentId) &&
+    s.sha256.toLowerCase() === record.documentSha256.toLowerCase()
+  );
+  if (!matchingSource) {
+    reasons.push('DOCUMENT_OR_SHA_NOT_IN_REFERENTIAL');
+  }
 
-  // SECTION 362 — MEPS (gov-023)
-  {
-    controlId: 'AUDIT-LFI-2026-SEC-362',
-    documentId: 'DGBF-LFI-2026',
-    documentSha256: SHA_LFI_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-023',
-    sectionCode: '362',
-    scope: 'SECTION_TOTAL',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 91411414044,
-    page: 53,
-  },
+  // 2. Contrôle du montant dans le référentiel documentaire
+  if (!isReferentialAuditedAmount(record.auditedAmount, record.sectionCode)) {
+    reasons.push('AMOUNT_NOT_IN_DOCUMENTARY_REFERENTIAL');
+  }
 
-  // SECTION 439 — MAIED (gov-033)
-  {
-    controlId: 'AUDIT-LFI-2026-SEC-439',
-    documentId: 'DGBF-LFI-2026',
-    documentSha256: SHA_LFI_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-033',
-    sectionCode: '439',
-    scope: 'SECTION_TOTAL',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 5122516889,
-    page: 53,
-  },
+  // 3. Référence de rapport
+  if (!record.reportRef || !record.reportRef.includes('LOT5_INDEPENDENT_LFI_CONTROLS.json')) {
+    reasons.push('REPORT_REF_NOT_REFERENTIAL');
+  }
 
-  // SECTION 440 — MAM (gov-032)
-  {
-    controlId: 'AUDIT-LFI-2026-SEC-440',
-    documentId: 'DGBF-LFI-2026',
-    documentSha256: SHA_LFI_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-032',
-    sectionCode: '440',
-    scope: 'SECTION_TOTAL',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 13746365872,
-    page: 54,
-  },
+  return { valid: reasons.length === 0, reasons };
+}
 
-  // SECTION 444 — MSCV (gov-030)
-  {
-    controlId: 'AUDIT-LFI-2026-SEC-444',
-    documentId: 'DGBF-LFI-2026',
-    documentSha256: SHA_LFI_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-030',
-    sectionCode: '444',
-    scope: 'SECTION_TOTAL',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 70427777385,
-    page: 54,
-  },
-  {
-    controlId: 'AUDIT-LFI-2026-PROG-23241',
-    documentId: 'DGBF-LFI-2026',
-    documentSha256: SHA_LFI_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-030',
-    sectionCode: '444',
-    scope: 'PROGRAM_23241',
-    programCode: '23241',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 10900000000,
-    page: 54,
-  },
-  {
-    controlId: 'AUDIT-DPPD-2026-ACT-2324101',
-    documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4',
-    documentSha256: SHA_DPPD_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-030',
-    sectionCode: '444',
-    scope: 'ACTION_2324101',
-    programCode: '23241',
-    actionCode: '2324101',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 7430000000,
-    page: 1134,
-  },
-  {
-    controlId: 'AUDIT-DPPD-2026-ACT-2324102',
-    documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4',
-    documentSha256: SHA_DPPD_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-030',
-    sectionCode: '444',
-    scope: 'ACTION_2324102',
-    programCode: '23241',
-    actionCode: '2324102',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 200000000,
-    page: 1134,
-  },
-  {
-    controlId: 'AUDIT-DPPD-2026-ACT-2324103',
-    documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4',
-    documentSha256: SHA_DPPD_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-030',
-    sectionCode: '444',
-    scope: 'ACTION_2324103',
-    programCode: '23241',
-    actionCode: '2324103',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 3270000000,
-    page: 1134,
-  },
-  {
-    controlId: 'AUDIT-LFI-2026-PROG-23249',
-    documentId: 'DGBF-LFI-2026',
-    documentSha256: SHA_LFI_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-030',
-    sectionCode: '444',
-    scope: 'PROGRAM_23249',
-    programCode: '23249',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 1720000000,
-    page: 54,
-  },
-  {
-    controlId: 'AUDIT-DPPD-2026-ACT-2324901',
-    documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4',
-    documentSha256: SHA_DPPD_2026,
-    fiscalYear: 2026,
-    controlStatus: 'VERIFIED',
-    reportRef: REF_LOT5_CONTROLS,
-    institutionId: 'gov-030',
-    sectionCode: '444',
-    scope: 'ACTION_2324901',
-    programCode: '23249',
-    actionCode: '2324901',
-    measure: 'ORDERED',
-    basis: 'INITIAL_BUDGET',
-    currency: 'XOF',
-    auditedAmount: 1720000000,
-    page: 1135,
-  },
-];
+/**
+ * Transforme le référentiel documentaire LOT 5 en enregistrements d'audit financier typés et validés.
+ * Évite la duplication manuelle des montants en code et garantit la fidélité documentaire.
+ */
+export function transformLot5ControlsToAudits(): FinancialAuditRecord[] {
+  const audits: FinancialAuditRecord[] = [];
+  const lfiSource = lot5Controls.sources.find(s => s.document_id === 'DGBF-LFI-2026')!;
+  const dppdSource = lot5Controls.sources.find(s => areDocumentIdsEquivalent(s.document_id, 'DGBF-DPPD-PAP-2026-2028'))!;
+
+  const sectionInstitutionMap: Record<string, string> = {
+    '237': 'gov-003',
+    '334': 'gov-034',
+    '336': 'gov-017',
+    '362': 'gov-023',
+    '439': 'gov-033',
+    '440': 'gov-032',
+    '444': 'gov-030',
+  };
+
+  for (const sc of lot5Controls.section_controls) {
+    const institutionId = ('institution_id' in sc && sc.institution_id) ? sc.institution_id : sectionInstitutionMap[sc.section];
+    if (!institutionId) continue;
+
+    // 1. Audit Section Total (LFI 2026)
+    audits.push({
+      controlId: `AUDIT-LFI-2026-SEC-${sc.section}`,
+      documentId: lfiSource.document_id,
+      documentSha256: lfiSource.sha256,
+      fiscalYear: 2026,
+      controlStatus: 'VERIFIED',
+      reportRef: 'docs/budget-ingestion/LOT5_INDEPENDENT_LFI_CONTROLS.json#section_controls',
+      institutionId,
+      sectionCode: sc.section,
+      scope: 'SECTION_TOTAL',
+      measure: 'ORDERED',
+      basis: 'INITIAL_BUDGET',
+      currency: 'XOF',
+      auditedAmount: sc.section_total_fcfa,
+      page: sc.lfi_pdf_pages[0] ?? null,
+      tableRef: 'Tableau 7',
+    });
+
+    // 2. Programmes et Actions nouvellement vérifiés
+    if ('newly_verified_programs' in sc && Array.isArray(sc.newly_verified_programs)) {
+      for (const prog of sc.newly_verified_programs) {
+        // Audit Programme (LFI 2026)
+        audits.push({
+          controlId: `AUDIT-LFI-2026-PROG-${prog.code}`,
+          documentId: lfiSource.document_id,
+          documentSha256: lfiSource.sha256,
+          fiscalYear: 2026,
+          controlStatus: 'VERIFIED',
+          reportRef: 'docs/budget-ingestion/LOT5_INDEPENDENT_LFI_CONTROLS.json#section_controls',
+          institutionId,
+          sectionCode: sc.section,
+          scope: `PROGRAM_${prog.code}`,
+          programCode: prog.code,
+          measure: 'ORDERED',
+          basis: 'INITIAL_BUDGET',
+          currency: 'XOF',
+          auditedAmount: prog.amount_fcfa,
+          page: prog.lfi_pdf_page ?? null,
+          tableRef: 'Tableau 7 : Budget détaillé du programme',
+        });
+
+        // Audit Actions (DPPD-PAP Tableau 7)
+        if ('actions' in prog && Array.isArray(prog.actions)) {
+          for (const act of prog.actions) {
+            audits.push({
+              controlId: `AUDIT-DPPD-2026-ACT-${act.code}`,
+              documentId: dppdSource.document_id,
+              documentSha256: dppdSource.sha256,
+              fiscalYear: 2026,
+              controlStatus: 'VERIFIED',
+              reportRef: 'docs/budget-ingestion/LOT5_INDEPENDENT_LFI_CONTROLS.json#section_controls',
+              institutionId,
+              sectionCode: sc.section,
+              scope: `ACTION_${act.code}`,
+              programCode: prog.code,
+              actionCode: act.code,
+              measure: 'ORDERED',
+              basis: 'INITIAL_BUDGET',
+              currency: 'XOF',
+              auditedAmount: act.amount_fcfa,
+              page: act.dppd_pdf_pages[0] ?? null,
+              tableRef: 'Tableau 7 : Budget détaillé du programme',
+            });
+          }
+        }
+      }
+    }
+  }
+
+  return audits;
+}
+
+/**
+ * Registre officiel des contrôles financiers indépendants vérifiés.
+ * Transformé directement depuis docs/budget-ingestion/LOT5_INDEPENDENT_LFI_CONTROLS.json.
+ */
+export const OFFICIAL_FINANCIAL_AUDITS: readonly FinancialAuditRecord[] = transformLot5ControlsToAudits();

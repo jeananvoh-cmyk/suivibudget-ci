@@ -2,12 +2,23 @@ import { assessObservation, hasEvidence, isCalendarDate, type EvidenceRef, type 
 import {
   matchFinancialAudit,
   OFFICIAL_FINANCIAL_AUDITS,
+  validateCodeCoherence,
+  areDocumentIdsEquivalent,
+  isReferentialAuditedAmount,
+  verifyAuditRecordAgainstReferential,
   type FinancialAuditRecord,
   type FinancialAuditMatchResult,
 } from './financialAudits';
 
 export type { FinancialAuditRecord, FinancialAuditMatchResult };
-export { matchFinancialAudit, OFFICIAL_FINANCIAL_AUDITS };
+export {
+  matchFinancialAudit,
+  OFFICIAL_FINANCIAL_AUDITS,
+  validateCodeCoherence,
+  areDocumentIdsEquivalent,
+  isReferentialAuditedAmount,
+  verifyAuditRecordAgainstReferential,
+};
 
 export type DocumentAvailability =
   | 'AVAILABLE'

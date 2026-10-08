@@ -22,6 +22,8 @@ export interface FinancialObservation {
   amount: number | null;
   precision: AmountPrecision;
   evidence: EvidenceRef | null;
+  programCode?: string | null;
+  actionCode?: string | null;
 }
 
 export type ReviewStatus = 'AVAILABLE' | 'UNKNOWN' | 'BLOCKED' | 'NOT_COMPARABLE';

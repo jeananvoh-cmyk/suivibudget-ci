@@ -71,7 +71,7 @@ const testAudits: readonly FinancialAuditRecord[] = [
     controlStatus: 'VERIFIED',
     reportRef: 'test-report',
     institutionId: 'gov-003',
-    sectionCode: '237',
+    sectionCode: '238',
     scope: 'SECTION_TOTAL',
     measure: 'ORDERED',
     basis: 'INITIAL_BUDGET',
@@ -278,6 +278,7 @@ describe('LOT 8 — documentary catalog', () => {
     it('13. preserves and accepts documented exact zero amount (amount: 0, precision: EXACT) when verified', () => {
       const zeroObs: FinancialObservation = {
         ...observation,
+        sectionCode: '238',
         amount: 0,
         precision: 'EXACT',
       };
