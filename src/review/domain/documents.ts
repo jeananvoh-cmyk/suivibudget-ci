@@ -6,6 +6,7 @@ import {
   areDocumentIdsEquivalent,
   isReferentialAuditedAmount,
   verifyAuditRecordAgainstReferential,
+  isLot5ReferentialClaim,
   type FinancialAuditRecord,
   type FinancialAuditMatchResult,
 } from './financialAudits';
@@ -18,6 +19,7 @@ export {
   areDocumentIdsEquivalent,
   isReferentialAuditedAmount,
   verifyAuditRecordAgainstReferential,
+  isLot5ReferentialClaim,
 };
 
 export type DocumentAvailability =

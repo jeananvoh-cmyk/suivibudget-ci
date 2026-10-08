@@ -79,44 +79,80 @@ export function areDocumentIdsEquivalent(id1: string, id2: string): boolean {
 export function validateCodeCoherence(record: {
   scope: string;
   sectionCode?: string | null;
+  institutionId?: string | null;
   programCode?: string | null;
   actionCode?: string | null;
 }): { valid: boolean; reasons: string[] } {
   const reasons: string[] = [];
+  const scope = record.scope ?? '';
 
-  // 1. Une action doit appartenir au programme indiqué
-  if (record.actionCode && record.programCode) {
-    if (!record.actionCode.startsWith(record.programCode)) {
-      reasons.push('ACTION_PROGRAM_MISMATCH');
-    }
-  }
-
-  // 2. Si scope est PROGRAM_<prog> :
-  if (record.scope.startsWith('PROGRAM_')) {
-    const scopeProg = record.scope.slice('PROGRAM_'.length);
-    if (record.programCode && record.programCode !== scopeProg) {
-      reasons.push('SCOPE_PROGRAM_CODE_MISMATCH');
+  // Invariants pour les périmètres ministériels
+  if (scope === 'SECTION_TOTAL') {
+    if (record.programCode) {
+      reasons.push('SECTION_TOTAL_HAS_PROGRAM_CODE');
     }
     if (record.actionCode) {
-      reasons.push('SCOPE_CODE_MISMATCH');
+      reasons.push('SECTION_TOTAL_HAS_ACTION_CODE');
     }
-  }
+    // Pour les budgets ministériels (institution gov- ou présence d'une section ministérielle)
+    const isMinisterial = Boolean(record.institutionId?.startsWith('gov-')) || (record.sectionCode !== null && record.sectionCode !== undefined);
+    if (isMinisterial) {
+      if (!record.sectionCode || !record.sectionCode.trim()) {
+        reasons.push('SECTION_REQUIRED');
+      }
+      if (record.institutionId !== undefined && (!record.institutionId || !record.institutionId.trim())) {
+        reasons.push('INSTITUTION_REQUIRED');
+      }
+    }
+  } else if (scope.startsWith('PROGRAM_')) {
+    const scopeProg = scope.slice('PROGRAM_'.length);
 
-  // 3. Si scope est ACTION_<act> :
-  if (record.scope.startsWith('ACTION_')) {
-    const scopeAct = record.scope.slice('ACTION_'.length);
-    if (record.actionCode && record.actionCode !== scopeAct) {
-      reasons.push('SCOPE_ACTION_CODE_MISMATCH');
+    if (scopeProg.length !== 5 || !/^\d{5}$/.test(scopeProg)) {
+      reasons.push('INVALID_PROGRAM_CODE_LENGTH');
     }
-    if (record.programCode && !scopeAct.startsWith(record.programCode)) {
-      reasons.push('ACTION_PROGRAM_MISMATCH');
-    }
-  }
 
-  // 4. Si scope est SECTION_TOTAL :
-  if (record.scope === 'SECTION_TOTAL') {
-    if (record.programCode || record.actionCode) {
-      reasons.push('SCOPE_CODE_MISMATCH');
+    if (!record.programCode || !record.programCode.trim()) {
+      reasons.push('PROGRAM_CODE_REQUIRED');
+    } else {
+      if (record.programCode !== scopeProg) {
+        reasons.push('SCOPE_PROGRAM_CODE_MISMATCH');
+      }
+      if (record.programCode.length !== 5 || !/^\d{5}$/.test(record.programCode)) {
+        reasons.push('INVALID_PROGRAM_CODE_LENGTH');
+      }
+    }
+
+    if (record.actionCode) {
+      reasons.push('PROGRAM_HAS_ACTION_CODE');
+    }
+  } else if (scope.startsWith('ACTION_')) {
+    const scopeAct = scope.slice('ACTION_'.length);
+
+    if (scopeAct.length !== 7 || !/^\d{7}$/.test(scopeAct)) {
+      reasons.push('INVALID_ACTION_CODE_LENGTH');
+    }
+
+    if (!record.programCode || !record.programCode.trim()) {
+      reasons.push('PROGRAM_CODE_REQUIRED');
+    } else if (record.programCode.length !== 5 || !/^\d{5}$/.test(record.programCode)) {
+      reasons.push('INVALID_PROGRAM_CODE_LENGTH');
+    }
+
+    if (!record.actionCode || !record.actionCode.trim()) {
+      reasons.push('ACTION_CODE_REQUIRED');
+    } else {
+      if (record.actionCode !== scopeAct) {
+        reasons.push('SCOPE_ACTION_CODE_MISMATCH');
+      }
+      if (record.actionCode.length !== 7 || !/^\d{7}$/.test(record.actionCode)) {
+        reasons.push('INVALID_ACTION_CODE_LENGTH');
+      }
+    }
+
+    if (record.actionCode && record.programCode) {
+      if (!record.actionCode.startsWith(record.programCode)) {
+        reasons.push('ACTION_PROGRAM_MISMATCH');
+      }
     }
   }
 
@@ -270,7 +306,16 @@ export function matchFinancialAudit(
       for (const r of auditCoherence.reasons) candidateErrors.add(r);
     }
 
-    // B. Codes structurés croisés avec l'observation
+    // B. Vérification contre le référentiel officiel LOT 5 si l'audit prétend représenter LOT 5
+    if (isLot5ReferentialClaim(a)) {
+      const refCheck = verifyAuditRecordAgainstReferential(a);
+      if (!refCheck.valid) {
+        matchesCriteria = false;
+        for (const r of refCheck.reasons) candidateErrors.add(r);
+      }
+    }
+
+    // C. Codes structurés croisés avec l'observation
     if (observation.programCode && a.programCode && observation.programCode !== a.programCode) {
       candidateErrors.add('SCOPE_PROGRAM_CODE_MISMATCH');
       matchesCriteria = false;
@@ -280,7 +325,7 @@ export function matchFinancialAudit(
       matchesCriteria = false;
     }
 
-    // C. Page documentaire obligatoire : si l'audit est limité à une page, l'observation DOIT la fournir exactement
+    // D. Page documentaire obligatoire : si l'audit est limité à une page, l'observation DOIT la fournir exactement
     if (a.page !== null && a.page !== undefined) {
       if (evidence.page === null || evidence.page === undefined) {
         candidateErrors.add('PAGE_REQUIRED');
@@ -291,7 +336,7 @@ export function matchFinancialAudit(
       }
     }
 
-    // D. Tableau documentaire obligatoire : si l'audit spécifie un tableRef sans page, l'observation DOIT le fournir
+    // E. Tableau documentaire obligatoire : si l'audit spécifie un tableRef sans page, l'observation DOIT le fournir
     if (a.tableRef !== null && a.tableRef !== undefined && (a.page === null || a.page === undefined)) {
       if (!evidence.reference?.trim()) {
         candidateErrors.add('TABLE_REF_REQUIRED');
@@ -335,6 +380,23 @@ export function matchFinancialAudit(
 }
 
 /**
+ * Détermine si un enregistrement d'audit prétend représenter les contrôles officiels du LOT 5.
+ */
+export function isLot5ReferentialClaim(audit: FinancialAuditRecord): boolean {
+  if (audit.reportRef && audit.reportRef.includes('LOT5_INDEPENDENT_LFI_CONTROLS.json')) {
+    return true;
+  }
+  if (
+    audit.controlId.startsWith('AUDIT-LFI-2026-') ||
+    audit.controlId.startsWith('AUDIT-DPPD-2026-') ||
+    audit.controlId.includes('LOT5')
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/**
  * Vérifie si un montant financier exact fait partie du référentiel officiel LOT 5.
  * Source de vérité : docs/budget-ingestion/LOT5_INDEPENDENT_LFI_CONTROLS.json
  */
@@ -358,7 +420,18 @@ export function isReferentialAuditedAmount(amount: number, sectionCode?: string 
 
 /**
  * Valide un enregistrement d'audit par rapport au référentiel documentaire officiel LOT 5.
- * Rejette toute présence de montant absent du référentiel documentaire.
+ * Contrôle rigoureusement et conjointement :
+ * - Identifiant documentaire et SHA-256
+ * - Exercice budgétaire
+ * - Institution
+ * - Section
+ * - Niveau de granularité (SECTION_TOTAL, PROGRAM_, ACTION_)
+ * - Code exact du programme ou de l'action
+ * - Mesure ('ORDERED'), base ('INITIAL_BUDGET'), devise ('XOF')
+ * - Montant exact en FCFA
+ * - Page ou référence documentaire
+ *
+ * Un montant correct présent ailleurs dans le référentiel ne valide JAMAIS une mauvaise ligne.
  */
 export function verifyAuditRecordAgainstReferential(record: FinancialAuditRecord): {
   valid: boolean;
@@ -369,20 +442,121 @@ export function verifyAuditRecordAgainstReferential(record: FinancialAuditRecord
   // 1. Contrôle des sources et empreintes
   const matchingSource = lot5Controls.sources.find(s =>
     areDocumentIdsEquivalent(s.document_id, record.documentId) &&
-    s.sha256.toLowerCase() === record.documentSha256.toLowerCase()
+    s.sha256.toLowerCase() === (record.documentSha256 ?? '').toLowerCase()
   );
   if (!matchingSource) {
     reasons.push('DOCUMENT_OR_SHA_NOT_IN_REFERENTIAL');
   }
 
-  // 2. Contrôle du montant dans le référentiel documentaire
-  if (!isReferentialAuditedAmount(record.auditedAmount, record.sectionCode)) {
-    reasons.push('AMOUNT_NOT_IN_DOCUMENTARY_REFERENTIAL');
+  // 2. Contrôle de l'exercice budgétaire (LFI 2026)
+  if (record.fiscalYear !== 2026) {
+    reasons.push('FISCAL_YEAR_NOT_IN_REFERENTIAL');
   }
 
-  // 3. Référence de rapport
+  // 3. Contrôle de la devise, mesure et base
+  if (record.currency !== 'XOF') {
+    reasons.push('CURRENCY_NOT_IN_REFERENTIAL');
+  }
+  if (record.measure !== 'ORDERED') {
+    reasons.push('MEASURE_NOT_IN_REFERENTIAL');
+  }
+  if (record.basis !== 'INITIAL_BUDGET') {
+    reasons.push('BASIS_NOT_IN_REFERENTIAL');
+  }
+
+  // 4. Contrôle de la référence de rapport
   if (!record.reportRef || !record.reportRef.includes('LOT5_INDEPENDENT_LFI_CONTROLS.json')) {
     reasons.push('REPORT_REF_NOT_REFERENTIAL');
+  }
+
+  // 5. Contrôle de la section ministérielle
+  const sc = lot5Controls.section_controls.find(s => s.section === record.sectionCode);
+  if (!sc) {
+    reasons.push('SECTION_NOT_IN_REFERENTIAL');
+    return { valid: false, reasons };
+  }
+
+  // 6. Contrôle de l'institution
+  const sectionInstitutionMap: Record<string, string> = {
+    '237': 'gov-003',
+    '334': 'gov-034',
+    '336': 'gov-017',
+    '362': 'gov-023',
+    '439': 'gov-033',
+    '440': 'gov-032',
+    '444': 'gov-030',
+  };
+  const expectedInstitution = ('institution_id' in sc && sc.institution_id) ? sc.institution_id : sectionInstitutionMap[sc.section];
+  if (expectedInstitution && record.institutionId !== expectedInstitution) {
+    reasons.push('INSTITUTION_NOT_IN_REFERENTIAL');
+  }
+
+  // 7. Contrôle d'identité exacte de ligne et montant en FCFA
+  if (record.scope === 'SECTION_TOTAL') {
+    if (record.programCode || record.actionCode) {
+      reasons.push('SCOPE_CODE_MISMATCH');
+    }
+    if (record.auditedAmount !== sc.section_total_fcfa) {
+      reasons.push('AMOUNT_NOT_IN_DOCUMENTARY_REFERENTIAL');
+    }
+    if (record.page !== null && record.page !== undefined) {
+      if (!sc.lfi_pdf_pages.includes(record.page)) {
+        reasons.push('PAGE_NOT_IN_REFERENTIAL');
+      }
+    }
+  } else if (record.scope.startsWith('PROGRAM_')) {
+    const progs = ('newly_verified_programs' in sc && Array.isArray(sc.newly_verified_programs))
+      ? sc.newly_verified_programs
+      : [];
+    const prog = progs.find(p => p.code === record.programCode && `PROGRAM_${p.code}` === record.scope);
+    if (!prog) {
+      reasons.push('PROGRAM_NOT_IN_REFERENTIAL');
+    } else {
+      if (record.actionCode) {
+        reasons.push('SCOPE_CODE_MISMATCH');
+      }
+      if (record.auditedAmount !== prog.amount_fcfa) {
+        reasons.push('AMOUNT_NOT_IN_DOCUMENTARY_REFERENTIAL');
+      }
+      if (record.page !== null && record.page !== undefined && prog.lfi_pdf_page !== null && prog.lfi_pdf_page !== undefined) {
+        if (record.page !== prog.lfi_pdf_page) {
+          reasons.push('PAGE_NOT_IN_REFERENTIAL');
+        }
+      }
+    }
+  } else if (record.scope.startsWith('ACTION_')) {
+    const progs = ('newly_verified_programs' in sc && Array.isArray(sc.newly_verified_programs))
+      ? sc.newly_verified_programs
+      : [];
+    let foundAction: { code: string; amount_fcfa: number; dppd_pdf_pages?: number[] } | null = null;
+    let parentProg: { code: string } | null = null;
+    for (const p of progs) {
+      if ('actions' in p && Array.isArray(p.actions)) {
+        const act = p.actions.find(a => a.code === record.actionCode && `ACTION_${a.code}` === record.scope);
+        if (act) {
+          foundAction = act;
+          parentProg = p;
+          break;
+        }
+      }
+    }
+    if (!foundAction) {
+      reasons.push('ACTION_NOT_IN_REFERENTIAL');
+    } else {
+      if (record.programCode && parentProg && record.programCode !== parentProg.code) {
+        reasons.push('ACTION_PROGRAM_MISMATCH');
+      }
+      if (record.auditedAmount !== foundAction.amount_fcfa) {
+        reasons.push('AMOUNT_NOT_IN_DOCUMENTARY_REFERENTIAL');
+      }
+      if (record.page !== null && record.page !== undefined && foundAction.dppd_pdf_pages) {
+        if (!foundAction.dppd_pdf_pages.includes(record.page)) {
+          reasons.push('PAGE_NOT_IN_REFERENTIAL');
+        }
+      }
+    }
+  } else {
+    reasons.push('SCOPE_NOT_IN_REFERENTIAL');
   }
 
   return { valid: reasons.length === 0, reasons };

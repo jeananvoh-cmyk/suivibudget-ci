@@ -106,6 +106,7 @@ describe('Adversarial Financial Evidence Hardening & Scope Constraints', () => {
       sectionCode: '237',
       fiscalYear: 2026,
       scope: 'PROGRAM_21042',
+      programCode: '21042',
       periodEnd: '2026-12-31',
       currency: 'XOF',
       measure: 'ORDERED',
@@ -139,6 +140,8 @@ describe('Adversarial Financial Evidence Hardening & Scope Constraints', () => {
       sectionCode: '334',
       fiscalYear: 2026,
       scope: 'ACTION_2322099',
+      programCode: '23220',
+      actionCode: '2322099',
       periodEnd: '2026-12-31',
       currency: 'XOF',
       measure: 'ORDERED',
@@ -366,7 +369,8 @@ describe('Adversarial Financial Evidence Hardening & Scope Constraints', () => {
       reportRef: 'docs/references/2026/SOURCE_REGISTER.md#zero-audit',
       institutionId: 'gov-030',
       sectionCode: '444',
-      scope: 'PROGRAM_23249_SUBSIDY_LINE',
+      scope: 'PROGRAM_23249',
+      programCode: '23249',
       measure: 'ORDERED',
       basis: 'INITIAL_BUDGET',
       currency: 'XOF',
@@ -378,7 +382,8 @@ describe('Adversarial Financial Evidence Hardening & Scope Constraints', () => {
       institutionId: 'gov-030',
       sectionCode: '444',
       fiscalYear: 2026,
-      scope: 'PROGRAM_23249_SUBSIDY_LINE',
+      scope: 'PROGRAM_23249',
+      programCode: '23249',
       periodEnd: '2026-12-31',
       currency: 'XOF',
       measure: 'ORDERED',
@@ -477,6 +482,8 @@ describe('Adversarial Financial Evidence Hardening & Scope Constraints', () => {
       sectionCode: '237',
       fiscalYear: 2026,
       scope: 'ACTION_2104201',
+      programCode: '21042',
+      actionCode: '2104201',
       periodEnd: '2026-12-31',
       currency: 'XOF',
       measure: 'ORDERED',
@@ -900,7 +907,8 @@ describe('Corrections ciblées PR #29 — Audits contradictoires, page obligatoi
       reportRef: 'docs/references/2026/SOURCE_REGISTER.md#zero-official',
       institutionId: 'gov-030',
       sectionCode: '444',
-      scope: 'PROGRAM_23249_SUBSIDY_LINE',
+      scope: 'PROGRAM_23249',
+      programCode: '23249',
       measure: 'ORDERED',
       basis: 'INITIAL_BUDGET',
       currency: 'XOF',
@@ -912,7 +920,8 @@ describe('Corrections ciblées PR #29 — Audits contradictoires, page obligatoi
       institutionId: 'gov-030',
       sectionCode: '444',
       fiscalYear: 2026,
-      scope: 'PROGRAM_23249_SUBSIDY_LINE',
+      scope: 'PROGRAM_23249',
+      programCode: '23249',
       periodEnd: '2026-12-31',
       currency: 'XOF',
       measure: 'ORDERED',
@@ -1046,5 +1055,607 @@ describe('Corrections ciblées PR #29 — Audits contradictoires, page obligatoi
       expect(match).toBeDefined();
       expect(match?.auditedAmount).toBe(sc.section_total_fcfa);
     }
+  });
+
+  describe('Phase 4 — 16 Scénarios adversariaux de contrôle strict et intégrité LOT5', () => {
+    // 1. Montant correct appartenant à une autre section
+    it('S1. rejects an observation with correct amount belonging to another section', () => {
+      const obs: FinancialObservation = {
+        institutionId: 'gov-017',
+        sectionCode: '336',
+        fiscalYear: 2026,
+        scope: 'SECTION_TOTAL',
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 45121940916, // Appartient à 237, pas 336
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'DGBF-LFI-2026',
+          page: 49,
+          reference: 'Tableau 7 Section 336',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+      const match = matchFinancialAudit(obs, OFFICIAL_FINANCIAL_AUDITS, validLfiDoc);
+      expect(match.matched).toBe(false);
+      expect(match.reasons).toContain('AMOUNT_MISMATCH');
+    });
+
+    // 2. Montant correct appartenant à un autre programme
+    it('S2. rejects an observation with correct amount belonging to another program', () => {
+      const obs: FinancialObservation = {
+        institutionId: 'gov-017',
+        sectionCode: '336',
+        fiscalYear: 2026,
+        scope: 'PROGRAM_23223',
+        programCode: '23223',
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 2035000000, // Appartient à 23224, pas 23223
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'DGBF-LFI-2026',
+          page: 50,
+          reference: 'Tableau 7 Programme 23223',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+      const match = matchFinancialAudit(obs, OFFICIAL_FINANCIAL_AUDITS, validLfiDoc);
+      expect(match.matched).toBe(false);
+      expect(match.reasons).toContain('AMOUNT_MISMATCH');
+    });
+
+    // 3. Montant correct appartenant à une autre action
+    it('S3. rejects an observation with correct amount belonging to another action', () => {
+      const obs: FinancialObservation = {
+        institutionId: 'gov-034',
+        sectionCode: '334',
+        fiscalYear: 2026,
+        scope: 'ACTION_2322001',
+        programCode: '23220',
+        actionCode: '2322001',
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 28821400000, // Appartient à 2322002, pas 2322001
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4',
+          page: 563,
+          reference: 'Tableau 7 Action 2322001',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+      const match = matchFinancialAudit(obs, OFFICIAL_FINANCIAL_AUDITS, validDppdDoc);
+      expect(match.matched).toBe(false);
+      expect(match.reasons).toContain('AMOUNT_MISMATCH');
+    });
+
+    // 4. Montant de section réutilisé comme montant de programme
+    it('S4. rejects an observation reusing section total as program amount', () => {
+      const obs: FinancialObservation = {
+        institutionId: 'gov-034',
+        sectionCode: '334',
+        fiscalYear: 2026,
+        scope: 'PROGRAM_23220',
+        programCode: '23220',
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 182301855312, // Montant de la section 334, pas du programme 23220 (46000000000)
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'DGBF-LFI-2026',
+          page: 49,
+          reference: 'Tableau 7 Programme 23220',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+      const match = matchFinancialAudit(obs, OFFICIAL_FINANCIAL_AUDITS, validLfiDoc);
+      expect(match.matched).toBe(false);
+      expect(match.reasons).toContain('AMOUNT_MISMATCH');
+    });
+
+    // 5. Audit officiel fabriqué avec un montant existant ailleurs dans LOT5
+    it('S5. rejects a fabricated official audit record using an amount existing elsewhere in LOT5', () => {
+      const fabricatedAudit: FinancialAuditRecord = {
+        controlId: 'AUDIT-LFI-2026-SEC-336-FABRICATED',
+        documentId: 'DGBF-LFI-2026',
+        documentSha256: SHA_LFI_2026,
+        fiscalYear: 2026,
+        controlStatus: 'VERIFIED',
+        reportRef: 'docs/budget-ingestion/LOT5_INDEPENDENT_LFI_CONTROLS.json#section_controls',
+        institutionId: 'gov-017',
+        sectionCode: '336',
+        scope: 'SECTION_TOTAL',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        currency: 'XOF',
+        auditedAmount: 45121940916, // Montant de la section 237, pas 336
+        page: 49,
+      };
+
+      const refCheck = verifyAuditRecordAgainstReferential(fabricatedAudit);
+      expect(refCheck.valid).toBe(false);
+      expect(refCheck.reasons).toContain('AMOUNT_NOT_IN_DOCUMENTARY_REFERENTIAL');
+
+      const obs: FinancialObservation = {
+        institutionId: 'gov-017',
+        sectionCode: '336',
+        fiscalYear: 2026,
+        scope: 'SECTION_TOTAL',
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 45121940916,
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'DGBF-LFI-2026',
+          page: 49,
+          reference: 'Tableau 7',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+      const match = matchFinancialAudit(obs, [fabricatedAudit], validLfiDoc);
+      expect(match.matched).toBe(false);
+      expect(match.reasons).toContain('AMOUNT_NOT_IN_DOCUMENTARY_REFERENTIAL');
+    });
+
+    // 6. Audit officiel sans correspondance exacte dans le référentiel
+    it('S6. rejects a fabricated official audit record with no exact match in the referential', () => {
+      const fabricatedAudit: FinancialAuditRecord = {
+        controlId: 'AUDIT-LFI-2026-UNKNOWN',
+        documentId: 'DGBF-LFI-2026',
+        documentSha256: SHA_LFI_2026,
+        fiscalYear: 2026,
+        controlStatus: 'VERIFIED',
+        reportRef: 'docs/budget-ingestion/LOT5_INDEPENDENT_LFI_CONTROLS.json#section_controls',
+        institutionId: 'gov-003',
+        sectionCode: '237',
+        scope: 'SECTION_TOTAL',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        currency: 'XOF',
+        auditedAmount: 999999999,
+        page: 47,
+      };
+
+      const refCheck = verifyAuditRecordAgainstReferential(fabricatedAudit);
+      expect(refCheck.valid).toBe(false);
+      expect(refCheck.reasons).toContain('AMOUNT_NOT_IN_DOCUMENTARY_REFERENTIAL');
+
+      const obs: FinancialObservation = {
+        institutionId: 'gov-003',
+        sectionCode: '237',
+        fiscalYear: 2026,
+        scope: 'SECTION_TOTAL',
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 999999999,
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'DGBF-LFI-2026',
+          page: 47,
+          reference: 'Tableau 7',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+      const match = matchFinancialAudit(obs, [fabricatedAudit], validLfiDoc);
+      expect(match.matched).toBe(false);
+      expect(match.reasons).toContain('AMOUNT_NOT_IN_DOCUMENTARY_REFERENTIAL');
+    });
+
+    // 7. Programme sans programCode
+    it('S7. rejects a program observation without programCode', () => {
+      const obs: FinancialObservation = {
+        institutionId: 'gov-034',
+        sectionCode: '334',
+        fiscalYear: 2026,
+        scope: 'PROGRAM_23220',
+        programCode: null,
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 46000000000,
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'DGBF-LFI-2026',
+          page: 49,
+          reference: 'Tableau 7',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+      const coherence = validateCodeCoherence(obs);
+      expect(coherence.valid).toBe(false);
+      expect(coherence.reasons).toContain('PROGRAM_CODE_REQUIRED');
+
+      const match = matchFinancialAudit(obs, OFFICIAL_FINANCIAL_AUDITS, validLfiDoc);
+      expect(match.matched).toBe(false);
+      expect(match.reasons).toContain('PROGRAM_CODE_REQUIRED');
+    });
+
+    // 8. Action sans actionCode
+    it('S8. rejects an action observation without actionCode', () => {
+      const obs: FinancialObservation = {
+        institutionId: 'gov-034',
+        sectionCode: '334',
+        fiscalYear: 2026,
+        scope: 'ACTION_2322001',
+        programCode: '23220',
+        actionCode: null,
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 17178600000,
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4',
+          page: 563,
+          reference: 'Tableau 7',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+      const coherence = validateCodeCoherence(obs);
+      expect(coherence.valid).toBe(false);
+      expect(coherence.reasons).toContain('ACTION_CODE_REQUIRED');
+
+      const match = matchFinancialAudit(obs, OFFICIAL_FINANCIAL_AUDITS, validDppdDoc);
+      expect(match.matched).toBe(false);
+      expect(match.reasons).toContain('ACTION_CODE_REQUIRED');
+    });
+
+    // 9. Action sans programCode
+    it('S9. rejects an action observation without programCode', () => {
+      const obs: FinancialObservation = {
+        institutionId: 'gov-034',
+        sectionCode: '334',
+        fiscalYear: 2026,
+        scope: 'ACTION_2322001',
+        programCode: null,
+        actionCode: '2322001',
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 17178600000,
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4',
+          page: 563,
+          reference: 'Tableau 7',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+      const coherence = validateCodeCoherence(obs);
+      expect(coherence.valid).toBe(false);
+      expect(coherence.reasons).toContain('PROGRAM_CODE_REQUIRED');
+
+      const match = matchFinancialAudit(obs, OFFICIAL_FINANCIAL_AUDITS, validDppdDoc);
+      expect(match.matched).toBe(false);
+      expect(match.reasons).toContain('PROGRAM_CODE_REQUIRED');
+    });
+
+    // 10. Action avec code parent incorrect
+    it('S10. rejects an action observation with mismatched parent program code', () => {
+      const obs: FinancialObservation = {
+        institutionId: 'gov-034',
+        sectionCode: '334',
+        fiscalYear: 2026,
+        scope: 'ACTION_2322001',
+        programCode: '21042', // Mauvais programme parent
+        actionCode: '2322001',
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 17178600000,
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4',
+          page: 563,
+          reference: 'Tableau 7',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+      const coherence = validateCodeCoherence(obs);
+      expect(coherence.valid).toBe(false);
+      expect(coherence.reasons).toContain('ACTION_PROGRAM_MISMATCH');
+
+      const match = matchFinancialAudit(obs, OFFICIAL_FINANCIAL_AUDITS, validDppdDoc);
+      expect(match.matched).toBe(false);
+      expect(match.reasons).toContain('ACTION_PROGRAM_MISMATCH');
+    });
+
+    // 11. Programme avec code de longueur invalide
+    it('S11. rejects a program observation with invalid code length (not 5 digits)', () => {
+      const obs: FinancialObservation = {
+        institutionId: 'gov-034',
+        sectionCode: '334',
+        fiscalYear: 2026,
+        scope: 'PROGRAM_2322', // 4 chiffres au lieu de 5
+        programCode: '2322',
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 46000000000,
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'DGBF-LFI-2026',
+          page: 49,
+          reference: 'Tableau 7',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+      const coherence = validateCodeCoherence(obs);
+      expect(coherence.valid).toBe(false);
+      expect(coherence.reasons).toContain('INVALID_PROGRAM_CODE_LENGTH');
+
+      const match = matchFinancialAudit(obs, OFFICIAL_FINANCIAL_AUDITS, validLfiDoc);
+      expect(match.matched).toBe(false);
+      expect(match.reasons).toContain('INVALID_PROGRAM_CODE_LENGTH');
+    });
+
+    // 12. Action avec code de longueur invalide
+    it('S12. rejects an action observation with invalid code length (not 7 digits)', () => {
+      const obs: FinancialObservation = {
+        institutionId: 'gov-034',
+        sectionCode: '334',
+        fiscalYear: 2026,
+        scope: 'ACTION_23220010', // 8 chiffres au lieu de 7
+        programCode: '23220',
+        actionCode: '23220010',
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 17178600000,
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4',
+          page: 563,
+          reference: 'Tableau 7',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+      const coherence = validateCodeCoherence(obs);
+      expect(coherence.valid).toBe(false);
+      expect(coherence.reasons).toContain('INVALID_ACTION_CODE_LENGTH');
+
+      const match = matchFinancialAudit(obs, OFFICIAL_FINANCIAL_AUDITS, validDppdDoc);
+      expect(match.matched).toBe(false);
+      expect(match.reasons).toContain('INVALID_ACTION_CODE_LENGTH');
+    });
+
+    // 13. Observation valide avec tous ses codes et preuves
+    it('S13. accepts a valid observation with all mandatory structured codes and documentary evidence', () => {
+      const obs: FinancialObservation = {
+        institutionId: 'gov-017',
+        sectionCode: '336',
+        fiscalYear: 2026,
+        scope: 'ACTION_2322301',
+        programCode: '23223',
+        actionCode: '2322301',
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 16465000001,
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4',
+          page: 651,
+          reference: 'Tableau 7 : Budget détaillé du programme',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+      const coherence = validateCodeCoherence(obs);
+      expect(coherence.valid).toBe(true);
+
+      const match = matchFinancialAudit(obs, OFFICIAL_FINANCIAL_AUDITS, validDppdDoc);
+      expect(match.matched).toBe(true);
+      expect(match.matchingRecord?.auditedAmount).toBe(16465000001);
+
+      const publish = canPublishOfficialObservation(obs, [validDppdDoc], OFFICIAL_FINANCIAL_AUDITS);
+      expect(publish.status).toBe('AVAILABLE');
+      expect(publish.value).toBe(16465000001);
+      expect(publish.reasons).toHaveLength(0);
+    });
+
+    // 14. Vrai montant zéro officiellement contrôlé
+    it('S14. accepts a genuine documented zero amount when audited and verified across all dimensions', () => {
+      const zeroAudit: FinancialAuditRecord = {
+        controlId: 'AUDIT-SYNTHETIC-ZERO-S14',
+        documentId: 'test-only',
+        documentSha256: 'a'.repeat(64),
+        fiscalYear: 2026,
+        controlStatus: 'VERIFIED',
+        reportRef: 'test-report',
+        institutionId: 'gov-030',
+        sectionCode: '444',
+        scope: 'PROGRAM_23249',
+        programCode: '23249',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        currency: 'XOF',
+        auditedAmount: 0,
+        page: 54,
+      };
+
+      const testDoc: SourceDocument = {
+        ...validLfiDoc,
+        id: 'test-only',
+        sha256: 'a'.repeat(64),
+      };
+
+      const zeroObs: FinancialObservation = {
+        institutionId: 'gov-030',
+        sectionCode: '444',
+        fiscalYear: 2026,
+        scope: 'PROGRAM_23249',
+        programCode: '23249',
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 0,
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'test-only',
+          page: 54,
+          reference: 'Subvention nulle documentée 0 FCFA',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+
+      const match = matchFinancialAudit(zeroObs, [zeroAudit], testDoc);
+      expect(match.matched).toBe(true);
+
+      const publish = canPublishOfficialObservation(zeroObs, [testDoc], [zeroAudit]);
+      expect(publish.status).toBe('AVAILABLE');
+      expect(publish.value).toBe(0);
+    });
+
+    // 15. Deux audits contradictoires
+    it('S15. rejects when two contradictory audits exist for the same scope', () => {
+      const auditA: FinancialAuditRecord = {
+        controlId: 'AUDIT-A',
+        documentId: 'test-only',
+        documentSha256: 'a'.repeat(64),
+        fiscalYear: 2026,
+        controlStatus: 'VERIFIED',
+        reportRef: 'test-report',
+        institutionId: 'gov-003',
+        sectionCode: '237',
+        scope: 'SECTION_TOTAL',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        currency: 'XOF',
+        auditedAmount: 45121940916,
+        page: 47,
+      };
+      const auditB: FinancialAuditRecord = {
+        ...auditA,
+        controlId: 'AUDIT-B',
+        auditedAmount: 45121940900, // Montant divergent
+      };
+
+      const testDoc: SourceDocument = {
+        ...validLfiDoc,
+        id: 'test-only',
+        sha256: 'a'.repeat(64),
+      };
+
+      const obs: FinancialObservation = {
+        institutionId: 'gov-003',
+        sectionCode: '237',
+        fiscalYear: 2026,
+        scope: 'SECTION_TOTAL',
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 45121940916,
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'test-only',
+          page: 47,
+          reference: 'Tableau 7',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+
+      const match = matchFinancialAudit(obs, [auditA, auditB], testDoc);
+      expect(match.matched).toBe(false);
+      expect(match.reasons).toContain('CONTRADICTORY_AUDIT_AMOUNTS');
+    });
+
+    // 16. Audit avec page manquante ou différente
+    it('S16. rejects when observation has missing page or mismatched page against audited page', () => {
+      const audit: FinancialAuditRecord = {
+        controlId: 'AUDIT-PAGE-TEST',
+        documentId: 'test-only',
+        documentSha256: 'a'.repeat(64),
+        fiscalYear: 2026,
+        controlStatus: 'VERIFIED',
+        reportRef: 'test-report',
+        institutionId: 'gov-003',
+        sectionCode: '237',
+        scope: 'SECTION_TOTAL',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        currency: 'XOF',
+        auditedAmount: 45121940916,
+        page: 47,
+      };
+
+      const testDoc: SourceDocument = {
+        ...validLfiDoc,
+        id: 'test-only',
+        sha256: 'a'.repeat(64),
+      };
+
+      // Page manquante
+      const obsNoPage: FinancialObservation = {
+        institutionId: 'gov-003',
+        sectionCode: '237',
+        fiscalYear: 2026,
+        scope: 'SECTION_TOTAL',
+        periodEnd: '2026-12-31',
+        currency: 'XOF',
+        measure: 'ORDERED',
+        basis: 'INITIAL_BUDGET',
+        amount: 45121940916,
+        precision: 'EXACT',
+        evidence: {
+          documentId: 'test-only',
+          page: null,
+          reference: 'Tableau 7',
+          fiscalYear: 2026,
+          verification: 'VERIFIED',
+        },
+      };
+      const matchNoPage = matchFinancialAudit(obsNoPage, [audit], testDoc);
+      expect(matchNoPage.matched).toBe(false);
+      expect(matchNoPage.reasons).toContain('PAGE_REQUIRED');
+
+      // Page différente
+      const obsWrongPage: FinancialObservation = {
+        ...obsNoPage,
+        evidence: {
+          ...obsNoPage.evidence!,
+          page: 99,
+        },
+      };
+      const matchWrongPage = matchFinancialAudit(obsWrongPage, [audit], testDoc);
+      expect(matchWrongPage.matched).toBe(false);
+      expect(matchWrongPage.reasons).toContain('PAGE_MISMATCH');
+    });
   });
 });

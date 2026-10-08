@@ -32,7 +32,7 @@ La branche `antigravity/reconcile-lots6-15-post-lot5` contient la correction doc
 | 12 | PARTIAL | NOT_COMPARABLE préservé, exports null | Sources multi-exercices et preuve d'équivalence |
 | 13 | PARTIAL | Composants accessibles et audit technique | Référence WCAG inaccessible, audit global et technologies d'assistance |
 | 14 | PARTIAL | Candidat local, workspace isolé de revue | Refonte de toutes les pages historiques et données réelles |
-| 15 | READY_FOR_INDEPENDENT_REVIEW | 513 tests (100% PASS), production build et review build PASS, garde-fous transport, audit financier granulaire étanche, suite adversariale 25 cas, et rendu visuel vérifié | Sources métier LOTS 6-12 non encore publiées par l'État |
+| 15 | READY_FOR_INDEPENDENT_REVIEW | 529 tests (100% PASS), production build et review build PASS, garde-fous transport, audit financier granulaire étanche, suite adversariale 41 cas, et rendu visuel vérifié | Sources métier LOTS 6-12 non encore publiées par l'État |
 
 ## Diagnostic de cause racine (Questions 1 à 7)
 
@@ -46,13 +46,14 @@ La branche `antigravity/reconcile-lots6-15-post-lot5` contient la correction doc
 ## Corrections ciblées finales (PR #29)
 1. **Élimination de `.find()` & traitement des audits contradictoires** : Analyse de tous les audits applicables, rejet déterministe de divergences de montants (`CONTRADICTORY_AUDIT_AMOUNTS`), de pages (`CONTRADICTORY_AUDIT_PAGES`), d'enregistrements multiples (`CONTRADICTORY_AUDIT_RECORDS`) ou de statuts (`SOURCE_CONFLICT`, `TO_VERIFY`).
 2. **Page documentaire obligatoire** : Présence de page obligatoire si audit paginé (`PAGE_REQUIRED` si absente, `PAGE_MISMATCH` si discordante). Contrôle par référence explicite de tableau (`tableRef`) si audit non paginé.
-3. **Cohérence structurelle des codes** : Rattachement obligatoire de l'action à son programme (`actionCode.startsWith(programCode)`), cohérence entre code et scope textuel, exclusion de code d'action pour un total de section.
-4. **Intégrité bidirectionnelle du registre financier** : Registre d'audits transformé de façon typée depuis `LOT5_INDEPENDENT_LFI_CONTROLS.json` (`transformLot5ControlsToAudits()`) avec validation bidirectionnelle d'intégrité et équivalence d'identifiants documentaires LFI/DPPD.
+3. **Cohérence structurelle des codes & formats obligatoires** : Rattachement obligatoire de l'action à son programme (`actionCode.startsWith(programCode)`), formats stricts (5 chiffres pour programmes, 7 pour actions), cohérence entre code et scope textuel, exclusion de code d'action pour un total de section.
+4. **Correspondance exacte avec le référentiel LOT5** : `verifyAuditRecordAgainstReferential` intégré dans `matchFinancialAudit` avec détection des revendications LOT5 via `isLot5ReferentialClaim`. Validation de la ligne exacte (section, programme, action, montant exact, devise XOF, doc ID, hash SHA-256, page PDF). Rejet strict des audits fabriqués ou discordants.
+5. **Suite de tests adversariaux portée à 41 tests** : `src/review/__tests__/financialEvidenceHardening.test.ts` enrichi des 16 scénarios de conformité stricts Phase 4 (S1 à S16).
 
 ## Contrôles exécutés
 
-- Suite complète : 34 fichiers, 513 tests réussis, zéro échec (100% PASS).
-- Suite adversariale dédiée (`src/review/__tests__/financialEvidenceHardening.test.ts`) : 25 tests couvrant l'ensemble des 10 scénarios d'attaque prescrits.
+- Suite complète : 34 fichiers, 529 tests réussis, zéro échec (100% PASS).
+- Suite adversariale dédiée (`src/review/__tests__/financialEvidenceHardening.test.ts`) : 41 tests couvrant l'ensemble des scénarios prescrits.
 - Types TypeScript : `tsc --noEmit` PASS (0 erreur).
 - Build production (`npm run build`) : PASS.
 - Build de revue séparé (`npm run build:review`) : PASS.
