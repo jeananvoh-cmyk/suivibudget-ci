@@ -15,6 +15,92 @@ import {
 import type { FinancialObservation } from '../domain/evidence';
 import lot5Controls from '../../../docs/budget-ingestion/LOT5_INDEPENDENT_LFI_CONTROLS.json';
 
+describe('LOT5 documentary identity and page gate', () => {
+  const section = OFFICIAL_FINANCIAL_AUDITS.find(a => a.sectionCode === '334' && a.scope === 'SECTION_TOTAL')!;
+  const program = OFFICIAL_FINANCIAL_AUDITS.find(a => a.sectionCode === '334' && a.scope === 'PROGRAM_23220')!;
+  const action = OFFICIAL_FINANCIAL_AUDITS.find(a => a.sectionCode === '334' && a.scope === 'ACTION_2322001')!;
+  const lfi = lot5Controls.sources.find(s => s.document_id === 'DGBF-LFI-2026')!;
+  const dppd = lot5Controls.sources.find(s => s.document_id === 'DGBF-DPPD-PAP-2026-2028')!;
+  const docFor = (audit: FinancialAuditRecord): SourceDocument => ({
+    id: audit.documentId, title: audit.documentId, publisher: 'DGBF',
+    officialUrl: audit.scope.startsWith('ACTION_') ? dppd.official_url : lfi.official_url,
+    fiscalYear: 2026, accessedAt: '2026-10-01', httpStatus: 200,
+    sha256: audit.documentSha256, pageCount: 1500, verification: 'VERIFIED',
+    visibility: 'PUBLIC', previousVersionId: null, availability: 'AVAILABLE',
+    provenance: 'OFFICIAL_SOURCE', extractionStatus: 'VERIFIED',
+  });
+  const obsFor = (audit: FinancialAuditRecord): FinancialObservation => ({
+    institutionId: audit.institutionId, sectionCode: audit.sectionCode,
+    fiscalYear: audit.fiscalYear, scope: audit.scope,
+    programCode: audit.programCode, actionCode: audit.actionCode,
+    periodEnd: '2026-12-31', currency: 'XOF', measure: 'ORDERED',
+    basis: 'INITIAL_BUDGET', amount: audit.auditedAmount, precision: 'EXACT',
+    evidence: { documentId: audit.documentId, page: audit.page ?? null,
+      reference: 'Tableau 7', fiscalYear: 2026, verification: 'VERIFIED' },
+  });
+  const publish = (audit: FinancialAuditRecord, observation = obsFor(audit)) =>
+    canPublishOfficialObservation(observation, [docFor(audit)], [audit]);
+
+  it.each([section, program, action])('accepts the exact official line %s', audit => {
+    expect(verifyAuditRecordAgainstReferential(audit).valid).toBe(true);
+    expect(publish(audit).status).toBe('AVAILABLE');
+  });
+
+  it.each([
+    [section, dppd], [program, dppd], [action, lfi],
+  ])('rejects a correct amount assigned to the wrong source document', (audit, source) => {
+    const swapped = { ...audit, documentId: source.document_id, documentSha256: source.sha256 };
+    expect(verifyAuditRecordAgainstReferential(swapped).reasons).toContain('DOCUMENT_SCOPE_MISMATCH');
+    expect(publish(swapped).status).toBe('UNKNOWN');
+  });
+
+  it.each([section, program, action])('rejects bad ID or hash for %s', audit => {
+    for (const altered of [
+      { ...audit, documentId: 'DGBF-DPPD-PAP-2026-2028-OTHER' },
+      { ...audit, documentSha256: 'a'.repeat(64) },
+    ]) {
+      expect(verifyAuditRecordAgainstReferential(altered).valid).toBe(false);
+      expect(publish(altered).status).toBe('UNKNOWN');
+    }
+  });
+
+  it.each([section, program, action])('requires the referential page for %s', audit => {
+    const missing = { ...audit, page: null };
+    const wrong = { ...audit, page: 999 };
+    expect(verifyAuditRecordAgainstReferential(missing).reasons).toContain('AUDIT_PAGE_REQUIRED');
+    expect(verifyAuditRecordAgainstReferential(wrong).reasons).toContain('PAGE_NOT_IN_REFERENTIAL');
+    expect(publish(missing).status).toBe('UNKNOWN');
+    expect(publish(wrong).status).toBe('UNKNOWN');
+  });
+
+  it.each([section, program, action])('requires the same page in the public citation for %s', audit => {
+    expect(publish(audit, { ...obsFor(audit), evidence: { ...obsFor(audit).evidence!, page: null } }).status).toBe('UNKNOWN');
+    expect(publish(audit, { ...obsFor(audit), evidence: { ...obsFor(audit).evidence!, page: 999 } }).status).toBe('UNKNOWN');
+  });
+
+  it('rejects a correct amount on another section, institution or action', () => {
+    for (const altered of [
+      { ...action, sectionCode: '336' },
+      { ...action, institutionId: 'gov-017' },
+      { ...action, scope: 'ACTION_2322002', actionCode: '2322002' },
+      { ...action, programCode: '23223' },
+    ]) expect(publish(altered).status).toBe('UNKNOWN');
+  });
+
+  it('rejects SOURCE_CONFLICT and accepts only an explicit DPPD Annex 4 alias', () => {
+    expect(publish({ ...action, controlStatus: 'SOURCE_CONFLICT' }).status).toBe('UNKNOWN');
+    const alias = { ...action, documentId: 'DGBF-DPPD-PAP-2026-2028-ANNEXE-4' };
+    expect(verifyAuditRecordAgainstReferential(alias).valid).toBe(true);
+    expect(publish(alias).status).toBe('AVAILABLE');
+  });
+
+  it('preserves a documented zero only in a synthetic non-LOT5 fixture', () => {
+    const synthetic = { ...section, controlId: 'TEST-ZERO', reportRef: 'synthetic-test',
+      documentId: 'synthetic-document', documentSha256: 'a'.repeat(64), auditedAmount: 0 };
+    expect(publish(synthetic).value).toBe(0);
+  });
+});
+
 describe('Adversarial Financial Evidence Hardening & Scope Constraints', () => {
   const SHA_LFI_2026 = 'f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76';
   const SHA_DPPD_2026 = '0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10';
@@ -980,8 +1066,7 @@ describe('Corrections ciblées PR #29 — Audits contradictoires, page obligatoi
     expect(publishResult.reasons).toHaveLength(0);
   });
 
-  // Test de correspondance explicite sur tableRef sans page
-  it('correctly matches when audit specifies a tableRef without page requirement', () => {
+  it('rejects a LOT5 table reference without the required source page', () => {
     const auditWithTableRefOnly: FinancialAuditRecord = {
       controlId: 'AUDIT-TABLEREF-ONLY',
       documentId: 'DGBF-LFI-2026',
@@ -996,7 +1081,7 @@ describe('Corrections ciblées PR #29 — Audits contradictoires, page obligatoi
       basis: 'INITIAL_BUDGET',
       currency: 'XOF',
       auditedAmount: 45121940916,
-      page: null, // Pas de page fixe exigée
+      page: null,
       tableRef: 'Tableau 7',
     };
 
@@ -1021,7 +1106,8 @@ describe('Corrections ciblées PR #29 — Audits contradictoires, page obligatoi
     };
 
     const match = matchFinancialAudit(obsWithMatchingTable, [auditWithTableRefOnly], validLfiDoc);
-    expect(match.matched).toBe(true);
+    expect(match.matched).toBe(false);
+    expect(match.reasons).toContain('AUDIT_PAGE_REQUIRED');
 
     const obsWithWrongTable: FinancialObservation = {
       ...obsWithMatchingTable,

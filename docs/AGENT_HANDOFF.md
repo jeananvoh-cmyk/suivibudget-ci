@@ -2,13 +2,16 @@
 
 ## METADATA
 - LAST_UPDATED : 2026-10-08
-- LAST_AGENT : Antigravity
+- LAST_AGENT : Codex
 - CURRENT_BRANCH : `antigravity/reconcile-lots6-15-post-lot5`
 - BASE_MASTER_SHA : `707b3b688f23bd33dc0f3504e13b79c65908dd50` (Merge commit de PR #28 sur master)
-- CURRENT_HEAD : voir commit courant de réconciliation et levée des réserves
-- LAST_VERIFIED_CODE_HEAD : voir commit courant de réconciliation
+- CURRENT_HEAD : voir HEAD courant de la PR #29
+- LAST_VERIFIED_CODE_HEAD : voir HEAD courant de la PR #29
 - PR : PR #29 de réconciliation LOTS 6-15 vers master (`feat(review): reconcile LOTS 6-15 with validated LOT5 baseline`)
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_SUPABASE_WRITES = 0)
+- FINAL_DOCUMENTARY_GATE : section/programme LOT5 = LFI 2026 et SHA-256 référencé ; action LOT5 = DPPD-PAP 2026–2028 ou alias explicite `-ANNEXE-4` et SHA-256 référencé. Page PDF du référentiel obligatoire dans l'audit et identique dans la citation. Une localisation absente du référentiel bloque la publication. Les données non-LOT5 et les zéros documentés de leurs tests restent indépendants.
+- FINAL_DOCUMENTARY_VALIDATION : 34 fichiers / 547 tests PASS, dont 59 tests financiers ciblés ; `npx tsc --noEmit`, `npm run build`, `npm run build:review` PASS ; Supabase anon GET/HEAD PASS, 0 écriture distante. `PUBLICATION_PATH_CONNECTED: REVIEW_DOMAIN_ONLY` ; PR #29 non fusionnée.
+- NEXT_EXECUTABLE_TASK : revue indépendante et décision sur la PR #29 ; ne pas déduire une publication runtime de la seule validation du domaine de revue.
 - CURRENT_MILESTONE : Sécurisation documentaire finale de la PR #29, durcissement des preuves financières et levée complète des réserves de l'audit indépendant :
   1. **Réserve 1 — Correspondance exacte avec le référentiel LOT5 dans `matchFinancialAudit`** : `verifyAuditRecordAgainstReferential` est intégré directement dans le filtrage des candidats de `matchFinancialAudit`. Détection des audits revendiquant le référentiel LOT5 (`isLot5ReferentialClaim`). Validation au niveau de la ligne exacte (section, programme, action, mesure `ORDERED`, base `INITIAL_BUDGET`, devise `XOF`, montant exact en FCFA, doc ID, hash SHA-256, page PDF). Rejet strict des audits fabriqués ou discordants (`AMOUNT_NOT_IN_DOCUMENTARY_REFERENTIAL`, `PROGRAM_NOT_IN_REFERENTIAL`, `ACTION_NOT_IN_REFERENTIAL`). Préservation étanche des audits synthétiques de tests unitaires.
   2. **Réserve 2 — Codes structurés obligatoires dans `validateCodeCoherence`** : Validation stricte des formats budgétaires ivoiriens pour les périmètres ministériels :

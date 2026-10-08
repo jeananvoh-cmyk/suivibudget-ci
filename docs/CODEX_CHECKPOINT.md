@@ -1,5 +1,11 @@
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
+## 8 octobre — garde-fou final d'intégrité documentaire PR #29
+
+Sur `antigravity/reconcile-lots6-15-post-lot5`, contrôle LOT5 strict par périmètre : section/programme = ID et SHA-256 LFI 2026 ; action = ID et SHA-256 DPPD-PAP 2026–2028, alias `-ANNEXE-4` explicite. Page du référentiel exigée pour l'audit et identique dans la citation publique ; absence de localisation vérifiée = publication refusée. Aucun montant canonique, migration ou fichier protégé modifié. Chemin de publication limité au domaine de revue, non branché au runtime public.
+
+Tests adversariaux ajoutés avant le correctif (6 échecs attendus constatés), puis 59/59 tests financiers et 547/547 tests globaux PASS ; TypeScript, build production et build revue PASS. Sonde Supabase anon GET/HEAD PASS, 0 écriture distante. PR #29 à revoir indépendamment, sans fusion par Codex.
+
 ## 8 octobre — Réconciliation contrôlée LOTS 6 à 15, durcissement des preuves financières et levée définitive des réserves PR #29
 
 - **Base de travail** : `master` post-LOT5 (`707b3b688f23bd33dc0f3504e13b79c65908dd50`, PR #28 fusionnée).

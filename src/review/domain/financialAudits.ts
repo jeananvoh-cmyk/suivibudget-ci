@@ -439,12 +439,14 @@ export function verifyAuditRecordAgainstReferential(record: FinancialAuditRecord
 } {
   const reasons: string[] = [];
 
-  // 1. Contrôle des sources et empreintes
-  const matchingSource = lot5Controls.sources.find(s =>
-    areDocumentIdsEquivalent(s.document_id, record.documentId) &&
-    s.sha256.toLowerCase() === (record.documentSha256 ?? '').toLowerCase()
-  );
-  if (!matchingSource) {
+  const expectedDocumentId = record.scope.startsWith('ACTION_')
+    ? 'DGBF-DPPD-PAP-2026-2028' : 'DGBF-LFI-2026';
+  const expectedSource = lot5Controls.sources.find(s => s.document_id === expectedDocumentId);
+  const documentMatches = record.scope.startsWith('ACTION_')
+    ? record.documentId === expectedDocumentId || record.documentId === `${expectedDocumentId}-ANNEXE-4`
+    : record.documentId === expectedDocumentId;
+  if (!documentMatches) reasons.push('DOCUMENT_SCOPE_MISMATCH');
+  if (!expectedSource || expectedSource.sha256.toLowerCase() !== (record.documentSha256 ?? '').toLowerCase()) {
     reasons.push('DOCUMENT_OR_SHA_NOT_IN_REFERENTIAL');
   }
 
@@ -499,11 +501,9 @@ export function verifyAuditRecordAgainstReferential(record: FinancialAuditRecord
     if (record.auditedAmount !== sc.section_total_fcfa) {
       reasons.push('AMOUNT_NOT_IN_DOCUMENTARY_REFERENTIAL');
     }
-    if (record.page !== null && record.page !== undefined) {
-      if (!sc.lfi_pdf_pages.includes(record.page)) {
-        reasons.push('PAGE_NOT_IN_REFERENTIAL');
-      }
-    }
+    if (!sc.lfi_pdf_pages.length) reasons.push('DOCUMENTARY_LOCATION_UNVERIFIED');
+    else if (record.page == null) reasons.push('AUDIT_PAGE_REQUIRED');
+    else if (!sc.lfi_pdf_pages.includes(record.page)) reasons.push('PAGE_NOT_IN_REFERENTIAL');
   } else if (record.scope.startsWith('PROGRAM_')) {
     const progs = ('newly_verified_programs' in sc && Array.isArray(sc.newly_verified_programs))
       ? sc.newly_verified_programs
@@ -518,11 +518,9 @@ export function verifyAuditRecordAgainstReferential(record: FinancialAuditRecord
       if (record.auditedAmount !== prog.amount_fcfa) {
         reasons.push('AMOUNT_NOT_IN_DOCUMENTARY_REFERENTIAL');
       }
-      if (record.page !== null && record.page !== undefined && prog.lfi_pdf_page !== null && prog.lfi_pdf_page !== undefined) {
-        if (record.page !== prog.lfi_pdf_page) {
-          reasons.push('PAGE_NOT_IN_REFERENTIAL');
-        }
-      }
+      if (prog.lfi_pdf_page == null) reasons.push('DOCUMENTARY_LOCATION_UNVERIFIED');
+      else if (record.page == null) reasons.push('AUDIT_PAGE_REQUIRED');
+      else if (record.page !== prog.lfi_pdf_page) reasons.push('PAGE_NOT_IN_REFERENTIAL');
     }
   } else if (record.scope.startsWith('ACTION_')) {
     const progs = ('newly_verified_programs' in sc && Array.isArray(sc.newly_verified_programs))
@@ -549,11 +547,9 @@ export function verifyAuditRecordAgainstReferential(record: FinancialAuditRecord
       if (record.auditedAmount !== foundAction.amount_fcfa) {
         reasons.push('AMOUNT_NOT_IN_DOCUMENTARY_REFERENTIAL');
       }
-      if (record.page !== null && record.page !== undefined && foundAction.dppd_pdf_pages) {
-        if (!foundAction.dppd_pdf_pages.includes(record.page)) {
-          reasons.push('PAGE_NOT_IN_REFERENTIAL');
-        }
-      }
+      if (!foundAction.dppd_pdf_pages?.length) reasons.push('DOCUMENTARY_LOCATION_UNVERIFIED');
+      else if (record.page == null) reasons.push('AUDIT_PAGE_REQUIRED');
+      else if (!foundAction.dppd_pdf_pages.includes(record.page)) reasons.push('PAGE_NOT_IN_REFERENTIAL');
     }
   } else {
     reasons.push('SCOPE_NOT_IN_REFERENTIAL');
