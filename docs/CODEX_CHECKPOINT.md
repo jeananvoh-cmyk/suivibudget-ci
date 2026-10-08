@@ -1,14 +1,18 @@
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
-## 8 octobre — Réconciliation contrôlée LOTS 6 à 15 avec la baseline post-LOT5
+## 8 octobre — Réconciliation contrôlée LOTS 6 à 15 et levée des réserves d'audit post-LOT5
 
 - **Base de travail** : `master` post-LOT5 (`707b3b688f23bd33dc0f3504e13b79c65908dd50`, PR #28 fusionnée).
-- **Branche** : `antigravity/reconcile-lots6-15-post-lot5`.
+- **Branche** : `antigravity/reconcile-lots6-15-post-lot5` (PR #29).
 - **Réconciliation** : Intégration sous `src/review/` des contrats d'exécution budgétaire (LOT6), versions de collectivités (LOT7), catalogue documentaire et SHA-256 (LOT8), liens projets-budgets sans agrégation abusive (LOT9), suivi citoyen avec protection de la vie privée (LOT10), réponses institutionnelles et audits officiels séparés (LOT11), historique et exports Open Data avec protection injection CSV (LOT12), primitives UI orientées preuve (LOT13), workspace de revue isolé (LOT14), et stabilisation en composition read-only (LOT15).
 - **Suppression du blocage LOT5 obsolète** : Remplacement du filtre codé en dur par `LOT5_UNRESOLVED_SCOPES = []`. Les trois ministères (MICOM 336, MSCV 444, METFPA 334) sont évalués selon les règles normales du moteur (UNKNOWN sans source, AVAILABLE avec preuve officielle vérifiée).
-- **Suite de tests** : 32 fichiers de tests, 457 tests réussis (457/457 PASS, 0 FAIL) incluant la nouvelle suite `lot5Reconciliation.test.ts` (34 tests d'invariants républicains).
+- **Résolution des réserves de l'audit indépendant** :
+  1. Découplage strict des statuts documentaires : disponibilité (`availability`), provenance officielle (`provenance`), vérification d'extraction financière (`extractionStatus`), et citation exacte (`resolveCitation`). Interdiction d'inférer la vérification d'un montant depuis la simple présence d'un PDF (`canPublishOfficialObservation`).
+  2. Distinction explicite entre fixtures synthétiques de tests unitaires (confinées aux suites `__tests__/`) et documents primaires officiels réels (LFI 2026, DPPD-PAP Annexe 4).
+  3. Garde-fou transport Supabase `guardedFetch` dans `scripts/verify-supabase-readonly.mjs` interdisant toute méthode non-GET/HEAD de façon synchrone avant le réseau, validé par 9 tests unitaires (`supabaseReadOnlyGuard.test.ts`). Sonde strictement limitée à ses propres requêtes, clé anon, aucun service_role, 0 écriture distante.
+- **Suite de tests** : 33 fichiers de tests, 475 tests réussis (475/475 PASS, 0 FAIL, 100% PASS).
 - **Builds** : Build production `npm run build` PASS (tsc && vite build), build review `npm run build:review` PASS (vite build --config vite.review.config.ts).
-- **Données protégées & Supabase** : Inchangées (`src/data`, `docs/imports`, `docs/references/2026`, `src/budget-ingestion`, `supabase`). Zéro écriture distante Supabase (`REMOTE_SUPABASE_WRITES = 0`).
+- **Données protégées & Supabase** : Inchangées (`src/data`, `docs/imports`, `docs/references/2026`, `src/budget-ingestion`, `supabase`). Zéro écriture distante Supabase (`REMOTE_SUPABASE_WRITES = 0`). Aucun merge effectué (`MERGE_PERFORMED = FALSE`). Statut : `READY_FOR_INDEPENDENT_REVIEW`.
 
 ## 1er octobre — console données et montants qualifiés, après #8
 

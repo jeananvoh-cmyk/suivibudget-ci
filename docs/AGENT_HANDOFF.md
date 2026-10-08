@@ -7,9 +7,14 @@
 - BASE_MASTER_SHA : `707b3b688f23bd33dc0f3504e13b79c65908dd50` (Merge commit de PR #28 sur master)
 - CURRENT_HEAD : voir HEAD de la PR de réconciliation LOTS 6-15
 - LAST_VERIFIED_CODE_HEAD : voir commit courant de réconciliation
-- PR : PR de réconciliation LOTS 6-15 vers master (`feat(review): reconcile LOTS 6-15 with validated LOT5 baseline`)
+- PR : PR #29 de réconciliation LOTS 6-15 vers master (`feat(review): reconcile LOTS 6-15 with validated LOT5 baseline`)
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_SUPABASE_WRITES = 0)
-- CURRENT_MILESTONE : Réconciliation contrôlée des LOTS 6 à 15 avec la base validée post-LOT5. Intégration du module `src/review/` (exécution budgétaire, versions collectivités, catalogue de sources avec SHA-256 et URL sûres, liens projets-budgets sans agrégation abusive, suivi citoyen avec protection de la vie privée, réponses institutionnelles et audits officiels séparés, historique et exports Open Data avec protection injection CSV, composants UI et workspace de revue isolé `review.html`, stabilisation et composition read-only `buildReviewSnapshot`). Suppression intégrale du blocage LOT5 codé en dur (`LOT5_UNRESOLVED_SCOPES = []`) sans publication automatique. 32 fichiers de tests, 457 tests PASS (100%), build production PASS, build review PASS. Zéro écriture distante Supabase (`REMOTE_SUPABASE_WRITES = 0`).
+- CURRENT_MILESTONE : Réconciliation contrôlée des LOTS 6 à 15 avec la base validée post-LOT5 et levée des réserves de l'audit indépendant :
+  1. Découplage strict des statuts documentaires dans `src/review/domain/documents.ts` et `src/review/catalog.ts` : disponibilité (`availability`), provenance officielle (`provenance`), vérification d'extraction financière (`extractionStatus`), et citation exacte (`resolveCitation`). Interdiction formelle d'inférer la vérification d'un montant depuis la simple présence d'un PDF. Ajout du contrat `canPublishOfficialObservation`.
+  2. Distinction explicite entre fixtures synthétiques de tests unitaires (confinées à `src/review/__tests__/`) et documents primaires officiels réels (LFI 2026, DPPD-PAP Annexe 4).
+  3. Garde-fou transport Supabase `guardedFetch` dans `scripts/verify-supabase-readonly.mjs` vérifié par 9 tests unitaires dédiés (blocage synchrone POST/PATCH/PUT/DELETE avant émission réseau, sonde ciblée sur ses propres requêtes, clé anon uniquement, aucun service_role, 0 écriture).
+  4. 33 fichiers de tests, 475 tests PASS (100%), build production PASS, build review PASS. Zéro écriture distante Supabase (`REMOTE_SUPABASE_WRITES = 0`).
+  5. État final : `READY_FOR_INDEPENDENT_REVIEW` (aucun merge effectué, `MERGE_PERFORMED = FALSE`).
 - FOUNDATION_READY : TRUE.
 
 ## LOTS 6 À 15 : ARCHITECTURE DE REVUE, CONTRATS DOCUMENTAIRES ET COMPOSITION READ-ONLY
@@ -19,7 +24,7 @@
 - **2. Périmètre des Contrats et Invariants Intégrés** :
   - **LOT 6 (Exécution & Performance)** : Contrats stricts dans `src/review/domain/execution.ts`. `UNKNOWN != 0`, vrai zéro documenté préservé, taux > 100% sans conclusion physique automatique, zéro dénominateur sécurisé (renvoie `null`), périmètres incompatibles classés `NOT_COMPARABLE`. Indicateurs de performance découplés des montants financiers.
   - **LOT 7 (Dossiers Collectivités & Versions)** : Sélection déterministe de la version budgétaire courante publiée dans `src/review/domain/collectivities.ts`. ID obligatoire, rejet des doublons de version et conflits vers `BLOCKED`. Séparation stricte BP / CA.
-  - **LOT 8 (Catalogue Documentaire & Citations)** : Liste blanche de documents officiels avec SHA-256 dans `src/review/domain/documents.ts`. Rejet des URL non sécurisées (`javascript:`, `data:`, `ftp:`, `http:` non-TLS), des documents privés (`visibility: PRIVATE`) et des cycles de version (`VERSION_CYCLE`).
+  - **LOT 8 (Catalogue Documentaire & Citations)** : Liste blanche de documents officiels avec SHA-256 dans `src/review/domain/documents.ts`. Statuts orthogonaux `availability`, `provenance`, `extractionStatus`, `verification`. Rejet des URL non sécurisées (`javascript:`, `data:`, `ftp:`, `http:` non-TLS), des documents privés (`visibility: PRIVATE`) et des cycles de version (`VERSION_CYCLE`). Rejet de toute publication financière si l'extraction n'est pas explicitement `VERIFIED`.
   - **LOT 9 (Liens Projets-Budgets)** : Modélisation des rattachements documentés sans agrégation abusive dans `src/review/domain/projects.ts`. `Budget Line != Project` : interdiction absolue de créer un projet depuis une ligne budgétaire. État physique maintenu à `UNKNOWN` en l'absence de preuve terrain.
   - **LOT 10 (Suivi Citoyen & Confidentialité)** : Projection publique sans fuite de données personnelles dans `src/review/domain/citizen.ts`. Dates obligatoirement calendaires ISO. Distinction fondamentale : la participation citoyenne ne constitue pas une représentativité statistique de la population.
   - **LOT 11 (Réponses Institutionnelles & Contrôle Officiel)** : Séparation stricte de provenance dans `src/review/domain/responses.ts` (`INSTITUTION_RESPONSE` vs `OFFICIAL_SOURCE`). Une réponse institutionnelle ne vaut jamais validation d'audit indépendant.
@@ -32,10 +37,10 @@
   - Les ministères MICOM (`gov-017` / 336), MSCV (`gov-030` / 444) et METFPA (`gov-034` / 334) sont désormais évalués selon les règles normales du moteur documentaire : `UNKNOWN` en l'absence de preuve, `AVAILABLE` avec preuve officielle vérifiée. Aucune disponibilité automatique.
 - **4. Contrôles Documentaires & Script Supabase Read-Only** :
   - `docs/overnight/LOT7_12_DOCUMENTARY_CONTROLS.json` : Spécification vérifiée par `src/review/__tests__/documentaryControls.test.ts` garantissant que les données sans sources restent `UNKNOWN` ou `NOT_COMPARABLE`, et `remote_supabase_writes: 0`.
-  - `scripts/verify-supabase-readonly.mjs` : Script de sonde en lecture seule avec transport `GET`/`HEAD` exclusif et credentials `anon`.
+  - `scripts/verify-supabase-readonly.mjs` : Script de sonde en lecture seule avec transport `GET`/`HEAD` exclusif (`guardedFetch`) et credentials `anon`, testé par `supabaseReadOnlyGuard.test.ts` (9 tests unitaires).
 - **5. Validation & Tests** :
-  - 32 fichiers de tests, 457 tests réussis (100% PASS), 0 échec.
-  - Suite de tests dédiée `lot5Reconciliation.test.ts` (34 tests) couvrant tous les invariants républicains prescrits.
+  - 33 fichiers de tests, 475 tests réussis (100% PASS), 0 échec.
+  - Suites dédiées `lot5Reconciliation.test.ts` (31 tests), `documents.test.ts` (17 tests), `supabaseReadOnlyGuard.test.ts` (9 tests).
   - Production build PASS (`tsc && vite build`), Review build PASS (`vite build --config vite.review.config.ts`).
   - Supabase distant : `REMOTE_SUPABASE_WRITES = 0`.
 
