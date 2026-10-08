@@ -5,16 +5,18 @@
 - LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/reconcile-lots6-15-post-lot5`
 - BASE_MASTER_SHA : `707b3b688f23bd33dc0f3504e13b79c65908dd50` (Merge commit de PR #28 sur master)
-- CURRENT_HEAD : voir HEAD de la PR de réconciliation LOTS 6-15
+- CURRENT_HEAD : voir commit courant de réconciliation et levée des réserves
 - LAST_VERIFIED_CODE_HEAD : voir commit courant de réconciliation
 - PR : PR #29 de réconciliation LOTS 6-15 vers master (`feat(review): reconcile LOTS 6-15 with validated LOT5 baseline`)
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_SUPABASE_WRITES = 0)
-- CURRENT_MILESTONE : Réconciliation contrôlée des LOTS 6 à 15 avec la base validée post-LOT5 et levée des réserves de l'audit indépendant :
-  1. Découplage strict des statuts documentaires dans `src/review/domain/documents.ts` et `src/review/catalog.ts` : disponibilité (`availability`), provenance officielle (`provenance`), vérification d'extraction financière (`extractionStatus`), et citation exacte (`resolveCitation`). Interdiction formelle d'inférer la vérification d'un montant depuis la simple présence d'un PDF. Ajout du contrat `canPublishOfficialObservation`.
-  2. Distinction explicite entre fixtures synthétiques de tests unitaires (confinées à `src/review/__tests__/`) et documents primaires officiels réels (LFI 2026, DPPD-PAP Annexe 4).
-  3. Garde-fou transport Supabase `guardedFetch` dans `scripts/verify-supabase-readonly.mjs` vérifié par 9 tests unitaires dédiés (blocage synchrone POST/PATCH/PUT/DELETE avant émission réseau, sonde ciblée sur ses propres requêtes, clé anon uniquement, aucun service_role, 0 écriture).
-  4. 33 fichiers de tests, 475 tests PASS (100%), build production PASS, build review PASS. Zéro écriture distante Supabase (`REMOTE_SUPABASE_WRITES = 0`).
-  5. État final : `READY_FOR_INDEPENDENT_REVIEW` (aucun merge effectué, `MERGE_PERFORMED = FALSE`).
+- CURRENT_MILESTONE : Sécurisation documentaire finale de la PR #29 et levée complète des réserves de l'audit indépendant :
+  1. **Réserve A — Découplage strict et chemin de publication financier** : Encodage dans `canPublishOfficialObservation()` exigeant formellement `provenance === 'OFFICIAL_SOURCE'`, `extractionStatus === 'VERIFIED'`, `availability === 'AVAILABLE'` et `verification === 'VERIFIED'`. Préservation de l'exact zéro documenté (`amount === 0, precision: 'EXACT'`). Découplage de `resolveCitation()` permettant la citation documentaire authentique sans conférer à elle seule l'autorité de publication financière.
+  2. **Réserve B — Contrat d'audit traçable au-delà du CONTROL_SCOPE déclaratif** : Définition du contrat `DocumentaryAuditRecord` et du vérificateur `verifyDocumentaryAudit()` dans `src/review/domain/documents.ts`. Registre `OFFICIAL_DOCUMENTARY_AUDITS` dans `src/review/catalog.ts` rattaché aux contrôles d'audit indépendants traçables (`AUDIT-DGBF-LFI-2026-LOT5`, `AUDIT-DPPD-PAP-2026-LOT5` adossés à `docs/budget-ingestion/LOT5_INDEPENDENT_LFI_CONTROLS.json#section_controls`). Rejet formel de toute promotion basée sur une simple chaîne déclarative non auditée.
+  3. **Suite exhaustive de 14 tests de non-régression et cas limites** : Intégrée dans `src/review/__tests__/documents.test.ts` (30 tests dédiés), couvrant l'absence de provenance, provenance secondaire, extraction non vérifiée, absence d'audit traçable, discordance SHA, discordance d'année, discordance de docId, citation résolue sans publication, montant exact sans preuve, document privé, montant nul, exact zéro préservé, et intégrité du catalogue LOT5.
+  4. **Transport Supabase en lecture seule hermétique** : Script `scripts/verify-supabase-readonly.mjs` autonome avec fallback sécurisé `.env` (`PASS`, `remoteSupabaseWrites: 0`), couvert par 9 tests unitaires (`supabaseReadOnlyGuard.test.ts`).
+  5. **Validation visuelle Chromium** : `CHROMIUM_CHECK = PASS` via Chrome DevTools MCP sur l'espace de revue local (`http://127.0.0.1:5174/review.html`) : 0 erreur console critique, affichage exact des originaux DGBF (LFI 2026 583 pages, Annexe 4 DPPD-PAP 1229 pages, SHA-256), liens TLS sécurisés, marquage rigoureux "Information indisponible" pour les données sans preuve.
+  6. **33 fichiers de tests, 488 tests PASS (100%)**, `npm run build` PASS, `npm run build:review` PASS. Zéro écriture distante Supabase (`REMOTE_SUPABASE_WRITES = 0`).
+  7. **État final** : `READY_FOR_INDEPENDENT_REVIEW` (aucun merge effectué, `MERGE_PERFORMED = FALSE`).
 - FOUNDATION_READY : TRUE.
 
 ## LOTS 6 À 15 : ARCHITECTURE DE REVUE, CONTRATS DOCUMENTAIRES ET COMPOSITION READ-ONLY
@@ -39,8 +41,9 @@
   - `docs/overnight/LOT7_12_DOCUMENTARY_CONTROLS.json` : Spécification vérifiée par `src/review/__tests__/documentaryControls.test.ts` garantissant que les données sans sources restent `UNKNOWN` ou `NOT_COMPARABLE`, et `remote_supabase_writes: 0`.
   - `scripts/verify-supabase-readonly.mjs` : Script de sonde en lecture seule avec transport `GET`/`HEAD` exclusif (`guardedFetch`) et credentials `anon`, testé par `supabaseReadOnlyGuard.test.ts` (9 tests unitaires).
 - **5. Validation & Tests** :
-  - 33 fichiers de tests, 475 tests réussis (100% PASS), 0 échec.
-  - Suites dédiées `lot5Reconciliation.test.ts` (31 tests), `documents.test.ts` (17 tests), `supabaseReadOnlyGuard.test.ts` (9 tests).
+  - 33 fichiers de tests, 488 tests réussis (100% PASS), 0 échec.
+  - Suites dédiées `lot5Reconciliation.test.ts` (31 tests), `documents.test.ts` (30 tests couvrant les 14 cas limites), `supabaseReadOnlyGuard.test.ts` (9 tests).
+  - Validation visuelle Chromium : `CHROMIUM_CHECK = PASS` via Chrome DevTools MCP sur `review.html`.
   - Production build PASS (`tsc && vite build`), Review build PASS (`vite build --config vite.review.config.ts`).
   - Supabase distant : `REMOTE_SUPABASE_WRITES = 0`.
 

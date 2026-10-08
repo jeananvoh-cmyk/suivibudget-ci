@@ -21,8 +21,29 @@ export const createGuardedFetch = (allowedMethods = ['GET', 'HEAD'], timeoutMs =
 export const guardedFetch = createGuardedFetch(['GET', 'HEAD']);
 
 export async function runReadOnlyVerification() {
-  const url = process.env.VITE_SUPABASE_URL;
-  const anonKey = process.env.VITE_SUPABASE_ANON_KEY;
+  let url = process.env.VITE_SUPABASE_URL;
+  let anonKey = process.env.VITE_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) {
+    try {
+      const fs = await import('node:fs');
+      const path = await import('node:path');
+      const envPath = path.resolve(process.cwd(), '.env');
+      if (fs.existsSync(envPath)) {
+        const content = fs.readFileSync(envPath, 'utf8');
+        for (const line of content.split('\n')) {
+          const match = line.trim().match(/^([^=]+)=(.*)$/);
+          if (match) {
+            const key = match[1].trim();
+            const val = match[2].trim();
+            if (key === 'VITE_SUPABASE_URL' && !url) url = val;
+            if (key === 'VITE_SUPABASE_ANON_KEY' && !anonKey) anonKey = val;
+          }
+        }
+      }
+    } catch {
+      // ignore fallback errors
+    }
+  }
   if (!url || !anonKey) throw new Error('SUPABASE_RUNTIME_VARIABLES_NOT_READY');
 
   const client = createClient(url, anonKey, {

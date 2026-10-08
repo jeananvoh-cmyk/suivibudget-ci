@@ -24,6 +24,33 @@ export type DocumentaryVerificationStatus =
   | 'TO_VERIFY'
   | 'SOURCE_CONFLICT';
 
+/**
+ * Enregistrement traçable de contrôle documentaire indépendant.
+ * Exigé pour certifier l'extraction financière d'un document primaire.
+ */
+export interface DocumentaryAuditRecord {
+  /** Identifiant unique de contrôle documentaire */
+  controlId: string;
+  /** Identifiant exact du document primaire contrôlé */
+  documentId: string;
+  /** SHA-256 vérifié du document contrôlé */
+  documentSha256: string;
+  /** Périmètre précis de la vérification (sections, programmes, tableaux) */
+  controlScope: string;
+  /** Exercice budgétaire concerné */
+  fiscalYear: number;
+  /** Statut du contrôle documentaire indépendant */
+  controlStatus: 'VERIFIED' | 'TO_VERIFY' | 'SOURCE_CONFLICT';
+  /** Référence traçable vers le résultat ou rapport d'audit vérifiable */
+  reportRef: string;
+}
+
+export interface AuditVerificationResult {
+  verified: boolean;
+  matchingAudit: DocumentaryAuditRecord | null;
+  reasons: string[];
+}
+
 export interface SourceDocument {
   id: string;
   title: string;
@@ -46,6 +73,42 @@ export interface SourceDocument {
   extractionStatus?: ExtractionVerificationStatus;
   /** Optional documentation of the verification audit scope. */
   controlScope?: string | null;
+  /** Identifiant unique de contrôle documentaire traçable */
+  auditRecordId?: string | null;
+  /** Référence traçable vers le rapport de contrôle */
+  auditReportRef?: string | null;
+}
+
+/**
+ * Vérifie si un document bénéficie d'un contrôle documentaire traçable et conforme.
+ * La seule présence d'un champ déclaratif (ex: CONTROL_SCOPE seul) ne suffit JAMAIS
+ * à certifier une extraction comme VERIFIED.
+ */
+export function verifyDocumentaryAudit(
+  doc: Pick<SourceDocument, 'id' | 'sha256' | 'fiscalYear'>,
+  audits: readonly DocumentaryAuditRecord[],
+): AuditVerificationResult {
+  if (!doc.id?.trim() || !doc.sha256?.trim()) {
+    return { verified: false, matchingAudit: null, reasons: ['MISSING_DOCUMENT_IDENTITY_OR_HASH'] };
+  }
+  if (!/^[a-f0-9]{64}$/i.test(doc.sha256)) {
+    return { verified: false, matchingAudit: null, reasons: ['INVALID_DOCUMENT_SHA256'] };
+  }
+  const matching = audits.find(a =>
+    a.documentId === doc.id
+    && a.documentSha256.toLowerCase() === doc.sha256?.toLowerCase()
+    && a.fiscalYear === doc.fiscalYear
+  );
+  if (!matching) {
+    return { verified: false, matchingAudit: null, reasons: ['NO_MATCHING_AUDIT_RECORD'] };
+  }
+  if (matching.controlStatus !== 'VERIFIED') {
+    return { verified: false, matchingAudit: matching, reasons: ['AUDIT_STATUS_NOT_VERIFIED'] };
+  }
+  if (!matching.controlScope?.trim() || !matching.reportRef?.trim()) {
+    return { verified: false, matchingAudit: matching, reasons: ['INCOMPLETE_AUDIT_TRACE'] };
+  }
+  return { verified: true, matchingAudit: matching, reasons: [] };
 }
 
 /** Only direct public HTTPS references; never display signed storage URLs or credentials. */
@@ -78,6 +141,11 @@ export function catalogProblems(documents: readonly SourceDocument[]): string[] 
   return [...problems];
 }
 
+/**
+ * Résout une citation documentaire (URL, page, métadonnées publiques).
+ * Note : résout la citation documentaire d'un original public sans pour autant
+ * certifier ou autoriser la publication d'un montant financier extrait.
+ */
 export function resolveCitation(ref: EvidenceRef | null, documents: readonly SourceDocument[]) {
   if (!ref || !hasEvidence(ref, ref.fiscalYear) || catalogProblems(documents).length) return null;
   const doc = documents.find(d => d.id === ref.documentId);
@@ -87,7 +155,6 @@ export function resolveCitation(ref: EvidenceRef | null, documents: readonly Sou
     || !doc.title.trim() || !doc.publisher.trim()) return null;
   if (doc.provenance === 'UNVERIFIED') return null;
   if (doc.availability && doc.availability !== 'AVAILABLE') return null;
-  if (doc.extractionStatus && doc.extractionStatus !== 'VERIFIED') return null;
   if (ref.page !== null && (!Number.isInteger(doc.pageCount) || ref.page > doc.pageCount! || ref.page < 1)) return null;
   const url = safeOfficialUrl(doc.officialUrl);
   if (!url) return null;
@@ -98,10 +165,21 @@ export function resolveCitation(ref: EvidenceRef | null, documents: readonly Sou
 }
 
 /**
- * Assesses whether a financial observation meets all criteria to be published as official,
- * strictly requiring verified document availability, authentic provenance,
- * verified extraction status, and exact citation resolution.
- * Never allows publishing an amount simply because a PDF is available.
+ * Évalue si une observation financière satisfait à TOUTES les exigences républicaines
+ * pour être publiée comme montant officiel.
+ *
+ * Chemin de publication financière strict :
+ * 1. L'observation doit être arithmétiquement et temporellement valide (assessObservation).
+ * 2. Un montant exact égal à zéro (amount === 0 avec precision === 'EXACT') est préservé.
+ * 3. La citation documentaire doit être résolue (resolveCitation).
+ * 4. Le document cité doit exister dans `documents` et posséder EXPLICITEMENT :
+ *    - provenance: 'OFFICIAL_SOURCE' (les provenances manquantes, secondaires ou non vérifiées sont REJETÉES).
+ *    - extractionStatus: 'VERIFIED' (les extractions manquantes, 'TO_VERIFY', 'SOURCE_CONFLICT' ou 'NOT_EXTRACTED' sont REJETÉES).
+ *    - availability: 'AVAILABLE' (les statuts manquants, 'PENDING', 'NOT_FOUND_PUBLICLY' sont REJETÉS).
+ *    - verification: 'VERIFIED'.
+ * 5. Si une seule preuve manque ou est ambiguë, la publication est REFUSÉE :
+ *    - L'état renvoyé est 'UNKNOWN' (ou 'BLOCKED' / 'NOT_COMPARABLE' si l'observation l'exige).
+ *    - La valeur financière renvoyée est null.
  */
 export function canPublishOfficialObservation(
   observation: FinancialObservation,
@@ -111,8 +189,31 @@ export function canPublishOfficialObservation(
   if (baseAssessment.status !== 'AVAILABLE') {
     return baseAssessment;
   }
+  if (!observation.evidence) {
+    return { value: null, status: 'UNKNOWN', reasons: ['UNVERIFIED_DOCUMENT_OR_EXTRACTION'] };
+  }
   const citation = resolveCitation(observation.evidence, documents);
   if (!citation) {
+    return { value: null, status: 'UNKNOWN', reasons: ['UNVERIFIED_DOCUMENT_OR_EXTRACTION'] };
+  }
+  const doc = documents.find(d => d.id === observation.evidence!.documentId);
+  if (!doc) {
+    return { value: null, status: 'UNKNOWN', reasons: ['UNVERIFIED_DOCUMENT_OR_EXTRACTION'] };
+  }
+  // Provenance must be explicitly OFFICIAL_SOURCE (missing, undefined, secondary, or unverified is strictly rejected)
+  if (doc.provenance !== 'OFFICIAL_SOURCE') {
+    return { value: null, status: 'UNKNOWN', reasons: ['UNVERIFIED_DOCUMENT_OR_EXTRACTION'] };
+  }
+  // Extraction must be explicitly VERIFIED (missing, undefined, TO_VERIFY, SOURCE_CONFLICT is strictly rejected)
+  if (doc.extractionStatus !== 'VERIFIED') {
+    return { value: null, status: 'UNKNOWN', reasons: ['UNVERIFIED_DOCUMENT_OR_EXTRACTION'] };
+  }
+  // Availability must be explicitly AVAILABLE (missing, undefined, PENDING, BLOCKED is strictly rejected)
+  if (doc.availability !== 'AVAILABLE') {
+    return { value: null, status: 'UNKNOWN', reasons: ['UNVERIFIED_DOCUMENT_OR_EXTRACTION'] };
+  }
+  // Documentary verification must be VERIFIED
+  if (doc.verification !== 'VERIFIED') {
     return { value: null, status: 'UNKNOWN', reasons: ['UNVERIFIED_DOCUMENT_OR_EXTRACTION'] };
   }
   return baseAssessment;
@@ -125,6 +226,7 @@ export function publicDocumentMetadata(documents: readonly SourceDocument[], yea
     return citation ? [{ id: doc.id, title: doc.title, publisher: doc.publisher, officialUrl: safeOfficialUrl(doc.officialUrl),
       fiscalYear: doc.fiscalYear, accessedAt: doc.accessedAt, httpStatus: doc.httpStatus, sha256: doc.sha256,
       pageCount: doc.pageCount, verification: doc.verification, visibility: doc.visibility, previousVersionId: doc.previousVersionId,
-      availability: doc.availability, provenance: doc.provenance, extractionStatus: doc.extractionStatus, controlScope: doc.controlScope }] : [];
+      availability: doc.availability, provenance: doc.provenance, extractionStatus: doc.extractionStatus, controlScope: doc.controlScope,
+      auditRecordId: doc.auditRecordId, auditReportRef: doc.auditReportRef }] : [];
   });
 }

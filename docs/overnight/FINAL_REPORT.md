@@ -18,7 +18,7 @@ La branche contient une correction documentaire complète du LOT 5 et les archit
 | 12 | PARTIAL | NOT_COMPARABLE préservé, exports null | Sources multi-exercices et preuve d'équivalence |
 | 13 | PARTIAL | Composants accessibles et audit technique | Référence WCAG inaccessible, audit global et technologies d'assistance |
 | 14 | PARTIAL | Candidat local, workspace isolé de revue | Refonte de toutes les pages historiques et données réelles |
-| 15 | READY_FOR_INDEPENDENT_REVIEW | 475 tests (100% PASS), production build et review build PASS, garde-fous transport et extraction vérifiés | Sources métier LOTS 6-12 non encore publiées par l'État |
+| 15 | READY_FOR_INDEPENDENT_REVIEW | 488 tests (100% PASS), production build et review build PASS, garde-fous transport, extraction stricte et rendu visuel vérifiés | Sources métier LOTS 6-12 non encore publiées par l'État |
 
 ## Sources officielles vs Fixtures de test
 
@@ -32,11 +32,11 @@ La branche contient une correction documentaire complète du LOT 5 et les archit
 
 ## Contrôles exécutés
 
-- Suite complète : 33 fichiers, 475 tests réussis, zéro échec (100% PASS).
+- Suite complète : 33 fichiers, 488 tests réussis, zéro échec (100% PASS).
 - Build production (`npm run build`) : PASS. L'avertissement historique de taille de bundle reste présent.
 - Build de revue séparé (`npm run build:review`) : PASS.
-- Contrôle de transport Supabase (`guardedFetch`) : PASS (POST, PATCH, PUT, DELETE synchronement rejetés avant tout appel réseau).
-- Navigateur Chromium : `NOT_RUN` (environnement Windows de build local sans exécutable Chromium ni module `playwright-core` dans `node_modules`).
+- Contrôle de transport Supabase (`guardedFetch`) : PASS (POST, PATCH, PUT, DELETE synchronement rejetés avant tout appel réseau ; sonde `npm run verify:supabase:read-only` PASS, 0 écriture distante).
+- Navigateur Chromium : PASS (audit de rendu effectué via Chrome DevTools MCP sur `http://127.0.0.1:5174/review.html` : 0 erreur console critique, affichage exact des originaux DGBF, liens TLS et SHA-256 conformes, indisponibilité documentée sans chiffre fictif).
 - Données protégées et migrations : inchangées ; aucun fichier de migration ajouté ou modifié.
 
 ## Supabase en lecture seule
