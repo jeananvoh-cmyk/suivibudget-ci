@@ -8,14 +8,15 @@
     "document": "Annexe 4 — Documents de Programmation Pluriannuelle des Dépenses - Projets Annuels de Performance (DPPD-PAP) 2026-2028",
     "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
     "section_reference": "SECTION 444 : MINISTERE DELEGUE AUPRES DU PREMIER MINISTRE, MINISTRE DES SPORTS ET DU CADRE DE VIE, CHARGE DES SPORTS ET DU CADRE DE VIE",
-    "page_range": "DPPD-PAP pp. 1145-1165 / LFI p. 54",
+    "page_range": "PDF pages 1117-1137 (Document pages 1115-1135 sur 1227)",
     "accessed_at": "2026-10-06"
   },
   "control_source": {
     "publisher": "DGBF",
     "document": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
     "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-    "section_reference": "Ministère code 444"
+    "section_reference": "Ministère code 444",
+    "page_range": "LFI PDF page 54 (Document page 52 sur 583)"
   },
   "totals": {
     "total_ministry_2026_fcfa": 70427777385,
@@ -30,7 +31,7 @@
       "program_code": "21081",
       "official_name": "Administration Générale",
       "program_amount_2026_fcfa": 17906782766,
-      "page_reference": "DPPD-PAP pp. 1145-1165 / LFI p. 54 - Tableau 7",
+      "page_reference": "PDF p. 1125 / Document p. 1123",
       "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
@@ -38,7 +39,7 @@
           "action_code": "2108101",
           "official_name": "Coordination de la politique du sport",
           "amount_2026_fcfa": 6094819416,
-          "page_reference": "DPPD-PAP pp. 1145-1165 / LFI p. 54 - Tableau 7",
+          "page_reference": "PDF p. 1125 / Document p. 1123",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
@@ -46,7 +47,7 @@
           "action_code": "2108102",
           "official_name": "Amélioration du système de planification, de suivi-évaluation et des statistiques",
           "amount_2026_fcfa": 19000000,
-          "page_reference": "DPPD-PAP pp. 1145-1165 / LFI p. 54 - Tableau 7",
+          "page_reference": "PDF p. 1125 / Document p. 1123",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
@@ -54,7 +55,7 @@
           "action_code": "2108103",
           "official_name": "Amélioration du cadre de gestion des ressources humaines",
           "amount_2026_fcfa": 62706205,
-          "page_reference": "DPPD-PAP pp. 1145-1165 / LFI p. 54 - Tableau 7",
+          "page_reference": "PDF p. 1125 / Document p. 1123",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
@@ -62,7 +63,7 @@
           "action_code": "2108104",
           "official_name": "Amélioration de la gestion des finances et du patrimoine",
           "amount_2026_fcfa": 11730257145,
-          "page_reference": "DPPD-PAP pp. 1145-1165 / LFI p. 54 - Tableau 7",
+          "page_reference": "PDF p. 1125 / Document p. 1123",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
@@ -72,7 +73,7 @@
       "program_code": "22082",
       "official_name": "Sport",
       "program_amount_2026_fcfa": 39900994619,
-      "page_reference": "DPPD-PAP pp. 1145-1165 / LFI p. 54 - Tableau 7",
+      "page_reference": "PDF p. 1131 / Document p. 1129",
       "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
@@ -80,7 +81,7 @@
           "action_code": "2208201",
           "official_name": "Construction, réhabilitation et renforcement du parc des infrastructures sportives",
           "amount_2026_fcfa": 21949210665,
-          "page_reference": "DPPD-PAP pp. 1145-1165 / LFI p. 54 - Tableau 7",
+          "page_reference": "PDF p. 1131 / Document p. 1129",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
@@ -88,7 +89,7 @@
           "action_code": "2208202",
           "official_name": "Promotion des sports scolaires, universitaires, de masse et du sport pour tous",
           "amount_2026_fcfa": 2742140620,
-          "page_reference": "DPPD-PAP pp. 1145-1165 / LFI p. 54 - Tableau 7",
+          "page_reference": "PDF p. 1131 / Document p. 1129",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
@@ -96,7 +97,7 @@
           "action_code": "2208203",
           "official_name": "Encadrement de la vie fédérale et promotion des sports de haut niveau",
           "amount_2026_fcfa": 15209643334,
-          "page_reference": "DPPD-PAP pp. 1145-1165 / LFI p. 54 - Tableau 7",
+          "page_reference": "PDF p. 1131 / Document p. 1129",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
@@ -106,7 +107,7 @@
       "program_code": "23241",
       "official_name": "Appui au développement durable du sport",
       "program_amount_2026_fcfa": 10900000000,
-      "page_reference": "DPPD-PAP pp. 1145-1165 / LFI p. 54 - Tableau 7",
+      "page_reference": "PDF p. 1134 / Document p. 1132",
       "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
@@ -114,7 +115,7 @@
           "action_code": "2324101",
           "official_name": "Développement des activités fédérales",
           "amount_2026_fcfa": 7430000000,
-          "page_reference": "DPPD-PAP pp. 1145-1165 / LFI p. 54 - Tableau 7",
+          "page_reference": "PDF p. 1134 / Document p. 1132",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
@@ -122,7 +123,7 @@
           "action_code": "2324102",
           "official_name": "Promotion sociale et sanitaire du secteur sport",
           "amount_2026_fcfa": 200000000,
-          "page_reference": "DPPD-PAP pp. 1145-1165 / LFI p. 54 - Tableau 7",
+          "page_reference": "PDF p. 1134 / Document p. 1132",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         },
@@ -130,7 +131,7 @@
           "action_code": "2324103",
           "official_name": "Construction, réhabilitation et équipement d'infrastructure socio-sportive",
           "amount_2026_fcfa": 3270000000,
-          "page_reference": "DPPD-PAP pp. 1145-1165 / LFI p. 54 - Tableau 7",
+          "page_reference": "PDF p. 1134 / Document p. 1132",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }
@@ -140,7 +141,7 @@
       "program_code": "23249",
       "official_name": "Appui à l'entretien et à la sécurisation des infrastructures",
       "program_amount_2026_fcfa": 1720000000,
-      "page_reference": "DPPD-PAP pp. 1145-1165 / LFI p. 54 - Tableau 7",
+      "page_reference": "PDF p. 1135 / Document p. 1133",
       "table_reference": "Tableau 7 : Budget détaillé du programme",
       "reconciliation_status": "RECONCILED",
       "actions": [
@@ -148,7 +149,7 @@
           "action_code": "2324901",
           "official_name": "Entretien, maintenance et sécurisation des infrastructures",
           "amount_2026_fcfa": 1720000000,
-          "page_reference": "DPPD-PAP pp. 1145-1165 / LFI p. 54 - Tableau 7",
+          "page_reference": "PDF p. 1135 / Document p. 1133",
           "table_reference": "Tableau 7 : Budget détaillé du programme",
           "evidence_status": "DIRECTLY_VERIFIED"
         }

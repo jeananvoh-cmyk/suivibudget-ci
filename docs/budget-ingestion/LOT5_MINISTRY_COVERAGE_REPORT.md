@@ -72,69 +72,90 @@ Le **Batch 1** intègre le périmètre intégral de 7 ministères conformément 
 
 ### 1. MAIED (`gov-033` / Section DGBF 439) — Ministère Délégué chargé de l'Intégration Africaine et des Ivoiriens de l'Extérieur
 - **Total LFI 2026** : **5 122 516 889 FCFA**
-- **Programmes & Actions** : 3 programmes DGBF, 7 actions officielles (DPPD-PAP pp. 1085–1100 / LFI p. 53).
-- **Contrôles Arithmétiques** :
-  - `21234` Administration Générale : 3 743 491 132 FCFA (2 actions, delta = 0).
-  - `22145` Intégration Africaine : 1 153 795 757 FCFA (2 actions, delta = 0).
-  - `22146` Ivoiriens de l'extérieur : 225 230 000 FCFA (3 actions, delta = 0).
+- **Programmes & Actions** : 3 programmes DGBF, 7 actions officielles.
+- **Sources documentaires** :
+  - Section DPPD-PAP : PDF pages 1087–1102 (Document pages 1085–1100 sur 1227)
+  - Tableau récapitulatif LFI 2026 : PDF page 53 (Document page 51 sur 583)
+- **Contrôles Arithmétiques & Pagination Tableau 7** :
+  - `21234` Administration Générale : 3 743 491 132 FCFA (2 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 1097 / Document page 1095.
+  - `22145` Intégration Africaine : 1 153 795 757 FCFA (2 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 1099 / Document page 1097.
+  - `22146` Ivoiriens de l'extérieur : 225 230 000 FCFA (3 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 1102 / Document page 1100.
   - Somme des programmes = 5 122 516 889 FCFA (delta = 0).
 
 ### 2. MAM (`gov-032` / Section DGBF 440) — Ministère Délégué chargé des Affaires Maritimes
 - **Total LFI 2026** : **13 746 365 872 FCFA**
-- **Programmes & Actions** : 2 programmes DGBF, 7 actions officielles (DPPD-PAP pp. 1101–1120 / LFI p. 53).
-- **Contrôles Arithmétiques** :
-  - `21237` Administration générale : 8 311 959 782 FCFA (4 actions, delta = 0).
-  - `22115` Transport maritime et fluvio-lagunaire : 5 434 406 090 FCFA (3 actions, delta = 0).
+- **Programmes & Actions** : 2 programmes DGBF, 7 actions officielles.
+- **Sources documentaires** :
+  - Section DPPD-PAP : PDF pages 1103–1116 (Document pages 1101–1114 sur 1227)
+  - Tableau récapitulatif LFI 2026 : PDF page 54 (Document page 52 sur 583)
+- **Contrôles Arithmétiques & Pagination Tableau 7** :
+  - `21237` Administration générale : 8 311 959 782 FCFA (4 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 1111 / Document page 1109.
+  - `22115` Transport maritime et fluvio-lagunaire : 5 434 406 090 FCFA (3 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 1114 / Document page 1112.
   - Somme des programmes = 13 746 365 872 FCFA (delta = 0).
 
 ### 3. MFPMA (`gov-003` / Section DGBF 237) — Ministère de la Fonction Publique et de la Modernisation de l'Administration
 - **Total LFI 2026** : **45 121 940 916 FCFA**
-- **Programmes & Actions** : 3 programmes DGBF, 7 actions officielles (DPPD-PAP pp. 101–125 / LFI p. 46).
-- **Contrôles Arithmétiques** :
-  - `21042` Administration Générale : 28 450 607 800 FCFA (3 actions, delta = 0).
-  - `22043` Fonction Publique : 14 396 485 400 FCFA (2 actions, delta = 0).
-  - `22066` Modernisation de l'Administration : 2 274 847 716 FCFA (2 actions, delta = 0).
+- **Programmes & Actions** : 3 programmes DGBF, 7 actions officielles.
+- **Sources documentaires** :
+  - Section DPPD-PAP : PDF pages 95–114 (Document pages 93–112 sur 1227)
+  - Tableau récapitulatif LFI 2026 : PDF page 47 (Document page 45 sur 583)
+- **Contrôles Arithmétiques & Pagination Tableau 7** :
+  - `21042` Administration Générale : 28 450 607 800 FCFA (3 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 104 / Document page 102.
+  - `22043` Fonction Publique : 14 396 485 400 FCFA (2 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 108 / Document page 106.
+  - `22066` Modernisation de l'Administration : 2 274 847 716 FCFA (2 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 112 / Document page 110.
   - Somme des programmes = 45 121 940 916 FCFA (delta = 0).
 
 ### 4. MEPS (`gov-023` / Section DGBF 362) — Ministère de l'Emploi et de la Protection Sociale
 - **Total LFI 2026** : **91 411 414 044 FCFA**
-- **Programmes & Actions** : 4 programmes DGBF, 15 actions officielles (DPPD-PAP pp. 815–845 / LFI p. 51).
-- **Contrôles Arithmétiques** :
-  - `21150` Administration Générale : 35 849 618 984 FCFA (4 actions, delta = 0).
-  - `22151` Emploi : 2 451 846 262 FCFA (3 actions, delta = 0).
-  - `22152` Travail : 6 374 402 905 FCFA (4 actions, delta = 0).
-  - `22153` Protection sociale : 46 735 545 893 FCFA (4 actions, delta = 0).
+- **Programmes & Actions** : 4 programmes DGBF, 15 actions officielles.
+- **Sources documentaires** :
+  - Section DPPD-PAP : PDF pages 987–1012 (Document pages 985–1010 sur 1227)
+  - Tableau récapitulatif LFI 2026 : PDF page 53 (Document page 51 sur 583)
+- **Contrôles Arithmétiques & Pagination Tableau 7** :
+  - `21150` Administration Générale : 35 849 618 984 FCFA (4 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 1000 / Document page 998.
+  - `22151` Emploi : 2 451 846 262 FCFA (3 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 1003 / Document page 1001.
+  - `22152` Travail : 6 374 402 905 FCFA (4 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 1005 / Document page 1003.
+  - `22153` Protection sociale : 46 735 545 893 FCFA (4 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 1009 / Document page 1007.
   - Somme des programmes = 91 411 414 044 FCFA (delta = 0).
 
 ### 5. MSCV (`gov-030` / Section DGBF 444) — Ministère Délégué chargé des Sports et du Cadre de Vie
 - **Total LFI 2026** : **70 427 777 385 FCFA**
-- **Programmes & Actions** : 4 programmes DGBF, 11 actions officielles (DPPD-PAP pp. 1145–1165 / LFI p. 54).
-- **Contrôles Arithmétiques** :
-  - `21081` Administration Générale : 17 906 782 766 FCFA (4 actions, delta = 0).
-  - `22082` Sport : 39 900 994 619 FCFA (3 actions, delta = 0).
-  - `23241` Appui au développement durable du sport : 10 900 000 000 FCFA (3 actions, delta = 0).
-  - `23249` Appui à l'entretien et à la sécurisation des infrastructures : 1 720 000 000 FCFA (1 action, delta = 0).
+- **Programmes & Actions** : 4 programmes DGBF, 11 actions officielles.
+- **Sources documentaires** :
+  - Section DPPD-PAP : PDF pages 1117–1137 (Document pages 1115–1135 sur 1227)
+  - Tableau récapitulatif LFI 2026 : PDF page 54 (Document page 52 sur 583)
+- **Contrôles Arithmétiques & Pagination Tableau 7** :
+  - `21081` Administration Générale : 17 906 782 766 FCFA (4 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 1125 / Document page 1123.
+  - `22082` Sport : 39 900 994 619 FCFA (3 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 1131 / Document page 1129.
+  - `23241` Appui au développement durable du sport : 10 900 000 000 FCFA (3 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 1134 / Document page 1132.
+  - `23249` Appui à l'entretien et à la sécurisation des infrastructures : 1 720 000 000 FCFA (1 action, delta = 0) — DPPD-PAP Tableau 7 : PDF page 1135 / Document page 1133.
   - Somme des programmes = 70 427 777 385 FCFA (delta = 0).
 
 ### 6. MICOM (`gov-017` / Section DGBF 336) — Ministère de la Communication
 - **Total LFI 2026** : **39 806 735 298 FCFA**
-- **Programmes & Actions** : 5 programmes DGBF, 9 actions officielles (DPPD-PAP pp. 505–525 / LFI p. 49).
-- **Contrôles Arithmétiques** :
-  - `21077` Administration Générale : 7 354 634 682 FCFA (3 actions, delta = 0).
-  - `22078` Communication et médias : 12 252 100 615 FCFA (3 actions, delta = 0).
-  - `23223` Appui au financement de la Radiodiffusion Télévision Ivoirienne (RTI) : 16 465 000 001 FCFA (1 action, delta = 0).
-  - `23224` Appui au financement de la Société Ivoirienne de Télédiffusion (IDT) : 2 035 000 000 FCFA (1 action, delta = 0).
-  - `23225` Appui au financement du secteur des médias : 1 700 000 000 FCFA (1 action, delta = 0).
+- **Programmes & Actions** : 5 programmes DGBF, 9 actions officielles.
+- **Sources documentaires** :
+  - Section DPPD-PAP : PDF pages 633–656 (Document pages 631–654 sur 1227)
+  - Tableau récapitulatif LFI 2026 : PDF page 49 (Document page 47 sur 583)
+- **Contrôles Arithmétiques & Pagination Tableau 7** :
+  - `21077` Administration Générale : 7 354 634 682 FCFA (3 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 644 / Document page 642.
+  - `22078` Communication et médias : 12 252 100 615 FCFA (3 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 648 / Document page 646.
+  - `23223` Appui au financement de la Radiodiffusion Télévision Ivoirienne (RTI) : 16 465 000 001 FCFA (1 action, delta = 0) — DPPD-PAP Tableau 7 : PDF page 651 / Document page 649.
+  - `23224` Appui au financement de la Société Ivoirienne de Télédiffusion (IDT) : 2 035 000 000 FCFA (1 action, delta = 0) — DPPD-PAP Tableau 7 : PDF page 653 / Document page 651.
+  - `23225` Appui au financement du secteur des médias : 1 700 000 000 FCFA (1 action, delta = 0) — DPPD-PAP Tableau 7 : PDF page 654 / Document page 652.
   - Somme des programmes = 39 806 735 298 FCFA (delta = 0).
 
 ### 7. METFPA (`gov-034` / Section DGBF 334) — Ministère de l'Enseignement Technique, de la Formation Professionnelle et de l'Apprentissage
 - **Total LFI 2026** : **182 301 855 312 FCFA**
-- **Programmes & Actions** : 4 programmes DGBF, 10 actions officielles (DPPD-PAP pp. 475–504 / LFI p. 49).
-- **Contrôles Arithmétiques** :
-  - `21210` Administration Générale : 14 408 855 796 FCFA (4 actions, delta = 0).
-  - `22063` Formation professionnelle et apprentissage : 111 002 347 046 FCFA (3 actions, delta = 0).
-  - `22219` Enseignement secondaire technique : 10 890 652 470 FCFA (1 action, delta = 0).
-  - `23220` Fonds de Développement de la Formation Professionnelle (FDFP) : 46 000 000 000 FCFA (2 actions, delta = 0).
+- **Programmes & Actions** : 4 programmes DGBF, 10 actions officielles.
+- **Sources documentaires** :
+  - Section DPPD-PAP : PDF pages 539–565 (Document pages 537–563 sur 1227)
+  - Tableau récapitulatif LFI 2026 : PDF page 49 (Document page 47 sur 583)
+- **Contrôles Arithmétiques & Pagination Tableau 7** :
+  - `21210` Administration Générale : 14 408 855 796 FCFA (4 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 548 / Document page 546.
+  - `22063` Formation professionnelle et apprentissage : 111 002 347 046 FCFA (3 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 552 / Document page 550.
+  - `22219` Enseignement secondaire technique : 10 890 652 470 FCFA (1 action, delta = 0) — DPPD-PAP Tableau 7 : PDF page 561 / Document page 559.
+  - `23220` Fonds de Développement de la Formation Professionnelle (FDFP) : 46 000 000 000 FCFA (2 actions, delta = 0) — DPPD-PAP Tableau 7 : PDF page 563 / Document page 561.
   - Somme des programmes = 182 301 855 312 FCFA (delta = 0).
 
 ---

@@ -84,13 +84,14 @@
       "dgbf_title": "MINISTERE D’ETAT, MINISTERE DE LA FONCTION PUBLIQUE ET DE LA MODERNISATION DE L'ADMINISTRATION",
       "source_status": "AVAILABLE",
       "documentation_reference": {
-        "dppd_pap_doc_pages": "pp. 93-110",
-        "dppd_pap_pdf_pages": "pp. 95-112",
+        "dppd_pap_doc_pages": "pp. 93-112",
+        "dppd_pap_pdf_pages": "pp. 95-114",
         "page_doc_start": 93,
-        "page_doc_end": 110,
+        "page_doc_end": 112,
         "page_pdf_start": 95,
-        "page_pdf_end": 112,
-        "dppd_page_range": "pp. 103-113 (PDF pp. 95-125)"
+        "page_pdf_end": 114,
+        "lfi_doc_page": 45,
+        "lfi_pdf_page": 47
       },
       "canonical_status": "READY_FOR_PUBLICATION",
       "programs_count": 3,
@@ -478,13 +479,14 @@
       "dgbf_title": "MINISTERE DE LA COMMUNICATION",
       "source_status": "AVAILABLE",
       "documentation_reference": {
-        "dppd_pap_doc_pages": "pp. 631-652",
-        "dppd_pap_pdf_pages": "pp. 633-654",
+        "dppd_pap_doc_pages": "pp. 631-654",
+        "dppd_pap_pdf_pages": "pp. 633-656",
         "page_doc_start": 631,
-        "page_doc_end": 652,
+        "page_doc_end": 654,
         "page_pdf_start": 633,
-        "page_pdf_end": 654,
-        "dppd_page_range": "pp. 643-655 (PDF pp. 633-660)"
+        "page_pdf_end": 656,
+        "lfi_doc_page": 47,
+        "lfi_pdf_page": 49
       },
       "canonical_status": "READY_FOR_PUBLICATION",
       "programs_count": 2,
@@ -649,13 +651,14 @@
       "dgbf_title": "MINISTERE DE L’EMPLOI ET DE LA PROTECTION SOCIALE",
       "source_status": "AVAILABLE",
       "documentation_reference": {
-        "dppd_pap_doc_pages": "pp. 985-1014",
-        "dppd_pap_pdf_pages": "pp. 987-1016",
+        "dppd_pap_doc_pages": "pp. 985-1010",
+        "dppd_pap_pdf_pages": "pp. 987-1012",
         "page_doc_start": 985,
-        "page_doc_end": 1014,
+        "page_doc_end": 1010,
         "page_pdf_start": 987,
-        "page_pdf_end": 1016,
-        "dppd_page_range": "pp. 999-1011 (PDF pp. 987-1030)"
+        "page_pdf_end": 1012,
+        "lfi_doc_page": 51,
+        "lfi_pdf_page": 53
       },
       "canonical_status": "READY_FOR_PUBLICATION",
       "programs_count": 4,
@@ -848,13 +851,14 @@
       "dgbf_title": "MINISTERE DELEGUE AUPRES DU PREMIER MINISTRE, MINISTRE DES SPORTS ET DU CADRE DE VIE, CHARGÉ DES SPORTS ET DU CADRE DE VIE",
       "source_status": "AVAILABLE",
       "documentation_reference": {
-        "dppd_pap_doc_pages": "pp. 1115-1140",
-        "dppd_pap_pdf_pages": "pp. 1117-1142",
+        "dppd_pap_doc_pages": "pp. 1115-1135",
+        "dppd_pap_pdf_pages": "pp. 1117-1137",
         "page_doc_start": 1115,
-        "page_doc_end": 1140,
+        "page_doc_end": 1135,
         "page_pdf_start": 1117,
-        "page_pdf_end": 1142,
-        "dppd_page_range": "pp. 1127-1136 (PDF pp. 1117-1145)"
+        "page_pdf_end": 1137,
+        "lfi_doc_page": 52,
+        "lfi_pdf_page": 54
       },
       "canonical_status": "READY_FOR_PUBLICATION",
       "programs_count": 2,
@@ -913,7 +917,8 @@
         "page_doc_end": 1114,
         "page_pdf_start": 1103,
         "page_pdf_end": 1116,
-        "dppd_page_range": "pp. 1110-1115 (PDF pp. 1103-1117)"
+        "lfi_doc_page": 52,
+        "lfi_pdf_page": 54
       },
       "canonical_status": "READY_FOR_PUBLICATION",
       "programs_count": 2,
@@ -945,7 +950,8 @@
         "page_doc_end": 1100,
         "page_pdf_start": 1087,
         "page_pdf_end": 1102,
-        "dppd_page_range": "pp. 1095-1102 (PDF pp. 1087-1103)"
+        "lfi_doc_page": 51,
+        "lfi_pdf_page": 53
       },
       "canonical_status": "READY_FOR_PUBLICATION",
       "programs_count": 3,
@@ -971,13 +977,14 @@
       "dgbf_title": "MINISTERE DE L’ENSEIGNEMENT TECHNIQUE, DE LA FORMATION PROFESSIONNELLE ET DE L'APPRENTISSAGE",
       "source_status": "AVAILABLE",
       "documentation_reference": {
-        "dppd_pap_doc_pages": "pp. 537-562",
-        "dppd_pap_pdf_pages": "pp. 539-564",
+        "dppd_pap_doc_pages": "pp. 537-563",
+        "dppd_pap_pdf_pages": "pp. 539-565",
         "page_doc_start": 537,
-        "page_doc_end": 562,
+        "page_doc_end": 563,
         "page_pdf_start": 539,
-        "page_pdf_end": 564,
-        "dppd_page_range": "pp. 547-564 (PDF pp. 539-580)"
+        "page_pdf_end": 565,
+        "lfi_doc_page": 47,
+        "lfi_pdf_page": 49
       },
       "canonical_status": "READY_FOR_PUBLICATION",
       "programs_count": 3,

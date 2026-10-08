@@ -38,8 +38,16 @@
   - `src/budget-ingestion/__tests__/fixtures/independentDocumentaryGolden.ts` : intègre `INDEPENDENT_LFI_REFERENCES_2026` et couvre l'intégralité des 11 ministères non-MMPE vérifiés avec valeurs en dur strictes.
   - `src/budget-ingestion/__tests__/lot5Generalization.test.ts` : 29 tests vérifiant les contrôles indépendants LFI, ingestion, statut réconcilié, non-publication stricte et tests négatifs de sensibilité.
   - `src/budget-ingestion/__tests__/pilotMinistries.test.ts` : 15 tests validant l'intégrité intacte des pilotes LOT 4.
-- **5. Rapport de Couverture** :
-  - `docs/budget-ingestion/LOT5_MINISTRY_COVERAGE_REPORT.md` mis à jour.
+- **5. Clôture Documentaire & Réconciliation de Pagination (Audit Indépendant)** :
+  - Audit systématique de pagination intégrale sur les deux documents sources primaires DGBF : *Annexe 4 DPPD-PAP 2026–2028* (1227 pages, règle stricte `PDF page = Document page + 2`) et *Loi de finances 2026* (583 pages, tableau récapitulatif).
+  - Alignement rigoureux avec double citation (ex: `PDF pages 633–656 (Document pages 631–654 sur 1227)`) et pagination exacte de chaque Tableau 7 par programme dans :
+    - Les 7 fichiers canoniques JSON (`docs/references/2026/ministry-*/`)
+    - Les 7 `SOURCE_REGISTER.md` normalisés (`docs/references/2026/ministry-*/`)
+    - `docs/references/2026/MINISTRY_DOCUMENTATION_REGISTRY_2026.json`
+    - `docs/budget-ingestion/LOT5_MINISTRY_COVERAGE_REPORT.md`
+  - Métadonnées et description GitHub de la PR #28 synchronisées avec les totaux réconciliés (Batch 1 : 447 938 605 716 FCFA, 25 programmes, 66 actions ; Cumulatif 12 ministères : 2 157 470 677 361 FCFA). Zero divergence arithmétique (delta = 0 partout).
+- **6. Rapport de Couverture** :
+  - `docs/budget-ingestion/LOT5_MINISTRY_COVERAGE_REPORT.md` mis à jour avec la double pagination officielle DGBF.
 
 ## LOT 4 : INDUSTRIALISATION DOCUMENTAIRE & ONBOARDING MINISTÉRIEL
 - **1. Objectif & Stratégie d'Échantillonnage Pilote** :
