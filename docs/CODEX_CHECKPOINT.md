@@ -1,5 +1,15 @@
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
+## 8 octobre — Réconciliation contrôlée LOTS 6 à 15 avec la baseline post-LOT5
+
+- **Base de travail** : `master` post-LOT5 (`707b3b688f23bd33dc0f3504e13b79c65908dd50`, PR #28 fusionnée).
+- **Branche** : `antigravity/reconcile-lots6-15-post-lot5`.
+- **Réconciliation** : Intégration sous `src/review/` des contrats d'exécution budgétaire (LOT6), versions de collectivités (LOT7), catalogue documentaire et SHA-256 (LOT8), liens projets-budgets sans agrégation abusive (LOT9), suivi citoyen avec protection de la vie privée (LOT10), réponses institutionnelles et audits officiels séparés (LOT11), historique et exports Open Data avec protection injection CSV (LOT12), primitives UI orientées preuve (LOT13), workspace de revue isolé (LOT14), et stabilisation en composition read-only (LOT15).
+- **Suppression du blocage LOT5 obsolète** : Remplacement du filtre codé en dur par `LOT5_UNRESOLVED_SCOPES = []`. Les trois ministères (MICOM 336, MSCV 444, METFPA 334) sont évalués selon les règles normales du moteur (UNKNOWN sans source, AVAILABLE avec preuve officielle vérifiée).
+- **Suite de tests** : 32 fichiers de tests, 457 tests réussis (457/457 PASS, 0 FAIL) incluant la nouvelle suite `lot5Reconciliation.test.ts` (34 tests d'invariants républicains).
+- **Builds** : Build production `npm run build` PASS (tsc && vite build), build review `npm run build:review` PASS (vite build --config vite.review.config.ts).
+- **Données protégées & Supabase** : Inchangées (`src/data`, `docs/imports`, `docs/references/2026`, `src/budget-ingestion`, `supabase`). Zéro écriture distante Supabase (`REMOTE_SUPABASE_WRITES = 0`).
+
 ## 1er octobre — console données et montants qualifiés, après #8
 
 #8 fusionnée au SHA attendu, master synchronisé sans perte à `8e934d19dcdbf0172259d4028aa969cb29084918`. Post-merge ciblé : 16 tests PASS. Branche `codex/import-console-amount-precision`, nouvelle PR à laisser ouverte.

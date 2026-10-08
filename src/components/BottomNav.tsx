@@ -14,12 +14,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   onOpenSendProof,
 }) => {
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-lg px-2 py-1.5">
+    <nav aria-label="Navigation principale mobile" className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-lg px-2 py-1.5">
       <div className="flex items-center justify-around max-w-lg mx-auto">
         
         {/* Tab 1: Accueil */}
         <button
           onClick={() => setActiveTab('home')}
+          aria-current={activeTab === 'home' ? 'page' : undefined}
           className={`flex flex-col items-center justify-center w-14 py-1 rounded-xl transition-all ${
             activeTab === 'home'
               ? 'text-brand-blue font-bold'
@@ -33,6 +34,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         {/* Tab 2: Budgets */}
         <button
           onClick={() => setActiveTab('institutions')}
+          aria-current={activeTab === 'institutions' ? 'page' : undefined}
           className={`flex flex-col items-center justify-center w-14 py-1 rounded-xl transition-all ${
             activeTab === 'institutions'
               ? 'text-brand-blue font-bold'
@@ -49,6 +51,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             onClick={onOpenSendProof}
             className="w-12 h-12 rounded-full bg-brand-orange text-white flex items-center justify-center shadow-lg shadow-orange-500/30 active:scale-95 transition-transform border-2 border-white"
             title="Signaler un chantier"
+            aria-label="Signaler un chantier"
           >
             <Camera className="w-6 h-6" />
           </button>
@@ -57,6 +60,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         {/* Tab 3: Suivi Projets */}
         <button
           onClick={() => setActiveTab('projects')}
+          aria-current={activeTab === 'projects' ? 'page' : undefined}
           className={`flex flex-col items-center justify-center w-14 py-1 rounded-xl transition-all ${
             activeTab === 'projects'
               ? 'text-brand-blue font-bold'
@@ -70,6 +74,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         {/* Tab 4: Observatoire */}
         <button
           onClick={() => setActiveTab('observatory')}
+          aria-current={activeTab === 'observatory' ? 'page' : undefined}
           className={`flex flex-col items-center justify-center w-14 py-1 rounded-xl transition-all ${
             activeTab === 'observatory'
               ? 'text-brand-blue font-bold'
@@ -81,6 +86,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         </button>
 
       </div>
-    </div>
+    </nav>
   );
 };

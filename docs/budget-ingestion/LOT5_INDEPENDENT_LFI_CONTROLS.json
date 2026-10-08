@@ -1,0 +1,135 @@
+{
+  "version": "2.0.0",
+  "verified_at": "2026-10-07",
+  "measure": "Crédit de Paiement 2026",
+  "unit": "FCFA",
+  "sources": [
+    {
+      "document_id": "DGBF-LFI-2026",
+      "official_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+      "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+      "use": "Liste exhaustive des programmes, montants et totaux de section"
+    },
+    {
+      "document_id": "DGBF-DPPD-PAP-2026-2028",
+      "official_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "sha256": "0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10",
+      "use": "Libellés, actions, montants et pages des tableaux 7"
+    }
+  ],
+  "method": "Double transcription LFI/DPPD depuis les PDF officiels téléchargés. Les valeurs attendues de ce fichier ne sont pas calculées depuis les canoniques. Chaque somme programme/action et chaque liste de codes est contrôlée sans ajouter les programmes de comptes spéciaux aux crédits une seconde fois.",
+  "section_controls": [
+    { "section": "237", "lfi_pdf_pages": [47], "section_total_fcfa": 45121940916, "program_codes": ["21042", "22043", "22066"] },
+    {
+      "section": "334",
+      "institution_id": "gov-034",
+      "official_section_name": "Ministère de l'Enseignement Technique, de la Formation Professionnelle et de l'Apprentissage",
+      "lfi_pdf_pages": [49],
+      "section_total_fcfa": 182301855312,
+      "program_codes": ["21210", "22063", "22219", "23220"],
+      "newly_verified_programs": [
+        {
+          "code": "23220",
+          "label": "Fonds de Développement de la Formation Professionnelle",
+          "amount_fcfa": 46000000000,
+          "lfi_pdf_page": 49,
+          "dppd_pdf_pages": [563],
+          "table_title": "Tableau 7 : Budget détaillé du programme",
+          "actions": [
+            { "code": "2322001", "label": "Gestion des ressources humaines, financières et matérielles", "amount_fcfa": 17178600000, "dppd_pdf_pages": [563] },
+            { "code": "2322002", "label": "Accompagnement des entreprises dans l'élaboration et le financement des projets et des plans de formation de leurs travailleurs", "amount_fcfa": 28821400000, "dppd_pdf_pages": [563] }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "336",
+      "institution_id": "gov-017",
+      "official_section_name": "Ministère de la Communication",
+      "lfi_pdf_pages": [49, 50],
+      "section_total_fcfa": 39806735298,
+      "program_codes": ["21077", "22078", "23223", "23224", "23225"],
+      "newly_verified_programs": [
+        {
+          "code": "23223",
+          "label": "Appui au financement de la Radiodiffusion Télévision Ivoirienne (RTI)",
+          "amount_fcfa": 16465000001,
+          "lfi_pdf_page": 50,
+          "dppd_pdf_pages": [651, 652],
+          "table_title": "Tableau 7 : Budget détaillé du programme",
+          "actions": [
+            { "code": "2322301", "label": "Gestion de la Redevance RTI", "amount_fcfa": 16465000001, "dppd_pdf_pages": [651] }
+          ]
+        },
+        {
+          "code": "23224",
+          "label": "Appui au financement de la Société Ivoirienne de Télédiffusion (IDT)",
+          "amount_fcfa": 2035000000,
+          "lfi_pdf_page": 50,
+          "dppd_pdf_pages": [653],
+          "table_title": "Tableau 7 : Budget détaillé du programme",
+          "actions": [
+            { "code": "2322401", "label": "Gestion des Centres de diffusion des programmes Télés et Radios nationales (Chaines TNT et Radios publiques)", "amount_fcfa": 2035000000, "dppd_pdf_pages": [653] }
+          ]
+        },
+        {
+          "code": "23225",
+          "label": "Appui au financement du secteur des médias",
+          "amount_fcfa": 1700000000,
+          "lfi_pdf_page": 50,
+          "dppd_pdf_pages": [654],
+          "table_title": "Tableau 7 : Budget détaillé du programme",
+          "actions": [
+            { "code": "2322501", "label": "Gestion de la taxe sur la publicité", "amount_fcfa": 1700000000, "dppd_pdf_pages": [654] }
+          ]
+        }
+      ]
+    },
+    { "section": "362", "lfi_pdf_pages": [53], "section_total_fcfa": 91411414044, "program_codes": ["21150", "22151", "22152", "22153"] },
+    { "section": "439", "lfi_pdf_pages": [53, 54], "section_total_fcfa": 5122516889, "program_codes": ["21234", "22145", "22146"] },
+    { "section": "440", "lfi_pdf_pages": [54], "section_total_fcfa": 13746365872, "program_codes": ["21237", "22115"] },
+    {
+      "section": "444",
+      "institution_id": "gov-030",
+      "official_section_name": "Ministère Délégué auprès du Premier Ministre, Ministre des Sports et du Cadre de Vie, chargé des Sports et du Cadre de Vie",
+      "lfi_pdf_pages": [54],
+      "section_total_fcfa": 70427777385,
+      "program_codes": ["21081", "22082", "23241", "23249"],
+      "newly_verified_programs": [
+        {
+          "code": "23241",
+          "label": "Appui au développement durable du sport",
+          "amount_fcfa": 10900000000,
+          "lfi_pdf_page": 54,
+          "dppd_pdf_pages": [1134],
+          "table_title": "Tableau 7 : Budget détaillé du programme",
+          "actions": [
+            { "code": "2324101", "label": "Développement des activités fédérales", "amount_fcfa": 7430000000, "dppd_pdf_pages": [1134] },
+            { "code": "2324102", "label": "Promotion sociale et sanitaire du secteur sport", "amount_fcfa": 200000000, "dppd_pdf_pages": [1134] },
+            { "code": "2324103", "label": "Construction, réhabilitation et équipement d'infrastructure socio-sportive", "amount_fcfa": 3270000000, "dppd_pdf_pages": [1134] }
+          ]
+        },
+        {
+          "code": "23249",
+          "label": "Appui à l'entretien et à la sécurisation des infrastructures",
+          "amount_fcfa": 1720000000,
+          "lfi_pdf_page": 54,
+          "dppd_pdf_pages": [1135],
+          "table_title": "Tableau 7 : Budget détaillé du programme",
+          "actions": [
+            { "code": "2324901", "label": "Entretien, maintenance et sécurisation des infrastructures", "amount_fcfa": 1720000000, "dppd_pdf_pages": [1135] }
+          ]
+        }
+      ]
+    }
+  ],
+  "anti_double_counting": {
+    "rule": "Les programmes 232xx sont inclus une seule fois dans la somme des programmes de la section. Le détail d'activités LFI/DPPD ne s'ajoute jamais au montant de l'action ou du programme.",
+    "verified_sections": ["334", "336", "444"],
+    "duplicate_program_codes": [],
+    "duplicate_action_codes": [],
+    "all_program_sums_equal_section_totals": true,
+    "all_action_sums_equal_program_amounts": true
+  },
+  "unverified_values": []
+}

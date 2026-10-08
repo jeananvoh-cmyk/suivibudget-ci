@@ -1,16 +1,43 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- LAST_UPDATED : 2026-10-07
+- LAST_UPDATED : 2026-10-08
 - LAST_AGENT : Antigravity
-- CURRENT_BRANCH : `antigravity/lot5-ministry-generalization-2026`
-- BASE_MASTER_SHA : `8145c0423482438cc4cc2fc89af68cb399b06ebc` (Merge commit de PR #27 sur master)
-- CURRENT_HEAD : voir HEAD courante de PR #28
-- LAST_VERIFIED_CODE_HEAD : voir commit courant LOT 5
-- PR : PR #28 (`feat(lot5): controlled ministerial budget generalization with Batch 1 (7 ministries)`)
+- CURRENT_BRANCH : `antigravity/reconcile-lots6-15-post-lot5`
+- BASE_MASTER_SHA : `707b3b688f23bd33dc0f3504e13b79c65908dd50` (Merge commit de PR #28 sur master)
+- CURRENT_HEAD : voir HEAD de la PR de réconciliation LOTS 6-15
+- LAST_VERIFIED_CODE_HEAD : voir commit courant de réconciliation
+- PR : PR de réconciliation LOTS 6-15 vers master (`feat(review): reconcile LOTS 6-15 with validated LOT5 baseline`)
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_SUPABASE_WRITES = 0)
-- CURRENT_MILESTONE : LOT 5 — Généralisation ministérielle 2026 contrôlée. Réconciliation intégrale du périmètre LFI 2026 suite à l'audit bloquant indépendant de la PR #28. Batch 1 réconcilié avec 7 ministères complets (25 programmes, 66 actions, 447 938 605 716 FCFA, delta = 0). Volume budgétaire ministériel cumulé vérifié : 2 157 470 677 361 FCFA (12 ministères, représentant 12,43% du budget de l'État). Libellés officiels 100% conformes verbatim à la LFI 2026 et à l'Annexe 4 DPPD-PAP. Isolation stricte de publication : seul MMPE (gov-008) reste PUBLISHED, les 11 autres ministères vérifiés sont en statut VERIFIED / STAGED. Fixtures golden indépendantes avec INDEPENDENT_LFI_REFERENCES_2026 et 29 tests de généralisation PASS (358 tests PASS au total sur le repo).
+- CURRENT_MILESTONE : Réconciliation contrôlée des LOTS 6 à 15 avec la base validée post-LOT5. Intégration du module `src/review/` (exécution budgétaire, versions collectivités, catalogue de sources avec SHA-256 et URL sûres, liens projets-budgets sans agrégation abusive, suivi citoyen avec protection de la vie privée, réponses institutionnelles et audits officiels séparés, historique et exports Open Data avec protection injection CSV, composants UI et workspace de revue isolé `review.html`, stabilisation et composition read-only `buildReviewSnapshot`). Suppression intégrale du blocage LOT5 codé en dur (`LOT5_UNRESOLVED_SCOPES = []`) sans publication automatique. 32 fichiers de tests, 457 tests PASS (100%), build production PASS, build review PASS. Zéro écriture distante Supabase (`REMOTE_SUPABASE_WRITES = 0`).
 - FOUNDATION_READY : TRUE.
+
+## LOTS 6 À 15 : ARCHITECTURE DE REVUE, CONTRATS DOCUMENTAIRES ET COMPOSITION READ-ONLY
+- **1. Synthèse de Réconciliation & Architecture Découplée** :
+  - Les travaux des LOTS 6 à 15 ont été réconciliés depuis le master validé post-LOT5 (`707b3b688f23bd33dc0f3504e13b79c65908dd50`) sans réintroduire l'ancienne base périmée ni altérer les données protégées (`src/data`, `docs/imports`, `docs/references/2026`, `src/budget-ingestion`, `supabase`).
+  - L'ensemble du code de revue est isolé sous `src/review/` et ne pollue pas le bundle de production runtime (point d'entrée distinct `review.html`, config Vite `vite.review.config.ts`, build dédié `npm run build:review`).
+- **2. Périmètre des Contrats et Invariants Intégrés** :
+  - **LOT 6 (Exécution & Performance)** : Contrats stricts dans `src/review/domain/execution.ts`. `UNKNOWN != 0`, vrai zéro documenté préservé, taux > 100% sans conclusion physique automatique, zéro dénominateur sécurisé (renvoie `null`), périmètres incompatibles classés `NOT_COMPARABLE`. Indicateurs de performance découplés des montants financiers.
+  - **LOT 7 (Dossiers Collectivités & Versions)** : Sélection déterministe de la version budgétaire courante publiée dans `src/review/domain/collectivities.ts`. ID obligatoire, rejet des doublons de version et conflits vers `BLOCKED`. Séparation stricte BP / CA.
+  - **LOT 8 (Catalogue Documentaire & Citations)** : Liste blanche de documents officiels avec SHA-256 dans `src/review/domain/documents.ts`. Rejet des URL non sécurisées (`javascript:`, `data:`, `ftp:`, `http:` non-TLS), des documents privés (`visibility: PRIVATE`) et des cycles de version (`VERSION_CYCLE`).
+  - **LOT 9 (Liens Projets-Budgets)** : Modélisation des rattachements documentés sans agrégation abusive dans `src/review/domain/projects.ts`. `Budget Line != Project` : interdiction absolue de créer un projet depuis une ligne budgétaire. État physique maintenu à `UNKNOWN` en l'absence de preuve terrain.
+  - **LOT 10 (Suivi Citoyen & Confidentialité)** : Projection publique sans fuite de données personnelles dans `src/review/domain/citizen.ts`. Dates obligatoirement calendaires ISO. Distinction fondamentale : la participation citoyenne ne constitue pas une représentativité statistique de la population.
+  - **LOT 11 (Réponses Institutionnelles & Contrôle Officiel)** : Séparation stricte de provenance dans `src/review/domain/responses.ts` (`INSTITUTION_RESPONSE` vs `OFFICIAL_SOURCE`). Une réponse institutionnelle ne vaut jamais validation d'audit indépendant.
+  - **LOT 12 (Historique, Comparaisons & Open Data)** : Comparabilité interannuelle conditionnée à une preuve d'équivalence de périmètre dans `src/review/domain/history.ts`. Export Open Data JSON et CSV avec encodage littéral `null` et neutralisation des formules tableur (protection anti-injection CSV sur `=, +, -, @`).
+  - **LOT 13 (Primitives UI Orientées Preuve)** : Composants accessibles `Primitives.tsx` et `DocumentLibrary.tsx` (badges de statut, cibles tactiles >= 44px, gestion des états vides informatifs).
+  - **LOT 14 (Workspace de Revue Isolé)** : Application candidate de revue `ReviewWorkspace.tsx` avec navigation clavier, skip link, 7 parcours de revue et zéro appel réseau externe.
+  - **LOT 15 (Stabilisation & Composition Read-Only)** : Moteur `buildReviewSnapshot` dans `src/review/domain/snapshot.ts` agrégeant périmètres, observations et documents de manière purement fonctionnelle et déterministe. Décision de publication explicite `NOT_REQUESTED`.
+- **3. Résolution du Blocage LOT 5 Obsolète** :
+  - Remplacement de la constante hardcodée de blocage par `LOT5_UNRESOLVED_SCOPES = []` dans `src/review/domain/evidence.ts`.
+  - Les ministères MICOM (`gov-017` / 336), MSCV (`gov-030` / 444) et METFPA (`gov-034` / 334) sont désormais évalués selon les règles normales du moteur documentaire : `UNKNOWN` en l'absence de preuve, `AVAILABLE` avec preuve officielle vérifiée. Aucune disponibilité automatique.
+- **4. Contrôles Documentaires & Script Supabase Read-Only** :
+  - `docs/overnight/LOT7_12_DOCUMENTARY_CONTROLS.json` : Spécification vérifiée par `src/review/__tests__/documentaryControls.test.ts` garantissant que les données sans sources restent `UNKNOWN` ou `NOT_COMPARABLE`, et `remote_supabase_writes: 0`.
+  - `scripts/verify-supabase-readonly.mjs` : Script de sonde en lecture seule avec transport `GET`/`HEAD` exclusif et credentials `anon`.
+- **5. Validation & Tests** :
+  - 32 fichiers de tests, 457 tests réussis (100% PASS), 0 échec.
+  - Suite de tests dédiée `lot5Reconciliation.test.ts` (34 tests) couvrant tous les invariants républicains prescrits.
+  - Production build PASS (`tsc && vite build`), Review build PASS (`vite build --config vite.review.config.ts`).
+  - Supabase distant : `REMOTE_SUPABASE_WRITES = 0`.
 
 ## LOT 5 : GÉNÉRALISATION MINISTÉRIELLE 2026 CONTRÔLÉE (BATCH 1)
 - **1. Objectif & Cadre du Batch 1** :
@@ -578,9 +605,9 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Aucune liaison besoin/budget/marché n’est créée sans provenance. 0 FCFA ≠ abandon ; dépense ≠ réalisation ; observation citoyenne ≠ source officielle.
 
 ## NEXT_EXECUTABLE_TASK / NEXT_3_TASKS
-1. Audit et contrôle indépendant par l'orchestrateur (ChatGPT) de la PR LOT 5.
-2. Revue contradictoire des 7 référentiels canoniques du Batch 1 (MAIED, MAM, MFPMA, MEPS, MSCV, MICOM, METFPA), des fixtures golden et du rapport de couverture.
-3. Autorisation formelle de merge de la PR LOT 5 et cadrage du Batch 2 (LOT 6).
+1. Revue indépendante par l'orchestrateur (ChatGPT) de la PR de réconciliation LOTS 6 à 15 (`feat(review): reconcile LOTS 6-15 with validated LOT5 baseline`).
+2. Audit contradictoire des contrats documentaires sous `src/review/`, de la suppression du blocage LOT5, des 457 tests et des deux builds.
+3. Décision d'autorisation formelle avant tout merge ou intégration runtime. Zéro écriture distante Supabase.
 
 ## COCODY_REMOTE_CLOSEOUT — ORCHESTRATEUR 2026-10-02
 - Institution canonique ajoutée à `public.institutions` : `inst-com-cocody`, `Mairie de Cocody`, type applicatif `MAIRIE`, région Abidjan, District Autonome d'Abidjan.
