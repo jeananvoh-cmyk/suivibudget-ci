@@ -1,3 +1,4 @@
+const assert = require('node:assert/strict');
 const { chromium } = require(process.env.REVIEW_PLAYWRIGHT_MODULE || 'playwright-core');
 const fs = require('node:fs');
 const os = require('node:os');

@@ -427,7 +427,7 @@ export function isReferentialAuditedAmount(amount: number, sectionCode?: string 
  * - Section
  * - Niveau de granularité (SECTION_TOTAL, PROGRAM_, ACTION_)
  * - Code exact du programme ou de l'action
- * - Mesure ('ORDERED'), base ('INITIAL_BUDGET'), devise ('XOF')
+ * - Mesure ('PLANNED'), base ('INITIAL_BUDGET'), devise ('XOF')
  * - Montant exact en FCFA
  * - Page ou référence documentaire
  *
@@ -459,7 +459,7 @@ export function verifyAuditRecordAgainstReferential(record: FinancialAuditRecord
   if (record.currency !== 'XOF') {
     reasons.push('CURRENCY_NOT_IN_REFERENTIAL');
   }
-  if (record.measure !== 'ORDERED') {
+  if (record.measure !== 'PLANNED') {
     reasons.push('MEASURE_NOT_IN_REFERENTIAL');
   }
   if (record.basis !== 'INITIAL_BUDGET') {
@@ -592,7 +592,7 @@ export function transformLot5ControlsToAudits(): FinancialAuditRecord[] {
       institutionId,
       sectionCode: sc.section,
       scope: 'SECTION_TOTAL',
-      measure: 'ORDERED',
+      measure: 'PLANNED',
       basis: 'INITIAL_BUDGET',
       currency: 'XOF',
       auditedAmount: sc.section_total_fcfa,
@@ -615,7 +615,7 @@ export function transformLot5ControlsToAudits(): FinancialAuditRecord[] {
           sectionCode: sc.section,
           scope: `PROGRAM_${prog.code}`,
           programCode: prog.code,
-          measure: 'ORDERED',
+          measure: 'PLANNED',
           basis: 'INITIAL_BUDGET',
           currency: 'XOF',
           auditedAmount: prog.amount_fcfa,
@@ -638,7 +638,7 @@ export function transformLot5ControlsToAudits(): FinancialAuditRecord[] {
               scope: `ACTION_${act.code}`,
               programCode: prog.code,
               actionCode: act.code,
-              measure: 'ORDERED',
+              measure: 'PLANNED',
               basis: 'INITIAL_BUDGET',
               currency: 'XOF',
               auditedAmount: act.amount_fcfa,

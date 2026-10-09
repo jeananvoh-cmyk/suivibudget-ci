@@ -1,29 +1,24 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- LAST_UPDATED : 2026-10-08
-- LAST_AGENT : Codex
+- LAST_UPDATED : 2026-10-09
+- LAST_AGENT : Antigravity
 - CURRENT_BRANCH : `antigravity/reconcile-lots6-15-post-lot5`
 - BASE_MASTER_SHA : `707b3b688f23bd33dc0f3504e13b79c65908dd50` (Merge commit de PR #28 sur master)
 - CURRENT_HEAD : voir HEAD courant de la PR #29
 - LAST_VERIFIED_CODE_HEAD : voir HEAD courant de la PR #29
 - PR : PR #29 de réconciliation LOTS 6-15 vers master (`feat(review): reconcile LOTS 6-15 with validated LOT5 baseline`)
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_SUPABASE_WRITES = 0)
-- FINAL_DOCUMENTARY_GATE : section/programme LOT5 = LFI 2026 et SHA-256 référencé ; action LOT5 = DPPD-PAP 2026–2028 ou alias explicite `-ANNEXE-4` et SHA-256 référencé. Page PDF du référentiel obligatoire dans l'audit et identique dans la citation. Une localisation absente du référentiel bloque la publication. Les données non-LOT5 et les zéros documentés de leurs tests restent indépendants.
-- FINAL_DOCUMENTARY_VALIDATION : 34 fichiers / 547 tests PASS, dont 59 tests financiers ciblés ; `npx tsc --noEmit`, `npm run build`, `npm run build:review` PASS ; Supabase anon GET/HEAD PASS, 0 écriture distante. `PUBLICATION_PATH_CONNECTED: REVIEW_DOMAIN_ONLY` ; PR #29 non fusionnée.
-- NEXT_EXECUTABLE_TASK : revue indépendante et décision sur la PR #29 ; ne pas déduire une publication runtime de la seule validation du domaine de revue.
-- CURRENT_MILESTONE : Sécurisation documentaire finale de la PR #29, durcissement des preuves financières et levée complète des réserves de l'audit indépendant :
-  1. **Réserve 1 — Correspondance exacte avec le référentiel LOT5 dans `matchFinancialAudit`** : `verifyAuditRecordAgainstReferential` est intégré directement dans le filtrage des candidats de `matchFinancialAudit`. Détection des audits revendiquant le référentiel LOT5 (`isLot5ReferentialClaim`). Validation au niveau de la ligne exacte (section, programme, action, mesure `ORDERED`, base `INITIAL_BUDGET`, devise `XOF`, montant exact en FCFA, doc ID, hash SHA-256, page PDF). Rejet strict des audits fabriqués ou discordants (`AMOUNT_NOT_IN_DOCUMENTARY_REFERENTIAL`, `PROGRAM_NOT_IN_REFERENTIAL`, `ACTION_NOT_IN_REFERENTIAL`). Préservation étanche des audits synthétiques de tests unitaires.
-  2. **Réserve 2 — Codes structurés obligatoires dans `validateCodeCoherence`** : Validation stricte des formats budgétaires ivoiriens pour les périmètres ministériels :
-     - `SECTION_TOTAL` : `sectionCode` et `institutionId` obligatoires, `programCode` et `actionCode` interdits (`SECTION_TOTAL_HAS_PROGRAM_CODE`, `SECTION_TOTAL_HAS_ACTION_CODE`).
-     - `PROGRAM_XXXXX` : `programCode` obligatoire à 5 chiffres exacts (`INVALID_PROGRAM_CODE_LENGTH`), concordance stricte avec le suffixe (`SCOPE_PROGRAM_CODE_MISMATCH`), `actionCode` interdit (`PROGRAM_HAS_ACTION_CODE`).
-     - `ACTION_XXXXXXX` : `programCode` (5 chiffres) et `actionCode` (7 chiffres) obligatoires, concordance de suffixe (`SCOPE_ACTION_CODE_MISMATCH`), préfixe hiérarchique strict (`actionCode.startsWith(programCode)` sinon `ACTION_PROGRAM_MISMATCH`).
-  3. **Suite de tests adversariaux portée à 41 tests** : `src/review/__tests__/financialEvidenceHardening.test.ts` intègre la Phase 4 (16 scénarios d'attaque et de conformité stricts S1 à S16) en plus des 25 tests existants.
-  4. **Transport Supabase en lecture seule hermétique** : Script `scripts/verify-supabase-readonly.mjs` autonome avec transport `guardedFetch` (rejet synachronisé des méthodes non-GET/HEAD avant le réseau), fallback sécurisé `.env` (`PASS`, `remoteSupabaseWrites: 0`), couvert par 9 tests unitaires (`supabaseReadOnlyGuard.test.ts`).
-  5. **Validation visuelle Chromium** : `CHROMIUM_CHECK = PASS` via Playwright / Chrome DevTools MCP sur l'espace de revue local (`http://127.0.0.1:5174/review.html`) : 0 erreur console critique, affichage exact des originaux DGBF (LFI 2026 583 pages, Annexe 4 DPPD-PAP 1229 pages, SHA-256), liens TLS sécurisés, marquage rigoureux "Information indisponible" pour les données sans preuve.
-  6. **Connectivité du chemin de publication** : `PUBLICATION_PATH_CONNECTED: REVIEW_DOMAIN_ONLY`. La fonction `canPublishOfficialObservation` appartient strictement au domaine de revue (`src/review/domain/`) et n'est pas branchée aux composants runtime de production de la plateforme (`src/pages`, `src/components`).
-  7. **34 fichiers de tests, 529 tests PASS (100%)**, `npx tsc --noEmit` PASS, `npm run build` PASS, `npm run build:review` PASS. Zéro écriture distante Supabase (`REMOTE_SUPABASE_WRITES = 0`).
-  8. **État final** : `READY_FOR_INDEPENDENT_REVIEW` (aucun merge effectué, `MERGE_PERFORMED = FALSE`).
+- FINAL_DOCUMENTARY_GATE : section/programme LOT5 = LFI 2026 et SHA-256 référencé ; action LOT5 = DPPD-PAP 2026–2028 ou alias explicite `-ANNEXE-4` et SHA-256 référencé. Mesure budgétaire officielle LFI/DPPD = `PLANNED` (base `INITIAL_BUDGET`), interdisant formellement l'assimilation à des ordonnancements exécutés (`ORDERED`). Page PDF du référentiel obligatoire dans l'audit et identique dans la citation. Une localisation absente du référentiel bloque la publication. Les données non-LOT5 et les zéros documentés de leurs tests restent indépendants.
+- FINAL_DOCUMENTARY_VALIDATION : 35 fichiers / 569 tests PASS (100%), dont 21 tests d'intégrité d'export (`exportIntegrityHardening.test.ts`) et 60 tests financiers ciblés (`financialEvidenceHardening.test.ts`) ; `npx tsc --noEmit`, `npm run build`, `npm run build:review` PASS ; Supabase anon GET/HEAD PASS, 0 écriture distante (`REMOTE_SUPABASE_WRITES = 0`). `PUBLICATION_PATH_CONNECTED: REVIEW_DOMAIN_ONLY` ; PR #29 prête pour merge, non fusionnée localement.
+- NEXT_EXECUTABLE_TASK : Revue indépendante finale et fusion contrôlée de la PR #29 vers master (fermeture de l'audit PR #30).
+- CURRENT_MILESTONE : Clôture définitive des réserves et bloqueurs de l'audit indépendant (PR #30) sur la PR #29 :
+  1. **Bloqueur P1 (Exports financiers protégés par la porte stricte)** : Élimination du bypass d'audit dans `openDataRows()`, `openDataJson()`, `openDataCsv()` (`src/review/domain/history.ts`) et `buildReviewSnapshot()` (`src/review/domain/snapshot.ts`). Tout montant altéré (+1 FCFA, -1 FCFA, hash non concordant, page discordante, périmètre erroné) produit `amount: null`, `status: 'UNKNOWN'`, et dans les agrégats neutralise la somme totale avec `AGGREGATE_CONTAINS_UNVERIFIED_AMOUNT`. `compareHistory()` protège les comparaisons interannuelles avec refus strict des montants altérés.
+  2. **Bloqueur P1 (Sémantique budgétaire PLANNED vs ORDERED)** : Rétablissement strict de la distinction budgétaire fondamentale (LOLF / LFI 2026) : les crédits de paiement (CP) votés dans la LFI 2026 et l'Annexe 4 DPPD-PAP sont des autorisations initiales (`PLANNED` avec `basis: 'INITIAL_BUDGET'`), et non des dépenses exécutées (`ORDERED`). `transformLot5ControlsToAudits()` et `verifyAuditRecordAgainstReferential()` dans `src/review/domain/financialAudits.ts` imposent `measure: 'PLANNED'`. Toute observation LFI 2026 prétendant une mesure `ORDERED` est rejetée avec `MEASURE_MISMATCH`.
+  3. **Bloqueur P2 (Script navigateur d'audit)** : Ajout de l'import manquant `const assert = require('node:assert/strict');` dans `scripts/verify-review-browser.cjs`. Validation syntaxique `node -c` réussie (code 0).
+  4. **Suite de tests adversariaux d'intégrité d'export (21 tests)** : `src/review/__tests__/exportIntegrityHardening.test.ts` démontre exhaustivement le rejet de toute tentative d'injection, mutation (+1 FCFA), discordance documentaire, et confirme la protection intégrale des fichiers CSV, JSON, snapshots et agrégats.
+  5. **Validation globale** : 35 fichiers de tests, 569 tests réussis (100% PASS), 0 échec. Build production PASS, build review PASS, Supabase en lecture seule hermétique (`remoteSupabaseWrites: 0`).
+  6. **État final** : `READY_FOR_INDEPENDENT_REVIEW_AND_MERGE` (aucun merge effectué, `MERGE_PERFORMED = FALSE`).
 - FOUNDATION_READY : TRUE.
 
 ## LOTS 6 À 15 : ARCHITECTURE DE REVUE, CONTRATS DOCUMENTAIRES ET COMPOSITION READ-ONLY

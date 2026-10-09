@@ -1,14 +1,21 @@
 import { describe, it, expect } from 'vitest';
 import { assessObservation, isCalendarDate, type FinancialObservation } from '../domain/evidence';
-import { publicDocumentMetadata, resolveCitation, type SourceDocument } from '../domain/documents';
+import { publicDocumentMetadata, resolveCitation, type SourceDocument, type FinancialAuditRecord } from '../domain/documents';
 import { performanceGap, type PerformanceIndicator } from '../domain/execution';
 import { buildReviewSnapshot } from '../domain/snapshot';
 const evidence = { documentId: 'test-only', page: 1, reference: null, fiscalYear: 2026, verification: 'VERIFIED' as const };
 const doc: SourceDocument = { id: 'test-only', title: 'Test only', publisher: 'Test only', officialUrl: 'https://example.org/test',
   fiscalYear: 2026, accessedAt: '2026-10-07', httpStatus: 200, sha256: 'a'.repeat(64), pageCount: 1,
-  verification: 'VERIFIED', visibility: 'PUBLIC', previousVersionId: null };
+  verification: 'VERIFIED', visibility: 'PUBLIC', previousVersionId: null,
+  availability: 'AVAILABLE', provenance: 'OFFICIAL_SOURCE', extractionStatus: 'VERIFIED' };
 const observation: FinancialObservation = { institutionId: 'test-only', sectionCode: null, fiscalYear: 2026, scope: 'test-only',
   periodEnd: '2026-12-31', currency: 'XOF', basis: 'FINAL_CREDITS', measure: 'PLANNED', amount: 100, precision: 'EXACT', evidence };
+const testAudits: FinancialAuditRecord[] = [{
+  controlId: 'AUDIT-TEST-336', documentId: 'test-only', documentSha256: 'a'.repeat(64),
+  fiscalYear: 2026, controlStatus: 'VERIFIED', reportRef: 'test-report',
+  institutionId: 'gov-017', sectionCode: '336', scope: 'test-only',
+  measure: 'PLANNED', basis: 'FINAL_CREDITS', currency: 'XOF', auditedAmount: 100, page: 1,
+}];
 describe('LOT 15 — end-to-end documentary boundaries', () => {
   it('rejects impossible calendar dates instead of normalizing them', () => {
     expect(isCalendarDate('2026-02-30')).toBe(false);
@@ -25,11 +32,11 @@ describe('LOT 15 — end-to-end documentary boundaries', () => {
   });
   it('removes the resolved LOT 5 blocker without requesting publication', () => {
     const scope = { institutionId: 'gov-017', sectionCode: '336', fiscalYear: 2026 };
-    const result = buildReviewSnapshot(scope, [{ ...observation, ...scope }], [doc]);
+    const result = buildReviewSnapshot(scope, [{ ...observation, ...scope }], [doc], testAudits);
     expect(result.status).toBe('AVAILABLE');
     expect(result.records[0].amount).toBe(100);
     expect(result.publicationDecision).toBe('NOT_REQUESTED');
-    expect(buildReviewSnapshot(scope, [], [doc]).status).toBe('UNKNOWN');
+    expect(buildReviewSnapshot(scope, [], [doc], testAudits).status).toBe('UNKNOWN');
   });
   it('keeps empty data unknown and filters unrelated institutional observations', () => {
     const scope = { institutionId: 'other-test', sectionCode: null, fiscalYear: 2026 };

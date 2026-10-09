@@ -1,5 +1,14 @@
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
+## 9 octobre — Clôture définitive des bloqueurs financiers de l'audit indépendant (PR #30) sur PR #29
+
+Sur la branche `antigravity/reconcile-lots6-15-post-lot5` (PR #29) :
+1. **Protection étanche de tous les chemins d'export (Bloqueur P1)** : `openDataRows()`, `openDataJson()`, `openDataCsv()` (`src/review/domain/history.ts`) et `buildReviewSnapshot()` (`src/review/domain/snapshot.ts`) appliquent désormais sans exception `canPublishOfficialObservation()`. Tout montant non vérifié ou muté (+1 FCFA, -1 FCFA, hash SHA-256 falsifié, discordance de page, etc.) est exporté sous forme `amount: null`, `status: 'UNKNOWN'`. `aggregateObservations()` neutralise la totalité de la somme agrégée avec `AGGREGATE_CONTAINS_UNVERIFIED_AMOUNT` dès lors qu'une observation est compromise. `compareHistory()` refuse les comparaisons interannuelles sur montants compromis.
+2. **Conformité de sémantique budgétaire LOLF (Bloqueur P1)** : Réconciliation rigoureuse des autorisations budgétaires initiales de la LFI 2026 et du DPPD-PAP Annexe 4 : la mesure canonique est `PLANNED` (base `INITIAL_BUDGET`), et non `ORDERED` (réservé aux mandats/ordonnancements exécutés). `transformLot5ControlsToAudits()` et `verifyAuditRecordAgainstReferential()` imposent `measure: 'PLANNED'`. Toute tentative d'associer `ORDERED` aux montants de la LFI 2026 est rejetée avec `MEASURE_MISMATCH`.
+3. **Script de vérification navigateur (Bloqueur P2)** : Correction de `scripts/verify-review-browser.cjs` avec l'import `const assert = require('node:assert/strict');` (vérification syntaxique node -c PASS).
+4. **Suite de tests d'intégrité d'export (21 tests)** : Ajout de `src/review/__tests__/exportIntegrityHardening.test.ts` couvrant l'ensemble des cas limites et tentatives d'injection/altération sur exports JSON, CSV, snapshots et agrégats.
+5. **Résultats de validation** : 35 fichiers de test / 569 tests PASS (100%), `npx tsc --noEmit` PASS, `npm run build` PASS, `npm run build:review` PASS, sonde Supabase en lecture seule PASS (`remoteSupabaseWrites: 0`).
+
 ## 8 octobre — garde-fou final d'intégrité documentaire PR #29
 
 Sur `antigravity/reconcile-lots6-15-post-lot5`, contrôle LOT5 strict par périmètre : section/programme = ID et SHA-256 LFI 2026 ; action = ID et SHA-256 DPPD-PAP 2026–2028, alias `-ANNEXE-4` explicite. Page du référentiel exigée pour l'audit et identique dans la citation publique ; absence de localisation vérifiée = publication refusée. Aucun montant canonique, migration ou fichier protégé modifié. Chemin de publication limité au domaine de revue, non branché au runtime public.
