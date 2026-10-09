@@ -1,0 +1,1442 @@
+[
+  {
+    "code": "1",
+    "label": "1 Dotations",
+    "value_fcfa": 8441176701267,
+    "page": 45
+  },
+  {
+    "code": "101",
+    "label": "101 Représentation Nationale",
+    "value_fcfa": 38578972451,
+    "page": 45
+  },
+  {
+    "code": "13001",
+    "label": "13001 Assemblée Nationale",
+    "value_fcfa": 38578972451,
+    "page": 45
+  },
+  {
+    "code": "102",
+    "label": "102 Sénat",
+    "value_fcfa": 14665806742,
+    "page": 45
+  },
+  {
+    "code": "13030",
+    "label": "13030 Assemblée Représentative",
+    "value_fcfa": 14665806742,
+    "page": 45
+  },
+  {
+    "code": "103",
+    "label": "103 Présidence de la République",
+    "value_fcfa": 193633705615,
+    "page": 45
+  },
+  {
+    "code": "13002",
+    "label": "13002 Autorité Exécutive Suprême",
+    "value_fcfa": 56818272519,
+    "page": 45
+  },
+  {
+    "code": "13003",
+    "label": "13003 Inspection et Audit",
+    "value_fcfa": 9872577575,
+    "page": 45
+  },
+  {
+    "code": "13004",
+    "label": "13004 Autorité de Suivi-Contrôle",
+    "value_fcfa": 5552174916,
+    "page": 45
+  },
+  {
+    "code": "13005",
+    "label": "13005 Autorité Administrative de Sécurité",
+    "value_fcfa": 87530184262,
+    "page": 45
+  },
+  {
+    "code": "13006",
+    "label": "13006 Autorité Normative de Régulation",
+    "value_fcfa": 200000000,
+    "page": 45
+  },
+  {
+    "code": "13007",
+    "label": "13007 Structures sous-tutelles de la Présidence de la République",
+    "value_fcfa": 33660496343,
+    "page": 45
+  },
+  {
+    "code": "105",
+    "label": "105 Conseil Economique, Social, Environnemental et Culturel",
+    "value_fcfa": 8069692846,
+    "page": 45
+  },
+  {
+    "code": "13008",
+    "label": "13008 Autorité Consultative",
+    "value_fcfa": 8069692846,
+    "page": 45
+  },
+  {
+    "code": "106",
+    "label": "106 Conseil Constitutionnel",
+    "value_fcfa": 3860437235,
+    "page": 45
+  },
+  {
+    "code": "13014",
+    "label": "13014 Pouvoir Public de Contrôle de Conformité des Lois et Règlements",
+    "value_fcfa": 3860437235,
+    "page": 45
+  },
+  {
+    "code": "107",
+    "label": "107 Grande Chancellerie",
+    "value_fcfa": 3743870172,
+    "page": 45
+  },
+  {
+    "code": "13009",
+    "label": "13009 Gestion du Code des Valeurs et des Distinctions",
+    "value_fcfa": 3743870172,
+    "page": 45
+  },
+  {
+    "code": "108",
+    "label": "108 Primature et Services Rattachés (Premier Ministre, Chef du Gouvernement, Ministre des Sports et du",
+    "value_fcfa": 71326766299,
+    "page": 45
+  },
+  {
+    "code": "13010",
+    "label": "13010 Autorité Exécutive et de Coordination",
+    "value_fcfa": 24053045398,
+    "page": 45
+  },
+  {
+    "code": "13011",
+    "label": "13011 Coordination Action Gouvernementale",
+    "value_fcfa": 2155227371,
+    "page": 45
+  },
+  {
+    "code": "13013",
+    "label": "13013 Structures sous-tutelles de la Primature",
+    "value_fcfa": 45118493530,
+    "page": 45
+  },
+  {
+    "code": "109",
+    "label": "109 Médiateur de la République",
+    "value_fcfa": 8285468221,
+    "page": 45
+  },
+  {
+    "code": "13933",
+    "label": "13933 Médiation et Gestion des Conflits",
+    "value_fcfa": 8285468221,
+    "page": 45
+  },
+  {
+    "code": "110",
+    "label": "110 Commission Electorale Indépendante",
+    "value_fcfa": 36309969943,
+    "page": 46
+  },
+  {
+    "code": "13017",
+    "label": "13017 Autorité Administrative d'Organisation et Gestion des Elections",
+    "value_fcfa": 11063969943,
+    "page": 46
+  },
+  {
+    "code": "13932",
+    "label": "13932 Fonctionnement des Commissions Electorales Locales",
+    "value_fcfa": 9000000000,
+    "page": 46
+  },
+  {
+    "code": "13971",
+    "label": "13971 Révision de la liste électorale",
+    "value_fcfa": 16246000000,
+    "page": 46
+  },
+  {
+    "code": "111",
+    "label": "111 Chambre Nationale des Rois et Chefs Traditionnels",
+    "value_fcfa": 5794171874,
+    "page": 46
+  },
+  {
+    "code": "13020",
+    "label": "13020 Valorisation des Us et Coutumes et Promotion de la Cohésion Sociale",
+    "value_fcfa": 5794171874,
+    "page": 46
+  },
+  {
+    "code": "114",
+    "label": "114 Cour de Cassation",
+    "value_fcfa": 7931309608,
+    "page": 46
+  },
+  {
+    "code": "13028",
+    "label": "13028 Contrôle de l'Application et Interprétation des Lois",
+    "value_fcfa": 7931309608,
+    "page": 46
+  },
+  {
+    "code": "115",
+    "label": "115 Cour des comptes",
+    "value_fcfa": 8851161351,
+    "page": 46
+  },
+  {
+    "code": "13935",
+    "label": "13935 Juridiction Financière de l'Ordre Administratif",
+    "value_fcfa": 8851161351,
+    "page": 46
+  },
+  {
+    "code": "116",
+    "label": "116 Parquet Général près la Cour de Cassation et le Conseil d'Etat",
+    "value_fcfa": 1781334223,
+    "page": 46
+  },
+  {
+    "code": "13029",
+    "label": "13029 Parquet Général",
+    "value_fcfa": 1781334223,
+    "page": 46
+  },
+  {
+    "code": "117",
+    "label": "117 Parquet Général près la Cour des comptes",
+    "value_fcfa": 1774461029,
+    "page": 46
+  },
+  {
+    "code": "13934",
+    "label": "13934 Ministère Public près la Cour des comptes",
+    "value_fcfa": 1774461029,
+    "page": 46
+  },
+  {
+    "code": "118",
+    "label": "118 Conseil d'Etat",
+    "value_fcfa": 5164531081,
+    "page": 46
+  },
+  {
+    "code": "13025",
+    "label": "13025 Juridiction de l'Ordre administratif",
+    "value_fcfa": 5164531081,
+    "page": 46
+  },
+  {
+    "code": "120",
+    "label": "120 Conseil Supérieur de la Magistrature",
+    "value_fcfa": 2746090010,
+    "page": 46
+  },
+  {
+    "code": "13032",
+    "label": "13032 Conseil Supérieur de la Magistrature",
+    "value_fcfa": 2746090010,
+    "page": 46
+  },
+  {
+    "code": "322",
+    "label": "322 Ministère des Finances et du Budget",
+    "value_fcfa": 8028658952567,
+    "page": 46
+  },
+  {
+    "code": "11018",
+    "label": "11018 Dettes Intérieures",
+    "value_fcfa": 4278756141164,
+    "page": 46
+  },
+  {
+    "code": "12019",
+    "label": "12019 Dettes Extérieures",
+    "value_fcfa": 2395351945931,
+    "page": 46
+  },
+  {
+    "code": "14970",
+    "label": "14970 Dépenses Communes",
+    "value_fcfa": 901235605377,
+    "page": 46
+  },
+  {
+    "code": "15022",
+    "label": "15022 Divers et imprévus",
+    "value_fcfa": 453315260095,
+    "page": 46
+  },
+  {
+    "code": "2",
+    "label": "2 Programmes",
+    "value_fcfa": 8908975281116,
+    "page": 46
+  },
+  {
+    "code": "226",
+    "label": "226 Ministère d'Etat, Ministère de la Défense",
+    "value_fcfa": 481041827995,
+    "page": 46
+  },
+  {
+    "code": "21074",
+    "label": "21074 Administration Générale",
+    "value_fcfa": 152149614286,
+    "page": 47
+  },
+  {
+    "code": "22075",
+    "label": "22075 Défense",
+    "value_fcfa": 198907665491,
+    "page": 47
+  },
+  {
+    "code": "22076",
+    "label": "22076 Sécurité",
+    "value_fcfa": 129984548218,
+    "page": 47
+  },
+  {
+    "code": "229",
+    "label": "229 Ministère d'Etat, Ministère de l'Agriculture, du Développement Rural et des Productions Vivrières",
+    "value_fcfa": 333878089526,
+    "page": 47
+  },
+  {
+    "code": "21047",
+    "label": "21047 Administration Générale",
+    "value_fcfa": 17143084583,
+    "page": 47
+  },
+  {
+    "code": "22048",
+    "label": "22048 Productions et Sécurité alimentaire",
+    "value_fcfa": 93194334889,
+    "page": 47
+  },
+  {
+    "code": "22049",
+    "label": "22049 Développement rural",
+    "value_fcfa": 106292029836,
+    "page": 47
+  },
+  {
+    "code": "22214",
+    "label": "22214 Promotion de la riziculture",
+    "value_fcfa": 25204640218,
+    "page": 47
+  },
+  {
+    "code": "23210",
+    "label": "23210 Fonds Interprofessionnel pour la Recherche et le Conseil Agricole (FIRCA)",
+    "value_fcfa": 13300000000,
+    "page": 47
+  },
+  {
+    "code": "23211",
+    "label": "23211 Fonds d'Investissement Agricole (FIA / 2QC)",
+    "value_fcfa": 10615000000,
+    "page": 47
+  },
+  {
+    "code": "23212",
+    "label": "23212 Fonds du secteur café cacao",
+    "value_fcfa": 49832000000,
+    "page": 47
+  },
+  {
+    "code": "23213",
+    "label": "23213 Fonds du secteur anacarde",
+    "value_fcfa": 18297000000,
+    "page": 47
+  },
+  {
+    "code": "237",
+    "label": "237 Ministère d'Etat, Ministère de la Fonction Publique et de la Modernisation de l'Administration",
+    "value_fcfa": 45121940916,
+    "page": 47
+  },
+  {
+    "code": "21042",
+    "label": "21042 Administration Générale",
+    "value_fcfa": 28450607800,
+    "page": 47
+  },
+  {
+    "code": "22043",
+    "label": "22043 Fonction Publique",
+    "value_fcfa": 14396485400,
+    "page": 47
+  },
+  {
+    "code": "22066",
+    "label": "22066 Modernisation de l'Administration",
+    "value_fcfa": 2274847716,
+    "page": 47
+  },
+  {
+    "code": "321",
+    "label": "321 Ministère des Affaires Etrangères, de l'Intégration Africaine et des Ivoiriens de l'Extérieur",
+    "value_fcfa": 146728395147,
+    "page": 47
+  },
+  {
+    "code": "21070",
+    "label": "21070 Administration Générale",
+    "value_fcfa": 68755415667,
+    "page": 47
+  },
+  {
+    "code": "22071",
+    "label": "22071 Relation bilatérale",
+    "value_fcfa": 68063835678,
+    "page": 47
+  },
+  {
+    "code": "22072",
+    "label": "22072 Relation multilaterale",
+    "value_fcfa": 9561143802,
+    "page": 47
+  },
+  {
+    "code": "22073",
+    "label": "22073 Protocole d'Etat, affaires juridiques, consulaires et de l'état civil",
+    "value_fcfa": 348000000,
+    "page": 47
+  },
+  {
+    "code": "322",
+    "label": "322 Ministère des Finances et du Budget",
+    "value_fcfa": 671323963425,
+    "page": 47
+  },
+  {
+    "code": "21032",
+    "label": "21032 Administration Générale",
+    "value_fcfa": 369535050547,
+    "page": 47
+  },
+  {
+    "code": "22034",
+    "label": "22034 Trésor et Comptabilité Publique",
+    "value_fcfa": 12847326386,
+    "page": 47
+  },
+  {
+    "code": "22084",
+    "label": "22084 Douanes",
+    "value_fcfa": 21460519567,
+    "page": 47
+  },
+  {
+    "code": "22085",
+    "label": "22085 Impôts",
+    "value_fcfa": 21362947078,
+    "page": 47
+  },
+  {
+    "code": "22086",
+    "label": "22086 Budget",
+    "value_fcfa": 64941585484,
+    "page": 48
+  },
+  {
+    "code": "22224",
+    "label": "22224 Marchés Publics",
+    "value_fcfa": 4020829721,
+    "page": 48
+  },
+  {
+    "code": "22232",
+    "label": "22232 Gestion des Financements",
+    "value_fcfa": 5389327020,
+    "page": 48
+  },
+  {
+    "code": "23214",
+    "label": "23214 Appui au contrôle des marchandises à l'importation",
+    "value_fcfa": 56500000000,
+    "page": 48
+  },
+  {
+    "code": "23215",
+    "label": "23215 Prélèvements communautaires UEMOA-CEDEAO (Prélèvement Communautaire de Solidarité - Prélèvement Communautaire de la CEDEAO)",
+    "value_fcfa": 91248460491,
+    "page": 48
+  },
+  {
+    "code": "23216",
+    "label": "23216 Prélèvement à l'importation de l'Union Africaine (UA)",
+    "value_fcfa": 13439617131,
+    "page": 48
+  },
+  {
+    "code": "23217",
+    "label": "23217 Fonds d'Investissement en Milieu Rural (FIMR)",
+    "value_fcfa": 10578300000,
+    "page": 48
+  },
+  {
+    "code": "323",
+    "label": "323 Ministère de l'Intérieur et de la Sécurité",
+    "value_fcfa": 945963329452,
+    "page": 48
+  },
+  {
+    "code": "21038",
+    "label": "21038 Administration Générale",
+    "value_fcfa": 101798828700,
+    "page": 48
+  },
+  {
+    "code": "22039",
+    "label": "22039 Sécurité Intérieure",
+    "value_fcfa": 246936755701,
+    "page": 48
+  },
+  {
+    "code": "22040",
+    "label": "22040 Décentralisation",
+    "value_fcfa": 237873882190,
+    "page": 48
+  },
+  {
+    "code": "22041",
+    "label": "22041 Administration territoriale et identification",
+    "value_fcfa": 86672782583,
+    "page": 48
+  },
+  {
+    "code": "22216",
+    "label": "22216 Protection civile",
+    "value_fcfa": 17671080278,
+    "page": 48
+  },
+  {
+    "code": "23218",
+    "label": "23218 Appui aux collectivités Territoriales",
+    "value_fcfa": 255010000000,
+    "page": 48
+  },
+  {
+    "code": "325",
+    "label": "325 Ministère de la Justice et des Droits de l'Homme",
+    "value_fcfa": 129151307791,
+    "page": 48
+  },
+  {
+    "code": "21044",
+    "label": "21044 Administration Générale",
+    "value_fcfa": 94913084375,
+    "page": 48
+  },
+  {
+    "code": "22045",
+    "label": "22045 Juridictions",
+    "value_fcfa": 11202593764,
+    "page": 48
+  },
+  {
+    "code": "22046",
+    "label": "22046 Etablissements pénitentiaires, centres d'observation et de reéducation des mineurs",
+    "value_fcfa": 20882892824,
+    "page": 48
+  },
+  {
+    "code": "22143",
+    "label": "22143 Droits de l'Homme",
+    "value_fcfa": 2152736828,
+    "page": 48
+  },
+  {
+    "code": "328",
+    "label": "328 Ministère de l'Economie, du Plan et du Développement",
+    "value_fcfa": 44194260102,
+    "page": 48
+  },
+  {
+    "code": "21054",
+    "label": "21054 Administration Générale",
+    "value_fcfa": 12893923764,
+    "page": 48
+  },
+  {
+    "code": "22033",
+    "label": "22033 Gestion macroéconomique et politique économique et financière",
+    "value_fcfa": 2322971492,
+    "page": 48
+  },
+  {
+    "code": "22055",
+    "label": "22055 Prospective, planification, programmation, suivi et évaluation",
+    "value_fcfa": 3812144370,
+    "page": 48
+  },
+  {
+    "code": "22056",
+    "label": "22056 Aménagement du territoire, développement régional et local",
+    "value_fcfa": 1483513571,
+    "page": 48
+  },
+  {
+    "code": "22057",
+    "label": "22057 Coordination de la coopération au développement, population et productions statistiques",
+    "value_fcfa": 14015706905,
+    "page": 48
+  },
+  {
+    "code": "23250",
+    "label": "23250 Fonds National de Développement de la Statistique",
+    "value_fcfa": 9666000000,
+    "page": 48
+  },
+  {
+    "code": "330",
+    "label": "330 Ministère de l'Equipement et de l'Entretien Routier",
+    "value_fcfa": 734442904943,
+    "page": 49
+  },
+  {
+    "code": "21058",
+    "label": "21058 Administration Générale",
+    "value_fcfa": 7964881215,
+    "page": 49
+  },
+  {
+    "code": "22059",
+    "label": "22059 Infrastructures routières et ouvrages d'arts",
+    "value_fcfa": 446634263710,
+    "page": 49
+  },
+  {
+    "code": "23219",
+    "label": "23219 Fonds d'Entretien Routier (FER)",
+    "value_fcfa": 279843760018,
+    "page": 49
+  },
+  {
+    "code": "331",
+    "label": "331 Ministère de l'Education Nationale et de l'Alphabétisation",
+    "value_fcfa": 1563721366602,
+    "page": 49
+  },
+  {
+    "code": "21060",
+    "label": "21060 Administration Générale",
+    "value_fcfa": 121396189006,
+    "page": 49
+  },
+  {
+    "code": "22061",
+    "label": "22061 Enseignement préscolaire et primaire",
+    "value_fcfa": 849707918059,
+    "page": 49
+  },
+  {
+    "code": "22062",
+    "label": "22062 Enseignement sécondaire général",
+    "value_fcfa": 591842059537,
+    "page": 49
+  },
+  {
+    "code": "22064",
+    "label": "22064 Alphabétisation et Education non formelle",
+    "value_fcfa": 775200000,
+    "page": 49
+  },
+  {
+    "code": "333",
+    "label": "333 Ministère de l'Enseignement Supérieur et de la Recherche Scientifique",
+    "value_fcfa": 338779408246,
+    "page": 49
+  },
+  {
+    "code": "21093",
+    "label": "21093 Administration Générale",
+    "value_fcfa": 24951460632,
+    "page": 49
+  },
+  {
+    "code": "22094",
+    "label": "22094 Enseignement supérieur",
+    "value_fcfa": 233945569392,
+    "page": 49
+  },
+  {
+    "code": "22095",
+    "label": "22095 Oeuvres universitaires et vie estudiantine",
+    "value_fcfa": 67106546257,
+    "page": 49
+  },
+  {
+    "code": "22096",
+    "label": "22096 Recherche scientifique et innovation",
+    "value_fcfa": 12775831965,
+    "page": 49
+  },
+  {
+    "code": "334",
+    "label": "334 Ministère de l'Enseignement Technique, de la Formation Professionnelle et de l'Apprentissage",
+    "value_fcfa": 182301855312,
+    "page": 49
+  },
+  {
+    "code": "21210",
+    "label": "21210 Administration Générale",
+    "value_fcfa": 14408855796,
+    "page": 49
+  },
+  {
+    "code": "22063",
+    "label": "22063 Formation professionnelle et apprentissage",
+    "value_fcfa": 111002347046,
+    "page": 49
+  },
+  {
+    "code": "22219",
+    "label": "22219 Enseignement secondaire technique",
+    "value_fcfa": 10890652470,
+    "page": 49
+  },
+  {
+    "code": "23220",
+    "label": "23220 Fonds de Développement de la Formation Professionnelle",
+    "value_fcfa": 46000000000,
+    "page": 49
+  },
+  {
+    "code": "335",
+    "label": "335 Ministère de la Santé, de l'Hygiène Publique et de la Couverture Maladie Universelle",
+    "value_fcfa": 808992158914,
+    "page": 49
+  },
+  {
+    "code": "21067",
+    "label": "21067 Administration Générale",
+    "value_fcfa": 386390670357,
+    "page": 49
+  },
+  {
+    "code": "22068",
+    "label": "22068 Offre et accessibilité des populations aux soins de qualité",
+    "value_fcfa": 243944049750,
+    "page": 49
+  },
+  {
+    "code": "22069",
+    "label": "22069 Renforcement de la lutte contre la maladie",
+    "value_fcfa": 175357438807,
+    "page": 49
+  },
+  {
+    "code": "23221",
+    "label": "23221 Programme National de Lutte contre le Tabagisme, l'Alcoolisme, la Toxicomanie et les autres Addictions",
+    "value_fcfa": 990000000,
+    "page": 49
+  },
+  {
+    "code": "23222",
+    "label": "23222 Fonds National de Lutte contre le SIDA (FNLS)",
+    "value_fcfa": 2310000000,
+    "page": 49
+  },
+  {
+    "code": "336",
+    "label": "336 Ministère de la Communication",
+    "value_fcfa": 39806735298,
+    "page": 49
+  },
+  {
+    "code": "21077",
+    "label": "21077 Administration Générale",
+    "value_fcfa": 7354634682,
+    "page": 50
+  },
+  {
+    "code": "22078",
+    "label": "22078 Communication et médias",
+    "value_fcfa": 12252100615,
+    "page": 50
+  },
+  {
+    "code": "23223",
+    "label": "23223 Appui au financement de la Radiodiffusion Télévision Ivoirienne (RTI)",
+    "value_fcfa": 16465000001,
+    "page": 50
+  },
+  {
+    "code": "23224",
+    "label": "23224 Appui au financement de la Société Ivoirienne de Télédiffusion (IDT)",
+    "value_fcfa": 2035000000,
+    "page": 50
+  },
+  {
+    "code": "23225",
+    "label": "23225 Appui au financement du secteur des médias",
+    "value_fcfa": 1700000000,
+    "page": 50
+  },
+  {
+    "code": "340",
+    "label": "340 Ministère des Transports",
+    "value_fcfa": 307769615082,
+    "page": 50
+  },
+  {
+    "code": "21112",
+    "label": "21112 Administration Générale",
+    "value_fcfa": 10483960604,
+    "page": 50
+  },
+  {
+    "code": "22113",
+    "label": "22113 Transport aérien",
+    "value_fcfa": 41918600000,
+    "page": 50
+  },
+  {
+    "code": "22114",
+    "label": "22114 Transport terrestre",
+    "value_fcfa": 250777054478,
+    "page": 50
+  },
+  {
+    "code": "23226",
+    "label": "23226 Mobilité Urbaine dans le Grand Abidjan",
+    "value_fcfa": 2295000000,
+    "page": 50
+  },
+  {
+    "code": "23227",
+    "label": "23227 Régulation du Transport Intérieur",
+    "value_fcfa": 2295000000,
+    "page": 50
+  },
+  {
+    "code": "343",
+    "label": "343 Ministère de l'Environnement, du Développement Durable et de la Transition Ecologique",
+    "value_fcfa": 36680067253,
+    "page": 50
+  },
+  {
+    "code": "21079",
+    "label": "21079 Administration Générale",
+    "value_fcfa": 7918536211,
+    "page": 50
+  },
+  {
+    "code": "22080",
+    "label": "22080 Environnement et développement durable",
+    "value_fcfa": 28761531042,
+    "page": 50
+  },
+  {
+    "code": "345",
+    "label": "345 Ministère des Eaux et Forêts",
+    "value_fcfa": 103197582643,
+    "page": 50
+  },
+  {
+    "code": "21088",
+    "label": "21088 Administration Générale",
+    "value_fcfa": 37824714687,
+    "page": 50
+  },
+  {
+    "code": "22089",
+    "label": "22089 Gestion durable des ressources forestières",
+    "value_fcfa": 58463516601,
+    "page": 50
+  },
+  {
+    "code": "22090",
+    "label": "22090 Gestion durable des ressources fauniques",
+    "value_fcfa": 917332688,
+    "page": 50
+  },
+  {
+    "code": "22091",
+    "label": "22091 Gestion intégrée des ressources en eau",
+    "value_fcfa": 5092018667,
+    "page": 50
+  },
+  {
+    "code": "23228",
+    "label": "23228 Fonds Forestier National",
+    "value_fcfa": 900000000,
+    "page": 50
+  },
+  {
+    "code": "346",
+    "label": "346 Ministère de la Culture et de la Francophonie",
+    "value_fcfa": 37598620420,
+    "page": 50
+  },
+  {
+    "code": "21097",
+    "label": "21097 Administration Générale",
+    "value_fcfa": 13835893251,
+    "page": 50
+  },
+  {
+    "code": "22098",
+    "label": "22098 Animation culturelle et industries culturelles et créatives",
+    "value_fcfa": 5131941800,
+    "page": 50
+  },
+  {
+    "code": "22099",
+    "label": "22099 Patrimoine culturel",
+    "value_fcfa": 1793938806,
+    "page": 50
+  },
+  {
+    "code": "22100",
+    "label": "22100 Enseignement artistique et culturel",
+    "value_fcfa": 3277857930,
+    "page": 50
+  },
+  {
+    "code": "22226",
+    "label": "22226 Francophonie",
+    "value_fcfa": 592488633,
+    "page": 50
+  },
+  {
+    "code": "23229",
+    "label": "23229 Fonds de Soutien à la Culture et à la Création Artistique (FSCCA)",
+    "value_fcfa": 12566500000,
+    "page": 51
+  },
+  {
+    "code": "23242",
+    "label": "23242 Fonds de Soutien à l'Industrie Cinématographique (FONSIC)",
+    "value_fcfa": 240000000,
+    "page": 51
+  },
+  {
+    "code": "23243",
+    "label": "23243 Appui au financement de l'Office National du Cinéma de Côte d'Ivoire (ONAC-CI)",
+    "value_fcfa": 160000000,
+    "page": 51
+  },
+  {
+    "code": "347",
+    "label": "347 Ministère du Commerce et de l'Industrie",
+    "value_fcfa": 96866871722,
+    "page": 51
+  },
+  {
+    "code": "21101",
+    "label": "21101 Administration Générale",
+    "value_fcfa": 14003862146,
+    "page": 51
+  },
+  {
+    "code": "22102",
+    "label": "22102 Commerce intérieur",
+    "value_fcfa": 4924344052,
+    "page": 51
+  },
+  {
+    "code": "22103",
+    "label": "22103 Commerce extérieur",
+    "value_fcfa": 2365616153,
+    "page": 51
+  },
+  {
+    "code": "22104",
+    "label": "22104 Industrie",
+    "value_fcfa": 36338192773,
+    "page": 51
+  },
+  {
+    "code": "22233",
+    "label": "22233 PME et Artisanat",
+    "value_fcfa": 39234856598,
+    "page": 51
+  },
+  {
+    "code": "348",
+    "label": "348 Ministère des Mines, du Pétrole et de l'Energie",
+    "value_fcfa": 706060209015,
+    "page": 51
+  },
+  {
+    "code": "21106",
+    "label": "21106 Administration Générale",
+    "value_fcfa": 8701872126,
+    "page": 51
+  },
+  {
+    "code": "22036",
+    "label": "22036 Hydrocabures",
+    "value_fcfa": 116054336,
+    "page": 51
+  },
+  {
+    "code": "22037",
+    "label": "22037 Energie",
+    "value_fcfa": 320914619601,
+    "page": 51
+  },
+  {
+    "code": "22107",
+    "label": "22107 Mines et géologie",
+    "value_fcfa": 783321335,
+    "page": 51
+  },
+  {
+    "code": "23230",
+    "label": "23230 Appui au financement du secteur de l'électricité",
+    "value_fcfa": 70368000000,
+    "page": 51
+  },
+  {
+    "code": "23231",
+    "label": "23231 Appui au financement de la Société Ivoirienne de Raffinage (SIR)",
+    "value_fcfa": 57906341617,
+    "page": 51
+  },
+  {
+    "code": "23232",
+    "label": "23232 Appui au financement du secteur minier",
+    "value_fcfa": 28500000000,
+    "page": 51
+  },
+  {
+    "code": "23233",
+    "label": "23233 Péréquation produit à la Société Ivoirienne de Raffinage (SIR)",
+    "value_fcfa": 105000000000,
+    "page": 51
+  },
+  {
+    "code": "23234",
+    "label": "23234 Péréquation transport à la Société d'Etudes et de Gestion en Hydrocarbures (SEGH)",
+    "value_fcfa": 70000000000,
+    "page": 51
+  },
+  {
+    "code": "23251",
+    "label": "23251 Appui au financement à Côte d'Ivoire ENERGIE",
+    "value_fcfa": 43770000000,
+    "page": 51
+  },
+  {
+    "code": "350",
+    "label": "350 Ministère du Tourisme et des Loisirs",
+    "value_fcfa": 19207286052,
+    "page": 51
+  },
+  {
+    "code": "21108",
+    "label": "21108 Administration Générale",
+    "value_fcfa": 6977145562,
+    "page": 51
+  },
+  {
+    "code": "22109",
+    "label": "22109 Tourisme",
+    "value_fcfa": 5229257356,
+    "page": 51
+  },
+  {
+    "code": "22111",
+    "label": "22111 Loisir",
+    "value_fcfa": 800883134,
+    "page": 51
+  },
+  {
+    "code": "23235",
+    "label": "23235 Fonds de Développement Touristique",
+    "value_fcfa": 2700000000,
+    "page": 51
+  },
+  {
+    "code": "23236",
+    "label": "23236 Appui au financement de la promotion du secteur touristique",
+    "value_fcfa": 3500000000,
+    "page": 51
+  },
+  {
+    "code": "351",
+    "label": "351 Ministère des Ressources Animales et Halieutiques",
+    "value_fcfa": 26700912028,
+    "page": 52
+  },
+  {
+    "code": "21132",
+    "label": "21132 Administration Générale",
+    "value_fcfa": 11095321403,
+    "page": 52
+  },
+  {
+    "code": "22133",
+    "label": "22133 Développement des productions animales",
+    "value_fcfa": 2819855421,
+    "page": 52
+  },
+  {
+    "code": "22134",
+    "label": "22134 Gestion durable des ressources halieutiques",
+    "value_fcfa": 11118502743,
+    "page": 52
+  },
+  {
+    "code": "22135",
+    "label": "22135 Renforcement de la santé publique vétérinaire",
+    "value_fcfa": 1667232461,
+    "page": 52
+  },
+  {
+    "code": "352",
+    "label": "352 Ministère de la Femme, de la Famille et de l'Enfant",
+    "value_fcfa": 31263058865,
+    "page": 52
+  },
+  {
+    "code": "21118",
+    "label": "21118 Administration Générale",
+    "value_fcfa": 16254527519,
+    "page": 52
+  },
+  {
+    "code": "22119",
+    "label": "22119 Promotion de l'approche Genre, de l'autonomisation des femmes et des jeunes filles",
+    "value_fcfa": 5998995287,
+    "page": 52
+  },
+  {
+    "code": "22120",
+    "label": "22120 Promotion et consolidation de la Famille",
+    "value_fcfa": 956600000,
+    "page": 52
+  },
+  {
+    "code": "22121",
+    "label": "22121 Protection des Enfants et des adolescents vulnérables",
+    "value_fcfa": 8052936059,
+    "page": 52
+  },
+  {
+    "code": "356",
+    "label": "356 Ministère de la Transition Numérique et de la Digitalisation",
+    "value_fcfa": 83275503595,
+    "page": 52
+  },
+  {
+    "code": "21235",
+    "label": "21235 Administration Générale",
+    "value_fcfa": 1704184519,
+    "page": 52
+  },
+  {
+    "code": "22126",
+    "label": "22126 Economie numérique et poste",
+    "value_fcfa": 45991319076,
+    "page": 52
+  },
+  {
+    "code": "23237",
+    "label": "23237 Appui au Développement des nouvelles technologies en zones rurales",
+    "value_fcfa": 33000000000,
+    "page": 52
+  },
+  {
+    "code": "23238",
+    "label": "23238 Appui à la régulation du secteur des télécommunications",
+    "value_fcfa": 2580000000,
+    "page": 52
+  },
+  {
+    "code": "357",
+    "label": "357 Ministère de la Promotion de la Jeunesse, de l'Insertion Professionnelle et du Service Civique",
+    "value_fcfa": 81484195624,
+    "page": 52
+  },
+  {
+    "code": "21127",
+    "label": "21127 Administration Générale",
+    "value_fcfa": 6395282843,
+    "page": 52
+  },
+  {
+    "code": "22128",
+    "label": "22128 Promotion de la jeunesse",
+    "value_fcfa": 885002094,
+    "page": 52
+  },
+  {
+    "code": "22129",
+    "label": "22129 Insertion Professionelle et Emploi des jeunes",
+    "value_fcfa": 54319474813,
+    "page": 52
+  },
+  {
+    "code": "22139",
+    "label": "22139 Service civique",
+    "value_fcfa": 15075185874,
+    "page": 52
+  },
+  {
+    "code": "23248",
+    "label": "23248 Fonds d'appui à la jeunesse",
+    "value_fcfa": 4300000000,
+    "page": 52
+  },
+  {
+    "code": "23252",
+    "label": "23252 Appui au financement du service civique",
+    "value_fcfa": 509250000,
+    "page": 52
+  },
+  {
+    "code": "358",
+    "label": "358 Ministère de la Construction, du Logement et de l'Urbanisme",
+    "value_fcfa": 123247714398,
+    "page": 52
+  },
+  {
+    "code": "21050",
+    "label": "21050 Administration Générale",
+    "value_fcfa": 16387778395,
+    "page": 52
+  },
+  {
+    "code": "22051",
+    "label": "22051 Foncier et urbanisme",
+    "value_fcfa": 16302276827,
+    "page": 52
+  },
+  {
+    "code": "22052",
+    "label": "22052 Construction et maintenance",
+    "value_fcfa": 3009475173,
+    "page": 52
+  },
+  {
+    "code": "22053",
+    "label": "22053 Logement et cadre de vie",
+    "value_fcfa": 87548184003,
+    "page": 53
+  },
+  {
+    "code": "362",
+    "label": "362 Ministère de l'Emploi et de la Protection Sociale",
+    "value_fcfa": 91411414044,
+    "page": 53
+  },
+  {
+    "code": "21150",
+    "label": "21150 Administration Générale",
+    "value_fcfa": 35849618984,
+    "page": 53
+  },
+  {
+    "code": "22151",
+    "label": "22151 Emploi",
+    "value_fcfa": 2451846262,
+    "page": 53
+  },
+  {
+    "code": "22152",
+    "label": "22152 Travail",
+    "value_fcfa": 6374402905,
+    "page": 53
+  },
+  {
+    "code": "22153",
+    "label": "22153 Protection sociale",
+    "value_fcfa": 46735545893,
+    "page": 53
+  },
+  {
+    "code": "366",
+    "label": "366 Ministère de l'Hydraulique, de l'Assainissement et de la Salubrité",
+    "value_fcfa": 502893150963,
+    "page": 53
+  },
+  {
+    "code": "21147",
+    "label": "21147 Administration Générale",
+    "value_fcfa": 8621283913,
+    "page": 53
+  },
+  {
+    "code": "22131",
+    "label": "22131 Infrastructures de l'hydraulique humaine",
+    "value_fcfa": 126703064215,
+    "page": 53
+  },
+  {
+    "code": "22148",
+    "label": "22148 Assainissement et drainage",
+    "value_fcfa": 139226132928,
+    "page": 53
+  },
+  {
+    "code": "22149",
+    "label": "22149 Salubrité et lutte contre les nuisances",
+    "value_fcfa": 19190669907,
+    "page": 53
+  },
+  {
+    "code": "23239",
+    "label": "23239 Appui au financement de la salubrité Urbaine",
+    "value_fcfa": 184539000000,
+    "page": 53
+  },
+  {
+    "code": "23240",
+    "label": "23240 Appui au financement de l'assainissement et le drainage",
+    "value_fcfa": 24613000000,
+    "page": 53
+  },
+  {
+    "code": "369",
+    "label": "369 Ministère de la Cohésion Nationale, de la Solidarité et de la Lutte Contre la Pauvreté",
+    "value_fcfa": 57361750199,
+    "page": 53
+  },
+  {
+    "code": "21122",
+    "label": "21122 Administration Générale",
+    "value_fcfa": 4453244145,
+    "page": 53
+  },
+  {
+    "code": "22123",
+    "label": "22123 Solidarité et Action Humanitaire",
+    "value_fcfa": 4207204503,
+    "page": 53
+  },
+  {
+    "code": "22124",
+    "label": "22124 Lutte contre la pauvreté",
+    "value_fcfa": 42037873689,
+    "page": 53
+  },
+  {
+    "code": "22227",
+    "label": "22227 Cohésion Nationale",
+    "value_fcfa": 6663427862,
+    "page": 53
+  },
+  {
+    "code": "376",
+    "label": "376 Ministère du Patrimoine, du Portefeuille de l'Etat et des Entreprises Publiques",
+    "value_fcfa": 49213125398,
+    "page": 53
+  },
+  {
+    "code": "21236",
+    "label": "21236 Administration Générale",
+    "value_fcfa": 40514471209,
+    "page": 53
+  },
+  {
+    "code": "22087",
+    "label": "22087 Portefeuille de l'Etat",
+    "value_fcfa": 7998654189,
+    "page": 53
+  },
+  {
+    "code": "22239",
+    "label": "22239 Gestion des Etablissements Publics Nationaux",
+    "value_fcfa": 700000000,
+    "page": 53
+  },
+  {
+    "code": "439",
+    "label": "439 Ministère Délégué auprès du Ministre des Affaires Etrangères, de l'Intégration Africaine et des",
+    "value_fcfa": 5122516889,
+    "page": 53
+  },
+  {
+    "code": "21234",
+    "label": "21234 Administration Générale",
+    "value_fcfa": 3743491132,
+    "page": 53
+  },
+  {
+    "code": "22145",
+    "label": "22145 Intégration Africaine",
+    "value_fcfa": 1153795757,
+    "page": 53
+  },
+  {
+    "code": "22146",
+    "label": "22146 Ivoiriens de l'extérieur",
+    "value_fcfa": 225230000,
+    "page": 54
+  },
+  {
+    "code": "440",
+    "label": "440 Ministère Délégué auprès du Ministre des Transports, chargé des Affaires Maritimes",
+    "value_fcfa": 13746365872,
+    "page": 54
+  },
+  {
+    "code": "21237",
+    "label": "21237 Administration générale",
+    "value_fcfa": 8311959782,
+    "page": 54
+  },
+  {
+    "code": "22115",
+    "label": "22115 Transport maritime et fluvio-lagunaire",
+    "value_fcfa": 5434406090,
+    "page": 54
+  },
+  {
+    "code": "444",
+    "label": "444 Ministère Délégué auprès du Premier Ministre, Ministre des Sports et du Cadre de Vie, chargé des",
+    "value_fcfa": 70427777385,
+    "page": 54
+  },
+  {
+    "code": "21081",
+    "label": "21081 Administration Générale",
+    "value_fcfa": 17906782766,
+    "page": 54
+  },
+  {
+    "code": "22082",
+    "label": "22082 Sport",
+    "value_fcfa": 39900994619,
+    "page": 54
+  },
+  {
+    "code": "23241",
+    "label": "23241 Appui au développement durable du sport",
+    "value_fcfa": 10900000000,
+    "page": 54
+  },
+  {
+    "code": "23249",
+    "label": "23249 Appui à l'entretien et à la sécurisation des infrastructures",
+    "value_fcfa": 1720000000,
+    "page": 54
+  },
+  {
+    "code": "Total",
+    "label": "Total Général",
+    "value_fcfa": 17350151982383,
+    "page": 54
+  }
+]

@@ -1,0 +1,812 @@
+[
+  {
+    "file": "src/pages/DocumentsPage.tsx",
+    "line": 150,
+    "expression": "{documents.reduce((sum, d) => sum + (d.downloads_count || 0), 0)}"
+  },
+  {
+    "file": "src/pages/HomePage.tsx",
+    "line": 142,
+    "expression": "const totalAllProjectsAmount = allProjects.reduce((acc, p) => acc + p.budget_amount_fcfa, 0) || 1;"
+  },
+  {
+    "file": "src/pages/HomePage.tsx",
+    "line": 146,
+    "expression": "const amount = matching.reduce((acc, p) => acc + p.budget_amount_fcfa, 0);"
+  },
+  {
+    "file": "src/pages/HomePage.tsx",
+    "line": 316,
+    "expression": "Explorez 7 162 lignes d'investissement et 3 461 Mds FCFA votés pour les collectivités et ministères."
+  },
+  {
+    "file": "src/pages/HomePage.tsx",
+    "line": 425,
+    "expression": "{formatFCFA(sec.amount)}"
+  },
+  {
+    "file": "src/pages/HomePage.tsx",
+    "line": 430,
+    "expression": "{formatAmountInWords(sec.amount)} FCFA"
+  },
+  {
+    "file": "src/pages/HomePage.tsx",
+    "line": 525,
+    "expression": "{formatFCFA(heroFeatured.budget_amount_fcfa)}"
+  },
+  {
+    "file": "src/pages/HomePage.tsx",
+    "line": 530,
+    "expression": "{formatAmountInWords(heroFeatured.budget_amount_fcfa)} FCFA"
+  },
+  {
+    "file": "src/pages/HomePage.tsx",
+    "line": 578,
+    "expression": "{formatFCFA(article.budget_amount_fcfa)}"
+  },
+  {
+    "file": "src/pages/HomePage.tsx",
+    "line": 581,
+    "expression": "({formatAmountInWords(article.budget_amount_fcfa)} FCFA)"
+  },
+  {
+    "file": "src/pages/ObservatoryPage.tsx",
+    "line": 168,
+    "expression": "Suivi photographique de terrain, veille contractuelle et vérification citoyenne indépendante des <strong>3 453,8 Milliards FCFA</strong> d'investissements de l'État et des collectivités locales."
+  },
+  {
+    "file": "src/pages/ObservatoryPage.tsx",
+    "line": 578,
+    "expression": "budget_amount_fcfa: activeStrategicProject.budgetFCFA,"
+  },
+  {
+    "file": "src/pages/ObservatoryPage.tsx",
+    "line": 986,
+    "expression": "<div className=\"text-[11px] font-black text-slate-700 break-words\">{formatFCFA(p.budget_amount_fcfa)} <span className=\"font-semibold text-brand-blue\">({formatAmountInWords(p.budget_amount_fcfa)} FCFA)</span></div>"
+  },
+  {
+    "file": "src/pages/ObservatoryPage.tsx",
+    "line": 1110,
+    "expression": "<span className=\"font-black text-slate-900\">{formatFCFA(project.budget_amount_fcfa)} <span className=\"text-brand-blue font-bold\">({formatAmountInWords(project.budget_amount_fcfa)})</span></span>"
+  },
+  {
+    "file": "src/pages/ProjectsPage.tsx",
+    "line": 156,
+    "expression": "const totalBudgetFiltered = filteredProjects.reduce((acc, curr) => acc + curr.budget_amount_fcfa, 0);"
+  },
+  {
+    "file": "src/pages/ProjectsPage.tsx",
+    "line": 221,
+    "expression": "<span className=\"text-lg sm:text-2xl font-black text-brand-orange\">{formatCompactFCFA(totalBudgetFiltered)}</span>"
+  },
+  {
+    "file": "src/pages/ProjectsPage.tsx",
+    "line": 598,
+    "expression": "{formatFCFA(p.budget_amount_fcfa)}"
+  },
+  {
+    "file": "src/pages/ProjectsPage.tsx",
+    "line": 601,
+    "expression": "({formatAmountInWords(p.budget_amount_fcfa)} FCFA)"
+  },
+  {
+    "file": "src/pages/institutions/AnnuaireIndexPage.tsx",
+    "line": 38,
+    "expression": "Budget Général de l'État : <span className=\"text-slate-900\">17 350,2 Milliards FCFA</span>"
+  },
+  {
+    "file": "src/pages/institutions/AnnuaireIndexPage.tsx",
+    "line": 74,
+    "expression": "8 728,5 Mds FCFA"
+  },
+  {
+    "file": "src/pages/institutions/AnnuaireIndexPage.tsx",
+    "line": 90,
+    "expression": "7 081,5 Mds FCFA"
+  },
+  {
+    "file": "src/pages/institutions/AnnuaireIndexPage.tsx",
+    "line": 106,
+    "expression": "1 540,2 Mds FCFA"
+  },
+  {
+    "file": "src/pages/institutions/AnnuaireIndexPage.tsx",
+    "line": 119,
+    "expression": "Sur ce budget global, <strong>3 461,00 Milliards FCFA</strong> sont alloués aux <strong>Investissements Publics & Chantiers</strong> (7 162 projets suivis par les citoyens sur cette plateforme)."
+  },
+  {
+    "file": "src/pages/institutions/MinistriesPage.tsx",
+    "line": 331,
+    "expression": "<span className=\"text-brand-blue\">{formatFCFA(premierMinistre.budget_fcfa)}</span>{' '}"
+  },
+  {
+    "file": "src/pages/institutions/MinistriesPage.tsx",
+    "line": 332,
+    "expression": "<span className=\"text-slate-500 font-bold\">({formatAmountInWords(premierMinistre.budget_fcfa)})</span>"
+  },
+  {
+    "file": "src/pages/institutions/MinistriesPage.tsx",
+    "line": 369,
+    "expression": "<span className=\"text-brand-blue\">{formatFCFA(vicePremierMinistre.budget_fcfa)}</span>{' '}"
+  },
+  {
+    "file": "src/pages/institutions/MinistriesPage.tsx",
+    "line": 370,
+    "expression": "<span className=\"text-slate-500 font-bold\">({formatAmountInWords(vicePremierMinistre.budget_fcfa)})</span>"
+  },
+  {
+    "file": "src/pages/institutions/MinistriesPage.tsx",
+    "line": 421,
+    "expression": "<span className=\"text-brand-blue\">{formatFCFA(official.budget_fcfa)}</span> <span className=\"text-slate-500 font-semibold text-[10px] break-words\">({formatAmountInWords(official.budget_fcfa)})</span>"
+  },
+  {
+    "file": "src/pages/institutions/MinistriesPage.tsx",
+    "line": 479,
+    "expression": "<span className=\"text-brand-blue\">{formatFCFA(official.budget_fcfa)}</span> <span className=\"text-slate-500 font-semibold text-[10px] break-words\">({formatAmountInWords(official.budget_fcfa)})</span>"
+  },
+  {
+    "file": "src/pages/institutions/MunicipalitiesPage.tsx",
+    "line": 546,
+    "expression": "{formatFCFA(primTotal)}{' '}"
+  },
+  {
+    "file": "src/pages/institutions/MunicipalitiesPage.tsx",
+    "line": 548,
+    "expression": "({formatAmountInWords(primTotal)})"
+  },
+  {
+    "file": "src/pages/institutions/MunicipalitiesPage.tsx",
+    "line": 560,
+    "expression": "<>Subvention État : <strong>{statePct}%</strong> ({formatAmountInWords(stateTotal)})</>"
+  },
+  {
+    "file": "src/pages/institutions/MunicipalitiesPage.tsx",
+    "line": 566,
+    "expression": "Recettes propres Mairie : <strong>{localPct}%</strong> ({formatAmountInWords(localRev)})"
+  },
+  {
+    "file": "src/pages/institutions/MunicipalitiesPage.tsx",
+    "line": 609,
+    "expression": "{formatFCFA(inst.total_budget_fcfa)} <span className=\"text-brand-blue font-bold\">({formatAmountInWords(inst.total_budget_fcfa)})</span>"
+  },
+  {
+    "file": "src/pages/institutions/MunicipalitiesPage.tsx",
+    "line": 620,
+    "expression": "Fonctionnement (DGF) : <strong>{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})"
+  },
+  {
+    "file": "src/pages/institutions/MunicipalitiesPage.tsx",
+    "line": 623,
+    "expression": "Investissement (DGE) : <strong>{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})"
+  },
+  {
+    "file": "src/pages/institutions/NationalInstitutionsPage.tsx",
+    "line": 250,
+    "expression": "{formatFCFA(presidence.total_budget_fcfa)}"
+  },
+  {
+    "file": "src/pages/institutions/NationalInstitutionsPage.tsx",
+    "line": 253,
+    "expression": "({formatAmountInWords(presidence.total_budget_fcfa)})"
+  },
+  {
+    "file": "src/pages/institutions/NationalInstitutionsPage.tsx",
+    "line": 265,
+    "expression": "<span className=\"text-sky-300\">Fonct. : {Math.round((presidence.budget_functioning_fcfa / presidence.total_budget_fcfa) * 100)}% ({formatAmountInWords(presidence.budget_functioning_fcfa)})</span>"
+  },
+  {
+    "file": "src/pages/institutions/NationalInstitutionsPage.tsx",
+    "line": 266,
+    "expression": "<span className=\"text-emerald-300\">Invest. : {Math.round((presidence.budget_investment_fcfa / presidence.total_budget_fcfa) * 100)}% ({formatAmountInWords(presidence.budget_investment_fcfa)})</span>"
+  },
+  {
+    "file": "src/pages/institutions/NationalInstitutionsPage.tsx",
+    "line": 347,
+    "expression": "{formatFCFA(inst.total_budget_fcfa)} <span className=\"text-brand-blue font-bold break-words\">({formatAmountInWords(inst.total_budget_fcfa)})</span>"
+  },
+  {
+    "file": "src/pages/institutions/NationalInstitutionsPage.tsx",
+    "line": 356,
+    "expression": "Fonct. : <strong className=\"font-bold\">{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})"
+  },
+  {
+    "file": "src/pages/institutions/NationalInstitutionsPage.tsx",
+    "line": 359,
+    "expression": "Invest. : <strong className=\"font-bold\">{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})"
+  },
+  {
+    "file": "src/pages/institutions/RegionalCouncilsPage.tsx",
+    "line": 311,
+    "expression": "{formatFCFA(primTotal)}{' '}"
+  },
+  {
+    "file": "src/pages/institutions/RegionalCouncilsPage.tsx",
+    "line": 313,
+    "expression": "({formatAmountInWords(primTotal)})"
+  },
+  {
+    "file": "src/pages/institutions/RegionalCouncilsPage.tsx",
+    "line": 324,
+    "expression": "Dotation État : <strong>{statePct}%</strong> ({formatAmountInWords(stateTotal)})"
+  },
+  {
+    "file": "src/pages/institutions/RegionalCouncilsPage.tsx",
+    "line": 327,
+    "expression": "{inst.type === 'DISTRICT' ? 'Ressources District :' : 'Ressources Région :'} <strong>{localPct}%</strong> ({formatAmountInWords(localRev)})"
+  },
+  {
+    "file": "src/pages/institutions/RegionalCouncilsPage.tsx",
+    "line": 340,
+    "expression": "{formatFCFA(inst.total_budget_fcfa)} <span className=\"text-brand-blue font-bold\">({formatAmountInWords(inst.total_budget_fcfa)})</span>"
+  },
+  {
+    "file": "src/pages/institutions/RegionalCouncilsPage.tsx",
+    "line": 351,
+    "expression": "Fonct. : <strong className=\"font-bold\">{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})"
+  },
+  {
+    "file": "src/pages/institutions/RegionalCouncilsPage.tsx",
+    "line": 354,
+    "expression": "Invest. : <strong className=\"font-bold\">{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})"
+  },
+  {
+    "file": "src/pages/institutions/RegulatoryAuthoritiesPage.tsx",
+    "line": 227,
+    "expression": "{formatFCFA(item.total_budget_fcfa)}"
+  },
+  {
+    "file": "src/pages/institutions/RegulatoryAuthoritiesPage.tsx",
+    "line": 230,
+    "expression": "({formatAmountInWords(item.total_budget_fcfa)})"
+  },
+  {
+    "file": "src/components/BudgetReportsView.tsx",
+    "line": 42,
+    "expression": "const totalAmount = filteredProjects.reduce((sum, p) => sum + p.budget_amount_fcfa, 0);"
+  },
+  {
+    "file": "src/components/BudgetReportsView.tsx",
+    "line": 45,
+    "expression": "const nationalAmount = filteredProjects.filter(p => p.scope_level === 'NATIONAL').reduce((sum, p) => sum + p.budget_amount_fcfa, 0);"
+  },
+  {
+    "file": "src/components/BudgetReportsView.tsx",
+    "line": 46,
+    "expression": "const localAmount = filteredProjects.filter(p => p.scope_level === 'LOCAL').reduce((sum, p) => sum + p.budget_amount_fcfa, 0);"
+  },
+  {
+    "file": "src/components/BudgetReportsView.tsx",
+    "line": 207,
+    "expression": "{formatFCFA(stats.totalAmount)}"
+  },
+  {
+    "file": "src/components/BudgetReportsView.tsx",
+    "line": 210,
+    "expression": "{formatAmountInWords(stats.totalAmount)} FCFA"
+  },
+  {
+    "file": "src/components/BudgetReportsView.tsx",
+    "line": 265,
+    "expression": "{formatFCFA(stats.nationalAmount)} <span className=\"block text-xs font-semibold text-slate-500 break-words\">({formatAmountInWords(stats.nationalAmount)} FCFA)</span>"
+  },
+  {
+    "file": "src/components/BudgetReportsView.tsx",
+    "line": 283,
+    "expression": "{formatFCFA(stats.localAmount)} <span className=\"block text-xs font-semibold text-slate-500 break-words\">({formatAmountInWords(stats.localAmount)} FCFA)</span>"
+  },
+  {
+    "file": "src/components/BudgetReportsView.tsx",
+    "line": 316,
+    "expression": "<td className=\"p-3.5 text-right font-black text-slate-900\">{formatFCFA(ent.amount)}<span className=\"block text-[10px] font-semibold text-slate-500 break-words\">({formatAmountInWords(ent.amount)} FCFA)</span></td>"
+  },
+  {
+    "file": "src/components/CommuneComparatorModal.tsx",
+    "line": 161,
+    "expression": "<div className=\"text-2xl font-black text-slate-900\">{formatFCFA(communeA.total_budget_fcfa)}</div>"
+  },
+  {
+    "file": "src/components/CommuneComparatorModal.tsx",
+    "line": 162,
+    "expression": "<div className=\"text-xs font-bold text-brand-blue\">({formatAmountInWords(communeA.total_budget_fcfa)})</div>"
+  },
+  {
+    "file": "src/components/CommuneComparatorModal.tsx",
+    "line": 229,
+    "expression": "<div className=\"text-2xl font-black text-slate-900\">{formatFCFA(communeB.total_budget_fcfa)}</div>"
+  },
+  {
+    "file": "src/components/CommuneComparatorModal.tsx",
+    "line": 230,
+    "expression": "<div className=\"text-xs font-bold text-brand-orange\">({formatAmountInWords(communeB.total_budget_fcfa)})</div>"
+  },
+  {
+    "file": "src/components/CommuneComparatorModal.tsx",
+    "line": 281,
+    "expression": "<strong className=\"text-slate-900 font-black text-sm\">{formatFCFA(budgetDiff)} <span className=\"text-brand-blue text-xs font-bold\">({formatAmountInWords(budgetDiff)})</span></strong>"
+  },
+  {
+    "file": "src/components/Footer.tsx",
+    "line": 405,
+    "expression": "title=\"Consulter la Loi de Finances 2026 (15 339,2 Milliards FCFA)\""
+  },
+  {
+    "file": "src/components/HeroSection.tsx",
+    "line": 41,
+    "expression": "Explorez en toute transparence les <strong>{allProjects.length.toLocaleString('fr-FR')} chantiers d'écoles, de santé, d'eau potable et de voirie</strong>. Suivez les <strong>3 461 Mds FCFA</strong> d'investissements publics votés et participez activement au contrôle citoyen avec vos constats de terrain."
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 234,
+    "expression": "const totalLinesAmount = safeBudgetLines.reduce((sum, l) => sum + (l.montant_fcfa || 0), 0);"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 317,
+    "expression": "const totalProjectsBudget = relatedProjects.reduce((sum, p) => sum + (p.budget_amount_fcfa || 0), 0);"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 334,
+    "expression": "const text = `Chantier citoyen : ${proj.title} - Budget : ${formatFCFA(proj.budget_amount_fcfa)} (${formatAmountInWords(proj.budget_amount_fcfa)}) - ${proj.commune_name || 'Côte d\\'Ivoire'}. Suivi transparent sur SuiviBudget CI : https://suivibudget.ci/`;"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 613,
+    "expression": "{formatFCFA(totalProjectsBudget > 0 ? totalProjectsBudget : institution.budget_investment_fcfa)}"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 616,
+    "expression": "({formatAmountInWords(totalProjectsBudget > 0 ? totalProjectsBudget : institution.budget_investment_fcfa)})"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 638,
+    "expression": "En tant que commune périphérique du District Autonome d'Abidjan, <strong>{institution.name}</strong> bénéficie d'une <strong>Dotation Globale d'Équipement (DGE) de {formatFCFA(institution.budget_investment_fcfa)}</strong> ({formatAmountInWords(institution.budget_investment_fcfa)}) inscrite au Budget de l'État. Ces <strong>{relatedProjects.length} chantiers physiques</strong> sont individualisés pour le bitumage, le reprofilage de voies, les dispensaires et les infrastructures scolaires de proximité."
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 840,
+    "expression": "{formatFCFA(proj.budget_amount_fcfa)}"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 843,
+    "expression": "({formatAmountInWords(proj.budget_amount_fcfa)})"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1077,
+    "expression": "{formatQualifiedFCFA(primTotal, prim.precision)} <span className=\"block text-xs font-semibold text-brand-blue break-words\">({formatAmountInWords(primTotal)} FCFA)</span>"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1139,
+    "expression": "{formatFCFA(stateTotal)}"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1142,
+    "expression": "({formatAmountInWords(stateTotal)})"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1150,
+    "expression": "<strong className=\"text-slate-900\">{formatFCFA(institution.budget_functioning_fcfa)} ({formatAmountInWords(institution.budget_functioning_fcfa)})</strong>"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1154,
+    "expression": "<strong className=\"text-slate-900\">{formatFCFA(institution.budget_investment_fcfa)} ({formatAmountInWords(institution.budget_investment_fcfa)})</strong>"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1195,
+    "expression": "{exactPrimitive && localRev !== null ? formatFCFA(localRev) : 'Montant non calculé'}"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1198,
+    "expression": "{exactPrimitive && localRev !== null ? `(${formatAmountInWords(localRev)})` : ''}"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1250,
+    "expression": "<span className=\"text-brand-blue break-words\">■ Subvention de l'État : {statePct}% ({formatFCFA(stateTotal)} — {formatAmountInWords(stateTotal)} FCFA)</span>"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1251,
+    "expression": "<span className=\"text-navy-900 break-words\">■ Recettes propres {isDistrict ? 'District' : isRegion ? 'Région' : 'Mairie'} : {localPct}% ({formatFCFA(localRev)} — {formatAmountInWords(localRev)} FCFA)</span>"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1274,
+    "expression": "{formatQualifiedFCFA(prim.investment_voted_fcfa, prim.investment_voted_fcfa == null ? 'UNKNOWN' : prim.precision)} {prim.investment_voted_fcfa != null && <span className=\"text-xs font-semibold text-brand-blue break-words\">({formatAmountInWords(prim.investment_voted_fcfa)} FCFA)</span>}{' '}"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1292,
+    "expression": "{formatQualifiedFCFA(prim.functioning_voted_fcfa, prim.functioning_voted_fcfa == null ? 'UNKNOWN' : prim.precision)} {prim.functioning_voted_fcfa != null && <span className=\"text-xs font-semibold text-brand-blue break-words\">({formatAmountInWords(prim.functioning_voted_fcfa)} FCFA)</span>}{' '}"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1316,
+    "expression": "<span className=\"text-emerald-700\">■ Investissements Votés : {primInvPct}% ({formatQualifiedFCFA(prim.investment_voted_fcfa, prim.precision)}{prim.investment_voted_fcfa != null ? ` — ${formatAmountInWords(prim.investment_voted_fcfa)} FCFA` : ''})</span>"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1317,
+    "expression": "<span className=\"text-slate-600\">■ Fonctionnement & Salaires : {primFonctPct}% ({formatQualifiedFCFA(prim.functioning_voted_fcfa, prim.precision)}{prim.functioning_voted_fcfa != null ? ` — ${formatAmountInWords(prim.functioning_voted_fcfa)} FCFA` : ''})</span>"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1410,
+    "expression": "{formatFCFA(institution.total_budget_fcfa)}"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1413,
+    "expression": "{formatAmountInWords(institution.total_budget_fcfa)}"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1428,
+    "expression": "<span className=\"text-lg font-black text-slate-900 block break-words\">{formatFCFA(institution.budget_functioning_fcfa)}</span>"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1430,
+    "expression": "<span className=\"text-[10px] font-semibold text-sky-900 block\">({formatAmountInWords(institution.budget_functioning_fcfa)})</span>"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1435,
+    "expression": "<span className=\"text-lg font-black text-slate-900 block break-words\">{formatFCFA(institution.budget_investment_fcfa)}</span>"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1437,
+    "expression": "<span className=\"text-[10px] font-semibold text-emerald-900 block\">({formatAmountInWords(institution.budget_investment_fcfa)})</span>"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1500,
+    "expression": "Tranche financée par la <strong className=\"text-slate-900\">Dotation Globale d'Équipement (DGE) de l'État</strong> à hauteur de <strong className=\"text-slate-900\">{formatFCFA(institution.budget_investment_fcfa)}</strong> ({formatAmountInWords(institution.budget_investment_fcfa)}). Les {relatedProjects.length} chantiers physiques correspondants sont détaillés dans l'onglet dédié."
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1504,
+    "expression": "Opérations d'investissements publics inscrits au Budget National pour un volume cumulé de <strong className=\"text-slate-900\">{formatFCFA(totalProjectsBudget)}</strong> ({formatAmountInWords(totalProjectsBudget)}) finançant <strong className=\"text-slate-900\">{relatedProjects.length} chantiers et équipements</strong> pour le territoire de <strong className=\"text-slate-900\">{institution.name}</strong>."
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1524,
+    "expression": "Dépenses d'Investissement Public Votées : {formatFCFA(institution.budget_investment_fcfa)} ({formatAmountInWords(institution.budget_investment_fcfa)} FCFA)"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1528,
+    "expression": "Cette enveloppe de <strong className=\"text-slate-900\">{formatAmountInWords(institution.budget_investment_fcfa)}</strong>{investmentPct > 0 ? ` (${investmentPct}% du budget total)` : ''} est inscrite à la Loi de Finances 2026 pour les investissements matériels, logistiques, numériques et d'aménagement de <strong className=\"text-slate-900\">{institution.name}</strong>."
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1615,
+    "expression": "<div className=\"text-xs break-words\">{formatFCFA(line.montant_fcfa)}</div>"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1617,
+    "expression": "{formatAmountInWords(line.montant_fcfa)}"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1631,
+    "expression": "{formatFCFA(filteredLines.reduce((acc, l) => acc + (l.montant_fcfa || 0), 0))}"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1634,
+    "expression": "{formatAmountInWords(filteredLines.reduce((acc, l) => acc + (l.montant_fcfa || 0), 0))}"
+  },
+  {
+    "file": "src/components/InstitutionDetailModal.tsx",
+    "line": 1654,
+    "expression": "Les montants officiels votés pour <strong>{institution.name}</strong> s'élèvent à <strong>{formatFCFA(institution.budget_functioning_fcfa)}</strong> ({formatAmountInWords(institution.budget_functioning_fcfa)} — {functioningPct}%) en fonctionnement et <strong>{formatFCFA(institution.budget_investment_fcfa)}</strong> ({formatAmountInWords(institution.budget_investment_fcfa)} — {investmentPct}%) en investissements publics."
+  },
+  {
+    "file": "src/components/LocalBudgetHistoryView.tsx",
+    "line": 132,
+    "expression": "{formatRecordAmount(ca, 'total_realized')}"
+  },
+  {
+    "file": "src/components/LocalBudgetHistoryView.tsx",
+    "line": 135,
+    "expression": "sur {formatRecordAmount(ca, 'total_planned')} votés au Budget"
+  },
+  {
+    "file": "src/components/LocalBudgetHistoryView.tsx",
+    "line": 142,
+    "expression": "<strong className=\"text-slate-900\">{formatRecordAmount(ca, 'operating_realized')}</strong>"
+  },
+  {
+    "file": "src/components/LocalBudgetHistoryView.tsx",
+    "line": 146,
+    "expression": "<strong className=\"text-slate-900\">{formatRecordAmount(ca, 'investment_realized')}</strong>"
+  },
+  {
+    "file": "src/components/LocalBudgetHistoryView.tsx",
+    "line": 152,
+    "expression": "{ca.surplus_or_deficit >= 0 ? '+' : ''}{formatRecordAmount(ca, 'surplus_or_deficit')}"
+  },
+  {
+    "file": "src/components/LocalBudgetHistoryView.tsx",
+    "line": 207,
+    "expression": "{formatRecordAmount(b, 'total_amount')}"
+  },
+  {
+    "file": "src/components/LocalBudgetHistoryView.tsx",
+    "line": 218,
+    "expression": "<strong className=\"text-slate-900\">{formatRecordAmount(b, 'operating_amount')}{isExactAmount(b, 'operating_amount') && isExactAmount(b, 'total_amount') && b.operating_percentage != null ? ` (${b.operating_percentage.toFixed(1)} %)` : ''}</strong>"
+  },
+  {
+    "file": "src/components/LocalBudgetHistoryView.tsx",
+    "line": 222,
+    "expression": "<strong className=\"text-emerald-950\">{formatRecordAmount(b, 'investment_amount')}{isExactAmount(b, 'investment_amount') && isExactAmount(b, 'total_amount') && b.investment_percentage != null ? ` (${b.investment_percentage.toFixed(1)} %)` : ''}</strong>"
+  },
+  {
+    "file": "src/components/OfficialDocRequestModal.tsx",
+    "line": 257,
+    "expression": "`- Montant alloué : ${formatFCFA(project.budget_amount_fcfa)} (Exercice ${project.fiscal_year || 2026})\\n` +"
+  },
+  {
+    "file": "src/components/ProjectAccountabilityPassport.tsx",
+    "line": 53,
+    "expression": "if (fact.label.includes('FCFA')) return formatQualifiedFCFA(typeof fact.value === 'number' ? fact.value : null, fact.amount_precision);"
+  },
+  {
+    "file": "src/components/ProjectCard.tsx",
+    "line": 127,
+    "expression": "{formatFCFA(project.budget_amount_fcfa)}"
+  },
+  {
+    "file": "src/components/ProjectCard.tsx",
+    "line": 130,
+    "expression": "({formatAmountInWords(project.budget_amount_fcfa)} FCFA)"
+  },
+  {
+    "file": "src/components/ProjectDetailModal.tsx",
+    "line": 75,
+    "expression": "` *Budget Alloué :* ${formatFCFA(project.budget_amount_fcfa)} (${formatAmountInWords(project.budget_amount_fcfa)} FCFA)\\n` +"
+  },
+  {
+    "file": "src/components/ProjectDetailModal.tsx",
+    "line": 239,
+    "expression": "{formatFCFA(project.budget_amount_fcfa)}"
+  },
+  {
+    "file": "src/components/ProjectDetailModal.tsx",
+    "line": 242,
+    "expression": "({formatAmountInWords(project.budget_amount_fcfa)} FCFA)"
+  },
+  {
+    "file": "src/components/SendProofModal.tsx",
+    "line": 644,
+    "expression": "{formatFCFA(selectedProject.budget_amount_fcfa)}"
+  },
+  {
+    "file": "src/components/SendProofModal.tsx",
+    "line": 717,
+    "expression": "<span className=\"font-bold text-brand-blue\">{formatFCFA(p.budget_amount_fcfa)}</span>"
+  },
+  {
+    "file": "src/components/SocialPostGenerator.tsx",
+    "line": 112,
+    "expression": "[{proj.commune_name}] {proj.title} ({formatFCFA(proj.budget_amount_fcfa)})"
+  },
+  {
+    "file": "src/components/SocialPostGenerator.tsx",
+    "line": 145,
+    "expression": "<span className=\"text-xl sm:text-2xl font-black text-amber-400\">{formatFCFA(selectedProject.budget_amount_fcfa)}</span>"
+  },
+  {
+    "file": "src/components/SocialPostGenerator.tsx",
+    "line": 148,
+    "expression": "({formatAmountInWords(selectedProject.budget_amount_fcfa)} FCFA)"
+  },
+  {
+    "file": "src/components/SpotlightSearchModal.tsx",
+    "line": 227,
+    "expression": "return `${locLabel} • ${m.is_tax_quota_commune ? \"Autonomie fiscale DGI\" : `Dotation : ${formatFCFA(m.total_budget_fcfa)} (${formatAmountInWords(m.total_budget_fcfa)})`}`;"
+  },
+  {
+    "file": "src/components/SpotlightSearchModal.tsx",
+    "line": 262,
+    "expression": "Chef-lieu : {r.departement} • Budget : {formatFCFA(r.total_budget_fcfa)} ({formatAmountInWords(r.total_budget_fcfa)} FCFA)"
+  },
+  {
+    "file": "src/components/SpotlightSearchModal.tsx",
+    "line": 368,
+    "expression": "<span className=\"font-black text-slate-900\">{formatFCFA(p.budget_amount_fcfa)}</span> <span className=\"text-brand-blue font-bold\">({formatAmountInWords(p.budget_amount_fcfa)})</span>"
+  },
+  {
+    "file": "src/components/StatImpactBanner.tsx",
+    "line": 53,
+    "expression": "{stats.totalInvestmentsFcfa ? formatCompactFCFA(stats.totalInvestmentsFcfa) : 'Montant à confirmer'}"
+  },
+  {
+    "file": "src/components/institutions/BudgetActionList.tsx",
+    "line": 57,
+    "expression": "{act.amount_fcfa != null ? formatFCFA(act.amount_fcfa) : 'Non individualisé'}"
+  },
+  {
+    "file": "src/components/institutions/BudgetActionList.tsx",
+    "line": 61,
+    "expression": "{formatAmountInWords(act.amount_fcfa)}"
+  },
+  {
+    "file": "src/components/institutions/BudgetProgramCard.tsx",
+    "line": 139,
+    "expression": "{formatFCFA(program.amount_fcfa)}"
+  },
+  {
+    "file": "src/components/institutions/BudgetProgramCard.tsx",
+    "line": 142,
+    "expression": "{formatAmountInWords(program.amount_fcfa)}"
+  },
+  {
+    "file": "src/components/institutions/BudgetProgramCard.tsx",
+    "line": 156,
+    "expression": "{formatFCFA(program.amount_fcfa)}"
+  },
+  {
+    "file": "src/components/institutions/LinkedProjectCard.tsx",
+    "line": 58,
+    "expression": "{formatFCFA(project.budget_amount_fcfa)}"
+  },
+  {
+    "file": "src/components/institutions/LinkedProjectCard.tsx",
+    "line": 61,
+    "expression": "{formatAmountInWords(project.budget_amount_fcfa)}"
+  },
+  {
+    "file": "src/components/institutions/MinistryBudgetHeader.tsx",
+    "line": 35,
+    "expression": "{formatFCFA(budget.total_budget_fcfa)}"
+  },
+  {
+    "file": "src/components/institutions/MinistryBudgetHeader.tsx",
+    "line": 38,
+    "expression": "{formatAmountInWords(budget.total_budget_fcfa)}"
+  },
+  {
+    "file": "src/components/institutions/MinistryBudgetProgramView.tsx",
+    "line": 72,
+    "expression": "{formatFCFA(totalBudget)}"
+  },
+  {
+    "file": "src/components/institutions/MinistryBudgetProgramView.tsx",
+    "line": 76,
+    "expression": "{formatAmountInWords(totalBudget)}"
+  },
+  {
+    "file": "src/components/institutions/MinistryBudgetProgramView.tsx",
+    "line": 114,
+    "expression": "<div className=\"text-[11px] text-slate-500 font-mono mt-0.5\">{formatFCFA(proj.budget_amount_fcfa)}</div>"
+  },
+  {
+    "file": "src/utils/budgetCycleEngine.ts",
+    "line": 263,
+    "expression": "? `${amendments.length} modification(s) budgétaire(s) officielle(s) documentée(s) pour un solde net de ${netTotalDelta !== null ? formatFCFA(netTotalDelta) : 'montant à corroborer'}.`"
+  },
+  {
+    "file": "src/utils/budgetCycleEngine.ts",
+    "line": 326,
+    "expression": "? `${formatFCFA(initialBudget.total.amount)} (BP initial) ${netTotalDelta >= 0 ? '+' : '-'} ${formatFCFA(Math.abs(netTotalDelta))} (Modifications nettes) = ${formatFCFA(finalTotalAmount)}`"
+  },
+  {
+    "file": "src/utils/budgetCycleEngine.ts",
+    "line": 368,
+    "expression": "formula: `${formatFCFA(initialBudget.total.amount)} (BP) ${netTotalDelta >= 0 ? '+' : '-'} ${formatFCFA(Math.abs(netTotalDelta))} (Actes connus) = ${formatFCFA(initialBudget.total.amount + netTotalDelta)}`"
+  },
+  {
+    "file": "src/utils/formatters.ts",
+    "line": 5,
+    "expression": "export function formatQualifiedFCFA(value: number | null | undefined, precision: AmountPrecision = 'EXACT'): string {"
+  },
+  {
+    "file": "src/utils/formatters.ts",
+    "line": 8,
+    "expression": "return prefix + formatFCFA(value);"
+  },
+  {
+    "file": "src/utils/formatters.ts",
+    "line": 17,
+    "expression": "return formatQualifiedFCFA(typeof value === 'number' ? value : null, amountPrecision(record, String(field)));"
+  },
+  {
+    "file": "src/utils/formatters.ts",
+    "line": 27,
+    "expression": "export function formatFCFA(amount: number | null | undefined): string {"
+  },
+  {
+    "file": "src/utils/formatters.ts",
+    "line": 40,
+    "expression": "export function formatCompactFCFA(amount: number | null | undefined): string {"
+  },
+  {
+    "file": "src/utils/formatters.ts",
+    "line": 52,
+    "expression": "return formatFCFA(amount);"
+  },
+  {
+    "file": "src/utils/formatters.ts",
+    "line": 58,
+    "expression": "export function formatAmountInWords(amount: number | null | undefined): string {"
+  },
+  {
+    "file": "src/utils/formatters.ts",
+    "line": 90,
+    "expression": "const formattedNumber = formatFCFA(amount);"
+  },
+  {
+    "file": "src/utils/formatters.ts",
+    "line": 91,
+    "expression": "const words = formatAmountInWords(amount);"
+  },
+  {
+    "file": "src/utils/projectPassport.ts",
+    "line": 451,
+    "expression": "value: project.budget_amount_fcfa > 0 ? formatFCFA(project.budget_amount_fcfa) : 'Non renseigné',"
+  },
+  {
+    "file": "src/utils/projectPassport.ts",
+    "line": 502,
+    "expression": "value: formatRecordAmount(matchedProc, 'award_amount'),"
+  },
+  {
+    "file": "src/utils/projectPassport.ts",
+    "line": 591,
+    "expression": "value: formatRecordAmount(matchedOp, 'planned_amount'),"
+  },
+  {
+    "file": "src/utils/projectPassport.ts",
+    "line": 596,
+    "expression": "value: formatRecordAmount(matchedOp, 'executed_amount'),"
+  },
+  {
+    "file": "src/utils/socialTemplates.ts",
+    "line": 10,
+    "expression": "*Budget Voté :* *${formatFCFA(project.budget_amount_fcfa)} (${formatAmountInWords(project.budget_amount_fcfa)} FCFA)*"
+  },
+  {
+    "file": "src/utils/socialTemplates.ts",
+    "line": 29,
+    "expression": "Budget Alloué : ${formatFCFA(project.budget_amount_fcfa)} (${formatAmountInWords(project.budget_amount_fcfa)} FCFA)"
+  },
+  {
+    "file": "src/utils/socialTemplates.ts",
+    "line": 47,
+    "expression": "Budget : ${formatFCFA(project.budget_amount_fcfa)} (${formatAmountInWords(project.budget_amount_fcfa)} FCFA)"
+  },
+  {
+    "file": "src/utils/socialTemplates.ts",
+    "line": 63,
+    "expression": "• Montant Voté : ${formatFCFA(project.budget_amount_fcfa)} (${formatAmountInWords(project.budget_amount_fcfa)} FCFA)"
+  },
+  {
+    "file": "src/services/dataStore.ts",
+    "line": 287,
+    "expression": "description: \"Texte officiel et intégral de la Loi de Finances Initiale 2026 (15 339,2 milliards FCFA) fixant l'ensemble des recettes, dotations, charges budgétaires et programmes de l'État ivoirien, votée par le Parlement et promulguée au Journal Officiel de la République de Côte d'Ivoire.\","
+  },
+  {
+    "file": "src/services/dataStore.ts",
+    "line": 319,
+    "expression": "description: \"Document officiel de vulgarisation budgétaire présentant les 15 339,2 milliards FCFA de dépenses et investissements publics (LFI 2026), ventilés par grandes priorités (Éducation, Santé, Routes, Sécurité).\","
+  },
+  {
+    "file": "src/services/dataStore.ts",
+    "line": 1077,
+    "expression": "const totalInvestmentsFcfa = this.projects.reduce((sum, p) => sum + p.budget_amount_fcfa, 0);"
+  }
+]

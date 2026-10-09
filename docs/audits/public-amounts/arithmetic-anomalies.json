@@ -1,0 +1,154 @@
+[
+  {
+    "id": "arithmetic:lbud-bangolo-2026",
+    "record_id": "lbud-bangolo-2026",
+    "sum": null,
+    "issues": [
+      "UNKNOWN_COMPONENT"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-bongouanou-2026",
+    "record_id": "lbud-bongouanou-2026",
+    "sum": null,
+    "issues": [
+      "UNKNOWN_COMPONENT"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-katiola-2026",
+    "record_id": "lbud-katiola-2026",
+    "sum": null,
+    "issues": [
+      "UNKNOWN_COMPONENT"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-madinani-2026",
+    "record_id": "lbud-madinani-2026",
+    "sum": null,
+    "issues": [
+      "UNKNOWN_COMPONENT"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-m-bahiakro-2026",
+    "record_id": "lbud-m-bahiakro-2026",
+    "sum": 1110648000,
+    "issues": [
+      "TOTAL_MISMATCH"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-toumodi-2026",
+    "record_id": "lbud-toumodi-2026",
+    "sum": null,
+    "issues": [
+      "UNKNOWN_COMPONENT"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-vavoua-2026",
+    "record_id": "lbud-vavoua-2026",
+    "sum": 1689100000,
+    "issues": [
+      "TOTAL_MISMATCH"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-yopougon-2026",
+    "record_id": "lbud-yopougon-2026",
+    "sum": null,
+    "issues": [
+      "UNKNOWN_COMPONENT"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-de-la-bagoue-2026",
+    "record_id": "lbud-de-la-bagoue-2026",
+    "sum": null,
+    "issues": [
+      "UNKNOWN_COMPONENT"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-du-bere-2026",
+    "record_id": "lbud-du-bere-2026",
+    "sum": 5428714000,
+    "issues": [
+      "TOTAL_MISMATCH"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-du-gbeke-2026",
+    "record_id": "lbud-du-gbeke-2026",
+    "sum": null,
+    "issues": [
+      "UNKNOWN_COMPONENT"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-du-gontougo-2026",
+    "record_id": "lbud-du-gontougo-2026",
+    "sum": null,
+    "issues": [
+      "UNKNOWN_COMPONENT"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-du-haut-sassandra-2026",
+    "record_id": "lbud-du-haut-sassandra-2026",
+    "sum": null,
+    "issues": [
+      "UNKNOWN_COMPONENT"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-du-moronou-2026",
+    "record_id": "lbud-du-moronou-2026",
+    "sum": 7571021000,
+    "issues": [
+      "TOTAL_MISMATCH"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-du-worodougou-2026",
+    "record_id": "lbud-du-worodougou-2026",
+    "sum": null,
+    "issues": [
+      "UNKNOWN_COMPONENT"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-tiassale-2026",
+    "record_id": "lbud-tiassale-2026",
+    "sum": null,
+    "issues": [
+      "UNKNOWN_COMPONENT"
+    ]
+  },
+  {
+    "id": "arithmetic:lbud-tiassale-2025",
+    "record_id": "lbud-tiassale-2025",
+    "sum": null,
+    "issues": [
+      "UNKNOWN_COMPONENT"
+    ]
+  },
+  {
+    "id": "arithmetic:import-d48c41af0cd3e5853efeafdb5058e7e71f971c12a10740c0d4a11a65a9e7e8dc",
+    "record_id": "import-d48c41af0cd3e5853efeafdb5058e7e71f971c12a10740c0d4a11a65a9e7e8dc",
+    "sum": null,
+    "issues": [
+      "UNKNOWN_COMPONENT"
+    ]
+  },
+  {
+    "id": "arithmetic:import-e6d25d636215ab4f3f5006bcb1f7ef9eb3d9798aea446915d4fad4e0ddf51c79",
+    "record_id": "import-e6d25d636215ab4f3f5006bcb1f7ef9eb3d9798aea446915d4fad4e0ddf51c79",
+    "sum": null,
+    "issues": [
+      "UNKNOWN_COMPONENT"
+    ]
+  }
+]

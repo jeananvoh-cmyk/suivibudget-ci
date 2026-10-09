@@ -1,0 +1,459 @@
+{
+  "captured_at": "2026-10-09T00:22:14.004Z",
+  "project": "cdesuvcozcetdtvibgqs",
+  "credential": "anon",
+  "methods": [
+    "GET"
+  ],
+  "remote_writes": 0,
+  "openapi_status": 401,
+  "discovered_financial_tables": [],
+  "requests": [
+    {
+      "table": "local_budgets",
+      "offset": 0,
+      "status": 200,
+      "rows": 3,
+      "error": null
+    },
+    {
+      "table": "administrative_accounts",
+      "offset": 0,
+      "status": 200,
+      "rows": 1,
+      "error": null
+    },
+    {
+      "table": "ca_financial_lines",
+      "offset": 0,
+      "status": 200,
+      "rows": 8,
+      "error": null
+    },
+    {
+      "table": "ca_investment_operations",
+      "offset": 0,
+      "status": 200,
+      "rows": 3,
+      "error": null
+    },
+    {
+      "table": "ca_procurement_matches",
+      "offset": 0,
+      "status": 200,
+      "rows": 3,
+      "error": null
+    },
+    {
+      "table": "institutions",
+      "offset": 0,
+      "status": 200,
+      "rows": 4,
+      "error": null
+    },
+    {
+      "table": "projects",
+      "offset": 0,
+      "status": 200,
+      "rows": 0,
+      "error": null
+    },
+    {
+      "table": "budget_lines",
+      "offset": 0,
+      "status": 401,
+      "rows": null,
+      "error": "42501"
+    },
+    {
+      "table": "budget_revenue_sources",
+      "offset": 0,
+      "status": 401,
+      "rows": null,
+      "error": "42501"
+    }
+  ],
+  "tables": {
+    "local_budgets": [
+      {
+        "id": "import-ccb778ee347fbbe513105fde95313fe697d4e2423b9e9c481ee63d28d4a26c7d",
+        "institution_id": "inst-com-bingerville",
+        "institution_type": "COMMUNE",
+        "institution_name": "Mairie de Bingerville",
+        "fiscal_year": 2026,
+        "budget_type": "AUTORISATION_EXECUTION",
+        "status": "PUBLISHED",
+        "is_current_version": false,
+        "version_number": 2,
+        "total_amount": 4046222000,
+        "operating_amount": 1877888000,
+        "investment_amount": 2168334000,
+        "amount_precision": "EXACT",
+        "adoption_date": "2026-01-27",
+        "verification_status": "AIP_VERIFIED",
+        "document_url": "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2026-de-la-commune-de-bingerville-arrete-a-plus-de-4-milliards-fcfa/",
+        "document_name": "AIP — Budget primitif 2026 de Bingerville",
+        "updated_at": "2026-10-01T20:00:41.910718+00:00",
+        "import_source": {
+          "url": "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2026-de-la-commune-de-bingerville-arrete-a-plus-de-4-milliards-fcfa/",
+          "date": "2026-01-28",
+          "name": "AIP — Budget primitif 2026 de Bingerville",
+          "date_kind": "PUBLISHED",
+          "reference": "Dépêche du 28 janvier 2026, paragraphes 1 à 3"
+        },
+        "import_precision": {
+          "total_amount": "EXACT",
+          "operating_amount": "EXACT",
+          "investment_amount": "EXACT"
+        }
+      },
+      {
+        "id": "import-d48c41af0cd3e5853efeafdb5058e7e71f971c12a10740c0d4a11a65a9e7e8dc",
+        "institution_id": "inst-com-tiassale",
+        "institution_type": "COMMUNE",
+        "institution_name": "Mairie de Tiassalé",
+        "fiscal_year": 2024,
+        "budget_type": "PRIMITIF_ADOPTE",
+        "status": "PUBLISHED",
+        "is_current_version": false,
+        "version_number": 1,
+        "total_amount": 820150000,
+        "operating_amount": null,
+        "investment_amount": null,
+        "amount_precision": "APPROXIMATE",
+        "adoption_date": "2024-03-12",
+        "verification_status": "AIP_VERIFIED",
+        "document_url": null,
+        "document_name": "Dépêche AIP — Budget primitif 2024 de Tiassalé",
+        "updated_at": "2026-10-04T17:03:30.635288+00:00",
+        "import_source": {
+          "url": "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2024-de-la-commune-de-tiassale-en-hausse-de-pres-de-6/?amp=1",
+          "date": "2024-03-13",
+          "name": "Agence Ivoirienne de Presse (AIP)",
+          "date_kind": "PUBLISHED",
+          "reference": "AIP-TIASSALE-BP-2024-20240313"
+        },
+        "import_precision": {
+          "total_amount": "APPROXIMATE",
+          "operating_amount": "UNKNOWN",
+          "investment_amount": "UNKNOWN"
+        }
+      },
+      {
+        "id": "import-e6d25d636215ab4f3f5006bcb1f7ef9eb3d9798aea446915d4fad4e0ddf51c79",
+        "institution_id": "inst-com-cocody",
+        "institution_type": "COMMUNE",
+        "institution_name": "Mairie de Cocody",
+        "fiscal_year": 2026,
+        "budget_type": "PRIMITIF_ADOPTE",
+        "status": "PUBLISHED",
+        "is_current_version": false,
+        "version_number": 1,
+        "total_amount": 19764660000,
+        "operating_amount": null,
+        "investment_amount": null,
+        "amount_precision": "EXACT",
+        "adoption_date": "2026-02-25",
+        "verification_status": "SECONDARY_TO_CORROBORATE",
+        "document_url": "https://news.abidjan.net/articles/746842/1ere-session-du-conseil-municipal-de-cocody-un-budget-primitif-de-197-milliards-pour-booster-les-travaux-innovants",
+        "document_name": "Abidjan.net / Le Nouveau Réveil",
+        "updated_at": "2026-10-02T12:48:43.594422+00:00",
+        "import_source": {
+          "url": "https://news.abidjan.net/articles/746842/1ere-session-du-conseil-municipal-de-cocody-un-budget-primitif-de-197-milliards-pour-booster-les-travaux-innovants",
+          "date": "2026-02-25",
+          "name": "Abidjan.net / Le Nouveau Réveil",
+          "date_kind": "PUBLISHED",
+          "reference": "1ère session du conseil municipal de Cocody, 25 février 2026"
+        },
+        "import_precision": {
+          "total_amount": "EXACT",
+          "operating_amount": "UNKNOWN",
+          "investment_amount": "UNKNOWN"
+        }
+      }
+    ],
+    "administrative_accounts": [
+      {
+        "id": "ca-tiassale-2024",
+        "institution_id": "inst-com-tiassale",
+        "institution_type": "COMMUNE",
+        "institution_name": "Mairie de Tiassalé",
+        "fiscal_year": 2024,
+        "status": "PUBLISHED",
+        "operating_planned": 618000000,
+        "operating_realized": 726260304,
+        "operating_revenue_realized": 883184725,
+        "investment_planned": 389841000,
+        "investment_realized": 332995454,
+        "investment_revenue_realized": 333151833,
+        "total_planned": 1007841000,
+        "total_realized": 1059255758,
+        "surplus_or_deficit": 0,
+        "source_document": "COMMUNE DE TIASSALE — Compte administratif 2024",
+        "source_url": null,
+        "source_page": null,
+        "approval_date": null,
+        "verification_status": "OFFICIAL_DOCUMENT",
+        "updated_at": "2026-10-04T17:03:30.635288+00:00",
+        "source_document_id": null,
+        "operating_revenue_planned": 618000000,
+        "operating_revenue_emitted": null,
+        "operating_revenue_collected": 883184725,
+        "operating_expenditure_planned": 618000000,
+        "operating_expenditure_engaged": 726260304,
+        "investment_revenue_planned": 389841000,
+        "investment_revenue_emitted": null,
+        "investment_revenue_collected": 333151833,
+        "investment_expenditure_planned": 389841000,
+        "investment_expenditure_engaged": 332995454,
+        "total_revenue_collected": 1216336558,
+        "total_expenditure_engaged": 1059255758,
+        "arithmetic_difference": 157080800
+      }
+    ],
+    "ca_financial_lines": [
+      {
+        "id": "caf-tias-inv-exp-eng",
+        "ca_id": "ca-tiassale-2024",
+        "institution_id": "inst-com-tiassale",
+        "fiscal_year": 2024,
+        "section": "INVESTMENT",
+        "flow_type": "EXPENDITURE",
+        "exact_heading": "Investissement — dépenses / réalisé",
+        "account_code": null,
+        "measure_type": "ENGAGED",
+        "amount_fcfa": 332995454,
+        "source_document_id": null,
+        "source_page": null,
+        "source_reference": "Synthèse du fichier comparé",
+        "verification_status": "VERIFIED",
+        "updated_at": "2026-09-29T11:32:10.256062+00:00"
+      },
+      {
+        "id": "caf-tias-inv-exp-plan",
+        "ca_id": "ca-tiassale-2024",
+        "institution_id": "inst-com-tiassale",
+        "fiscal_year": 2024,
+        "section": "INVESTMENT",
+        "flow_type": "EXPENDITURE",
+        "exact_heading": "Investissement — dépenses",
+        "account_code": null,
+        "measure_type": "PLANNED",
+        "amount_fcfa": 389841000,
+        "source_document_id": null,
+        "source_page": null,
+        "source_reference": "Synthèse du fichier comparé",
+        "verification_status": "VERIFIED",
+        "updated_at": "2026-09-29T11:32:10.256062+00:00"
+      },
+      {
+        "id": "caf-tias-inv-rev-col",
+        "ca_id": "ca-tiassale-2024",
+        "institution_id": "inst-com-tiassale",
+        "fiscal_year": 2024,
+        "section": "INVESTMENT",
+        "flow_type": "REVENUE",
+        "exact_heading": "Investissement — recettes / réalisé",
+        "account_code": null,
+        "measure_type": "COLLECTED",
+        "amount_fcfa": 333151833,
+        "source_document_id": null,
+        "source_page": null,
+        "source_reference": "Synthèse du fichier comparé",
+        "verification_status": "VERIFIED",
+        "updated_at": "2026-09-29T11:32:10.256062+00:00"
+      },
+      {
+        "id": "caf-tias-inv-rev-plan",
+        "ca_id": "ca-tiassale-2024",
+        "institution_id": "inst-com-tiassale",
+        "fiscal_year": 2024,
+        "section": "INVESTMENT",
+        "flow_type": "REVENUE",
+        "exact_heading": "Investissement — recettes",
+        "account_code": null,
+        "measure_type": "PLANNED",
+        "amount_fcfa": 389841000,
+        "source_document_id": null,
+        "source_page": null,
+        "source_reference": "Synthèse du fichier comparé",
+        "verification_status": "VERIFIED",
+        "updated_at": "2026-09-29T11:32:10.256062+00:00"
+      },
+      {
+        "id": "caf-tias-op-exp-eng",
+        "ca_id": "ca-tiassale-2024",
+        "institution_id": "inst-com-tiassale",
+        "fiscal_year": 2024,
+        "section": "OPERATING",
+        "flow_type": "EXPENDITURE",
+        "exact_heading": "Fonctionnement — dépenses / réalisé",
+        "account_code": null,
+        "measure_type": "ENGAGED",
+        "amount_fcfa": 726260304,
+        "source_document_id": null,
+        "source_page": null,
+        "source_reference": "Synthèse du fichier comparé",
+        "verification_status": "SOURCE_ANOMALY",
+        "updated_at": "2026-09-29T11:32:10.256062+00:00"
+      },
+      {
+        "id": "caf-tias-op-exp-plan",
+        "ca_id": "ca-tiassale-2024",
+        "institution_id": "inst-com-tiassale",
+        "fiscal_year": 2024,
+        "section": "OPERATING",
+        "flow_type": "EXPENDITURE",
+        "exact_heading": "Fonctionnement — dépenses",
+        "account_code": null,
+        "measure_type": "PLANNED",
+        "amount_fcfa": 618000000,
+        "source_document_id": null,
+        "source_page": null,
+        "source_reference": "Synthèse du fichier comparé",
+        "verification_status": "SOURCE_ANOMALY",
+        "updated_at": "2026-09-29T11:32:10.256062+00:00"
+      },
+      {
+        "id": "caf-tias-op-rev-col",
+        "ca_id": "ca-tiassale-2024",
+        "institution_id": "inst-com-tiassale",
+        "fiscal_year": 2024,
+        "section": "OPERATING",
+        "flow_type": "REVENUE",
+        "exact_heading": "Fonctionnement — recettes / réalisé",
+        "account_code": null,
+        "measure_type": "COLLECTED",
+        "amount_fcfa": 883184725,
+        "source_document_id": null,
+        "source_page": null,
+        "source_reference": "Synthèse du fichier comparé",
+        "verification_status": "SOURCE_ANOMALY",
+        "updated_at": "2026-09-29T11:32:10.256062+00:00"
+      },
+      {
+        "id": "caf-tias-op-rev-plan",
+        "ca_id": "ca-tiassale-2024",
+        "institution_id": "inst-com-tiassale",
+        "fiscal_year": 2024,
+        "section": "OPERATING",
+        "flow_type": "REVENUE",
+        "exact_heading": "Fonctionnement — recettes",
+        "account_code": null,
+        "measure_type": "PLANNED",
+        "amount_fcfa": 618000000,
+        "source_document_id": null,
+        "source_page": null,
+        "source_reference": "Synthèse du fichier comparé",
+        "verification_status": "SOURCE_ANOMALY",
+        "updated_at": "2026-09-29T11:32:10.256062+00:00"
+      }
+    ],
+    "ca_investment_operations": [
+      {
+        "id": "op-tias-2024-06",
+        "ca_id": "ca-tiassale-2024",
+        "institution_id": "inst-com-tiassale",
+        "fiscal_year": 2024,
+        "operation_reference": "Priorité n°6",
+        "title": "Construction de vingt (20) magasins au marché de Tiassalé",
+        "planned_amount": 28000000,
+        "executed_amount": 27850646,
+        "source_page": 36,
+        "source_reference": null
+      },
+      {
+        "id": "op-tias-2024-14",
+        "ca_id": "ca-tiassale-2024",
+        "institution_id": "inst-com-tiassale",
+        "fiscal_year": 2024,
+        "operation_reference": "Priorité n°14",
+        "title": "Construction de trois (03) salles de classe à l'EPP François KADJO de Tiassalé",
+        "planned_amount": 15000000,
+        "executed_amount": 12413014,
+        "source_page": 36,
+        "source_reference": null
+      },
+      {
+        "id": "op-tias-2024-15",
+        "ca_id": "ca-tiassale-2024",
+        "institution_id": "inst-com-tiassale",
+        "fiscal_year": 2024,
+        "operation_reference": "REPORT",
+        "title": "Construction d'un bâtiment de trois salles de classe, bureau et latrines pour une nouvelle école primaire à Gardienkro",
+        "planned_amount": 29000000,
+        "executed_amount": 0,
+        "source_page": 36,
+        "source_reference": null
+      }
+    ],
+    "ca_procurement_matches": [
+      {
+        "id": "proc-tias-2024-06",
+        "operation_id": "op-tias-2024-06",
+        "contract_number": null,
+        "procurement_object": "CONSTRUCTION DE VINGT (20) MAGASINS AU MARCHE DE TIASSALE",
+        "award_amount": 27730380,
+        "match_level": "STRONG",
+        "source": "DGMP",
+        "source_url": "https://www.marchespublics.ci/uploads/ResultatsAvisAttribution/Resultats_avis_attribution_2024.pdf",
+        "verification_status": "Vérifié DGMP"
+      },
+      {
+        "id": "proc-tias-2024-14",
+        "operation_id": "op-tias-2024-14",
+        "contract_number": null,
+        "procurement_object": "CONSTRUCTION DE TROIS (03) SALLES DE CLASSE A L'EPP FRANCOIS KADJO DE TIASSALE",
+        "award_amount": 12413014,
+        "match_level": "STRONG",
+        "source": "DGMP",
+        "source_url": "https://www.marchespublics.ci/uploads/ResultatsAvisAttribution/Resultats_avis_attribution_2024.pdf",
+        "verification_status": "Vérifié DGMP"
+      },
+      {
+        "id": "proc-tias-2024-15",
+        "operation_id": "op-tias-2024-15",
+        "contract_number": null,
+        "procurement_object": "CONSTRUCTION D'UN BATIMENT DE TROIS SALLES DE CLASSE + BUREAU + DES LATRINES POUR LA CREATION D'UNE NOUVELLE ECOLE PRIMAIRE A GARDIENKRO",
+        "award_amount": 23725064,
+        "match_level": "STRONG",
+        "source": "DGMP",
+        "source_url": "https://www.marchespublics.ci/uploads/ResultatsAvisAttribution/Resultats_avis_attribution_2024.pdf",
+        "verification_status": "Vérifié DGMP"
+      }
+    ],
+    "institutions": [
+      {
+        "id": "inst-com-abobo",
+        "budget_functioning_fcfa": null,
+        "budget_investment_fcfa": null,
+        "total_budget_fcfa": null,
+        "updated_at": "2026-09-29T11:24:30.463231+00:00"
+      },
+      {
+        "id": "inst-com-bingerville",
+        "budget_functioning_fcfa": null,
+        "budget_investment_fcfa": null,
+        "total_budget_fcfa": null,
+        "updated_at": "2026-09-29T11:24:30.463231+00:00"
+      },
+      {
+        "id": "inst-com-cocody",
+        "budget_functioning_fcfa": null,
+        "budget_investment_fcfa": null,
+        "total_budget_fcfa": null,
+        "updated_at": "2026-10-02T12:48:24.75549+00:00"
+      },
+      {
+        "id": "inst-com-tiassale",
+        "budget_functioning_fcfa": null,
+        "budget_investment_fcfa": null,
+        "total_budget_fcfa": null,
+        "updated_at": "2026-09-29T11:24:30.463231+00:00"
+      }
+    ],
+    "projects": [],
+    "budget_lines": [],
+    "budget_revenue_sources": []
+  }
+}

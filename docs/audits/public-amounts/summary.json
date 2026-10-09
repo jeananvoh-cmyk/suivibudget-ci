@@ -1,0 +1,98 @@
+{
+  "generated_at": "2026-10-09T00:36:09.747Z",
+  "audited_master": "707b3b688f23bd33dc0f3504e13b79c65908dd50",
+  "pr29_head": "d479c1f9596538aac9caa82193ec766b4f4591e4",
+  "head_at_generation": "707b3b688f23bd33dc0f3504e13b79c65908dd50",
+  "institutions": 290,
+  "raw_projects": 7169,
+  "runtime_projects": 4708,
+  "observations": 24953,
+  "public_candidates": 24787,
+  "numeric_public_candidates": 24692,
+  "unknown_public_candidates": 95,
+  "verified_exact": 58,
+  "verification_coverage": 0.002348938927587883,
+  "statuses": {
+    "NOT_YET_CHECKED": 165,
+    "SOURCE_MISSING": 24438,
+    "MISMATCH": 14,
+    "VERIFIED_EXACT": 58,
+    "NOT_COMPARABLE": 7,
+    "DOCUMENTARY_LOCATION_MISSING": 105
+  },
+  "duplicate_ids": [],
+  "aggregates": 565,
+  "remote_requests": [
+    {
+      "table": "local_budgets",
+      "offset": 0,
+      "status": 200,
+      "rows": 3,
+      "error": null
+    },
+    {
+      "table": "administrative_accounts",
+      "offset": 0,
+      "status": 200,
+      "rows": 1,
+      "error": null
+    },
+    {
+      "table": "ca_financial_lines",
+      "offset": 0,
+      "status": 200,
+      "rows": 8,
+      "error": null
+    },
+    {
+      "table": "ca_investment_operations",
+      "offset": 0,
+      "status": 200,
+      "rows": 3,
+      "error": null
+    },
+    {
+      "table": "ca_procurement_matches",
+      "offset": 0,
+      "status": 200,
+      "rows": 3,
+      "error": null
+    },
+    {
+      "table": "institutions",
+      "offset": 0,
+      "status": 200,
+      "rows": 4,
+      "error": null
+    },
+    {
+      "table": "projects",
+      "offset": 0,
+      "status": 200,
+      "rows": 0,
+      "error": null
+    },
+    {
+      "table": "budget_lines",
+      "offset": 0,
+      "status": 401,
+      "rows": null,
+      "error": "42501"
+    },
+    {
+      "table": "budget_revenue_sources",
+      "offset": 0,
+      "status": 401,
+      "rows": null,
+      "error": "42501"
+    }
+  ],
+  "remote_writes": 0,
+  "limitations": [
+    "Fresh browser profile only: user-specific localStorage overlays cannot be inventoried globally.",
+    "Financial candidates and source-line details are not additive; do not sum this inventory.",
+    "Parameterized search/filter aggregates are recorded as formulas; not every possible subset is materialized.",
+    "SOURCE_MISSING means no precise source in the inspected record, not proof that no official document exists.",
+    "Coverage counts candidate observations, not a percentage of the national budget or a guarantee of reliability."
+  ]
+}

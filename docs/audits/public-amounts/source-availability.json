@@ -1,0 +1,386 @@
+[
+  {
+    "url": "https://news.abidjan.net/articles/746842/1ere-session-du-conseil-municipal-de-cocody-un-budget-primitif-de-197-milliards-pour-booster-les-travaux-innovants",
+    "status": 200,
+    "final_url": "https://news.abidjan.net/articles/746842/1ere-session-du-conseil-municipal-de-cocody-un-budget-primitif-de-197-milliards-pour-booster-les-travaux-innovants",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 84381,
+    "sha256": "adcfe1e7821bf09a67290056aacf9209fa16accab93818e1766ee97026bc9d37",
+    "checked_at": "2026-10-09T00:16:28.261Z"
+  },
+  {
+    "url": "https://www.koaci.com/article/2025/12/30/cote-divoire/politique/cote-divoire-mairie-de-yopougon-reconduction-entiere-des-taxes-municipales-de-2025-pour-lexercice-2026-un-budget-primitif-chiffre-a-plus-de-17-milliards-fcfa_193268.html",
+    "status": 200,
+    "final_url": "https://www.koaci.com/article/2025/12/30/cote-divoire/politique/cote-divoire-mairie-de-yopougon-reconduction-entiere-des-taxes-municipales-de-2025-pour-lexercice-2026-un-budget-primitif-chiffre-a-plus-de-17-milliards-fcfa_193268.html",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 86239,
+    "sha256": "3716bf92168477eefaa7ad959f6d4246d233cd94d163d6e6426522f6686ed1ff",
+    "checked_at": "2026-10-09T00:16:28.537Z"
+  },
+  {
+    "url": "https://www.aip.ci/electionpresidentielle2025/article.php?id=379819",
+    "status": 200,
+    "final_url": "https://www.aip.ci/electionpresidentielle2025/article.php?id=379819",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 36340,
+    "sha256": "ab5fcf4b8bf4fa1548f37c6604c88bf81f1ad2d25ac9e93588be9eb6500d86e7",
+    "checked_at": "2026-10-09T00:16:34.999Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-conseil-regional-de-la-bagoue-adopte-un-budget-primitif-2026-de-plus-de-886-milliards-fcfa/",
+    "status": 200,
+    "final_url": "https://www.aip.ci/cote-divoire-aip-le-conseil-regional-de-la-bagoue-adopte-un-budget-primitif-2026-de-plus-de-886-milliards-fcfa/",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 397573,
+    "sha256": "2d2ad38eb915026cc44b70e020db660e3f97d771528af49bf7b6fae5f14af909",
+    "checked_at": "2026-10-09T00:16:37.925Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-abengourou-la-commune-adopte-un-budget-de-37-milliards-fcfa-pour-accelerer-la-transformation-urbaine-et-le-developpement-durable/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:16:39.248Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2026-mairie-dadzope-en-hausse-de-3399-par-rapport-a-lannee-precedente/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:16:39.250Z"
+  },
+  {
+    "url": "https://www.fratmat.info/article/2640752/regions/bouakeconseil-municipal-linauguration-du-grand-marche-se-prepare",
+    "status": 200,
+    "final_url": "https://www.fratmat.info/article/2640752/regions/bouakeconseil-municipal-linauguration-du-grand-marche-se-prepare",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 299270,
+    "sha256": "4b7fdb0ffd877c2c1da92278d86e123bad33c041ccfbd853ef903ad7a0fbda46",
+    "checked_at": "2026-10-09T00:16:39.891Z"
+  },
+  {
+    "url": "https://www.fratmat.info/article/2641011/regions/bettie-un-budget-2026-de-plus-de-816-millions-fcfa-adopte-par-le-conseil-municipal",
+    "status": 200,
+    "final_url": "https://www.fratmat.info/article/2641011/regions/bettie-un-budget-2026-de-plus-de-816-millions-fcfa-adopte-par-le-conseil-municipal",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 301012,
+    "sha256": "8c7271ef87878e33637d8eb582559912a133b7c749a02370497fac6cb7617cdb",
+    "checked_at": "2026-10-09T00:16:39.906Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-un-budget-de-plus-dun-milliard-fcfa-adopte-pour-renforcer-la-securite-et-les-infrastructures-a-bangolo/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:16:51.255Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2026-de-la-commune-de-bingerville-arrete-a-plus-de-4-milliards-fcfa/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:16:51.256Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-maire-appelle-a-la-cohesion-pour-accelerer-le-developpement-de-la-commune-de-bondoukou/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:16:51.258Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-la-commune-de-bongouanou-execute-326-de-son-budget-primitif-au-premier-semestre-2026/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:16:51.259Z"
+  },
+  {
+    "url": "https://www.fratmat.info/article/2638319/societe/developpement-local-la-mairie-de-boundiali-multiplie-par-six-ses-investissements-en-sept-ans",
+    "status": 200,
+    "final_url": "https://www.fratmat.info/article/2638319/societe/developpement-local-la-mairie-de-boundiali-multiplie-par-six-ses-investissements-en-sept-ans",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 305998,
+    "sha256": "81ff4b6a8cfebce94b2bba9fcdab762aea52243cecdf9aba307b16bf67e269a0",
+    "checked_at": "2026-10-09T00:16:51.657Z"
+  },
+  {
+    "url": "https://www.koaci.com/article/2026/08/30/cote-divoire/economie/cote-divoire-dimbokro-6697-de-recettes-mobilisees-et-un-budget-de-215-milliards-fcfa-adama-coulibaly-accelere-les-investissements_200013.html",
+    "status": 200,
+    "final_url": "https://www.koaci.com/article/2026/08/30/cote-divoire/economie/cote-divoire-dimbokro-6697-de-recettes-mobilisees-et-un-budget-de-215-milliards-fcfa-adama-coulibaly-accelere-les-investissements_200013.html",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 93482,
+    "sha256": "403ab22157f8f5138296effede11f006ba37fe7ce0311d680cd1fb1cd6ee1022",
+    "checked_at": "2026-10-09T00:16:52.408Z"
+  },
+  {
+    "url": "https://www.koaci.com/article/2026/04/18/cote-divoire/societe/cote-divoire-gagnoa-le-budget-primitif-de-lexercice-2026-de-plus-de-3-milliards-fcfa-adopte-en-conseil-municipal_195970.html",
+    "status": 200,
+    "final_url": "https://www.koaci.com/article/2026/04/18/cote-divoire/societe/cote-divoire-gagnoa-le-budget-primitif-de-lexercice-2026-de-plus-de-3-milliards-fcfa-adopte-en-conseil-municipal_195970.html",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 85741,
+    "sha256": "5945f12bcd4dc70f82bd43ca250dde89a1228014a912e4b3339ae8289a259675",
+    "checked_at": "2026-10-09T00:16:52.526Z"
+  },
+  {
+    "url": "https://mairie-gbeleban.ci/",
+    "status": 200,
+    "final_url": "https://mairie-gbeleban.ci/",
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 7271206,
+    "sha256": "54a4697f3fef3618049dc2e016dbacae4c4ed50f85df663343462904fff0f6b9",
+    "checked_at": "2026-10-09T00:16:54.436Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-danane-le-conseil-municipal-adopte-un-budget-2026-de-19-milliard-f-cfa/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:03.267Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2026-de-la-mairie-de-daoukro-oriente-vers-des-projets-dinfrastructures/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:03.267Z"
+  },
+  {
+    "url": "https://www.koaci.com/article/2026/01/16/cote-divoire/societe/cote-divoire-conseil-municipal-de-grand-bereby-le-budget-primitif-de-lexercice-2026-fixe-a-03-milliards-fcfa-application-des-taxes-de-nuitee-dans-les-hotels_193634.html",
+    "status": 200,
+    "final_url": "https://www.koaci.com/article/2026/01/16/cote-divoire/societe/cote-divoire-conseil-municipal-de-grand-bereby-le-budget-primitif-de-lexercice-2026-fixe-a-03-milliards-fcfa-application-des-taxes-de-nuitee-dans-les-hotels_193634.html",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 88983,
+    "sha256": "65b6d31cc9f568d8e30fab68a716a5b3d3316e8c28bc3212a26174434fabe4f7",
+    "checked_at": "2026-10-09T00:17:04.475Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2026-du-conseil-municipal-de-katiola-progresse-de-7694/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:15.277Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-budget-2026-de-la-mairie-de-kounahiri-oriente-vers-les-infrastructures-de-base/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:15.277Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-un-budget-primitif-de-plus-dun-milliard-adopte-pour-booster-les-projets-developpement-de-la-commune-de-mbahiakro/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:15.278Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-budget-municipal-2026-de-madinani-en-hausse-de-plus-de-437-millions-de-f-cfa/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:15.278Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-budget-2026-considere-comme-le-levier-pour-une-annee-decisive-de-developpement-de-nassian/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:15.279Z"
+  },
+  {
+    "url": "https://www.koaci.com/index.php/article/2026/08/22/cote-divoire/politique/cote-divoire-2e-session-ordinaire-le-conseil-regional-de-san-pedro-adopte-son-programme-triennal-202762029-de-plus-de-15-milliards-fcfa_199778.html",
+    "status": 200,
+    "final_url": "https://www.koaci.com/index.php/article/2026/08/22/cote-divoire/politique/cote-divoire-2e-session-ordinaire-le-conseil-regional-de-san-pedro-adopte-son-programme-triennal-202762029-de-plus-de-15-milliards-fcfa_199778.html",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 89522,
+    "sha256": "05df2a71bb326772da690934d32d6d73d1120cf616671b225ab3335a30f61147",
+    "checked_at": "2026-10-09T00:17:16.614Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-un-budget-2026-tourne-vers-linvestissement-et-les-attentes-citoyennes-a-ouangolodougou/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:27.294Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2026-de-la-commune-de-ouelle-en-hausse-de-plus-de-50/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:27.294Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-du-conseil-regional-du-haut-sassandra-en-hausse-de-pres-de-25-en-2026/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:27.295Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-un-budget-de-plus-de-825-millions-fcfa-adopte-pour-accelerer-le-developpement-communal-de-tafire-en-2026/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:27.295Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2026-de-la-mairie-de-tanda-en-hausse-de-1445/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:27.295Z"
+  },
+  {
+    "url": "https://www.fratmat.info/article/2637459/regions/indenie-djuablin-le-conseil-regional-adopte-un-budget-2026-de-plus-de-66-milliards-fcfa",
+    "status": 200,
+    "final_url": "https://www.fratmat.info/article/2637459/regions/indenie-djuablin-le-conseil-regional-adopte-un-budget-2026-de-plus-de-66-milliards-fcfa",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 296429,
+    "sha256": "27b6e3071f7451e97ba27d8aaec35556684028c83855559959c0afdb54be8247",
+    "checked_at": "2026-10-09T00:17:27.818Z"
+  },
+  {
+    "url": "https://www.koaci.com/article/2025/11/17/cote-divoire/politique/cote-divoire-conseil-regional-de-la-me-20-nouveaux-projets-inscrits-au-budget-primitif-de-lexercice-2026_192008.html",
+    "status": 200,
+    "final_url": "https://www.koaci.com/article/2025/11/17/cote-divoire/politique/cote-divoire-conseil-regional-de-la-me-20-nouveaux-projets-inscrits-au-budget-primitif-de-lexercice-2026_192008.html",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 87977,
+    "sha256": "f6c5714bd296ace21cff955b384acbff6e16dd9f3298fb1db1e8b9e6efcab68b",
+    "checked_at": "2026-10-09T00:17:28.494Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-conseil-regional-de-lagneby-tiassa-autorise-lexecution-dun-budget-de-plus-de-6-milliards-fcfa-en-2026/",
+    "status": 200,
+    "final_url": "https://www.aip.ci/cote-divoire-aip-le-conseil-regional-de-lagneby-tiassa-autorise-lexecution-dun-budget-de-plus-de-6-milliards-fcfa-en-2026/",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 400710,
+    "sha256": "20eafd1a1d4508de4d1df58865d4d7dacace234c53359a0840692b678ef5af31",
+    "checked_at": "2026-10-09T00:17:38.545Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-maire-de-tiebissou-explique-la-hausse-du-budget-primitif-de-lexercice-2026/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:39.300Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2026-de-la-mairie-de-toumodi-adopte-a-plus-de-13-milliard-fcfa/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:39.301Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-budget-primitif-2026-plus-de-16-milliards-f-cfa-adoptes-par-le-conseil-municipal-de-vavoua/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:39.302Z"
+  },
+  {
+    "url": "https://www.koaci.com/article/2026/02/08/cote-divoire/politique/cote-divoire-conseil-regional-du-cavally-un-budget-de-8-273-587-000-fcfa-destine-a-financer-des-projets-structurants-dans-plusieurs-domaines_194176.html",
+    "status": 200,
+    "final_url": "https://www.koaci.com/article/2026/02/08/cote-divoire/politique/cote-divoire-conseil-regional-du-cavally-un-budget-de-8-273-587-000-fcfa-destine-a-financer-des-projets-structurants-dans-plusieurs-domaines_194176.html",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 90533,
+    "sha256": "52db3cea4572f3ea09075592239fd179d89f420e757b9d9a6a0334a482a17ea9",
+    "checked_at": "2026-10-09T00:17:40.521Z"
+  },
+  {
+    "url": "https://www.koaci.com/article/2025/10/31/cote-divoire/societe/cote-divoire-region-du-hambol-un-programme-de-construction-de-40-logements-sociaux-pour-enseignants-lance-le-budget-primitif-2026-arrete-a-6690-milliards-fcfa_191653.html",
+    "status": 200,
+    "final_url": "https://www.koaci.com/article/2025/10/31/cote-divoire/societe/cote-divoire-region-du-hambol-un-programme-de-construction-de-40-logements-sociaux-pour-enseignants-lance-le-budget-primitif-2026-arrete-a-6690-milliards-fcfa_191653.html",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 91257,
+    "sha256": "7a4f0f5006d3b69b456261f50f25bd56d2dd1aa73d30b9ec56cdec3eba48471b",
+    "checked_at": "2026-10-09T00:17:40.533Z"
+  },
+  {
+    "url": "https://www.aip.ci/electionpresidentielle2025/article.php?id=396404",
+    "status": 200,
+    "final_url": "https://www.aip.ci/electionpresidentielle2025/article.php?id=396404",
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 38087,
+    "sha256": "461e155614a4acd82fa254cb6fc912ec2c7c3aa944781f6993e5f9bf987cb7d4",
+    "checked_at": "2026-10-09T00:17:50.447Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-conseil-regional-du-bere-adopte-un-budget-2026-de-plus-de-54-milliards-fcfa/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:51.306Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-bondoukou-le-conseil-regional-du-gontougo-renforce-le-developpement-local-lors-de-sa-session/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:51.321Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-conseil-regional-du-loh-djiboua-adopte-un-budget-primitif-de-7517-milliards-fcfa-pour-2026/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:17:51.321Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-conseil-regional-du-moronou-prevoit-123-operations-dinvestissement-dans-son-budget-2026/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:18:03.327Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-les-conseillers-regionaux-du-nzi-adoptent-un-budget-primitif-de-plus-de-662-milliards-pour-2026/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:18:03.328Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2026-de-la-region-du-poro-en-hausse-de-3428/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:18:03.328Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-worodougou-trace-sa-feuille-de-route-financiere-pour-2026/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:18:03.329Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-la-commune-de-tiassale-adopte-un-budget-primitif-de-plus-de-17-milliard-fcfa/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:18:03.329Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-conseil-municipal-de-tiassale-adoption-un-budget-de-plus-dun-milliard-pour-le-developpement-de-la-commune/",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:18:03.329Z"
+  },
+  {
+    "url": "https://web.facebook.com/share/p/1BaeZcWf9r/",
+    "status": 200,
+    "final_url": "https://www.facebook.com/share/p/1BaeZcWf9r/?_rdc=1&_rdr",
+    "content_type": "text/html; charset=\"utf-8\"",
+    "bytes": 65889,
+    "sha256": "31785ed1ab9ffdf3376229a5ee8ba1eb9a52aab63c08af849715b1a6c6962b60",
+    "checked_at": "2026-10-09T00:18:04.114Z"
+  },
+  {
+    "url": "https://www.marchespublics.ci/uploads/ResultatsAvisAttribution/Resultats_avis_attribution_2024.pdf",
+    "status": 200,
+    "final_url": "https://www.marchespublics.ci/uploads/ResultatsAvisAttribution/Resultats_avis_attribution_2024.pdf",
+    "content_type": "application/pdf",
+    "bytes": 4079716,
+    "sha256": "45cd98b1cf9fd914fed5a6b58f14f30a48f99cc461dc5db27dea997b23e5f5ca",
+    "checked_at": "2026-10-09T00:18:05.023Z"
+  },
+  {
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+    "status": 200,
+    "final_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+    "content_type": "application/pdf",
+    "bytes": 13706025,
+    "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+    "checked_at": "2026-10-09T00:18:06.133Z"
+  },
+  {
+    "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+    "status": 200,
+    "final_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+    "content_type": "application/pdf",
+    "bytes": 21007442,
+    "sha256": "0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10",
+    "checked_at": "2026-10-09T00:18:07.892Z"
+  },
+  {
+    "url": "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2024-de-la-commune-de-tiassale-en-hausse-de-pres-de-6/?amp=1",
+    "status": null,
+    "error": "The operation was aborted due to timeout",
+    "checked_at": "2026-10-09T00:18:15.338Z"
+  }
+]

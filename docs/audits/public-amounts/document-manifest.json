@@ -1,0 +1,78 @@
+[
+  {
+    "file": "Loi-de-Finances-2026.pdf",
+    "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+    "pages": [
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54
+    ],
+    "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+    "http_status_at_acquisition": 200,
+    "acquired_at": "2026-10-09",
+    "byte_length": 13706025
+  },
+  {
+    "file": "Annexe-4-DPPD-PAP-2026-2028.pdf",
+    "sha256": "0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10",
+    "pages": [
+      799,
+      800,
+      801,
+      802,
+      803,
+      804,
+      805,
+      806,
+      807,
+      808,
+      809,
+      810,
+      811,
+      812,
+      813,
+      814,
+      815,
+      816,
+      817,
+      818,
+      819,
+      820,
+      821,
+      822,
+      823,
+      824,
+      825,
+      826,
+      827,
+      828,
+      829,
+      830,
+      831,
+      832
+    ],
+    "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+    "http_status_at_acquisition": 200,
+    "acquired_at": "2026-10-09",
+    "byte_length": 21007442
+  },
+  {
+    "file": "Resultats_avis_attribution_2024.pdf",
+    "sha256": "45cd98b1cf9fd914fed5a6b58f14f30a48f99cc461dc5db27dea997b23e5f5ca",
+    "source_url": "https://www.marchespublics.ci/uploads/ResultatsAvisAttribution/Resultats_avis_attribution_2024.pdf",
+    "pages": [
+      33
+    ],
+    "page_count": 171,
+    "http_status_at_acquisition": 200,
+    "acquired_at": "2026-10-09",
+    "byte_length": 4079716
+  }
+]

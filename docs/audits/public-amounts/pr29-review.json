@@ -1,0 +1,389 @@
+{
+  "head": "d479c1f9596538aac9caa82193ec766b4f4591e4",
+  "base": "707b3b688f23bd33dc0f3504e13b79c65908dd50",
+  "reproduced_at": "2026-10-09T00:32:58.770Z",
+  "verdict": "NO_GO",
+  "files": [
+    {
+      "file": "docs/AGENT_HANDOFF.md",
+      "added": 53,
+      "removed": 11
+    },
+    {
+      "file": "docs/CODEX_CHECKPOINT.md",
+      "added": 26,
+      "removed": 0
+    },
+    {
+      "file": "docs/budget-ingestion/LOT5_DOCUMENT_MANIFEST.json",
+      "added": 62,
+      "removed": 0
+    },
+    {
+      "file": "docs/budget-ingestion/LOT5_INDEPENDENT_LFI_CONTROLS.json",
+      "added": 135,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/DOCUMENTS.json",
+      "added": 58,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/FINAL_REPORT.md",
+      "added": 70,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/LOT10_REPORT.md",
+      "added": 22,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/LOT11_REPORT.md",
+      "added": 22,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/LOT12_REPORT.md",
+      "added": 22,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/LOT13_REPORT.md",
+      "added": 22,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/LOT14_REPORT.md",
+      "added": 26,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/LOT15_REPORT.md",
+      "added": 37,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/LOT6_REPORT.md",
+      "added": 22,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/LOT7_12_DOCUMENTARY_CONTROLS.json",
+      "added": 81,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/LOT7_REPORT.md",
+      "added": 22,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/LOT8_REPORT.md",
+      "added": 22,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/LOT9_REPORT.md",
+      "added": 22,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/REQUIREMENTS.md",
+      "added": 26,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/SUPABASE_READ_ONLY_CHECK.md",
+      "added": 27,
+      "removed": 0
+    },
+    {
+      "file": "docs/overnight/UX_AUDIT.md",
+      "added": 21,
+      "removed": 0
+    },
+    {
+      "file": "index.html",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "file": "package.json",
+      "added": 2,
+      "removed": 0
+    },
+    {
+      "file": "review.html",
+      "added": 14,
+      "removed": 0
+    },
+    {
+      "file": "scripts/verify-review-browser.cjs",
+      "added": 76,
+      "removed": 0
+    },
+    {
+      "file": "scripts/verify-supabase-readonly.mjs",
+      "added": 83,
+      "removed": 0
+    },
+    {
+      "file": "src/components/BottomNav.tsx",
+      "added": 7,
+      "removed": 2
+    },
+    {
+      "file": "src/components/Header.tsx",
+      "added": 2,
+      "removed": 2
+    },
+    {
+      "file": "src/index.css",
+      "added": 10,
+      "removed": 1
+    },
+    {
+      "file": "src/review/__tests__/citizen.test.ts",
+      "added": 36,
+      "removed": 0
+    },
+    {
+      "file": "src/review/__tests__/collectivities.test.ts",
+      "added": 48,
+      "removed": 0
+    },
+    {
+      "file": "src/review/__tests__/documentaryControls.test.ts",
+      "added": 46,
+      "removed": 0
+    },
+    {
+      "file": "src/review/__tests__/documents.test.ts",
+      "added": 408,
+      "removed": 0
+    },
+    {
+      "file": "src/review/__tests__/execution.test.ts",
+      "added": 36,
+      "removed": 0
+    },
+    {
+      "file": "src/review/__tests__/financialEvidenceHardening.test.ts",
+      "added": 1747,
+      "removed": 0
+    },
+    {
+      "file": "src/review/__tests__/history.test.ts",
+      "added": 40,
+      "removed": 0
+    },
+    {
+      "file": "src/review/__tests__/lot5Reconciliation.test.ts",
+      "added": 446,
+      "removed": 0
+    },
+    {
+      "file": "src/review/__tests__/projects.test.ts",
+      "added": 34,
+      "removed": 0
+    },
+    {
+      "file": "src/review/__tests__/responses.test.ts",
+      "added": 33,
+      "removed": 0
+    },
+    {
+      "file": "src/review/__tests__/stabilization.test.ts",
+      "added": 53,
+      "removed": 0
+    },
+    {
+      "file": "src/review/__tests__/supabaseReadOnlyGuard.test.ts",
+      "added": 89,
+      "removed": 0
+    },
+    {
+      "file": "src/review/__tests__/ui.test.tsx",
+      "added": 22,
+      "removed": 0
+    },
+    {
+      "file": "src/review/__tests__/workspace.test.tsx",
+      "added": 26,
+      "removed": 0
+    },
+    {
+      "file": "src/review/catalog.ts",
+      "added": 86,
+      "removed": 0
+    },
+    {
+      "file": "src/review/domain/citizen.ts",
+      "added": 44,
+      "removed": 0
+    },
+    {
+      "file": "src/review/domain/collectivities.ts",
+      "added": 41,
+      "removed": 0
+    },
+    {
+      "file": "src/review/domain/documents.ts",
+      "added": 273,
+      "removed": 0
+    },
+    {
+      "file": "src/review/domain/evidence.ts",
+      "added": 81,
+      "removed": 0
+    },
+    {
+      "file": "src/review/domain/execution.ts",
+      "added": 49,
+      "removed": 0
+    },
+    {
+      "file": "src/review/domain/financialAudits.ts",
+      "added": 661,
+      "removed": 0
+    },
+    {
+      "file": "src/review/domain/history.ts",
+      "added": 50,
+      "removed": 0
+    },
+    {
+      "file": "src/review/domain/projects.ts",
+      "added": 54,
+      "removed": 0
+    },
+    {
+      "file": "src/review/domain/responses.ts",
+      "added": 35,
+      "removed": 0
+    },
+    {
+      "file": "src/review/domain/snapshot.ts",
+      "added": 20,
+      "removed": 0
+    },
+    {
+      "file": "src/review/main.tsx",
+      "added": 7,
+      "removed": 0
+    },
+    {
+      "file": "src/review/supabaseGuard.d.ts",
+      "added": 16,
+      "removed": 0
+    },
+    {
+      "file": "src/review/ui/DocumentLibrary.tsx",
+      "added": 30,
+      "removed": 0
+    },
+    {
+      "file": "src/review/ui/Primitives.tsx",
+      "added": 37,
+      "removed": 0
+    },
+    {
+      "file": "src/review/ui/ReviewWorkspace.tsx",
+      "added": 74,
+      "removed": 0
+    },
+    {
+      "file": "src/review/ui/review.css",
+      "added": 82,
+      "removed": 0
+    },
+    {
+      "file": "vite.review.config.ts",
+      "added": 8,
+      "removed": 0
+    }
+  ],
+  "added": 5705,
+  "removed": 17,
+  "protected_paths_changed": [],
+  "proof": {
+    "original": 45121940916,
+    "mutation": 45121940917,
+    "strict": {
+      "value": null,
+      "status": "UNKNOWN",
+      "reasons": [
+        "UNVERIFIED_DOCUMENT_OR_EXTRACTION",
+        "AMOUNT_MISMATCH"
+      ]
+    },
+    "exported": [
+      {
+        "institution_id": "gov-003",
+        "section_code": "237",
+        "fiscal_year": 2026,
+        "scope": "SECTION_TOTAL",
+        "period_end": "2026-12-31",
+        "measure": "ORDERED",
+        "basis": "INITIAL_BUDGET",
+        "currency": "XOF",
+        "amount": 45121940917,
+        "status": "AVAILABLE",
+        "document_id": "DGBF-LFI-2026",
+        "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf#page=47",
+        "source_sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+        "source_page": 47
+      }
+    ],
+    "snapshot": {
+      "scope": {
+        "institutionId": "gov-003",
+        "sectionCode": "237",
+        "fiscalYear": 2026
+      },
+      "status": "AVAILABLE",
+      "records": [
+        {
+          "institution_id": "gov-003",
+          "section_code": "237",
+          "fiscal_year": 2026,
+          "scope": "SECTION_TOTAL",
+          "period_end": "2026-12-31",
+          "measure": "ORDERED",
+          "basis": "INITIAL_BUDGET",
+          "currency": "XOF",
+          "amount": 45121940917,
+          "status": "AVAILABLE",
+          "document_id": "DGBF-LFI-2026",
+          "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf#page=47",
+          "source_sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+          "source_page": 47
+        }
+      ],
+      "documents": [
+        {
+          "id": "DGBF-LFI-2026",
+          "title": "LFI 2026",
+          "publisher": "DGBF",
+          "officialUrl": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+          "fiscalYear": 2026,
+          "accessedAt": "2026-10-09",
+          "httpStatus": 200,
+          "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+          "pageCount": 583,
+          "verification": "VERIFIED",
+          "visibility": "PUBLIC",
+          "previousVersionId": null,
+          "availability": "AVAILABLE",
+          "provenance": "OFFICIAL_SOURCE",
+          "extractionStatus": "VERIFIED"
+        }
+      ],
+      "dependenciesBlocked": [],
+      "documentaryProblems": [],
+      "publicationDecision": "NOT_REQUESTED"
+    }
+  }
+}

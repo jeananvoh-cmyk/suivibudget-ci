@@ -1,4 +1,16 @@
-# Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
+# Checkpoint — SuiviBudget Côte d'Ivoire
+
+## 9 octobre 2026 — clôture indépendante PR #29 et audit public
+
+Branche `codex/public-amounts-audit` depuis master `707b3b688f23bd33dc0f3504e13b79c65908dd50`, travail antérieur préservé. PR #29 inchangée au HEAD `d479c1f9596538aac9caa82193ec766b4f4591e4`, ouverte, mergeable, Quality/Vercel SUCCESS. Diff complet des sept commits inspecté : 60 fichiers, +5 705/−17, données canoniques/migrations/dépendances intactes. Verdict NO_GO : export/snapshot contournent le contrôle financier strict et acceptent une mutation de 1 FCFA ; mesures CP de LFI qualifiées ORDERED à tort. Script navigateur assert non importé, validation non reproductible en l'état.
+
+Livraison : [rapport consolidé](audits/public-amounts/REPORT.md), inventaire JSONL de 24 953 observations, 565 agrégats, catalogue des surfaces, captures publiques anonymes, empreintes PDF, contrôles documentaires et plan de correction sans duplication. 24 692 montants candidats numériques, 58 VERIFIED_EXACT (0,2349 %), 14 écarts avec la LFI initiale 2026, 7 périmètres non comparables ; couverture explicitement partielle. Deux attributions Tiassalé confirmées dans le PDF DGMP ; le marché des vingt magasins garde une ambiguïté AO/lot à résoudre. Quatre incohérences arithmétiques locales et agrégats publics contradictoires documentés, aucun montant métier corrigé.
+
+Tests-first critiques : 12 tests d'audit, baseline réelle hors ligne et reproduction sur le SHA figé de #29. Suite 370 tests / 21 fichiers PASS ; TypeScript et build production PASS (1 737 modules, avertissement de gros bundles préexistant). Contrôles HTTP publics : neuf relations, deux refus de lecture préservés ; cinq pages consultées avec Chromium réel en GET/HEAD uniquement, aucune erreur JS collectée. Aucune nouvelle validation UX responsive revendiquée.
+
+Écritures Supabase = 0 ; migrations écrites/appliquées = 0 ; imports/publications = 0. Aucune fusion, aucune modification de master, aucun déploiement de production. Nouvelle PR d'audit à laisser ouverte ; son HEAD porte l'identité finale de ce checkpoint et ses checks CI. Reprise prioritaire : lot A du rapport, puis corrections des montants publics par lots séparés sur preuves.
+
+## Historique — 29 septembre 2026 (Relais Antigravity après Codex)
 
 ## 1er octobre — console données et montants qualifiés, après #8
 

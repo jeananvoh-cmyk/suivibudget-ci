@@ -1,16 +1,29 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- LAST_UPDATED : 2026-10-07
-- LAST_AGENT : Antigravity
-- CURRENT_BRANCH : `antigravity/lot5-ministry-generalization-2026`
-- BASE_MASTER_SHA : `8145c0423482438cc4cc2fc89af68cb399b06ebc` (Merge commit de PR #27 sur master)
-- CURRENT_HEAD : voir HEAD courante de PR #28
-- LAST_VERIFIED_CODE_HEAD : voir commit courant LOT 5
-- PR : PR #28 (`feat(lot5): controlled ministerial budget generalization with Batch 1 (7 ministries)`)
+- LAST_UPDATED : 2026-10-09
+- LAST_AGENT : Codex
+- CURRENT_BRANCH : `codex/public-amounts-audit`
+- BASE_MASTER_SHA : `707b3b688f23bd33dc0f3504e13b79c65908dd50`
+- CURRENT_HEAD : HEAD de la PR d'audit associée à cette branche ; aucun hash autoréférent.
+- LAST_VERIFIED_CODE_HEAD : runtime master `707b3b6` ; revue PR #29 `d479c1f9596538aac9caa82193ec766b4f4591e4`.
+- PR : nouvelle PR d'audit indépendante de #29, à laisser ouverte ; #29 inchangée et non fusionnée.
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_SUPABASE_WRITES = 0)
-- CURRENT_MILESTONE : LOT 5 — Généralisation ministérielle 2026 contrôlée. Réconciliation intégrale du périmètre LFI 2026 suite à l'audit bloquant indépendant de la PR #28. Batch 1 réconcilié avec 7 ministères complets (25 programmes, 66 actions, 447 938 605 716 FCFA, delta = 0). Volume budgétaire ministériel cumulé vérifié : 2 157 470 677 361 FCFA (12 ministères, représentant 12,43% du budget de l'État). Libellés officiels 100% conformes verbatim à la LFI 2026 et à l'Annexe 4 DPPD-PAP. Isolation stricte de publication : seul MMPE (gov-008) reste PUBLISHED, les 11 autres ministères vérifiés sont en statut VERIFIED / STAGED. Fixtures golden indépendantes avec INDEPENDENT_LFI_REFERENCES_2026 et 29 tests de généralisation PASS (358 tests PASS au total sur le repo).
+- CURRENT_MILESTONE : AUDIT_DELIVERED / DOCUMENTARY_RECONCILIATION_PARTIAL. PR #29 NO_GO documentaire malgré CI verte. 58 montants exactement contrôlés sur 24 692 candidats publics numériques (0,2349 %), 14 écarts LFI et 7 périmètres non comparables. Aucune certification exhaustive.
 - FOUNDATION_READY : TRUE.
+
+## CHECKPOINT ACTUEL — AUDIT PUBLIC, 9 OCTOBRE 2026
+
+- Rapport consolidé : [docs/audits/public-amounts/REPORT.md](audits/public-amounts/REPORT.md). Inventaire par observation, sources et empreintes, preuves de reproduction, écarts, couverture, contrôles et plan de correction par lots dans le même dossier.
+- PR #29 : 60 fichiers +5 705/−17, sept commits, HEAD `d479c1f`, master de base `707b3b6`, CI Quality run `37861518482` et Vercel SUCCESS. Aucun changement de données canoniques, migration ou dépendance. NO_GO : export/snapshot acceptent un montant altéré refusé par le contrôle strict ; mesures LFI CP mal qualifiées ORDERED. Script navigateur sans import assert, validation à rétablir.
+- Audit master : 24 953 observations, dont 24 787 candidats publics et 95 valeurs null ; 565 agrégats séparés. 58 VERIFIED_EXACT = 14 totaux ministériels + 11 institutions nationales + 31 programmes/actions MMPE + 2 attributions DGMP. Les autres statuts sont explicités, sans transformer l'absence de preuve en erreur.
+- 14 montants ministériels divergent de la LFI initiale 2026 ; quatre ventilations locales divergent du total stocké ; accueil/annuaire/SEO/observatoire présentent des totaux incompatibles avec le périmètre de projets runtime. Le rapprochement DGMP des vingt magasins Tiassalé reste ambigu (même AO/lot, deux lignes officielles différentes). Aucun montant modifié.
+- VALIDATION : 370 tests / 21 fichiers PASS, TypeScript PASS, build production PASS (1 737 modules ; avertissement préexistant de gros bundles). 12 tests d'audit ciblés et baseline financière hors ligne. Le HEAD final de la nouvelle PR reste la référence pour sa CI.
+- HTTP/RLS ciblé : neuf relations interrogées en GET anon, deux refus 401/42501 préservés ; aucune élévation de privilèges. Supabase, Storage, imports, schéma, migrations et données inchangés par cette mission ; REMOTE_SUPABASE_WRITES = 0, MIGRATIONS_APPLIED = 0.
+- UX/UI_AUDIT_STATUS : aucune UI modifiée, aucune nouvelle page déclarée VALIDATED. Consultation Chromium réelle de cinq pages publiques : HTTP 200, zéro erreur JavaScript collectée ; pas de nouveau contrôle responsive complet. Pas de SHA de production confirmé indépendamment.
+- NEXT_EXECUTABLE_TASK : lot A du rapport — corriger les frontières financières du domaine review sur sa branche dédiée, tests de mutation sur export/snapshot/compositions et qualification PLANNED/ORDERED ; ne pas fusionner automatiquement. Ensuite traiter séparément les lots B–F, sans recréer les registres existants ni réimporter Bingerville. Les migrations APPLIED ne doivent jamais être rejouées.
+
+Les sections suivantes conservent l'historique des lots précédents ; leurs pourcentages documentaires ne certifient pas les montants du runtime public audité ci-dessus.
 
 ## LOT 5 : GÉNÉRALISATION MINISTÉRIELLE 2026 CONTRÔLÉE (BATCH 1)
 - **1. Objectif & Cadre du Batch 1** :
