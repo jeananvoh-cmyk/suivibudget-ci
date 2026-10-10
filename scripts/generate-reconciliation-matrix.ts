@@ -171,7 +171,7 @@ const evidence = JSON.parse(readFileSync(resolve(process.cwd(), 'docs/audits/ins
   ministries: Array<{id: string; section_code: string; pdf_page: number; doc_page: number; amount_fcfa: number; record_kind: string }>;
 };
 const historicRegulators = JSON.parse(readFileSync(resolve(process.cwd(), 'docs/audits/institution-reconciliation/REGULATORY_UNVERIFIED_2026_HISTORY.json'),'utf-8')) as { entities: Array<{id:string;previously_reported_fcfa:number}> };
-const documentary = new Map([...evidence.national, ...evidence.ministries].map(row => [row.id, row]));
+const documentary = new Map<string, (typeof evidence.national)[number]>([...evidence.national, ...evidence.ministries].map(row => [row.id, row]));
 const historicalRegulatorAmounts = new Map(historicRegulators.entities.map(row => [row.id, row.previously_reported_fcfa]));
 for (const e of matrixEntities) {
   const row = documentary.get(e.institution_id);
