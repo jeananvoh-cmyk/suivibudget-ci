@@ -328,7 +328,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                   <div className="space-y-2 pt-2 mt-3">
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-slate-500 font-bold uppercase text-[10px]">
-                        {inst.type === 'DISTRICT' ? 'Dotation du District Autonome (Loi de Finances)' : 'Dotation Budgétaire Régionale (Loi de Finances)'}
+                        {inst.type === 'DISTRICT' ? 'Dotation enregistrée du District — source primaire à confirmer' : 'Dotation régionale enregistrée — source primaire à confirmer'}
                       </span>
                       <span className="font-black text-slate-900">
                         {assessment.totalFormatted}{' '}
