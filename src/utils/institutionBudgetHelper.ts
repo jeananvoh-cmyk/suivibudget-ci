@@ -156,7 +156,7 @@ export function assessInstitutionBudget(
   const total = inst.total_budget_fcfa;
   const fonct = inst.budget_functioning_fcfa;
   const inv = inst.budget_investment_fcfa;
-  const hasBreakdown = fonct != null && inv != null;
+  const hasBreakdown = calculateSafePercentages(fonct, inv, total).functioningPct !== null;
   const { functioningPct, investmentPct } = calculateSafePercentages(fonct, inv, total);
 
   return {
@@ -168,9 +168,9 @@ export function assessInstitutionBudget(
     functioningPct,
     investmentPct,
     hasBreakdown,
-    badgeText: 'Dotation Officielle (LFI 2026)',
+    badgeText: 'Montant enregistré — provenance à vérifier',
     badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-    noticeText: null,
+    noticeText: 'Ce montant est enregistré dans le référentiel applicatif. Son périmètre et sa provenance doivent être vérifiés avant toute qualification de dotation officielle.',
     isCourSupreme: false,
     isTaxQuotaCommune: false,
   };
