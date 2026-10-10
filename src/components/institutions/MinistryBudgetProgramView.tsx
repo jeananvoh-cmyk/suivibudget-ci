@@ -66,7 +66,7 @@ export const MinistryBudgetProgramView: React.FC<MinistryBudgetProgramViewProps>
 
           <div>
             <div className="text-xs font-semibold text-slate-500 uppercase">
-              Montant enregistré pour ce portefeuille
+              Montant documenté pour ce portefeuille
             </div>
             <div className="text-2xl sm:text-3xl font-black text-slate-900 font-mono tracking-tight mt-0.5">
               {formatFCFA(totalBudget)}
@@ -89,7 +89,7 @@ export const MinistryBudgetProgramView: React.FC<MinistryBudgetProgramViewProps>
           <div className="text-xs text-amber-900 bg-amber-50 border border-amber-300 rounded-xl p-3 space-y-1" role="note">
             <p className="font-semibold">CP votés pour la section candidate {MINISTRY_DOCUMENTARY_DISCREPANCIES[institution.id]} : {formatFCFA(MINISTRY_CANDIDATE_CP_2026[institution.id])}</p>
             <p><a href="https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf" target="_blank" rel="noopener noreferrer" className="underline">Source : Loi de finances 2026, tableau des sections (DGBF)</a></p>
-            <p><strong>Écart documentaire identifié :</strong> le montant de cette fiche diffère du total des crédits de paiement (CP) de la section candidate {MINISTRY_DOCUMENTARY_DISCREPANCIES[institution.id]} de la LFI 2026. La correspondance exacte du périmètre reste à établir. Ces montants ne doivent pas être additionnés ni considérés comme réconciliés.</p>
+            <p><strong>Écart documentaire identifié :</strong> l'ancien montant non vérifié du répertoire a été retiré de la fiche publique car il différait du total des crédits de paiement (CP) de la section candidate {MINISTRY_DOCUMENTARY_DISCREPANCIES[institution.id]} de la LFI 2026. La correspondance exacte du périmètre reste à établir. Ces montants ne doivent pas être additionnés ni considérés comme réconciliés.</p>
           </div>
         )}
 
