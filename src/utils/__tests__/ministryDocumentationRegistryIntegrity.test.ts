@@ -55,7 +55,7 @@ describe('2026 documentation registry consistency against canonical sources', ()
     }
   });
 
-  it('keeps all 35 directory amounts synchronized with the documentary register', () => {
+  it('keeps the 34 attributable directory amounts aligned and isolates the delegated historical duplicate', () => {
     const lines = reconciliationCsv.trim().split(/\r?\n/);
     const entries = lines.slice(1).map(line => {
       const match = line.match(/^(gov-\d{3}),.+?,(\d+),(?:PROGRAMMES(?:\+PROGRAMMES)?|DOTATIONS)?,/);
@@ -66,7 +66,13 @@ describe('2026 documentation registry consistency against canonical sources', ()
     const unique = new Map(entries);
     expect(unique.size).toBe(35);
     for (const [id, documented] of unique) {
-      expect(GOVERNMENT_OFFICIALS.find(x => x.id === id)?.budget_fcfa, id).toBe(documented);
+      if (id === 'gov-035') {
+        // Historical duplicated amount retained only in the audit register.
+        expect(documented).toBe(337_932_332_542);
+        expect(GOVERNMENT_OFFICIALS.find(x => x.id === id)?.budget_fcfa).toBeUndefined();
+      } else {
+        expect(GOVERNMENT_OFFICIALS.find(x => x.id === id)?.budget_fcfa, id).toBe(documented);
+      }
     }
   });
 
