@@ -34,10 +34,10 @@ def main(paths):
                 text = page.get_text()
                 for number in found:
                     numeral = str(abs(number))
-                    # Match a single 6-digit number with a thousands separator, but
+                    # Match a single 6-digit number with a thousands separator (including thin space U+2009), but
                     # never embedded in a larger number. The scan is of PDF text, not OCR.
                     expr = (r"(?<!\d)" + re.escape(numeral[:-3])
-                            + r"[.\u00a0\u202f ]" + re.escape(numeral[-3:]) + r"(?!\d)")
+                            + r"[.\u00a0\u202f\u2009 ]" + re.escape(numeral[-3:]) + r"(?!\d)")
                     if re.search(expr, text):
                         found[number].append((evidence["name"], i + 1))
                 scanned += 1
