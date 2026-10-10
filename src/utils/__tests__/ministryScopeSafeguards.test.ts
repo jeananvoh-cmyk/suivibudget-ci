@@ -31,8 +31,8 @@ describe('2026 ministerial portfolio documentary safeguards', () => {
     }
   });
 
-  it('flags precisely the 15 unresolved numeric section differences for every ministry detail', () => {
-    expect(Object.keys(MINISTRY_DOCUMENTARY_DISCREPANCIES).sort()).toEqual(["gov-001","gov-005","gov-006","gov-009","gov-011","gov-012","gov-013","gov-014","gov-018","gov-022","gov-025","gov-029","gov-031","gov-032","gov-034"]);
+  it('flags precisely the 9 unresolved numeric section differences for every ministry detail', () => {
+    expect(Object.keys(MINISTRY_DOCUMENTARY_DISCREPANCIES).sort()).toEqual(["gov-001","gov-006","gov-009","gov-011","gov-012","gov-013","gov-014","gov-022","gov-029"]);
     for (const [id, section] of Object.entries(MINISTRY_DOCUMENTARY_DISCREPANCIES)) {
       expect(officials.has(id)).toBe(true);
       expect(section).toMatch(/^\d{3}$/);
