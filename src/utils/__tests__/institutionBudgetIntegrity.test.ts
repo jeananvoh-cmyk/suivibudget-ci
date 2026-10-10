@@ -185,6 +185,25 @@ describe('Institution Budget Integrity & Safe Rendering', () => {
     });
   });
 
+  describe('Unreconciled breakdown safeguard', () => {
+    it('does not present percentages or a complete breakdown for amounts that do not sum to total', () => {
+      const assessment = assessInstitutionBudget({
+        id: 'test-unreconciled',
+        name: 'Institution de test',
+        type: 'INSTITUTION',
+        total_budget_fcfa: 100,
+        budget_functioning_fcfa: 60,
+        budget_investment_fcfa: 30,
+        budget_not_published: false,
+      });
+      expect(assessment.hasBreakdown).toBe(false);
+      expect(assessment.functioningPct).toBeNull();
+      expect(assessment.investmentPct).toBeNull();
+      expect(assessment.badgeText).not.toContain('Officielle');
+      expect(assessment.noticeText).toContain('provenance');
+    });
+  });
+
   describe('Legitimate Documented Zero Budget', () => {
     it('preserves documented 0 FCFA when total is legitimately 0 without unpublished flag', () => {
       const dummyEntity: Partial<Institution> = {
