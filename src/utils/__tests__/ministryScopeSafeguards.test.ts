@@ -5,6 +5,22 @@ import { SCOPE_EXCEPTIONS } from '../../data/ministryScopeExceptions';
 describe('2026 ministerial portfolio documentary safeguards', () => {
   const officials = new Map(GOVERNMENT_OFFICIALS.map(o => [o.id, o]));
 
+
+  it('covers each of the 35 distinct 2026 portfolio identifiers without manufacturing a missing budget', () => {
+    const ids = GOVERNMENT_OFFICIALS.map(o => o.id).filter(id => /^gov-\\d{3}$/.test(id));
+    expect(ids).toHaveLength(35);
+    expect(new Set(ids).size).toBe(35);
+    expect([...ids].sort()).toEqual(
+      Array.from({ length: 35 }, (_, index) => `gov-${String(index + 1).padStart(3, '0')}`),
+    );
+    for (const official of GOVERNMENT_OFFICIALS.filter(o => ids.includes(o.id))) {
+      // Unknown is not zero; this test validates shape, not documentary certification.
+      if (official.budget_fcfa == null) continue;
+      expect(Number.isSafeInteger(official.budget_fcfa)).toBe(true);
+      expect(official.budget_fcfa).toBeGreaterThanOrEqual(0);
+    }
+  });
+
   it('documents exactly the four composite portfolios and the delegated portfolio without an autonomous section', () => {
     expect(Object.keys(SCOPE_EXCEPTIONS).sort()).toEqual([
       'gov-007', 'gov-010', 'gov-023', 'gov-024', 'gov-035',
