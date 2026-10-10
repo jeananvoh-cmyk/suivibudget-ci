@@ -1,3 +1,4 @@
+import { BudgetDataDownloads } from '../../components/institutions/BudgetDataDownloads';
 import React, { useState } from 'react';
 import { ArrowLeft, Search, ChevronDown, ArrowRight, Globe, FileText } from 'lucide-react';
 import { GOVERNMENT_OFFICIALS, OfficialLeader } from '../../data/governmentData';
@@ -258,6 +259,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
 
   return (
     <div className="space-y-10 animate-in fade-in duration-300">
+      <BudgetDataDownloads scope="MINISTERE" />
       
       {/* Header Banner */}
       <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm flex flex-col md:flex-row items-center gap-6">
