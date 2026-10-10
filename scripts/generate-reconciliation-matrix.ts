@@ -1,4 +1,4 @@
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { NATIONAL_INSTITUTIONS_DATA } from '../src/data/nationalBudgetData';
 import { GOVERNMENT_OFFICIALS, OfficialLeader } from '../src/data/governmentData';
@@ -26,6 +26,12 @@ interface MatrixEntity {
   provenance: DocumentaryProvenance | null;
   blocking_reasons: string[];
   notice_text: string | null;
+  accounting_treatment?: string;
+  lfi_section_cp_2026_fcfa?: number | null;
+  parent_section_code?: string | null;
+  program_code?: string | null;
+  amount_matches_lfi_row?: boolean;
+  previous_reported_2026_fcfa?: number | null;
 }
 
 const matrixEntities: MatrixEntity[] = [];
@@ -157,6 +163,64 @@ for (const comId of grandAbidjanCommuneIds) {
   });
 }
 
+// Traçabilité normative indépendante des totaux bruts présents dans les fiches.
+// La matrice ne peut pas promouvoir une égalité arithmétique en preuve documentaire.
+const evidence = JSON.parse(readFileSync(resolve(process.cwd(), 'docs/audits/institution-reconciliation/LFI_2026_SECTION_EVIDENCE.json'), 'utf-8')) as {
+  source_url: string; pdf_sha256: string;
+  national: Array<{id: string; section_code: string; pdf_page: number; doc_page: number; amount_fcfa: number; record_kind: string; program_code?: string; parent_section_code?: string; parent_section_amount_fcfa?: number }>;
+  ministries: Array<{id: string; section_code: string; pdf_page: number; doc_page: number; amount_fcfa: number; record_kind: string }>;
+};
+const historicRegulators = JSON.parse(readFileSync(resolve(process.cwd(), 'docs/audits/institution-reconciliation/REGULATORY_UNVERIFIED_2026_HISTORY.json'),'utf-8')) as { entities: Array<{id:string;previously_reported_fcfa:number}> };
+const documentary = new Map([...evidence.national, ...evidence.ministries].map(row => [row.id, row]));
+const historicalRegulatorAmounts = new Map(historicRegulators.entities.map(row => [row.id, row.previously_reported_fcfa]));
+for (const e of matrixEntities) {
+  const row = documentary.get(e.institution_id);
+  if (row) {
+    e.official_section_code = row.section_code;
+    e.provenance = {
+      document_title: 'Loi de Finances n°2025-987 - tableau CP section et programme',
+      document_reference: `LFI 2026 • Section ${row.section_code}${row.program_code ? ` • Programme ${row.program_code}`:''}`,
+      source_url: evidence.source_url, pdf_page: row.pdf_page, doc_page: row.doc_page,
+      sha256: evidence.pdf_sha256,
+      table_or_line: row.program_code ? `Programme interne ${row.program_code} de section 103` : `Section ${row.section_code} credits de paiement 2026`,
+    };
+    e.accounting_treatment = row.record_kind;
+    e.program_code = row.program_code ?? null;
+    e.parent_section_code = row.parent_section_code ?? null;
+    e.lfi_section_cp_2026_fcfa = row.parent_section_amount_fcfa ?? row.amount_fcfa;
+    e.amount_matches_lfi_row = e.total_fcfa === row.amount_fcfa;
+    if (!e.amount_matches_lfi_row) {
+      e.verification_status = 'NOT_DOCUMENTED';
+      e.blocking_reasons = [`Montant de la fiche (${e.total_fcfa}) distinct de section LFI ${row.section_code} (${row.amount_fcfa}). Perimetre de portefeuille/C2D et actes de transfert a documenter.`];
+      e.notice_text = 'Ancien montant de portefeuille : ne pas presenter comme credit officiel de section.';
+    } else if (e.category === 'MINISTERE') {
+      e.verification_status = 'PARTIAL_BREAKDOWN';
+      e.blocking_reasons = ['Montant de section recoupe, ventilation absente ; attribution au portefeuille administratif non certifiee.'];
+      e.notice_text = 'Credit de section confirme ; ventilation et attribution de portefeuille non certifiees.';
+    } else if (row.record_kind === 'INTERNAL_PROGRAM') {
+      e.blocking_reasons = [`Programme ${row.program_code} inclus dans section 103. Interdiction de l'ajouter au total de la Presidence.`];
+      e.notice_text = 'Programme inclus dans sa section mere, non additif.';
+    } else {
+      e.blocking_reasons = []; e.notice_text = null;
+    }
+  } else if (e.category === 'AUTORITE_REGULATION') {
+    e.previous_reported_2026_fcfa = historicalRegulatorAmounts.get(e.institution_id) ?? null;
+    e.total_fcfa = null; e.functioning_fcfa = null; e.investment_fcfa = null;
+    e.functioning_pct = null; e.investment_pct = null; e.delta_fcfa = null;
+    e.official_section_code = null;
+    e.provenance = null; e.verification_status = 'NOT_DOCUMENTED';
+    e.reconciliation_status = 'NO_BREAKDOWN'; e.accounting_treatment = 'UNVERIFIED_AAI';
+    e.blocking_reasons = ['Absence de preuve budget 2026 nominative : ancienne attribution non justifiee par la LFI.'];
+    e.notice_text = 'Budget individuel 2026 non documente.';
+  } else if (e.category === 'COMMUNE_GRAND_ABIDJAN') {
+    e.accounting_treatment = 'MUNICIPAL_BUDGET_NOT_PROVIDED';
+  } else if (e.institution_id === 'inst-cour-supreme') {
+    e.accounting_treatment = 'NO_INDEPENDENT_LFI_SECTION';
+  } else if (e.institution_id === 'gov-035') {
+    e.accounting_treatment = 'PORTFOLIO_WITHOUT_INDEPENDENT_SECTION';
+  }
+}
+
 // Vérifications et métriques
 const totalEntities = matrixEntities.length;
 const verifiedAmountCount = matrixEntities.filter(e => e.verification_status === 'VERIFIED_AMOUNT').length;
@@ -166,12 +230,13 @@ const partialBreakdownCount = matrixEntities.filter(e => e.verification_status =
 const notDocumentedCount = matrixEntities.filter(e => e.verification_status === 'NOT_DOCUMENTED').length;
 const notPublishedCount = matrixEntities.filter(e => e.verification_status === 'NOT_PUBLISHED').length;
 
+// On additionne les montants une seule fois PAR SECTION distincte ; programmes internes exclus.
 const totalFcfaVerified = matrixEntities
-  .filter(e => e.verification_status === 'VERIFIED_AMOUNT' && typeof e.total_fcfa === 'number')
+  .filter(e => e.verification_status === 'VERIFIED_AMOUNT' && e.accounting_treatment === 'SECTION' && typeof e.total_fcfa === 'number')
   .reduce((sum, e) => sum + (e.total_fcfa as number), 0);
 
 const metadata = {
-  audit_version: "1.0.0",
+  audit_version: "2.0.0-evidence-constrained",
   fiscal_year: 2026,
   audit_date: "2026-10-10",
   total_entities_audited: totalEntities,
@@ -183,6 +248,16 @@ const metadata = {
   not_published_count: notPublishedCount,
   total_fcfa_verified: totalFcfaVerified,
   total_fcfa_verified_formatted: formatFCFA(totalFcfaVerified),
+  aggregate_scope: '11 sections institutionnelles sans les deux programmes internes de la Présidence ni les régulateurs non sourcés',
+  non_additive_presidency_programs: 2,
+  unverified_regulatory_entities: 7,
+  regulators_previously_reported_sum_fcfa: 42150000000,
+  unsupported_ministry_portfolio_rows: matrixEntities.filter(e => e.category === 'MINISTERE' && e.total_fcfa != null && e.verification_status === 'NOT_DOCUMENTED').length,
+  ministry_section_reference_rows: 34,
+  ministry_portfolios: 35,
+  previous_certified_sum_fcfa: 356153879687,
+  documentary_certification: 'RESERVED_P0',
+  notes: 'L’égalité arithmétique n’est pas une preuve documentaire. Les anciens rapprochements C2D et reliquats historiques restent réservés.',
   remote_supabase_writes: 0,
   zero_fcfa_corruptions_remaining: 0,
 };
@@ -198,79 +273,33 @@ writeFileSync(matrixPath, JSON.stringify(fullMatrix, null, 2), 'utf-8');
 console.log(`[OK] Matrix saved to: ${matrixPath}`);
 
 // 2. Génération du rapport Markdown REPORT.md
-const reportContent = `# RAPPORT D'AUDIT ET DE RÉCONCILIATION BUDGÉTAIRE INSTITUTIONNELLE
-## SuiviBudget Côte d'Ivoire — Exercice Budgétaire 2026
+const reportContent = `# AUDIT DOCUMENTAIRE — LFI 2026 — AVEC RÉSERVES
 
-**Date de réalisation :** 10 octobre 2026  
-**Auditeur :** Antigravity Senior Software & Financial Integrity Agent  
-**Périmètre :** 66 entités publiques (14 Grandes Institutions, 35 Ministères, 7 Autorités de Régulation, 10 Communes du Grand Abidjan)  
-**Base légale et documentaire :**  
-- Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026 (\`SHA-256: f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76\`)
-- Annexe 4 DPPD-PAP 2026-2028 (\`SHA-256: 0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10\`)
-- Constitution ivoirienne de 2016 (Titre VII)
-- Loi n° 2013-867 relative à l'accès à l'information et aux documents publics (CAIDP)
+La matrice de 66 entités est générée à partir des références LFI 2026 (PDF pp.45–54), en distinguant montants de sections, programmes internes, portefeuilles ministériels et valeurs insuffisamment documentées. Aucune certification sans réserve.
 
----
+- Montants institutionnels recoupés : **${verifiedAmountCount}**, dont 2 programmes internes de la Présidence (non additifs).
+- Total limité aux **11 sections institutionnelles distinctes** : **${formatFCFA(totalFcfaVerified)}**.
+- **7 autorités non certifiées** : 42 150 000 000 FCFA historiquement affichés, retirés jusqu'à preuve nominative.
+- **34 sections ministérielles** pour 35 portefeuilles : rapprochements C2D et 4 reliquats historiques maintenus ; ${metadata.unsupported_ministry_portfolio_rows} montants de portefeuille ne concordent pas avec le total CP de leur section.
+- ${notDocumentedCount} entités non documentées selon le niveau requis, ${partialBreakdownCount} ventilations partielles, ${notPublishedCount} non publiées.
+- Ancien total 356 153 879 687 FCFA : **invalidé** (double comptage Présidence/IGE/HABG et budgets de régulateurs non justifiés).
 
-## 1. Synthèse Exécutive et Métriques Clés
+Sources : [LFI 2026](${evidence.source_url}), SHA-256 \`${evidence.pdf_sha256}\`; Annexe 4 DPPD-PAP ; Annexe 7 Dotations ; preuve de section dans \`LFI_2026_SECTION_EVIDENCE.json\`.
 
-| Indicateur | Valeur Certifiée | Interprétation et Règle d'Intégrité |
-| :--- | :--- | :--- |
-| **Total Entités Auditées** | **${totalEntities}** | 14 Grandes Institutions + 35 Ministères + 7 AAI + 10 Communes |
-| **Montants Vérifiés (\`VERIFIED_AMOUNT\`)** | **${verifiedAmountCount}** | Total = Fonctionnement + Investissement à 1 FCFA près |
-| **Zéros Vérifiés (\`VERIFIED_ZERO\`)** | **${verifiedZeroCount}** | Zéros officiellement confirmés par un document probant |
-| **Discordances (\`UNRECONCILED\`)** | **${unreconciledCount}** | Rejet automatique de toute déviation de 1 FCFA ou somme != total |
-| **Ventilations Partielles (\`PARTIAL_BREAKDOWN\`)** | **${partialBreakdownCount}** | Total connu mais décomposition incomplète |
-| **Non Documentés Publiquement (\`NOT_DOCUMENTED\`)** | **${notDocumentedCount}** | Y compris la Cour Suprême (compétences réparties sous la Constitution 2016) |
-| **Non Publiés (\`NOT_PUBLISHED\`)** | **${notPublishedCount}** | Dont les 10 communes du Grand Abidjan en autonomie fiscale |
-| **Volume Budgétaire Vérifié** | **${formatFCFA(totalFcfaVerified)}** | Arithmétique certifiée sans décalage |
-| **Écritures Distantes Supabase (\`REMOTE_SUPABASE_WRITES\`)** | **0** | Aucune écriture distorsionnelle en base |
-| **Zéros Artificiels Résiduels** | **0** | Élimination complète des \`0 FCFA\` masquant une absence de source |
+| ID | Catégorie | Section | Montant fiche (FCFA) | Nature | Statut | Page PDF |
+|---|---|---|---:|---|---|---:|
+${matrixEntities.map(e => `| ${e.institution_id} | ${e.category} | ${e.official_section_code ?? '—'} | ${e.total_fcfa == null ? 'non renseigné' : formatFCFA(e.total_fcfa)} | ${e.accounting_treatment ?? '—'} | ${e.verification_status} | ${e.provenance?.pdf_page ?? '—'} |`).join('\\n')}
 
----
+## Réserves maintenues
 
-## 2. Traitement Spécifique des Cas Complexes
+- Les codes et CP de section ne certifient pas la ventilation fonction/investissement, les attributions de portefeuille postérieures à la LFI ni l'exécution.
+- Programme IGE 13003 (9 872 577 575 FCFA) et HABG 13004 (5 552 174 916 FCFA) inclus dans la section 103 Présidence (193 633 705 615 FCFA) ; non additifs.
+- Les chiffres des autorités doivent être documentés individuellement par leurs budgets approuvés, potentiellement dans l'Annexe 6 EPN si l'identité juridique et le périmètre sont confirmés.
+- La Cour Suprême historique n'a pas de section autonome ; Cour de Cassation 114, Cour des Comptes 115, Conseil d'État 118.
+- Les 10 communes attendent des documents budgétaires ; null ne veut pas dire 0.
+- Relecture CI TypeScript/tests/build nécessaire au HEAD final, contrôle Vercel build-rate-limit distinct de la compilation.
 
-### A. La Cour Suprême de Côte d'Ivoire (\`inst-cour-supreme\`)
-- **Constat d'origine :** La fiche affichait précédemment 0 FCFA en dotation, 0% en fonctionnement et 0% en investissement.
-- **Origine juridique démontrée :** Sous l'empire de la Constitution de 2016 (Titre VII), les compétences de l'ancienne Cour Suprême ont été réparties entre :
-  - La **Cour de Cassation** (Section 023 : 7 931 309 608 FCFA)
-  - Le **Conseil d'État** (Section 022 : 5 164 531 081 FCFA)
-  - La **Cour des Comptes** (Section 015 : 8 851 161 351 FCFA)
-- **Traitement SuiviBudget :** La Cour Suprême n'ayant aucune section budgétaire propre dans la LFI 2026, son budget est maintenu à \`null\`, qualifié de \`NOT_DOCUMENTED\` avec la mention explicite *« Non individualisé (LFI 2026) »* et notice informative renvoyant vers les trois cours suprêmes autonomes. Aucun faux zéro n'est affiché.
-
-### B. Les 10 Communes du Grand Abidjan sous Autonomie Fiscale
-- **Périmètre :** Abobo, Adjamé, Attécoubé, Cocody, Koumassi, Marcory, Plateau, Port-Bouët, Treichville, Yopougon.
-- **Régime budgétaire :** Ces 10 communes fonctionnent sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales).
-- **Traitement SuiviBudget :** Aucune dotation LFI centralisée ne leur est attribuée arbitrairement. Leurs fiches affichent *« Budget municipal propre »* (\`TAX_AUTONOMY\` / \`NOT_PUBLISHED\`), \`delta_fcfa = null\`, avec la notice expliquant l'attente de centralisation des délibérations des conseils municipaux respectifs.
-
-### C. Élimination des Pourcentages Artificiels (\`calculateSafePercentages\`)
-- Rapprochement arithmétique strict : \`functioning + investment === total\` vérifié à 1 FCFA près.
-- Toute anomalie (ex. mutation de 1 FCFA ou total de 100M avec composants 60M + 30M) produit immédiatement le statut \`UNRECONCILED\`, bloque l'affichage de pourcentages et calcule l'écart exact (\`deltaFcfa\`).
-- Aucune division par zéro n'est possible en cas de dotation nulle légitime (\`ZERO_TOTAL\`).
-
----
-
-## 3. Matrice Détaillée des 66 Entités Publiques
-
-| Entité | Catégorie | Section | Statut Vérification | Total (FCFA) | Fonct. (FCFA) | Invest. (FCFA) | % F / % I | Écart Delta |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-${matrixEntities.map(e => {
-  const tot = e.total_fcfa !== null ? formatFCFA(e.total_fcfa) : (e.verification_status === 'NOT_DOCUMENTED' ? 'Non documenté' : 'Non publié');
-  const fonct = e.functioning_fcfa !== null ? formatFCFA(e.functioning_fcfa) : '-';
-  const inv = e.investment_fcfa !== null ? formatFCFA(e.investment_fcfa) : '-';
-  const pcts = (e.functioning_pct !== null && e.investment_pct !== null) ? `${e.functioning_pct}% / ${e.investment_pct}%` : '-';
-  const delta = e.delta_fcfa !== null ? `${e.delta_fcfa} FCFA` : '-';
-  return `| **${e.institution_name}** | \`${e.category}\` | ${e.official_section_code || '-'} | \`${e.verification_status}\` | ${tot} | ${fonct} | ${inv} | ${pcts} | ${delta} |`;
-}).join('\n')}
-
----
-
-## 4. Garanties de Clôture et Non-Régression
-
-1. **Source de Vérité Unique :** Les cartes publiques (\`NationalInstitutionsPage\`, \`MinistriesPage\`) et la fenêtre modale (\`InstitutionDetailModal\`) utilisent le même résolveur \`resolveInstitutionFinancialView\`. Toute divergence visuelle est impossible.
-2. **Intégrité Documentaire :** Tout montant \`VERIFIED_AMOUNT\` remonte à un document officiel publié par la DGBF (LFI 2026 ou DPPD-PAP) avec son hash SHA-256 et sa pagination.
-3. **Absence de Corruption Silencieuse :** \`delta_fcfa\` est strictement \`null\` en l'absence de montants complets et \`0\` lorsque le budget est parfaitement réconcilié.
+**Décision : prêt pour réexamen technique ; certification documentaire globale refusée en l'état.**
 `;
 
 const reportPath = resolve(process.cwd(), 'docs/audits/institution-reconciliation/REPORT.md');
