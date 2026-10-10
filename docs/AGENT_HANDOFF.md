@@ -1,8 +1,23 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
+## REPRISE PRIORITAIRE — CONTRÔLE DOCUMENTAIRE PR #31 DU 10 OCTOBRE 2026
+
+**Source de vérité pour la reprise :** HEAD actuel de la PR #31, à interroger avant chaque modification. Ne pas supposer que les anciens snapshots, comptes de tests ou PR mergées sont encore d'actualité.
+
+- **LFI et Annexe 4 retrouvées et contrôlées directement depuis les PDF originaux fournis**, empreintes SHA-256 conservées dans `SECTION_PROGRAM_CROSSCHECK_22_2026.json`.
+- **35 portefeuilles documentés** ; 12 référentiels canoniques antérieurs avec programmes/actions ; les 23 autres portefeuilles reliés à **22 sections distinctes**, dont la section 229 commune à `gov-009` et `gov-035`.
+- **112 programmes LFI 2026** numériquement retrouvés dans l'Annexe 4, tous les totaux de section exactement réconciliés (delta = 0). **340 actions**, sommes exactes sur **108 programmes**. Quatre exceptions : `108/13010`, `108/13011`, `108/13013` (dotations) et `352/22121` (tableau d'actions absent sous ce code).
+- **Vérification reproductible** des PDFs : `python scripts/verify_ministry_section_pdfs.py <LFI.pdf> <Annexe4.pdf>` ; aucune dépendance à Supabase, script en lecture seule, installez `pymupdf` si besoin.
+- **UI PR #31** : les portefeuilles concernés peuvent montrer les CP de section, les 112 programmes et leur provenance, **sans prétendre que les crédits de section sont une dotation autonome propre à la fiche**. Neuf anciens montants divergents + le doublon `gov-035` demeurent archivés mais non réattribués.
+- **Certification intégrale des 35 portefeuilles non acquise** tant que la correspondance officielle des crédits avant/après le Gouvernement du 23 janvier 2026, les périmètres composites et les quatre exceptions ne sont pas levés. Conserver le statut `DRAFT` des 23 portefeuilles et ne pas annoncer un résultat certifié.
+- Documents clés : `PR31_CERTIFICATION_EVIDENCE_MATRIX_35.md`, `PR31_SOURCE_GAP_SECTION_352_PROGRAM_22121.md`, `PR31_DGBF_DOCUMENTARY_CLARIFICATION_REQUEST_DRAFT.md`, tous dans `docs/references/2026/ministry-reconciliation/`.
+- **Règles non négociables** : ne pas fusionner PR #31, aucune écriture Supabase, aucune migration, aucun déploiement intentionnel ; aucune invention de montant ou d'allocation ; vérifier la CI du HEAD avant de considérer le lot techniquement prêt.
+
+---
+
 ## METADATA
 - LAST_UPDATED : 2026-10-10
-- LAST_AGENT : Antigravity
+- LAST_AGENT : GPT-6 (réconciliation documentaire PR #31)
 - CURRENT_BRANCH : `antigravity/institution-budgets-reconciliation`
 - BASE_MASTER_SHA : `707b3b688f23bd33dc0f3504e13b79c65908dd50` (Merge commit de PR #28 sur master)
 - PR : PR Reconciliation Budgets Institutionnels & Élimination des Faux Zéros
