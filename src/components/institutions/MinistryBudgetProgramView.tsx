@@ -6,7 +6,6 @@ import {
   MinistryLinkedProject,
 } from '../../types/ministryBudget';
 import {
-  getMinistryBudget,
   isPilotMinistry,
   MMPE_MINISTRY_BUDGET_2026,
 } from '../../data/ministryPilotReferential';
@@ -32,7 +31,7 @@ export const MinistryBudgetProgramView: React.FC<MinistryBudgetProgramViewProps>
 
   // Par défaut, le Programme Énergie (22037) est ouvert (le plus important en volume)
   const [expandedProgramId, setExpandedProgramId] = useState<string | null>(
-    isPilot ? 'prog-22037' : null
+    pilotBudget?.programs.find(program => program.official_code === '22037')?.id ?? null
   );
 
   const toggleProgram = (programId: string) => {
