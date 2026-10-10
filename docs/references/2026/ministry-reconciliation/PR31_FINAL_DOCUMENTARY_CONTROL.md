@@ -1,5 +1,14 @@
 # PR #31 — Rapport de clôture du contrôle documentaire 2026
 
+## Certification documentée de la LFI initiale, pas du remaniement (10 octobre 2026)
+
+Les **34 montants de section distincts** invoqués pour les 35 fiches ont été repérés dans la *partie normative* de la LFI 2026 : **article 14 (Primature, PDF p.12)** et **article 15 (répartition des programmes ministériels, PDF p.14–20)**. Il s'agit des **CP votés dans la loi**, réconciliés avec les totaux de section du recueil budgétaire officiel. **Il ne s'agit pas de 35 dotations autonomes votées**, car `gov-009` et `gov-035` renvoient tous deux à la section 229, et les remaniements postérieurs ne sont pas ici reconstitués par actes de transfert. Les fiches sont maintenant sourcées vers la partie législative et le registre `LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json`.
+
+En complément, `PR31_FOUR_UNEXPLAINED_LEGACY_RESIDUALS_2026.json` conserve les **quatre différences historiques toujours sans rapprochement exact**, avec source hashée pour chacune des 1 901 pages de PDF vérifiées. Leur absence en tant que valeur textuelle autonome dans ces trois PDF ne permet ni d'accuser les sources officielles, ni de restaurer les montants historiques comme budgétaires certifiés.
+
+**Verdict :** CP **initiaux des 34 sections** légalement établis ; sommes des programmes/actions documentées ; **attribution à chaque portefeuille post-remaniement et transferts de crédits éventuels non démontrés**. Certification financière **sans réserve des 35 fiches : NON ACQUISE**.
+
+
 > **Mise à jour du 10 octobre 2026 — postérieure au rapport ci-dessous :** six montants du répertoire applicatif `src/data/governmentData.ts` ont été alignés sur leurs référentiels canoniques CP 2026 (gov-005, gov-018, gov-025, gov-031, gov-032, gov-034). Le rapport initial ci-dessous conserve l'historique des 15 écarts *avant correction*. Neuf écarts numériques demeurent : gov-001, gov-006, gov-009, gov-011, gov-012, gov-013, gov-014, gov-022, gov-029. Les correspondances administratives de périmètre et les situations composites ne sont pas certifiées automatiquement. Aucune fusion ni modification Supabase.
 
 
