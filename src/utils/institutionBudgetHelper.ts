@@ -487,6 +487,8 @@ export function resolveInstitutionFinancialView(
     const isExplicitlyUnpublished = institution.budget_not_published === true;
     const vStatus: InstitutionBudgetVerificationStatus = isExplicitlyUnpublished ? 'NOT_PUBLISHED' : 'NOT_DOCUMENTED';
     const sStatus: InstitutionBudgetStatus = isExplicitlyUnpublished ? 'NOT_PUBLISHED' : 'NOT_DOCUMENTED';
+    const referenceOnly = fiscalYear === 2026 && (requestedBasis == null || requestedBasis === 'LFI')
+      ? (NATIONAL_INSTITUTIONS_SECTIONS[instId] ?? MINISTRIES_SECTIONS[instId]) : undefined;
     const totalFormatted = isExplicitlyUnpublished ? 'Montant à confirmer' : 'Non documenté publiquement';
     const badgeText = isExplicitlyUnpublished ? 'Budget non publié' : 'Non documenté publiquement';
 
@@ -494,7 +496,7 @@ export function resolveInstitutionFinancialView(
       institution_id: instId,
       institution_name: instName,
       institution_type: instType,
-      official_section_code: null,
+      official_section_code: referenceOnly?.section_code ?? null,
       fiscal_year: fiscalYear,
       nature_credits: null,
       budget_basis: requestedBasis || (instType === 'MAIRIE' || instType === 'REGION' ? 'PRIMITIVE' : 'LFI'),
@@ -512,13 +514,22 @@ export function resolveInstitutionFinancialView(
       delta_fcfa: null,
       programs: [],
       actions: [],
-      documentary_provenance: null,
+      documentary_provenance: referenceOnly ? {
+        document_title: LFI_2026_DOCUMENT.title,
+        document_reference: `Référence de section ${referenceOnly.section_code} uniquement : ne certifie pas une allocation de portefeuille`,
+        source_url: LFI_2026_DOCUMENT.url,
+        pdf_page: referenceOnly.pdf_page,
+        doc_page: referenceOnly.doc_page,
+        sha256: LFI_2026_DOCUMENT.sha256,
+        table_or_line: `Total LFI de section ${referenceOnly.section_code}, sans imputation certifiée au portefeuille`
+      } : null,
       verification_status: vStatus,
       reconciliation_status: 'NO_BREAKDOWN',
       blocking_reasons: [
         isExplicitlyUnpublished
           ? "Document officiel d'approbation budgétaire ou annexe de la Loi de Finances non encore publié ou en cours d'obtention."
-          : "Aucune documentation budgétaire publique disponible ou document non encore transmis à SuiviBudget."
+          : "Aucune documentation budgétaire publique disponible ou document non encore transmis à SuiviBudget.",
+        ...(referenceOnly ? [`Section LFI ${referenceOnly.section_code} connue, mais montant affectable à ce portefeuille inconnu.`] : [])
       ],
       badge_text: badgeText,
       badge_class: isExplicitlyUnpublished ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-slate-100 text-slate-600 border-slate-300',
@@ -631,7 +642,7 @@ export function resolveInstitutionFinancialView(
       ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
       : 'bg-amber-100 text-amber-800 border-amber-300',
     notice_text: !isLfi2026AmountConfirmed
-      ? 'Le montant actuellement reference ne peut etre certifie comme credit de section LFI 2026. Voir les reserves documentaires ; les ecarts C2D ou de portefeuille necessitent un acte de rapprochement.'
+      ? 'Le montant actuellement reference ne peut etre certifie comme credit de section LFI 2026. provenance documentaire insuffisante ; les ecarts C2D ou de portefeuille necessitent un acte de rapprochement.'
       : !isReconciled ? `${pctResult.reason || 'Ventilation incomplète.'} La concordance du total LFI ne certifie pas les ratios.`
       : null,
     is_cour_supreme: false,
