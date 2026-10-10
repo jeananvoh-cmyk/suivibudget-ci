@@ -1,18 +1,18 @@
 import { Institution, PrimitiveBudgetInfo } from '../types';
 
 /**
- * Référentiel National des Budgets Primitifs Officiels 2026
- * Validé pour 46 Collectivités Territoriales (30 Communes et 16 Conseils Régionaux) de Côte d'Ivoire.
- * Extrait et certifié à partir du Référentiel des Budgets Primitifs 2026 (Referentiel_232).
+ * Référentiel de budgets primitifs locaux rapportés pour 2026
+ * 46 publications repérées : 30 Communes et 16 Conseils Régionaux de Côte d'Ivoire.
+ * Montants issus de publications référencées : vérifier les délibérations originales avant toute certification.
  * 
- * Sources certifiées :
+ * Sources documentaires signalées (souvent secondaires) :
  * - Délibérations officielles des Conseils Municipaux et Régionaux
  * - Agence Ivoirienne de Presse (AIP)
  * - Fraternité Matin (Quotidiens officiels & comptes-rendus)
  * - Abidjan.net / Le Nouveau Réveil (ex: Mairie de Cocody)
  * - KOACI (États d'exécution & sessions budgétaires)
  * 
- * Ce référentiel permet la « Double Lecture Certifiée » :
+ * Ce référentiel prépare deux lectures qu'il faut conserver distinctes :
  * 1. Dotation de l'État (Loi de Finances / DGBF : DGF + DGE)
  * 2. Budget Primitif Municipal/Régional Propre (Ressources propres + fiscalité locale partagée DGI)
  */
@@ -624,7 +624,7 @@ const normalizeStr = (s: string) => (s || '')
   .replace(/[^a-z0-9]/g, '');
 
 /**
- * Enrichit les collectivités (communes, régions et districts) avec les budgets primitifs officiels votés
+ * Enrichit les collectivités (communes, régions et districts) avec les budgets primitifs rapportés par source
  */
 export function enrichWithPrimitiveBudgets(entities: Institution[]): Institution[] {
   return entities.map(entity => {
