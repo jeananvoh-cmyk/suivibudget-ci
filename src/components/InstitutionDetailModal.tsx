@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Institution, BudgetProject, BudgetLineItem } from '../types';
 import { formatQualifiedFCFA, formatFCFA, formatAmountInWords, getProjectTier, getProjectTierBadge, ProjectTier } from '../utils/formatters';
-import { assessInstitutionBudget, calculateSafePercentages } from '../utils/institutionBudgetHelper';
+import { assessInstitutionBudget, calculateSafePercentages, resolveInstitutionFinancialView } from '../utils/institutionBudgetHelper';
 import { getProjectsForInstitution } from '../utils/institutionProjects';
 import { 
   X, 
@@ -234,27 +234,20 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
 
   const totalLinesAmount = safeBudgetLines.reduce((sum, l) => sum + (l.montant_fcfa || 0), 0);
 
-  // Budget ratios (Safe zero & exact proportion handling)
-  const primInfo = institution.primitive_budget || OFFICIAL_PRIMITIVE_BUDGETS[institution.id];
-  const assessment = assessInstitutionBudget(institution);
-  const functioningBudget = (institution.total_budget_fcfa === 0 && primInfo?.functioning_voted_fcfa != null)
-    ? primInfo.functioning_voted_fcfa
-    : institution.budget_functioning_fcfa;
-  const investmentBudget = (institution.total_budget_fcfa === 0 && primInfo?.investment_voted_fcfa != null)
-    ? primInfo.investment_voted_fcfa
-    : institution.budget_investment_fcfa;
-  const totalBudget = (institution.total_budget_fcfa === 0 && primInfo?.total_voted_fcfa != null)
-    ? primInfo.total_voted_fcfa
-    : (institution.total_budget_fcfa ?? (functioningBudget != null && investmentBudget != null ? functioningBudget + investmentBudget : null));
-  const hasInstBreakdown = calculateSafePercentages(functioningBudget, investmentBudget, totalBudget).functioningPct !== null;
-
-  const { functioningPct: safeFonctPct, investmentPct: safeInvPct } = calculateSafePercentages(
-    functioningBudget,
-    investmentBudget,
-    totalBudget
+  // Résolveur Financier Commun Unique (P1-B : intégrité carte/fiche)
+  const financialView = resolveInstitutionFinancialView(
+    institution, 
+    2026, 
+    institution.type === 'MAIRIE' || institution.type === 'REGION' ? 'PRIMITIVE' : 'LFI'
   );
-  const functioningPct = safeFonctPct ?? 0;
-  const investmentPct = safeInvPct ?? 0;
+  const assessment = assessInstitutionBudget(institution);
+
+  const functioningBudget = financialView.functioning_amount_fcfa;
+  const investmentBudget = financialView.investment_amount_fcfa;
+  const totalBudget = financialView.total_amount_fcfa;
+  const hasInstBreakdown = financialView.has_breakdown;
+  const functioningPct = financialView.functioning_pct ?? 0;
+  const investmentPct = financialView.investment_pct ?? 0;
 
   // Resolve CAIDP Information Officer accurately from registry
   const caidpMatch = dataStore.findCaidpEntity(institution.name) || findCaidpRI(institution.name);
@@ -1323,7 +1316,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     </div>
                   );
                 })()
-              ) : (institution.total_budget_fcfa == null || institution.total_budget_fcfa === 0 || institution.is_tax_quota_commune || institution.budget_not_published || assessment.isCourSupreme) ? (
+              ) : (financialView.total_amount_fcfa == null || financialView.verification_status === 'NOT_PUBLISHED' || financialView.verification_status === 'NOT_DOCUMENTED' || financialView.is_tax_quota_commune || financialView.is_cour_supreme) ? (
                 (() => {
                   const isCourSupreme = assessment.isCourSupreme;
                   const isGrandAbidjan = institution.type === 'MAIRIE' && (
@@ -1493,10 +1486,10 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                           : "Montant budgétaire enregistré (source à vérifier)"}
                       </span>
                       <h3 className="text-xl sm:text-2xl font-black text-slate-900">
-                        {formatFCFA(institution.total_budget_fcfa)}
+                        {financialView.total_formatted}
                       </h3>
                       <p className="text-xs text-brand-blue font-bold">
-                        {formatAmountInWords(institution.total_budget_fcfa)}
+                        {financialView.total_words}
                       </p>
                     </div>
 
@@ -1511,14 +1504,14 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="p-3.5 bg-sky-50 rounded-xl border border-sky-200 space-y-1">
                           <span className="text-[10px] font-black uppercase tracking-wider text-sky-700 block">Dépenses de Fonctionnement (DGF)</span>
-                          <span className="text-lg font-black text-slate-900 block break-words">{formatFCFA(institution.budget_functioning_fcfa)}</span>
+                          <span className="text-lg font-black text-slate-900 block break-words">{financialView.functioning_formatted}</span>
                           <span className="text-xs font-bold text-sky-800 block">({functioningPct}% de la dotation)</span>
                           <span className="text-[10px] font-semibold text-sky-900 block">({formatAmountInWords(institution.budget_functioning_fcfa)})</span>
                         </div>
 
                         <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 space-y-1">
                           <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 block">Dépenses d'Investissement Public (DGE)</span>
-                          <span className="text-lg font-black text-slate-900 block break-words">{formatFCFA(institution.budget_investment_fcfa)}</span>
+                          <span className="text-lg font-black text-slate-900 block break-words">{financialView.investment_formatted}</span>
                           <span className="text-xs font-bold text-emerald-800 block">({investmentPct}% de la dotation)</span>
                           <span className="text-[10px] font-semibold text-emerald-900 block">({formatAmountInWords(institution.budget_investment_fcfa)})</span>
                           {investmentBudget === 0 && (

@@ -4,6 +4,7 @@ import { GOVERNMENT_OFFICIALS, OfficialLeader } from '../../data/governmentData'
 import { dataStore } from '../../services/dataStore';
 import { BudgetProject, Institution } from '../../types';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
+import { resolveInstitutionFinancialView } from '../../utils/institutionBudgetHelper';
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
 import { isPilotMinistry } from '../../data/ministryPilotReferential';
@@ -144,6 +145,32 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
       budget_not_published: official.budget_fcfa == null
     };
     setSelectedInstForDetail(instObj);
+  };
+
+  const renderOfficialBudget = (official: OfficialLeader, textClass = 'text-[11px]') => {
+    const view = resolveInstitutionFinancialView({
+      id: official.id,
+      name: official.department_ministry,
+      type: 'MINISTERE',
+      total_budget_fcfa: official.budget_fcfa ?? null,
+    }, 2026, 'LFI');
+
+    if (view.verification_status === 'VERIFIED_AMOUNT') {
+      return (
+        <div className={`${textClass} font-bold text-slate-800 pt-0.5 whitespace-nowrap`}>
+          Budget : <span className="text-brand-blue font-black">{view.total_formatted}</span>{' '}
+          {view.total_words && (
+            <span className="text-slate-500 font-semibold text-[10px] break-words">({view.total_words})</span>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className={`${textClass} font-bold text-slate-800 pt-0.5 whitespace-nowrap`}>
+        Budget : <span className="text-slate-400 font-semibold italic text-[10px]">{view.badge_text}</span>
+      </div>
+    );
   };
 
   const renderCardFooter = (official: OfficialLeader) => (

@@ -27,26 +27,27 @@ describe('Institution Budget Integrity & Safe Rendering', () => {
 
   describe('calculateSafePercentages', () => {
     it('returns null for both percentages when total is null, undefined, 0, or negative', () => {
-      expect(calculateSafePercentages(100, 50, null)).toEqual({ functioningPct: null, investmentPct: null });
-      expect(calculateSafePercentages(100, 50, undefined)).toEqual({ functioningPct: null, investmentPct: null });
-      expect(calculateSafePercentages(100, 50, 0)).toEqual({ functioningPct: null, investmentPct: null });
-      expect(calculateSafePercentages(100, 50, -1000)).toEqual({ functioningPct: null, investmentPct: null });
+      expect(calculateSafePercentages(100, 50, null)).toMatchObject({ functioningPct: null, investmentPct: null, status: 'NO_BREAKDOWN' });
+      expect(calculateSafePercentages(100, 50, undefined)).toMatchObject({ functioningPct: null, investmentPct: null, status: 'NO_BREAKDOWN' });
+      expect(calculateSafePercentages(100, 50, 0)).toMatchObject({ functioningPct: null, investmentPct: null, status: 'UNRECONCILED' });
+      expect(calculateSafePercentages(0, 0, 0)).toMatchObject({ functioningPct: null, investmentPct: null, status: 'ZERO_TOTAL' });
+      expect(calculateSafePercentages(100, 50, -1000)).toMatchObject({ functioningPct: null, investmentPct: null, status: 'UNRECONCILED' });
     });
 
     it('returns null when either functioning or investment component is missing', () => {
-      expect(calculateSafePercentages(null, 50, 100)).toEqual({ functioningPct: null, investmentPct: null });
-      expect(calculateSafePercentages(50, null, 100)).toEqual({ functioningPct: null, investmentPct: null });
-      expect(calculateSafePercentages(undefined, 50, 100)).toEqual({ functioningPct: null, investmentPct: null });
+      expect(calculateSafePercentages(null, 50, 100)).toMatchObject({ functioningPct: null, investmentPct: null, status: 'PARTIAL_BREAKDOWN' });
+      expect(calculateSafePercentages(50, null, 100)).toMatchObject({ functioningPct: null, investmentPct: null, status: 'PARTIAL_BREAKDOWN' });
+      expect(calculateSafePercentages(undefined, 50, 100)).toMatchObject({ functioningPct: null, investmentPct: null, status: 'PARTIAL_BREAKDOWN' });
     });
 
     it('returns 100% functioning and 0% investment when investment is 0', () => {
       const res = calculateSafePercentages(10_000_000, 0, 10_000_000);
-      expect(res).toEqual({ functioningPct: 100, investmentPct: 0 });
+      expect(res).toMatchObject({ functioningPct: 100, investmentPct: 0, status: 'RECONCILED', isBalanced: true });
     });
 
     it('returns 0% functioning and 100% investment when functioning is 0', () => {
       const res = calculateSafePercentages(0, 10_000_000, 10_000_000);
-      expect(res).toEqual({ functioningPct: 0, investmentPct: 100 });
+      expect(res).toMatchObject({ functioningPct: 0, investmentPct: 100, status: 'RECONCILED', isBalanced: true });
     });
 
     it('returns correctly rounded percentages summing to 100%', () => {
@@ -59,17 +60,17 @@ describe('Institution Budget Integrity & Safe Rendering', () => {
 
   describe('financial arithmetic gate', () => {
     it('rejects a non-reconciled 60 + 30 vs 100 breakdown', () => {
-      expect(calculateSafePercentages(60, 30, 100)).toEqual({ functioningPct: null, investmentPct: null });
+      expect(calculateSafePercentages(60, 30, 100)).toMatchObject({ functioningPct: null, investmentPct: null, status: 'UNRECONCILED' });
     });
     it('rejects a one-franc mismatch', () => {
-      expect(calculateSafePercentages(60, 39, 100)).toEqual({ functioningPct: null, investmentPct: null });
+      expect(calculateSafePercentages(60, 39, 100)).toMatchObject({ functioningPct: null, investmentPct: null, status: 'UNRECONCILED' });
     });
     it('rejects negative or unsafe monetary numbers', () => {
       expect(calculateSafePercentages(-1, 101, 100).functioningPct).toBeNull();
       expect(calculateSafePercentages(Number.MAX_SAFE_INTEGER + 1, 0, Number.MAX_SAFE_INTEGER + 1).functioningPct).toBeNull();
     });
     it('accepts a reconciled breakdown', () => {
-      expect(calculateSafePercentages(60, 40, 100)).toEqual({ functioningPct: 60, investmentPct: 40 });
+      expect(calculateSafePercentages(60, 40, 100)).toMatchObject({ functioningPct: 60, investmentPct: 40, status: 'RECONCILED' });
     });
   });
 
