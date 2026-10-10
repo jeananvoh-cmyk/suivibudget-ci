@@ -19,6 +19,10 @@ Notre contrôle a réconcilié les crédits de paiement de **22 sections et 112 
 
 ## 2. Correspondance administrative entre LFI 2026 et gouvernement du 23 janvier 2026
 
+**Précision documentaire déjà obtenue :** nous avons identifié l'annexe officielle au décret n° 2026-84 du 4 mars 2026 (https://www.gouv.ci/uploads/publications/177580607447.pdf), qui clarifie les **autorités de tutelle et structures rattachées aux 35 portefeuilles actuels**. Nous ne sollicitons donc pas une nouvelle liste de tutelles, mais uniquement **les éventuels actes et tableaux permettant de déterminer les montants CP effectivement transférés ou rattachés à chaque portefeuille après la LFI**. En l'absence de tels mouvements, merci de confirmer que les CP demeurent attachés aux sections et programmes initiaux.
+
+
+
 Le gouvernement du 23 janvier 2026 a été nommé postérieurement à la LFI votée en décembre 2025. Plusieurs portefeuilles ne correspondent pas à une section budgétaire autonome clairement individualisée dans la présentation LFI.
 
 **Pièces demandées :** tableau de correspondance officiel `portefeuille gouvernemental 2026 → section(s) budgétaire(s) → programmes → crédits CP`, décisions de transfert/réaménagement de crédits éventuellement prises après la nouvelle composition gouvernementale, et règles de rattachement des ministres délégués. Nous ne présumons pas qu'une nouvelle appellation ministérielle crée nécessairement une dotation additionnelle.
