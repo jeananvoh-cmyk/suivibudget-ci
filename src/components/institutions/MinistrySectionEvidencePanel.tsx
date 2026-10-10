@@ -1,6 +1,7 @@
 import React from 'react';
 import sectionEvidence from '../../../docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json';
 import actionEvidence from '../../../docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json';
+import complementaryActions from '../../../docs/references/2026/ministry-reconciliation/LFI_2026_ACTION_COMPLEMENTS_4_PROGRAMMES.json';
 import officialProgramNames from '../../data/ministryOfficialProgramLabels2026.json';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
 
@@ -44,6 +45,9 @@ export const MinistrySectionEvidencePanel: React.FC<Props> = ({ institutionId })
           const actions = actionEvidence.programs.find(a =>
             a.section_code === section.section_code && a.program_code === program.official_code,
           );
+          const supplement = complementaryActions.records.find(r =>
+            r.section_code === section.section_code && r.program_code === program.official_code,
+          );
           return (
             <div key={program.official_code} className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-1">
               <div className="flex flex-wrap justify-between items-start gap-2">
@@ -55,13 +59,30 @@ export const MinistrySectionEvidencePanel: React.FC<Props> = ({ institutionId })
                 <span className="text-slate-600">
                   {actions?.actions_count
                     ? `${actions.actions_count} action(s) réconciliée(s) — total CP exact`
-                    : 'Détail des actions non établi'}
+                    : supplement
+                      ? `${supplement.actions.length} action(s) réconciliée(s) depuis la LFI — somme CP exacte`
+                      : 'Détail des actions non établi'}
                 </span>
                 <a href={`${ANNEX4_URL}#page=${program.annex4_pdf_page}`} target="_blank"
                   rel="noopener noreferrer" className="underline text-brand-blue">
                   Annexe 4 — PDF p. {program.annex4_pdf_page}
                 </a>
               </div>
+              {supplement && (
+                <div className="text-[11px] border-t border-slate-200 pt-2 space-y-1">
+                  {supplement.actions.map(action => (
+                    <div key={action.code} className="flex flex-wrap justify-between gap-2">
+                      <span>{action.code} — {action.name}</span>
+                      <span className="font-semibold">{formatFCFA(action.cp_fcfa)} ·{' '}
+                        <a href={`${LFI_URL}#page=${action.lfi_pdf_page}`} className="underline text-brand-blue"
+                          target="_blank" rel="noopener noreferrer">LFI p. {action.lfi_pdf_page}</a>
+                      </span>
+                    </div>
+                  ))}
+                  <p className="text-slate-600">L’Annexe 4 ne donne pas le détail de ces actions sous ce code ;
+                    la Loi de finances fournit une ventilation financière directement vérifiable.</p>
+                </div>
+              )}
             </div>
           );
         })}
