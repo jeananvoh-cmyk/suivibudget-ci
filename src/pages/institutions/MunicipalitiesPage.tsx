@@ -596,7 +596,7 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                     <div className="space-y-2 pt-2 mt-2">
                       <div className="flex justify-between items-center text-xs">
                         <span className="text-slate-500 font-bold uppercase">
-                          {isPeripheralAbidjan ? "Dotation de l'État — DGE & DGF (LFI 2026)" : "Dotation de l'État (LFI 2026)"}
+                          {isPeripheralAbidjan ? "Dotation enregistrée — source primaire à confirmer" : "Dotation enregistrée — source primaire à confirmer"}
                         </span>
                         <span className="font-black text-slate-900">
                           {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold">({formatAmountInWords(inst.total_budget_fcfa)})</span>
