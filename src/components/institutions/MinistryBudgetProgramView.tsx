@@ -16,6 +16,7 @@ import { BudgetProgramCard } from './BudgetProgramCard';
 import { SCOPE_EXCEPTIONS, MINISTRY_DOCUMENTARY_DISCREPANCIES, MINISTRY_CANDIDATE_CP_2026 } from '../../data/ministryScopeExceptions';
 import { MinistrySectionEvidencePanel } from './MinistrySectionEvidencePanel';
 import { MinistryAttributionsNotice } from './MinistryAttributionsNotice';
+import { MinistryLegalCPNotice } from './MinistryLegalCPNotice';
 import { MinistryC2DEvidence } from './MinistryC2DEvidence';
 
 interface MinistryBudgetProgramViewProps {
@@ -58,6 +59,7 @@ export const MinistryBudgetProgramView: React.FC<MinistryBudgetProgramViewProps>
     return (
       <div className="space-y-5 animate-in fade-in duration-200">
         <MinistryAttributionsNotice institutionId={institution.id} />
+        <MinistryLegalCPNotice institutionId={institution.id} />
         <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-3">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
@@ -154,6 +156,7 @@ export const MinistryBudgetProgramView: React.FC<MinistryBudgetProgramViewProps>
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       <MinistryAttributionsNotice institutionId={institution.id} />
+        <MinistryLegalCPNotice institutionId={institution.id} />
       <MinistryC2DEvidence institutionId={institution.id} />
       {/* 1. En-tête budgétaire officiel */}
       <MinistryBudgetHeader budget={pilotBudget} />
