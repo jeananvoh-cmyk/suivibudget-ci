@@ -11,7 +11,7 @@ Sources complémentaires : [LFI 2026](https://www.dgbf.ci/wp-content/uploads/202
 - **13 correspondances numériques institutionnelles documentées** dont **2 programmes internes de la Présidence non additifs**.
 - **11 sections institutionnelles DISTINCTES**, total limité à ce périmètre : **298 579 127 196 FCFA**. Ce montant ne représente ni l'ensemble du budget de l'État ni un total cumulant ministères/AAI/communes.
 - **7 budgets de régulateurs retirés de la catégorie vérifiée** ; anciens chiffres totalisant **42 150 000 000 FCFA**, sans pièces probantes individuelles suffisantes dans la matrice précédente. Montants = `null`, et surtout pas 0.
-- **11 montants de portefeuilles ministériels historiques distincts de leur section LFI**, donc non certifiés comme budget de section ; **34 sections LFI pour 35 portefeuilles administratifs**. Ne pas redistribuer automatiquement les crédits.
+- **2 montants de portefeuilles ministériels distincts de leur section LFI et 9 montants volontairement non renseignés**, donc non certifiés comme budget de section ; **34 sections LFI pour 35 portefeuilles administratifs**. Ne pas redistribuer automatiquement les crédits.
 - Ancien cumul prétendument certifié **356 153 879 687 FCFA** : **retiré**. Ce total mélangeait programmes imbriqués et régulateurs non justifiés.
 - Statuts des 66 : `{"VERIFIED_AMOUNT":13,"NOT_DOCUMENTED":20,"PARTIAL_BREAKDOWN":23,"NOT_PUBLISHED":10}`. Les écarts arithmétiques ne remplacent jamais une preuve documentaire.
 
@@ -43,20 +43,20 @@ Sources complémentaires : [LFI 2026](https://www.dgbf.ci/wp-content/uploads/202
 | inst-cesec | 105 | GRANDE_INSTITUTION | SECTION | 8 069 692 846 | VERIFIED_AMOUNT | 45 |
 | inst-cnrct | 111 | GRANDE_INSTITUTION | SECTION | 5 794 171 874 | VERIFIED_AMOUNT | 46 |
 | inst-habg | 103 | GRANDE_INSTITUTION | INTERNAL_PROGRAM | 5 552 174 916 | VERIFIED_AMOUNT | 45 |
-| gov-001 | 108 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 73 426 766 299 | NOT_DOCUMENTED | 45 |
+| gov-001 | 108 | MINISTERE | PORTFOLIO_AMOUNT_WITHHELD | non renseigné | NOT_DOCUMENTED | 45 |
 | gov-002 | 226 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 481 041 827 995 | PARTIAL_BREAKDOWN | 46 |
 | gov-003 | 237 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 45 121 940 916 | PARTIAL_BREAKDOWN | 47 |
 | gov-004 | 321 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 146 728 395 147 | PARTIAL_BREAKDOWN | 47 |
 | gov-005 | 325 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 129 151 307 791 | PARTIAL_BREAKDOWN | 48 |
-| gov-006 | 323 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 947 962 959 206 | NOT_DOCUMENTED | 48 |
+| gov-006 | 323 | MINISTERE | PORTFOLIO_AMOUNT_WITHHELD | non renseigné | NOT_DOCUMENTED | 48 |
 | gov-007 | 322 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 2 038 854 932 647 | NOT_DOCUMENTED | 46 |
 | gov-008 | 348 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 706 060 209 015 | PARTIAL_BREAKDOWN | 51 |
-| gov-009 | 229 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 337 932 332 542 | NOT_DOCUMENTED | 47 |
+| gov-009 | 229 | MINISTERE | PORTFOLIO_AMOUNT_WITHHELD | non renseigné | NOT_DOCUMENTED | 47 |
 | gov-010 | 340 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 307 769 615 082 | PARTIAL_BREAKDOWN | 50 |
-| gov-011 | 366 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 504 985 369 765 | NOT_DOCUMENTED | 53 |
-| gov-012 | 357 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 88 949 349 037 | NOT_DOCUMENTED | 52 |
-| gov-013 | 335 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 817 868 452 462 | NOT_DOCUMENTED | 49 |
-| gov-014 | 358 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 131 771 209 724 | NOT_DOCUMENTED | 52 |
+| gov-011 | 366 | MINISTERE | PORTFOLIO_AMOUNT_WITHHELD | non renseigné | NOT_DOCUMENTED | 53 |
+| gov-012 | 357 | MINISTERE | PORTFOLIO_AMOUNT_WITHHELD | non renseigné | NOT_DOCUMENTED | 52 |
+| gov-013 | 335 | MINISTERE | PORTFOLIO_AMOUNT_WITHHELD | non renseigné | NOT_DOCUMENTED | 49 |
+| gov-014 | 358 | MINISTERE | PORTFOLIO_AMOUNT_WITHHELD | non renseigné | NOT_DOCUMENTED | 52 |
 | gov-015 | 351 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 26 700 912 028 | PARTIAL_BREAKDOWN | 52 |
 | gov-016 | 376 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 49 213 125 398 | PARTIAL_BREAKDOWN | 53 |
 | gov-017 | 336 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 39 806 735 298 | PARTIAL_BREAKDOWN | 49 |
@@ -64,14 +64,14 @@ Sources complémentaires : [LFI 2026](https://www.dgbf.ci/wp-content/uploads/202
 | gov-019 | 347 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 96 866 871 722 | PARTIAL_BREAKDOWN | 51 |
 | gov-020 | 350 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 19 207 286 052 | PARTIAL_BREAKDOWN | 51 |
 | gov-021 | 328 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 44 194 260 102 | PARTIAL_BREAKDOWN | 48 |
-| gov-022 | 333 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 344 706 305 890 | NOT_DOCUMENTED | 49 |
+| gov-022 | 333 | MINISTERE | PORTFOLIO_AMOUNT_WITHHELD | non renseigné | NOT_DOCUMENTED | 49 |
 | gov-023 | 362 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 91 411 414 044 | PARTIAL_BREAKDOWN | 53 |
 | gov-024 | 331 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 1 571 000 767 175 | NOT_DOCUMENTED | 49 |
 | gov-025 | 330 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 734 442 904 943 | PARTIAL_BREAKDOWN | 49 |
 | gov-026 | 369 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 57 361 750 199 | PARTIAL_BREAKDOWN | 53 |
 | gov-027 | 356 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 83 275 503 595 | PARTIAL_BREAKDOWN | 52 |
 | gov-028 | 352 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 31 263 058 865 | PARTIAL_BREAKDOWN | 52 |
-| gov-029 | 346 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 39 771 854 976 | NOT_DOCUMENTED | 50 |
+| gov-029 | 346 | MINISTERE | PORTFOLIO_AMOUNT_WITHHELD | non renseigné | NOT_DOCUMENTED | 50 |
 | gov-030 | 444 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 70 427 777 385 | PARTIAL_BREAKDOWN | 54 |
 | gov-031 | 343 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 36 680 067 253 | PARTIAL_BREAKDOWN | 50 |
 | gov-032 | 440 | MINISTERE | SECTION_REFERENCE_NOT_PORTFOLIO | 13 746 365 872 | PARTIAL_BREAKDOWN | 54 |
