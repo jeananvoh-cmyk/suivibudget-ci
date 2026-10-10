@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GOVERNMENT_OFFICIALS } from '../../data/governmentData';
-import { SCOPE_EXCEPTIONS, MINISTRY_DOCUMENTARY_DISCREPANCIES, MINISTRY_CANDIDATE_CP_2026 } from '../../data/ministryScopeExceptions';
+import { SCOPE_EXCEPTIONS, MINISTRY_DOCUMENTARY_DISCREPANCIES, MINISTRY_CANDIDATE_CP_2026, WITHHELD_MINISTRY_PORTFOLIO_IDS } from '../../data/ministryScopeExceptions';
 
 describe('2026 ministerial portfolio documentary safeguards', () => {
   const officials = new Map(GOVERNMENT_OFFICIALS.map(o => [o.id, o]));
@@ -41,6 +41,15 @@ describe('2026 ministerial portfolio documentary safeguards', () => {
     for (const [id, section] of Object.entries(MINISTRY_DOCUMENTARY_DISCREPANCIES)) {
       expect(officials.has(id)).toBe(true);
       expect(section).toMatch(/^\d{3}$/);
+    }
+  });
+
+  it('withholds exactly the nine unproven budgets and the delegated duplicate from public display', () => {
+    const expected = [...Object.keys(MINISTRY_DOCUMENTARY_DISCREPANCIES), 'gov-035'].sort();
+    expect([...WITHHELD_MINISTRY_PORTFOLIO_IDS].sort()).toEqual(expected);
+    expect(WITHHELD_MINISTRY_PORTFOLIO_IDS.size).toBe(10);
+    for (const id of WITHHELD_MINISTRY_PORTFOLIO_IDS) {
+      expect(officials.get(id)?.budget_fcfa).toBeUndefined();
     }
   });
 
