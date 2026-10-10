@@ -1,3 +1,4 @@
+import { BudgetDataDownloads } from '../../components/institutions/BudgetDataDownloads';
 import { normalizeSearchText } from '../../utils/searchHelpers';
 import React, { useState } from 'react';
 import { ArrowLeft, Search, Building2, ChevronDown, ArrowRight, FileText, ArrowRightLeft, Globe, ExternalLink, Info, Eye, EyeOff, Scale } from 'lucide-react';
@@ -161,6 +162,7 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
 
   return (
     <div className="space-y-10 animate-in fade-in duration-300">
+      <BudgetDataDownloads scope="COMMUNE" />
       
       {/* Top Navigation & Clean Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
