@@ -1486,13 +1486,13 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                     <div>
                       <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                        {institution.type === 'DISTRICT' 
-                          ? "Dotation du District Autonome (Loi de Finances 2026)" 
-                          : institution.type === 'REGION' 
-                          ? "Dotation Budgétaire Régionale (Loi de Finances 2026)" 
-                          : isPeripheralAbidjan 
-                          ? "Dotation de l'État aux Communes Périphériques du Grand Abidjan (LFI 2026)" 
-                          : "Dotation Globale Allouée par l'État (Loi de Finances 2026)"}
+                        {institution.type === 'MINISTERE'
+                          ? "Montant enregistré pour ce portefeuille (périmètre à vérifier)"
+                          : institution.type === 'DISTRICT'
+                          ? "Montant budgétaire du District (source à vérifier)"
+                          : institution.type === 'REGION'
+                          ? "Montant budgétaire régional (source à vérifier)"
+                          : "Montant budgétaire enregistré (source à vérifier)"}
                       </span>
                       <h3 className="text-xl sm:text-2xl font-black text-slate-900">
                         {formatFCFA(institution.total_budget_fcfa)}
@@ -1503,7 +1503,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     </div>
 
                     <div className="text-xs text-slate-500 font-medium">
-                      Exercice Budgétaire : <span className="font-bold text-slate-800">2026 (LFI)</span>
+                      Exercice de référence : <span className="font-bold text-slate-800">2026 — source et catégorie de crédit à vérifier</span>
                     </div>
                   </div>
 
