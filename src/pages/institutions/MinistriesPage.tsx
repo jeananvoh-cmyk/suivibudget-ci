@@ -329,7 +329,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                     </h3>
                     <p className="text-xs text-slate-500 font-medium">{premierMinistre.department_ministry}</p>
                     <div className="text-xs font-black text-slate-800 pt-0.5">
-                      Montant enregistré (périmètre à confirmer) : {premierMinistre.budget_fcfa != null ? (
+                      Montant à vérifier : {premierMinistre.budget_fcfa != null ? (
                         <>
                           <span className="text-brand-blue">{formatFCFA(premierMinistre.budget_fcfa)}</span>{' '}
                           <span className="text-slate-500 font-bold">({formatAmountInWords(premierMinistre.budget_fcfa)})</span>
@@ -367,7 +367,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                     </h3>
                     <p className="text-xs text-slate-500 font-medium">{vicePremierMinistre.role_title}</p>
                     <div className="text-xs font-black text-slate-800 pt-0.5">
-                      Montant enregistré (périmètre à confirmer) : {vicePremierMinistre.budget_fcfa != null ? (
+                      Montant à vérifier : {vicePremierMinistre.budget_fcfa != null ? (
                         <>
                           <span className="text-brand-blue">{formatFCFA(vicePremierMinistre.budget_fcfa)}</span>{' '}
                           <span className="text-slate-500 font-bold">({formatAmountInWords(vicePremierMinistre.budget_fcfa)})</span>
@@ -419,7 +419,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                       </h3>
                       <p className="text-[11px] text-slate-500 line-clamp-2 leading-tight">{official.department_ministry}</p>
                       <div className="text-[11px] font-bold text-slate-800 pt-0.5 whitespace-nowrap">
-                        Montant enregistré (périmètre à confirmer) : {official.budget_fcfa != null ? (
+                        Montant à vérifier : {official.budget_fcfa != null ? (
                           <>
                             <span className="text-brand-blue">{formatFCFA(official.budget_fcfa)}</span> <span className="text-slate-500 font-semibold text-[10px] break-words">({formatAmountInWords(official.budget_fcfa)})</span>
                           </>
@@ -477,7 +477,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                     </h3>
                     <p className="text-[11px] text-slate-600 font-medium line-clamp-2 leading-tight">{official.department_ministry}</p>
                     <div className="text-[11px] font-bold text-slate-800 pt-0.5 whitespace-nowrap">
-                      Montant enregistré (périmètre à confirmer) : {official.budget_fcfa != null ? (
+                      Montant à vérifier : {official.budget_fcfa != null ? (
                         <>
                           <span className="text-brand-blue">{formatFCFA(official.budget_fcfa)}</span> <span className="text-slate-500 font-semibold text-[10px] break-words">({formatAmountInWords(official.budget_fcfa)})</span>
                         </>
