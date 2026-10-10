@@ -280,10 +280,6 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                   (() => {
                     const prim = (inst.primitive_budget || OFFICIAL_PRIMITIVE_BUDGETS[inst.id])!;
                     const primTotal = prim.total_voted_fcfa;
-                    const stateTotal = inst.total_budget_fcfa ?? 0;
-                    const localRev = Math.max(0, primTotal - stateTotal);
-                    const statePct = primTotal > 0 ? Math.round((stateTotal / primTotal) * 100) : 0;
-                    const localPct = 100 - statePct;
 
                     return (
                       <div className="space-y-2 pt-2 mt-2">
@@ -311,19 +307,18 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                             </span>
                           </span>
                         </div>
-                        {/* Jauge Bicolore État vs Effort Régional */}
-                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden flex">
-                          <div className="bg-sky-500 h-full" style={{ width: `${statePct}%` }} title={`Concours de l'État: ${statePct}%`}></div>
-                          <div className="bg-emerald-500 h-full" style={{ width: `${localPct}%` }} title={`Ressources propres: ${localPct}%`}></div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:justify-between text-[10px] font-semibold text-slate-600 gap-1 pt-0.5">
-                          <span className="text-sky-700">
-                            Dotation État : <strong>{statePct}%</strong> ({formatAmountInWords(stateTotal)})
-                          </span>
-                          <span className="text-emerald-700">
-                            {inst.type === 'DISTRICT' ? 'Ressources District :' : 'Ressources Région :'} <strong>{localPct}%</strong> ({formatAmountInWords(localRev)})
-                          </span>
-                        </div>
+                        <p className="text-[10px] leading-relaxed text-slate-600 rounded-lg bg-slate-50 p-2" role="note">
+                          La répartition entre concours de l’État et ressources propres n’est pas
+                          déductible du montant total voté. Elle est affichée uniquement après lecture
+                          d’un état de recettes officiellement ventilé.
+                        </p>
+                        {prim.source_url && (
+                          <a href={prim.source_url} target="_blank" rel="noopener noreferrer"
+                            onClick={event => event.stopPropagation()}
+                            className="text-[10px] text-brand-blue underline">
+                            Consulter la source du budget primitif 2026
+                          </a>
+                        )}
                       </div>
                     );
                   })()
