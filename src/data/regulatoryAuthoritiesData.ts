@@ -49,9 +49,10 @@ export const REGULATORY_AUTHORITIES_DATA: Institution[] = [
       }
     ],
     info_officer_title: "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    budget_functioning_fcfa: 4200000000,
-    budget_investment_fcfa: 0,
-    total_budget_fcfa: 4200000000,
+    budget_functioning_fcfa: null,
+    budget_investment_fcfa: null,
+    total_budget_fcfa: null,
+    // Pas de preuve individuelle 2026 rattachée au montant antérieurement affiché.
     budget_not_published: false
   },
   {
@@ -101,9 +102,10 @@ export const REGULATORY_AUTHORITIES_DATA: Institution[] = [
       }
     ],
     info_officer_title: "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    budget_functioning_fcfa: 2150000000,
-    budget_investment_fcfa: 0,
-    total_budget_fcfa: 2150000000,
+    budget_functioning_fcfa: null,
+    budget_investment_fcfa: null,
+    total_budget_fcfa: null,
+    // Pas de preuve individuelle 2026 rattachée au montant antérieurement affiché.
     budget_not_published: false
   },
   {
@@ -153,9 +155,10 @@ export const REGULATORY_AUTHORITIES_DATA: Institution[] = [
       }
     ],
     info_officer_title: "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    budget_functioning_fcfa: 4850000000,
-    budget_investment_fcfa: 0,
-    total_budget_fcfa: 4850000000,
+    budget_functioning_fcfa: null,
+    budget_investment_fcfa: null,
+    total_budget_fcfa: null,
+    // Pas de preuve individuelle 2026 rattachée au montant antérieurement affiché.
     budget_not_published: false
   },
   {
@@ -206,9 +209,10 @@ export const REGULATORY_AUTHORITIES_DATA: Institution[] = [
       }
     ],
     info_officer_title: "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    budget_functioning_fcfa: 16500000000,
-    budget_investment_fcfa: 2500000000,
-    total_budget_fcfa: 19000000000,
+    budget_functioning_fcfa: null,
+    budget_investment_fcfa: null,
+    total_budget_fcfa: null,
+    // Pas de preuve individuelle 2026 rattachée au montant antérieurement affiché.
     budget_not_published: false
   },
   {
@@ -258,9 +262,10 @@ export const REGULATORY_AUTHORITIES_DATA: Institution[] = [
       }
     ],
     info_officer_title: "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    budget_functioning_fcfa: 5200000000,
-    budget_investment_fcfa: 0,
-    total_budget_fcfa: 5200000000,
+    budget_functioning_fcfa: null,
+    budget_investment_fcfa: null,
+    total_budget_fcfa: null,
+    // Pas de preuve individuelle 2026 rattachée au montant antérieurement affiché.
     budget_not_published: false
   },
   {
@@ -310,9 +315,10 @@ export const REGULATORY_AUTHORITIES_DATA: Institution[] = [
       }
     ],
     info_officer_title: "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    budget_functioning_fcfa: 3100000000,
-    budget_investment_fcfa: 0,
-    total_budget_fcfa: 3100000000,
+    budget_functioning_fcfa: null,
+    budget_investment_fcfa: null,
+    total_budget_fcfa: null,
+    // Pas de preuve individuelle 2026 rattachée au montant antérieurement affiché.
     budget_not_published: false
   },
   {
@@ -362,9 +368,10 @@ export const REGULATORY_AUTHORITIES_DATA: Institution[] = [
       }
     ],
     info_officer_title: "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    budget_functioning_fcfa: 3650000000,
-    budget_investment_fcfa: 0,
-    total_budget_fcfa: 3650000000,
+    budget_functioning_fcfa: null,
+    budget_investment_fcfa: null,
+    total_budget_fcfa: null,
+    // Pas de preuve individuelle 2026 rattachée au montant antérieurement affiché.
     budget_not_published: false
   }
 ];
