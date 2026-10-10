@@ -1,5 +1,12 @@
 # Demande de clarification documentaire — budget de l'État 2026 (projet prêt à transmission)
 
+## Nouvelle précision — article 14/15 légalement voté et quatre résidus historiques
+
+La base légale du CP initial est désormais démontrée **par section** dans la LFI : **article 14 (Primature, page PDF 12)** et **article 15 (ministères, pages PDF 14–20)**, regroupant 34 sections distinctes pour les 35 fiches gouvernementales actuelles (dont une partagée). Nous ne demandons donc pas une nouvelle validation générale des crédits votés, mais **les éventuelles décisions réglementaires prises après la LFI répartissant ou transférant les crédits entre les portefeuilles de janvier 2026**, ou la confirmation officielle qu'aucune nouvelle individualisation de CP n'est intervenue.
+
+Les quatre reliquats historiques sont recalculés exactement : **Intérieur −370 246 FCFA**, **Hydraulique +481 394 FCFA**, **Santé +283 456 FCFA** (différences résiduelles après rapprochement du volet C2D), et **Entretien routier +239 982 FCFA** (sans volet C2D lié à la section). Aucun de ces montants n'apparaît directement comme valeur autonome dans le texte extrait des **1 901 pages de la LFI, de l'Annexe 4 et de l'Annexe 7**. Nous sollicitons leur **source applicative historique éventuelle**, une clarification de périmètre ou toute pièce officielle corrigeant les tableaux, sans conclure qu'il s'agit d'une erreur de l'administration.
+
+
 > **Complément d'instruction disponible (10 octobre 2026) :** le détail financier des programmes précédemment signalés comme lacunaires a été retrouvé dans le détail de la LFI 2026. Pour le programme **22121**, les actions **2212101 (5 304 391 059 FCFA)** et **2212102 (2 748 545 000 FCFA)** (LFI pages physiques PDF 502 et 503) totalisent exactement **8 052 936 059 FCFA**. La DGBF n'a donc **plus à fournir de montant d'action manquant pour permettre la réconciliation numérique** : la demande concerne désormais uniquement la correction éditoriale ou la confirmation du Tableau 7 de l'Annexe 4. Les données C2D (14 sections, 74,4 milliards FCFA dans la LFI PDF p.565–569) expliquent neuf écarts historiques et isolent six résidus à clarifier sans les assimiler à des transferts de crédits. La demande principale porte sur les **actes éventuels de répartition des CP après le remaniement ministériel**, et sur les six différences non justifiées (trois résidus de quelques centaines de milliers de FCFA, trois autres écarts sans lien C2D retrouvé).
 
 
