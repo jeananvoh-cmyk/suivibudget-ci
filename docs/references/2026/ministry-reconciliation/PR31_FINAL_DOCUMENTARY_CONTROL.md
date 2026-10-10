@@ -45,6 +45,22 @@ Quatre exceptions explicites : **section 108** (dotations 13010, 13011, 13013, s
 
 **Preuves GitHub :** `SECTION_PROGRAM_CROSSCHECK_22_2026.json`, `ANNEX4_ACTION_SUM_CROSSCHECK_2026.json`, `PR31_CERTIFICATION_EVIDENCE_MATRIX_35.md` et `scripts/verify_ministry_section_pdfs.py`. Aucun montant inconnu n'a été inventé. La publication de montants par portefeuille non attribuables reste bloquée.
 
+## Complément de source déterminant — Financements C2D et quatre actions (10 octobre 2026)
+
+La LFI 2026 n'a pas seulement le récapitulatif des crédits par section (PDF p.45–54). Elle contient aussi le **« Détail des Projets Financés sur C2D » (PDF p.565–569)**, avec **14 sections et un total national de 74 400 000 000 FCFA**. Ce montant est confirmé par le Rapport de présentation officiel du budget 2026 (projets C2D compris dans les investissements financés sur ressources intérieures).
+
+La comparaison de ce tableau avec les **15 valeurs historiques divergentes** initialement enregistrées dans `governmentData.ts` et conservées dans l'audit révèle :
+- **9 écarts exactement égaux au C2D de leur section** : gov-001, gov-005, gov-009, gov-012, gov-014, gov-018, gov-022, gov-029, gov-031. Ces neuf anciennes différences ont donc une **explication documentaire numérique démontrée** (et ne doivent plus être qualifiées de montants inventés ou arbitraires).
+- **3 écarts partiellement expliqués par C2D** : gov-006 (**−370 246 FCFA** résiduels par rapport à CP section + C2D), gov-011 (**+481 394 FCFA**), gov-013 (**+283 456 FCFA**). Ces trois résidus **restent non justifiés**.
+- **3 écarts non explicables par le tableau C2D** : gov-025 (**+239 982 FCFA**), gov-032 (**−553 500 000 FCFA**), gov-034 (**−4 362 218 FCFA**).
+- Sur ce total de 15 écarts historiques, **neuf ont une provenance numérique exacte** ; **six demeurent arithmétiquement non expliqués** par le C2D. Les décisions antérieures de remplacer certaines anciennes valeurs par les seuls CP de section étaient des précautions de publication, pas une preuve que le financement C2D était erroné. Les sommes CP de section + C2D ne deviennent pas pour autant automatiquement les dotations autonomes des portefeuilles gouvernementaux.
+
+**Sources / reproductibilité :** `PR31_C2D_2026_DISCREPANCY_PROVENANCE.json`, `scripts/verify_ministry_c2d_2026.py`, SHA-256 exact du PDF LFI.
+
+**Autres lacunes d'actions résolues :** le **détail budgétaire de la LFI elle-même** (p.83–84 et 502–503) donne les cinq actions manquantes aux quatre programmes qui n'étaient pas détaillés sous leur code dans l'Annexe 4 : `1301001` (24 053 045 398), `1301101` (2 155 227 371), `1301301` (45 118 493 530), `2212101` (5 304 391 059) et `2212102` (2 748 545 000 FCFA). Leurs quatre sommes programme correspondent exactement à la LFI. **112/112 programmes disposent maintenant de sommes d'actions justifiées par source officielle** (108 programmes/340 actions dans l'Annexe 4 ; 4 programmes/5 actions supplémentaires dans le détail LFI). L'absence de ces actions dans le Tableau 7 de l'Annexe 4 reste un problème de cohérence éditoriale du tirage, non une lacune financière empêchant ce rapprochement.
+
+**Certification financière sans réserve par portefeuille : toujours NON ACQUISE.** Les documents présents permettent la certification numérique de la présentation des sections et programmes mais ne prouvent pas tous les actes de transfert/répartition de CP entre portefeuilles de janvier 2026. Ce dernier sujet ne doit pas être éludé par l'égalité arithmétique ou le décret d'attributions.
+
 **Périmètre :** rapprochement du registre applicatif des 35 portefeuilles gouvernementaux et des sections candidates de la Loi de finances initiale 2026. Ce rapport ne constitue **pas** une certification des 35 fiches. Il constitue la clôture du contrôle technique et de la qualification des écarts, avec les points non résolus explicitement conservés.
 
 ## Sources et méthode
