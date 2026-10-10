@@ -1,5 +1,12 @@
 # PR #31 — Matrice de preuves budgétaires 2026 pour les 35 portefeuilles
 
+## Complément de certification numérique du 10 octobre 2026
+
+La LFI 2026 présente aussi un **tableau distinct des financements C2D (PDF p.565–569)** : **14 sections, 74 400 000 000 FCFA**. Le registre `PR31_C2D_2026_DISCREPANCY_PROVENANCE.json` réconcilie les **15 anciennes différences** avec ce volet de financement : **9 différences exactes**, **3 proches avec résidus de −370 246 / +481 394 / +283 456 FCFA**, **3 sans ligne C2D correspondante**. La coïncidence numérique n'est pas une attribution juridique d'un CP additionnel et ne justifie aucune double comptabilisation.
+
+Les quatre programmes initialement sans actions de l'Annexe 4 sont complétés par le **détail LFI officiel** : trois actions de la Primature (LFI pages PDF 83–84), deux actions du programme 22121 (PDF p.502–503). Les **112 programmes / 112 sont maintenant numériquement réconciliés au niveau action** : 108 programmes / 340 actions via Annexe 4 et 4 programmes / 5 actions via LFI. Deux limites demeurent indépendantes : le Tableau 7 de l'Annexe 4 reste incomplet pour le programme 22121, et les transferts/réaffectations budgétaires postérieurs à la LFI ne sont pas documentés de façon suffisante pour certifier les 35 **dotations autonomes par portefeuille**.
+
+
 **Date :** 10 octobre 2026. **Statut global : certification intégrale non acquise.**
 Cette matrice documente les preuves disponibles au niveau des **sections et des programmes**, sans confondre l'appartenance à une section LFI avec l'allocation budgétaire d'un portefeuille gouvernemental postérieur.
 
