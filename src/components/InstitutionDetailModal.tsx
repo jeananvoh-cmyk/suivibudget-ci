@@ -1486,9 +1486,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                     <div>
                       <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                        {institution.type === 'MINISTERE'
-                          ? "Montant enregistré pour ce portefeuille (périmètre à vérifier)"
-                          : institution.type === 'DISTRICT'
+                        {institution.type === 'DISTRICT'
                           ? "Montant budgétaire du District (source à vérifier)"
                           : institution.type === 'REGION'
                           ? "Montant budgétaire régional (source à vérifier)"
