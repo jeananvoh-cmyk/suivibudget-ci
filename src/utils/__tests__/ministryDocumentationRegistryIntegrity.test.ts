@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import documentationRegistry from '../../../docs/references/2026/MINISTRY_DOCUMENTATION_REGISTRY_2026.json';
 import { GOVERNMENT_OFFICIALS } from '../../data/governmentData';
+import reconciliationCsv from '../../../docs/references/2026/ministry-reconciliation/pr31_ministry_reconciliation_register.csv?raw';
 
 interface CanonicalBudget {
   institution_code: string;
@@ -51,6 +52,21 @@ describe('2026 documentation registry consistency against canonical sources', ()
       const budget = canonicalFiles['../../../' + item!.canonical_reference_path];
       const official = GOVERNMENT_OFFICIALS.find(x => x.id === id);
       expect(official?.budget_fcfa, id).toBe(budget.totals.total_ministry_2026_fcfa);
+    }
+  });
+
+  it('keeps all 35 directory amounts synchronized with the documentary register', () => {
+    const lines = reconciliationCsv.trim().split(/\r?\n/);
+    const entries = lines.slice(1).map(line => {
+      const match = line.match(/^(gov-\d{3}),.+?,(\d+),(?:PROGRAMMES|DOTATIONS|PROGRAMMES\+PROGRAMMES),/);
+      expect(match, line.slice(0, 16)).not.toBeNull();
+      return [match![1], Number(match![2])] as const;
+    });
+    expect(entries).toHaveLength(35);
+    const unique = new Map(entries);
+    expect(unique.size).toBe(35);
+    for (const [id, documented] of unique) {
+      expect(GOVERNMENT_OFFICIALS.find(x => x.id === id)?.budget_fcfa, id).toBe(documented);
     }
   });
 
