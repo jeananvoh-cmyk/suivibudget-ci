@@ -57,6 +57,22 @@ describe('Institution Budget Integrity & Safe Rendering', () => {
     });
   });
 
+  describe('financial arithmetic gate', () => {
+    it('rejects a non-reconciled 60 + 30 vs 100 breakdown', () => {
+      expect(calculateSafePercentages(60, 30, 100)).toEqual({ functioningPct: null, investmentPct: null });
+    });
+    it('rejects a one-franc mismatch', () => {
+      expect(calculateSafePercentages(60, 39, 100)).toEqual({ functioningPct: null, investmentPct: null });
+    });
+    it('rejects negative or unsafe monetary numbers', () => {
+      expect(calculateSafePercentages(-1, 101, 100).functioningPct).toBeNull();
+      expect(calculateSafePercentages(Number.MAX_SAFE_INTEGER + 1, 0, Number.MAX_SAFE_INTEGER + 1).functioningPct).toBeNull();
+    });
+    it('accepts a reconciled breakdown', () => {
+      expect(calculateSafePercentages(60, 40, 100)).toEqual({ functioningPct: 60, investmentPct: 40 });
+    });
+  });
+
   describe('Cour Suprême de Côte d\'Ivoire (inst-cour-supreme)', () => {
     const courSupreme = NATIONAL_INSTITUTIONS_DATA.find(i => i.id === 'inst-cour-supreme')!;
 
@@ -81,9 +97,9 @@ describe('Institution Budget Integrity & Safe Rendering', () => {
 
       // Never shows 0 FCFA or 0%
       expect(assessment.totalFormatted).not.toContain('0 FCFA');
-      expect(assessment.noticeText).toContain('Cour de Cassation (Section 023)');
-      expect(assessment.noticeText).toContain('Conseil d\'État (Section 022)');
-      expect(assessment.noticeText).toContain('Cour des Comptes (Section 015)');
+      expect(assessment.noticeText).toContain('Cour de Cassation (Section 114)');
+      expect(assessment.noticeText).toContain('Conseil d\'État (Section 118)');
+      expect(assessment.noticeText).toContain('Cour des Comptes (Section 115)');
     });
 
     it('does not return fabricated budget lines for inst-cour-supreme', () => {
@@ -134,7 +150,7 @@ describe('Institution Budget Integrity & Safe Rendering', () => {
   });
 
   describe('Autonomous Supreme Jurisdictions in LFI 2026', () => {
-    it('Cour de Cassation has authentic verified allocation (Section 023: 7 931 309 608 FCFA)', () => {
+    it('Cour de Cassation has authentic verified allocation (Section 114: 7 931 309 608 FCFA)', () => {
       const cassation = NATIONAL_INSTITUTIONS_DATA.find(i => i.id === 'inst-cour-cassation')!;
       expect(cassation).toBeDefined();
       expect(cassation.total_budget_fcfa).toBe(7_931_309_608);
@@ -145,7 +161,7 @@ describe('Institution Budget Integrity & Safe Rendering', () => {
       expect(assessment.investmentPct).toBe(0);
     });
 
-    it('Conseil d\'État has authentic verified allocation (Section 022: 5 164 531 081 FCFA)', () => {
+    it('Conseil d\'État has authentic verified allocation (Section 118: 5 164 531 081 FCFA)', () => {
       const conseilEtat = NATIONAL_INSTITUTIONS_DATA.find(i => i.id === 'inst-conseil-etat')!;
       expect(conseilEtat).toBeDefined();
       expect(conseilEtat.total_budget_fcfa).toBe(5_164_531_081);
@@ -156,7 +172,7 @@ describe('Institution Budget Integrity & Safe Rendering', () => {
       expect(assessment.investmentPct).toBe(0);
     });
 
-    it('Cour des Comptes has authentic verified allocation (Section 015: 8 851 161 351 FCFA)', () => {
+    it('Cour des Comptes has authentic verified allocation (Section 115: 8 851 161 351 FCFA)', () => {
       const courComptes = NATIONAL_INSTITUTIONS_DATA.find(i => i.id === 'inst-cour-comptes')!;
       expect(courComptes).toBeDefined();
       expect(courComptes.total_budget_fcfa).toBe(8_851_161_351);
