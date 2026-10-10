@@ -14,6 +14,7 @@ import { MinistryBudgetHeader } from './MinistryBudgetHeader';
 import { ProgramDistribution } from './ProgramDistribution';
 import { BudgetProgramCard } from './BudgetProgramCard';
 import { SCOPE_EXCEPTIONS, MINISTRY_DOCUMENTARY_DISCREPANCIES, MINISTRY_CANDIDATE_CP_2026 } from '../../data/ministryScopeExceptions';
+import { MinistrySectionEvidencePanel } from './MinistrySectionEvidencePanel';
 
 interface MinistryBudgetProgramViewProps {
   institution: Institution;
@@ -94,6 +95,8 @@ export const MinistryBudgetProgramView: React.FC<MinistryBudgetProgramViewProps>
         )}
 
         <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-3">Le montant ci-dessus provient du registre applicatif. Son rattachement exact à une section et à des crédits CP de la LFI 2026 reste à vérifier ; ne pas le considérer comme une dotation officiellement réconciliée.</p>
+
+        <MinistrySectionEvidencePanel institutionId={institution.id} />
 
         <div className="p-4 bg-sky-50/70 rounded-2xl border border-sky-200 text-xs text-sky-950 space-y-2 leading-relaxed">
           <div className="font-bold flex items-center gap-1.5 text-sky-900">
