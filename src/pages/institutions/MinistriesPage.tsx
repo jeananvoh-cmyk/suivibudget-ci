@@ -7,6 +7,7 @@ import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
 import { isPilotMinistry } from '../../data/ministryPilotReferential';
+import { selectMinistryBudgetAmount } from '../../utils/ministryBudgetSelection';
 
 const getInitials = (name: string) => {
   const clean = name.replace(/^(M\.|Mme|Prof\.|Gal\.|Dr)\s+/i, '').trim();
@@ -84,7 +85,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
         facebook_url: fromStore.facebook_url || official.facebook_url,
         // A present store row is authoritative for display, including an explicit
         // null (unknown) or zero. Never revive a static budget as fallback.
-        budget_fcfa: fromStore.total_budget_fcfa ?? undefined,
+        budget_fcfa: selectMinistryBudgetAmount(official.budget_fcfa, true, fromStore.total_budget_fcfa),
       };
     });
   }, [institutions, storeTick]);
