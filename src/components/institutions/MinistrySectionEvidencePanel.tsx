@@ -3,6 +3,7 @@ import sectionEvidence from '../../../docs/references/2026/ministry-reconciliati
 import actionEvidence from '../../../docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json';
 import complementaryActions from '../../../docs/references/2026/ministry-reconciliation/LFI_2026_ACTION_COMPLEMENTS_4_PROGRAMMES.json';
 import officialProgramNames from '../../data/ministryOfficialProgramLabels2026.json';
+import lfiArticle15Programs from '../../data/ministryLfiArticle15Programs2026.json';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
 
 const ANNEX4_URL = 'https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf';
@@ -18,6 +19,52 @@ interface Props {
  */
 export const MinistrySectionEvidencePanel: React.FC<Props> = ({ institutionId }) => {
   const section = sectionEvidence.sections.find(s => s.portfolio_ids.includes(institutionId));
+  const article15 = lfiArticle15Programs.records.find(s => s.portfolio_ids.includes(institutionId));
+  if (!section && !article15) return null;
+
+  // Douze sections non détaillées dans l'ancien rapprochement Annexe 4
+  // disposent cependant de programmes chiffrés et nommés dans l'article 15.
+  // Ils sont publiés avec leur propre périmètre légal, sans simuler de codes DGBF.
+  if (!section && article15) {
+    return (
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-3"
+        aria-label="Programmes officiels de la loi de finances 2026">
+        <h4 className="text-sm font-black text-slate-900">
+          Programmes budgétaires de la section {article15.section_code} — LFI 2026
+        </h4>
+        <p className="text-xs text-slate-700">
+          Programmes et crédits de paiement votés, extraits de l'article 15 de la loi de finances
+          initiale. Ils composent le total de la section ; ne pas les additionner une seconde fois
+          ni les assimiler aux crédits propres du portefeuille remanié.
+        </p>
+        <p className="font-black text-lg text-slate-900">{formatFCFA(article15.section_cp_2026_fcfa)}</p>
+        <p className="text-xs text-slate-600">{formatAmountInWords(article15.section_cp_2026_fcfa)}</p>
+        <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+          {article15.programmes.map(programme => (
+            <div key={programme.number}
+              className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 p-3 text-xs">
+              <div className="font-semibold text-slate-800">
+                Programme {programme.number} — {programme.name}
+              </div>
+              <div className="sm:text-right shrink-0">
+                <p className="font-black text-slate-900">{formatFCFA(programme.cp_2026_fcfa)}</p>
+                <p className="text-[10px] text-slate-600">{formatAmountInWords(programme.cp_2026_fcfa)}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <a href={`${LFI_URL}#page=${article15.lfi_pdf_page}`} target="_blank" rel="noopener noreferrer"
+          className="text-xs underline text-brand-blue">
+          Vérifier les {article15.programmes.length} programmes dans la LFI 2026 — PDF p. {article15.lfi_pdf_page}
+        </a>
+        <p className="text-[11px] text-slate-600" role="note">
+          Les numéros « Programme 1 », « Programme 2 », etc. sont ceux de l'article 15,
+          pas des codes de programmes DGBF. Ventilation par actions non revendiquée.
+        </p>
+      </section>
+    );
+  }
+
   if (!section) return null;
 
   const sectionShared = section.portfolio_ids.length > 1;
