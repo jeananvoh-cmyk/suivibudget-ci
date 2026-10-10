@@ -107,3 +107,20 @@ Voir `MATRICE_234_APRES_CONTRE_VERIFICATION_ANNEXE4.csv` :
 Les 64 pages signalées à moins de 80 caractères (22 LFI, 2 Annexe 4, 40 Annexe 7) ont ensuite été soumises à un second tri par contenu visuel et densité de tracés : **42 quasi blanches et 22 pages intercalaires/titres** (montage de vérification `low_text_nonblank_contact.png`). Aucune de ces pages n'a été identifiée comme un tableau budgétaire illisible ; aucune page n'a été écartée silencieusement du parcours des **1 901 pages**. Cela ne signifie pas que chaque chiffre du reste des PDF a été vérifié visuellement indépendamment ; la réconciliation ciblée des dotations locales se fonde sur les codes et CP complets du programme, corroborés par l'Annexe 4.
 
 **Conclusion :** **219/234** dossiers arithmétiquement rapprochés pour leurs dotations nominatives ; **5** appellent une attribution bénéficiaire non disponible dans le libellé d'activité ; **1** dispose d'un transfert nominatif alors que la fiche ne possède pas de budget primitif, et **9** restent sans ligne nominative dans ce programme. **Ce n'est pas une certification de budget primitif.** Aucun montant municipal/régional n'a été corrigé sans justification ; ne pas fusionner, migrer ni déployer.
+
+## Contrôle visuel humain — quatre pages transmises le 10 octobre 2026
+
+Quatre extraits PDF originaux, chacun d'une page, ont été fournis par le porteur pour une seconde lecture. Ces pages affichent la pagination intérieure **143/484, 153/484, 164/484 et 171/484**, correspondant aux pages physiques **221, 231, 242 et 249** indiquées dans la première extraction de la LFI. Les codes, les AE et les CP ont été lus ; **AE = CP** sur chaque activité ciblée.
+
+| Attribution hypothétique seulement | Activité | CP 2026 exact (FCFA) | Pagination imprimée du fichier fourni | Contexte de voisinage | Niveau de preuve |
+|---|---|---:|---|---|---|
+| Tafiré | 18016002784 — Développer la prise en charge des personnes âgées | 50 500 000 | 143/484 | Après des lignes explicitement situées à Fronan et Dabakala ; précédant Booko/Touba | Montant confirmé, commune NON NOMMÉE |
+| Komborodougou | 25016002927 — Acquérir des appareils et du matériel thérapeutique | 21 473 000 | 153/484 | Après cinq lignes nommant Komborodougou, avant Boundiali | Montant confirmé, bénéficiaire NON NOMMÉ |
+| Gohitafla | 35016001565 — Développer des services de radiodiffusion, de télévision et d'édition | 25 300 000 | 164/484 | Après une activité qui nomme Gohitafla, avant les lignes du Worodougou | Montant confirmé, commune NON NOMMÉE |
+| Logoualé | 41016002390 — Développer les équipements collectifs | 9 000 000 | 171/484 | Après l'activité « autres services généraux dans la Commune de Logoualé », avant les lignes du Cavally | Montant confirmé, commune NON NOMMÉE |
+
+**Attention :** pour Tafiré, la page fournie **ne nomme pas Tafiré** près de cette ligne ; elle mentionne Fronan, Dabakala et d'autres collectivités. Le bénéficiaire Tafiré provient **uniquement du reliquat dans l'ancien répertoire applicatif** ; aucun rattachement à Tafiré ne doit être qualifié de vérifié.
+
+Pour Komborodougou, Gohitafla et Logoualé, l'ordre des activités et leurs codes constituent une présomption de groupement mais **pas une preuve administrative autonome de bénéficiaire**. Les quatre lignes restent en **réserve d'affectation**. Les trois lignes du dossier Kouassi-Kouassikro (codes 14016001054, 14016001055, 14016001056 ; 94 689 805 FCFA) avaient reçu un extrait analogue avec libellés sans bénéficiaire nominatif.
+
+**Disposition :** ne modifier aucun budget primitif ni reprendre les hypothèses comme dotations individuelles certifiées ; poursuivre la recherche de l'axe « code d'activité → unité administrative/collectivité bénéficiaire » dans les pages hiérarchiques du document et les annexes budgétaires officielles.
