@@ -236,6 +236,13 @@ export function calculateSafePercentages(
 
   // 3. Cas particulier : Total nul (0 FCFA) officiellement documenté
   if (total === 0) {
+    if ((functioning != null && !Number.isSafeInteger(functioning)) ||
+        (investment != null && !Number.isSafeInteger(investment)) ||
+        (functioning != null && functioning < 0) ||
+        (investment != null && investment < 0)) {
+      return { status: 'UNRECONCILED', functioningPct: null, investmentPct: null,
+        deltaFcfa: null, isBalanced: false, reason: 'Ventilation nulle invalide : montant negatif, NaN, infini ou non entier.' };
+    }
     if (functioning === 0 && investment === 0) {
       return {
         status: 'ZERO_TOTAL',
@@ -580,8 +587,7 @@ export function resolveInstitutionFinancialView(
   // Verification documentaire INDEPENDANTE de l'egalite arithmetique.
   // Aucune preuve PDF = jamais VERIFIED_AMOUNT, meme si les composantes s'additionnent.
   const amountEvidence = nationalSection ?? ministrySection;
-  const isLfi2026AmountConfirmed = fiscalYear === 2026 && requestedBasis !== 'RECTIFICATIF' &&
-    requestedBasis !== 'ADMINISTRATIVE_ACCOUNT' &&
+  const isLfi2026AmountConfirmed = fiscalYear === 2026 && (requestedBasis == null || requestedBasis === 'LFI') &&
     amountEvidence != null && amountEvidence.lfi_amount_fcfa === total;
   const documentaryDiscrepancy = amountEvidence != null && !isLfi2026AmountConfirmed;
   const isReconciled = pctResult.status === 'RECONCILED';
