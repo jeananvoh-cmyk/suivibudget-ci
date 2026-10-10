@@ -66,3 +66,44 @@ La correspondance automatique ne signifie **pas** certification de l'identité a
 
 **Aucune mutation des budgets de collectivités** avant le rapprochement complet montant-par-type, la vérification du périmètre nominatif et la levée des réserves de lecture.
 
+
+## Clôture du rapprochement nominatif LFI + Annexe 4
+
+Après examen des deux versions officielles de chaque activité orpheline, **46/46 codes d'activités** et leurs **montants CP 2026 exacts** ont été retrouvés indépendamment dans l'Annexe 4, à la page PDF renseignée dans `46_ACTIVITES_LFI_ANNEX4_PREUVES.csv`.
+
+- **37 activités supplémentaires** possèdent un libellé permettant d'identifier nominativement un bénéficiaire, pour **1 950 010 183 FCFA**, concernant 17 collectivités. Pour **16** collectivités cela réconcilie intégralement le montant initialement manquant ; la 17e garde un reliquat constitué d'une autre activité non nominative.
+- **7 activités**, pour **200 962 805 FCFA**, restent sans collectivité nommée dans leurs libellés LFI **et** Annexe 4. Les anciens budgets présents dans le code semblent arithmétiquement en tenir compte, mais **l'égalité numérique ou la proximité des codes ne prouve pas leur bénéficiaire**.
+- Les **2 autres activités non nominatives** sont la provision générale investissement **3 000 000 000 FCFA** et PAMREC **131 000 000 FCFA** : ne pas imputer arbitrairement à une mairie.
+
+### Résultat de la matrice exhaustive des 234 fiches locales
+
+Voir `MATRICE_234_APRES_CONTRE_VERIFICATION_ANNEXE4.csv` :
+
+| Qualification | Effectif | Décision |
+|---|---:|---|
+| Concordance arithmétique directement à la LFI | 203 | Montant de dotation recoupé, sans l'assimiler au budget primitif |
+| Concordance après complément de libellé Annexe 4 | 16 | Montant de dotation recoupé, code activité et pages en annexe |
+| Résidus de bénéficiaire d'activité non nommé | 5 | Montants existants préservés, **allocation non certifiée** |
+| Activité nominative LFI, budget applicatif encore inconnu | 1 (Attécoubé) | Ne pas écraser le champ « budget primitif inconnu » ; enregistrer la dotation d'État séparément |
+| Pas de ligne de fonctionnement nominative dans le programme | 9 communes d'Abidjan | **Conserver null** et attendre les budgets primitifs ; ne signifie pas absence de financement |
+| **Total** | **234** | Aucune fausse attribution ni valeur zéro ajoutée |
+
+### Les sept activités nécessitant la lecture contextualisée ou une pièce d'affectation
+
+| Code activité | CP (FCFA) | Pages PDF (LFI / Annexe 4) | Intitulé non nominatif |
+|---|---:|---|---|
+| 14016001054 | 29 000 000 | 211 / 336 | Développer la pêche et la chasse |
+| 14016001055 | 15 000 000 | 211 / 336 | Préservation de la diversité biologique |
+| 14016001056 | 50 689 805 | 211 / 336 | Enseignement pré-élémentaire |
+| 18016002784 | 50 500 000 | 221 / 328 | Prise en charge des personnes âgées |
+| 25016002927 | 21 473 000 | 231 / 318 | Matériel thérapeutique |
+| 35016001565 | 25 300 000 | 242 / 308 | Radiodiffusion, télévision, édition |
+| 41016002390 | 9 000 000 | 249 / 302 | Équipements collectifs |
+
+**Five provisional recipient hypotheses** may be derived from groupings and reconciliation of application balances, but are NOT official allocations: Kouassi-Kouassikro (three actions of 94 689 805), Tafiré (50 500 000), Komborodougou (21 473 000), Gohitafla (25 300 000), and Logoualé (9 000 000). They remain **non attribuées officiellement** pending evidence. These are suggestions for field/page review ONLY, not facts.
+
+### Couverture des pages à faible texte
+
+Les 64 pages signalées à moins de 80 caractères (22 LFI, 2 Annexe 4, 40 Annexe 7) ont ensuite été soumises à un second tri par contenu visuel et densité de tracés : **42 quasi blanches et 22 pages intercalaires/titres** (montage de vérification `low_text_nonblank_contact.png`). Aucune de ces pages n'a été identifiée comme un tableau budgétaire illisible ; aucune page n'a été écartée silencieusement du parcours des **1 901 pages**. Cela ne signifie pas que chaque chiffre du reste des PDF a été vérifié visuellement indépendamment ; la réconciliation ciblée des dotations locales se fonde sur les codes et CP complets du programme, corroborés par l'Annexe 4.
+
+**Conclusion :** **219/234** dossiers arithmétiquement rapprochés pour leurs dotations nominatives ; **5** appellent une attribution bénéficiaire non disponible dans le libellé d'activité ; **1** dispose d'un transfert nominatif alors que la fiche ne possède pas de budget primitif, et **9** restent sans ligne nominative dans ce programme. **Ce n'est pas une certification de budget primitif.** Aucun montant municipal/régional n'a été corrigé sans justification ; ne pas fusionner, migrer ni déployer.
