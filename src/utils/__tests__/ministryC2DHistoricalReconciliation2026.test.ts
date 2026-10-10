@@ -61,6 +61,17 @@ describe('LFI 2026 project financing C2D and historical ministry discrepancies',
       ]);
   });
 
+  it('keeps two single-activity magnitude matches separate from proof of legacy calculation', () => {
+    const maritime = audits.find(a => a.portfolio_id === 'gov-032');
+    const technical = audits.find(a => a.portfolio_id === 'gov-034');
+    expect(maritime?.original_discrepancy_fcfa).toBe(-553_500_000);
+    expect(technical?.original_discrepancy_fcfa).toBe(-4_362_218);
+    expect(JSON.stringify(maritime)).toContain('78045200134');
+    expect(JSON.stringify(technical)).toContain('78098000984');
+    expect(JSON.stringify(maritime)).toContain('does NOT prove');
+    expect(JSON.stringify(technical)).toContain('does NOT prove');
+  });
+
   it('prevents mistaken classification of numeric provenance as certified ministry appropriations', () => {
     for (const a of audits) {
       expect(a.portfolio_allocation_certified).toBe(false);
