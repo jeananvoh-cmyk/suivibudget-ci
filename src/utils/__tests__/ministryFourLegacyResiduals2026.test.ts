@@ -25,7 +25,11 @@ describe('four still-unexplained 2026 historical registry residuals', () => {
       expect(original?.lfi_general_section_cp_2026_fcfa).toBe(r.voted);
       expect(original?.c2d_section_cp_2026_fcfa ?? null).toBe(r.c2d);
       if (r.c2d != null) expect(original?.discrepancy_minus_c2d_fcfa).toBe(r.residual_fcfa);
-      expect(GOVERNMENT_OFFICIALS.find(x => x.id === r.id)?.budget_fcfa).toBeUndefined();
+      const publishedCP = GOVERNMENT_OFFICIALS.find(x => x.id === r.id)?.budget_fcfa;
+      // Three old divergent entries remain withheld; road maintenance already publishes
+      // the independently canonical-reconciled 2026 LFI section CP, not its legacy amount.
+      if (r.id === 'gov-025') expect(publishedCP).toBe(r.voted);
+      else expect(publishedCP).toBeUndefined();
     }
   });
 
