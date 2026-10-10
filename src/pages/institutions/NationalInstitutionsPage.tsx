@@ -4,6 +4,7 @@ import { NATIONAL_INSTITUTIONS_DATA } from '../../data/nationalBudgetData';
 import { dataStore } from '../../services/dataStore';
 import { Institution, BudgetProject } from '../../types';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
+import { assessInstitutionBudget } from '../../utils/institutionBudgetHelper';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
 
@@ -304,10 +305,7 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {otherInstitutions.map((inst: any) => {
-            const functioningPct = inst.total_budget_fcfa > 0 
-              ? Math.round((inst.budget_functioning_fcfa / inst.total_budget_fcfa) * 100) 
-              : 0;
-            const investmentPct = inst.total_budget_fcfa > 0 ? (100 - functioningPct) : 0;
+            const assessment = assessInstitutionBudget(inst);
 
             return (
               <div 
@@ -340,26 +338,56 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
                   </div>
 
                   {/* Budget Section */}
-                  <div className="space-y-2 pt-2">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-500 font-bold uppercase">Dotation Budgétaire</span>
-                      <span className="font-black text-slate-900 whitespace-nowrap">
-                        {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold break-words">({formatAmountInWords(inst.total_budget_fcfa)})</span>
-                      </span>
+                  {assessment.status === 'AVAILABLE' ? (
+                    <div className="space-y-2 pt-2">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-slate-500 font-bold uppercase">Dotation Budgétaire</span>
+                        <span className="font-black text-slate-900 whitespace-nowrap">
+                          {assessment.totalFormatted}{' '}
+                          {assessment.totalWords && (
+                            <span className="text-brand-blue font-bold break-words">({assessment.totalWords})</span>
+                          )}
+                        </span>
+                      </div>
+                      {assessment.hasBreakdown && assessment.functioningPct !== null && assessment.investmentPct !== null ? (
+                        <>
+                          <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden flex">
+                            <div className="bg-brand-blue h-full" style={{ width: `${assessment.functioningPct}%` }} />
+                            <div className="bg-emerald-500 h-full" style={{ width: `${assessment.investmentPct}%` }} />
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-semibold text-slate-600 gap-1 pt-1">
+                            <span className="text-brand-blue">
+                              Fonct. : <strong className="font-bold">{assessment.functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
+                            </span>
+                            <span className="text-emerald-700">
+                              Invest. : <strong className="font-bold">{assessment.investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
+                            </span>
+                          </div>
+                        </>
+                      ) : null}
                     </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden flex">
-                      <div className="bg-brand-blue h-full" style={{ width: `${functioningPct}%` }} />
-                      <div className="bg-emerald-500 h-full" style={{ width: `${investmentPct}%` }} />
+                  ) : (
+                    <div className="space-y-2 pt-2">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-slate-500 font-bold uppercase">Dotation Budgétaire</span>
+                        <span className="font-bold text-slate-700 text-xs italic">
+                          {assessment.totalFormatted}
+                        </span>
+                      </div>
+                      <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${assessment.badgeClass}`}>
+                            {assessment.badgeText}
+                          </span>
+                        </div>
+                        {assessment.noticeText && (
+                          <p className="text-[11px] text-slate-600 leading-snug">
+                            {assessment.noticeText}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-semibold text-slate-600 gap-1 pt-1">
-                      <span className="text-brand-blue">
-                        Fonct. : <strong className="font-bold">{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
-                      </span>
-                      <span className="text-emerald-700">
-                        Invest. : <strong className="font-bold">{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
-                      </span>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Card Footer : Harmonized with MinistriesPage */}

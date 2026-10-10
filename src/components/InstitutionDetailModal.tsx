@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Institution, BudgetProject, BudgetLineItem } from '../types';
 import { formatQualifiedFCFA, formatFCFA, formatAmountInWords, getProjectTier, getProjectTierBadge, ProjectTier } from '../utils/formatters';
+import { assessInstitutionBudget, calculateSafePercentages } from '../utils/institutionBudgetHelper';
 import { getProjectsForInstitution } from '../utils/institutionProjects';
 import { 
   X, 
@@ -235,7 +236,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
 
   // Budget ratios (Safe zero & exact proportion handling)
   const primInfo = institution.primitive_budget || OFFICIAL_PRIMITIVE_BUDGETS[institution.id];
-  const hasInstBreakdown = institution.budget_functioning_fcfa != null && institution.budget_investment_fcfa != null;
+  const assessment = assessInstitutionBudget(institution);
   const functioningBudget = (institution.total_budget_fcfa === 0 && primInfo?.functioning_voted_fcfa != null)
     ? primInfo.functioning_voted_fcfa
     : institution.budget_functioning_fcfa;
@@ -245,22 +246,15 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   const totalBudget = (institution.total_budget_fcfa === 0 && primInfo?.total_voted_fcfa != null)
     ? primInfo.total_voted_fcfa
     : (institution.total_budget_fcfa ?? (functioningBudget != null && investmentBudget != null ? functioningBudget + investmentBudget : null));
+  const hasInstBreakdown = functioningBudget != null && investmentBudget != null && (totalBudget ?? 0) > 0;
 
-  let functioningPct = 0;
-  let investmentPct = 0;
-
-  if (totalBudget != null && totalBudget > 0 && functioningBudget != null && investmentBudget != null) {
-    if (investmentBudget === 0 && functioningBudget > 0) {
-      functioningPct = 100;
-      investmentPct = 0;
-    } else if (functioningBudget === 0 && investmentBudget > 0) {
-      functioningPct = 0;
-      investmentPct = 100;
-    } else {
-      functioningPct = Math.round((functioningBudget / totalBudget) * 100);
-      investmentPct = 100 - functioningPct;
-    }
-  }
+  const { functioningPct: safeFonctPct, investmentPct: safeInvPct } = calculateSafePercentages(
+    functioningBudget,
+    investmentBudget,
+    totalBudget
+  );
+  const functioningPct = safeFonctPct ?? 0;
+  const investmentPct = safeInvPct ?? 0;
 
   // Resolve CAIDP Information Officer accurately from registry
   const caidpMatch = dataStore.findCaidpEntity(institution.name) || findCaidpRI(institution.name);
@@ -1329,13 +1323,107 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     </div>
                   );
                 })()
-              ) : (institution.total_budget_fcfa === 0 || institution.is_tax_quota_commune || institution.budget_not_published) ? (
+              ) : (institution.total_budget_fcfa == null || institution.total_budget_fcfa === 0 || institution.is_tax_quota_commune || institution.budget_not_published || assessment.isCourSupreme) ? (
                 (() => {
+                  const isCourSupreme = assessment.isCourSupreme;
                   const isGrandAbidjan = institution.type === 'MAIRIE' && (
                     institution.district?.toLowerCase().includes('abidjan') ||
                     institution.region?.toLowerCase().includes('abidjan') ||
                     ['abobo', 'adjamé', 'attécoubé', 'koumassi', 'marcory', 'plateau', 'port-bouët', 'treichville', 'anyama', 'songon'].some(name => institution.name.toLowerCase().includes(name))
                   );
+
+                  if (isCourSupreme) {
+                    return (
+                      <div className="bg-white rounded-2xl p-5 sm:p-6 border-2 border-slate-300 shadow-2xs space-y-4">
+                        <div className="flex items-start gap-3.5">
+                          <div className="p-3 rounded-2xl flex-shrink-0 bg-slate-100 text-slate-800">
+                            <Scale className="w-6 h-6" />
+                          </div>
+                          <div className="space-y-1 flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-300">
+                                Institution Constitutionnelle & Juridiction Suprême
+                              </span>
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blue-50 text-blue-800 border border-blue-200">
+                                Loi de Finances 2026
+                              </span>
+                            </div>
+                            <h3 className="text-base sm:text-lg font-black text-slate-900">
+                              Dotation Budgétaire Non Individualisée — Répartition Constitutionnelle
+                            </h3>
+                            <p className="text-xs text-slate-600 leading-relaxed">
+                              Conformément à la Constitution ivoirienne de 2016 (Titre VII), les compétences juridictionnelles historiques de la Cour Suprême sont exercées par trois juridictions suprêmes autonomes, chacune dotée de sa propre section budgétaire dans la Loi de Finances 2026 : la <strong>Cour de Cassation</strong> (Section 023 — 7 931 309 608 FCFA), le <strong>Conseil d'État</strong> (Section 022 — 5 164 531 081 FCFA) et la <strong>Cour des Comptes</strong> (Section 015 — 8 851 161 351 FCFA). Aucune dotation distincte n'est individualisée pour la Cour Suprême dans le budget général de l'État.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
+                          <div className="flex items-center gap-2 font-black text-slate-800 uppercase tracking-wider text-[11px]">
+                            <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                            <span>Traçabilité & Vérifiabilité Citoyenne SuiviBudget CI</span>
+                          </div>
+                          <p className="text-slate-600 leading-relaxed font-medium">
+                            Conformément à notre charte de vérifiabilité (Règle 2 : <em>Provenance by default</em> et Règle 9 : <em>Absence de donnée ≠ donnée d'absence</em>), aucun montant fictif ou estimé n'est attribué à la Cour Suprême. Les crédits alloués au sommet du pouvoir judiciaire sont vérifiables sur les fiches officielles de la Cour de Cassation, du Conseil d'État et de la Cour des Comptes.
+                          </p>
+                        </div>
+
+                        <div className="pt-1 flex flex-wrap gap-2.5">
+                          <button
+                            onClick={() => setDocModalOpen(true)}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black shadow-xs transition-all cursor-pointer"
+                          >
+                            <FileText className="w-3.5 h-3.5 text-amber-300" />
+                            <span>Consulter / Demander les pièces officielles (Loi CAIDP)</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  if (institution.type !== 'MAIRIE') {
+                    return (
+                      <div className="bg-white rounded-2xl p-5 sm:p-6 border-2 border-amber-300 shadow-2xs space-y-4">
+                        <div className="flex items-start gap-3.5">
+                          <div className="p-3 rounded-2xl flex-shrink-0 bg-amber-100 text-amber-900">
+                            <Scale className="w-6 h-6" />
+                          </div>
+                          <div className="space-y-1 flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300">
+                                Dotation en attente de publication
+                              </span>
+                            </div>
+                            <h3 className="text-base sm:text-lg font-black text-slate-900">
+                              Transmission Officielle du Budget 2026 en attente
+                            </h3>
+                            <p className="text-xs text-slate-600 leading-relaxed">
+                              Les crédits budgétaires alloués à cette institution sont en cours de consolidation à partir des annexes de la Loi de Finances et des documents budgétaires officiels.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
+                          <div className="flex items-center gap-2 font-black text-slate-800 uppercase tracking-wider text-[11px]">
+                            <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                            <span>Engagement de Rigueur & Crédibilité Citoyenne Suivi Budget CI</span>
+                          </div>
+                          <p className="text-slate-600 leading-relaxed font-medium">
+                            Conformément à notre charte de vérifiabilité, aucun chiffre estimé ou non certifié n'est publié sur cette plateforme. Des démarches sont en cours pour obtenir les documents officiels validés.
+                          </p>
+                        </div>
+
+                        <div className="pt-1 flex flex-wrap gap-2.5">
+                          <button
+                            onClick={() => setDocModalOpen(true)}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black shadow-xs transition-all cursor-pointer"
+                          >
+                            <FileText className="w-3.5 h-3.5 text-amber-300" />
+                            <span>Faire / Suivre la demande de document officiel (Loi CAIDP)</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
 
                   return (
                     <div className={`bg-white rounded-2xl p-5 sm:p-6 border-2 shadow-2xs space-y-4 ${isGrandAbidjan ? 'border-brand-blue/40 bg-gradient-to-br from-white via-sky-50/20 to-white' : 'border-amber-300'}`}>
@@ -1546,7 +1634,15 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     </h4>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Conformément aux règles de la comptabilité publique ivoirienne, <strong>{institution.name}</strong> ne porte pas de ligne de crédit d'investissement direct en propre dans les concours décentralisés de l'État (100% de sa dotation est affectée au fonctionnement, à l'administration et aux cantines scolaires). Les opérations d'infrastructures métropolitaines majeures sont directement pilotées par les ministères sectoriels ou sur ressources propres.
+                    {institution.type === 'MAIRIE' ? (
+                      <>
+                        Conformément aux règles de la comptabilité publique ivoirienne, <strong>{institution.name}</strong> ne porte pas de ligne de crédit d'investissement direct en propre dans les concours décentralisés de l'État (100% de sa dotation est affectée au fonctionnement, à l'administration et aux services de proximité). Les opérations d'infrastructures métropolitaines majeures sont directement pilotées par les ministères sectoriels ou sur ressources propres.
+                      </>
+                    ) : (
+                      <>
+                        Les opérations d'investissement public de cette institution sont directement centralisées au niveau des programmes ministériels d'équipement ou financées sur budgets sectoriels d'investissement de l'État.
+                      </>
+                    )}
                   </p>
                 </div>
               )}

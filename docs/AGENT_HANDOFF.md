@@ -1,16 +1,41 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
 ## METADATA
-- LAST_UPDATED : 2026-10-07
+- LAST_UPDATED : 2026-10-10
 - LAST_AGENT : Antigravity
-- CURRENT_BRANCH : `antigravity/lot5-ministry-generalization-2026`
-- BASE_MASTER_SHA : `8145c0423482438cc4cc2fc89af68cb399b06ebc` (Merge commit de PR #27 sur master)
-- CURRENT_HEAD : voir HEAD courante de PR #28
-- LAST_VERIFIED_CODE_HEAD : voir commit courant LOT 5
-- PR : PR #28 (`feat(lot5): controlled ministerial budget generalization with Batch 1 (7 ministries)`)
-- SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_SUPABASE_WRITES = 0)
-- CURRENT_MILESTONE : LOT 5 — Généralisation ministérielle 2026 contrôlée. Réconciliation intégrale du périmètre LFI 2026 suite à l'audit bloquant indépendant de la PR #28. Batch 1 réconcilié avec 7 ministères complets (25 programmes, 66 actions, 447 938 605 716 FCFA, delta = 0). Volume budgétaire ministériel cumulé vérifié : 2 157 470 677 361 FCFA (12 ministères, représentant 12,43% du budget de l'État). Libellés officiels 100% conformes verbatim à la LFI 2026 et à l'Annexe 4 DPPD-PAP. Isolation stricte de publication : seul MMPE (gov-008) reste PUBLISHED, les 11 autres ministères vérifiés sont en statut VERIFIED / STAGED. Fixtures golden indépendantes avec INDEPENDENT_LFI_REFERENCES_2026 et 29 tests de généralisation PASS (358 tests PASS au total sur le repo).
+- CURRENT_BRANCH : `antigravity/institution-budgets-reconciliation`
+- BASE_MASTER_SHA : `707b3b688f23bd33dc0f3504e13b79c65908dd50` (Merge commit de PR #28 sur master)
+- PR : PR Reconciliation Budgets Institutionnels & Élimination des Faux Zéros
+- SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée, REMOTE_SUPABASE_WRITES = 0)
+- CURRENT_MILESTONE : Réconciliation des dotations institutionnelles publiques et élimination définitive des faux zéros budgétaires. Fiche Cour Suprême certifiée non-individualisée dans la LFI 2026 (répartition constitutionnelle vers Cour de Cassation, Conseil d'État et Cour des Comptes). 10 communes du Grand Abidjan assainies sous autonomie fiscale (null !== 0). Module d'intégrité budgétaire unifié `institutionBudgetHelper.ts`. 374 tests unitaires PASS, build TypeScript et Vite 100% verts.
 - FOUNDATION_READY : TRUE.
+
+## RÉCONCILIATION DES DOTATIONS INSTITUTIONNELLES & ÉLIMINATION DES FAUX ZÉROS (OCTOBRE 2026)
+- **1. Diagnostic & Preuve Documentaire** :
+  - **Anomalie initiale** : La fiche publique « La Cour Suprême de Côte d'Ivoire » affichait une dotation de 0 FCFA, 0% fonctionnement, 0% investissement.
+  - **Preuve LFI 2026** : *Loi n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026* (583 pages, Tableaux des crédits pp. 45–54).
+  - **Réalité constitutionnelle** : Sous la Constitution de 2016 (Titre VII), la Cour Suprême a été scindée en trois juridictions suprêmes souveraines dotées chacune de sa section budgétaire autonome dans la LFI 2026 :
+    * Cour de Cassation : Section 023 (7 931 309 608 FCFA)
+    * Conseil d'État : Section 022 (5 164 531 081 FCFA)
+    * Cour des Comptes : Section 015 (8 851 161 351 FCFA)
+    * Cour Suprême : Aucune section budgétaire distincte dans le budget général (`OFFICIAL_AMOUNT = UNVERIFIED` / `DOCUMENTARY_GAP`).
+- **2. Causes Racines Identifiées & Corrigées** :
+  - `NationalInstitutionsPage.tsx` : les pourcentages `functioningPct` et `investmentPct` retombaient par défaut sur `0%` lorsque `total_budget_fcfa` était null ou absent, affichant une jauge vide et des pourcentages trompeurs.
+  - `InstitutionDetailModal.tsx` : lorsqu'une entité n'avait pas de budget publié, le modal affichait un texte hardcodé pour les mairies (`Cette collectivité municipale fonctionne sous le régime de l'autonomie financière et fiscale...`), qualifiant la Cour Suprême de collectivité municipale !
+  - `budgetLinesData.ts` : deux lignes budgétaires fictives simulant 5 000 000 000 FCFA pour `inst-cour-supreme` étaient présentes dans `NATIONAL_INSTITUTIONS_EXTRA_LINES`, en contradiction avec l'absence de section LFI 2026.
+  - `officialDataFromCsv.ts` : 10 communes du Grand Abidjan en autonomie fiscale (`is_tax_quota_commune: true`) avaient des valeurs numériques `0` au lieu de `null`.
+- **3. Solutions Architecturales Mises en Œuvre** :
+  - Création de `src/utils/institutionBudgetHelper.ts` (`assessInstitutionBudget`, `calculateSafePercentages`) garantissant le principe fondamental `null !== 0`.
+  - Cour Suprême : statut `NOT_DOCUMENTED`, affichage « Non individualisé (LFI 2026) », jauge masquée, notice institutionnelle explicative citant les sections 023, 022 et 015 de la LFI 2026.
+  - Communes du Grand Abidjan : passage des budgets à `null`, statut `TAX_AUTONOMY`, badge « Ressources Propres & Impôts Locaux ».
+  - Modal institutionnel : différenciation stricte entre juridictions constitutionnelles, institutions nationales et collectivités municipales (suppression des mentions incongrues de « cantines scolaires » et de « conseil municipal » pour les juridictions).
+  - Suppression des lignes budgétaires fictives dans `budgetLinesData.ts`.
+- **4. Validation & Conformité** :
+  - 16 tests unitaires dédiés dans `src/utils/__tests__/institutionBudgetIntegrity.test.ts`.
+  - 374/374 tests unitaires au total PASS (`npm test`).
+  - Validation statique TypeScript (`npx tsc --noEmit`) : 0 erreur.
+  - Build de production Vite (`npm run build`) : succès en 2m 38s.
+  - Base Supabase distante : 0 écriture (`REMOTE_SUPABASE_WRITES = 0`).
 
 ## LOT 5 : GÉNÉRALISATION MINISTÉRIELLE 2026 CONTRÔLÉE (BATCH 1)
 - **1. Objectif & Cadre du Batch 1** :

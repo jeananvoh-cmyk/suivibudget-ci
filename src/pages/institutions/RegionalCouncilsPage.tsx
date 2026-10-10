@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Search, MapPin, ChevronDown, ArrowRight, FileText, Globe, ExternalLink, Info, Eye, EyeOff } from 'lucide-react';
 import { Institution, BudgetProject } from '../../types';
 import { formatFCFA, formatAmountInWords, getInstitutionLeaderGender } from '../../utils/formatters';
+import { assessInstitutionBudget } from '../../utils/institutionBudgetHelper';
 import { getProjectsForInstitution } from '../../utils/institutionProjects';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
@@ -216,11 +217,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
       {/* Grid of Regions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {paginatedRegions.map((inst) => {
-          const hasBreakdown = inst.budget_functioning_fcfa != null && inst.budget_investment_fcfa != null && (inst.total_budget_fcfa ?? 0) > 0;
-          const functioningPct = hasBreakdown 
-            ? Math.round((inst.budget_functioning_fcfa! / inst.total_budget_fcfa!) * 100) 
-            : 0;
-          const investmentPct = hasBreakdown ? (100 - functioningPct) : 0;
+          const assessment = assessInstitutionBudget(inst);
           const relatedProjects = getProjectsForInstitution(inst, allProjects);
           const relatedProjectsCount = relatedProjects.length;
 
@@ -337,27 +334,30 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                         {inst.type === 'DISTRICT' ? 'Dotation du District Autonome (Loi de Finances)' : 'Dotation Budgétaire Régionale (Loi de Finances)'}
                       </span>
                       <span className="font-black text-slate-900">
-                        {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold">({formatAmountInWords(inst.total_budget_fcfa)})</span>
+                        {assessment.totalFormatted}{' '}
+                        {assessment.totalWords && (
+                          <span className="text-brand-blue font-bold">({assessment.totalWords})</span>
+                        )}
                       </span>
                     </div>
-                    {hasBreakdown ? (
+                    {assessment.status === 'AVAILABLE' && assessment.hasBreakdown && assessment.functioningPct !== null && assessment.investmentPct !== null ? (
                       <>
                         <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden flex">
-                          <div className="bg-brand-blue h-full" style={{ width: `${functioningPct}%` }}></div>
-                          <div className="bg-emerald-500 h-full" style={{ width: `${investmentPct}%` }}></div>
+                          <div className="bg-brand-blue h-full" style={{ width: `${assessment.functioningPct}%` }}></div>
+                          <div className="bg-emerald-500 h-full" style={{ width: `${assessment.investmentPct}%` }}></div>
                         </div>
                         <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-semibold text-slate-600 gap-1 pt-1">
                           <span className="text-brand-blue">
-                            Fonct. : <strong className="font-bold">{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
+                            Fonct. : <strong className="font-bold">{assessment.functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
                           </span>
                           <span className="text-emerald-700">
-                            Invest. : <strong className="font-bold">{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
+                            Invest. : <strong className="font-bold">{assessment.investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
                           </span>
                         </div>
                       </>
                     ) : (
                       <div className="p-2 bg-slate-50 rounded-xl border border-slate-200 text-[10px] text-slate-500 italic">
-                        Ventilation Fonctionnement / Investissement à corroborer via l'annexe budgétaire.
+                        {assessment.noticeText || "Ventilation Fonctionnement / Investissement à corroborer via l'annexe budgétaire."}
                       </div>
                     )}
                   </div>
