@@ -4,11 +4,15 @@
   "source_documents": [
     {
       "document": "Loi de Finances 2026",
-      "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf"
+      "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+      "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+      "physical_pdf_pages": 583
     },
     {
       "document": "Annexe 4 DPPD-PAP 2026-2028",
-      "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf"
+      "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "sha256": "0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10",
+      "physical_pdf_pages": 1229
     }
   ],
   "pdf_annex4_page_numbering": "physical PDF page = printed document page + 2",
@@ -1238,5 +1242,13 @@
       "action_documentary_status": "NOT_YET_VERIFIED",
       "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
     }
+  ],
+  "validation_notes": [
+    "CP amounts read by row association in the LFI recap, PDF pages 45–54; columns AE and CP were independently located on these lines and are numerically identical for this subset.",
+    "Annex 4 values were found as space-grouped amounts in the cited programme section spans; this is numeric corroboration, not yet a complete line-by-line action audit.",
+    "Annex 4 programme identifier 22121 of section 352 could not be found as literal text in the source span although the programme title and the exact 2026 amount are present on PDF p.906.",
+    "Section 229 is shared between gov-009 and gov-035; its CP total cannot be allocated twice or treated as two independent ministerial appropriations.",
+    "Section 322 occurs both in DOTATIONS (LFI p.46) and PROGRAMMES (LFI p.47); only the PROGRAMMES section CP 671323963425 is included here. The separate DOTATIONS entry is not added.",
+    "An aggregate across sections is not equivalent to the sum of current 2026 government portfolio budgets; scope and cabinet allocation remain unverified."
   ]
 }
