@@ -37,7 +37,11 @@ export function calculateSafePercentages(
     return { functioningPct: null, investmentPct: null };
   }
 
-  if (!Number.isFinite(total) || !Number.isFinite(functioning) || !Number.isFinite(investment)) {
+  // Monetary reconciliation is exact: never turn a missing or inconsistent
+  // budget breakdown into an apparently complete 100% allocation.
+  if (![total, functioning, investment].every(Number.isSafeInteger) ||
+      functioning < 0 || investment < 0 ||
+      BigInt(functioning) + BigInt(investment) !== BigInt(total)) {
     return { functioningPct: null, investmentPct: null };
   }
 
@@ -82,7 +86,7 @@ export function assessInstitutionBudget(
       hasBreakdown: false,
       badgeText: 'Dotation non individualisée (LFI 2026)',
       badgeClass: 'bg-slate-100 text-slate-700 border-slate-300',
-      noticeText: 'Conformément à la Constitution de 2016, les compétences juridictionnelles sont réparties entre la Cour de Cassation (Section 023), le Conseil d\'État (Section 022) et la Cour des Comptes (Section 015), chacune dotée de sa propre section budgétaire dans la Loi de Finances.',
+      noticeText: 'Conformément à la Constitution de 2016, les compétences juridictionnelles sont réparties entre la Cour de Cassation (Section 114), le Conseil d\'État (Section 118) et la Cour des Comptes (Section 115), chacune dotée de sa propre section budgétaire dans la Loi de Finances.',
       isCourSupreme: true,
       isTaxQuotaCommune: false,
     };
