@@ -49,9 +49,10 @@ describe('2026 ministerial portfolio documentary safeguards', () => {
     const delegate = officials.get('gov-035');
     expect(agriculture).toBeDefined();
     expect(delegate).toBeDefined();
-    expect(agriculture?.budget_fcfa).toBe(337_932_332_542);
+    expect(agriculture?.budget_fcfa).toBeUndefined();
     expect(delegate?.budget_fcfa).toBeUndefined();
     expect(SCOPE_EXCEPTIONS['gov-035']).toContain('ne doit pas être compté deux fois');
+    expect(MINISTRY_DOCUMENTARY_DISCREPANCIES['gov-009']).toBe('229');
   });
 
   it('does not silently sum candidate sections for transport or employment', () => {
