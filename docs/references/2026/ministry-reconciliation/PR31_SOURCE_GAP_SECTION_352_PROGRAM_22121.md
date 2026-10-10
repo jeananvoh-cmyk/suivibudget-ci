@@ -1,5 +1,8 @@
 # Réserve documentaire DGBF 2026 — section 352, programme 22121
 
+> **Rectification de l'analyse (10 octobre 2026) :** la lacune du Tableau 7 de l'Annexe 4 **ne bloque plus la réconciliation financière du programme 22121**. La LFI 2026 contient le détail complémentaire officiel : action **2212101**, **5 304 391 059 FCFA** (page PDF 502) et action **2212102**, **2 748 545 000 FCFA** (page PDF 503). Leur somme est exactement **8 052 936 059 FCFA**, soit les CP votés du programme. Preuve structurée : `LFI_2026_ACTION_COMPLEMENTS_4_PROGRAMMES.json`. La réserve qui subsiste est **éditoriale** (tableau de l'Annexe 4 incomplet), et non un manque de justification de la somme des actions dans les pièces officielles prises ensemble.
+
+
 **Constat au 10 octobre 2026, vérifié sur les PDF officiels originaux, sans modification des sources.**
 
 ## 1. Concordance certaine entre les documents
