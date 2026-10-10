@@ -58,7 +58,7 @@ describe('2026 documentation registry consistency against canonical sources', ()
   it('keeps all 35 directory amounts synchronized with the documentary register', () => {
     const lines = reconciliationCsv.trim().split(/\r?\n/);
     const entries = lines.slice(1).map(line => {
-      const match = line.match(/^(gov-\d{3}),.+?,(\d+),(?:PROGRAMMES|DOTATIONS|PROGRAMMES\+PROGRAMMES),/);
+      const match = line.match(/^(gov-\d{3}),.+?,(\d+),(?:PROGRAMMES(?:\+PROGRAMMES)?|DOTATIONS)?,/);
       expect(match, line.slice(0, 16)).not.toBeNull();
       return [match![1], Number(match![2])] as const;
     });
