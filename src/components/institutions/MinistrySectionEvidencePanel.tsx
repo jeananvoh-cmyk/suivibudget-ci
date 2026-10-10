@@ -1,6 +1,7 @@
 import React from 'react';
 import sectionEvidence from '../../../docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json';
 import actionEvidence from '../../../docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json';
+import officialProgramNames from '../../data/ministryOfficialProgramLabels2026.json';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
 
 const ANNEX4_URL = 'https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf';
@@ -19,6 +20,7 @@ export const MinistrySectionEvidencePanel: React.FC<Props> = ({ institutionId })
   if (!section) return null;
 
   const sectionShared = section.portfolio_ids.length > 1;
+  const programmeNames: Record<string, string> = officialProgramNames.names;
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-3" aria-label="Preuves budgétaires officielles de section">
@@ -45,7 +47,7 @@ export const MinistrySectionEvidencePanel: React.FC<Props> = ({ institutionId })
           return (
             <div key={program.official_code} className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-1">
               <div className="flex flex-wrap justify-between items-start gap-2">
-                <span className="text-xs font-bold text-slate-800">Programme DGBF {program.official_code}</span>
+                <span className="text-xs font-bold text-slate-800">{programmeNames[program.official_code]} (DGBF {program.official_code})</span>
                 <span className="text-xs font-bold text-slate-900">{formatFCFA(program.cp_2026_fcfa)}</span>
               </div>
               <p className="text-[11px] text-slate-600">{formatAmountInWords(program.cp_2026_fcfa)}</p>
