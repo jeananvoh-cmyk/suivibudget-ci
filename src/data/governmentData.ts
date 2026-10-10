@@ -1861,7 +1861,6 @@ export const GOVERNMENT_DATA: OfficialLeader[] = [
     "photo_url": "https://www.gouv.ci/uploads/gouvernement/176920254960.jpg",
     "website_url": "https://agriculture.gouv.ci/",
     "facebook_url": "https://www.facebook.com/agriculture.ci",
-    "budget_fcfa": 337932332542,
     "address": "Abidjan Plateau, Cité Administrative, Tour C",
     "info_officer_name": "M. KOFFI Kouassi",
     "info_officer_title": "Responsable de l'Information (RI CAIDP)",
