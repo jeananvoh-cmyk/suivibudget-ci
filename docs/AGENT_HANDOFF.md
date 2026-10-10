@@ -1,5 +1,24 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
+## CHECKPOINT DE CLÔTURE TECHNIQUE & INTÉGRITÉ FINANCIÈRE PR #31 — 10 OCTOBRE 2026
+
+- **Statut PR #31** : Clôturée techniquement avec intégrité financière certifiée, 435 tests réussis (31 suites de tests), `tsc && vite build` 100% vert, GitHub Actions Quality (`verify`) et Vercel Preview validés avec succès sur le HEAD `5c69863` (ou son successeur direct).
+- **Branche** : `antigravity/institution-budgets-reconciliation`
+- **Revue documentaire & Matrice d'intégrité (66 entités)** :
+  * Matrice d'audit : `docs/audits/institution-reconciliation/matrix.json`
+  * Rapport d'audit : `docs/audits/institution-reconciliation/REPORT.md`
+  * Script reproductible : `scripts/generate-reconciliation-matrix.ts`
+  * Entités auditées : 66 (14 Grandes Institutions, 35 Portefeuilles Ministériels, 7 AAI, 10 Communes du Grand Abidjan).
+  * Statuts certifiés : 20 `VERIFIED_AMOUNT`, 0 `VERIFIED_ZERO`, 0 `UNRECONCILED`, 34 `PARTIAL_BREAKDOWN` (CP LFI documentés avec ventilation manquante conservée sans invention), 2 `NOT_DOCUMENTED`, 10 `NOT_PUBLISHED`.
+  * Total FCFA vérifié : **356 153 879 687 FCFA**.
+  * Écritures Supabase distantes : **0** (`REMOTE_SUPABASE_WRITES = 0`).
+  * Faux zéros résiduels : **0**.
+- **P1-A Arithmétique exacte (`calculateSafePercentages`)** : Entiers stricts (`Number.isSafeInteger`), égalité exacte `functioning + investment === total` à 1 FCFA près, rejet des faux pourcentages 100% en cas d'écart (`UNRECONCILED` avec `deltaFcfa`), gestion des totaux 0 FCFA sans division par zéro (`ZERO_TOTAL`).
+- **P1-B Résolveur unique (`resolveInstitutionFinancialView`)** : Source de vérité partagée pour les cartes publiques (`NationalInstitutionsPage`, `MinistriesPage`) et la modale détaillée (`InstitutionDetailModal`), éliminant toute divergence visuelle.
+- **P1-C Élimination des zéros trompeurs** : Cour Suprême explicitée comme non individualisée (scission constitutionnelle 2016 vers Cassation Section 114, Conseil d'État Section 118, Cour des Comptes Section 115) ; 10 communes du Grand Abidjan sous autonomie fiscale (`TAX_AUTONOMY`, `null !== 0`).
+- **NEXT_EXECUTABLE_TASK** : Revue finale humaine de la PR #31 sur GitHub (`https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/31`) et merge non-destructif sur `master` sans force-push.
+
+---
 ## CHECKPOINT DE CERTIFICATION LÉGALE INITIALE ET RÉSIDUS — 10 OCTOBRE 2026
 
 **Ne pas confondre la certification du crédit voté dans la LFI avec la certification de l'enveloppe propre au portefeuille actuel.** Les **34 sections LFI distinctes** référencées par les **35 fiches ministérielles** possèdent désormais une **preuve dans les articles 14 ou 15 de la loi elle-même** :
