@@ -15,6 +15,22 @@ Cela clôt la **suppression des attributions non justifiées dans le répertoire
 
 **Périmètre de la décision :** fichiers GitHub de la branche PR #31 uniquement ; aucune écriture Supabase, aucune fusion ni déploiement demandé. Une donnée provenant d'une autre source de l'application doit faire l'objet d'un contrôle distinct.
 
+## Contrôle des attributions administratives post-LFI — décret du 4 mars 2026
+
+**Source nouvelle et officielle :** annexe au décret n° **2026-84 du 4 mars 2026** portant attributions des membres du Gouvernement, publiée par `gouv.ci` : https://www.gouv.ci/uploads/publications/177580607447.pdf.
+
+**35/35 portefeuilles** sont reliés à une page de leur tutelle ou de leurs structures rattachées dans `DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json` et dans `MINISTRY_DOCUMENTATION_REGISTRY_2026.json` ; l'interface expose la provenance. Trois rapprochements particulièrement instructifs :
+
+- **gov-009/gov-035 — Agriculture / Productions vivrières (PDF p.4)** : Aderiz est placé sous la tutelle du ministre délégué, sans preuve de dotation budgétaire autonome au sein de la section LFI 229.
+- **gov-010/gov-032 — Transports / Affaires maritimes (PDF p.5)** : l'ARSTM figure sous le ministre délégué chargé des Affaires maritimes, sans autorisation d'additionner les sections LFI 340 et 440.
+- **gov-024/gov-034 — Éducation / Enseignement technique (PDF p.9)** : l'IPNETP et les centres de formation professionnelle figurent sous le ministre délégué, sans preuve d'un nouvel arrêté budgétaire transférant les CP entre sections 331/334.
+
+**Conclusion sur les attributions :** les personnes publiques, organismes et autorités de tutelle peuvent maintenant être distingués par référence à une pièce administrative officielle de mars 2026. **Conclusion budgétaire :** le décret et son annexe n'établissent ni transfert de CP, ni collectif budgétaire, ni crédits exécutés. Le niveau `budget_portfolio_attribution` est donc explicitement *non établi* dans les 35 décisions de certification. Les 12 références canoniques restent contrôlées au niveau section-programmes-actions, 21 autres au niveau sommes d'actions et 2 dossiers comportent une exception.
+
+Le répertoire de la **DGBF des lois de finances rectificatives**, consulté lors du contrôle, ne présentait pas de collectif 2026 : https://www.dgbf.ci/loi-de-finances-rectificative/ . **Cette consultation ne prouve pas l'inexistence d'un acte budgétaire non publié sur ce portail.** La demande ciblée dans `PR31_DGBF_DOCUMENTARY_CLARIFICATION_REQUEST_DRAFT.md` réclame seulement les éventuelles pièces de répartition ou de transfert réellement nécessaires à une certification par portefeuille.
+
+**Décision :** certification des *attributions administratives* documentée ; **certification intégrale des CP par portefeuille non acquise**. Aucun montant supplémentaire imputé ou certifié par déduction du décret.
+
 ## Contrôle indépendant additionnel — sections, programmes et actions (10 octobre 2026)
 
 Les **PDF originaux fournis par le porteur du projet** ont été relus et leurs empreintes SHA-256 enregistrées :
