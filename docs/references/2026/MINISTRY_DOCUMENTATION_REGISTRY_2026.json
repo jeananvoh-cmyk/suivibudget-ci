@@ -63,15 +63,18 @@
         "portfolio_allocation_certified": false,
         "shared_section": false,
         "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
-        "action_programme_sums_reconciled": 0,
+        "action_programme_sums_reconciled": 3,
         "action_programmes_total": 3,
-        "actions_individually_identified": 0,
-        "action_numeric_reconciliation_complete": false,
-        "unresolved_action_programme_codes": [
+        "actions_individually_identified": 3,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": [],
+        "lfi_action_complement_path": "docs/references/2026/ministry-reconciliation/LFI_2026_ACTION_COMPLEMENTS_4_PROGRAMMES.json",
+        "lfi_supplemented_action_programme_codes": [
           "13010",
           "13011",
           "13013"
-        ]
+        ],
+        "annex4_source_gap_remains": true
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
@@ -85,17 +88,17 @@
         "budget_CP_reallocation_certified": false
       },
       "certification_control_2026": {
-        "numeric_verification_level": "SECTION_PROGRAMMES_BALANCED_ACTION_EXCEPTION",
+        "numeric_verification_level": "SECTION_PROGRAMMES_ACTIONS_BALANCED",
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER",
-          "ANNEX4_ACTIONS_SOURCE_GAP",
           "INSTITUTIONAL_DOTATION_VS_PROGRAMME_SCOPE"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "annex4_action_gap_supplemented_by_lfi": true
       }
     },
     {
@@ -1881,13 +1884,16 @@
         "portfolio_allocation_certified": false,
         "shared_section": false,
         "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
-        "action_programme_sums_reconciled": 3,
+        "action_programme_sums_reconciled": 4,
         "action_programmes_total": 4,
-        "actions_individually_identified": 10,
-        "action_numeric_reconciliation_complete": false,
-        "unresolved_action_programme_codes": [
+        "actions_individually_identified": 12,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": [],
+        "lfi_action_complement_path": "docs/references/2026/ministry-reconciliation/LFI_2026_ACTION_COMPLEMENTS_4_PROGRAMMES.json",
+        "lfi_supplemented_action_programme_codes": [
           "22121"
-        ]
+        ],
+        "annex4_source_gap_remains": true
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
@@ -1901,16 +1907,16 @@
         "budget_CP_reallocation_certified": false
       },
       "certification_control_2026": {
-        "numeric_verification_level": "SECTION_PROGRAMMES_BALANCED_ACTION_EXCEPTION",
+        "numeric_verification_level": "SECTION_PROGRAMMES_ACTIONS_BALANCED",
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
         "outstanding_proofs": [
-          "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER",
-          "ANNEX4_ACTIONS_SOURCE_GAP"
+          "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "annex4_action_gap_supplemented_by_lfi": true
       }
     },
     {
