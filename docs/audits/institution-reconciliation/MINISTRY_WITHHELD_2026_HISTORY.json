@@ -1,0 +1,60 @@
+{
+  "fiscal_year": 2026,
+  "warning": "Ne jamais republier les anciennes valeurs de ces neuf portefeuilles sans preuve officielle. Historiques conservés uniquement pour audit.",
+  "entities": [
+    {
+      "id": "gov-001",
+      "previously_reported_fcfa": 73426766299,
+      "current_portfolio_budget_fcfa": null,
+      "readmission_requires": "OFFICIAL_PORTFOLIO_ALLOCATION_DOCUMENT"
+    },
+    {
+      "id": "gov-006",
+      "previously_reported_fcfa": 947962959206,
+      "current_portfolio_budget_fcfa": null,
+      "readmission_requires": "OFFICIAL_PORTFOLIO_ALLOCATION_DOCUMENT"
+    },
+    {
+      "id": "gov-009",
+      "previously_reported_fcfa": 337932332542,
+      "current_portfolio_budget_fcfa": null,
+      "readmission_requires": "OFFICIAL_PORTFOLIO_ALLOCATION_DOCUMENT"
+    },
+    {
+      "id": "gov-011",
+      "previously_reported_fcfa": 504985369765,
+      "current_portfolio_budget_fcfa": null,
+      "readmission_requires": "OFFICIAL_PORTFOLIO_ALLOCATION_DOCUMENT"
+    },
+    {
+      "id": "gov-012",
+      "previously_reported_fcfa": 88949349037,
+      "current_portfolio_budget_fcfa": null,
+      "readmission_requires": "OFFICIAL_PORTFOLIO_ALLOCATION_DOCUMENT"
+    },
+    {
+      "id": "gov-013",
+      "previously_reported_fcfa": 817868452462,
+      "current_portfolio_budget_fcfa": null,
+      "readmission_requires": "OFFICIAL_PORTFOLIO_ALLOCATION_DOCUMENT"
+    },
+    {
+      "id": "gov-014",
+      "previously_reported_fcfa": 131771209724,
+      "current_portfolio_budget_fcfa": null,
+      "readmission_requires": "OFFICIAL_PORTFOLIO_ALLOCATION_DOCUMENT"
+    },
+    {
+      "id": "gov-022",
+      "previously_reported_fcfa": 344706305890,
+      "current_portfolio_budget_fcfa": null,
+      "readmission_requires": "OFFICIAL_PORTFOLIO_ALLOCATION_DOCUMENT"
+    },
+    {
+      "id": "gov-029",
+      "previously_reported_fcfa": 39771854976,
+      "current_portfolio_budget_fcfa": null,
+      "readmission_requires": "OFFICIAL_PORTFOLIO_ALLOCATION_DOCUMENT"
+    }
+  ]
+}

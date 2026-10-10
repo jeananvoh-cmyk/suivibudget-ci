@@ -403,30 +403,6 @@ export const NATIONAL_INSTITUTIONS_EXTRA_LINES: Record<string, BudgetLineItem[]>
       nature: "Biens et services",
       year: 2026
     }
-  ],
-  "inst-cour-supreme": [
-    {
-      libelle: "Rémunérations et traitements des Hauts Magistrats, Présidents de Chambre et Conseillers de la Cour Suprême",
-      montant_fcfa: 3200000000,
-      evolution_pct: 3.0,
-      categorie: "PERSONNEL",
-      sous_categorie_1: "INSTITUTIONS",
-      sous_categorie_2: "COUR SUPREME",
-      sous_categorie_3: "Magistrature Suprême & Greffe",
-      nature: "Personnel",
-      year: 2026
-    },
-    {
-      libelle: "Fonctionnement juridictionnel de la plus haute cour, documentation juridique et relations internationales",
-      montant_fcfa: 1800000000,
-      evolution_pct: 2.5,
-      categorie: "FONCTIONNEMENT",
-      sous_categorie_1: "INSTITUTIONS",
-      sous_categorie_2: "COUR SUPREME",
-      sous_categorie_3: "Activités Juridictionnelles & Greffe",
-      nature: "Biens et services",
-      year: 2026
-    }
   ]
 };
 
@@ -488,7 +464,7 @@ export function getBudgetLinesForEntity(
     if (q.includes('ROIS') || q.includes('CNRCT') || q.includes('TRADITION')) return (budgetLines2026 as any)['Chambre Nationale des Rois et Chefs Traditionnels'] || [];
     if (q.includes('HABG') || q.includes('BONNE GOUVERNANCE')) return NATIONAL_INSTITUTIONS_EXTRA_LINES['inst-habg'];
     if (q.includes('IGE') || q.includes('INSPECTION GENERALE')) return NATIONAL_INSTITUTIONS_EXTRA_LINES['inst-ige'];
-    if (q.includes('SUPREME')) return NATIONAL_INSTITUTIONS_EXTRA_LINES['inst-cour-supreme'];
+    if (q.includes('SUPREME')) return [];
   }
 
   // 4. Communes of Abidjan

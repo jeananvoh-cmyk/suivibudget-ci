@@ -1,0 +1,50 @@
+{
+  "fiscal_year": 2026,
+  "record_type": "PREVIOUSLY_PUBLISHED_UNVERIFIED_AMOUNTS",
+  "warning": "Ces montants historiques etaient affiches sans justificatif 2026 suffisant. Archive d'audit seulement : ne pas reintroduire ces montants dans les donnees publiques.",
+  "total_previous_fcfa": 42150000000,
+  "entities": [
+    {
+      "id": "aai-haca",
+      "previously_reported_fcfa": 4200000000,
+      "source_status": "UNSUPPORTED_IN_2026_RECONCILIATION",
+      "republication_allowed": false
+    },
+    {
+      "id": "aai-caidp",
+      "previously_reported_fcfa": 2150000000,
+      "source_status": "UNSUPPORTED_IN_2026_RECONCILIATION",
+      "republication_allowed": false
+    },
+    {
+      "id": "aai-arcop",
+      "previously_reported_fcfa": 4850000000,
+      "source_status": "UNSUPPORTED_IN_2026_RECONCILIATION",
+      "republication_allowed": false
+    },
+    {
+      "id": "aai-artci",
+      "previously_reported_fcfa": 19000000000,
+      "source_status": "UNSUPPORTED_IN_2026_RECONCILIATION",
+      "republication_allowed": false
+    },
+    {
+      "id": "aai-anare",
+      "previously_reported_fcfa": 5200000000,
+      "source_status": "UNSUPPORTED_IN_2026_RECONCILIATION",
+      "republication_allowed": false
+    },
+    {
+      "id": "aai-cndh",
+      "previously_reported_fcfa": 3100000000,
+      "source_status": "UNSUPPORTED_IN_2026_RECONCILIATION",
+      "republication_allowed": false
+    },
+    {
+      "id": "aai-airp",
+      "previously_reported_fcfa": 3650000000,
+      "source_status": "UNSUPPORTED_IN_2026_RECONCILIATION",
+      "republication_allowed": false
+    }
+  ]
+}

@@ -1,0 +1,253 @@
+{
+  "version": 1,
+  "reference_date": "2026-03-04",
+  "date_verified": "2026-10-10",
+  "decree": "Décret n° 2026-84 du 4 mars 2026 portant attributions des membres du Gouvernement",
+  "annex_official_pdf": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+  "publisher": "Portail officiel du Gouvernement de Côte d'Ivoire (gouv.ci)",
+  "evidence_scope": "ADMINISTRATIVE_TUTELLE_ONLY",
+  "explicit_non_coverage": [
+    "budget_credit_transfers",
+    "appropriation_by_portfolio",
+    "programme_CP_ownership",
+    "post_LFI_2026_reallocation"
+  ],
+  "entries": [
+    {
+      "id": "gov-001",
+      "pdf_page": 2,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-002",
+      "pdf_page": 2,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-003",
+      "pdf_page": 2,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-004",
+      "pdf_page": 2,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-033",
+      "pdf_page": 2,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-005",
+      "pdf_page": 3,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-006",
+      "pdf_page": 3,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-007",
+      "pdf_page": 3,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-008",
+      "pdf_page": 4,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-009",
+      "pdf_page": 4,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-035",
+      "pdf_page": 4,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-010",
+      "pdf_page": 5,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-032",
+      "pdf_page": 5,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-011",
+      "pdf_page": 5,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-012",
+      "pdf_page": 5,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-013",
+      "pdf_page": 5,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-014",
+      "pdf_page": 6,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-015",
+      "pdf_page": 6,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-016",
+      "pdf_page": 6,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-017",
+      "pdf_page": 6,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-018",
+      "pdf_page": 7,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-019",
+      "pdf_page": 7,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-020",
+      "pdf_page": 7,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-021",
+      "pdf_page": 7,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-022",
+      "pdf_page": 8,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-023",
+      "pdf_page": 8,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-024",
+      "pdf_page": 9,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-034",
+      "pdf_page": 9,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-025",
+      "pdf_page": 9,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-026",
+      "pdf_page": 9,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-027",
+      "pdf_page": 10,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-028",
+      "pdf_page": 10,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-029",
+      "pdf_page": 10,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-030",
+      "pdf_page": 11,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    },
+    {
+      "id": "gov-031",
+      "pdf_page": 11,
+      "verified_type": "LEGAL_ADMINISTRATIVE_TUTELLE_STRUCTURE_NOT_BUDGET_ALLOCATION"
+    }
+  ],
+  "composite_cases": [
+    {
+      "ids": [
+        "gov-009",
+        "gov-035"
+      ],
+      "pdf_page": 4,
+      "points": [
+        "Ministère de l'Agriculture: ANADER, AFOR, FIRCA, CNRA et autres structures",
+        "Ministre délégué chargé des Productions vivrières : Aderiz (Productions vivrières)"
+      ],
+      "budget_conclusion": "ONE_SHARED_LFI_SECTION_229_NO_SEPARATE_DELEGATED_CP_PROVEN"
+    },
+    {
+      "ids": [
+        "gov-010",
+        "gov-032"
+      ],
+      "pdf_page": 5,
+      "points": [
+        "Ministre des Transports et des Affaires maritimes : SOTRA, ANAC, OSER et autres",
+        "Ministre délégué chargé des Affaires maritimes : Académie Régionale des Sciences et Techniques de la Mer (ARSTM)"
+      ],
+      "budget_conclusion": "TWO_ADMINISTRATIVE_SCOPE_RECORDS_NO_AUTOMATIC_SUMMATION_340_440"
+    },
+    {
+      "ids": [
+        "gov-023",
+        "gov-034",
+        "gov-024"
+      ],
+      "pdf_page": 9,
+      "points": [
+        "Ministre délégué chargé de l'Enseignement technique : IPNETP, centres de formation professionnelle",
+        "Ministère de l'Education nationale : CAFOP, COGES et autres"
+      ],
+      "budget_conclusion": "SHARED_TECHNICAL_EDUCATION_RESPONSIBILITIES_DO_NOT_CERTIFY_334_CREDIT_SPLIT"
+    },
+    {
+      "ids": [
+        "gov-007",
+        "gov-021"
+      ],
+      "pdf_page": 3,
+      "points": [
+        "Ministre de l'Économie, des Finances et du Budget : tutelle de BNI, BHCI, CDC-CI et autres",
+        "Ministre du Plan et du Développement : ANStat, FNDS, ENSEA (annexe PDF p.7)"
+      ],
+      "budget_conclusion": "ADMINISTRATIVE_SCOPE_CONFIRMED_2026_LFI_SECTION_REASSIGNMENT_NOT_PROVEN"
+    },
+    {
+      "ids": [
+        "gov-001"
+      ],
+      "pdf_page": 2,
+      "points": [
+        "Premier Ministre : CICG, ST-C2D, ST PCD et autres structures rattachées"
+      ],
+      "budget_conclusion": "NO_PROOF_ALLOCATION_OF_ALL_SECTION_108_CP_TO_NEW_PORTFOLIO"
+    }
+  ]
+}

@@ -1,9 +1,11 @@
+import { BudgetDataDownloads } from '../../components/institutions/BudgetDataDownloads';
 import React, { useState } from 'react';
 import { ArrowLeft, Search, Landmark, ArrowRight, FileText, Globe, ExternalLink, Info, ShieldCheck } from 'lucide-react';
 import { NATIONAL_INSTITUTIONS_DATA } from '../../data/nationalBudgetData';
 import { dataStore } from '../../services/dataStore';
 import { Institution, BudgetProject } from '../../types';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
+import { assessInstitutionBudget, resolveInstitutionFinancialView } from '../../utils/institutionBudgetHelper';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
 
@@ -106,6 +108,7 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
 
   return (
     <div className="space-y-10 animate-in fade-in duration-300">
+      <BudgetDataDownloads scope="INSTITUTION" />
       
       {/* Header */}
       <div className="text-center space-y-2">
@@ -241,51 +244,58 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
             </div>
 
             {/* Right / Bottom: Presidential Budget Block & CTA */}
-            <div className="w-full lg:w-80 bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/15 space-y-3.5 flex-shrink-0 shadow-lg text-white">
-              <div className="space-y-1">
-                <div className="text-[11px] font-black uppercase text-amber-300 tracking-wider">
-                  Dotation Budgétaire Présidence
-                </div>
-                <div className="text-lg font-black text-white break-words">
-                  {formatFCFA(presidence.total_budget_fcfa)}
-                </div>
-                <div className="text-xs text-amber-200 font-bold break-words">
-                  ({formatAmountInWords(presidence.total_budget_fcfa)})
-                </div>
-              </div>
-
-              {/* Budget bar */}
-              {presidence.total_budget_fcfa != null && presidence.total_budget_fcfa > 0 && presidence.budget_functioning_fcfa != null && presidence.budget_investment_fcfa != null ? (
-                <div className="space-y-1.5">
-                  <div className="w-full bg-slate-900/50 rounded-full h-2 overflow-hidden flex">
-                    <div className="bg-sky-400 h-full" style={{ width: `${Math.round((presidence.budget_functioning_fcfa / presidence.total_budget_fcfa) * 100)}%` }} />
-                    <div className="bg-emerald-400 h-full" style={{ width: `${Math.round((presidence.budget_investment_fcfa / presidence.total_budget_fcfa) * 100)}%` }} />
+            {(() => {
+              const presAssessment = assessInstitutionBudget(presidence);
+              return (
+                <div className="w-full lg:w-80 bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/15 space-y-3.5 flex-shrink-0 shadow-lg text-white">
+                  <div className="space-y-1">
+                    <div className="text-[11px] font-black uppercase text-amber-300 tracking-wider">
+                      Dotation Budgétaire Présidence
+                    </div>
+                    <div className="text-lg font-black text-white break-words">
+                      {presAssessment.totalFormatted}
+                    </div>
+                    {presAssessment.totalWords && (
+                      <div className="text-xs text-amber-200 font-bold break-words">
+                        ({presAssessment.totalWords})
+                      </div>
+                    )}
                   </div>
-                  <div className="flex justify-between text-[10px] font-bold text-sky-100">
-                    <span className="text-sky-300">Fonct. : {Math.round((presidence.budget_functioning_fcfa / presidence.total_budget_fcfa) * 100)}% ({formatAmountInWords(presidence.budget_functioning_fcfa)})</span>
-                    <span className="text-emerald-300">Invest. : {Math.round((presidence.budget_investment_fcfa / presidence.total_budget_fcfa) * 100)}% ({formatAmountInWords(presidence.budget_investment_fcfa)})</span>
+
+                  {/* Budget bar */}
+                  {presAssessment.hasBreakdown && presAssessment.functioningPct !== null && presAssessment.investmentPct !== null ? (
+                    <div className="space-y-1.5">
+                      <div className="w-full bg-slate-900/50 rounded-full h-2 overflow-hidden flex">
+                        <div className="bg-sky-400 h-full" style={{ width: `${presAssessment.functioningPct}%` }} />
+                        <div className="bg-emerald-400 h-full" style={{ width: `${presAssessment.investmentPct}%` }} />
+                      </div>
+                      <div className="flex justify-between text-[10px] font-bold text-sky-100">
+                        <span className="text-sky-300">Fonct. : {presAssessment.functioningPct}% ({formatAmountInWords(presidence.budget_functioning_fcfa)})</span>
+                        <span className="text-emerald-300">Invest. : {presAssessment.investmentPct}% ({formatAmountInWords(presidence.budget_investment_fcfa)})</span>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="pt-2 flex flex-col gap-2">
+                    <button
+                      onClick={() => setSelectedInstForDetail(presidence)}
+                      className="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                    >
+                      <Info className="w-3.5 h-3.5" />
+                      <span>Consulter la fiche complète</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setSelectedInstForDoc(presidence)}
+                      className="w-full py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-white/20 cursor-pointer"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-amber-300" />
+                      <span>Demande de Documents Publics</span>
+                    </button>
                   </div>
                 </div>
-              ) : null}
-
-              <div className="pt-2 flex flex-col gap-2">
-                <button
-                  onClick={() => setSelectedInstForDetail(presidence)}
-                  className="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
-                >
-                  <Info className="w-3.5 h-3.5" />
-                  <span>Consulter la fiche complète</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => setSelectedInstForDoc(presidence)}
-                  className="w-full py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-white/20 cursor-pointer"
-                >
-                  <FileText className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Demande de Documents Publics</span>
-                </button>
-              </div>
-            </div>
+              );
+            })()}
 
           </div>
         </div>
@@ -304,10 +314,7 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {otherInstitutions.map((inst: any) => {
-            const functioningPct = inst.total_budget_fcfa > 0 
-              ? Math.round((inst.budget_functioning_fcfa / inst.total_budget_fcfa) * 100) 
-              : 0;
-            const investmentPct = inst.total_budget_fcfa > 0 ? (100 - functioningPct) : 0;
+            const assessment = assessInstitutionBudget(inst);
 
             return (
               <div 
@@ -340,26 +347,56 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
                   </div>
 
                   {/* Budget Section */}
-                  <div className="space-y-2 pt-2">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-500 font-bold uppercase">Dotation Budgétaire</span>
-                      <span className="font-black text-slate-900 whitespace-nowrap">
-                        {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold break-words">({formatAmountInWords(inst.total_budget_fcfa)})</span>
-                      </span>
+                  {assessment.status === 'AVAILABLE' ? (
+                    <div className="space-y-2 pt-2">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-slate-500 font-bold uppercase">Dotation Budgétaire</span>
+                        <span className="font-black text-slate-900 whitespace-nowrap">
+                          {assessment.totalFormatted}{' '}
+                          {assessment.totalWords && (
+                            <span className="text-brand-blue font-bold break-words">({assessment.totalWords})</span>
+                          )}
+                        </span>
+                      </div>
+                      {assessment.hasBreakdown && assessment.functioningPct !== null && assessment.investmentPct !== null ? (
+                        <>
+                          <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden flex">
+                            <div className="bg-brand-blue h-full" style={{ width: `${assessment.functioningPct}%` }} />
+                            <div className="bg-emerald-500 h-full" style={{ width: `${assessment.investmentPct}%` }} />
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-semibold text-slate-600 gap-1 pt-1">
+                            <span className="text-brand-blue">
+                              Fonct. : <strong className="font-bold">{assessment.functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
+                            </span>
+                            <span className="text-emerald-700">
+                              Invest. : <strong className="font-bold">{assessment.investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
+                            </span>
+                          </div>
+                        </>
+                      ) : null}
                     </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden flex">
-                      <div className="bg-brand-blue h-full" style={{ width: `${functioningPct}%` }} />
-                      <div className="bg-emerald-500 h-full" style={{ width: `${investmentPct}%` }} />
+                  ) : (
+                    <div className="space-y-2 pt-2">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-slate-500 font-bold uppercase">Dotation Budgétaire</span>
+                        <span className="font-bold text-slate-700 text-xs italic">
+                          {assessment.totalFormatted}
+                        </span>
+                      </div>
+                      <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${assessment.badgeClass}`}>
+                            {assessment.badgeText}
+                          </span>
+                        </div>
+                        {assessment.noticeText && (
+                          <p className="text-[11px] text-slate-600 leading-snug">
+                            {assessment.noticeText}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-semibold text-slate-600 gap-1 pt-1">
-                      <span className="text-brand-blue">
-                        Fonct. : <strong className="font-bold">{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
-                      </span>
-                      <span className="text-emerald-700">
-                        Invest. : <strong className="font-bold">{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
-                      </span>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Card Footer : Harmonized with MinistriesPage */}

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Institution, BudgetProject } from '../../types';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
+import { assessInstitutionBudget } from '../../utils/institutionBudgetHelper';
 import { matchesSmartSearch, normalizeSearchText } from '../../utils/searchHelpers';
 import { REGULATORY_AUTHORITIES_DATA } from '../../data/regulatoryAuthoritiesData';
 import { dataStore } from '../../services/dataStore';
@@ -96,8 +97,14 @@ export const RegulatoryAuthoritiesPage: React.FC<RegulatoryAuthoritiesPageProps>
         : (item.leader_photo_url || fromStore.leader_photo_url);
 
       return { 
-        ...item, 
+        ...item,
         ...fromStore,
+        // Les anciennes valeurs du store ne constituent pas une preuve documentaire.
+        // Garder les donnees biographiques modifiables, jamais le budget de reference.
+        total_budget_fcfa: item.total_budget_fcfa,
+        budget_functioning_fcfa: item.budget_functioning_fcfa,
+        budget_investment_fcfa: item.budget_investment_fcfa,
+        budget_not_published: item.budget_not_published,
         leader_photo_url
       };
     });
@@ -216,43 +223,50 @@ export const RegulatoryAuthoritiesPage: React.FC<RegulatoryAuthoritiesPageProps>
               </p>
 
               {/* Budget Block */}
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2">
-                <div className="flex items-center justify-between text-[10px] font-black uppercase text-slate-400">
-                  <span>Dotation Budgétaire</span>
-                  <span className="text-slate-600 font-bold">2026</span>
-                </div>
-                
-                <div>
-                  <div className="text-sm font-black text-slate-900 break-words">
-                    {formatFCFA(item.total_budget_fcfa)}
-                  </div>
-                  <div className="text-[11px] text-slate-500 font-semibold break-words">
-                    ({formatAmountInWords(item.total_budget_fcfa)})
-                  </div>
-                </div>
-
-                {/* Operating vs Investment mini-bar */}
-                {item.total_budget_fcfa != null && item.total_budget_fcfa > 0 && item.budget_functioning_fcfa != null && item.budget_investment_fcfa != null && (
-                  <div className="space-y-1 pt-1">
-                    <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden flex">
-                      <div 
-                        className="bg-brand-blue h-full" 
-                        style={{ width: `${Math.round((item.budget_functioning_fcfa / item.total_budget_fcfa) * 100)}%` }} 
-                      />
-                      <div 
-                        className="bg-emerald-500 h-full" 
-                        style={{ width: `${Math.round((item.budget_investment_fcfa / item.total_budget_fcfa) * 100)}%` }} 
-                      />
+              {(() => {
+                const assessment = assessInstitutionBudget(item);
+                return (
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2">
+                    <div className="flex items-center justify-between text-[10px] font-black uppercase text-slate-400">
+                      <span>Dotation Budgétaire</span>
+                      <span className="text-slate-600 font-bold">2026</span>
                     </div>
-                    <div className="flex justify-between text-[9px] font-bold text-slate-500">
-                      <span>Fonct. {Math.round((item.budget_functioning_fcfa / item.total_budget_fcfa) * 100)}%</span>
-                      {item.budget_investment_fcfa > 0 && (
-                        <span>Invest. {Math.round((item.budget_investment_fcfa / item.total_budget_fcfa) * 100)}%</span>
+                    
+                    <div>
+                      <div className="text-sm font-black text-slate-900 break-words">
+                        {assessment.totalFormatted}
+                      </div>
+                      {assessment.totalWords && (
+                        <div className="text-[11px] text-slate-500 font-semibold break-words">
+                          ({assessment.totalWords})
+                        </div>
                       )}
                     </div>
+
+                    {/* Operating vs Investment mini-bar */}
+                    {assessment.hasBreakdown && assessment.functioningPct !== null && assessment.investmentPct !== null && (
+                      <div className="space-y-1 pt-1">
+                        <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden flex">
+                          <div 
+                            className="bg-brand-blue h-full" 
+                            style={{ width: `${assessment.functioningPct}%` }} 
+                          />
+                          <div 
+                            className="bg-emerald-500 h-full" 
+                            style={{ width: `${assessment.investmentPct}%` }} 
+                          />
+                        </div>
+                        <div className="flex justify-between text-[9px] font-bold text-slate-500">
+                          <span>Fonct. {assessment.functioningPct}%</span>
+                          {assessment.investmentPct > 0 && (
+                            <span>Invest. {assessment.investmentPct}%</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                );
+              })()}
 
             </div>
 

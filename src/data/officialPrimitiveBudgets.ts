@@ -1,18 +1,18 @@
 import { Institution, PrimitiveBudgetInfo } from '../types';
 
 /**
- * Référentiel National des Budgets Primitifs Officiels 2026
- * Validé pour 46 Collectivités Territoriales (30 Communes et 16 Conseils Régionaux) de Côte d'Ivoire.
- * Extrait et certifié à partir du Référentiel des Budgets Primitifs 2026 (Referentiel_232).
+ * Référentiel de budgets primitifs locaux rapportés pour 2026
+ * 46 publications repérées : 30 Communes et 16 Conseils Régionaux de Côte d'Ivoire.
+ * Montants issus de publications référencées : vérifier les délibérations originales avant toute certification.
  * 
- * Sources certifiées :
+ * Sources documentaires signalées (souvent secondaires) :
  * - Délibérations officielles des Conseils Municipaux et Régionaux
  * - Agence Ivoirienne de Presse (AIP)
  * - Fraternité Matin (Quotidiens officiels & comptes-rendus)
  * - Abidjan.net / Le Nouveau Réveil (ex: Mairie de Cocody)
  * - KOACI (États d'exécution & sessions budgétaires)
  * 
- * Ce référentiel permet la « Double Lecture Certifiée » :
+ * Ce référentiel prépare deux lectures qu'il faut conserver distinctes :
  * 1. Dotation de l'État (Loi de Finances / DGBF : DGF + DGE)
  * 2. Budget Primitif Municipal/Régional Propre (Ressources propres + fiscalité locale partagée DGI)
  */
@@ -59,8 +59,8 @@ export const OFFICIAL_PRIMITIVE_BUDGETS: Record<string, PrimitiveBudgetInfo> = {
   // Bangolo (Commune)
   'inst-com-bangolo': {
     total_voted_fcfa: 1586000000,
-    investment_voted_fcfa: 1159000000,
-    functioning_voted_fcfa: 427185000,
+    investment_voted_fcfa: null,
+    functioning_voted_fcfa: null,
     voted_date: "25 janvier 2026",
     source: "Mairie de Bangolo & AIP",
     source_url: "https://www.aip.ci/cote-divoire-aip-un-budget-de-plus-dun-milliard-fcfa-adopte-pour-renforcer-la-securite-et-les-infrastructures-a-bangolo/",
@@ -241,8 +241,8 @@ export const OFFICIAL_PRIMITIVE_BUDGETS: Record<string, PrimitiveBudgetInfo> = {
   // Katiola (Commune)
   'inst-com-katiola': {
     total_voted_fcfa: 1684000000,
-    investment_voted_fcfa: 1267000000,
-    functioning_voted_fcfa: 419903000,
+    investment_voted_fcfa: null,
+    functioning_voted_fcfa: null,
     voted_date: "27 novembre 2025",
     source: "Mairie de Katiola & AIP",
     source_url: "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-2026-du-conseil-municipal-de-katiola-progresse-de-7694/",
@@ -267,8 +267,8 @@ export const OFFICIAL_PRIMITIVE_BUDGETS: Record<string, PrimitiveBudgetInfo> = {
   // Madinani (Commune)
   'inst-com-madinani': {
     total_voted_fcfa: 1073000000,
-    investment_voted_fcfa: 882219000,
-    functioning_voted_fcfa: 191432000,
+    investment_voted_fcfa: null,
+    functioning_voted_fcfa: null,
     voted_date: "20 novembre 2025",
     source: "Mairie de Madinani & AIP",
     source_url: "https://www.aip.ci/cote-divoire-aip-le-budget-municipal-2026-de-madinani-en-hausse-de-plus-de-437-millions-de-f-cfa/",
@@ -280,8 +280,8 @@ export const OFFICIAL_PRIMITIVE_BUDGETS: Record<string, PrimitiveBudgetInfo> = {
   // M'Bahiakro (Commune)
   'inst-com-m-bahiakro': {
     total_voted_fcfa: 1165711000,
-    investment_voted_fcfa: 899231000,
-    functioning_voted_fcfa: 211417000,
+    investment_voted_fcfa: null,
+    functioning_voted_fcfa: null,
     voted_date: "7 novembre 2025",
     source: "Mairie de M'bahiakro & AIP",
     source_url: "https://www.aip.ci/cote-divoire-aip-un-budget-primitif-de-plus-dun-milliard-adopte-pour-booster-les-projets-developpement-de-la-commune-de-mbahiakro/",
@@ -384,8 +384,8 @@ export const OFFICIAL_PRIMITIVE_BUDGETS: Record<string, PrimitiveBudgetInfo> = {
   // Vavoua (Commune)
   'inst-com-vavoua': {
     total_voted_fcfa: 1689000000,
-    investment_voted_fcfa: 1156500000,
-    functioning_voted_fcfa: 532600000,
+    investment_voted_fcfa: null,
+    functioning_voted_fcfa: null,
     voted_date: "16 novembre 2025",
     source: "Mairie de Vavoua & AIP",
     source_url: "https://www.aip.ci/cote-divoire-aip-budget-primitif-2026-plus-de-16-milliards-f-cfa-adoptes-par-le-conseil-municipal-de-vavoua/",
@@ -423,8 +423,8 @@ export const OFFICIAL_PRIMITIVE_BUDGETS: Record<string, PrimitiveBudgetInfo> = {
   // Bagoué (Conseil régional)
   'inst-reg-conseil-regional-de-la-bagoue': {
     total_voted_fcfa: 8869000000,
-    investment_voted_fcfa: 6995000000,
-    functioning_voted_fcfa: 1800000000,
+    investment_voted_fcfa: null,
+    functioning_voted_fcfa: null,
     voted_date: "26 novembre 2025",
     source: "Conseil Régional de la Bagoué & AIP",
     source_url: "https://www.aip.ci/cote-divoire-aip-le-conseil-regional-de-la-bagoue-adopte-un-budget-primitif-2026-de-plus-de-886-milliards-fcfa/",
@@ -436,8 +436,8 @@ export const OFFICIAL_PRIMITIVE_BUDGETS: Record<string, PrimitiveBudgetInfo> = {
   // Béré (Conseil régional)
   'inst-reg-conseil-regional-du-bere': {
     total_voted_fcfa: 5428716000,
-    investment_voted_fcfa: 4367779000,
-    functioning_voted_fcfa: 1060935000,
+    investment_voted_fcfa: null,
+    functioning_voted_fcfa: null,
     voted_date: "1 mars 2026",
     source: "Conseil Régional du Béré & AIP",
     source_url: "https://www.aip.ci/cote-divoire-aip-le-conseil-regional-du-bere-adopte-un-budget-2026-de-plus-de-54-milliards-fcfa/",
@@ -501,8 +501,8 @@ export const OFFICIAL_PRIMITIVE_BUDGETS: Record<string, PrimitiveBudgetInfo> = {
   // Haut-Sassandra (Conseil régional)
   'inst-reg-conseil-regional-du-haut-sassandra': {
     total_voted_fcfa: 9290000000,
-    investment_voted_fcfa: 7810000000,
-    functioning_voted_fcfa: 1490000000,
+    investment_voted_fcfa: null,
+    functioning_voted_fcfa: null,
     voted_date: "15 décembre 2025",
     source: "Conseil Régional du Haut Sassandra & AIP",
     source_url: "https://www.aip.ci/cote-divoire-aip-le-budget-primitif-du-conseil-regional-du-haut-sassandra-en-hausse-de-pres-de-25-en-2026/",
@@ -553,8 +553,8 @@ export const OFFICIAL_PRIMITIVE_BUDGETS: Record<string, PrimitiveBudgetInfo> = {
   // Moronou (Conseil régional)
   'inst-reg-conseil-regional-du-moronou': {
     total_voted_fcfa: 7571020000,
-    investment_voted_fcfa: 6379454000,
-    functioning_voted_fcfa: 1191567000,
+    investment_voted_fcfa: null,
+    functioning_voted_fcfa: null,
     voted_date: "7 mars 2026",
     source: "Conseil Régional du Moronou & AIP",
     source_url: "https://www.aip.ci/cote-divoire-aip-le-conseil-regional-du-moronou-prevoit-123-operations-dinvestissement-dans-son-budget-2026/",
@@ -624,7 +624,7 @@ const normalizeStr = (s: string) => (s || '')
   .replace(/[^a-z0-9]/g, '');
 
 /**
- * Enrichit les collectivités (communes, régions et districts) avec les budgets primitifs officiels votés
+ * Enrichit les collectivités (communes, régions et districts) avec les budgets primitifs rapportés par source
  */
 export function enrichWithPrimitiveBudgets(entities: Institution[]): Institution[] {
   return entities.map(entity => {

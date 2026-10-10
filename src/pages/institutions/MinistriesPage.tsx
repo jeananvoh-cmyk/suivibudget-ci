@@ -1,3 +1,4 @@
+import { BudgetDataDownloads } from '../../components/institutions/BudgetDataDownloads';
 import React, { useState } from 'react';
 import { ArrowLeft, Search, ChevronDown, ArrowRight, Globe, FileText } from 'lucide-react';
 import { GOVERNMENT_OFFICIALS, OfficialLeader } from '../../data/governmentData';
@@ -7,6 +8,9 @@ import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
 import { isPilotMinistry } from '../../data/ministryPilotReferential';
+import { selectMinistryBudgetAmount } from '../../utils/ministryBudgetSelection';
+import { WITHHELD_MINISTRY_PORTFOLIO_IDS } from '../../data/ministryScopeExceptions';
+import legalCP from '../../../docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json';
 
 const getInitials = (name: string) => {
   const clean = name.replace(/^(M\.|Mme|Prof\.|Gal\.|Dr)\s+/i, '').trim();
@@ -82,7 +86,11 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
         photo_url: fromStore.leader_photo_url || official.photo_url,
         website_url: fromStore.website || official.website_url,
         facebook_url: fromStore.facebook_url || official.facebook_url,
-        budget_fcfa: fromStore.total_budget_fcfa || official.budget_fcfa,
+        // A present store row is authoritative for display, including an explicit
+        // null (unknown) or zero. Never revive a static budget as fallback.
+        budget_fcfa: WITHHELD_MINISTRY_PORTFOLIO_IDS.has(official.id)
+          ? undefined
+          : selectMinistryBudgetAmount(official.budget_fcfa, true, fromStore.total_budget_fcfa),
       };
     });
   }, [institutions, storeTick]);
@@ -135,9 +143,47 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
       budget_functioning_fcfa: null,
       budget_investment_fcfa: null,
       total_budget_fcfa: official.budget_fcfa ?? null,
-      budget_not_published: !official.budget_fcfa
+      budget_not_published: official.budget_fcfa == null
     };
     setSelectedInstForDetail(instObj);
+  };
+
+  // Les crédits votés de la section sont disponibles pour les 35 portefeuilles.
+  // Une section de la LFI n'est jamais présentée comme une dotation propre
+  // certifiée du ministre nommé après l'adoption de la loi.
+  const renderOfficialBudget = (official: OfficialLeader, textClass = 'text-[11px]') => {
+    const section = legalCP.rows.find(row => row.portfolio_id === official.id);
+    if (!section) {
+      return <p className={`${textClass} text-slate-600`}>Crédits LFI 2026 : non renseignés</p>;
+    }
+    const shared = section.section_shared_with_other_portfolio;
+    return (
+      <div className={`${textClass} pt-1 space-y-1 min-w-0`}>
+        <p className="font-bold text-slate-700">
+          Section budgétaire {section.section_code} — crédits votés 2026 (CP)
+        </p>
+        <p className="text-brand-blue font-black text-sm whitespace-normal break-words">
+          {formatFCFA(section.voted_section_cp_2026_fcfa)}
+        </p>
+        <p className="text-slate-600 text-[10px] leading-relaxed break-words">
+          {formatAmountInWords(section.voted_section_cp_2026_fcfa)}
+        </p>
+        <p className="text-slate-500 text-[10px] leading-snug">
+          {shared
+            ? 'Section partagée : montant affiché sur plusieurs fiches, à comptabiliser une seule fois.'
+            : 'Crédit voté pour la section LFI ; affectation au portefeuille actuel non établie.'}
+        </p>
+        <a
+          href={`${legalCP.source_pdf_url}#page=${section.official_lfi_pdf_page}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={event => event.stopPropagation()}
+          className="inline-block text-[10px] underline text-brand-blue hover:text-slate-900"
+        >
+          Lire la LFI 2026 — art. {section.legal_article}, PDF p. {section.official_lfi_pdf_page}
+        </a>
+      </div>
+    );
   };
 
   const renderCardFooter = (official: OfficialLeader) => (
@@ -213,6 +259,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
 
   return (
     <div className="space-y-10 animate-in fade-in duration-300">
+      <BudgetDataDownloads scope="MINISTERE" />
       
       {/* Header Banner */}
       <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm flex flex-col md:flex-row items-center gap-6">
@@ -325,16 +372,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                       {premierMinistre.name}
                     </h3>
                     <p className="text-xs text-slate-500 font-medium">{premierMinistre.department_ministry}</p>
-                    <div className="text-xs font-black text-slate-800 pt-0.5">
-                      Budget : {premierMinistre.budget_fcfa ? (
-                        <>
-                          <span className="text-brand-blue">{formatFCFA(premierMinistre.budget_fcfa)}</span>{' '}
-                          <span className="text-slate-500 font-bold">({formatAmountInWords(premierMinistre.budget_fcfa)})</span>
-                        </>
-                      ) : (
-                        <span className="text-slate-400 font-semibold italic">Montant à confirmer</span>
-                      )}
-                    </div>
+                    {renderOfficialBudget(premierMinistre, 'text-xs')}
                   </div>
                 </div>
               </div>
@@ -363,16 +401,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                       {vicePremierMinistre.name}
                     </h3>
                     <p className="text-xs text-slate-500 font-medium">{vicePremierMinistre.role_title}</p>
-                    <div className="text-xs font-black text-slate-800 pt-0.5">
-                      Budget : {vicePremierMinistre.budget_fcfa ? (
-                        <>
-                          <span className="text-brand-blue">{formatFCFA(vicePremierMinistre.budget_fcfa)}</span>{' '}
-                          <span className="text-slate-500 font-bold">({formatAmountInWords(vicePremierMinistre.budget_fcfa)})</span>
-                        </>
-                      ) : (
-                        <span className="text-slate-400 font-semibold italic">Montant à confirmer</span>
-                      )}
-                    </div>
+                    {renderOfficialBudget(vicePremierMinistre, 'text-xs')}
                   </div>
                 </div>
               </div>
@@ -415,15 +444,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                         {official.name}
                       </h3>
                       <p className="text-[11px] text-slate-500 line-clamp-2 leading-tight">{official.department_ministry}</p>
-                      <div className="text-[11px] font-bold text-slate-800 pt-0.5 whitespace-nowrap">
-                        Budget : {official.budget_fcfa ? (
-                          <>
-                            <span className="text-brand-blue">{formatFCFA(official.budget_fcfa)}</span> <span className="text-slate-500 font-semibold text-[10px] break-words">({formatAmountInWords(official.budget_fcfa)})</span>
-                          </>
-                        ) : (
-                          <span className="text-slate-400 font-semibold italic text-[10px]">Montant à confirmer</span>
-                        )}
-                      </div>
+                      {renderOfficialBudget(official)}
                     </div>
                   </div>
                 </div>
@@ -473,15 +494,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                       {official.name}
                     </h3>
                     <p className="text-[11px] text-slate-600 font-medium line-clamp-2 leading-tight">{official.department_ministry}</p>
-                    <div className="text-[11px] font-bold text-slate-800 pt-0.5 whitespace-nowrap">
-                      Budget : {official.budget_fcfa ? (
-                        <>
-                          <span className="text-brand-blue">{formatFCFA(official.budget_fcfa)}</span> <span className="text-slate-500 font-semibold text-[10px] break-words">({formatAmountInWords(official.budget_fcfa)})</span>
-                        </>
-                      ) : (
-                        <span className="text-slate-400 font-semibold italic text-[10px]">Montant à confirmer</span>
-                      )}
-                    </div>
+                    {renderOfficialBudget(official)}
                   </div>
                 </div>
               </div>

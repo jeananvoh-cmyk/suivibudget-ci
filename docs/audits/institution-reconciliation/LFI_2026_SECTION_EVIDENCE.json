@@ -1,0 +1,396 @@
+{
+  "fiscal_year": 2026,
+  "source_title": "Loi n°2025-987 - Tableau recapitulatif des credits par section et programme",
+  "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+  "pdf_sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+  "pdf_page_indexing": "one_based",
+  "recap_document_page_formula": "pdf_page - 44 (pages internes 1-10 du tableau)",
+  "scope_warning": "Les montants de programmes internes de section 103 ne sont pas additifs au total de la section. Les codes ministeriels identifient des sections et non necessairement les portefeuilles administratifs 2026.",
+  "national": [
+    {
+      "id": "inst-presidence",
+      "section_code": "103",
+      "pdf_page": 45,
+      "doc_page": 1,
+      "amount_fcfa": 193633705615,
+      "record_kind": "SECTION"
+    },
+    {
+      "id": "inst-assnat",
+      "section_code": "101",
+      "pdf_page": 45,
+      "doc_page": 1,
+      "amount_fcfa": 38578972451,
+      "record_kind": "SECTION"
+    },
+    {
+      "id": "inst-senat",
+      "section_code": "102",
+      "pdf_page": 45,
+      "doc_page": 1,
+      "amount_fcfa": 14665806742,
+      "record_kind": "SECTION"
+    },
+    {
+      "id": "inst-conseil-const",
+      "section_code": "106",
+      "pdf_page": 45,
+      "doc_page": 1,
+      "amount_fcfa": 3860437235,
+      "record_kind": "SECTION"
+    },
+    {
+      "id": "inst-cesec",
+      "section_code": "105",
+      "pdf_page": 45,
+      "doc_page": 1,
+      "amount_fcfa": 8069692846,
+      "record_kind": "SECTION"
+    },
+    {
+      "id": "inst-cour-comptes",
+      "section_code": "115",
+      "pdf_page": 46,
+      "doc_page": 2,
+      "amount_fcfa": 8851161351,
+      "record_kind": "SECTION"
+    },
+    {
+      "id": "inst-chancellerie",
+      "section_code": "107",
+      "pdf_page": 45,
+      "doc_page": 1,
+      "amount_fcfa": 3743870172,
+      "record_kind": "SECTION"
+    },
+    {
+      "id": "inst-mediateur",
+      "section_code": "109",
+      "pdf_page": 45,
+      "doc_page": 1,
+      "amount_fcfa": 8285468221,
+      "record_kind": "SECTION"
+    },
+    {
+      "id": "inst-habg",
+      "section_code": "103",
+      "pdf_page": 45,
+      "doc_page": 1,
+      "amount_fcfa": 5552174916,
+      "record_kind": "INTERNAL_PROGRAM",
+      "program_code": "13004",
+      "parent_section_code": "103",
+      "parent_section_amount_fcfa": 193633705615
+    },
+    {
+      "id": "inst-cnrct",
+      "section_code": "111",
+      "pdf_page": 46,
+      "doc_page": 2,
+      "amount_fcfa": 5794171874,
+      "record_kind": "SECTION"
+    },
+    {
+      "id": "inst-conseil-etat",
+      "section_code": "118",
+      "pdf_page": 46,
+      "doc_page": 2,
+      "amount_fcfa": 5164531081,
+      "record_kind": "SECTION"
+    },
+    {
+      "id": "inst-cour-cassation",
+      "section_code": "114",
+      "pdf_page": 46,
+      "doc_page": 2,
+      "amount_fcfa": 7931309608,
+      "record_kind": "SECTION"
+    },
+    {
+      "id": "inst-ige",
+      "section_code": "103",
+      "pdf_page": 45,
+      "doc_page": 1,
+      "amount_fcfa": 9872577575,
+      "record_kind": "INTERNAL_PROGRAM",
+      "program_code": "13003",
+      "parent_section_code": "103",
+      "parent_section_amount_fcfa": 193633705615
+    }
+  ],
+  "ministries": [
+    {
+      "id": "gov-001",
+      "section_code": "108",
+      "pdf_page": 45,
+      "doc_page": 1,
+      "amount_fcfa": 71326766299,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-002",
+      "section_code": "226",
+      "pdf_page": 46,
+      "doc_page": 2,
+      "amount_fcfa": 481041827995,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-003",
+      "section_code": "237",
+      "pdf_page": 47,
+      "doc_page": 3,
+      "amount_fcfa": 45121940916,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-004",
+      "section_code": "321",
+      "pdf_page": 47,
+      "doc_page": 3,
+      "amount_fcfa": 146728395147,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-005",
+      "section_code": "325",
+      "pdf_page": 48,
+      "doc_page": 4,
+      "amount_fcfa": 129151307791,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-006",
+      "section_code": "323",
+      "pdf_page": 48,
+      "doc_page": 4,
+      "amount_fcfa": 945963329452,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-007",
+      "section_code": "322",
+      "pdf_page": 46,
+      "doc_page": 2,
+      "amount_fcfa": 8699982915992,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-008",
+      "section_code": "348",
+      "pdf_page": 51,
+      "doc_page": 7,
+      "amount_fcfa": 706060209015,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-009",
+      "section_code": "229",
+      "pdf_page": 47,
+      "doc_page": 3,
+      "amount_fcfa": 333878089526,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-010",
+      "section_code": "340",
+      "pdf_page": 50,
+      "doc_page": 6,
+      "amount_fcfa": 307769615082,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-011",
+      "section_code": "366",
+      "pdf_page": 53,
+      "doc_page": 9,
+      "amount_fcfa": 502893150963,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-012",
+      "section_code": "357",
+      "pdf_page": 52,
+      "doc_page": 8,
+      "amount_fcfa": 81484195624,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-013",
+      "section_code": "335",
+      "pdf_page": 49,
+      "doc_page": 5,
+      "amount_fcfa": 808992158914,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-014",
+      "section_code": "358",
+      "pdf_page": 52,
+      "doc_page": 8,
+      "amount_fcfa": 123247714398,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-015",
+      "section_code": "351",
+      "pdf_page": 52,
+      "doc_page": 8,
+      "amount_fcfa": 26700912028,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-016",
+      "section_code": "376",
+      "pdf_page": 53,
+      "doc_page": 9,
+      "amount_fcfa": 49213125398,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-017",
+      "section_code": "336",
+      "pdf_page": 49,
+      "doc_page": 5,
+      "amount_fcfa": 39806735298,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-018",
+      "section_code": "345",
+      "pdf_page": 50,
+      "doc_page": 6,
+      "amount_fcfa": 103197582643,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-019",
+      "section_code": "347",
+      "pdf_page": 51,
+      "doc_page": 7,
+      "amount_fcfa": 96866871722,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-020",
+      "section_code": "350",
+      "pdf_page": 51,
+      "doc_page": 7,
+      "amount_fcfa": 19207286052,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-021",
+      "section_code": "328",
+      "pdf_page": 48,
+      "doc_page": 4,
+      "amount_fcfa": 44194260102,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-022",
+      "section_code": "333",
+      "pdf_page": 49,
+      "doc_page": 5,
+      "amount_fcfa": 338779408246,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-023",
+      "section_code": "362",
+      "pdf_page": 53,
+      "doc_page": 9,
+      "amount_fcfa": 91411414044,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-024",
+      "section_code": "331",
+      "pdf_page": 49,
+      "doc_page": 5,
+      "amount_fcfa": 1563721366602,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-025",
+      "section_code": "330",
+      "pdf_page": 49,
+      "doc_page": 5,
+      "amount_fcfa": 734442904943,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-026",
+      "section_code": "369",
+      "pdf_page": 53,
+      "doc_page": 9,
+      "amount_fcfa": 57361750199,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-027",
+      "section_code": "356",
+      "pdf_page": 52,
+      "doc_page": 8,
+      "amount_fcfa": 83275503595,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-028",
+      "section_code": "352",
+      "pdf_page": 52,
+      "doc_page": 8,
+      "amount_fcfa": 31263058865,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-029",
+      "section_code": "346",
+      "pdf_page": 50,
+      "doc_page": 6,
+      "amount_fcfa": 37598620420,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-030",
+      "section_code": "444",
+      "pdf_page": 54,
+      "doc_page": 10,
+      "amount_fcfa": 70427777385,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-031",
+      "section_code": "343",
+      "pdf_page": 50,
+      "doc_page": 6,
+      "amount_fcfa": 36680067253,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-032",
+      "section_code": "440",
+      "pdf_page": 54,
+      "doc_page": 10,
+      "amount_fcfa": 13746365872,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-033",
+      "section_code": "439",
+      "pdf_page": 53,
+      "doc_page": 9,
+      "amount_fcfa": 5122516889,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    },
+    {
+      "id": "gov-034",
+      "section_code": "334",
+      "pdf_page": 49,
+      "doc_page": 5,
+      "amount_fcfa": 182301855312,
+      "record_kind": "SECTION_REFERENCE_NOT_PORTFOLIO"
+    }
+  ],
+  "ministry_without_independent_section": "gov-035"
+}

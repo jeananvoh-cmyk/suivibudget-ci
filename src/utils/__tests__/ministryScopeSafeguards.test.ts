@@ -1,0 +1,73 @@
+import { describe, expect, it } from 'vitest';
+import { GOVERNMENT_OFFICIALS } from '../../data/governmentData';
+import { SCOPE_EXCEPTIONS, MINISTRY_DOCUMENTARY_DISCREPANCIES, MINISTRY_CANDIDATE_CP_2026, WITHHELD_MINISTRY_PORTFOLIO_IDS } from '../../data/ministryScopeExceptions';
+
+describe('2026 ministerial portfolio documentary safeguards', () => {
+  const officials = new Map(GOVERNMENT_OFFICIALS.map(o => [o.id, o]));
+
+
+  it('covers each of the 35 distinct 2026 portfolio identifiers without manufacturing a missing budget', () => {
+    const ids = GOVERNMENT_OFFICIALS.map(o => o.id).filter(id => /^gov-\d{3}$/.test(id));
+    expect(ids).toHaveLength(35);
+    expect(new Set(ids).size).toBe(35);
+    expect([...ids].sort()).toEqual(
+      Array.from({ length: 35 }, (_, index) => `gov-${String(index + 1).padStart(3, '0')}`),
+    );
+    for (const official of GOVERNMENT_OFFICIALS.filter(o => ids.includes(o.id))) {
+      // Unknown is not zero; this test validates shape, not documentary certification.
+      if (official.budget_fcfa == null) continue;
+      expect(Number.isSafeInteger(official.budget_fcfa)).toBe(true);
+      expect(official.budget_fcfa).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it('documents exactly the four composite portfolios and the delegated portfolio without an autonomous section', () => {
+    expect(Object.keys(SCOPE_EXCEPTIONS).sort()).toEqual([
+      'gov-007', 'gov-010', 'gov-023', 'gov-024', 'gov-035',
+    ]);
+    for (const [id, notice] of Object.entries(SCOPE_EXCEPTIONS)) {
+      expect(officials.has(id)).toBe(true);
+      expect(notice.length).toBeGreaterThan(70);
+    }
+  });
+
+  it('flags precisely the 9 unresolved numeric section differences for every ministry detail', () => {
+    expect(Object.keys(MINISTRY_DOCUMENTARY_DISCREPANCIES).sort()).toEqual(["gov-001","gov-006","gov-009","gov-011","gov-012","gov-013","gov-014","gov-022","gov-029"]);
+    expect(Object.keys(MINISTRY_CANDIDATE_CP_2026).sort()).toEqual(Object.keys(MINISTRY_DOCUMENTARY_DISCREPANCIES).sort());
+    for (const amount of Object.values(MINISTRY_CANDIDATE_CP_2026)) {
+      expect(Number.isSafeInteger(amount)).toBe(true);
+      expect(amount).toBeGreaterThan(0);
+    }
+    for (const [id, section] of Object.entries(MINISTRY_DOCUMENTARY_DISCREPANCIES)) {
+      expect(officials.has(id)).toBe(true);
+      expect(section).toMatch(/^\d{3}$/);
+    }
+  });
+
+  it('withholds exactly the nine unproven budgets and the delegated duplicate from public display', () => {
+    const expected = [...Object.keys(MINISTRY_DOCUMENTARY_DISCREPANCIES), 'gov-035'].sort();
+    expect([...WITHHELD_MINISTRY_PORTFOLIO_IDS].sort()).toEqual(expected);
+    expect(WITHHELD_MINISTRY_PORTFOLIO_IDS.size).toBe(10);
+    for (const id of WITHHELD_MINISTRY_PORTFOLIO_IDS) {
+      expect(officials.get(id)?.budget_fcfa).toBeUndefined();
+    }
+  });
+
+  it('does not attribute agriculture credits to a delegated ministry without autonomous section', () => {
+    const agriculture = officials.get('gov-009');
+    const delegate = officials.get('gov-035');
+    expect(agriculture).toBeDefined();
+    expect(delegate).toBeDefined();
+    expect(agriculture?.budget_fcfa).toBeUndefined();
+    expect(delegate?.budget_fcfa).toBeUndefined();
+    expect(SCOPE_EXCEPTIONS['gov-035']).toContain('ne doit pas être compté deux fois');
+    expect(MINISTRY_DOCUMENTARY_DISCREPANCIES['gov-009']).toBe('229');
+  });
+
+  it('does not silently sum candidate sections for transport or employment', () => {
+    expect(officials.get('gov-010')?.budget_fcfa).toBe(307_769_615_082);
+    expect(officials.get('gov-023')?.budget_fcfa).toBe(91_411_414_044);
+    expect(SCOPE_EXCEPTIONS['gov-010']).toContain('440');
+    expect(SCOPE_EXCEPTIONS['gov-023']).toContain('334');
+  });
+});
