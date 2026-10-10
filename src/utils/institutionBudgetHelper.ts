@@ -526,44 +526,27 @@ export function resolveInstitutionFinancialView(
 
   // 4. CAS DU ZÉRO DOCUMENTÉ (total === 0)
   if (institution.total_budget_fcfa === 0) {
+    const arithmetic = calculateSafePercentages(institution.budget_functioning_fcfa, institution.budget_investment_fcfa, 0);
     return {
-      institution_id: instId,
-      institution_name: instName,
-      institution_type: instType,
-      official_section_code: null,
-      fiscal_year: fiscalYear,
-      nature_credits: "Crédits Directs",
-      budget_basis: requestedBasis || 'LFI',
-      budget_measure: 'CREDITS_VOTES',
+      institution_id: instId, institution_name: instName, institution_type: instType,
+      official_section_code: null, fiscal_year: fiscalYear, nature_credits: null,
+      budget_basis: requestedBasis || 'LFI', budget_measure: 'CREDITS_VOTES',
       total_amount_fcfa: 0,
-      functioning_amount_fcfa: institution.budget_functioning_fcfa ?? 0,
-      investment_amount_fcfa: institution.budget_investment_fcfa ?? 0,
-      total_formatted: '0 FCFA',
-      total_words: '0 FCFA',
-      functioning_formatted: institution.budget_functioning_fcfa != null ? formatFCFA(institution.budget_functioning_fcfa) : '0 FCFA',
-      investment_formatted: institution.budget_investment_fcfa != null ? formatFCFA(institution.budget_investment_fcfa) : '0 FCFA',
-      functioning_pct: null,
-      investment_pct: null,
-      has_breakdown: false,
-      delta_fcfa: 0,
-      programs: [],
-      actions: [],
-      documentary_provenance: {
-        document_title: LFI_2026_DOCUMENT.title,
-        document_reference: "Loi de Finances 2026",
-        source_url: LFI_2026_DOCUMENT.url,
-        pdf_page: null,
-        sha256: LFI_2026_DOCUMENT.sha256,
-      },
+      functioning_amount_fcfa: institution.budget_functioning_fcfa ?? null,
+      investment_amount_fcfa: institution.budget_investment_fcfa ?? null,
+      total_formatted: '0 FCFA (non vérifié)', total_words: null,
+      functioning_formatted: institution.budget_functioning_fcfa != null ? formatFCFA(institution.budget_functioning_fcfa) : null,
+      investment_formatted: institution.budget_investment_fcfa != null ? formatFCFA(institution.budget_investment_fcfa) : null,
+      functioning_pct: null, investment_pct: null, has_breakdown: false,
+      delta_fcfa: arithmetic.status === 'ZERO_TOTAL' ? 0 : null,
+      programs: [], actions: [], documentary_provenance: null,
       verification_status: 'NOT_DOCUMENTED',
-      reconciliation_status: 'ZERO_TOTAL',
-      blocking_reasons: [],
-      badge_text: 'Zéro à justifier par document',
-      badge_class: 'bg-slate-100 text-slate-600 border-slate-200',
-      notice_text: 'La valeur zéro n\'est pas certifiée en l\'absence d\'une preuve nominative de dotation nulle.',
-      is_cour_supreme: false,
-      is_tax_quota_commune: false,
-      status: 'AVAILABLE'
+      reconciliation_status: arithmetic.status,
+      blocking_reasons: ['Valeur nulle présente dans les données, mais aucune pièce officielle ne permet de la certifier.'],
+      badge_text: 'Zéro déclaré, preuve manquante',
+      badge_class: 'bg-amber-100 text-amber-800 border-amber-300',
+      notice_text: 'Zéro non certifié : la donnée est conservée mais nécessite une ligne budgétaire officielle individuelle.',
+      is_cour_supreme: false, is_tax_quota_commune: false, status: 'NOT_DOCUMENTED'
     };
   }
 
