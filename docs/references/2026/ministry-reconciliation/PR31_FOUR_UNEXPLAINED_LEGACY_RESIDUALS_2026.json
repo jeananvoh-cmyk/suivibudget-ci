@@ -1,0 +1,91 @@
+{
+  "fiscal_year": 2026,
+  "verification_date": "2026-10-10",
+  "method": "Exact residual recomputation using 2026 LFI article 15 section CP and official C2D table (where available). Search every text-extractable physical PDF page for each six-digit residual formatted as xxx.yyy or xxx yyy or with NBSP, bounded from adjacent numeric digits; an exact standalone residual was not found. Absence of a literal stand-alone match does not prove that sums, accounting modifications or source transformations do not exist.",
+  "source_documents": [
+    {
+      "name": "Loi de finances 2026",
+      "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+      "physical_pages": 583
+    },
+    {
+      "name": "Annexe 4 DPPD-PAP 2026–2028",
+      "sha256": "0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10",
+      "physical_pages": 1229
+    },
+    {
+      "name": "Annexe 7 Dotations des Institutions 2026",
+      "sha256": "567810702fb7ed7cb83945a0af18ef23ee52bf617a305bac36243c08de4a1842",
+      "physical_pages": 89
+    }
+  ],
+  "pages_checked": 1901,
+  "residuals": [
+    {
+      "id": "gov-006",
+      "section": "323",
+      "legacy": 947962959206,
+      "voted": 945963329452,
+      "c2d": 2000000000,
+      "residual": -370246,
+      "label": "Intérieur et Sécurité",
+      "voted_plus_identified_c2d_fcfa": 947963329452,
+      "residual_fcfa": -370246,
+      "calculation": "LEGACY_MINUS_LFI_SECTION_CP_AND_C2D",
+      "official_source_status": "NO_EXACT_STANDALONE_NUMERIC_MATCH_IN_THREE_PDFS",
+      "historical_record_status": "PROVENANCE_UNVERIFIED",
+      "current_lfi_section_cp_status": "LEGALLY_VOTED_2026",
+      "independent_portfolio_certification": false
+    },
+    {
+      "id": "gov-011",
+      "section": "366",
+      "legacy": 504985369765,
+      "voted": 502893150963,
+      "c2d": 2091737408,
+      "residual": 481394,
+      "label": "Hydraulique, Assainissement et Salubrité",
+      "voted_plus_identified_c2d_fcfa": 504984888371,
+      "residual_fcfa": 481394,
+      "calculation": "LEGACY_MINUS_LFI_SECTION_CP_AND_C2D",
+      "official_source_status": "NO_EXACT_STANDALONE_NUMERIC_MATCH_IN_THREE_PDFS",
+      "historical_record_status": "PROVENANCE_UNVERIFIED",
+      "current_lfi_section_cp_status": "LEGALLY_VOTED_2026",
+      "independent_portfolio_certification": false
+    },
+    {
+      "id": "gov-013",
+      "section": "335",
+      "legacy": 817868452462,
+      "voted": 808992158914,
+      "c2d": 8876010092,
+      "residual": 283456,
+      "label": "Santé et Couverture maladie universelle",
+      "voted_plus_identified_c2d_fcfa": 817868169006,
+      "residual_fcfa": 283456,
+      "calculation": "LEGACY_MINUS_LFI_SECTION_CP_AND_C2D",
+      "official_source_status": "NO_EXACT_STANDALONE_NUMERIC_MATCH_IN_THREE_PDFS",
+      "historical_record_status": "PROVENANCE_UNVERIFIED",
+      "current_lfi_section_cp_status": "LEGALLY_VOTED_2026",
+      "independent_portfolio_certification": false
+    },
+    {
+      "id": "gov-025",
+      "section": "330",
+      "legacy": 734443144925,
+      "voted": 734442904943,
+      "c2d": null,
+      "residual": 239982,
+      "label": "Infrastructures et Entretien routier",
+      "voted_plus_identified_c2d_fcfa": 734442904943,
+      "residual_fcfa": 239982,
+      "calculation": "LEGACY_MINUS_LFI_SECTION_CP",
+      "official_source_status": "NO_EXACT_STANDALONE_NUMERIC_MATCH_IN_THREE_PDFS",
+      "historical_record_status": "PROVENANCE_UNVERIFIED",
+      "current_lfi_section_cp_status": "LEGALLY_VOTED_2026",
+      "independent_portfolio_certification": false
+    }
+  ],
+  "requested_evidence": "Original source and calculation of historical governmentData.ts values or an official corrective distribution/transfer instrument, not a new amount inferred from residuals",
+  "correct_publication_policy": "Keep original historical residuals only in the documentary audit; present voted CP with LFI Article 15 source and C2D separately, never invent a stand-alone ministerial allocation."
+}
