@@ -13,7 +13,7 @@ import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
 import { MinistryBudgetHeader } from './MinistryBudgetHeader';
 import { ProgramDistribution } from './ProgramDistribution';
 import { BudgetProgramCard } from './BudgetProgramCard';
-import { SCOPE_EXCEPTIONS, MINISTRY_DOCUMENTARY_DISCREPANCIES } from '../../data/ministryScopeExceptions';
+import { SCOPE_EXCEPTIONS, MINISTRY_DOCUMENTARY_DISCREPANCIES, MINISTRY_CANDIDATE_CP_2026 } from '../../data/ministryScopeExceptions';
 
 interface MinistryBudgetProgramViewProps {
   institution: Institution;
@@ -87,6 +87,8 @@ export const MinistryBudgetProgramView: React.FC<MinistryBudgetProgramViewProps>
 
         {MINISTRY_DOCUMENTARY_DISCREPANCIES[institution.id] && (
           <p className="text-xs text-amber-900 bg-amber-50 border border-amber-300 rounded-xl p-3" role="note">
+            <div className="font-semibold mb-1">CP votés pour la section candidate {MINISTRY_DOCUMENTARY_DISCREPANCIES[institution.id]} : {formatFCFA(MINISTRY_CANDIDATE_CP_2026[institution.id])}</div>
+            <a href="https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf" target="_blank" rel="noopener noreferrer" className="underline">Source : Loi de finances 2026, tableau des sections (DGBF)</a><br />
             <strong>Écart documentaire identifié :</strong> le montant de cette fiche diffère du total des crédits de paiement (CP) de la section candidate {MINISTRY_DOCUMENTARY_DISCREPANCIES[institution.id]} de la LFI 2026. La correspondance exacte du périmètre reste à établir. Ces montants ne doivent pas être additionnés ni considérés comme réconciliés.
           </p>
         )}
