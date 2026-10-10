@@ -24,7 +24,7 @@ describe('strict 2026 ministerial documentary certification gate', () => {
     }
   });
 
-  it('distinguishes 12 canonical budgets from 21 action-complete sections and two incomplete ones', () => {
+  it('distinguishes 12 canonical budgets from 23 additional section/action CP reconciliations', () => {
     const counts = controls.reduce((acc, { control }) => {
       const key = control!.numeric_verification_level;
       acc[key] = (acc[key] ?? 0) + 1;
@@ -32,12 +32,12 @@ describe('strict 2026 ministerial documentary certification gate', () => {
     }, {} as Record<string, number>);
     expect(counts).toEqual({
       CANONICAL_PROGRAMMES_ACTIONS_BALANCED: 12,
-      SECTION_PROGRAMMES_ACTIONS_BALANCED: 21,
-      SECTION_PROGRAMMES_BALANCED_ACTION_EXCEPTION: 2,
+      SECTION_PROGRAMMES_ACTIONS_BALANCED: 23,
     });
     expect(controls.filter(x => x.control?.numeric_verification_level
-      === 'SECTION_PROGRAMMES_BALANCED_ACTION_EXCEPTION').map(x => x.id))
-      .toEqual(['gov-001', 'gov-028']);
+      === 'SECTION_PROGRAMMES_BALANCED_ACTION_EXCEPTION')).toHaveLength(0);
+    expect(controls.filter(x => x.control?.annex4_action_gap_supplemented_by_lfi)
+      .map(x => x.id)).toEqual(['gov-001', 'gov-028']);
   });
 
   it('does not count a shared or delegated section as an independently certified credit', () => {
