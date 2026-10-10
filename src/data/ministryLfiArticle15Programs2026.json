@@ -1,0 +1,387 @@
+{
+  "fiscal_year": 2026,
+  "document": "Loi n°2025-987 du 19 décembre 2025, article 15, répartition des programmes par ministère",
+  "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+  "source_pdf_sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+  "scope": "INITIAL_LFI_2026_SECTION_CP_ONLY; PROGRAMME NUMBERS ARE ARTICLE 15 ORDINAL LABELS NOT DGBF TECHNICAL CODES",
+  "verification": "EVERY_SECTION_CP_EQUALS_SUM_OF_NAMED_ARTICLE_15_PROGRAMMES",
+  "records": [
+    {
+      "section_code": "237",
+      "portfolio_ids": [
+        "gov-003"
+      ],
+      "article": "15",
+      "lfi_pdf_page": 15,
+      "section_cp_2026_fcfa": 45121940916,
+      "programmes": [
+        {
+          "number": 1,
+          "name": "Administration Générale",
+          "cp_2026_fcfa": 28450607800
+        },
+        {
+          "number": 2,
+          "name": "Fonction Publique",
+          "cp_2026_fcfa": 14396485400
+        },
+        {
+          "number": 3,
+          "name": "Modernisation de l'Administration",
+          "cp_2026_fcfa": 2274847716
+        }
+      ]
+    },
+    {
+      "section_code": "325",
+      "portfolio_ids": [
+        "gov-005"
+      ],
+      "article": "15",
+      "lfi_pdf_page": 14,
+      "section_cp_2026_fcfa": 129151307791,
+      "programmes": [
+        {
+          "number": 1,
+          "name": "Administration Générale",
+          "cp_2026_fcfa": 94913084375
+        },
+        {
+          "number": 2,
+          "name": "Juridictions",
+          "cp_2026_fcfa": 11202593764
+        },
+        {
+          "number": 3,
+          "name": "Etablissements pénitentiaires, centres d'observation et de rééducation des mineurs",
+          "cp_2026_fcfa": 20882892824
+        },
+        {
+          "number": 4,
+          "name": "Droits de l'Homme",
+          "cp_2026_fcfa": 2152736828
+        }
+      ]
+    },
+    {
+      "section_code": "330",
+      "portfolio_ids": [
+        "gov-025"
+      ],
+      "article": "15",
+      "lfi_pdf_page": 18,
+      "section_cp_2026_fcfa": 734442904943,
+      "programmes": [
+        {
+          "number": 1,
+          "name": "Administration Générale",
+          "cp_2026_fcfa": 7964881215
+        },
+        {
+          "number": 2,
+          "name": "Infrastructures routières et ouvrages d'arts",
+          "cp_2026_fcfa": 446634263710
+        },
+        {
+          "number": 3,
+          "name": "Fonds d'Entretien Routier (FER)",
+          "cp_2026_fcfa": 279843760018
+        }
+      ]
+    },
+    {
+      "section_code": "334",
+      "portfolio_ids": [
+        "gov-034"
+      ],
+      "article": "15",
+      "lfi_pdf_page": 16,
+      "section_cp_2026_fcfa": 182301855312,
+      "programmes": [
+        {
+          "number": 1,
+          "name": "Administration Générale",
+          "cp_2026_fcfa": 14408855796
+        },
+        {
+          "number": 2,
+          "name": "Formation professionnelle et apprentissage",
+          "cp_2026_fcfa": 111002347046
+        },
+        {
+          "number": 3,
+          "name": "Enseignement secondaire technique",
+          "cp_2026_fcfa": 10890652470
+        },
+        {
+          "number": 4,
+          "name": "Fonds de Développement de la Formation Professionnelle",
+          "cp_2026_fcfa": 46000000000
+        }
+      ]
+    },
+    {
+      "section_code": "336",
+      "portfolio_ids": [
+        "gov-017"
+      ],
+      "article": "15",
+      "lfi_pdf_page": 17,
+      "section_cp_2026_fcfa": 39806735298,
+      "programmes": [
+        {
+          "number": 1,
+          "name": "Administration Générale",
+          "cp_2026_fcfa": 7354634682
+        },
+        {
+          "number": 2,
+          "name": "Communication et médias",
+          "cp_2026_fcfa": 12252100615
+        },
+        {
+          "number": 3,
+          "name": "Appui au financement de la Radiodiffusion Télévision Ivoirienne (RTI)",
+          "cp_2026_fcfa": 16465000001
+        },
+        {
+          "number": 4,
+          "name": "Appui au financement de la Société Ivoirienne de Télédiffusion (IDT)",
+          "cp_2026_fcfa": 2035000000
+        },
+        {
+          "number": 5,
+          "name": "Appui au financement du secteur des médias",
+          "cp_2026_fcfa": 1700000000
+        }
+      ]
+    },
+    {
+      "section_code": "343",
+      "portfolio_ids": [
+        "gov-031"
+      ],
+      "article": "15",
+      "lfi_pdf_page": 19,
+      "section_cp_2026_fcfa": 36680067253,
+      "programmes": [
+        {
+          "number": 1,
+          "name": "Administration Générale",
+          "cp_2026_fcfa": 7918536211
+        },
+        {
+          "number": 2,
+          "name": "Environnement et développement durable",
+          "cp_2026_fcfa": 28761531042
+        }
+      ]
+    },
+    {
+      "section_code": "345",
+      "portfolio_ids": [
+        "gov-018"
+      ],
+      "article": "15",
+      "lfi_pdf_page": 19,
+      "section_cp_2026_fcfa": 103197582643,
+      "programmes": [
+        {
+          "number": 1,
+          "name": "Administration Générale",
+          "cp_2026_fcfa": 37824714687
+        },
+        {
+          "number": 2,
+          "name": "Gestion durable des ressources forestières",
+          "cp_2026_fcfa": 58463516601
+        },
+        {
+          "number": 3,
+          "name": "Gestion durable des ressources fauniques",
+          "cp_2026_fcfa": 917332688
+        },
+        {
+          "number": 4,
+          "name": "Gestion intégrée des ressources en eau",
+          "cp_2026_fcfa": 5092018667
+        },
+        {
+          "number": 5,
+          "name": "Fonds Forestier National",
+          "cp_2026_fcfa": 900000000
+        }
+      ]
+    },
+    {
+      "section_code": "348",
+      "portfolio_ids": [
+        "gov-008"
+      ],
+      "article": "15",
+      "lfi_pdf_page": 18,
+      "section_cp_2026_fcfa": 706060209015,
+      "programmes": [
+        {
+          "number": 1,
+          "name": "Administration Générale",
+          "cp_2026_fcfa": 8701872126
+        },
+        {
+          "number": 2,
+          "name": "Hydrocarbures",
+          "cp_2026_fcfa": 116054336
+        },
+        {
+          "number": 3,
+          "name": "Energie",
+          "cp_2026_fcfa": 320914619601
+        },
+        {
+          "number": 4,
+          "name": "Mines et géologie",
+          "cp_2026_fcfa": 783321335
+        },
+        {
+          "number": 5,
+          "name": "Appui au financement du secteur de l’électricité",
+          "cp_2026_fcfa": 70368000000
+        },
+        {
+          "number": 6,
+          "name": "Appui au financement de la Société Ivoirienne de Raffinage (SIR)",
+          "cp_2026_fcfa": 57906341617
+        },
+        {
+          "number": 7,
+          "name": "Appui au financement du secteur minier",
+          "cp_2026_fcfa": 28500000000
+        },
+        {
+          "number": 8,
+          "name": "Péréquation produit à la Société Ivoirienne de Raffinage (SIR)",
+          "cp_2026_fcfa": 105000000000
+        },
+        {
+          "number": 9,
+          "name": "Péréquation transport à la Société d'Etudes et de Gestion en Hydrocarbures (SEGH)",
+          "cp_2026_fcfa": 70000000000
+        },
+        {
+          "number": 10,
+          "name": "Appui au financement à Côte d’Ivoire Energies (CI ENERGIES)",
+          "cp_2026_fcfa": 43770000000
+        }
+      ]
+    },
+    {
+      "section_code": "362",
+      "portfolio_ids": [
+        "gov-023"
+      ],
+      "article": "15",
+      "lfi_pdf_page": 16,
+      "section_cp_2026_fcfa": 91411414044,
+      "programmes": [
+        {
+          "number": 1,
+          "name": "Administration Générale",
+          "cp_2026_fcfa": 35849618984
+        },
+        {
+          "number": 2,
+          "name": "Emploi",
+          "cp_2026_fcfa": 2451846262
+        },
+        {
+          "number": 3,
+          "name": "Travail",
+          "cp_2026_fcfa": 6374402905
+        },
+        {
+          "number": 4,
+          "name": "Protection sociale",
+          "cp_2026_fcfa": 46735545893
+        }
+      ]
+    },
+    {
+      "section_code": "439",
+      "portfolio_ids": [
+        "gov-033"
+      ],
+      "article": "15",
+      "lfi_pdf_page": 14,
+      "section_cp_2026_fcfa": 5122516889,
+      "programmes": [
+        {
+          "number": 1,
+          "name": "Administration Générale",
+          "cp_2026_fcfa": 3743491132
+        },
+        {
+          "number": 2,
+          "name": "Intégration Africaine",
+          "cp_2026_fcfa": 1153795757
+        },
+        {
+          "number": 3,
+          "name": "Ivoiriens de l'extérieur",
+          "cp_2026_fcfa": 225230000
+        }
+      ]
+    },
+    {
+      "section_code": "440",
+      "portfolio_ids": [
+        "gov-032"
+      ],
+      "article": "15",
+      "lfi_pdf_page": 18,
+      "section_cp_2026_fcfa": 13746365872,
+      "programmes": [
+        {
+          "number": 1,
+          "name": "Administration Générale",
+          "cp_2026_fcfa": 8311959782
+        },
+        {
+          "number": 2,
+          "name": "Transport maritime et fluvio-lagunaire",
+          "cp_2026_fcfa": 5434406090
+        }
+      ]
+    },
+    {
+      "section_code": "444",
+      "portfolio_ids": [
+        "gov-030"
+      ],
+      "article": "15",
+      "lfi_pdf_page": 17,
+      "section_cp_2026_fcfa": 70427777385,
+      "programmes": [
+        {
+          "number": 1,
+          "name": "Administration Générale",
+          "cp_2026_fcfa": 17906782766
+        },
+        {
+          "number": 2,
+          "name": "Sport",
+          "cp_2026_fcfa": 39900994619
+        },
+        {
+          "number": 3,
+          "name": "Appui au financement du développement du sport",
+          "cp_2026_fcfa": 10900000000
+        },
+        {
+          "number": 4,
+          "name": "Appui à l’entretien et à la sécurisation des infrastructures",
+          "cp_2026_fcfa": 1720000000
+        }
+      ]
+    }
+  ]
+}

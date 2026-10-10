@@ -1,0 +1,305 @@
+{
+  "fiscal_year": 2026,
+  "official_source": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+  "official_pdf_sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+  "source_table": "Budget 2026 — Détail des Projets Financés sur C2D",
+  "source_pdf_page_range": [
+    565,
+    569
+  ],
+  "total_official_C2D_cp_fcfa": 74400000000,
+  "source_scope_warning": "C2D is reported in a distinct project-financing table and is described in DGBF's 2026 budget presentation as part of investment financed from domestic resources. Do not add CP columns to a total if C2D has already been included in that total. Do not certify portfolio appropriations from section equivalence.",
+  "reference_report": "https://www.dgbf.ci/wp-content/uploads/2025/12/Rapport-de-presentation-du-budget-2026.pdf",
+  "sections": [
+    {
+      "section_code": "108",
+      "c2d_cp_2026_fcfa": 2100000000,
+      "lfi_pdf_page": 565,
+      "verification": "EXACT_OFFICIAL_LFI_C2D_SECTION_ROW"
+    },
+    {
+      "section_code": "229",
+      "c2d_cp_2026_fcfa": 4054243016,
+      "lfi_pdf_page": 565,
+      "verification": "EXACT_OFFICIAL_LFI_C2D_SECTION_ROW"
+    },
+    {
+      "section_code": "322",
+      "c2d_cp_2026_fcfa": 12980403497,
+      "lfi_pdf_page": 565,
+      "verification": "EXACT_OFFICIAL_LFI_C2D_SECTION_ROW"
+    },
+    {
+      "section_code": "323",
+      "c2d_cp_2026_fcfa": 2000000000,
+      "lfi_pdf_page": 565,
+      "verification": "EXACT_OFFICIAL_LFI_C2D_SECTION_ROW"
+    },
+    {
+      "section_code": "325",
+      "c2d_cp_2026_fcfa": 6750849380,
+      "lfi_pdf_page": 566,
+      "verification": "EXACT_OFFICIAL_LFI_C2D_SECTION_ROW"
+    },
+    {
+      "section_code": "331",
+      "c2d_cp_2026_fcfa": 7403476877,
+      "lfi_pdf_page": 566,
+      "verification": "EXACT_OFFICIAL_LFI_C2D_SECTION_ROW"
+    },
+    {
+      "section_code": "333",
+      "c2d_cp_2026_fcfa": 5926897644,
+      "lfi_pdf_page": 566,
+      "verification": "EXACT_OFFICIAL_LFI_C2D_SECTION_ROW"
+    },
+    {
+      "section_code": "335",
+      "c2d_cp_2026_fcfa": 8876010092,
+      "lfi_pdf_page": 566,
+      "verification": "EXACT_OFFICIAL_LFI_C2D_SECTION_ROW"
+    },
+    {
+      "section_code": "343",
+      "c2d_cp_2026_fcfa": 1054498791,
+      "lfi_pdf_page": 567,
+      "verification": "EXACT_OFFICIAL_LFI_C2D_SECTION_ROW"
+    },
+    {
+      "section_code": "345",
+      "c2d_cp_2026_fcfa": 3000000000,
+      "lfi_pdf_page": 567,
+      "verification": "EXACT_OFFICIAL_LFI_C2D_SECTION_ROW"
+    },
+    {
+      "section_code": "346",
+      "c2d_cp_2026_fcfa": 2173234556,
+      "lfi_pdf_page": 568,
+      "verification": "EXACT_OFFICIAL_LFI_C2D_SECTION_ROW"
+    },
+    {
+      "section_code": "357",
+      "c2d_cp_2026_fcfa": 7465153413,
+      "lfi_pdf_page": 568,
+      "verification": "EXACT_OFFICIAL_LFI_C2D_SECTION_ROW"
+    },
+    {
+      "section_code": "358",
+      "c2d_cp_2026_fcfa": 8523495326,
+      "lfi_pdf_page": 568,
+      "verification": "EXACT_OFFICIAL_LFI_C2D_SECTION_ROW"
+    },
+    {
+      "section_code": "366",
+      "c2d_cp_2026_fcfa": 2091737408,
+      "lfi_pdf_page": 568,
+      "verification": "EXACT_OFFICIAL_LFI_C2D_SECTION_ROW"
+    }
+  ],
+  "historical_discrepancy_audit": [
+    {
+      "portfolio_id": "gov-001",
+      "lfi_section": "108",
+      "legacy_directory_fcfa": 73426766299,
+      "lfi_general_section_cp_2026_fcfa": 71326766299,
+      "original_discrepancy_fcfa": 2100000000,
+      "c2d_section_cp_2026_fcfa": 2100000000,
+      "discrepancy_minus_c2d_fcfa": 0,
+      "classification": "EXACTLY_EXPLAINED_BY_C2D",
+      "c2d_lfi_pdf_page": 565,
+      "portfolio_allocation_certified": false
+    },
+    {
+      "portfolio_id": "gov-005",
+      "lfi_section": "325",
+      "legacy_directory_fcfa": 135902157171,
+      "lfi_general_section_cp_2026_fcfa": 129151307791,
+      "original_discrepancy_fcfa": 6750849380,
+      "c2d_section_cp_2026_fcfa": 6750849380,
+      "discrepancy_minus_c2d_fcfa": 0,
+      "classification": "EXACTLY_EXPLAINED_BY_C2D",
+      "c2d_lfi_pdf_page": 566,
+      "portfolio_allocation_certified": false
+    },
+    {
+      "portfolio_id": "gov-006",
+      "lfi_section": "323",
+      "legacy_directory_fcfa": 947962959206,
+      "lfi_general_section_cp_2026_fcfa": 945963329452,
+      "original_discrepancy_fcfa": 1999629754,
+      "c2d_section_cp_2026_fcfa": 2000000000,
+      "discrepancy_minus_c2d_fcfa": -370246,
+      "classification": "C2D_CLOSE_WITH_RESIDUAL_UNEXPLAINED",
+      "c2d_lfi_pdf_page": 565,
+      "portfolio_allocation_certified": false
+    },
+    {
+      "portfolio_id": "gov-009",
+      "lfi_section": "229",
+      "legacy_directory_fcfa": 337932332542,
+      "lfi_general_section_cp_2026_fcfa": 333878089526,
+      "original_discrepancy_fcfa": 4054243016,
+      "c2d_section_cp_2026_fcfa": 4054243016,
+      "discrepancy_minus_c2d_fcfa": 0,
+      "classification": "EXACTLY_EXPLAINED_BY_C2D",
+      "c2d_lfi_pdf_page": 565,
+      "portfolio_allocation_certified": false
+    },
+    {
+      "portfolio_id": "gov-011",
+      "lfi_section": "366",
+      "legacy_directory_fcfa": 504985369765,
+      "lfi_general_section_cp_2026_fcfa": 502893150963,
+      "original_discrepancy_fcfa": 2092218802,
+      "c2d_section_cp_2026_fcfa": 2091737408,
+      "discrepancy_minus_c2d_fcfa": 481394,
+      "classification": "C2D_CLOSE_WITH_RESIDUAL_UNEXPLAINED",
+      "c2d_lfi_pdf_page": 568,
+      "portfolio_allocation_certified": false
+    },
+    {
+      "portfolio_id": "gov-012",
+      "lfi_section": "357",
+      "legacy_directory_fcfa": 88949349037,
+      "lfi_general_section_cp_2026_fcfa": 81484195624,
+      "original_discrepancy_fcfa": 7465153413,
+      "c2d_section_cp_2026_fcfa": 7465153413,
+      "discrepancy_minus_c2d_fcfa": 0,
+      "classification": "EXACTLY_EXPLAINED_BY_C2D",
+      "c2d_lfi_pdf_page": 568,
+      "portfolio_allocation_certified": false
+    },
+    {
+      "portfolio_id": "gov-013",
+      "lfi_section": "335",
+      "legacy_directory_fcfa": 817868452462,
+      "lfi_general_section_cp_2026_fcfa": 808992158914,
+      "original_discrepancy_fcfa": 8876293548,
+      "c2d_section_cp_2026_fcfa": 8876010092,
+      "discrepancy_minus_c2d_fcfa": 283456,
+      "classification": "C2D_CLOSE_WITH_RESIDUAL_UNEXPLAINED",
+      "c2d_lfi_pdf_page": 566,
+      "portfolio_allocation_certified": false
+    },
+    {
+      "portfolio_id": "gov-014",
+      "lfi_section": "358",
+      "legacy_directory_fcfa": 131771209724,
+      "lfi_general_section_cp_2026_fcfa": 123247714398,
+      "original_discrepancy_fcfa": 8523495326,
+      "c2d_section_cp_2026_fcfa": 8523495326,
+      "discrepancy_minus_c2d_fcfa": 0,
+      "classification": "EXACTLY_EXPLAINED_BY_C2D",
+      "c2d_lfi_pdf_page": 568,
+      "portfolio_allocation_certified": false
+    },
+    {
+      "portfolio_id": "gov-018",
+      "lfi_section": "345",
+      "legacy_directory_fcfa": 106197582643,
+      "lfi_general_section_cp_2026_fcfa": 103197582643,
+      "original_discrepancy_fcfa": 3000000000,
+      "c2d_section_cp_2026_fcfa": 3000000000,
+      "discrepancy_minus_c2d_fcfa": 0,
+      "classification": "EXACTLY_EXPLAINED_BY_C2D",
+      "c2d_lfi_pdf_page": 567,
+      "portfolio_allocation_certified": false
+    },
+    {
+      "portfolio_id": "gov-022",
+      "lfi_section": "333",
+      "legacy_directory_fcfa": 344706305890,
+      "lfi_general_section_cp_2026_fcfa": 338779408246,
+      "original_discrepancy_fcfa": 5926897644,
+      "c2d_section_cp_2026_fcfa": 5926897644,
+      "discrepancy_minus_c2d_fcfa": 0,
+      "classification": "EXACTLY_EXPLAINED_BY_C2D",
+      "c2d_lfi_pdf_page": 566,
+      "portfolio_allocation_certified": false
+    },
+    {
+      "portfolio_id": "gov-025",
+      "lfi_section": "330",
+      "legacy_directory_fcfa": 734443144925,
+      "lfi_general_section_cp_2026_fcfa": 734442904943,
+      "original_discrepancy_fcfa": 239982,
+      "c2d_section_cp_2026_fcfa": null,
+      "discrepancy_minus_c2d_fcfa": null,
+      "classification": "NO_C2D_SECTION_ENTRY",
+      "c2d_lfi_pdf_page": null,
+      "portfolio_allocation_certified": false
+    },
+    {
+      "portfolio_id": "gov-029",
+      "lfi_section": "346",
+      "legacy_directory_fcfa": 39771854976,
+      "lfi_general_section_cp_2026_fcfa": 37598620420,
+      "original_discrepancy_fcfa": 2173234556,
+      "c2d_section_cp_2026_fcfa": 2173234556,
+      "discrepancy_minus_c2d_fcfa": 0,
+      "classification": "EXACTLY_EXPLAINED_BY_C2D",
+      "c2d_lfi_pdf_page": 568,
+      "portfolio_allocation_certified": false
+    },
+    {
+      "portfolio_id": "gov-031",
+      "lfi_section": "343",
+      "legacy_directory_fcfa": 37734566044,
+      "lfi_general_section_cp_2026_fcfa": 36680067253,
+      "original_discrepancy_fcfa": 1054498791,
+      "c2d_section_cp_2026_fcfa": 1054498791,
+      "discrepancy_minus_c2d_fcfa": 0,
+      "classification": "EXACTLY_EXPLAINED_BY_C2D",
+      "c2d_lfi_pdf_page": 567,
+      "portfolio_allocation_certified": false
+    },
+    {
+      "portfolio_id": "gov-032",
+      "lfi_section": "440",
+      "legacy_directory_fcfa": 13192865872,
+      "lfi_general_section_cp_2026_fcfa": 13746365872,
+      "original_discrepancy_fcfa": -553500000,
+      "c2d_section_cp_2026_fcfa": null,
+      "discrepancy_minus_c2d_fcfa": null,
+      "classification": "NO_C2D_SECTION_ENTRY",
+      "c2d_lfi_pdf_page": null,
+      "portfolio_allocation_certified": false,
+      "same_magnitude_official_lfi_activity": {
+        "activity_code": "78045200134",
+        "activity_cp_fcfa": 553500000,
+        "lfi_pdf_page": 554,
+        "activity_name": "LPSI - Animer les structures opérationnelles de la DGAMP",
+        "relation": "THE_MAGNITUDE_OF_THE_NEGATIVE_LEGACY_DIFFERENCE_EQUALS_THIS_ACTIVITY_CP",
+        "proof_limit": "Coincident amount does NOT prove whether the historical registry accidentally excluded this activity; its original transformation/source must be traced.",
+        "pdf_sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76"
+      }
+    },
+    {
+      "portfolio_id": "gov-034",
+      "lfi_section": "334",
+      "legacy_directory_fcfa": 182297493094,
+      "lfi_general_section_cp_2026_fcfa": 182301855312,
+      "original_discrepancy_fcfa": -4362218,
+      "c2d_section_cp_2026_fcfa": null,
+      "discrepancy_minus_c2d_fcfa": null,
+      "classification": "NO_C2D_SECTION_ENTRY",
+      "c2d_lfi_pdf_page": null,
+      "portfolio_allocation_certified": false,
+      "same_magnitude_official_lfi_activity": {
+        "activity_code": "78098000984",
+        "activity_cp_fcfa": 4362218,
+        "lfi_pdf_page": 384,
+        "activity_name": "Encadrer et certifier les stagiaires de l'IPNETP sur le terrain",
+        "relation": "THE_MAGNITUDE_OF_THE_NEGATIVE_LEGACY_DIFFERENCE_EQUALS_THIS_ACTIVITY_CP",
+        "proof_limit": "Coincident amount does NOT prove whether the historical registry accidentally excluded this activity; its original transformation/source must be traced.",
+        "pdf_sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76"
+      }
+    }
+  ],
+  "classifications": {
+    "EXACTLY_EXPLAINED_BY_C2D": "The historical difference equals the C2D CP amount for the corresponding official section exactly. This explains numeric provenance but does NOT establish unique ministerial ownership or additive budget interpretation.",
+    "C2D_CLOSE_WITH_RESIDUAL_UNEXPLAINED": "Most of the discrepancy equals the C2D CP row; nonzero remaining francs require further audit.",
+    "NO_C2D_SECTION_ENTRY": "The source C2D table lists no project on that section; cannot explain this historical difference through C2D."
+  },
+  "follow_up_note": "gov-032 and gov-034 negative legacy differences have exact-magnitude matches to a 2026 LFI activity within the same section. Do not treat a magnitude match as definitive provenance or restore those amounts without evidence."
+}

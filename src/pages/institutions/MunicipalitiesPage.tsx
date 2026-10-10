@@ -1,3 +1,4 @@
+import { BudgetDataDownloads } from '../../components/institutions/BudgetDataDownloads';
 import { normalizeSearchText } from '../../utils/searchHelpers';
 import React, { useState } from 'react';
 import { ArrowLeft, Search, Building2, ChevronDown, ArrowRight, FileText, ArrowRightLeft, Globe, ExternalLink, Info, Eye, EyeOff, Scale } from 'lucide-react';
@@ -161,6 +162,7 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
 
   return (
     <div className="space-y-10 animate-in fade-in duration-300">
+      <BudgetDataDownloads scope="COMMUNE" />
       
       {/* Top Navigation & Clean Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
@@ -518,10 +520,6 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                   const prim = inst.primitive_budget || OFFICIAL_PRIMITIVE_BUDGETS[inst.id];
                   if (prim) {
                     const primTotal = prim.total_voted_fcfa;
-                    const stateTotal = inst.total_budget_fcfa ?? 0;
-                    const localRev = Math.max(0, primTotal - stateTotal);
-                    const statePct = primTotal > 0 ? Math.round((stateTotal / primTotal) * 100) : 0;
-                    const localPct = 100 - statePct;
 
                     return (
                       <div className="space-y-2 pt-2 mt-2">
@@ -549,23 +547,18 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                             </span>
                           </span>
                         </div>
-                        {/* Jauge Bicolore État vs Effort Local */}
-                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden flex">
-                          <div className="bg-sky-500 h-full" style={{ width: `${statePct}%` }} title={`Subvention de l'État: ${statePct}%`}></div>
-                          <div className="bg-emerald-500 h-full" style={{ width: `${localPct}%` }} title={`Recettes propres de la Mairie: ${localPct}%`}></div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:justify-between text-[10px] font-semibold text-slate-600 gap-1 pt-0.5">
-                          <span className="text-sky-700">
-                            {stateTotal > 0 ? (
-                              <>Subvention État : <strong>{statePct}%</strong> ({formatAmountInWords(stateTotal)})</>
-                            ) : (
-                              <>Autonomie fiscale locale intégrale (100% DGI & Taxes)</>
-                            )}
-                          </span>
-                          <span className="text-emerald-700">
-                            Recettes propres Mairie : <strong>{localPct}%</strong> ({formatAmountInWords(localRev)})
-                          </span>
-                        </div>
+                        <p className="text-[10px] leading-relaxed text-slate-600 rounded-lg bg-slate-50 p-2" role="note">
+                          Budget primitif de la commune. La part des subventions de l'État et celle
+                          des ressources propres ne peuvent être établies sans tableau officiel
+                          de recettes ventilées. Aucune répartition fictive n'est calculée.
+                        </p>
+                        {prim.source_url && (
+                          <a href={prim.source_url} target="_blank" rel="noopener noreferrer"
+                            onClick={event => event.stopPropagation()}
+                            className="text-[10px] text-brand-blue underline">
+                            Consulter la source du budget primitif 2026
+                          </a>
+                        )}
                       </div>
                     );
                   }
@@ -603,7 +596,7 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                     <div className="space-y-2 pt-2 mt-2">
                       <div className="flex justify-between items-center text-xs">
                         <span className="text-slate-500 font-bold uppercase">
-                          {isPeripheralAbidjan ? "Dotation de l'État — DGE & DGF (LFI 2026)" : "Dotation de l'État (LFI 2026)"}
+                          {isPeripheralAbidjan ? "Dotation enregistrée — source primaire à confirmer" : "Dotation enregistrée — source primaire à confirmer"}
                         </span>
                         <span className="font-black text-slate-900">
                           {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold">({formatAmountInWords(inst.total_budget_fcfa)})</span>

@@ -1,0 +1,1254 @@
+{
+  "fiscal_year": 2026,
+  "method": "Independent row-level extraction of CP column, LFI PDF pages 45-54, with the numeric program totals located in Annex 4 PDF page ranges; program action-level certification is NOT claimed.",
+  "source_documents": [
+    {
+      "document": "Loi de Finances 2026",
+      "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+      "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+      "physical_pdf_pages": 583
+    },
+    {
+      "document": "Annexe 4 DPPD-PAP 2026-2028",
+      "url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "sha256": "0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10",
+      "physical_pdf_pages": 1229
+    }
+  ],
+  "pdf_annex4_page_numbering": "physical PDF page = printed document page + 2",
+  "sections": [
+    {
+      "section_code": "108",
+      "portfolio_ids": [
+        "gov-001"
+      ],
+      "lfi_2026_pdf_page": 45,
+      "annex4_pdf_page_range": [
+        1171,
+        1178
+      ],
+      "section_cp_2026_fcfa": 71326766299,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "13010",
+          "cp_2026_fcfa": 24053045398,
+          "annex4_pdf_page": 1174,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "13011",
+          "cp_2026_fcfa": 2155227371,
+          "annex4_pdf_page": 1175,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "13013",
+          "cp_2026_fcfa": 45118493530,
+          "annex4_pdf_page": 1176,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 71326766299,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "226",
+      "portfolio_ids": [
+        "gov-002"
+      ],
+      "lfi_2026_pdf_page": 46,
+      "annex4_pdf_page_range": [
+        27,
+        56
+      ],
+      "section_cp_2026_fcfa": 481041827995,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21074",
+          "cp_2026_fcfa": 152149614286,
+          "annex4_pdf_page": 38,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22075",
+          "cp_2026_fcfa": 198907665491,
+          "annex4_pdf_page": 44,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22076",
+          "cp_2026_fcfa": 129984548218,
+          "annex4_pdf_page": 50,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 481041827995,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "229",
+      "portfolio_ids": [
+        "gov-009",
+        "gov-035"
+      ],
+      "lfi_2026_pdf_page": 47,
+      "annex4_pdf_page_range": [
+        57,
+        94
+      ],
+      "section_cp_2026_fcfa": 333878089526,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21047",
+          "cp_2026_fcfa": 17143084583,
+          "annex4_pdf_page": 70,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22048",
+          "cp_2026_fcfa": 93194334889,
+          "annex4_pdf_page": 77,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22049",
+          "cp_2026_fcfa": 106292029836,
+          "annex4_pdf_page": 82,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22214",
+          "cp_2026_fcfa": 25204640218,
+          "annex4_pdf_page": 86,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23210",
+          "cp_2026_fcfa": 13300000000,
+          "annex4_pdf_page": 88,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23211",
+          "cp_2026_fcfa": 10615000000,
+          "annex4_pdf_page": 91,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23212",
+          "cp_2026_fcfa": 49832000000,
+          "annex4_pdf_page": 92,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23213",
+          "cp_2026_fcfa": 18297000000,
+          "annex4_pdf_page": 94,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 333878089526,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SHARED_SECTION_NOT_SEPARATELY_ALLOCATED"
+    },
+    {
+      "section_code": "321",
+      "portfolio_ids": [
+        "gov-004"
+      ],
+      "lfi_2026_pdf_page": 47,
+      "annex4_pdf_page_range": [
+        113,
+        140
+      ],
+      "section_cp_2026_fcfa": 146728395147,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21070",
+          "cp_2026_fcfa": 68755415667,
+          "annex4_pdf_page": 125,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22071",
+          "cp_2026_fcfa": 68063835678,
+          "annex4_pdf_page": 129,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22072",
+          "cp_2026_fcfa": 9561143802,
+          "annex4_pdf_page": 137,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22073",
+          "cp_2026_fcfa": 348000000,
+          "annex4_pdf_page": 140,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 146728395147,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "322",
+      "portfolio_ids": [
+        "gov-007"
+      ],
+      "lfi_2026_pdf_page": 47,
+      "annex4_pdf_page_range": [
+        141,
+        232
+      ],
+      "section_cp_2026_fcfa": 671323963425,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21032",
+          "cp_2026_fcfa": 369535050547,
+          "annex4_pdf_page": 167,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22034",
+          "cp_2026_fcfa": 12847326386,
+          "annex4_pdf_page": 179,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22084",
+          "cp_2026_fcfa": 21460519567,
+          "annex4_pdf_page": 196,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22085",
+          "cp_2026_fcfa": 21362947078,
+          "annex4_pdf_page": 200,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22086",
+          "cp_2026_fcfa": 64941585484,
+          "annex4_pdf_page": 214,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22224",
+          "cp_2026_fcfa": 4020829721,
+          "annex4_pdf_page": 221,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22232",
+          "cp_2026_fcfa": 5389327020,
+          "annex4_pdf_page": 225,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23214",
+          "cp_2026_fcfa": 56500000000,
+          "annex4_pdf_page": 227,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23215",
+          "cp_2026_fcfa": 91248460491,
+          "annex4_pdf_page": 229,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23216",
+          "cp_2026_fcfa": 13439617131,
+          "annex4_pdf_page": 230,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23217",
+          "cp_2026_fcfa": 10578300000,
+          "annex4_pdf_page": 232,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 671323963425,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "323",
+      "portfolio_ids": [
+        "gov-006"
+      ],
+      "lfi_2026_pdf_page": 48,
+      "annex4_pdf_page_range": [
+        233,
+        366
+      ],
+      "section_cp_2026_fcfa": 945963329452,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21038",
+          "cp_2026_fcfa": 101798828700,
+          "annex4_pdf_page": 250,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22039",
+          "cp_2026_fcfa": 246936755701,
+          "annex4_pdf_page": 253,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22040",
+          "cp_2026_fcfa": 237873882190,
+          "annex4_pdf_page": 274,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22041",
+          "cp_2026_fcfa": 86672782583,
+          "annex4_pdf_page": 342,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22216",
+          "cp_2026_fcfa": 17671080278,
+          "annex4_pdf_page": 363,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23218",
+          "cp_2026_fcfa": 255010000000,
+          "annex4_pdf_page": 365,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 945963329452,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "328",
+      "portfolio_ids": [
+        "gov-021"
+      ],
+      "lfi_2026_pdf_page": 48,
+      "annex4_pdf_page_range": [
+        391,
+        420
+      ],
+      "section_cp_2026_fcfa": 44194260102,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21054",
+          "cp_2026_fcfa": 12893923764,
+          "annex4_pdf_page": 403,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22033",
+          "cp_2026_fcfa": 2322971492,
+          "annex4_pdf_page": 407,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22055",
+          "cp_2026_fcfa": 3812144370,
+          "annex4_pdf_page": 411,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22056",
+          "cp_2026_fcfa": 1483513571,
+          "annex4_pdf_page": 414,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22057",
+          "cp_2026_fcfa": 14015706905,
+          "annex4_pdf_page": 417,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23250",
+          "cp_2026_fcfa": 9666000000,
+          "annex4_pdf_page": 420,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 44194260102,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "331",
+      "portfolio_ids": [
+        "gov-024"
+      ],
+      "lfi_2026_pdf_page": 49,
+      "annex4_pdf_page_range": [
+        445,
+        514
+      ],
+      "section_cp_2026_fcfa": 1563721366602,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21060",
+          "cp_2026_fcfa": 121396189006,
+          "annex4_pdf_page": 455,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22061",
+          "cp_2026_fcfa": 849707918059,
+          "annex4_pdf_page": 464,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22062",
+          "cp_2026_fcfa": 591842059537,
+          "annex4_pdf_page": 484,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22064",
+          "cp_2026_fcfa": 775200000,
+          "annex4_pdf_page": 513,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 1563721366602,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "333",
+      "portfolio_ids": [
+        "gov-022"
+      ],
+      "lfi_2026_pdf_page": 49,
+      "annex4_pdf_page_range": [
+        515,
+        538
+      ],
+      "section_cp_2026_fcfa": 338779408246,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21093",
+          "cp_2026_fcfa": 24951460632,
+          "annex4_pdf_page": 525,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22094",
+          "cp_2026_fcfa": 233945569392,
+          "annex4_pdf_page": 529,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22095",
+          "cp_2026_fcfa": 67106546257,
+          "annex4_pdf_page": 533,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22096",
+          "cp_2026_fcfa": 12775831965,
+          "annex4_pdf_page": 537,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 338779408246,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "335",
+      "portfolio_ids": [
+        "gov-013"
+      ],
+      "lfi_2026_pdf_page": 49,
+      "annex4_pdf_page_range": [
+        565,
+        632
+      ],
+      "section_cp_2026_fcfa": 808992158914,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21067",
+          "cp_2026_fcfa": 386390670357,
+          "annex4_pdf_page": 576,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22068",
+          "cp_2026_fcfa": 243944049750,
+          "annex4_pdf_page": 585,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22069",
+          "cp_2026_fcfa": 175357438807,
+          "annex4_pdf_page": 626,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23221",
+          "cp_2026_fcfa": 990000000,
+          "annex4_pdf_page": 629,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23222",
+          "cp_2026_fcfa": 2310000000,
+          "annex4_pdf_page": 631,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 808992158914,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "340",
+      "portfolio_ids": [
+        "gov-010"
+      ],
+      "lfi_2026_pdf_page": 50,
+      "annex4_pdf_page_range": [
+        655,
+        678
+      ],
+      "section_cp_2026_fcfa": 307769615082,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21112",
+          "cp_2026_fcfa": 10483960604,
+          "annex4_pdf_page": 666,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22113",
+          "cp_2026_fcfa": 41918600000,
+          "annex4_pdf_page": 670,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22114",
+          "cp_2026_fcfa": 250777054478,
+          "annex4_pdf_page": 673,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23226",
+          "cp_2026_fcfa": 2295000000,
+          "annex4_pdf_page": 675,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23227",
+          "cp_2026_fcfa": 2295000000,
+          "annex4_pdf_page": 675,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 307769615082,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "346",
+      "portfolio_ids": [
+        "gov-029"
+      ],
+      "lfi_2026_pdf_page": 50,
+      "annex4_pdf_page_range": [
+        729,
+        758
+      ],
+      "section_cp_2026_fcfa": 37598620420,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21097",
+          "cp_2026_fcfa": 13835893251,
+          "annex4_pdf_page": 741,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22098",
+          "cp_2026_fcfa": 5131941800,
+          "annex4_pdf_page": 745,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22099",
+          "cp_2026_fcfa": 1793938806,
+          "annex4_pdf_page": 748,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22100",
+          "cp_2026_fcfa": 3277857930,
+          "annex4_pdf_page": 750,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22226",
+          "cp_2026_fcfa": 592488633,
+          "annex4_pdf_page": 752,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23229",
+          "cp_2026_fcfa": 12566500000,
+          "annex4_pdf_page": 754,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23242",
+          "cp_2026_fcfa": 240000000,
+          "annex4_pdf_page": 755,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23243",
+          "cp_2026_fcfa": 160000000,
+          "annex4_pdf_page": 756,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 37598620420,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "347",
+      "portfolio_ids": [
+        "gov-019"
+      ],
+      "lfi_2026_pdf_page": 51,
+      "annex4_pdf_page_range": [
+        759,
+        798
+      ],
+      "section_cp_2026_fcfa": 96866871722,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21101",
+          "cp_2026_fcfa": 14003862146,
+          "annex4_pdf_page": 779,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22102",
+          "cp_2026_fcfa": 4924344052,
+          "annex4_pdf_page": 785,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22103",
+          "cp_2026_fcfa": 2365616153,
+          "annex4_pdf_page": 788,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22104",
+          "cp_2026_fcfa": 36338192773,
+          "annex4_pdf_page": 791,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22233",
+          "cp_2026_fcfa": 39234856598,
+          "annex4_pdf_page": 795,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 96866871722,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "350",
+      "portfolio_ids": [
+        "gov-020"
+      ],
+      "lfi_2026_pdf_page": 51,
+      "annex4_pdf_page_range": [
+        833,
+        856
+      ],
+      "section_cp_2026_fcfa": 19207286052,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21108",
+          "cp_2026_fcfa": 6977145562,
+          "annex4_pdf_page": 844,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22109",
+          "cp_2026_fcfa": 5229257356,
+          "annex4_pdf_page": 847,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22111",
+          "cp_2026_fcfa": 800883134,
+          "annex4_pdf_page": 850,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23235",
+          "cp_2026_fcfa": 2700000000,
+          "annex4_pdf_page": 852,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23236",
+          "cp_2026_fcfa": 3500000000,
+          "annex4_pdf_page": 854,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 19207286052,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "351",
+      "portfolio_ids": [
+        "gov-015"
+      ],
+      "lfi_2026_pdf_page": 52,
+      "annex4_pdf_page_range": [
+        857,
+        880
+      ],
+      "section_cp_2026_fcfa": 26700912028,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21132",
+          "cp_2026_fcfa": 11095321403,
+          "annex4_pdf_page": 869,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22133",
+          "cp_2026_fcfa": 2819855421,
+          "annex4_pdf_page": 875,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22134",
+          "cp_2026_fcfa": 11118502743,
+          "annex4_pdf_page": 877,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22135",
+          "cp_2026_fcfa": 1667232461,
+          "annex4_pdf_page": 880,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 26700912028,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "352",
+      "portfolio_ids": [
+        "gov-028"
+      ],
+      "lfi_2026_pdf_page": 52,
+      "annex4_pdf_page_range": [
+        881,
+        910
+      ],
+      "section_cp_2026_fcfa": 31263058865,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21118",
+          "cp_2026_fcfa": 16254527519,
+          "annex4_pdf_page": 892,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22119",
+          "cp_2026_fcfa": 5998995287,
+          "annex4_pdf_page": 896,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22120",
+          "cp_2026_fcfa": 956600000,
+          "annex4_pdf_page": 902,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22121",
+          "cp_2026_fcfa": 8052936059,
+          "annex4_pdf_page": 906,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": false
+        }
+      ],
+      "reconciled_program_total_fcfa": 31263058865,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "356",
+      "portfolio_ids": [
+        "gov-027"
+      ],
+      "lfi_2026_pdf_page": 52,
+      "annex4_pdf_page_range": [
+        911,
+        930
+      ],
+      "section_cp_2026_fcfa": 83275503595,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21235",
+          "cp_2026_fcfa": 1704184519,
+          "annex4_pdf_page": 922,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22126",
+          "cp_2026_fcfa": 45991319076,
+          "annex4_pdf_page": 924,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23237",
+          "cp_2026_fcfa": 33000000000,
+          "annex4_pdf_page": 927,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23238",
+          "cp_2026_fcfa": 2580000000,
+          "annex4_pdf_page": 929,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 83275503595,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "357",
+      "portfolio_ids": [
+        "gov-012"
+      ],
+      "lfi_2026_pdf_page": 52,
+      "annex4_pdf_page_range": [
+        931,
+        958
+      ],
+      "section_cp_2026_fcfa": 81484195624,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21127",
+          "cp_2026_fcfa": 6395282843,
+          "annex4_pdf_page": 941,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22128",
+          "cp_2026_fcfa": 885002094,
+          "annex4_pdf_page": 949,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22129",
+          "cp_2026_fcfa": 54319474813,
+          "annex4_pdf_page": 951,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22139",
+          "cp_2026_fcfa": 15075185874,
+          "annex4_pdf_page": 953,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23248",
+          "cp_2026_fcfa": 4300000000,
+          "annex4_pdf_page": 955,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23252",
+          "cp_2026_fcfa": 509250000,
+          "annex4_pdf_page": 957,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 81484195624,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "358",
+      "portfolio_ids": [
+        "gov-014"
+      ],
+      "lfi_2026_pdf_page": 52,
+      "annex4_pdf_page_range": [
+        959,
+        986
+      ],
+      "section_cp_2026_fcfa": 123247714398,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21050",
+          "cp_2026_fcfa": 16387778395,
+          "annex4_pdf_page": 972,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22051",
+          "cp_2026_fcfa": 16302276827,
+          "annex4_pdf_page": 981,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22052",
+          "cp_2026_fcfa": 3009475173,
+          "annex4_pdf_page": 983,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22053",
+          "cp_2026_fcfa": 87548184003,
+          "annex4_pdf_page": 985,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 123247714398,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "366",
+      "portfolio_ids": [
+        "gov-011"
+      ],
+      "lfi_2026_pdf_page": 53,
+      "annex4_pdf_page_range": [
+        1017,
+        1048
+      ],
+      "section_cp_2026_fcfa": 502893150963,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21147",
+          "cp_2026_fcfa": 8621283913,
+          "annex4_pdf_page": 1031,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22131",
+          "cp_2026_fcfa": 126703064215,
+          "annex4_pdf_page": 1036,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22148",
+          "cp_2026_fcfa": 139226132928,
+          "annex4_pdf_page": 1040,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22149",
+          "cp_2026_fcfa": 19190669907,
+          "annex4_pdf_page": 1042,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23239",
+          "cp_2026_fcfa": 184539000000,
+          "annex4_pdf_page": 1044,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "23240",
+          "cp_2026_fcfa": 24613000000,
+          "annex4_pdf_page": 1047,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 502893150963,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "369",
+      "portfolio_ids": [
+        "gov-026"
+      ],
+      "lfi_2026_pdf_page": 53,
+      "annex4_pdf_page_range": [
+        1049,
+        1070
+      ],
+      "section_cp_2026_fcfa": 57361750199,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21122",
+          "cp_2026_fcfa": 4453244145,
+          "annex4_pdf_page": 1061,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22123",
+          "cp_2026_fcfa": 4207204503,
+          "annex4_pdf_page": 1065,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22124",
+          "cp_2026_fcfa": 42037873689,
+          "annex4_pdf_page": 1067,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22227",
+          "cp_2026_fcfa": 6663427862,
+          "annex4_pdf_page": 1069,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 57361750199,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    },
+    {
+      "section_code": "376",
+      "portfolio_ids": [
+        "gov-016"
+      ],
+      "lfi_2026_pdf_page": 53,
+      "annex4_pdf_page_range": [
+        1071,
+        1102
+      ],
+      "section_cp_2026_fcfa": 49213125398,
+      "source_credit_type": "CP_2026",
+      "programs": [
+        {
+          "official_code": "21236",
+          "cp_2026_fcfa": 40514471209,
+          "annex4_pdf_page": 1080,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22087",
+          "cp_2026_fcfa": 7998654189,
+          "annex4_pdf_page": 1083,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        },
+        {
+          "official_code": "22239",
+          "cp_2026_fcfa": 700000000,
+          "annex4_pdf_page": 1085,
+          "annex4_numeric_amount_found": true,
+          "annex4_program_code_found": true
+        }
+      ],
+      "reconciled_program_total_fcfa": 49213125398,
+      "programs_sum_delta_fcfa": 0,
+      "section_documentary_status": "SECTION_PROGRAM_NUMERIC_CROSSCHECKED",
+      "action_documentary_status": "NOT_YET_VERIFIED",
+      "attribution_status": "SECTION_CANDIDATE_NOT_AUTOMATIC_PORTFOLIO_CERTIFICATION"
+    }
+  ],
+  "validation_notes": [
+    "CP amounts read by row association in the LFI recap, PDF pages 45–54; columns AE and CP were independently located on these lines and are numerically identical for this subset.",
+    "Annex 4 values were found as space-grouped amounts in the cited programme section spans; this is numeric corroboration, not yet a complete line-by-line action audit.",
+    "Annex 4 programme identifier 22121 of section 352 could not be found as literal text in the source span although the programme title and the exact 2026 amount are present on PDF p.906.",
+    "Section 229 is shared between gov-009 and gov-035; its CP total cannot be allocated twice or treated as two independent ministerial appropriations.",
+    "Section 322 occurs both in DOTATIONS (LFI p.46) and PROGRAMMES (LFI p.47); only the PROGRAMMES section CP 671323963425 is included here. The separate DOTATIONS entry is not added.",
+    "An aggregate across sections is not equivalent to the sum of current 2026 government portfolio budgets; scope and cabinet allocation remain unverified."
+  ]
+}

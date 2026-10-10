@@ -1,7 +1,9 @@
+import { BudgetDataDownloads } from '../../components/institutions/BudgetDataDownloads';
 import React, { useState } from 'react';
 import { ArrowLeft, Search, MapPin, ChevronDown, ArrowRight, FileText, Globe, ExternalLink, Info, Eye, EyeOff } from 'lucide-react';
 import { Institution, BudgetProject } from '../../types';
 import { formatFCFA, formatAmountInWords, getInstitutionLeaderGender } from '../../utils/formatters';
+import { assessInstitutionBudget } from '../../utils/institutionBudgetHelper';
 import { getProjectsForInstitution } from '../../utils/institutionProjects';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
@@ -83,6 +85,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
 
   return (
     <div className="space-y-10 animate-in fade-in duration-300">
+      <BudgetDataDownloads scope="CONSEIL_REGIONAL" />
       
       {/* Top Navigation & Clean Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
@@ -216,11 +219,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
       {/* Grid of Regions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {paginatedRegions.map((inst) => {
-          const hasBreakdown = inst.budget_functioning_fcfa != null && inst.budget_investment_fcfa != null && (inst.total_budget_fcfa ?? 0) > 0;
-          const functioningPct = hasBreakdown 
-            ? Math.round((inst.budget_functioning_fcfa! / inst.total_budget_fcfa!) * 100) 
-            : 0;
-          const investmentPct = hasBreakdown ? (100 - functioningPct) : 0;
+          const assessment = assessInstitutionBudget(inst);
           const relatedProjects = getProjectsForInstitution(inst, allProjects);
           const relatedProjectsCount = relatedProjects.length;
 
@@ -283,10 +282,6 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                   (() => {
                     const prim = (inst.primitive_budget || OFFICIAL_PRIMITIVE_BUDGETS[inst.id])!;
                     const primTotal = prim.total_voted_fcfa;
-                    const stateTotal = inst.total_budget_fcfa ?? 0;
-                    const localRev = Math.max(0, primTotal - stateTotal);
-                    const statePct = primTotal > 0 ? Math.round((stateTotal / primTotal) * 100) : 0;
-                    const localPct = 100 - statePct;
 
                     return (
                       <div className="space-y-2 pt-2 mt-2">
@@ -314,19 +309,18 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                             </span>
                           </span>
                         </div>
-                        {/* Jauge Bicolore État vs Effort Régional */}
-                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden flex">
-                          <div className="bg-sky-500 h-full" style={{ width: `${statePct}%` }} title={`Concours de l'État: ${statePct}%`}></div>
-                          <div className="bg-emerald-500 h-full" style={{ width: `${localPct}%` }} title={`Ressources propres: ${localPct}%`}></div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:justify-between text-[10px] font-semibold text-slate-600 gap-1 pt-0.5">
-                          <span className="text-sky-700">
-                            Dotation État : <strong>{statePct}%</strong> ({formatAmountInWords(stateTotal)})
-                          </span>
-                          <span className="text-emerald-700">
-                            {inst.type === 'DISTRICT' ? 'Ressources District :' : 'Ressources Région :'} <strong>{localPct}%</strong> ({formatAmountInWords(localRev)})
-                          </span>
-                        </div>
+                        <p className="text-[10px] leading-relaxed text-slate-600 rounded-lg bg-slate-50 p-2" role="note">
+                          La répartition entre concours de l’État et ressources propres n’est pas
+                          déductible du montant total voté. Elle est affichée uniquement après lecture
+                          d’un état de recettes officiellement ventilé.
+                        </p>
+                        {prim.source_url && (
+                          <a href={prim.source_url} target="_blank" rel="noopener noreferrer"
+                            onClick={event => event.stopPropagation()}
+                            className="text-[10px] text-brand-blue underline">
+                            Consulter la source du budget primitif 2026
+                          </a>
+                        )}
                       </div>
                     );
                   })()
@@ -334,30 +328,33 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                   <div className="space-y-2 pt-2 mt-3">
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-slate-500 font-bold uppercase text-[10px]">
-                        {inst.type === 'DISTRICT' ? 'Dotation du District Autonome (Loi de Finances)' : 'Dotation Budgétaire Régionale (Loi de Finances)'}
+                        {inst.type === 'DISTRICT' ? 'Dotation enregistrée du District — source primaire à confirmer' : 'Dotation régionale enregistrée — source primaire à confirmer'}
                       </span>
                       <span className="font-black text-slate-900">
-                        {formatFCFA(inst.total_budget_fcfa)} <span className="text-brand-blue font-bold">({formatAmountInWords(inst.total_budget_fcfa)})</span>
+                        {assessment.totalFormatted}{' '}
+                        {assessment.totalWords && (
+                          <span className="text-brand-blue font-bold">({assessment.totalWords})</span>
+                        )}
                       </span>
                     </div>
-                    {hasBreakdown ? (
+                    {assessment.status === 'AVAILABLE' && assessment.hasBreakdown && assessment.functioningPct !== null && assessment.investmentPct !== null ? (
                       <>
                         <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden flex">
-                          <div className="bg-brand-blue h-full" style={{ width: `${functioningPct}%` }}></div>
-                          <div className="bg-emerald-500 h-full" style={{ width: `${investmentPct}%` }}></div>
+                          <div className="bg-brand-blue h-full" style={{ width: `${assessment.functioningPct}%` }}></div>
+                          <div className="bg-emerald-500 h-full" style={{ width: `${assessment.investmentPct}%` }}></div>
                         </div>
                         <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-semibold text-slate-600 gap-1 pt-1">
                           <span className="text-brand-blue">
-                            Fonct. : <strong className="font-bold">{functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
+                            Fonct. : <strong className="font-bold">{assessment.functioningPct}%</strong> ({formatAmountInWords(inst.budget_functioning_fcfa)})
                           </span>
                           <span className="text-emerald-700">
-                            Invest. : <strong className="font-bold">{investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
+                            Invest. : <strong className="font-bold">{assessment.investmentPct}%</strong> ({formatAmountInWords(inst.budget_investment_fcfa)})
                           </span>
                         </div>
                       </>
                     ) : (
                       <div className="p-2 bg-slate-50 rounded-xl border border-slate-200 text-[10px] text-slate-500 italic">
-                        Ventilation Fonctionnement / Investissement à corroborer via l'annexe budgétaire.
+                        {assessment.noticeText || "Ventilation Fonctionnement / Investissement à corroborer via l'annexe budgétaire."}
                       </div>
                     )}
                   </div>
