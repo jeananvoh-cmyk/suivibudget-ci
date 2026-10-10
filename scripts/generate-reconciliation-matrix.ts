@@ -173,6 +173,9 @@ const evidence = JSON.parse(readFileSync(resolve(process.cwd(), 'docs/audits/ins
 const historicRegulators = JSON.parse(readFileSync(resolve(process.cwd(), 'docs/audits/institution-reconciliation/REGULATORY_UNVERIFIED_2026_HISTORY.json'),'utf-8')) as { entities: Array<{id:string;previously_reported_fcfa:number}> };
 const documentary = new Map<string, (typeof evidence.national)[number]>([...evidence.national, ...evidence.ministries].map(row => [row.id, row]));
 const historicalRegulatorAmounts = new Map(historicRegulators.entities.map(row => [row.id, row.previously_reported_fcfa]));
+const historicMinistries = JSON.parse(readFileSync(resolve(process.cwd(), 'docs/audits/institution-reconciliation/MINISTRY_WITHHELD_2026_HISTORY.json'), 'utf-8')) as { entities: Array<{id:string;previously_reported_fcfa:number}> };
+const withheldMinistryLegacy = new Map(historicMinistries.entities.map(row => [row.id, row.previously_reported_fcfa]));
+
 for (const e of matrixEntities) {
   const row = documentary.get(e.institution_id);
   if (row) {
@@ -189,10 +192,17 @@ for (const e of matrixEntities) {
     e.parent_section_code = row.parent_section_code ?? null;
     e.lfi_section_cp_2026_fcfa = row.parent_section_amount_fcfa ?? row.amount_fcfa;
     e.amount_matches_lfi_row = e.total_fcfa === row.amount_fcfa;
-    if (!e.amount_matches_lfi_row) {
+    if (e.category === 'MINISTERE' && e.total_fcfa == null) {
+      e.previous_reported_2026_fcfa = withheldMinistryLegacy.get(e.institution_id) ?? null;
+      e.verification_status = 'NOT_DOCUMENTED';
+      e.reconciliation_status = 'NO_BREAKDOWN';
+      e.accounting_treatment = 'PORTFOLIO_AMOUNT_WITHHELD';
+      e.blocking_reasons = [`Section LFI ${row.section_code} identifiable, mais budget du portefeuille non renseigne dans les donnees officielles applicatives actuelles. Ne pas reactiver l'ancien chiffre historique.`];
+      e.notice_text = 'Montant de portefeuille volontairement non renseigne. Ancienne valeur en archive uniquement.';
+    } else if (!e.amount_matches_lfi_row) {
       e.verification_status = 'NOT_DOCUMENTED';
       e.blocking_reasons = [`Montant de la fiche (${e.total_fcfa}) distinct de section LFI ${row.section_code} (${row.amount_fcfa}). Perimetre de portefeuille/C2D et actes de transfert a documenter.`];
-      e.notice_text = 'Ancien montant de portefeuille : ne pas presenter comme credit officiel de section.';
+      e.notice_text = 'Montant de portefeuille non certifie comme credit de section.';
     } else if (e.category === 'MINISTERE') {
       e.verification_status = 'PARTIAL_BREAKDOWN';
       e.blocking_reasons = ['Montant de section recoupe, ventilation absente ; attribution au portefeuille administratif non certifiee.'];
@@ -253,6 +263,8 @@ const metadata = {
   unverified_regulatory_entities: 7,
   regulators_previously_reported_sum_fcfa: 42150000000,
   unsupported_ministry_portfolio_rows: matrixEntities.filter(e => e.category === 'MINISTERE' && e.total_fcfa != null && e.verification_status === 'NOT_DOCUMENTED').length,
+  withheld_ministry_portfolio_rows: matrixEntities.filter(e => e.category === 'MINISTERE' && e.accounting_treatment === 'PORTFOLIO_AMOUNT_WITHHELD').length,
+  ministry_documentary_reservations_count: matrixEntities.filter(e => e.category === 'MINISTERE' && e.verification_status === 'NOT_DOCUMENTED' && e.institution_id !== 'gov-035').length,
   ministry_section_reference_rows: 34,
   ministry_portfolios: 35,
   previous_certified_sum_fcfa: 356153879687,
@@ -280,7 +292,7 @@ La matrice de 66 entités est générée à partir des références LFI 2026 (PD
 - Montants institutionnels recoupés : **${verifiedAmountCount}**, dont 2 programmes internes de la Présidence (non additifs).
 - Total limité aux **11 sections institutionnelles distinctes** : **${formatFCFA(totalFcfaVerified)}**.
 - **7 autorités non certifiées** : 42 150 000 000 FCFA historiquement affichés, retirés jusqu'à preuve nominative.
-- **34 sections ministérielles** pour 35 portefeuilles : rapprochements C2D et 4 reliquats historiques maintenus ; ${metadata.unsupported_ministry_portfolio_rows} montants de portefeuille ne concordent pas avec le total CP de leur section.
+- **34 sections ministérielles** pour 35 portefeuilles : rapprochements C2D et 4 reliquats historiques maintenus ; ${metadata.unsupported_ministry_portfolio_rows} montants diffèrent du CP de leur section et ${metadata.withheld_ministry_portfolio_rows} portefeuilles ont leur montant non renseigné dans les données actuelles.
 - ${notDocumentedCount} entités non documentées selon le niveau requis, ${partialBreakdownCount} ventilations partielles, ${notPublishedCount} non publiées.
 - Ancien total 356 153 879 687 FCFA : **invalidé** (double comptage Présidence/IGE/HABG et budgets de régulateurs non justifiés).
 
