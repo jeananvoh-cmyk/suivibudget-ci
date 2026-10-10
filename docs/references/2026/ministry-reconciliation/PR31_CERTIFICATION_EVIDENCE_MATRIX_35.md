@@ -55,6 +55,18 @@ Cette matrice documente les preuves disponibles au niveau des **sections et des 
 | gov-034 | MINISTÈRE DÉLÉGUÉ CHARGÉ DE L'ENSEIGNEMENT TECHNIQUE | 334 | 182 301 855 312 | Actions réconciliées (référentiel canonique) | Correspondance portefeuille/section à certifier indépendamment |
 | gov-035 | MINISTÈRE DÉLÉGUÉ CHARGÉ DES PRODUCTIONS VIVRIÈRES | 229 | Non individualisable (section partagée) | Sections, programmes et sommes d’actions vérifiés (Annexe 4) | Section 229 partagée : aucune dotation autonome établie |
 
+## Actualisation des attributions du Gouvernement après la LFI
+
+L'annexe officielle au **décret n° 2026-84 du 4 mars 2026** permet d'identifier la tutelle et les structures rattachées aux **35/35 portefeuilles actuels**. La matrice explicite des identifiants et numéros de pages est enregistrée dans `DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json` (source primaire : https://www.gouv.ci/uploads/publications/177580607447.pdf). La source est liée dans les 35 enregistrements du registre ministériel et dans les fiches.
+
+Les cas à périmètre partagé sont mieux documentés administrativement :
+- **Agriculture / Productions vivrières** : à la page PDF 4, le ministère délégué a notamment **Aderiz** comme structure rattachée, tandis que les structures agricoles générales sont listées sous le ministère principal. Ce partage de tutelle ne crée **aucune dotation autonome démontrée** dans la section 229.
+- **Transports / Affaires maritimes** : page PDF 5, la délégation maritime est distincte et inclut **l'ARSTM** ; ne pas additionner automatiquement sections 340 et 440.
+- **Éducation nationale / Enseignement technique** : page PDF 9, le ministre délégué est distinct et exerce la tutelle notamment sur **l'IPNETP** et les centres de formation professionnelle ; cela ne prouve aucun transfert de crédits entre les sections 331 et 334.
+- **Finances/Budget / Plan** : l'annexe distingue leurs organismes de tutelle (pages PDF 3 et 7), mais pas les transferts comptables entre sections 322 et 328.
+
+**Niveau de preuve acquis : tutelles et rattachements administratifs.** **Niveau de preuve non acquis : mouvements de crédits, enveloppes budgétaires individualisées après remaniement, exécution.** Ce document ne doit pas faire passer une compétence ministérielle pour un CP supplémentaire.
+
 ## Sources, fiabilité et méthode
 
 - LFI 2026, récapitulatif par section et programme : **pages PDF 45–54**, crédits **CP 2026** distincts des AE (pour les lignes extraites, les valeurs AE et CP sont égales, sans les confondre conceptuellement).
