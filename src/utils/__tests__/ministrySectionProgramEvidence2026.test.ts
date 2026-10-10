@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import evidence from '../../../docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json';
 import actionEvidence from '../../../docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json';
+import lfiActionComplement from '../../../docs/references/2026/ministry-reconciliation/LFI_2026_ACTION_COMPLEMENTS_4_PROGRAMMES.json';
 import programmeLabels from '../../data/ministryOfficialProgramLabels2026.json';
 import registry from '../../../docs/references/2026/MINISTRY_DOCUMENTATION_REGISTRY_2026.json';
 import { MINISTRY_CANDIDATE_CP_2026, MINISTRY_DOCUMENTARY_DISCREPANCIES } from '../../data/ministryScopeExceptions';
@@ -106,9 +107,20 @@ describe('independent 2026 LFI CP and Annexe 4 section/program documentary cross
       .map(x => x.section_code + '/' + x.program_code)).toEqual([
         '108/13010', '108/13011', '108/13013', '352/22121',
       ]);
-    expect(pending.filter(x => x.section_program_evidence?.action_numeric_reconciliation_complete === false)
-      .map(x => x.institution_id)).toEqual(['gov-001', 'gov-028']);
-    expect(pending.filter(x => x.section_program_evidence?.action_numeric_reconciliation_complete === true)).toHaveLength(21);
+    // Annex 4's four gaps remain documented, but LFI's detailed budget now supplies the missing CP actions.
+    expect(pending.filter(x => x.section_program_evidence?.action_numeric_reconciliation_complete === false))
+      .toHaveLength(0);
+    expect(pending.filter(x => x.section_program_evidence?.action_numeric_reconciliation_complete === true)).toHaveLength(23);
+    expect(lfiActionComplement.records).toHaveLength(4);
+    expect(lfiActionComplement.records.flatMap(x => x.actions)).toHaveLength(5);
+    const programmeCP = new Map(sections.flatMap(sec =>
+      sec.programs.map(p => [sec.section_code + '/' + p.official_code, p.cp_2026_fcfa] as const),
+    ));
+    for (const record of lfiActionComplement.records) {
+      expect(record.actions.reduce((sum, action) => sum + action.cp_fcfa, 0))
+        .toBe(record.program_total_cp_fcfa);
+      expect(record.program_total_cp_fcfa).toBe(programmeCP.get(record.section_code + '/' + record.program_code));
+    }
   });
 
   it('has an official readable programme label for every one of the 112 CP lines', () => {
