@@ -45,7 +45,26 @@
       "documentary_status": "AMBIGUOUS_STRUCTURE",
       "reconciliation_status": "NOT_COMPARABLE",
       "publication_status": "DRAFT",
-      "blocking_reason": "Structure institutionnelle particulière (Primature, Section 108) sans découpage standard en programmes 21xxx/22xxx dans l'Annexe 4 DPPD-PAP."
+      "blocking_reason": "Structure institutionnelle particulière (Primature, Section 108) sans découpage standard en programmes 21xxx/22xxx dans l'Annexe 4 DPPD-PAP.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "108",
+        "section_cp_2026_fcfa": 71326766299,
+        "lfi_pdf_page": 45,
+        "annex4_pdf_page_range": [
+          1171,
+          1178
+        ],
+        "section_programs_count": 3,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-002",
@@ -73,7 +92,26 @@
       "documentary_status": "DOCUMENTARY_GAP",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Crédits de défense nationale (Section 226) comportant des dépenses opérationnelles et confidentielles avec ventilation d'actions partielle non détaillée dans le PAP public."
+      "blocking_reason": "Crédits de défense nationale (Section 226) comportant des dépenses opérationnelles et confidentielles avec ventilation d'actions partielle non détaillée dans le PAP public.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "226",
+        "section_cp_2026_fcfa": 481041827995,
+        "lfi_pdf_page": 46,
+        "annex4_pdf_page_range": [
+          27,
+          56
+        ],
+        "section_programs_count": 3,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-003",
@@ -134,7 +172,26 @@
       "documentary_status": "DOCUMENTARY_GAP",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 321 (Affaires Étrangères) : crédits des représentations diplomatiques et consulaires nécessitant consolidation préalable des dotations annexes."
+      "blocking_reason": "Section 321 (Affaires Étrangères) : crédits des représentations diplomatiques et consulaires nécessitant consolidation préalable des dotations annexes.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "321",
+        "section_cp_2026_fcfa": 146728395147,
+        "lfi_pdf_page": 47,
+        "annex4_pdf_page_range": [
+          113,
+          140
+        ],
+        "section_programs_count": 4,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-005",
@@ -189,7 +246,26 @@
       "documentary_status": "HIGH_COMPLEXITY",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 323 (Intérieur et Sécurité) : déconcentration territoriale lourde et subventions d'appui aux collectivités territoriales (23218) intriquées."
+      "blocking_reason": "Section 323 (Intérieur et Sécurité) : déconcentration territoriale lourde et subventions d'appui aux collectivités territoriales (23218) intriquées.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "323",
+        "section_cp_2026_fcfa": 945963329452,
+        "lfi_pdf_page": 48,
+        "annex4_pdf_page_range": [
+          233,
+          366
+        ],
+        "section_programs_count": 6,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-007",
@@ -217,7 +293,26 @@
       "documentary_status": "HIGH_COMPLEXITY",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 322 (Finances et Budget) : 7 programmes, service de la dette publique et charges communes réparties nécessitant isolation stricte."
+      "blocking_reason": "Section 322 (Finances et Budget) : 7 programmes, service de la dette publique et charges communes réparties nécessitant isolation stricte.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "322",
+        "section_cp_2026_fcfa": 671323963425,
+        "lfi_pdf_page": 47,
+        "annex4_pdf_page_range": [
+          141,
+          232
+        ],
+        "section_programs_count": 11,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-008",
@@ -272,7 +367,26 @@
       "documentary_status": "AMBIGUOUS_STRUCTURE",
       "reconciliation_status": "NOT_COMPARABLE",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 229 (Agriculture) : section budgétaire unifiée partagée avec gov-035 (Productions Vivrières) sans scission budgétaire légale en LFI 2026."
+      "blocking_reason": "Section 229 (Agriculture) : section budgétaire unifiée partagée avec gov-035 (Productions Vivrières) sans scission budgétaire légale en LFI 2026.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "229",
+        "section_cp_2026_fcfa": 333878089526,
+        "lfi_pdf_page": 47,
+        "annex4_pdf_page_range": [
+          57,
+          94
+        ],
+        "section_programs_count": 8,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": true
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-010",
@@ -300,7 +414,26 @@
       "documentary_status": "DOCUMENTARY_GAP",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 340 (Transports) : dotations Mobilité Urbaine Grand Abidjan (23226) et Régulation (23227) non ventilées en actions simples."
+      "blocking_reason": "Section 340 (Transports) : dotations Mobilité Urbaine Grand Abidjan (23226) et Régulation (23227) non ventilées en actions simples.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "340",
+        "section_cp_2026_fcfa": 307769615082,
+        "lfi_pdf_page": 50,
+        "annex4_pdf_page_range": [
+          655,
+          678
+        ],
+        "section_programs_count": 5,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-011",
@@ -328,7 +461,26 @@
       "documentary_status": "DOCUMENTARY_GAP",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 366 (Hydraulique, Assainissement) : dotations assainissement (23240) et salubrité (23239) intriquées avec programmes 22148/22149."
+      "blocking_reason": "Section 366 (Hydraulique, Assainissement) : dotations assainissement (23240) et salubrité (23239) intriquées avec programmes 22148/22149.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "366",
+        "section_cp_2026_fcfa": 502893150963,
+        "lfi_pdf_page": 53,
+        "annex4_pdf_page_range": [
+          1017,
+          1048
+        ],
+        "section_programs_count": 6,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-012",
@@ -356,7 +508,26 @@
       "documentary_status": "DOCUMENTARY_GAP",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 357 (Promotion de la Jeunesse) : Fonds d'appui à la jeunesse (23248) et service civique (23252) à isoler."
+      "blocking_reason": "Section 357 (Promotion de la Jeunesse) : Fonds d'appui à la jeunesse (23248) et service civique (23252) à isoler.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "357",
+        "section_cp_2026_fcfa": 81484195624,
+        "lfi_pdf_page": 52,
+        "annex4_pdf_page_range": [
+          931,
+          958
+        ],
+        "section_programs_count": 6,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-013",
@@ -384,7 +555,26 @@
       "documentary_status": "HIGH_COMPLEXITY",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 335 (Santé) : budget massif (808 Mds FCFA) et fonds spéciaux SIDA (23222) / Addictions (23221) nécessitant audit approfondi des dotations."
+      "blocking_reason": "Section 335 (Santé) : budget massif (808 Mds FCFA) et fonds spéciaux SIDA (23222) / Addictions (23221) nécessitant audit approfondi des dotations.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "335",
+        "section_cp_2026_fcfa": 808992158914,
+        "lfi_pdf_page": 49,
+        "annex4_pdf_page_range": [
+          565,
+          632
+        ],
+        "section_programs_count": 5,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-014",
@@ -412,7 +602,26 @@
       "documentary_status": "DOCUMENTARY_GAP",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 358 (Construction, Logement, Urbanisme) : éclatement des programmes foncier et cadre de vie multi-pages dans le PAP."
+      "blocking_reason": "Section 358 (Construction, Logement, Urbanisme) : éclatement des programmes foncier et cadre de vie multi-pages dans le PAP.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "358",
+        "section_cp_2026_fcfa": 123247714398,
+        "lfi_pdf_page": 52,
+        "annex4_pdf_page_range": [
+          959,
+          986
+        ],
+        "section_programs_count": 4,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-015",
@@ -440,7 +649,26 @@
       "documentary_status": "DOCUMENTARY_GAP",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 351 (Ressources Animales et Halieutiques) : rupture de page sur le sous-tableau aquacole (action 2213402) nécessitant consolidation documentaire."
+      "blocking_reason": "Section 351 (Ressources Animales et Halieutiques) : rupture de page sur le sous-tableau aquacole (action 2213402) nécessitant consolidation documentaire.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "351",
+        "section_cp_2026_fcfa": 26700912028,
+        "lfi_pdf_page": 52,
+        "annex4_pdf_page_range": [
+          857,
+          880
+        ],
+        "section_programs_count": 4,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-016",
@@ -468,7 +696,26 @@
       "documentary_status": "DOCUMENTARY_GAP",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 376 (Patrimoine, Portefeuille de l'État) : déclinaison des crédits d'EPN (22239) et entreprises publiques à consolider."
+      "blocking_reason": "Section 376 (Patrimoine, Portefeuille de l'État) : déclinaison des crédits d'EPN (22239) et entreprises publiques à consolider.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "376",
+        "section_cp_2026_fcfa": 49213125398,
+        "lfi_pdf_page": 53,
+        "annex4_pdf_page_range": [
+          1071,
+          1102
+        ],
+        "section_programs_count": 3,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-017",
@@ -556,7 +803,26 @@
       "documentary_status": "DOCUMENTARY_GAP",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 347 (Commerce et Industrie) : 5 programmes dont PME et Artisanat avec pagination éclatée dans le PAP."
+      "blocking_reason": "Section 347 (Commerce et Industrie) : 5 programmes dont PME et Artisanat avec pagination éclatée dans le PAP.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "347",
+        "section_cp_2026_fcfa": 96866871722,
+        "lfi_pdf_page": 51,
+        "annex4_pdf_page_range": [
+          759,
+          798
+        ],
+        "section_programs_count": 5,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-020",
@@ -584,7 +850,26 @@
       "documentary_status": "DOCUMENTARY_GAP",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 350 (Tourisme et Loisirs) : dotations Fonds de Développement Touristique (23235) et promotion (23236) non déclinées en actions standard."
+      "blocking_reason": "Section 350 (Tourisme et Loisirs) : dotations Fonds de Développement Touristique (23235) et promotion (23236) non déclinées en actions standard.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "350",
+        "section_cp_2026_fcfa": 19207286052,
+        "lfi_pdf_page": 51,
+        "annex4_pdf_page_range": [
+          833,
+          856
+        ],
+        "section_programs_count": 5,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-021",
@@ -612,7 +897,26 @@
       "documentary_status": "DOCUMENTARY_GAP",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 328 (Économie, Plan et Développement) : dotation Fonds National de la Statistique (23250) et 5 programmes macroéconomiques."
+      "blocking_reason": "Section 328 (Économie, Plan et Développement) : dotation Fonds National de la Statistique (23250) et 5 programmes macroéconomiques.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "328",
+        "section_cp_2026_fcfa": 44194260102,
+        "lfi_pdf_page": 48,
+        "annex4_pdf_page_range": [
+          391,
+          420
+        ],
+        "section_programs_count": 6,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-022",
@@ -640,7 +944,26 @@
       "documentary_status": "HIGH_COMPLEXITY",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 333 (Enseignement Supérieur) : universités et centres de recherche avec multiples transferts autonomes et bourses."
+      "blocking_reason": "Section 333 (Enseignement Supérieur) : universités et centres de recherche avec multiples transferts autonomes et bourses.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "333",
+        "section_cp_2026_fcfa": 338779408246,
+        "lfi_pdf_page": 49,
+        "annex4_pdf_page_range": [
+          515,
+          538
+        ],
+        "section_programs_count": 4,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-023",
@@ -701,7 +1024,26 @@
       "documentary_status": "HIGH_COMPLEXITY",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 331 (Éducation Nationale) : premier budget de l'État (1 563 Mds FCFA) avec 4 sous-secteurs d'enseignement lourdement déconcentrés."
+      "blocking_reason": "Section 331 (Éducation Nationale) : premier budget de l'État (1 563 Mds FCFA) avec 4 sous-secteurs d'enseignement lourdement déconcentrés.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "331",
+        "section_cp_2026_fcfa": 1563721366602,
+        "lfi_pdf_page": 49,
+        "annex4_pdf_page_range": [
+          445,
+          514
+        ],
+        "section_programs_count": 4,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-025",
@@ -756,7 +1098,26 @@
       "documentary_status": "DOCUMENTARY_GAP",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 369 (Cohésion Nationale) : écart documentaire détecté dans le Tableau 7 du programme 22123 (Solidarité)."
+      "blocking_reason": "Section 369 (Cohésion Nationale) : écart documentaire détecté dans le Tableau 7 du programme 22123 (Solidarité).",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "369",
+        "section_cp_2026_fcfa": 57361750199,
+        "lfi_pdf_page": 53,
+        "annex4_pdf_page_range": [
+          1049,
+          1070
+        ],
+        "section_programs_count": 4,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-027",
@@ -784,7 +1145,26 @@
       "documentary_status": "DOCUMENTARY_GAP",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 356 (Transition Numérique) : dotations zones rurales (23237) et régulation (23238) non associées à des actions détaillées dans le DPPD."
+      "blocking_reason": "Section 356 (Transition Numérique) : dotations zones rurales (23237) et régulation (23238) non associées à des actions détaillées dans le DPPD.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "356",
+        "section_cp_2026_fcfa": 83275503595,
+        "lfi_pdf_page": 52,
+        "annex4_pdf_page_range": [
+          911,
+          930
+        ],
+        "section_programs_count": 4,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-028",
@@ -812,7 +1192,26 @@
       "documentary_status": "DOCUMENTARY_GAP",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 352 (Femme, Famille, Enfant) : saut de pagination sur le tableau du programme 22121 dans le tirage officiel."
+      "blocking_reason": "Section 352 (Femme, Famille, Enfant) : saut de pagination sur le tableau du programme 22121 dans le tirage officiel.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "352",
+        "section_cp_2026_fcfa": 31263058865,
+        "lfi_pdf_page": 52,
+        "annex4_pdf_page_range": [
+          881,
+          910
+        ],
+        "section_programs_count": 4,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": false,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-029",
@@ -840,7 +1239,26 @@
       "documentary_status": "DOCUMENTARY_GAP",
       "reconciliation_status": "SOURCE_GAP",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 346 (Culture et Francophonie) : dotations cinéma FONSIC (23242) / ONAC-CI (23243) / FSCCA (23229)."
+      "blocking_reason": "Section 346 (Culture et Francophonie) : dotations cinéma FONSIC (23242) / ONAC-CI (23243) / FSCCA (23229).",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "346",
+        "section_cp_2026_fcfa": 37598620420,
+        "lfi_pdf_page": 50,
+        "annex4_pdf_page_range": [
+          729,
+          758
+        ],
+        "section_programs_count": 8,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": false
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     },
     {
       "institution_id": "gov-030",
@@ -1027,7 +1445,26 @@
       "documentary_status": "AMBIGUOUS_STRUCTURE",
       "reconciliation_status": "NOT_COMPARABLE",
       "publication_status": "DRAFT",
-      "blocking_reason": "Section 229 (Productions Vivrières) : section budgétaire unifiée partagée avec gov-009 (Agriculture) en LFI 2026."
+      "blocking_reason": "Section 229 (Productions Vivrières) : section budgétaire unifiée partagée avec gov-009 (Agriculture) en LFI 2026.",
+      "section_program_evidence": {
+        "source": "LFI_2026_CP_AND_ANNEX4",
+        "path": "docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json",
+        "section_code": "229",
+        "section_cp_2026_fcfa": 333878089526,
+        "lfi_pdf_page": 47,
+        "annex4_pdf_page_range": [
+          57,
+          94
+        ],
+        "section_programs_count": 8,
+        "program_amounts_match_annex4": true,
+        "programme_codes_individually_found": true,
+        "action_level_certified": false,
+        "portfolio_allocation_certified": false,
+        "shared_section": true
+      },
+      "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
     }
   ]
 }
