@@ -98,7 +98,9 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false,
-        "annex4_action_gap_supplemented_by_lfi": true
+        "annex4_action_gap_supplemented_by_lfi": true,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "c2d_source_evidence": {
         "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
@@ -117,6 +119,16 @@
         "c2d_difference_residual_fcfa": 0,
         "numeric_provenance_explained": true,
         "ministry_budget_certified": false
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "14",
+        "lfi_pdf_page": 12,
+        "section_code": "108",
+        "legal_voted_section_cp_fcfa": 71326766299,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -189,7 +201,19 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 14,
+        "section_code": "226",
+        "legal_voted_section_cp_fcfa": 481041827995,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -242,7 +266,19 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 15,
+        "section_code": "237",
+        "legal_voted_section_cp_fcfa": 45121940916,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -315,7 +351,19 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 14,
+        "section_code": "321",
+        "legal_voted_section_cp_fcfa": 146728395147,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -362,7 +410,9 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "c2d_source_evidence": {
         "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
@@ -381,6 +431,16 @@
         "c2d_difference_residual_fcfa": 0,
         "numeric_provenance_explained": true,
         "ministry_budget_certified": false
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 14,
+        "section_code": "325",
+        "legal_voted_section_cp_fcfa": 129151307791,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -453,7 +513,9 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "c2d_source_evidence": {
         "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
@@ -472,6 +534,16 @@
         "c2d_difference_residual_fcfa": -370246,
         "numeric_provenance_explained": false,
         "ministry_budget_certified": false
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 14,
+        "section_code": "323",
+        "legal_voted_section_cp_fcfa": 945963329452,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -545,7 +617,9 @@
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "c2d_source_evidence": {
         "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
@@ -556,6 +630,16 @@
         "portfolio_independent_allocation_certified": false,
         "shared_section": false,
         "must_not_sum_without_scope_proof": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 15,
+        "section_code": "322",
+        "legal_voted_section_cp_fcfa": 671323963425,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -602,7 +686,19 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 18,
+        "section_code": "348",
+        "legal_voted_section_cp_fcfa": 706060209015,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -676,7 +772,9 @@
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "c2d_source_evidence": {
         "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
@@ -695,6 +793,16 @@
         "c2d_difference_residual_fcfa": 0,
         "numeric_provenance_explained": true,
         "ministry_budget_certified": false
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 19,
+        "section_code": "229",
+        "legal_voted_section_cp_fcfa": 333878089526,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": true
       }
     },
     {
@@ -768,7 +876,19 @@
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 18,
+        "section_code": "340",
+        "legal_voted_section_cp_fcfa": 307769615082,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -841,7 +961,9 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "c2d_source_evidence": {
         "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
@@ -860,6 +982,16 @@
         "c2d_difference_residual_fcfa": 481394,
         "numeric_provenance_explained": false,
         "ministry_budget_certified": false
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 20,
+        "section_code": "366",
+        "legal_voted_section_cp_fcfa": 502893150963,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -932,7 +1064,9 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "c2d_source_evidence": {
         "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
@@ -951,6 +1085,16 @@
         "c2d_difference_residual_fcfa": 0,
         "numeric_provenance_explained": true,
         "ministry_budget_certified": false
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 17,
+        "section_code": "357",
+        "legal_voted_section_cp_fcfa": 81484195624,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -1023,7 +1167,9 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "c2d_source_evidence": {
         "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
@@ -1042,6 +1188,16 @@
         "c2d_difference_residual_fcfa": 283456,
         "numeric_provenance_explained": false,
         "ministry_budget_certified": false
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 16,
+        "section_code": "335",
+        "legal_voted_section_cp_fcfa": 808992158914,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -1114,7 +1270,9 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "c2d_source_evidence": {
         "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
@@ -1133,6 +1291,16 @@
         "c2d_difference_residual_fcfa": 0,
         "numeric_provenance_explained": true,
         "ministry_budget_certified": false
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 18,
+        "section_code": "358",
+        "legal_voted_section_cp_fcfa": 123247714398,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -1205,7 +1373,19 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 19,
+        "section_code": "351",
+        "legal_voted_section_cp_fcfa": 26700912028,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -1278,7 +1458,19 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 15,
+        "section_code": "376",
+        "legal_voted_section_cp_fcfa": 49213125398,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -1331,7 +1523,19 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 17,
+        "section_code": "336",
+        "legal_voted_section_cp_fcfa": 39806735298,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -1378,7 +1582,9 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "c2d_source_evidence": {
         "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
@@ -1397,6 +1603,16 @@
         "c2d_difference_residual_fcfa": 0,
         "numeric_provenance_explained": true,
         "ministry_budget_certified": false
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 19,
+        "section_code": "345",
+        "legal_voted_section_cp_fcfa": 103197582643,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -1469,7 +1685,19 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 19,
+        "section_code": "347",
+        "legal_voted_section_cp_fcfa": 96866871722,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -1542,7 +1770,19 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 17,
+        "section_code": "350",
+        "legal_voted_section_cp_fcfa": 19207286052,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -1615,7 +1855,19 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 15,
+        "section_code": "328",
+        "legal_voted_section_cp_fcfa": 44194260102,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -1688,7 +1940,9 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "c2d_source_evidence": {
         "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
@@ -1707,6 +1961,16 @@
         "c2d_difference_residual_fcfa": 0,
         "numeric_provenance_explained": true,
         "ministry_budget_certified": false
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 16,
+        "section_code": "333",
+        "legal_voted_section_cp_fcfa": 338779408246,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -1760,7 +2024,19 @@
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 16,
+        "section_code": "362",
+        "legal_voted_section_cp_fcfa": 91411414044,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -1834,7 +2110,9 @@
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "c2d_source_evidence": {
         "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
@@ -1845,6 +2123,16 @@
         "portfolio_independent_allocation_certified": false,
         "shared_section": false,
         "must_not_sum_without_scope_proof": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 15,
+        "section_code": "331",
+        "legal_voted_section_cp_fcfa": 1563721366602,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -1891,7 +2179,9 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "historical_budget_discrepancy_audit": {
         "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
@@ -1900,6 +2190,16 @@
         "c2d_difference_residual_fcfa": null,
         "numeric_provenance_explained": false,
         "ministry_budget_certified": false
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 18,
+        "section_code": "330",
+        "legal_voted_section_cp_fcfa": 734442904943,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -1972,7 +2272,19 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 16,
+        "section_code": "369",
+        "legal_voted_section_cp_fcfa": 57361750199,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -2045,7 +2357,19 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 18,
+        "section_code": "356",
+        "legal_voted_section_cp_fcfa": 83275503595,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -2124,7 +2448,19 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false,
-        "annex4_action_gap_supplemented_by_lfi": true
+        "annex4_action_gap_supplemented_by_lfi": true,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 16,
+        "section_code": "352",
+        "legal_voted_section_cp_fcfa": 31263058865,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -2197,7 +2533,9 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "c2d_source_evidence": {
         "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
@@ -2216,6 +2554,16 @@
         "c2d_difference_residual_fcfa": 0,
         "numeric_provenance_explained": true,
         "ministry_budget_certified": false
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 17,
+        "section_code": "346",
+        "legal_voted_section_cp_fcfa": 37598620420,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -2268,7 +2616,19 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 17,
+        "section_code": "444",
+        "legal_voted_section_cp_fcfa": 70427777385,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -2315,7 +2675,9 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "c2d_source_evidence": {
         "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
@@ -2334,6 +2696,16 @@
         "c2d_difference_residual_fcfa": 0,
         "numeric_provenance_explained": true,
         "ministry_budget_certified": false
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 19,
+        "section_code": "343",
+        "legal_voted_section_cp_fcfa": 36680067253,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -2387,7 +2759,9 @@
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "historical_budget_discrepancy_audit": {
         "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
@@ -2396,6 +2770,16 @@
         "c2d_difference_residual_fcfa": null,
         "numeric_provenance_explained": false,
         "ministry_budget_certified": false
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 18,
+        "section_code": "440",
+        "legal_voted_section_cp_fcfa": 13746365872,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -2448,7 +2832,19 @@
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 14,
+        "section_code": "439",
+        "legal_voted_section_cp_fcfa": 5122516889,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -2502,7 +2898,9 @@
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "historical_budget_discrepancy_audit": {
         "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
@@ -2511,6 +2909,16 @@
         "c2d_difference_residual_fcfa": null,
         "numeric_provenance_explained": false,
         "ministry_budget_certified": false
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 16,
+        "section_code": "334",
+        "legal_voted_section_cp_fcfa": 182301855312,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": false
       }
     },
     {
@@ -2584,7 +2992,9 @@
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
-        "is_portfolio_appropriation_verified": false
+        "is_portfolio_appropriation_verified": false,
+        "voted_2026_initial_CP_section_proven": true,
+        "voted_2026_initial_CP_not_synonymous_with_reorganized_portfolio": true
       },
       "c2d_source_evidence": {
         "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
@@ -2595,6 +3005,16 @@
         "portfolio_independent_allocation_certified": false,
         "shared_section": true,
         "must_not_sum_without_scope_proof": true
+      },
+      "initial_2026_lfi_legal_cp_basis": {
+        "article": "15",
+        "lfi_pdf_page": 19,
+        "section_code": "229",
+        "legal_voted_section_cp_fcfa": 333878089526,
+        "verified_against_original_lfi": true,
+        "source": "docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json",
+        "independent_current_portfolio_budget_certified": false,
+        "shared_section": true
       }
     }
   ]
