@@ -125,7 +125,7 @@ describe('Adversarial & E2E Financial Integrity Suite (Section 7)', () => {
     const inst = NATIONAL_INSTITUTIONS_DATA.find(i => i.id === 'inst-senat')!;
     const view2026 = resolveInstitutionFinancialView(inst, 2026, 'LFI');
     expect(view2026.fiscal_year).toBe(2026);
-    expect(view2026.official_section_code).toBe('012');
+    expect(view2026.official_section_code).toBe('102');
     expect(view2026.budget_measure).toBe('CREDITS_VOTES');
 
     // A past fiscal year without loaded data falls back safely to NOT_DOCUMENTED
