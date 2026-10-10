@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import evidence from '../../../docs/references/2026/ministry-reconciliation/SECTION_PROGRAM_CROSSCHECK_22_2026.json';
+import actionEvidence from '../../../docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json';
 import registry from '../../../docs/references/2026/MINISTRY_DOCUMENTATION_REGISTRY_2026.json';
 import { MINISTRY_CANDIDATE_CP_2026, MINISTRY_DOCUMENTARY_DISCREPANCIES } from '../../data/ministryScopeExceptions';
 
@@ -76,6 +77,37 @@ describe('independent 2026 LFI CP and Annexe 4 section/program documentary cross
     expect(sectionById.get('gov-007')?.section_cp_2026_fcfa).toBe(671_323_963_425);
     expect(sectionById.get('gov-007')?.lfi_2026_pdf_page).toBe(47);
     expect(sectionById.get('gov-035')?.attribution_status).toBe('SHARED_SECTION_NOT_SEPARATELY_ALLOCATED');
+  });
+
+  it('reconciles 340 distinct Annex 4 action rows across 108 programme totals', () => {
+    expect(actionEvidence.programs).toHaveLength(112);
+    expect(actionEvidence.totals.action_reconciled_programmes).toBe(108);
+    expect(actionEvidence.totals.unique_actions).toBe(340);
+    const references = new Map(sections.flatMap(sec =>
+      sec.programs.map(p => [sec.section_code + '/' + p.official_code, p.cp_2026_fcfa] as const),
+    ));
+    for (const action of actionEvidence.programs) {
+      const expected = references.get(action.section_code + '/' + action.program_code);
+      expect(expected).toBeDefined();
+      if (action.actions_count > 0) {
+        expect(action.status).toBe('ACTION_SUM_RECONCILED');
+        expect(action.actions_sum_fcfa).toBe(expected);
+        expect(action.first_action_pdf_page).toBeGreaterThan(0);
+      } else {
+        expect(action.actions_sum_fcfa).toBe(0);
+        expect(action.status).not.toBe('ACTION_SUM_RECONCILED');
+      }
+    }
+  });
+
+  it('keeps exactly four programme action-level exceptions visible', () => {
+    expect(actionEvidence.programs.filter(x => x.actions_count === 0)
+      .map(x => x.section_code + '/' + x.program_code)).toEqual([
+        '108/13010', '108/13011', '108/13013', '352/22121',
+      ]);
+    expect(pending.filter(x => x.section_program_evidence?.action_numeric_reconciliation_complete === false)
+      .map(x => x.institution_id)).toEqual(['gov-001', 'gov-028']);
+    expect(pending.filter(x => x.section_program_evidence?.action_numeric_reconciliation_complete === true)).toHaveLength(21);
   });
 
   it('keeps the source documents auditable by original SHA-256', () => {
