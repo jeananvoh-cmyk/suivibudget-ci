@@ -1,5 +1,8 @@
 # PR #31 — Rapport de clôture du contrôle documentaire 2026
 
+> **Mise à jour du 10 octobre 2026 — postérieure au rapport ci-dessous :** six montants du répertoire applicatif `src/data/governmentData.ts` ont été alignés sur leurs référentiels canoniques CP 2026 (gov-005, gov-018, gov-025, gov-031, gov-032, gov-034). Le rapport initial ci-dessous conserve l'historique des 15 écarts *avant correction*. Neuf écarts numériques demeurent : gov-001, gov-006, gov-009, gov-011, gov-012, gov-013, gov-014, gov-022, gov-029. Les correspondances administratives de périmètre et les situations composites ne sont pas certifiées automatiquement. Aucune fusion ni modification Supabase.
+
+
 **Périmètre :** rapprochement du registre applicatif des 35 portefeuilles gouvernementaux et des sections candidates de la Loi de finances initiale 2026. Ce rapport ne constitue **pas** une certification des 35 fiches. Il constitue la clôture du contrôle technique et de la qualification des écarts, avec les points non résolus explicitement conservés.
 
 ## Sources et méthode
