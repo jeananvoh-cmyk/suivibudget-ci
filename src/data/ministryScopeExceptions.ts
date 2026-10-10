@@ -38,3 +38,9 @@ export const MINISTRY_CANDIDATE_CP_2026: Readonly<Record<string, number>> = Obje
   'gov-022': 338779408246,
   'gov-029': 37598620420,
 });
+
+/** Legacy directory totals withheld until independent section attribution is evidenced. */
+export const WITHHELD_MINISTRY_PORTFOLIO_IDS: ReadonlySet<string> = new Set([
+  ...Object.keys(MINISTRY_DOCUMENTARY_DISCREPANCIES),
+  'gov-035',
+]);
