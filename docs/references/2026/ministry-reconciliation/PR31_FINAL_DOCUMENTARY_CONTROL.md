@@ -5,6 +5,16 @@
 
 **Contrôle complémentaire du 10 octobre 2026 :** `gov-035` ne présente plus de dotation autonome sur sa fiche publique : le montant identique à l'Agriculture (gov-009) a été supprimé de `governmentData.ts` pour éviter une double attribution. L'ancienne valeur demeure exclusivement dans le CSV d'audit sous le statut `HISTORICAL_VALUE_ONLY`. Absence de montant individualisé = inconnu, jamais zéro. Les neuf écarts encore ouverts ne doivent pas être qualifiés de réconciliés sur la seule base des crédits de section candidate.
 
+## Décision de clôture de sûreté de publication — 10 octobre 2026
+
+Le contrôle de provenance dans le dépôt n'a pas établi une justification indépendante des neuf valeurs historiques divergentes du répertoire (gov-001, gov-006, gov-009, gov-011, gov-012, gov-013, gov-014, gov-022, gov-029). Elles sont **conservées dans le CSV d'audit**, mais ne sont plus attribuées à ces portefeuilles dans `src/data/governmentData.ts`. Il en va de même pour la dotation dupliquée du portefeuille délégué `gov-035`.
+
+La fiche affiche **montant à confirmer**, accompagné pour les neuf sections candidates du **montant CP de la section**, clairement séparé de la dotation propre au portefeuille. Aucun de ces neuf CP n'est une certification de l'attribution administrative exacte. Il ne faut pas sommer les montants de la section et de la fiche.
+
+Cela clôt la **suppression des attributions non justifiées dans le répertoire statique**, pas la réconciliation intégrale des 35 portefeuilles. Dix portefeuilles n'ont plus de budget indépendant affiché et l'origine historique des neuf valeurs reste inconnue. Pour lever ces réserves, il faut une pièce établissant la chaîne `portefeuille → section(s) → programmes → CP`, ainsi que le traitement des crédits communs et des ministres délégués.
+
+**Périmètre de la décision :** fichiers GitHub de la branche PR #31 uniquement ; aucune écriture Supabase, aucune fusion ni déploiement demandé. Une donnée provenant d'une autre source de l'application doit faire l'objet d'un contrôle distinct.
+
 **Périmètre :** rapprochement du registre applicatif des 35 portefeuilles gouvernementaux et des sections candidates de la Loi de finances initiale 2026. Ce rapport ne constitue **pas** une certification des 35 fiches. Il constitue la clôture du contrôle technique et de la qualification des écarts, avec les points non résolus explicitement conservés.
 
 ## Sources et méthode
