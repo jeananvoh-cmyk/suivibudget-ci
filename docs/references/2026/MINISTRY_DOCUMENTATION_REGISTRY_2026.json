@@ -89,13 +89,13 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER",
           "ANNEX4_ACTIONS_SOURCE_GAP",
           "INSTITUTIONAL_DOTATION_VS_PROGRAMME_SCOPE"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -164,11 +164,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -217,11 +217,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -290,11 +290,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -337,11 +337,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -410,11 +410,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -483,12 +483,12 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER",
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -531,11 +531,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -604,12 +604,12 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER",
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -678,12 +678,12 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER",
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -752,11 +752,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -825,11 +825,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -898,11 +898,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -971,11 +971,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -1044,11 +1044,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -1117,11 +1117,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -1170,11 +1170,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -1217,11 +1217,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -1290,11 +1290,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -1363,11 +1363,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -1436,11 +1436,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -1509,11 +1509,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -1562,12 +1562,12 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER",
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -1636,12 +1636,12 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER",
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -1684,11 +1684,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -1757,11 +1757,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -1830,11 +1830,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -1905,12 +1905,12 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER",
           "ANNEX4_ACTIONS_SOURCE_GAP"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -1979,11 +1979,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -2032,11 +2032,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -2079,11 +2079,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -2132,12 +2132,12 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER",
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -2186,11 +2186,11 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -2239,12 +2239,12 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER",
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     },
     {
@@ -2313,12 +2313,12 @@
         "legal_tutelle_evidence": "DECREE_2026_84_ANNEX_VERIFIED",
         "budget_portfolio_attribution": "NOT_ESTABLISHED_FROM_AVAILABLE_LFI_AND_DECREE",
         "certified_public_budget": false,
-        "does_not_count_as_appropriation": false,
         "outstanding_proofs": [
           "OFFICIAL_2026_CP_PORTFOLIO_ALLOCATION_OR_POST_LFI_CREDIT_TRANSFER",
           "COMPOSITE_OR_SHARED_SCOPE_INDEPENDENT_CP_PROOF"
         ],
-        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json"
+        "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
+        "is_portfolio_appropriation_verified": false
       }
     }
   ]
