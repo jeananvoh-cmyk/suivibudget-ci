@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import documentationRegistry from '../../../docs/references/2026/MINISTRY_DOCUMENTATION_REGISTRY_2026.json';
+import { GOVERNMENT_OFFICIALS } from '../../data/governmentData';
 
 interface CanonicalBudget {
   institution_code: string;
@@ -39,6 +40,17 @@ describe('2026 documentation registry consistency against canonical sources', ()
       expect(budget.totals.programs_delta).toBe(0);
       expect(budget.totals.actions_delta).toBe(0);
       expect(budget.totals.reconciliation_status).toBe('RECONCILED');
+    }
+  });
+
+  it('keeps six corrected public directory totals aligned with canonical CP evidence', () => {
+    const correctedIds = ['gov-005', 'gov-018', 'gov-025', 'gov-031', 'gov-032', 'gov-034'];
+    for (const id of correctedIds) {
+      const item = documentationRegistry.institutions.find(x => x.institution_id === id);
+      expect(item?.canonical_reference_path).toBeTruthy();
+      const budget = canonicalFiles['../../../' + item!.canonical_reference_path];
+      const official = GOVERNMENT_OFFICIALS.find(x => x.id === id);
+      expect(official?.budget_fcfa, id).toBe(budget.totals.total_ministry_2026_fcfa);
     }
   });
 
