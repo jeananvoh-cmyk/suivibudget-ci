@@ -82,7 +82,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
         photo_url: fromStore.leader_photo_url || official.photo_url,
         website_url: fromStore.website || official.website_url,
         facebook_url: fromStore.facebook_url || official.facebook_url,
-        budget_fcfa: fromStore.total_budget_fcfa || official.budget_fcfa,
+        budget_fcfa: fromStore.total_budget_fcfa ?? official.budget_fcfa,
       };
     });
   }, [institutions, storeTick]);
@@ -135,7 +135,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
       budget_functioning_fcfa: null,
       budget_investment_fcfa: null,
       total_budget_fcfa: official.budget_fcfa ?? null,
-      budget_not_published: !official.budget_fcfa
+      budget_not_published: official.budget_fcfa == null
     };
     setSelectedInstForDetail(instObj);
   };
