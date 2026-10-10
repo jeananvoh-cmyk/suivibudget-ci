@@ -7,7 +7,7 @@ describe('2026 ministerial portfolio documentary safeguards', () => {
 
 
   it('covers each of the 35 distinct 2026 portfolio identifiers without manufacturing a missing budget', () => {
-    const ids = GOVERNMENT_OFFICIALS.map(o => o.id).filter(id => /^gov-\\d{3}$/.test(id));
+    const ids = GOVERNMENT_OFFICIALS.map(o => o.id).filter(id => /^gov-\d{3}$/.test(id));
     expect(ids).toHaveLength(35);
     expect(new Set(ids).size).toBe(35);
     expect([...ids].sort()).toEqual(
