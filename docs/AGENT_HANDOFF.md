@@ -7,7 +7,7 @@
 - BASE_MASTER_SHA : `707b3b688f23bd33dc0f3504e13b79c65908dd50` (Merge commit de PR #28 sur master)
 - PR : PR Reconciliation Budgets Institutionnels & Élimination des Faux Zéros
 - SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée, REMOTE_SUPABASE_WRITES = 0)
-- CURRENT_MILESTONE : Réconciliation des dotations institutionnelles publiques et élimination définitive des faux zéros budgétaires. Fiche Cour Suprême certifiée non-individualisée dans la LFI 2026 (répartition constitutionnelle vers Cour de Cassation, Conseil d'État et Cour des Comptes). 10 communes du Grand Abidjan assainies sous autonomie fiscale (null !== 0). Module d'intégrité budgétaire unifié `institutionBudgetHelper.ts`. 374 tests unitaires PASS, build TypeScript et Vite 100% verts.
+- CURRENT_MILESTONE : Réconciliation des dotations institutionnelles publiques et élimination définitive des faux zéros budgétaires. Fiche Cour Suprême signalée non individualisée dans le récapitulatif de la LFI 2026 (répartition constitutionnelle vers Cour de Cassation, Conseil d'État et Cour des Comptes). 10 communes du Grand Abidjan assainies sous autonomie fiscale (null !== 0). Module d'intégrité budgétaire unifié `institutionBudgetHelper.ts`. 374 tests unitaires PASS, build TypeScript et Vite 100% verts.
 - FOUNDATION_READY : TRUE.
 
 ## RÉCONCILIATION DES DOTATIONS INSTITUTIONNELLES & ÉLIMINATION DES FAUX ZÉROS (OCTOBRE 2026)
@@ -15,9 +15,9 @@
   - **Anomalie initiale** : La fiche publique « La Cour Suprême de Côte d'Ivoire » affichait une dotation de 0 FCFA, 0% fonctionnement, 0% investissement.
   - **Preuve LFI 2026** : *Loi n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026* (583 pages, Tableaux des crédits pp. 45–54).
   - **Réalité constitutionnelle** : Sous la Constitution de 2016 (Titre VII), la Cour Suprême a été scindée en trois juridictions suprêmes souveraines dotées chacune de sa section budgétaire autonome dans la LFI 2026 :
-    * Cour de Cassation : Section 023 (7 931 309 608 FCFA)
-    * Conseil d'État : Section 022 (5 164 531 081 FCFA)
-    * Cour des Comptes : Section 015 (8 851 161 351 FCFA)
+    * Cour de Cassation : Section 114 (7 931 309 608 FCFA)
+    * Conseil d'État : Section 118 (5 164 531 081 FCFA)
+    * Cour des Comptes : Section 115 (8 851 161 351 FCFA)
     * Cour Suprême : Aucune section budgétaire distincte dans le budget général (`OFFICIAL_AMOUNT = UNVERIFIED` / `DOCUMENTARY_GAP`).
 - **2. Causes Racines Identifiées & Corrigées** :
   - `NationalInstitutionsPage.tsx` : les pourcentages `functioningPct` et `investmentPct` retombaient par défaut sur `0%` lorsque `total_budget_fcfa` était null ou absent, affichant une jauge vide et des pourcentages trompeurs.
@@ -26,7 +26,7 @@
   - `officialDataFromCsv.ts` : 10 communes du Grand Abidjan en autonomie fiscale (`is_tax_quota_commune: true`) avaient des valeurs numériques `0` au lieu de `null`.
 - **3. Solutions Architecturales Mises en Œuvre** :
   - Création de `src/utils/institutionBudgetHelper.ts` (`assessInstitutionBudget`, `calculateSafePercentages`) garantissant le principe fondamental `null !== 0`.
-  - Cour Suprême : statut `NOT_DOCUMENTED`, affichage « Non individualisé (LFI 2026) », jauge masquée, notice institutionnelle explicative citant les sections 023, 022 et 015 de la LFI 2026.
+  - Cour Suprême : statut `NOT_DOCUMENTED`, affichage « Non individualisé (LFI 2026) », jauge masquée, notice institutionnelle explicative citant les sections 114, 118 et 115 de la LFI 2026.
   - Communes du Grand Abidjan : passage des budgets à `null`, statut `TAX_AUTONOMY`, badge « Ressources Propres & Impôts Locaux ».
   - Modal institutionnel : différenciation stricte entre juridictions constitutionnelles, institutions nationales et collectivités municipales (suppression des mentions incongrues de « cantines scolaires » et de « conseil municipal » pour les juridictions).
   - Suppression des lignes budgétaires fictives dans `budgetLinesData.ts`.
@@ -619,3 +619,9 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Lecture sous rôle `anon` : PASS sur la ligne PUBLISHED.
 - Bingerville Golden Reference contrôlée intacte : 4 046 222 000 / 1 877 888 000 / 2 168 334 000 FCFA.
 - Aucune migration créée ; aucun RLS/GRANT modifié.
+
+## CORRECTIF DOCUMENTAIRE PR #31 — 10 OCTOBRE 2026
+- Rectification des références de sections des juridictions suprêmes dans le présent handoff : Cour de cassation **114**, Conseil d’État **118**, Cour des comptes **115**, suivant `docs/references/2026/ministry-reconciliation/PR31_FINAL_DOCUMENTARY_CONTROL.md`.
+- Le registre `pr31_ministry_reconciliation_register.csv` distingue **15 égalités numériques non certifiées**, **15 écarts de périmètre à instruire**, **4 portefeuilles composites** et **1 portefeuille sans section autonome identifiée**. Une égalité de chiffres ne certifie ni l'identité de portefeuille ni son assiette.
+- **Aucun des 35 montants applicatifs ne doit être écrasé automatiquement** par une section candidate. Les crédits de paiement, autorisations d’engagement, dotations directement gérées et données d’exécution sont des catégories distinctes.
+- La réussite de la CI ne signifie pas certification financière des 35 fiches. Pas de fusion, d'écriture Supabase ni de déploiement intentionnel dans ce lot.
