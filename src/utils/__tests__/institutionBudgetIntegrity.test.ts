@@ -206,7 +206,7 @@ describe('Institution Budget Integrity & Safe Rendering', () => {
   });
 
   describe('Legitimate Documented Zero Budget', () => {
-    it('preserves documented 0 FCFA when total is legitimately 0 without unpublished flag', () => {
+    it('requires official evidence even when zero is numerically explicit', () => {
       const dummyEntity: Partial<Institution> = {
         id: 'test-zero-inst',
         name: 'Agence Spécifique',
@@ -218,8 +218,9 @@ describe('Institution Budget Integrity & Safe Rendering', () => {
       };
 
       const assessment = assessInstitutionBudget(dummyEntity);
-      expect(assessment.status).toBe('AVAILABLE');
-      expect(assessment.totalFormatted).toBe('0 FCFA');
+      expect(assessment.status).toBe('NOT_DOCUMENTED');
+      expect(assessment.verificationStatus).toBe('NOT_DOCUMENTED');
+      expect(assessment.totalFormatted).toBe('0 FCFA (non vérifié)');
       expect(assessment.functioningPct).toBeNull();
       expect(assessment.investmentPct).toBeNull();
     });
