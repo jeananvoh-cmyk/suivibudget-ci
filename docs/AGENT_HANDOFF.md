@@ -1,5 +1,21 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
+## CHECKPOINT DE CERTIFICATION LÉGALE INITIALE ET RÉSIDUS — 10 OCTOBRE 2026
+
+**Ne pas confondre la certification du crédit voté dans la LFI avec la certification de l'enveloppe propre au portefeuille actuel.** Les **34 sections LFI distinctes** référencées par les **35 fiches ministérielles** possèdent désormais une **preuve dans les articles 14 ou 15 de la loi elle-même** :
+- Primature section **108** : art. **14**, LFI physique PDF **p.12** (dotations);
+- les **33 autres sections distinctes**, ministérielles : art. **15**, PDF **p.14–20** (programmes);
+- gov-009/gov-035 : section **229 commune**, jamais deux crédits autonomes.
+
+Registre source légal : `LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json` ; script source SHA-256 `scripts/verify_lfi_articles_14_15_2026.py` ; affichage citoyen du fondement légal : `MinistryLegalCPNotice.tsx` ; test `ministryLegallyVotedCPBaseline2026.test.ts`. `MINISTRY_DOCUMENTATION_REGISTRY_2026.json` expose le niveau de preuve juridique sans débloquer `certified_public_budget`.
+
+Les **quatre reliquats historiques non entièrement expliqués** sont documentés exactement dans `PR31_FOUR_UNEXPLAINED_LEGACY_RESIDUALS_2026.json` : gov-006 (**−370 246 FCFA**), gov-011 (**+481 394**), gov-013 (**+283 456**), gov-025 (**+239 982**). Les trois PDF sources (LFI **583 p.**, Annexe 4 **1229 p.**, Annexe 7 **89 p.**) ont été vérifiés sur **1901 pages** et leurs empreintes SHA-256 sont conservées. Aucun des quatre résidus n'est une valeur autonome retrouvée en recherche textuelle exacte. **Une absence de jeton n'est ni une preuve de fausseté ni une justification de crédits inventés.** La fiche gov-025 **publie correctement** le CP LFI vérifié `734442904943`, pas l'ancien budget ; les trois autres anciennes différences demeurent archivées sans attribution publique.
+
+**DGBF : canal officiel identifié, demande toujours NON ENVOYÉE :** `info@dgbf.gouv.ci`, formulaire https://www.dgbf.ci/contactez-la-dgbf/ , Direction du Budget de l'État : https://www.dgbf.ci/ecrire-au-dbe/ . La demande documentaire est prête dans `PR31_DGBF_DOCUMENTARY_CLARIFICATION_REQUEST_DRAFT.md`. Les actes éventuels de transferts budgétaires après l'entrée en fonction du Gouvernement de janvier 2026 restent non établis, **la certification sans réserve par portefeuille n'est pas acquise**. Pas de merge, de modification Supabase ni de déploiement manuel.
+
+**Vérification CI :** le commit `c250649f...` a échoué à cause d'un test ajoutant à tort l'absence de CP sur gov-025 ; correction dans `ab170503f...` : vérifier la nouvelle CI sur le HEAD de PR #31 avant toute conclusion.
+
+---
 ## CHECKPOINT PRIORITAIRE — DÉCOUVERTES FINANCIÈRES OFFICIELLES C2D + COMPLÉMENTS LFI (10-10-2026)
 
 - **NE PAS REVENIR À L'ANCIEN DIAGNOSTIC « 15 ÉCARTS SANS ORIGINE »** : la LFI PDF pages **565–569** liste 14 sections de projets financés sur C2D (total général **74 400 000 000 FCFA**, contrôle source SHA-256). Parmi les **15 anciennes divergences** du répertoire, **9** correspondent exactement au C2D de leur section ; **3** sont expliquées à quelques centaines de milliers de francs près ; **3** n'ont pas de ligne C2D. Deux de ces trois derniers écarts négatifs correspondent exactement en valeur absolue à une ligne d'activité de la LFI (gov-032 → 78045200134, **553 500 000 FCFA**, PDF p.554 ; gov-034 → 78098000984, **4 362 218 FCFA**, PDF p.384). **Cette coïncidence ne prouve pas l'omission historique de l'action.** Quatre écarts restent sans rapprochement exact : gov-006 (−370 246 FCFA), gov-011 (+481 394), gov-013 (+283 456), gov-025 (+239 982).
