@@ -99,6 +99,24 @@
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false,
         "annex4_action_gap_supplemented_by_lfi": true
+      },
+      "c2d_source_evidence": {
+        "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+        "lfi_pdf_page": 565,
+        "lfi_section": "108",
+        "c2d_section_cp_2026_fcfa": 2100000000,
+        "evidence_level": "OFFICIAL_SECTION_C2D_CP",
+        "portfolio_independent_allocation_certified": false,
+        "shared_section": false,
+        "must_not_sum_without_scope_proof": true
+      },
+      "historical_budget_discrepancy_audit": {
+        "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
+        "classification": "EXACTLY_EXPLAINED_BY_C2D",
+        "original_difference_fcfa": 2100000000,
+        "c2d_difference_residual_fcfa": 0,
+        "numeric_provenance_explained": true,
+        "ministry_budget_certified": false
       }
     },
     {
@@ -345,6 +363,24 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "c2d_source_evidence": {
+        "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+        "lfi_pdf_page": 566,
+        "lfi_section": "325",
+        "c2d_section_cp_2026_fcfa": 6750849380,
+        "evidence_level": "OFFICIAL_SECTION_C2D_CP",
+        "portfolio_independent_allocation_certified": false,
+        "shared_section": false,
+        "must_not_sum_without_scope_proof": true
+      },
+      "historical_budget_discrepancy_audit": {
+        "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
+        "classification": "EXACTLY_EXPLAINED_BY_C2D",
+        "original_difference_fcfa": 6750849380,
+        "c2d_difference_residual_fcfa": 0,
+        "numeric_provenance_explained": true,
+        "ministry_budget_certified": false
       }
     },
     {
@@ -418,6 +454,24 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "c2d_source_evidence": {
+        "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+        "lfi_pdf_page": 565,
+        "lfi_section": "323",
+        "c2d_section_cp_2026_fcfa": 2000000000,
+        "evidence_level": "OFFICIAL_SECTION_C2D_CP",
+        "portfolio_independent_allocation_certified": false,
+        "shared_section": false,
+        "must_not_sum_without_scope_proof": true
+      },
+      "historical_budget_discrepancy_audit": {
+        "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
+        "classification": "C2D_CLOSE_WITH_RESIDUAL_UNEXPLAINED",
+        "original_difference_fcfa": 1999629754,
+        "c2d_difference_residual_fcfa": -370246,
+        "numeric_provenance_explained": false,
+        "ministry_budget_certified": false
       }
     },
     {
@@ -492,6 +546,16 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "c2d_source_evidence": {
+        "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+        "lfi_pdf_page": 565,
+        "lfi_section": "322",
+        "c2d_section_cp_2026_fcfa": 12980403497,
+        "evidence_level": "OFFICIAL_SECTION_C2D_CP",
+        "portfolio_independent_allocation_certified": false,
+        "shared_section": false,
+        "must_not_sum_without_scope_proof": true
       }
     },
     {
@@ -613,6 +677,24 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "c2d_source_evidence": {
+        "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+        "lfi_pdf_page": 565,
+        "lfi_section": "229",
+        "c2d_section_cp_2026_fcfa": 4054243016,
+        "evidence_level": "OFFICIAL_SECTION_C2D_CP",
+        "portfolio_independent_allocation_certified": false,
+        "shared_section": false,
+        "must_not_sum_without_scope_proof": true
+      },
+      "historical_budget_discrepancy_audit": {
+        "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
+        "classification": "EXACTLY_EXPLAINED_BY_C2D",
+        "original_difference_fcfa": 4054243016,
+        "c2d_difference_residual_fcfa": 0,
+        "numeric_provenance_explained": true,
+        "ministry_budget_certified": false
       }
     },
     {
@@ -760,6 +842,24 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "c2d_source_evidence": {
+        "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+        "lfi_pdf_page": 568,
+        "lfi_section": "366",
+        "c2d_section_cp_2026_fcfa": 2091737408,
+        "evidence_level": "OFFICIAL_SECTION_C2D_CP",
+        "portfolio_independent_allocation_certified": false,
+        "shared_section": false,
+        "must_not_sum_without_scope_proof": true
+      },
+      "historical_budget_discrepancy_audit": {
+        "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
+        "classification": "C2D_CLOSE_WITH_RESIDUAL_UNEXPLAINED",
+        "original_difference_fcfa": 2092218802,
+        "c2d_difference_residual_fcfa": 481394,
+        "numeric_provenance_explained": false,
+        "ministry_budget_certified": false
       }
     },
     {
@@ -833,6 +933,24 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "c2d_source_evidence": {
+        "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+        "lfi_pdf_page": 568,
+        "lfi_section": "357",
+        "c2d_section_cp_2026_fcfa": 7465153413,
+        "evidence_level": "OFFICIAL_SECTION_C2D_CP",
+        "portfolio_independent_allocation_certified": false,
+        "shared_section": false,
+        "must_not_sum_without_scope_proof": true
+      },
+      "historical_budget_discrepancy_audit": {
+        "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
+        "classification": "EXACTLY_EXPLAINED_BY_C2D",
+        "original_difference_fcfa": 7465153413,
+        "c2d_difference_residual_fcfa": 0,
+        "numeric_provenance_explained": true,
+        "ministry_budget_certified": false
       }
     },
     {
@@ -906,6 +1024,24 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "c2d_source_evidence": {
+        "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+        "lfi_pdf_page": 566,
+        "lfi_section": "335",
+        "c2d_section_cp_2026_fcfa": 8876010092,
+        "evidence_level": "OFFICIAL_SECTION_C2D_CP",
+        "portfolio_independent_allocation_certified": false,
+        "shared_section": false,
+        "must_not_sum_without_scope_proof": true
+      },
+      "historical_budget_discrepancy_audit": {
+        "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
+        "classification": "C2D_CLOSE_WITH_RESIDUAL_UNEXPLAINED",
+        "original_difference_fcfa": 8876293548,
+        "c2d_difference_residual_fcfa": 283456,
+        "numeric_provenance_explained": false,
+        "ministry_budget_certified": false
       }
     },
     {
@@ -979,6 +1115,24 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "c2d_source_evidence": {
+        "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+        "lfi_pdf_page": 568,
+        "lfi_section": "358",
+        "c2d_section_cp_2026_fcfa": 8523495326,
+        "evidence_level": "OFFICIAL_SECTION_C2D_CP",
+        "portfolio_independent_allocation_certified": false,
+        "shared_section": false,
+        "must_not_sum_without_scope_proof": true
+      },
+      "historical_budget_discrepancy_audit": {
+        "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
+        "classification": "EXACTLY_EXPLAINED_BY_C2D",
+        "original_difference_fcfa": 8523495326,
+        "c2d_difference_residual_fcfa": 0,
+        "numeric_provenance_explained": true,
+        "ministry_budget_certified": false
       }
     },
     {
@@ -1225,6 +1379,24 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "c2d_source_evidence": {
+        "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+        "lfi_pdf_page": 567,
+        "lfi_section": "345",
+        "c2d_section_cp_2026_fcfa": 3000000000,
+        "evidence_level": "OFFICIAL_SECTION_C2D_CP",
+        "portfolio_independent_allocation_certified": false,
+        "shared_section": false,
+        "must_not_sum_without_scope_proof": true
+      },
+      "historical_budget_discrepancy_audit": {
+        "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
+        "classification": "EXACTLY_EXPLAINED_BY_C2D",
+        "original_difference_fcfa": 3000000000,
+        "c2d_difference_residual_fcfa": 0,
+        "numeric_provenance_explained": true,
+        "ministry_budget_certified": false
       }
     },
     {
@@ -1517,6 +1689,24 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "c2d_source_evidence": {
+        "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+        "lfi_pdf_page": 566,
+        "lfi_section": "333",
+        "c2d_section_cp_2026_fcfa": 5926897644,
+        "evidence_level": "OFFICIAL_SECTION_C2D_CP",
+        "portfolio_independent_allocation_certified": false,
+        "shared_section": false,
+        "must_not_sum_without_scope_proof": true
+      },
+      "historical_budget_discrepancy_audit": {
+        "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
+        "classification": "EXACTLY_EXPLAINED_BY_C2D",
+        "original_difference_fcfa": 5926897644,
+        "c2d_difference_residual_fcfa": 0,
+        "numeric_provenance_explained": true,
+        "ministry_budget_certified": false
       }
     },
     {
@@ -1645,6 +1835,16 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "c2d_source_evidence": {
+        "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+        "lfi_pdf_page": 566,
+        "lfi_section": "331",
+        "c2d_section_cp_2026_fcfa": 7403476877,
+        "evidence_level": "OFFICIAL_SECTION_C2D_CP",
+        "portfolio_independent_allocation_certified": false,
+        "shared_section": false,
+        "must_not_sum_without_scope_proof": true
       }
     },
     {
@@ -1692,6 +1892,14 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "historical_budget_discrepancy_audit": {
+        "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
+        "classification": "NO_C2D_SECTION_ENTRY",
+        "original_difference_fcfa": 239982,
+        "c2d_difference_residual_fcfa": null,
+        "numeric_provenance_explained": false,
+        "ministry_budget_certified": false
       }
     },
     {
@@ -1990,6 +2198,24 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "c2d_source_evidence": {
+        "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+        "lfi_pdf_page": 568,
+        "lfi_section": "346",
+        "c2d_section_cp_2026_fcfa": 2173234556,
+        "evidence_level": "OFFICIAL_SECTION_C2D_CP",
+        "portfolio_independent_allocation_certified": false,
+        "shared_section": false,
+        "must_not_sum_without_scope_proof": true
+      },
+      "historical_budget_discrepancy_audit": {
+        "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
+        "classification": "EXACTLY_EXPLAINED_BY_C2D",
+        "original_difference_fcfa": 2173234556,
+        "c2d_difference_residual_fcfa": 0,
+        "numeric_provenance_explained": true,
+        "ministry_budget_certified": false
       }
     },
     {
@@ -2090,6 +2316,24 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "c2d_source_evidence": {
+        "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+        "lfi_pdf_page": 567,
+        "lfi_section": "343",
+        "c2d_section_cp_2026_fcfa": 1054498791,
+        "evidence_level": "OFFICIAL_SECTION_C2D_CP",
+        "portfolio_independent_allocation_certified": false,
+        "shared_section": false,
+        "must_not_sum_without_scope_proof": true
+      },
+      "historical_budget_discrepancy_audit": {
+        "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
+        "classification": "EXACTLY_EXPLAINED_BY_C2D",
+        "original_difference_fcfa": 1054498791,
+        "c2d_difference_residual_fcfa": 0,
+        "numeric_provenance_explained": true,
+        "ministry_budget_certified": false
       }
     },
     {
@@ -2144,6 +2388,14 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "historical_budget_discrepancy_audit": {
+        "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
+        "classification": "NO_C2D_SECTION_ENTRY",
+        "original_difference_fcfa": -553500000,
+        "c2d_difference_residual_fcfa": null,
+        "numeric_provenance_explained": false,
+        "ministry_budget_certified": false
       }
     },
     {
@@ -2251,6 +2503,14 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "historical_budget_discrepancy_audit": {
+        "source": "docs/references/2026/ministry-reconciliation/PR31_C2D_2026_DISCREPANCY_PROVENANCE.json",
+        "classification": "NO_C2D_SECTION_ENTRY",
+        "original_difference_fcfa": -4362218,
+        "c2d_difference_residual_fcfa": null,
+        "numeric_provenance_explained": false,
+        "ministry_budget_certified": false
       }
     },
     {
@@ -2325,6 +2585,16 @@
         ],
         "source_of_legal_attributions": "docs/references/2026/ministry-reconciliation/DECREE_2026_84_ADMINISTRATIVE_MAPPING_35.json",
         "is_portfolio_appropriation_verified": false
+      },
+      "c2d_source_evidence": {
+        "official_source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+        "lfi_pdf_page": 565,
+        "lfi_section": "229",
+        "c2d_section_cp_2026_fcfa": 4054243016,
+        "evidence_level": "OFFICIAL_SECTION_C2D_CP",
+        "portfolio_independent_allocation_certified": false,
+        "shared_section": true,
+        "must_not_sum_without_scope_proof": true
       }
     }
   ]
