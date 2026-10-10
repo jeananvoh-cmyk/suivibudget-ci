@@ -24,3 +24,17 @@ export const MINISTRY_DOCUMENTARY_DISCREPANCIES: Readonly<Record<string, string>
   'gov-022': '333',
   'gov-029': '346',
 });
+
+/** Candidate section CP amounts transcribed from the 2026 LFI reconciliation
+ * register, not certified as the amount allocated to the current portfolio. */
+export const MINISTRY_CANDIDATE_CP_2026: Readonly<Record<string, number>> = Object.freeze({
+  'gov-001': 71326766299,
+  'gov-006': 945963329452,
+  'gov-009': 333878089526,
+  'gov-011': 502893150963,
+  'gov-012': 81484195624,
+  'gov-013': 808992158914,
+  'gov-014': 123247714398,
+  'gov-022': 338779408246,
+  'gov-029': 37598620420,
+});
