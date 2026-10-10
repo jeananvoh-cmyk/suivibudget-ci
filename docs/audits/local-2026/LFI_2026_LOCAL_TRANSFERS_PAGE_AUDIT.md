@@ -45,3 +45,24 @@ Le critère « texte très faible » signifie moins de 80 caractères de texte e
 Extraction et réconciliation **des CP d'investissement individuels**, identification des neuf communes sans ligne nominative de fonctionnement dans le bloc, examen visuel des pages ci-dessus, recherche des éventuels transferts sous d'autres formulations, puis matrice finale 234 collectivités avec statut documenté. Ne modifier les données applicatives qu'après correspondance d'assiette et preuve officielle.
 
 **Restrictions :** pas de fusion, d'écriture Supabase ou de déploiement intentionnel.
+
+## Complément de réconciliation arithmétique du programme 2204040
+
+**La ventilation source a désormais été recalculée sur les lignes individuelles**, sans additionner les rubriques-titres avec leurs enfants :
+- 32 activités de **personnel** (31 conseils régionaux + 1 district de Yamoussoukro), **6 202 599 197 FCFA**. Les autres dépenses salariales extérieures au programme, en amont du code `2204040`, ne sont pas intégrées.
+- 233 activités classées en **transferts**, **46 087 962 099 FCFA** : 225 lignes nominatives de fonctionnement (**41 387 962 099 FCFA**), 6 lignes de cantines scolaires régionales à **600 000 000 FCFA** chacune, 1 ligne de cantines scolaires du district d'Abidjan à **400 000 000 FCFA**, et 1 provision de fonctionnement à **700 000 000 FCFA**. Contrôle : 41 387 962 099 + 3 600 000 000 + 400 000 000 + 700 000 000 = **46 087 962 099 FCFA**.
+- 2 115 activités d'**investissement**, total exact **172 531 000 000 FCFA**. Parmi elles, `90016000010` (PAMREC, PDF p.271) est de **131 000 000 FCFA**. Les autres totalisent **172 400 000 000 FCFA**, montant de l'article 21. Il s'agit d'une identité arithmétique ; l'interprétation juridique du rattachement de PAMREC doit être documentée séparément.
+
+Donc **6 202 599 197 + 46 087 962 099 + 172 531 000 000 = 224 821 561 296 FCFA** (total affiché du programme LFI), et **224 821 561 296 − 131 000 000 = 224 690 561 296 FCFA** (article 21). **Zéro différence arithmétique dans ces blocs.**
+
+### Affectation nominative des investissements : réserve indispensable
+
+- Parmi les 2 115 activités, **2 069** ont un rapprochement nominatif automatique univoque avec une collectivité du registre des 225 lignes de fonctionnement : **167 249 027 012 FCFA** en investissement.
+- **37 activités** avec nom de lieu mais sans identité rattachable sans réserve par l'algorithme : **1 995 810 183 FCFA**.
+- **9 activités** sans bénéficiaire local nominatif dans le libellé : **3 286 162 805 FCFA**, comprenant la provision pour investissement de **3 000 000 000 FCFA** et le programme PAMREC de **131 000 000 FCFA**.
+- Total contrôlé : **167 249 027 012 + 1 995 810 183 + 3 286 162 805 = 172 531 000 000 FCFA**.
+
+La correspondance automatique ne signifie **pas** certification de l'identité administrative : plusieurs libellés présentent des fautes ou variantes orthographiques (ex. `Napieledougou` dans la LFI vs `napie` dans le répertoire des 201 mairies). Les neuf grandes communes du noyau urbain d'Abidjan, à l'exception d'Attécoubé, ne disposent pas de ligne sous le libellé nominatif « Assurer le fonctionnement des services » : **ce constat n'est pas une attestation d'absence de dotation**.
+
+**Aucune mutation des budgets de collectivités** avant le rapprochement complet montant-par-type, la vérification du périmètre nominatif et la levée des réserves de lecture.
+
