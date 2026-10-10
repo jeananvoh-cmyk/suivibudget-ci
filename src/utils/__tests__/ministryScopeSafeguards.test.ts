@@ -44,12 +44,13 @@ describe('2026 ministerial portfolio documentary safeguards', () => {
     }
   });
 
-  it('preserves and flags the duplicated agriculture value rather than adding it twice', () => {
+  it('does not attribute agriculture credits to a delegated ministry without autonomous section', () => {
     const agriculture = officials.get('gov-009');
     const delegate = officials.get('gov-035');
     expect(agriculture).toBeDefined();
     expect(delegate).toBeDefined();
-    expect(delegate?.budget_fcfa).toBe(agriculture?.budget_fcfa);
+    expect(agriculture?.budget_fcfa).toBe(337_932_332_542);
+    expect(delegate?.budget_fcfa).toBeUndefined();
     expect(SCOPE_EXCEPTIONS['gov-035']).toContain('ne doit pas être compté deux fois');
   });
 
