@@ -4,12 +4,12 @@ import { GOVERNMENT_OFFICIALS, OfficialLeader } from '../../data/governmentData'
 import { dataStore } from '../../services/dataStore';
 import { BudgetProject, Institution } from '../../types';
 import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
-import { resolveInstitutionFinancialView } from '../../utils/institutionBudgetHelper';
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
 import { isPilotMinistry } from '../../data/ministryPilotReferential';
 import { selectMinistryBudgetAmount } from '../../utils/ministryBudgetSelection';
 import { WITHHELD_MINISTRY_PORTFOLIO_IDS } from '../../data/ministryScopeExceptions';
+import legalCP from '../../../docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json';
 
 const getInitials = (name: string) => {
   const clean = name.replace(/^(M\.|Mme|Prof\.|Gal\.|Dr)\s+/i, '').trim();
@@ -147,28 +147,40 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
     setSelectedInstForDetail(instObj);
   };
 
+  // Les crédits votés de la section sont disponibles pour les 35 portefeuilles.
+  // Une section de la LFI n'est jamais présentée comme une dotation propre
+  // certifiée du ministre nommé après l'adoption de la loi.
   const renderOfficialBudget = (official: OfficialLeader, textClass = 'text-[11px]') => {
-    const view = resolveInstitutionFinancialView({
-      id: official.id,
-      name: official.department_ministry,
-      type: 'MINISTERE',
-      total_budget_fcfa: official.budget_fcfa ?? null,
-    }, 2026, 'LFI');
-
-    if (view.verification_status === 'VERIFIED_AMOUNT') {
-      return (
-        <div className={`${textClass} font-bold text-slate-800 pt-0.5 whitespace-nowrap`}>
-          Budget : <span className="text-brand-blue font-black">{view.total_formatted}</span>{' '}
-          {view.total_words && (
-            <span className="text-slate-500 font-semibold text-[10px] break-words">({view.total_words})</span>
-          )}
-        </div>
-      );
+    const section = legalCP.rows.find(row => row.portfolio_id === official.id);
+    if (!section) {
+      return <p className={`${textClass} text-slate-600`}>Crédits LFI 2026 : non renseignés</p>;
     }
-
+    const shared = section.section_shared_with_other_portfolio;
     return (
-      <div className={`${textClass} font-bold text-slate-800 pt-0.5 whitespace-nowrap`}>
-        Budget : <span className="text-slate-400 font-semibold italic text-[10px]">{view.badge_text}</span>
+      <div className={`${textClass} pt-1 space-y-1 min-w-0`}>
+        <p className="font-bold text-slate-700">
+          Section budgétaire {section.section_code} — crédits votés 2026 (CP)
+        </p>
+        <p className="text-brand-blue font-black text-sm whitespace-normal break-words">
+          {formatFCFA(section.voted_section_cp_2026_fcfa)}
+        </p>
+        <p className="text-slate-600 text-[10px] leading-relaxed break-words">
+          {formatAmountInWords(section.voted_section_cp_2026_fcfa)}
+        </p>
+        <p className="text-slate-500 text-[10px] leading-snug">
+          {shared
+            ? 'Section partagée : montant affiché sur plusieurs fiches, à comptabiliser une seule fois.'
+            : 'Crédit voté pour la section LFI ; affectation au portefeuille actuel non établie.'}
+        </p>
+        <a
+          href={`${legalCP.source_pdf_url}#page=${section.official_lfi_pdf_page}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={event => event.stopPropagation()}
+          className="inline-block text-[10px] underline text-brand-blue hover:text-slate-900"
+        >
+          Lire la LFI 2026 — art. {section.legal_article}, PDF p. {section.official_lfi_pdf_page}
+        </a>
       </div>
     );
   };
@@ -358,16 +370,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                       {premierMinistre.name}
                     </h3>
                     <p className="text-xs text-slate-500 font-medium">{premierMinistre.department_ministry}</p>
-                    <div className="text-xs font-black text-slate-800 pt-0.5">
-                      Montant à vérifier : {premierMinistre.budget_fcfa != null ? (
-                        <>
-                          <span className="text-brand-blue">{formatFCFA(premierMinistre.budget_fcfa)}</span>{' '}
-                          <span className="text-slate-500 font-bold">({formatAmountInWords(premierMinistre.budget_fcfa)})</span>
-                        </>
-                      ) : (
-                        <span className="text-slate-400 font-semibold italic">Montant à confirmer</span>
-                      )}
-                    </div>
+                    {renderOfficialBudget(premierMinistre, 'text-xs')}
                   </div>
                 </div>
               </div>
@@ -396,16 +399,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                       {vicePremierMinistre.name}
                     </h3>
                     <p className="text-xs text-slate-500 font-medium">{vicePremierMinistre.role_title}</p>
-                    <div className="text-xs font-black text-slate-800 pt-0.5">
-                      Montant à vérifier : {vicePremierMinistre.budget_fcfa != null ? (
-                        <>
-                          <span className="text-brand-blue">{formatFCFA(vicePremierMinistre.budget_fcfa)}</span>{' '}
-                          <span className="text-slate-500 font-bold">({formatAmountInWords(vicePremierMinistre.budget_fcfa)})</span>
-                        </>
-                      ) : (
-                        <span className="text-slate-400 font-semibold italic">Montant à confirmer</span>
-                      )}
-                    </div>
+                    {renderOfficialBudget(vicePremierMinistre, 'text-xs')}
                   </div>
                 </div>
               </div>
@@ -448,15 +442,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                         {official.name}
                       </h3>
                       <p className="text-[11px] text-slate-500 line-clamp-2 leading-tight">{official.department_ministry}</p>
-                      <div className="text-[11px] font-bold text-slate-800 pt-0.5 whitespace-nowrap">
-                        Montant à vérifier : {official.budget_fcfa != null ? (
-                          <>
-                            <span className="text-brand-blue">{formatFCFA(official.budget_fcfa)}</span> <span className="text-slate-500 font-semibold text-[10px] break-words">({formatAmountInWords(official.budget_fcfa)})</span>
-                          </>
-                        ) : (
-                          <span className="text-slate-400 font-semibold italic text-[10px]">Montant à confirmer</span>
-                        )}
-                      </div>
+                      {renderOfficialBudget(official)}
                     </div>
                   </div>
                 </div>
@@ -506,15 +492,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                       {official.name}
                     </h3>
                     <p className="text-[11px] text-slate-600 font-medium line-clamp-2 leading-tight">{official.department_ministry}</p>
-                    <div className="text-[11px] font-bold text-slate-800 pt-0.5 whitespace-nowrap">
-                      Montant à vérifier : {official.budget_fcfa != null ? (
-                        <>
-                          <span className="text-brand-blue">{formatFCFA(official.budget_fcfa)}</span> <span className="text-slate-500 font-semibold text-[10px] break-words">({formatAmountInWords(official.budget_fcfa)})</span>
-                        </>
-                      ) : (
-                        <span className="text-slate-400 font-semibold italic text-[10px]">Montant à confirmer</span>
-                      )}
-                    </div>
+                    {renderOfficialBudget(official)}
                   </div>
                 </div>
               </div>
