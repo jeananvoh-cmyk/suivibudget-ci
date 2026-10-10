@@ -13,7 +13,8 @@ import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
 import { MinistryBudgetHeader } from './MinistryBudgetHeader';
 import { ProgramDistribution } from './ProgramDistribution';
 import { BudgetProgramCard } from './BudgetProgramCard';
-import { SCOPE_EXCEPTIONS, MINISTRY_DOCUMENTARY_DISCREPANCIES, MINISTRY_CANDIDATE_CP_2026 } from '../../data/ministryScopeExceptions';
+import { SCOPE_EXCEPTIONS } from '../../data/ministryScopeExceptions';
+import legalCP from '../../../docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json';
 import { MinistrySectionEvidencePanel } from './MinistrySectionEvidencePanel';
 import { MinistryAttributionsNotice } from './MinistryAttributionsNotice';
 import { MinistryLegalCPNotice } from './MinistryLegalCPNotice';
@@ -54,35 +55,44 @@ export const MinistryBudgetProgramView: React.FC<MinistryBudgetProgramViewProps>
   // CAS 1 : MINISTÈRE EN TRANSITION (NON ENCORE MODÉLISÉ EN 10 PROGRAMMES)
   // =========================================================================
   if (!isPilot || !pilotBudget) {
-    const totalBudget = institution.total_budget_fcfa;
+    const votedSection = legalCP.rows.find(r => r.portfolio_id === institution.id);
 
     return (
       <div className="space-y-5 animate-in fade-in duration-200">
         <MinistryAttributionsNotice institutionId={institution.id} />
-        <MinistryLegalCPNotice institutionId={institution.id} />
         <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-3">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-              Budget de l'État • Exercice 2026
+              Loi de finances initiale • 2026
             </span>
-            <span className="text-xs font-semibold text-slate-500">
-              Périmètre budgétaire à confirmer
-            </span>
+            <span className="text-xs font-semibold text-slate-500">Crédits de paiement (CP) votés</span>
           </div>
-
-          <div>
-            <div className="text-xs font-semibold text-slate-500 uppercase">
-              Montant documenté pour ce portefeuille
+          {votedSection ? (
+            <div className="space-y-2">
+              <h3 className="text-sm font-bold text-slate-900">
+                Section budgétaire {votedSection.section_code} — crédits officiellement votés
+              </h3>
+              <p className="text-2xl sm:text-3xl font-black text-slate-900 font-mono tracking-tight break-words">
+                {formatFCFA(votedSection.voted_section_cp_2026_fcfa)}
+              </p>
+              <p className="text-xs text-slate-600">{formatAmountInWords(votedSection.voted_section_cp_2026_fcfa)}</p>
+              <a
+                href={`${legalCP.source_pdf_url}#page=${votedSection.official_lfi_pdf_page}`}
+                target="_blank" rel="noopener noreferrer"
+                className="text-xs underline text-brand-blue"
+              >
+                LFI 2026 — article {votedSection.legal_article}, page PDF {votedSection.official_lfi_pdf_page}
+              </a>
+              <p className="text-xs text-slate-700 bg-slate-50 border border-slate-200 rounded-lg p-3" role="note">
+                {votedSection.section_shared_with_other_portfolio
+                  ? 'Section commune à plusieurs portefeuilles : montant affiché à titre de référence, jamais additionné plusieurs fois.'
+                  : 'Crédit légal de la section de la LFI initiale, non une preuve de répartition autonome au portefeuille remanié en janvier 2026.'}
+                {' '}La ventilation fonctionnement/investissement n'est pas déduite sans source distincte.
+              </p>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900 font-mono tracking-tight mt-0.5">
-              {formatFCFA(totalBudget)}
-            </div>
-            {totalBudget != null && (
-              <div className="text-xs text-slate-600 font-medium mt-1">
-                {formatAmountInWords(totalBudget)}
-              </div>
-            )}
-          </div>
+          ) : (
+            <p className="text-sm text-slate-600">Aucune section budgétaire 2026 identifiable dans les pièces disponibles.</p>
+          )}
         </div>
 
         {SCOPE_EXCEPTIONS[institution.id] && (
@@ -90,16 +100,6 @@ export const MinistryBudgetProgramView: React.FC<MinistryBudgetProgramViewProps>
             <strong>Attention au périmètre :</strong> {SCOPE_EXCEPTIONS[institution.id]}
           </p>
         )}
-
-        {MINISTRY_DOCUMENTARY_DISCREPANCIES[institution.id] && (
-          <div className="text-xs text-amber-900 bg-amber-50 border border-amber-300 rounded-xl p-3 space-y-1" role="note">
-            <p className="font-semibold">CP votés pour la section candidate {MINISTRY_DOCUMENTARY_DISCREPANCIES[institution.id]} : {formatFCFA(MINISTRY_CANDIDATE_CP_2026[institution.id])}</p>
-            <p><a href="https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf" target="_blank" rel="noopener noreferrer" className="underline">Source : Loi de finances 2026, tableau des sections (DGBF)</a></p>
-            <p><strong>Écart documentaire identifié :</strong> l'ancien montant non vérifié du répertoire a été retiré de la fiche publique car il différait du total des crédits de paiement (CP) de la section candidate {MINISTRY_DOCUMENTARY_DISCREPANCIES[institution.id]} de la LFI 2026. La correspondance exacte du périmètre reste à établir. Ces montants ne doivent pas être additionnés ni considérés comme réconciliés.</p>
-          </div>
-        )}
-
-        <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-3">Le montant ci-dessus provient du registre applicatif. Son rattachement exact à une section et à des crédits CP de la LFI 2026 reste à vérifier ; ne pas le considérer comme une dotation officiellement réconciliée.</p>
 
         <MinistrySectionEvidencePanel institutionId={institution.id} />
         <MinistryC2DEvidence institutionId={institution.id} />
