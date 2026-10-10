@@ -60,13 +60,13 @@ export const MinistryBudgetProgramView: React.FC<MinistryBudgetProgramViewProps>
               Budget de l'État • Exercice 2026
             </span>
             <span className="text-xs font-semibold text-slate-500">
-              Loi de Finances Initiale
+              Périmètre budgétaire à confirmer
             </span>
           </div>
 
           <div>
             <div className="text-xs font-semibold text-slate-500 uppercase">
-              Dotation Budgétaire Ministérielle
+              Montant enregistré pour ce portefeuille
             </div>
             <div className="text-2xl sm:text-3xl font-black text-slate-900 font-mono tracking-tight mt-0.5">
               {formatFCFA(totalBudget)}
@@ -78,6 +78,8 @@ export const MinistryBudgetProgramView: React.FC<MinistryBudgetProgramViewProps>
             )}
           </div>
         </div>
+
+        <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-3">Le montant ci-dessus provient du registre applicatif. Son rattachement exact à une section et à des crédits CP de la LFI 2026 reste à vérifier ; ne pas le considérer comme une dotation officiellement réconciliée.</p>
 
         <div className="p-4 bg-sky-50/70 rounded-2xl border border-sky-200 text-xs text-sky-950 space-y-2 leading-relaxed">
           <div className="font-bold flex items-center gap-1.5 text-sky-900">
