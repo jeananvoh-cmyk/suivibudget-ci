@@ -13,7 +13,7 @@ import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
 import { MinistryBudgetHeader } from './MinistryBudgetHeader';
 import { ProgramDistribution } from './ProgramDistribution';
 import { BudgetProgramCard } from './BudgetProgramCard';
-import { SCOPE_EXCEPTIONS } from '../../data/ministryScopeExceptions';
+import { SCOPE_EXCEPTIONS, MINISTRY_DOCUMENTARY_DISCREPANCIES } from '../../data/ministryScopeExceptions';
 
 interface MinistryBudgetProgramViewProps {
   institution: Institution;
@@ -82,6 +82,12 @@ export const MinistryBudgetProgramView: React.FC<MinistryBudgetProgramViewProps>
         {SCOPE_EXCEPTIONS[institution.id] && (
           <p className="text-xs text-amber-900 bg-amber-50 border border-amber-300 rounded-xl p-3" role="note">
             <strong>Attention au périmètre :</strong> {SCOPE_EXCEPTIONS[institution.id]}
+          </p>
+        )}
+
+        {MINISTRY_DOCUMENTARY_DISCREPANCIES[institution.id] && (
+          <p className="text-xs text-amber-900 bg-amber-50 border border-amber-300 rounded-xl p-3" role="note">
+            <strong>Écart documentaire identifié :</strong> le montant de cette fiche diffère du total des crédits de paiement (CP) de la section candidate {MINISTRY_DOCUMENTARY_DISCREPANCIES[institution.id]} de la LFI 2026. La correspondance exacte du périmètre reste à établir. Ces montants ne doivent pas être additionnés ni considérés comme réconciliés.
           </p>
         )}
 
