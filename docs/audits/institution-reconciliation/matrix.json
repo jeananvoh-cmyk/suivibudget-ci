@@ -1,26 +1,36 @@
 {
   "audit_metadata": {
-    "audit_version": "1.0.0",
+    "audit_version": "2.0.0-evidence-constrained",
     "fiscal_year": 2026,
     "audit_date": "2026-10-10",
     "total_entities_audited": 66,
-    "verified_amount_count": 20,
+    "verified_amount_count": 13,
     "verified_zero_count": 0,
     "unreconciled_count": 0,
-    "partial_breakdown_count": 34,
-    "not_documented_count": 2,
+    "partial_breakdown_count": 23,
+    "not_documented_count": 20,
     "not_published_count": 10,
-    "total_fcfa_verified": 356153879687,
-    "total_fcfa_verified_formatted": "356 153 879 687 FCFA",
+    "total_fcfa_verified": 298579127196,
+    "total_fcfa_verified_formatted": "298 579 127 196 FCFA",
     "remote_supabase_writes": 0,
-    "zero_fcfa_corruptions_remaining": 0
+    "zero_fcfa_corruptions_remaining": 0,
+    "aggregate_scope": "11 sections institutionnelles distinctes; exclus programmes internes 13003/13004, regulateurs et portefeuilles ministeriels",
+    "non_additive_presidency_programs": 2,
+    "unverified_regulatory_entities": 7,
+    "regulators_previously_reported_sum_fcfa": 42150000000,
+    "unsupported_ministry_portfolio_rows": 11,
+    "ministry_section_reference_rows": 34,
+    "ministry_portfolios": 35,
+    "previous_certified_sum_fcfa": 356153879687,
+    "documentary_certification": "RESERVED_P0",
+    "notes": "Montants verifiés = concordance à la ligne du PDF + identification. Pas de certification exhaustive de l'execution ou des ventilations."
   },
   "entities": [
     {
       "institution_id": "inst-presidence",
       "institution_name": "La Présidence de la République",
       "category": "GRANDE_INSTITUTION",
-      "official_section_code": "001",
+      "official_section_code": "103",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -33,22 +43,27 @@
       "reconciliation_status": "RECONCILED",
       "verification_status": "VERIFIED_AMOUNT",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 001",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 103",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
         "pdf_page": 45,
-        "doc_page": 45,
+        "doc_page": 1,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 103 - Credits de paiement 2026"
       },
       "blocking_reasons": [],
-      "notice_text": null
+      "notice_text": null,
+      "accounting_treatment": "SECTION",
+      "lfi_section_cp_2026_fcfa": 193633705615,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "inst-assnat",
       "institution_name": "L'Assemblée Nationale de Côte d'Ivoire",
       "category": "GRANDE_INSTITUTION",
-      "official_section_code": "011",
+      "official_section_code": "101",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -61,22 +76,27 @@
       "reconciliation_status": "RECONCILED",
       "verification_status": "VERIFIED_AMOUNT",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 011",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 101",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
         "pdf_page": 45,
-        "doc_page": 45,
+        "doc_page": 1,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 101 - Credits de paiement 2026"
       },
       "blocking_reasons": [],
-      "notice_text": null
+      "notice_text": null,
+      "accounting_treatment": "SECTION",
+      "lfi_section_cp_2026_fcfa": 38578972451,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "inst-senat",
       "institution_name": "Le Sénat de Côte d'Ivoire",
       "category": "GRANDE_INSTITUTION",
-      "official_section_code": "012",
+      "official_section_code": "102",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -89,22 +109,27 @@
       "reconciliation_status": "RECONCILED",
       "verification_status": "VERIFIED_AMOUNT",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 012",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 102",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
         "pdf_page": 45,
-        "doc_page": 45,
+        "doc_page": 1,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 102 - Credits de paiement 2026"
       },
       "blocking_reasons": [],
-      "notice_text": null
+      "notice_text": null,
+      "accounting_treatment": "SECTION",
+      "lfi_section_cp_2026_fcfa": 14665806742,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "inst-conseil-const",
       "institution_name": "Le Conseil Constitutionnel de Côte d'Ivoire",
       "category": "GRANDE_INSTITUTION",
-      "official_section_code": "013",
+      "official_section_code": "106",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -117,16 +142,21 @@
       "reconciliation_status": "RECONCILED",
       "verification_status": "VERIFIED_AMOUNT",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 013",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 106",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
         "pdf_page": 45,
-        "doc_page": 45,
+        "doc_page": 1,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 106 - Credits de paiement 2026"
       },
       "blocking_reasons": [],
-      "notice_text": null
+      "notice_text": null,
+      "accounting_treatment": "SECTION",
+      "lfi_section_cp_2026_fcfa": 3860437235,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "inst-cour-supreme",
@@ -153,15 +183,16 @@
         "table_or_line": "Tableau récapitulatif des crédits par section"
       },
       "blocking_reasons": [
-        "Compétences juridictionnelles réparties sous la Constitution de 2016 entre Cassation (023), Conseil d'État (022) et Cour des Comptes (015). Aucune section budgétaire autonome propre dans la LFI 2026."
+        "Pas de section budgétaire individualisée 'Cour Suprême' dans la LFI 2026 ; distinguer les sections 114, 115, 118."
       ],
-      "notice_text": "Conformément à la Constitution ivoirienne de 2016 (Titre VII), les compétences juridictionnelles historiques de la Cour Suprême sont exercées par trois juridictions suprêmes autonomes, chacune dotée de sa propre section budgétaire dans la Loi de Finances 2026 : la Cour de Cassation (Section 114 — 7 931 309 608 FCFA), le Conseil d'État (Section 118 — 5 164 531 081 FCFA) et la Cour des Comptes (Section 115 — 8 851 161 351 FCFA). Aucune dotation distincte n'est individualisée pour la Cour Suprême dans le budget général de l'État."
+      "notice_text": "Conformément à la Constitution ivoirienne de 2016 (Titre VII), les compétences juridictionnelles historiques de la Cour Suprême sont exercées par trois juridictions suprêmes autonomes, chacune dotée de sa propre section budgétaire dans la Loi de Finances 2026 : la Cour de Cassation (Section 114 — 7 931 309 608 FCFA), le Conseil d'État (Section 118 — 5 164 531 081 FCFA) et la Cour des Comptes (Section 115 — 8 851 161 351 FCFA). Aucune dotation distincte n'est individualisée pour la Cour Suprême dans le budget général de l'État.",
+      "accounting_treatment": "NO_INDEPENDENT_LFI_SECTION"
     },
     {
       "institution_id": "inst-cour-comptes",
       "institution_name": "La Cour des Comptes de Côte d'Ivoire",
       "category": "GRANDE_INSTITUTION",
-      "official_section_code": "015",
+      "official_section_code": "115",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -174,22 +205,27 @@
       "reconciliation_status": "RECONCILED",
       "verification_status": "VERIFIED_AMOUNT",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 015",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 115",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 45,
-        "doc_page": 45,
+        "pdf_page": 46,
+        "doc_page": 2,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 115 - Credits de paiement 2026"
       },
       "blocking_reasons": [],
-      "notice_text": null
+      "notice_text": null,
+      "accounting_treatment": "SECTION",
+      "lfi_section_cp_2026_fcfa": 8851161351,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "inst-conseil-etat",
       "institution_name": "Le Conseil d'État de Côte d'Ivoire",
       "category": "GRANDE_INSTITUTION",
-      "official_section_code": "022",
+      "official_section_code": "118",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -202,22 +238,27 @@
       "reconciliation_status": "RECONCILED",
       "verification_status": "VERIFIED_AMOUNT",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 022",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 118",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 45,
-        "doc_page": 45,
+        "pdf_page": 46,
+        "doc_page": 2,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 118 - Credits de paiement 2026"
       },
       "blocking_reasons": [],
-      "notice_text": null
+      "notice_text": null,
+      "accounting_treatment": "SECTION",
+      "lfi_section_cp_2026_fcfa": 5164531081,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "inst-cour-cassation",
       "institution_name": "La Cour de Cassation de Côte d'Ivoire",
       "category": "GRANDE_INSTITUTION",
-      "official_section_code": "023",
+      "official_section_code": "114",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -230,22 +271,27 @@
       "reconciliation_status": "RECONCILED",
       "verification_status": "VERIFIED_AMOUNT",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 023",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 114",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 45,
-        "doc_page": 45,
+        "pdf_page": 46,
+        "doc_page": 2,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 114 - Credits de paiement 2026"
       },
       "blocking_reasons": [],
-      "notice_text": null
+      "notice_text": null,
+      "accounting_treatment": "SECTION",
+      "lfi_section_cp_2026_fcfa": 7931309608,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "inst-mediateur",
       "institution_name": "Le Médiateur de la République de Côte d'Ivoire",
       "category": "GRANDE_INSTITUTION",
-      "official_section_code": "017",
+      "official_section_code": "109",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -258,22 +304,27 @@
       "reconciliation_status": "RECONCILED",
       "verification_status": "VERIFIED_AMOUNT",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 017",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 109",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
         "pdf_page": 45,
-        "doc_page": 45,
+        "doc_page": 1,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 109 - Credits de paiement 2026"
       },
       "blocking_reasons": [],
-      "notice_text": null
+      "notice_text": null,
+      "accounting_treatment": "SECTION",
+      "lfi_section_cp_2026_fcfa": 8285468221,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "inst-ige",
       "institution_name": "L'Inspection Générale de l'État (IGE)",
       "category": "GRANDE_INSTITUTION",
-      "official_section_code": "001-IGE",
+      "official_section_code": "103",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -286,22 +337,29 @@
       "reconciliation_status": "RECONCILED",
       "verification_status": "VERIFIED_AMOUNT",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 001-IGE",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 103 • Programme 13003",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
         "pdf_page": 45,
-        "doc_page": 45,
+        "doc_page": 1,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Programme interne 13003 de la section 103"
       },
-      "blocking_reasons": [],
-      "notice_text": null
+      "blocking_reasons": [
+        "Programme 13003 inclus dans la section 103 Présidence ; total non additif au montant de la Présidence."
+      ],
+      "notice_text": "Programme interne de la Présidence, ne pas ajouter au total de sa section.",
+      "accounting_treatment": "INTERNAL_PROGRAM",
+      "lfi_section_cp_2026_fcfa": 193633705615,
+      "parent_section_code": "103",
+      "program_code": "13003",
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "inst-chancellerie",
       "institution_name": "La Grande Chancellerie de l'Ordre National",
       "category": "GRANDE_INSTITUTION",
-      "official_section_code": "016",
+      "official_section_code": "107",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -314,22 +372,27 @@
       "reconciliation_status": "RECONCILED",
       "verification_status": "VERIFIED_AMOUNT",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 016",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 107",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
         "pdf_page": 45,
-        "doc_page": 45,
+        "doc_page": 1,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 107 - Credits de paiement 2026"
       },
       "blocking_reasons": [],
-      "notice_text": null
+      "notice_text": null,
+      "accounting_treatment": "SECTION",
+      "lfi_section_cp_2026_fcfa": 3743870172,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "inst-cesec",
       "institution_name": "Le Conseil Économique, Social, Environnemental et Culturel (CESEC)",
       "category": "GRANDE_INSTITUTION",
-      "official_section_code": "014",
+      "official_section_code": "105",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -342,22 +405,27 @@
       "reconciliation_status": "RECONCILED",
       "verification_status": "VERIFIED_AMOUNT",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 014",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 105",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
         "pdf_page": 45,
-        "doc_page": 45,
+        "doc_page": 1,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 105 - Credits de paiement 2026"
       },
       "blocking_reasons": [],
-      "notice_text": null
+      "notice_text": null,
+      "accounting_treatment": "SECTION",
+      "lfi_section_cp_2026_fcfa": 8069692846,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "inst-cnrct",
       "institution_name": "La Chambre Nationale des Rois et Chefs Traditionnels (CNRCT)",
       "category": "GRANDE_INSTITUTION",
-      "official_section_code": "021",
+      "official_section_code": "111",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -370,22 +438,27 @@
       "reconciliation_status": "RECONCILED",
       "verification_status": "VERIFIED_AMOUNT",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 021",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 111",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 45,
-        "doc_page": 45,
+        "pdf_page": 46,
+        "doc_page": 2,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 111 - Credits de paiement 2026"
       },
       "blocking_reasons": [],
-      "notice_text": null
+      "notice_text": null,
+      "accounting_treatment": "SECTION",
+      "lfi_section_cp_2026_fcfa": 5794171874,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "inst-habg",
       "institution_name": "La Haute Autorité pour la Bonne Gouvernance (HABG)",
       "category": "GRANDE_INSTITUTION",
-      "official_section_code": "020",
+      "official_section_code": "103",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -398,16 +471,23 @@
       "reconciliation_status": "RECONCILED",
       "verification_status": "VERIFIED_AMOUNT",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 020",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 103 • Programme 13004",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
         "pdf_page": 45,
-        "doc_page": 45,
+        "doc_page": 1,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Programme interne 13004 de la section 103"
       },
-      "blocking_reasons": [],
-      "notice_text": null
+      "blocking_reasons": [
+        "Programme 13004 inclus dans la section 103 Présidence ; total non additif au montant de la Présidence."
+      ],
+      "notice_text": "Programme interne de la Présidence, ne pas ajouter au total de sa section.",
+      "accounting_treatment": "INTERNAL_PROGRAM",
+      "lfi_section_cp_2026_fcfa": 193633705615,
+      "parent_section_code": "103",
+      "program_code": "13004",
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-001",
@@ -424,20 +504,25 @@
       "investment_pct": null,
       "delta_fcfa": null,
       "reconciliation_status": "NO_BREAKDOWN",
-      "verification_status": "PARTIAL_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 108",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 108",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 1171,
-        "doc_page": 1169,
+        "pdf_page": 45,
+        "doc_page": 1,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 108 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de portefeuille/ancien perimetre 73426766299 FCFA distinct du total LFI section 108 71326766299 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 71326766299,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": false
     },
     {
       "institution_id": "gov-002",
@@ -456,18 +541,23 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 226",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 226",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 27,
-        "doc_page": 25,
+        "pdf_page": 46,
+        "doc_page": 2,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 226 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 481041827995,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-003",
@@ -486,24 +576,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 237",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 237",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 95,
-        "doc_page": 93,
+        "pdf_page": 47,
+        "doc_page": 3,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 237 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 45121940916,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-004",
       "institution_name": "MINISTÈRE D'ÉTAT, MINISTÈRE DES AFFAIRES ÉTRANGÈRES",
       "category": "MINISTERE",
-      "official_section_code": "301",
+      "official_section_code": "321",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -516,18 +611,23 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 301",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 321",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 153,
-        "doc_page": 151,
+        "pdf_page": 47,
+        "doc_page": 3,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 321 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 146728395147,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-005",
@@ -546,24 +646,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 325",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 325",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 497,
-        "doc_page": 495,
+        "pdf_page": 48,
+        "doc_page": 4,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 325 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 129151307791,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-006",
       "institution_name": "MINISTÈRE DE L'INTÉRIEUR ET DE LA SÉCURITÉ",
       "category": "MINISTERE",
-      "official_section_code": "201",
+      "official_section_code": "323",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -574,26 +679,31 @@
       "investment_pct": null,
       "delta_fcfa": null,
       "reconciliation_status": "NO_BREAKDOWN",
-      "verification_status": "PARTIAL_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 201",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 323",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 63,
-        "doc_page": 61,
+        "pdf_page": 48,
+        "doc_page": 4,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 323 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de portefeuille/ancien perimetre 947962959206 FCFA distinct du total LFI section 323 945963329452 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 945963329452,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": false
     },
     {
       "institution_id": "gov-007",
       "institution_name": "MINISTÈRE DE L'ÉCONOMIE, DES FINANCES ET DU BUDGET",
       "category": "MINISTERE",
-      "official_section_code": "202",
+      "official_section_code": "322",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -604,20 +714,25 @@
       "investment_pct": null,
       "delta_fcfa": null,
       "reconciliation_status": "NO_BREAKDOWN",
-      "verification_status": "PARTIAL_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 202",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 322",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 79,
-        "doc_page": 77,
+        "pdf_page": 46,
+        "doc_page": 2,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 322 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de portefeuille/ancien perimetre 2038854932647 FCFA distinct du total LFI section 322 8699982915992 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 8699982915992,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": false
     },
     {
       "institution_id": "gov-008",
@@ -636,24 +751,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 348",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 348",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 801,
-        "doc_page": 799,
+        "pdf_page": 51,
+        "doc_page": 7,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 348 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 706060209015,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-009",
       "institution_name": "MINISTÈRE DE L'AGRICULTURE, DU DÉVELOPPEMENT RURAL ET DES PRODUCTIONS VIVRIÈRES",
       "category": "MINISTERE",
-      "official_section_code": "330",
+      "official_section_code": "229",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -664,26 +784,31 @@
       "investment_pct": null,
       "delta_fcfa": null,
       "reconciliation_status": "NO_BREAKDOWN",
-      "verification_status": "PARTIAL_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 330",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 229",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 541,
-        "doc_page": 539,
+        "pdf_page": 47,
+        "doc_page": 3,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 229 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de portefeuille/ancien perimetre 337932332542 FCFA distinct du total LFI section 229 333878089526 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 333878089526,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": false
     },
     {
       "institution_id": "gov-010",
       "institution_name": "MINISTÈRE DES TRANSPORTS ET DES AFFAIRES MARITIMES",
       "category": "MINISTERE",
-      "official_section_code": "302",
+      "official_section_code": "340",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -696,24 +821,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 302",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 340",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 175,
-        "doc_page": 173,
+        "pdf_page": 50,
+        "doc_page": 6,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 340 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 307769615082,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-011",
       "institution_name": "MINISTÈRE DE L'HYDRAULIQUE, DE L'ASSAINISSEMENT ET DE LA SALUBRITÉ",
       "category": "MINISTERE",
-      "official_section_code": "303",
+      "official_section_code": "366",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -724,26 +854,31 @@
       "investment_pct": null,
       "delta_fcfa": null,
       "reconciliation_status": "NO_BREAKDOWN",
-      "verification_status": "PARTIAL_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 303",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 366",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 195,
-        "doc_page": 193,
+        "pdf_page": 53,
+        "doc_page": 9,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 366 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de portefeuille/ancien perimetre 504985369765 FCFA distinct du total LFI section 366 502893150963 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 502893150963,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": false
     },
     {
       "institution_id": "gov-012",
       "institution_name": "MINISTÈRE DE LA PROMOTION DE LA JEUNESSE, DE L'INSERTION PROFESSIONNELLE ET DU SERVICE CIVIQUE",
       "category": "MINISTERE",
-      "official_section_code": "304",
+      "official_section_code": "357",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -754,26 +889,31 @@
       "investment_pct": null,
       "delta_fcfa": null,
       "reconciliation_status": "NO_BREAKDOWN",
-      "verification_status": "PARTIAL_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 304",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 357",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 219,
-        "doc_page": 217,
+        "pdf_page": 52,
+        "doc_page": 8,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 357 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de portefeuille/ancien perimetre 88949349037 FCFA distinct du total LFI section 357 81484195624 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 81484195624,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": false
     },
     {
       "institution_id": "gov-013",
       "institution_name": "MINISTÈRE DE LA SANTÉ, DE L'HYGIÈNE PUBLIQUE ET DE LA COUVERTURE MALADIE UNIVERSELLE",
       "category": "MINISTERE",
-      "official_section_code": "305",
+      "official_section_code": "335",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -784,26 +924,31 @@
       "investment_pct": null,
       "delta_fcfa": null,
       "reconciliation_status": "NO_BREAKDOWN",
-      "verification_status": "PARTIAL_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 305",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 335",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 243,
-        "doc_page": 241,
+        "pdf_page": 49,
+        "doc_page": 5,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 335 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de portefeuille/ancien perimetre 817868452462 FCFA distinct du total LFI section 335 808992158914 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 808992158914,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": false
     },
     {
       "institution_id": "gov-014",
       "institution_name": "MINISTÈRE DE L'URBANISME, DU LOGEMENT ET DU CADRE DE VIE",
       "category": "MINISTERE",
-      "official_section_code": "306",
+      "official_section_code": "358",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -814,26 +959,31 @@
       "investment_pct": null,
       "delta_fcfa": null,
       "reconciliation_status": "NO_BREAKDOWN",
-      "verification_status": "PARTIAL_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 306",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 358",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 267,
-        "doc_page": 265,
+        "pdf_page": 52,
+        "doc_page": 8,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 358 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de portefeuille/ancien perimetre 131771209724 FCFA distinct du total LFI section 358 123247714398 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 123247714398,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": false
     },
     {
       "institution_id": "gov-015",
       "institution_name": "MINISTÈRE DES RESSOURCES ANIMALES ET HALIEUTIQUES",
       "category": "MINISTERE",
-      "official_section_code": "307",
+      "official_section_code": "351",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -846,24 +996,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 307",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 351",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 289,
-        "doc_page": 287,
+        "pdf_page": 52,
+        "doc_page": 8,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 351 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 26700912028,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-016",
       "institution_name": "MINISTÈRE DU PORTEFEUILLE DE L'ÉTAT ET DES ENTREPRISES PUBLIQUES",
       "category": "MINISTERE",
-      "official_section_code": "308",
+      "official_section_code": "376",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -876,24 +1031,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 308",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 376",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 311,
-        "doc_page": 309,
+        "pdf_page": 53,
+        "doc_page": 9,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 376 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 49213125398,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-017",
       "institution_name": "MINISTÈRE DE LA COMMUNICATION",
       "category": "MINISTERE",
-      "official_section_code": "309",
+      "official_section_code": "336",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -906,24 +1066,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 309",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 336",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 333,
-        "doc_page": 331,
+        "pdf_page": 49,
+        "doc_page": 5,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 336 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 39806735298,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-018",
       "institution_name": "MINISTÈRE DES EAUX ET FORÊTS",
       "category": "MINISTERE",
-      "official_section_code": "310",
+      "official_section_code": "345",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -936,24 +1101,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 310",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 345",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 355,
-        "doc_page": 353,
+        "pdf_page": 50,
+        "doc_page": 6,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 345 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 103197582643,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-019",
       "institution_name": "MINISTÈRE DU COMMERCE, DE L'INDUSTRIE ET DE L'ARTISANAT",
       "category": "MINISTERE",
-      "official_section_code": "311",
+      "official_section_code": "347",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -966,24 +1136,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 311",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 347",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 377,
-        "doc_page": 375,
+        "pdf_page": 51,
+        "doc_page": 7,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 347 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 96866871722,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-020",
       "institution_name": "MINISTÈRE DU TOURISME ET DES LOISIRS",
       "category": "MINISTERE",
-      "official_section_code": "312",
+      "official_section_code": "350",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -996,24 +1171,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 312",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 350",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 399,
-        "doc_page": 397,
+        "pdf_page": 51,
+        "doc_page": 7,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 350 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 19207286052,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-021",
       "institution_name": "MINISTÈRE DU PLAN ET DU DÉVELOPPEMENT",
       "category": "MINISTERE",
-      "official_section_code": "313",
+      "official_section_code": "328",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -1026,24 +1206,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 313",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 328",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 419,
-        "doc_page": 417,
+        "pdf_page": 48,
+        "doc_page": 4,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 328 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 44194260102,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-022",
       "institution_name": "MINISTÈRE DE L'ENSEIGNEMENT SUPÉRIEUR ET DE LA RECHERCHE SCIENTIFIQUE",
       "category": "MINISTERE",
-      "official_section_code": "314",
+      "official_section_code": "333",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -1054,26 +1239,31 @@
       "investment_pct": null,
       "delta_fcfa": null,
       "reconciliation_status": "NO_BREAKDOWN",
-      "verification_status": "PARTIAL_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 314",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 333",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 439,
-        "doc_page": 437,
+        "pdf_page": 49,
+        "doc_page": 5,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 333 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de portefeuille/ancien perimetre 344706305890 FCFA distinct du total LFI section 333 338779408246 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 338779408246,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": false
     },
     {
       "institution_id": "gov-023",
       "institution_name": "MINISTÈRE DE L'EMPLOI, DE LA PROTECTION SOCIALE ET DE LA FORMATION PROFESSIONNELLE",
       "category": "MINISTERE",
-      "official_section_code": "315",
+      "official_section_code": "362",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -1086,24 +1276,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 315",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 362",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 459,
-        "doc_page": 457,
+        "pdf_page": 53,
+        "doc_page": 9,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 362 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 91411414044,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-024",
       "institution_name": "MINISTÈRE DE L'ÉDUCATION NATIONALE, DE L'ALPHABÉTISATION ET DE L'ENSEIGNEMENT TECHNIQUE",
       "category": "MINISTERE",
-      "official_section_code": "316",
+      "official_section_code": "331",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -1114,26 +1309,31 @@
       "investment_pct": null,
       "delta_fcfa": null,
       "reconciliation_status": "NO_BREAKDOWN",
-      "verification_status": "PARTIAL_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 316",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 331",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 479,
-        "doc_page": 477,
+        "pdf_page": 49,
+        "doc_page": 5,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 331 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de portefeuille/ancien perimetre 1571000767175 FCFA distinct du total LFI section 331 1563721366602 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 1563721366602,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": false
     },
     {
       "institution_id": "gov-025",
       "institution_name": "MINISTÈRE DES INFRASTRUCTURES ET DE L'ENTRETIEN ROUTIER",
       "category": "MINISTERE",
-      "official_section_code": "326",
+      "official_section_code": "330",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -1146,24 +1346,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 326",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 330",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 519,
-        "doc_page": 517,
+        "pdf_page": 49,
+        "doc_page": 5,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 330 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 734442904943,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-026",
       "institution_name": "MINISTÈRE DE LA COHÉSION NATIONALE, DE LA SOLIDARITÉ ET DE LA LUTTE CONTRE LA PAUVRETÉ",
       "category": "MINISTERE",
-      "official_section_code": "331",
+      "official_section_code": "369",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -1176,24 +1381,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 331",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 369",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 563,
-        "doc_page": 561,
+        "pdf_page": 53,
+        "doc_page": 9,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 369 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 57361750199,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-027",
       "institution_name": "MINISTÈRE DE LA TRANSITION NUMÉRIQUE ET DE L'INNOVATION TECHNOLOGIQUE",
       "category": "MINISTERE",
-      "official_section_code": "332",
+      "official_section_code": "356",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -1206,24 +1416,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 332",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 356",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 585,
-        "doc_page": 583,
+        "pdf_page": 52,
+        "doc_page": 8,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 356 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 83275503595,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-028",
       "institution_name": "MINISTÈRE DE LA FEMME, DE LA FAMILLE ET DE L'ENFANT",
       "category": "MINISTERE",
-      "official_section_code": "333",
+      "official_section_code": "352",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -1236,24 +1451,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 333",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 352",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 607,
-        "doc_page": 605,
+        "pdf_page": 52,
+        "doc_page": 8,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 352 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 31263058865,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-029",
       "institution_name": "MINISTÈRE DE LA CULTURE ET DE LA FRANCOPHONIE",
       "category": "MINISTERE",
-      "official_section_code": "334",
+      "official_section_code": "346",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -1264,26 +1484,31 @@
       "investment_pct": null,
       "delta_fcfa": null,
       "reconciliation_status": "NO_BREAKDOWN",
-      "verification_status": "PARTIAL_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 334",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 346",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 629,
-        "doc_page": 627,
+        "pdf_page": 50,
+        "doc_page": 6,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 346 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de portefeuille/ancien perimetre 39771854976 FCFA distinct du total LFI section 346 37598620420 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 37598620420,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": false
     },
     {
       "institution_id": "gov-030",
       "institution_name": "MINISTÈRE DES SPORTS",
       "category": "MINISTERE",
-      "official_section_code": "335",
+      "official_section_code": "444",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -1296,24 +1521,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 335",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 444",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 651,
-        "doc_page": 649,
+        "pdf_page": 54,
+        "doc_page": 10,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 444 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 70427777385,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-031",
       "institution_name": "MINISTÈRE DE L'ENVIRONNEMENT ET DE LA TRANSITION ÉCOLOGIQUE",
       "category": "MINISTERE",
-      "official_section_code": "336",
+      "official_section_code": "343",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -1326,24 +1556,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 336",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 343",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 673,
-        "doc_page": 671,
+        "pdf_page": 50,
+        "doc_page": 6,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 343 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 36680067253,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-032",
       "institution_name": "MINISTÈRE DÉLÉGUÉ CHARGÉ DES AFFAIRES MARITIMES",
       "category": "MINISTERE",
-      "official_section_code": "337",
+      "official_section_code": "440",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -1356,24 +1591,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 337",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 440",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 695,
-        "doc_page": 693,
+        "pdf_page": 54,
+        "doc_page": 10,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 440 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 13746365872,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-033",
       "institution_name": "MINISTÈRE DÉLÉGUÉ CHARGÉ DE L'INTÉGRATION AFRICAINE",
       "category": "MINISTERE",
-      "official_section_code": "338",
+      "official_section_code": "439",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -1386,24 +1626,29 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 338",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 439",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 717,
-        "doc_page": 715,
+        "pdf_page": 53,
+        "doc_page": 9,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 439 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 5122516889,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-034",
       "institution_name": "MINISTÈRE DÉLÉGUÉ CHARGÉ DE L'ENSEIGNEMENT TECHNIQUE",
       "category": "MINISTERE",
-      "official_section_code": "339",
+      "official_section_code": "334",
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
@@ -1416,18 +1661,23 @@
       "reconciliation_status": "NO_BREAKDOWN",
       "verification_status": "PARTIAL_BREAKDOWN",
       "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • Section 339",
+        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 - Tableau credits de paiement par section et programme",
+        "document_reference": "LFI 2026 • Section 334",
         "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 739,
-        "doc_page": 737,
+        "pdf_page": 49,
+        "doc_page": 5,
         "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
+        "table_or_line": "Section 334 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Aucune ventilation fonctionnement/investissement disponible."
+        "Montant de section LFI identifiable ; ventilation fonctionnement/investissement absente et affectation exacte au portefeuille 2026 non certifiee."
       ],
-      "notice_text": "Aucune ventilation fonctionnement/investissement disponible. Périmètre et provenance documentaire à vérifier."
+      "notice_text": "Crédit de section confirmé ; affectation administrative et ventilation non certifiées.",
+      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "lfi_section_cp_2026_fcfa": 182301855312,
+      "parent_section_code": null,
+      "program_code": null,
+      "amount_matches_lfi_row": true
     },
     {
       "institution_id": "gov-035",
@@ -1447,9 +1697,10 @@
       "verification_status": "NOT_DOCUMENTED",
       "provenance": null,
       "blocking_reasons": [
-        "Aucune documentation budgétaire publique disponible ou document non encore transmis à SuiviBudget."
+        "Portefeuille gouvernemental sans section LFI 2026 distincte attribuable en l'etat. Ne pas imputer un montant fictif."
       ],
-      "notice_text": "Cette entité ne dispose pas de document budgétaire officiel public répertorié pour l'exercice."
+      "notice_text": "Cette entité ne dispose pas de document budgétaire officiel public répertorié pour l'exercice.",
+      "accounting_treatment": "PORTFOLIO_WITHOUT_INDEPENDENT_SECTION"
     },
     {
       "institution_id": "aai-haca",
@@ -1459,25 +1710,21 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 4200000000,
-      "functioning_fcfa": 4200000000,
-      "investment_fcfa": 0,
-      "functioning_pct": 100,
-      "investment_pct": 0,
-      "delta_fcfa": 0,
-      "reconciliation_status": "RECONCILED",
-      "verification_status": "VERIFIED_AMOUNT",
-      "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • JORCI • DGBF",
-        "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 45,
-        "doc_page": 45,
-        "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
-      },
-      "blocking_reasons": [],
-      "notice_text": null
+      "total_fcfa": null,
+      "functioning_fcfa": null,
+      "investment_fcfa": null,
+      "functioning_pct": null,
+      "investment_pct": null,
+      "delta_fcfa": null,
+      "reconciliation_status": "NO_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
+      "provenance": null,
+      "blocking_reasons": [
+        "La LFI citée précédemment ne justifiait pas individuellement ce montant. Budget d'autorité, dotation de section et budget d'EPN ne doivent pas être confondus."
+      ],
+      "notice_text": "Budget individuel 2026 non vérifié ; document officiel d'affectation à obtenir.",
+      "previous_reported_2026_fcfa": 4200000000,
+      "accounting_treatment": "UNVERIFIED_AAI"
     },
     {
       "institution_id": "aai-caidp",
@@ -1487,25 +1734,21 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 2150000000,
-      "functioning_fcfa": 2150000000,
-      "investment_fcfa": 0,
-      "functioning_pct": 100,
-      "investment_pct": 0,
-      "delta_fcfa": 0,
-      "reconciliation_status": "RECONCILED",
-      "verification_status": "VERIFIED_AMOUNT",
-      "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • JORCI • DGBF",
-        "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 45,
-        "doc_page": 45,
-        "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
-      },
-      "blocking_reasons": [],
-      "notice_text": null
+      "total_fcfa": null,
+      "functioning_fcfa": null,
+      "investment_fcfa": null,
+      "functioning_pct": null,
+      "investment_pct": null,
+      "delta_fcfa": null,
+      "reconciliation_status": "NO_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
+      "provenance": null,
+      "blocking_reasons": [
+        "La LFI citée précédemment ne justifiait pas individuellement ce montant. Budget d'autorité, dotation de section et budget d'EPN ne doivent pas être confondus."
+      ],
+      "notice_text": "Budget individuel 2026 non vérifié ; document officiel d'affectation à obtenir.",
+      "previous_reported_2026_fcfa": 2150000000,
+      "accounting_treatment": "UNVERIFIED_AAI"
     },
     {
       "institution_id": "aai-arcop",
@@ -1515,25 +1758,21 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 4850000000,
-      "functioning_fcfa": 4850000000,
-      "investment_fcfa": 0,
-      "functioning_pct": 100,
-      "investment_pct": 0,
-      "delta_fcfa": 0,
-      "reconciliation_status": "RECONCILED",
-      "verification_status": "VERIFIED_AMOUNT",
-      "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • JORCI • DGBF",
-        "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 45,
-        "doc_page": 45,
-        "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
-      },
-      "blocking_reasons": [],
-      "notice_text": null
+      "total_fcfa": null,
+      "functioning_fcfa": null,
+      "investment_fcfa": null,
+      "functioning_pct": null,
+      "investment_pct": null,
+      "delta_fcfa": null,
+      "reconciliation_status": "NO_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
+      "provenance": null,
+      "blocking_reasons": [
+        "La LFI citée précédemment ne justifiait pas individuellement ce montant. Budget d'autorité, dotation de section et budget d'EPN ne doivent pas être confondus."
+      ],
+      "notice_text": "Budget individuel 2026 non vérifié ; document officiel d'affectation à obtenir.",
+      "previous_reported_2026_fcfa": 4850000000,
+      "accounting_treatment": "UNVERIFIED_AAI"
     },
     {
       "institution_id": "aai-artci",
@@ -1543,25 +1782,21 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 19000000000,
-      "functioning_fcfa": 16500000000,
-      "investment_fcfa": 2500000000,
-      "functioning_pct": 87,
-      "investment_pct": 13,
-      "delta_fcfa": 0,
-      "reconciliation_status": "RECONCILED",
-      "verification_status": "VERIFIED_AMOUNT",
-      "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • JORCI • DGBF",
-        "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 45,
-        "doc_page": 45,
-        "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
-      },
-      "blocking_reasons": [],
-      "notice_text": null
+      "total_fcfa": null,
+      "functioning_fcfa": null,
+      "investment_fcfa": null,
+      "functioning_pct": null,
+      "investment_pct": null,
+      "delta_fcfa": null,
+      "reconciliation_status": "NO_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
+      "provenance": null,
+      "blocking_reasons": [
+        "La LFI citée précédemment ne justifiait pas individuellement ce montant. Budget d'autorité, dotation de section et budget d'EPN ne doivent pas être confondus."
+      ],
+      "notice_text": "Budget individuel 2026 non vérifié ; document officiel d'affectation à obtenir.",
+      "previous_reported_2026_fcfa": 19000000000,
+      "accounting_treatment": "UNVERIFIED_AAI"
     },
     {
       "institution_id": "aai-anare",
@@ -1571,25 +1806,21 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 5200000000,
-      "functioning_fcfa": 5200000000,
-      "investment_fcfa": 0,
-      "functioning_pct": 100,
-      "investment_pct": 0,
-      "delta_fcfa": 0,
-      "reconciliation_status": "RECONCILED",
-      "verification_status": "VERIFIED_AMOUNT",
-      "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • JORCI • DGBF",
-        "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 45,
-        "doc_page": 45,
-        "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
-      },
-      "blocking_reasons": [],
-      "notice_text": null
+      "total_fcfa": null,
+      "functioning_fcfa": null,
+      "investment_fcfa": null,
+      "functioning_pct": null,
+      "investment_pct": null,
+      "delta_fcfa": null,
+      "reconciliation_status": "NO_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
+      "provenance": null,
+      "blocking_reasons": [
+        "La LFI citée précédemment ne justifiait pas individuellement ce montant. Budget d'autorité, dotation de section et budget d'EPN ne doivent pas être confondus."
+      ],
+      "notice_text": "Budget individuel 2026 non vérifié ; document officiel d'affectation à obtenir.",
+      "previous_reported_2026_fcfa": 5200000000,
+      "accounting_treatment": "UNVERIFIED_AAI"
     },
     {
       "institution_id": "aai-cndh",
@@ -1599,25 +1830,21 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 3100000000,
-      "functioning_fcfa": 3100000000,
-      "investment_fcfa": 0,
-      "functioning_pct": 100,
-      "investment_pct": 0,
-      "delta_fcfa": 0,
-      "reconciliation_status": "RECONCILED",
-      "verification_status": "VERIFIED_AMOUNT",
-      "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • JORCI • DGBF",
-        "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 45,
-        "doc_page": 45,
-        "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
-      },
-      "blocking_reasons": [],
-      "notice_text": null
+      "total_fcfa": null,
+      "functioning_fcfa": null,
+      "investment_fcfa": null,
+      "functioning_pct": null,
+      "investment_pct": null,
+      "delta_fcfa": null,
+      "reconciliation_status": "NO_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
+      "provenance": null,
+      "blocking_reasons": [
+        "La LFI citée précédemment ne justifiait pas individuellement ce montant. Budget d'autorité, dotation de section et budget d'EPN ne doivent pas être confondus."
+      ],
+      "notice_text": "Budget individuel 2026 non vérifié ; document officiel d'affectation à obtenir.",
+      "previous_reported_2026_fcfa": 3100000000,
+      "accounting_treatment": "UNVERIFIED_AAI"
     },
     {
       "institution_id": "aai-airp",
@@ -1627,25 +1854,21 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 3650000000,
-      "functioning_fcfa": 3650000000,
-      "investment_fcfa": 0,
-      "functioning_pct": 100,
-      "investment_pct": 0,
-      "delta_fcfa": 0,
-      "reconciliation_status": "RECONCILED",
-      "verification_status": "VERIFIED_AMOUNT",
-      "provenance": {
-        "document_title": "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
-        "document_reference": "Loi n° 2025-987 • JORCI • DGBF",
-        "source_url": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
-        "pdf_page": 45,
-        "doc_page": 45,
-        "sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
-        "table_or_line": "Tableau des crédits par section et par programme"
-      },
-      "blocking_reasons": [],
-      "notice_text": null
+      "total_fcfa": null,
+      "functioning_fcfa": null,
+      "investment_fcfa": null,
+      "functioning_pct": null,
+      "investment_pct": null,
+      "delta_fcfa": null,
+      "reconciliation_status": "NO_BREAKDOWN",
+      "verification_status": "NOT_DOCUMENTED",
+      "provenance": null,
+      "blocking_reasons": [
+        "La LFI citée précédemment ne justifiait pas individuellement ce montant. Budget d'autorité, dotation de section et budget d'EPN ne doivent pas être confondus."
+      ],
+      "notice_text": "Budget individuel 2026 non vérifié ; document officiel d'affectation à obtenir.",
+      "previous_reported_2026_fcfa": 3650000000,
+      "accounting_treatment": "UNVERIFIED_AAI"
     },
     {
       "institution_id": "inst-com-abobo",
@@ -1672,7 +1895,8 @@
       "blocking_reasons": [
         "Commune du Grand Abidjan sous autonomie fiscale (quotes-parts DGI, patentes, taxes locales). Délibération du Budget Primitif 2026 en attente de centralisation."
       ],
-      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation."
+      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation.",
+      "accounting_treatment": "MUNICIPAL_BUDGET_NOT_PROVIDED"
     },
     {
       "institution_id": "inst-com-adjame",
@@ -1699,7 +1923,8 @@
       "blocking_reasons": [
         "Commune du Grand Abidjan sous autonomie fiscale (quotes-parts DGI, patentes, taxes locales). Délibération du Budget Primitif 2026 en attente de centralisation."
       ],
-      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation."
+      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation.",
+      "accounting_treatment": "MUNICIPAL_BUDGET_NOT_PROVIDED"
     },
     {
       "institution_id": "inst-com-attecoube",
@@ -1726,7 +1951,8 @@
       "blocking_reasons": [
         "Commune du Grand Abidjan sous autonomie fiscale (quotes-parts DGI, patentes, taxes locales). Délibération du Budget Primitif 2026 en attente de centralisation."
       ],
-      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation."
+      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation.",
+      "accounting_treatment": "MUNICIPAL_BUDGET_NOT_PROVIDED"
     },
     {
       "institution_id": "inst-com-cocody",
@@ -1753,7 +1979,8 @@
       "blocking_reasons": [
         "Commune du Grand Abidjan sous autonomie fiscale (quotes-parts DGI, patentes, taxes locales). Délibération du Budget Primitif 2026 en attente de centralisation."
       ],
-      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation."
+      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation.",
+      "accounting_treatment": "MUNICIPAL_BUDGET_NOT_PROVIDED"
     },
     {
       "institution_id": "inst-com-koumassi",
@@ -1780,7 +2007,8 @@
       "blocking_reasons": [
         "Commune du Grand Abidjan sous autonomie fiscale (quotes-parts DGI, patentes, taxes locales). Délibération du Budget Primitif 2026 en attente de centralisation."
       ],
-      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation."
+      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation.",
+      "accounting_treatment": "MUNICIPAL_BUDGET_NOT_PROVIDED"
     },
     {
       "institution_id": "inst-com-marcory",
@@ -1807,7 +2035,8 @@
       "blocking_reasons": [
         "Commune du Grand Abidjan sous autonomie fiscale (quotes-parts DGI, patentes, taxes locales). Délibération du Budget Primitif 2026 en attente de centralisation."
       ],
-      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation."
+      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation.",
+      "accounting_treatment": "MUNICIPAL_BUDGET_NOT_PROVIDED"
     },
     {
       "institution_id": "inst-com-plateau",
@@ -1834,7 +2063,8 @@
       "blocking_reasons": [
         "Commune du Grand Abidjan sous autonomie fiscale (quotes-parts DGI, patentes, taxes locales). Délibération du Budget Primitif 2026 en attente de centralisation."
       ],
-      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation."
+      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation.",
+      "accounting_treatment": "MUNICIPAL_BUDGET_NOT_PROVIDED"
     },
     {
       "institution_id": "inst-com-port-bouet",
@@ -1861,7 +2091,8 @@
       "blocking_reasons": [
         "Commune du Grand Abidjan sous autonomie fiscale (quotes-parts DGI, patentes, taxes locales). Délibération du Budget Primitif 2026 en attente de centralisation."
       ],
-      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation."
+      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation.",
+      "accounting_treatment": "MUNICIPAL_BUDGET_NOT_PROVIDED"
     },
     {
       "institution_id": "inst-com-treichville",
@@ -1888,7 +2119,8 @@
       "blocking_reasons": [
         "Commune du Grand Abidjan sous autonomie fiscale (quotes-parts DGI, patentes, taxes locales). Délibération du Budget Primitif 2026 en attente de centralisation."
       ],
-      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation."
+      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation.",
+      "accounting_treatment": "MUNICIPAL_BUDGET_NOT_PROVIDED"
     },
     {
       "institution_id": "inst-com-yopougon",
@@ -1915,7 +2147,8 @@
       "blocking_reasons": [
         "Commune du Grand Abidjan sous autonomie fiscale (quotes-parts DGI, patentes, taxes locales). Délibération du Budget Primitif 2026 en attente de centralisation."
       ],
-      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation."
+      "notice_text": "Commune du Grand Abidjan fonctionnant sous le régime de l'autonomie financière et fiscale (quotes-parts DGI, patentes, taxes municipales). Délibération du Budget Primitif 2026 en attente de centralisation.",
+      "accounting_treatment": "MUNICIPAL_BUDGET_NOT_PROVIDED"
     }
   ]
 }
