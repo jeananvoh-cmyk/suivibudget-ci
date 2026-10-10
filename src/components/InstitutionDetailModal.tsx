@@ -1029,14 +1029,14 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200 flex items-center gap-1.5 shadow-2xs">
                               <ShieldCheck className="w-3.5 h-3.5 text-brand-blue" />
-                              {isDistrict ? 'Budget Primitif Officiel Voté en Conseil du District' : isRegion ? 'Budget Primitif Officiel Voté en Conseil Régional' : 'Budget Primitif Officiel Voté en Conseil Municipal'}
+                              {isDistrict ? 'Budget primitif du District rapporté en 2026' : isRegion ? 'Budget primitif régional rapporté en 2026' : 'Budget primitif communal rapporté en 2026'}
                             </span>
                             <span className="text-[11px] font-bold text-slate-500">
                               Exercice 2026
                             </span>
                             {prim.precision === 'EXACT' && (
                               <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                Montant Délibéré Exact
+                                Montant exact cité par la source
                               </span>
                             )}
                             {prim.precision === 'APPROXIMATE' && (
