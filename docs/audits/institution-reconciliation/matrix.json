@@ -18,12 +18,14 @@
     "non_additive_presidency_programs": 2,
     "unverified_regulatory_entities": 7,
     "regulators_previously_reported_sum_fcfa": 42150000000,
-    "unsupported_ministry_portfolio_rows": 11,
+    "unsupported_ministry_portfolio_rows": 2,
     "ministry_section_reference_rows": 34,
     "ministry_portfolios": 35,
     "previous_certified_sum_fcfa": 356153879687,
     "documentary_certification": "RESERVED_P0",
-    "notes": "Montants verifiés = concordance à la ligne du PDF + identification. Pas de certification exhaustive de l'execution ou des ventilations."
+    "notes": "Montants verifiés = concordance à la ligne du PDF + identification. Pas de certification exhaustive de l'execution ou des ventilations. 9 budgets de portefeuilles non renseignes dans le jeu public: valeurs historiques conservees uniquement en archive d'audit.",
+    "withheld_ministry_portfolio_rows": 9,
+    "ministry_documentary_reservations_count": 11
   },
   "entities": [
     {
@@ -497,7 +499,7 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 73426766299,
+      "total_fcfa": null,
       "functioning_fcfa": null,
       "investment_fcfa": null,
       "functioning_pct": null,
@@ -515,14 +517,15 @@
         "table_or_line": "Section 108 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Montant de portefeuille/ancien perimetre 73426766299 FCFA distinct du total LFI section 108 71326766299 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
+        "Ancien montant historique de portefeuille archive mais non publie dans les donnees de reference actuelles. Section LFI 108 identifiable sans affectation numerique certifiee."
       ],
-      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
-      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "notice_text": "Montant de portefeuille volontairement non renseigné : ne pas rétablir l'ancien chiffre sans preuve d'affectation.",
+      "accounting_treatment": "PORTFOLIO_AMOUNT_WITHHELD",
       "lfi_section_cp_2026_fcfa": 71326766299,
       "parent_section_code": null,
       "program_code": null,
-      "amount_matches_lfi_row": false
+      "amount_matches_lfi_row": false,
+      "previous_reported_2026_fcfa": 73426766299
     },
     {
       "institution_id": "gov-002",
@@ -672,7 +675,7 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 947962959206,
+      "total_fcfa": null,
       "functioning_fcfa": null,
       "investment_fcfa": null,
       "functioning_pct": null,
@@ -690,14 +693,15 @@
         "table_or_line": "Section 323 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Montant de portefeuille/ancien perimetre 947962959206 FCFA distinct du total LFI section 323 945963329452 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
+        "Ancien montant historique de portefeuille archive mais non publie dans les donnees de reference actuelles. Section LFI 323 identifiable sans affectation numerique certifiee."
       ],
-      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
-      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "notice_text": "Montant de portefeuille volontairement non renseigné : ne pas rétablir l'ancien chiffre sans preuve d'affectation.",
+      "accounting_treatment": "PORTFOLIO_AMOUNT_WITHHELD",
       "lfi_section_cp_2026_fcfa": 945963329452,
       "parent_section_code": null,
       "program_code": null,
-      "amount_matches_lfi_row": false
+      "amount_matches_lfi_row": false,
+      "previous_reported_2026_fcfa": 947962959206
     },
     {
       "institution_id": "gov-007",
@@ -777,7 +781,7 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 337932332542,
+      "total_fcfa": null,
       "functioning_fcfa": null,
       "investment_fcfa": null,
       "functioning_pct": null,
@@ -795,14 +799,15 @@
         "table_or_line": "Section 229 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Montant de portefeuille/ancien perimetre 337932332542 FCFA distinct du total LFI section 229 333878089526 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
+        "Ancien montant historique de portefeuille archive mais non publie dans les donnees de reference actuelles. Section LFI 229 identifiable sans affectation numerique certifiee."
       ],
-      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
-      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "notice_text": "Montant de portefeuille volontairement non renseigné : ne pas rétablir l'ancien chiffre sans preuve d'affectation.",
+      "accounting_treatment": "PORTFOLIO_AMOUNT_WITHHELD",
       "lfi_section_cp_2026_fcfa": 333878089526,
       "parent_section_code": null,
       "program_code": null,
-      "amount_matches_lfi_row": false
+      "amount_matches_lfi_row": false,
+      "previous_reported_2026_fcfa": 337932332542
     },
     {
       "institution_id": "gov-010",
@@ -847,7 +852,7 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 504985369765,
+      "total_fcfa": null,
       "functioning_fcfa": null,
       "investment_fcfa": null,
       "functioning_pct": null,
@@ -865,14 +870,15 @@
         "table_or_line": "Section 366 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Montant de portefeuille/ancien perimetre 504985369765 FCFA distinct du total LFI section 366 502893150963 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
+        "Ancien montant historique de portefeuille archive mais non publie dans les donnees de reference actuelles. Section LFI 366 identifiable sans affectation numerique certifiee."
       ],
-      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
-      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "notice_text": "Montant de portefeuille volontairement non renseigné : ne pas rétablir l'ancien chiffre sans preuve d'affectation.",
+      "accounting_treatment": "PORTFOLIO_AMOUNT_WITHHELD",
       "lfi_section_cp_2026_fcfa": 502893150963,
       "parent_section_code": null,
       "program_code": null,
-      "amount_matches_lfi_row": false
+      "amount_matches_lfi_row": false,
+      "previous_reported_2026_fcfa": 504985369765
     },
     {
       "institution_id": "gov-012",
@@ -882,7 +888,7 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 88949349037,
+      "total_fcfa": null,
       "functioning_fcfa": null,
       "investment_fcfa": null,
       "functioning_pct": null,
@@ -900,14 +906,15 @@
         "table_or_line": "Section 357 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Montant de portefeuille/ancien perimetre 88949349037 FCFA distinct du total LFI section 357 81484195624 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
+        "Ancien montant historique de portefeuille archive mais non publie dans les donnees de reference actuelles. Section LFI 357 identifiable sans affectation numerique certifiee."
       ],
-      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
-      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "notice_text": "Montant de portefeuille volontairement non renseigné : ne pas rétablir l'ancien chiffre sans preuve d'affectation.",
+      "accounting_treatment": "PORTFOLIO_AMOUNT_WITHHELD",
       "lfi_section_cp_2026_fcfa": 81484195624,
       "parent_section_code": null,
       "program_code": null,
-      "amount_matches_lfi_row": false
+      "amount_matches_lfi_row": false,
+      "previous_reported_2026_fcfa": 88949349037
     },
     {
       "institution_id": "gov-013",
@@ -917,7 +924,7 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 817868452462,
+      "total_fcfa": null,
       "functioning_fcfa": null,
       "investment_fcfa": null,
       "functioning_pct": null,
@@ -935,14 +942,15 @@
         "table_or_line": "Section 335 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Montant de portefeuille/ancien perimetre 817868452462 FCFA distinct du total LFI section 335 808992158914 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
+        "Ancien montant historique de portefeuille archive mais non publie dans les donnees de reference actuelles. Section LFI 335 identifiable sans affectation numerique certifiee."
       ],
-      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
-      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "notice_text": "Montant de portefeuille volontairement non renseigné : ne pas rétablir l'ancien chiffre sans preuve d'affectation.",
+      "accounting_treatment": "PORTFOLIO_AMOUNT_WITHHELD",
       "lfi_section_cp_2026_fcfa": 808992158914,
       "parent_section_code": null,
       "program_code": null,
-      "amount_matches_lfi_row": false
+      "amount_matches_lfi_row": false,
+      "previous_reported_2026_fcfa": 817868452462
     },
     {
       "institution_id": "gov-014",
@@ -952,7 +960,7 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 131771209724,
+      "total_fcfa": null,
       "functioning_fcfa": null,
       "investment_fcfa": null,
       "functioning_pct": null,
@@ -970,14 +978,15 @@
         "table_or_line": "Section 358 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Montant de portefeuille/ancien perimetre 131771209724 FCFA distinct du total LFI section 358 123247714398 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
+        "Ancien montant historique de portefeuille archive mais non publie dans les donnees de reference actuelles. Section LFI 358 identifiable sans affectation numerique certifiee."
       ],
-      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
-      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "notice_text": "Montant de portefeuille volontairement non renseigné : ne pas rétablir l'ancien chiffre sans preuve d'affectation.",
+      "accounting_treatment": "PORTFOLIO_AMOUNT_WITHHELD",
       "lfi_section_cp_2026_fcfa": 123247714398,
       "parent_section_code": null,
       "program_code": null,
-      "amount_matches_lfi_row": false
+      "amount_matches_lfi_row": false,
+      "previous_reported_2026_fcfa": 131771209724
     },
     {
       "institution_id": "gov-015",
@@ -1232,7 +1241,7 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 344706305890,
+      "total_fcfa": null,
       "functioning_fcfa": null,
       "investment_fcfa": null,
       "functioning_pct": null,
@@ -1250,14 +1259,15 @@
         "table_or_line": "Section 333 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Montant de portefeuille/ancien perimetre 344706305890 FCFA distinct du total LFI section 333 338779408246 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
+        "Ancien montant historique de portefeuille archive mais non publie dans les donnees de reference actuelles. Section LFI 333 identifiable sans affectation numerique certifiee."
       ],
-      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
-      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "notice_text": "Montant de portefeuille volontairement non renseigné : ne pas rétablir l'ancien chiffre sans preuve d'affectation.",
+      "accounting_treatment": "PORTFOLIO_AMOUNT_WITHHELD",
       "lfi_section_cp_2026_fcfa": 338779408246,
       "parent_section_code": null,
       "program_code": null,
-      "amount_matches_lfi_row": false
+      "amount_matches_lfi_row": false,
+      "previous_reported_2026_fcfa": 344706305890
     },
     {
       "institution_id": "gov-023",
@@ -1477,7 +1487,7 @@
       "fiscal_year": 2026,
       "budget_basis": "LFI",
       "budget_measure": "CREDITS_VOTES",
-      "total_fcfa": 39771854976,
+      "total_fcfa": null,
       "functioning_fcfa": null,
       "investment_fcfa": null,
       "functioning_pct": null,
@@ -1495,14 +1505,15 @@
         "table_or_line": "Section 346 - Credits de paiement 2026"
       },
       "blocking_reasons": [
-        "Montant de portefeuille/ancien perimetre 39771854976 FCFA distinct du total LFI section 346 37598620420 FCFA. Rapprochement non acheve. Conserver C2D et reliquats historiques."
+        "Ancien montant historique de portefeuille archive mais non publie dans les donnees de reference actuelles. Section LFI 346 identifiable sans affectation numerique certifiee."
       ],
-      "notice_text": "Montant de portefeuille affiché à titre indicatif et non certifié par cette ligne LFI. Ne pas additionner au crédit de section.",
-      "accounting_treatment": "SECTION_REFERENCE_NOT_PORTFOLIO",
+      "notice_text": "Montant de portefeuille volontairement non renseigné : ne pas rétablir l'ancien chiffre sans preuve d'affectation.",
+      "accounting_treatment": "PORTFOLIO_AMOUNT_WITHHELD",
       "lfi_section_cp_2026_fcfa": 37598620420,
       "parent_section_code": null,
       "program_code": null,
-      "amount_matches_lfi_row": false
+      "amount_matches_lfi_row": false,
+      "previous_reported_2026_fcfa": 39771854976
     },
     {
       "institution_id": "gov-030",
