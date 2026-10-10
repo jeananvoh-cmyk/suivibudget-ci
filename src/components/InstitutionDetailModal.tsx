@@ -246,7 +246,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   const totalBudget = (institution.total_budget_fcfa === 0 && primInfo?.total_voted_fcfa != null)
     ? primInfo.total_voted_fcfa
     : (institution.total_budget_fcfa ?? (functioningBudget != null && investmentBudget != null ? functioningBudget + investmentBudget : null));
-  const hasInstBreakdown = functioningBudget != null && investmentBudget != null && (totalBudget ?? 0) > 0;
+  const hasInstBreakdown = calculateSafePercentages(functioningBudget, investmentBudget, totalBudget).functioningPct !== null;
 
   const { functioningPct: safeFonctPct, investmentPct: safeInvPct } = calculateSafePercentages(
     functioningBudget,
