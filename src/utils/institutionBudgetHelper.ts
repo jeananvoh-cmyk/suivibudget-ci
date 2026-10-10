@@ -586,13 +586,15 @@ export function resolveInstitutionFinancialView(
   const provenance: DocumentaryProvenance = {
     document_title: LFI_2026_DOCUMENT.title,
     document_reference: officialSectionCode 
-      ? `Loi n° 2025-987 • Section ${officialSectionCode}` 
+      ? `Loi n° 2025-987 • Section ${officialSectionCode}${nationalSection?.program_code ? ` • Programme ${nationalSection.program_code}` : ''}` 
       : LFI_2026_DOCUMENT.reference,
     source_url: LFI_2026_DOCUMENT.url,
     pdf_page: pdfPage,
     doc_page: docPage,
     sha256: LFI_2026_DOCUMENT.sha256,
-    table_or_line: "Tableau des crédits par section et par programme"
+    table_or_line: nationalSection?.program_code
+      ? `Programme interne ${nationalSection.program_code} de la section 103 (Présidence)`
+      : "Tableau des crédits par section et par programme"
   };
 
   // Verification documentaire INDEPENDANTE de l'egalite arithmetique.
@@ -610,7 +612,9 @@ export function resolveInstitutionFinancialView(
     institution_type: instType,
     official_section_code: officialSectionCode,
     fiscal_year: fiscalYear,
-    nature_credits: "Autorisations d'Engagement & Crédits de Paiement (LFI 2026)",
+    nature_credits: nationalSection?.program_code
+      ? `Programme interne ${nationalSection.program_code} de la Présidence, non additif au total de la section 103`
+      : "Autorisations d'Engagement & Crédits de Paiement (LFI 2026)",
     budget_basis: requestedBasis || (instType === 'MAIRIE' || instType === 'REGION' ? 'PRIMITIVE' : 'LFI'),
     budget_measure: 'CREDITS_VOTES',
     total_amount_fcfa: total,
@@ -633,15 +637,19 @@ export function resolveInstitutionFinancialView(
     reconciliation_status: pctResult.status,
     blocking_reasons: [
       ...(pctResult.reason ? [pctResult.reason] : []),
+      ...(nationalSection?.program_code ? [`Le programme ${nationalSection.program_code} est déjà inclus dans les 193 633 705 615 FCFA de la Présidence (section 103). Ne pas additionner.`] : []),
       ...(!isLfi2026AmountConfirmed ? [documentaryDiscrepancy
         ? `Montant de la fiche non identique aux credits de la section LFI ${officialSectionCode} : ${total} FCFA affiche contre ${amountEvidence!.lfi_amount_fcfa} FCFA section. Portefeuille, C2D et transferts a rapprocher sans remplacement automatique.`
         : 'Aucune ligne officielle LFI 2026 probante pour ce montant et ce perimetre.'] : []),
     ],
-    badge_text: isLfi2026AmountConfirmed ? 'Montant recoupe LFI 2026' : 'Montant a rapprocher - source insuffisante',
+    badge_text: nationalSection?.program_code ? 'Programme Présidence - non additif'
+      : isLfi2026AmountConfirmed ? 'Montant recoupe LFI 2026' : 'Montant a rapprocher - source insuffisante',
     badge_class: isLfi2026AmountConfirmed && isReconciled 
       ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
       : 'bg-amber-100 text-amber-800 border-amber-300',
-    notice_text: !isLfi2026AmountConfirmed
+    notice_text: nationalSection?.program_code
+      ? `Crédits du programme ${nationalSection.program_code}, inclus dans le total de la section 103 Présidence ; ils ne constituent pas une dotation autonome supplémentaire.`
+      : !isLfi2026AmountConfirmed
       ? 'Le montant actuellement reference ne peut etre certifie comme credit de section LFI 2026. provenance documentaire insuffisante ; les ecarts C2D ou de portefeuille necessitent un acte de rapprochement.'
       : !isReconciled ? `${pctResult.reason || 'Ventilation incomplète.'} La concordance du total LFI ne certifie pas les ratios.`
       : null,
