@@ -1,5 +1,14 @@
 # PR #31 — Matrice de preuves budgétaires 2026 pour les 35 portefeuilles
 
+## Contrôle juridique des crédits initialement votés et clôture du balayage des quatre résidus
+
+Les **articles 14 et 15 de la LFI 2026** fournissent la **base légale du CP voté pour les 34 sections distinctes** correspondant aux 35 fiches : art. 14 p.12 pour la **Primature (section 108)** ; art. 15 p.14–20 pour les autres ministères. Le ministre délégué `gov-035` partage la section 229 avec l'Agriculture : **34 enveloppes de section, pas 35 budgets autonomes**. Vérification unitaire du total de chaque section dans le PDF original, sans utiliser les données applicatives comme seul justificatif. Registre : `LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json`, source officielle hashée par SHA-256.
+
+Cela établit une **certification documentaire des crédits initiaux votés par section**, sans jamais démontrer que le cabinet remanié en janvier 2026 possède exactement ces mêmes dotations autonomes, ni qu'un transfert ultérieur existe. La **certification sans réserve des 35 portefeuilles actuels** demeure bloquée par cette correspondance juridique.
+
+Les quatre reliquats historiques `gov-006, gov-011, gov-013, gov-025` ont été recalculés au FCFA près contre CP votés et volet C2D. La recherche d'une valeur numérique autonome identique aux reliquats dans les **1 901 pages des trois PDF** (LFI : 583, Annexe 4 : 1 229, Annexe 7 : 89) ne trouve pas de valeur directement identique. Le **contrôle négatif de texte n'est pas une preuve d'erreur du document public** ; il ne démontre pas non plus la provenance des valeurs inscrites auparavant dans l'application. Preuve structurée et historique : `PR31_FOUR_UNEXPLAINED_LEGACY_RESIDUALS_2026.json`.
+
+
 ## Complément de certification numérique du 10 octobre 2026
 
 La LFI 2026 présente aussi un **tableau distinct des financements C2D (PDF p.565–569)** : **14 sections, 74 400 000 000 FCFA**. Le registre `PR31_C2D_2026_DISCREPANCY_PROVENANCE.json` réconcilie les **15 anciennes différences** avec ce volet de financement : **9 différences exactes**, **3 proches avec résidus de −370 246 / +481 394 / +283 456 FCFA**, **3 sans ligne C2D correspondante**. La coïncidence numérique n'est pas une attribution juridique d'un CP additionnel et ne justifie aucune double comptabilisation.
