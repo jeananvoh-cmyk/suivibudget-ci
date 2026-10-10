@@ -97,8 +97,14 @@ export const RegulatoryAuthoritiesPage: React.FC<RegulatoryAuthoritiesPageProps>
         : (item.leader_photo_url || fromStore.leader_photo_url);
 
       return { 
-        ...item, 
+        ...item,
         ...fromStore,
+        // Les anciennes valeurs du store ne constituent pas une preuve documentaire.
+        // Garder les donnees biographiques modifiables, jamais le budget de reference.
+        total_budget_fcfa: item.total_budget_fcfa,
+        budget_functioning_fcfa: item.budget_functioning_fcfa,
+        budget_investment_fcfa: item.budget_investment_fcfa,
+        budget_not_published: item.budget_not_published,
         leader_photo_url
       };
     });
