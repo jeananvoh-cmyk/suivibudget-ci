@@ -1,3 +1,4 @@
+import { BudgetDataDownloads } from '../../components/institutions/BudgetDataDownloads';
 import React, { useState } from 'react';
 import { ArrowLeft, Search, Landmark, ArrowRight, FileText, Globe, ExternalLink, Info, ShieldCheck } from 'lucide-react';
 import { NATIONAL_INSTITUTIONS_DATA } from '../../data/nationalBudgetData';
@@ -107,6 +108,7 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
 
   return (
     <div className="space-y-10 animate-in fade-in duration-300">
+      <BudgetDataDownloads scope="INSTITUTION" />
       
       {/* Header */}
       <div className="text-center space-y-2">
