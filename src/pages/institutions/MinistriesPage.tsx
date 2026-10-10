@@ -82,7 +82,9 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
         photo_url: fromStore.leader_photo_url || official.photo_url,
         website_url: fromStore.website || official.website_url,
         facebook_url: fromStore.facebook_url || official.facebook_url,
-        budget_fcfa: fromStore.total_budget_fcfa ?? official.budget_fcfa,
+        // A present store row is authoritative for display, including an explicit
+        // null (unknown) or zero. Never revive a static budget as fallback.
+        budget_fcfa: fromStore.total_budget_fcfa ?? undefined,
       };
     });
   }, [institutions, storeTick]);
