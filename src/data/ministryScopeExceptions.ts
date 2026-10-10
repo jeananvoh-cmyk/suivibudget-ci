@@ -10,3 +10,23 @@ export const SCOPE_EXCEPTIONS: Record<string, string> = {
   'gov-035': 'Ministère délégué sans section autonome identifiée dans le récapitulatif LFI 2026. Le montant enregistré est identique à celui de la fiche Agriculture (gov-009) et ne doit pas être compté deux fois.',
 };
 
+
+/** Sections with an unresolved numeric difference between the 2026 directory
+ * and the CP total in the LFI reconciliation register. No implied correction. */
+export const MINISTRY_DOCUMENTARY_DISCREPANCIES: Readonly<Record<string, string>> = Object.freeze({
+  'gov-001': '108',
+  'gov-005': '325',
+  'gov-006': '323',
+  'gov-009': '229',
+  'gov-011': '366',
+  'gov-012': '357',
+  'gov-013': '335',
+  'gov-014': '358',
+  'gov-018': '345',
+  'gov-022': '333',
+  'gov-025': '330',
+  'gov-029': '346',
+  'gov-031': '343',
+  'gov-032': '440',
+  'gov-034': '334',
+});
