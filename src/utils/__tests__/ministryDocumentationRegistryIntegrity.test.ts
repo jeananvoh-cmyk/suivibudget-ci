@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import documentationRegistry from '../../../docs/references/2026/MINISTRY_DOCUMENTATION_REGISTRY_2026.json';
 import { GOVERNMENT_OFFICIALS } from '../../data/governmentData';
+import { MINISTRY_DOCUMENTARY_DISCREPANCIES } from '../../data/ministryScopeExceptions';
 import reconciliationCsv from '../../../docs/references/2026/ministry-reconciliation/pr31_ministry_reconciliation_register.csv?raw';
 
 interface CanonicalBudget {
@@ -55,7 +56,7 @@ describe('2026 documentation registry consistency against canonical sources', ()
     }
   });
 
-  it('keeps the 34 attributable directory amounts aligned and isolates the delegated historical duplicate', () => {
+  it('keeps evidenced public directory amounts aligned and retains unverified legacy values only for audit', () => {
     const lines = reconciliationCsv.trim().split(/\r?\n/);
     const entries = lines.slice(1).map(line => {
       const match = line.match(/^(gov-\d{3}),.+?,(\d+),(?:PROGRAMMES(?:\+PROGRAMMES)?|DOTATIONS)?,/);
@@ -66,10 +67,9 @@ describe('2026 documentation registry consistency against canonical sources', ()
     const unique = new Map(entries);
     expect(unique.size).toBe(35);
     for (const [id, documented] of unique) {
-      if (id === 'gov-035') {
-        // Historical duplicated amount retained only in the audit register.
-        expect(documented).toBe(337_932_332_542);
-        expect(GOVERNMENT_OFFICIALS.find(x => x.id === id)?.budget_fcfa).toBeUndefined();
+      if (id === 'gov-035' || id in MINISTRY_DOCUMENTARY_DISCREPANCIES) {
+        // Legacy number is not an independently evidenced 2026 portfolio credit.
+        expect(GOVERNMENT_OFFICIALS.find(x => x.id === id)?.budget_fcfa, id).toBeUndefined();
       } else {
         expect(GOVERNMENT_OFFICIALS.find(x => x.id === id)?.budget_fcfa, id).toBe(documented);
       }
