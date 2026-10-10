@@ -1,0 +1,62 @@
+{
+  "lot": 5,
+  "access_date": "2026-10-07",
+  "baseline_commit": "84277a791336e258331271843c772362061821d3",
+  "documents": [
+    {
+      "DOCUMENT_ID": "DGBF-LFI-2026",
+      "TITLE": "Loi de finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
+      "PUBLISHER": "République de Côte d'Ivoire — Direction Générale du Budget et des Finances",
+      "OFFICIAL_URL": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+      "FISCAL_YEAR": 2026,
+      "ACCESS_DATE": "2026-10-07",
+      "HTTP_STATUS": 200,
+      "SHA256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+      "LOCAL_AVAILABILITY": "AVAILABLE",
+      "LOCAL_PATH": "/tmp/suivibudget-lot5-documents/Loi-de-Finances-2026.pdf",
+      "PDF_PAGES": 583,
+      "PAGE_OR_SECTION_REFERENCES": [
+        { "section": "237", "pdf_pages": [47], "table_pages": [3] },
+        { "section": "334", "pdf_pages": [49], "table_pages": [5] },
+        { "section": "336", "pdf_pages": [49, 50], "table_pages": [5, 6] },
+        { "section": "362", "pdf_pages": [53], "table_pages": [9] },
+        { "section": "439", "pdf_pages": [53, 54], "table_pages": [9, 10] },
+        { "section": "440", "pdf_pages": [54], "table_pages": [10] },
+        { "section": "444", "pdf_pages": [54], "table_pages": [10] }
+      ],
+      "TABLE_REFERENCE": "Budget 2026 (Récapitulatif Par Section, Dotation et Programme)",
+      "MEASURE": "Crédit de Paiement 2026",
+      "CONTROL_SCOPE": "Totaux de section et listes exhaustives de programmes pour les sept sections LOT5 ; contrôle détaillé des six programmes précédemment omis croisé avec l'Annexe 4 DPPD-PAP."
+    },
+    {
+      "DOCUMENT_ID": "DGBF-DPPD-PAP-2026-2028-ANNEXE-4",
+      "TITLE": "Annexe 4 : Documents de Programmation Pluriannuelle des Dépenses - Projets Annuels de Performance (DPPD-PAP) 2026-2028",
+      "PUBLISHER": "Direction Générale du Budget et des Finances",
+      "OFFICIAL_URL": "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "FISCAL_YEAR": 2026,
+      "ACCESS_DATE": "2026-10-07",
+      "HTTP_STATUS": 200,
+      "SHA256": "0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10",
+      "LOCAL_AVAILABILITY": "AVAILABLE",
+      "LOCAL_PATH": "/tmp/suivibudget-lot5-documents/Annexe-4-DPPD-PAP-2026-2028.pdf",
+      "PDF_PAGES": 1229,
+      "DOCUMENT_NUMBERED_PAGES": 1227,
+      "PAGE_OR_SECTION_REFERENCES": [
+        { "section": "237", "pdf_range": [95, 112], "document_range": [93, 110], "program_pdf_pages": [104, 108, 112] },
+        { "section": "334", "pdf_range": [539, 564], "document_range": [537, 562], "program_pdf_pages": [548, 552, 561, 563] },
+        { "section": "336", "pdf_range": [633, 654], "document_range": [631, 652], "program_pdf_pages": [644, 648, 651, 652, 653, 654] },
+        { "section": "362", "pdf_range": [987, 1016], "document_range": [985, 1014], "program_pdf_pages": [1000, 1003, 1005, 1009] },
+        { "section": "439", "pdf_range": [1087, 1102], "document_range": [1085, 1100], "program_pdf_pages": [1097, 1099, 1102] },
+        { "section": "440", "pdf_range": [1103, 1116], "document_range": [1101, 1114], "program_pdf_pages": [1111, 1114] },
+        { "section": "444", "pdf_range": [1117, 1142], "document_range": [1115, 1140], "program_pdf_pages": [1125, 1131, 1134, 1135] }
+      ],
+      "TABLE_REFERENCE": "Tableau 7 : Budget détaillé du programme",
+      "CONTROL_SCOPE": "Codes, libellés, montants et pages des 25 programmes et 66 actions des sept canoniques LOT5, croisés avec les listes exhaustives et totaux de section LFI."
+    }
+  ],
+  "limitations": [
+    "Les PDF restent dans l'espace temporaire ; ils ne sont pas ajoutés à Git.",
+    "Les sources d'exécution 2026, BP/CA locaux, marchés, contributions et réponses institutionnelles restent indisponibles ; aucune valeur n'est substituée.",
+    "Les données primaires et les totaux de contrôle ne sont pas extraits d'un rapport d'agent ou d'un canonical candidat."
+  ]
+}

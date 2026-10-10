@@ -1,0 +1,58 @@
+{
+  "access_date": "2026-10-07",
+  "existing_verified_inventory": "../budget-ingestion/LOT5_DOCUMENT_MANIFEST.json",
+  "documents": [
+    {
+      "DOCUMENT_ID": "DGBF-RAP-2022",
+      "TITLE": "Rapports annuels de performance — Loi de règlement portant budget de l'État pour l'année 2022",
+      "PUBLISHER": "Direction Générale du Budget et des Finances",
+      "OFFICIAL_URL": "https://www.dgbf.ci/wp-content/uploads/2024/04/Rapport-Annuel-de-Performance-2022.pdf",
+      "FISCAL_YEAR": 2022,
+      "ACCESS_DATE": "2026-10-07",
+      "HTTP_STATUS_AT_ACQUISITION": 200,
+      "HTTP_STATUS_RECHECK_2026_10_07": 404,
+      "SHA256": "b62b716caf5efe9ce8fa6f5edfa853e530f2fb183ff4530689950553ba346156",
+      "LOCAL_AVAILABILITY": "AVAILABLE_FROM_PRIOR_OFFICIAL_ACQUISITION",
+      "LOCAL_PATH": "/tmp/suivibudget-lot5-documents/Rapport-Annuel-de-Performance-2022.pdf",
+      "PAGE_OR_SECTION_REFERENCES": "PDF p. 3 titre/exercice ; p. 5 sommaire et sections institutionnelles",
+      "PDF_PAGES": 1750,
+      "USE": "Type documentaire et exercice historique seulement ; aucune extraction de montant ni correspondance institutionnelle automatique avec 2026. Le portail officiel le référence encore, mais son URL PDF répond 404 lors du dernier contrôle."
+    },
+    {
+      "DOCUMENT_ID": "DGBF-RAP-INDEX",
+      "TITLE": "RAP — portail documentaire DGBF",
+      "PUBLISHER": "Direction Générale du Budget et des Finances",
+      "OFFICIAL_URL": "https://www.dgbf.ci/rap/",
+      "FISCAL_YEAR": null,
+      "ACCESS_DATE": "2026-10-07",
+      "HTTP_STATUS": 200,
+      "SHA256": "9a201bd08e1319b158c5fc7ee6bc10a4aba7abe8a43955e131872afc43920440",
+      "LOCAL_AVAILABILITY": "AVAILABLE",
+      "LOCAL_PATH": "/tmp/suivibudget-lot5-documents/dgbf-rap-index.html",
+      "PAGE_OR_SECTION_REFERENCES": "Lien Rapport Annuel de Performance 2022 ; également liens 2021 et 2020",
+      "USE": "Découverte du document primaire RAP 2022, sans présumer un RAP 2026."
+    },
+    {
+      "DOCUMENT_ID": "W3C-WCAG-2.2",
+      "TITLE": "Web Content Accessibility Guidelines (WCAG) 2.2",
+      "PUBLISHER": "W3C",
+      "OFFICIAL_URL": "https://www.w3.org/TR/WCAG22/",
+      "FISCAL_YEAR": null,
+      "ACCESS_DATE": "2026-10-07",
+      "HTTP_STATUS": null,
+      "SHA256": null,
+      "LOCAL_AVAILABILITY": "BLOCKED_NETWORK_POLICY",
+      "LOCAL_PATH": null,
+      "PAGE_OR_SECTION_REFERENCES": null,
+      "USE": "Référence requise pour une certification d'accessibilité, non acquise. Le proxy refuse CONNECT (403) ; aucun contournement."
+    }
+  ],
+  "requirements_without_identified_primary_document": [
+    { "lots": [6, 12], "requirement": "LFR, loi de règlement et RAP correspondant à tout exercice et périmètre réellement comparé", "document_id": null, "status": "UNKNOWN" },
+    { "lots": [7], "requirement": "BP, modificatifs et CA primaires des collectivités à traiter", "document_id": null, "status": "UNKNOWN", "note": "Imports hérités conservés ; aucun original acquis ni réimport." },
+    { "lots": [9], "requirement": "Fiches de projets et registres de marchés DGMP attestant les liens et montants", "document_id": null, "status": "UNKNOWN" },
+    { "lots": [10, 11], "requirement": "Contributions publiques modérées, réponses institutionnelles et rapports de contrôle citables", "document_id": null, "status": "UNKNOWN" },
+    { "lots": [13, 14, 15], "requirement": "Références d'accessibilité officielles et audit complet de l'application", "document_id": "W3C-WCAG-2.2", "status": "PARTIAL" }
+  ],
+  "rule": "Un besoin documentaire sans original identifié est un requirement, jamais un faux document ni une source future inventée. Les rapports des agents ne sont pas des sources métier."
+}

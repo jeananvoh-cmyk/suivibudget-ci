@@ -1,5 +1,68 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
+## CHECKPOINT D'INTÉGRATION CONTRÔLÉE — 10 OCTOBRE 2026
+
+- **PR #31 : FUSIONNÉE sur master** par squash au commit `eda34b4d103110e6570d895812a60214052d854b`, après CI Quality réussie.
+- **PR #29 : BASE MISE À JOUR** — les 8 commits du moteur LOTS 6–15 sont conservés et les changements de master sont intégrés sans réécriture des commits.
+- **Portée** : 60 fichiers propres à PR #29 conservés tels quels ; conflit de `docs/AGENT_HANDOFF.md` résolu en préservant les deux historiques documentaires.
+- **PR #30 : audit indépendant intact, ouverte et non fusionnée**.
+- **Décision documentaire maintenue** : crédits LFI par section prouvés, mais attribution autonome aux portefeuilles gouvernementaux post-remaniement non certifiée ; aucun montant inconnu n'est transformé en zéro.
+- **Validation de combinaison** : GitHub Actions doit être relancé sur le nouvel état de PR #29 et le build de revue doit être vérifié avant toute fusion de PR #29.
+- Aucune écriture Supabase ni migration ; aucun déploiement manuel.
+
+### Handoff du moteur de revue LOTS 6–15 (historique de la PR #29)
+
+## METADATA
+- LAST_UPDATED : 2026-10-09
+- LAST_AGENT : Antigravity
+- CURRENT_BRANCH : `antigravity/reconcile-lots6-15-post-lot5`
+- BASE_MASTER_SHA : `707b3b688f23bd33dc0f3504e13b79c65908dd50` (Merge commit de PR #28 sur master)
+- CURRENT_HEAD : voir HEAD courant de la PR #29
+- LAST_VERIFIED_CODE_HEAD : voir HEAD courant de la PR #29
+- PR : PR #29 de réconciliation LOTS 6-15 vers master (`feat(review): reconcile LOTS 6-15 with validated LOT5 baseline`)
+- SUPABASE_PROJECT : `cdesuvcozcetdtvibgqs`, eu-west-1 (AUCUNE écriture distante réalisée par l'agent, REMOTE_SUPABASE_WRITES = 0)
+- FINAL_DOCUMENTARY_GATE : section/programme LOT5 = LFI 2026 et SHA-256 référencé ; action LOT5 = DPPD-PAP 2026–2028 ou alias explicite `-ANNEXE-4` et SHA-256 référencé. Mesure budgétaire officielle LFI/DPPD = `PLANNED` (base `INITIAL_BUDGET`), interdisant formellement l'assimilation à des ordonnancements exécutés (`ORDERED`). Page PDF du référentiel obligatoire dans l'audit et identique dans la citation. Une localisation absente du référentiel bloque la publication. Les données non-LOT5 et les zéros documentés de leurs tests restent indépendants.
+- FINAL_DOCUMENTARY_VALIDATION : 35 fichiers / 569 tests PASS (100%), dont 21 tests d'intégrité d'export (`exportIntegrityHardening.test.ts`) et 60 tests financiers ciblés (`financialEvidenceHardening.test.ts`) ; `npx tsc --noEmit`, `npm run build`, `npm run build:review` PASS ; Supabase anon GET/HEAD PASS, 0 écriture distante (`REMOTE_SUPABASE_WRITES = 0`). `PUBLICATION_PATH_CONNECTED: REVIEW_DOMAIN_ONLY` ; PR #29 prête pour merge, non fusionnée localement.
+- NEXT_EXECUTABLE_TASK : Revue indépendante finale et fusion contrôlée de la PR #29 vers master (fermeture de l'audit PR #30).
+- CURRENT_MILESTONE : Clôture définitive des réserves et bloqueurs de l'audit indépendant (PR #30) sur la PR #29 :
+  1. **Bloqueur P1 (Exports financiers protégés par la porte stricte)** : Élimination du bypass d'audit dans `openDataRows()`, `openDataJson()`, `openDataCsv()` (`src/review/domain/history.ts`) et `buildReviewSnapshot()` (`src/review/domain/snapshot.ts`). Tout montant altéré (+1 FCFA, -1 FCFA, hash non concordant, page discordante, périmètre erroné) produit `amount: null`, `status: 'UNKNOWN'`, et dans les agrégats neutralise la somme totale avec `AGGREGATE_CONTAINS_UNVERIFIED_AMOUNT`. `compareHistory()` protège les comparaisons interannuelles avec refus strict des montants altérés.
+  2. **Bloqueur P1 (Sémantique budgétaire PLANNED vs ORDERED)** : Rétablissement strict de la distinction budgétaire fondamentale (LOLF / LFI 2026) : les crédits de paiement (CP) votés dans la LFI 2026 et l'Annexe 4 DPPD-PAP sont des autorisations initiales (`PLANNED` avec `basis: 'INITIAL_BUDGET'`), et non des dépenses exécutées (`ORDERED`). `transformLot5ControlsToAudits()` et `verifyAuditRecordAgainstReferential()` dans `src/review/domain/financialAudits.ts` imposent `measure: 'PLANNED'`. Toute observation LFI 2026 prétendant une mesure `ORDERED` est rejetée avec `MEASURE_MISMATCH`.
+  3. **Bloqueur P2 (Script navigateur d'audit)** : Ajout de l'import manquant `const assert = require('node:assert/strict');` dans `scripts/verify-review-browser.cjs`. Validation syntaxique `node -c` réussie (code 0).
+  4. **Suite de tests adversariaux d'intégrité d'export (21 tests)** : `src/review/__tests__/exportIntegrityHardening.test.ts` démontre exhaustivement le rejet de toute tentative d'injection, mutation (+1 FCFA), discordance documentaire, et confirme la protection intégrale des fichiers CSV, JSON, snapshots et agrégats.
+  5. **Validation globale** : 35 fichiers de tests, 569 tests réussis (100% PASS), 0 échec. Build production PASS, build review PASS, Supabase en lecture seule hermétique (`remoteSupabaseWrites: 0`).
+  6. **État final** : `READY_FOR_INDEPENDENT_REVIEW_AND_MERGE` (aucun merge effectué, `MERGE_PERFORMED = FALSE`).
+- FOUNDATION_READY : TRUE.
+
+## LOTS 6 À 15 : ARCHITECTURE DE REVUE, CONTRATS DOCUMENTAIRES ET COMPOSITION READ-ONLY
+- **1. Synthèse de Réconciliation & Architecture Découplée** :
+  - Les travaux des LOTS 6 à 15 ont été réconciliés depuis le master validé post-LOT5 (`707b3b688f23bd33dc0f3504e13b79c65908dd50`) sans réintroduire l'ancienne base périmée ni altérer les données protégées (`src/data`, `docs/imports`, `docs/references/2026`, `src/budget-ingestion`, `supabase`).
+  - L'ensemble du code de revue est isolé sous `src/review/` et ne pollue pas le bundle de production runtime (point d'entrée distinct `review.html`, config Vite `vite.review.config.ts`, build dédié `npm run build:review`).
+- **2. Périmètre des Contrats et Invariants Intégrés** :
+  - **LOT 6 (Exécution & Performance)** : Contrats stricts dans `src/review/domain/execution.ts`. `UNKNOWN != 0`, vrai zéro documenté préservé, taux > 100% sans conclusion physique automatique, zéro dénominateur sécurisé (renvoie `null`), périmètres incompatibles classés `NOT_COMPARABLE`. Indicateurs de performance découplés des montants financiers.
+  - **LOT 7 (Dossiers Collectivités & Versions)** : Sélection déterministe de la version budgétaire courante publiée dans `src/review/domain/collectivities.ts`. ID obligatoire, rejet des doublons de version et conflits vers `BLOCKED`. Séparation stricte BP / CA.
+  - **LOT 8 (Catalogue Documentaire & Citations)** : Liste blanche de documents officiels avec SHA-256 dans `src/review/domain/documents.ts`. Statuts orthogonaux `availability`, `provenance`, `extractionStatus`, `verification`. Rejet des URL non sécurisées (`javascript:`, `data:`, `ftp:`, `http:` non-TLS), des documents privés (`visibility: PRIVATE`) et des cycles de version (`VERSION_CYCLE`). Rejet de toute publication financière si l'extraction n'est pas explicitement `VERIFIED`.
+  - **LOT 9 (Liens Projets-Budgets)** : Modélisation des rattachements documentés sans agrégation abusive dans `src/review/domain/projects.ts`. `Budget Line != Project` : interdiction absolue de créer un projet depuis une ligne budgétaire. État physique maintenu à `UNKNOWN` en l'absence de preuve terrain.
+  - **LOT 10 (Suivi Citoyen & Confidentialité)** : Projection publique sans fuite de données personnelles dans `src/review/domain/citizen.ts`. Dates obligatoirement calendaires ISO. Distinction fondamentale : la participation citoyenne ne constitue pas une représentativité statistique de la population.
+  - **LOT 11 (Réponses Institutionnelles & Contrôle Officiel)** : Séparation stricte de provenance dans `src/review/domain/responses.ts` (`INSTITUTION_RESPONSE` vs `OFFICIAL_SOURCE`). Une réponse institutionnelle ne vaut jamais validation d'audit indépendant.
+  - **LOT 12 (Historique, Comparaisons & Open Data)** : Comparabilité interannuelle conditionnée à une preuve d'équivalence de périmètre dans `src/review/domain/history.ts`. Export Open Data JSON et CSV avec encodage littéral `null` et neutralisation des formules tableur (protection anti-injection CSV sur `=, +, -, @`).
+  - **LOT 13 (Primitives UI Orientées Preuve)** : Composants accessibles `Primitives.tsx` et `DocumentLibrary.tsx` (badges de statut, cibles tactiles >= 44px, gestion des états vides informatifs).
+  - **LOT 14 (Workspace de Revue Isolé)** : Application candidate de revue `ReviewWorkspace.tsx` avec navigation clavier, skip link, 7 parcours de revue et zéro appel réseau externe.
+  - **LOT 15 (Stabilisation & Composition Read-Only)** : Moteur `buildReviewSnapshot` dans `src/review/domain/snapshot.ts` agrégeant périmètres, observations et documents de manière purement fonctionnelle et déterministe. Décision de publication explicite `NOT_REQUESTED`.
+- **3. Résolution du Blocage LOT 5 Obsolète** :
+  - Remplacement de la constante hardcodée de blocage par `LOT5_UNRESOLVED_SCOPES = []` dans `src/review/domain/evidence.ts`.
+  - Les ministères MICOM (`gov-017` / 336), MSCV (`gov-030` / 444) et METFPA (`gov-034` / 334) sont désormais évalués selon les règles normales du moteur documentaire : `UNKNOWN` en l'absence de preuve, `AVAILABLE` avec preuve officielle vérifiée. Aucune disponibilité automatique.
+- **4. Contrôles Documentaires & Script Supabase Read-Only** :
+  - `docs/overnight/LOT7_12_DOCUMENTARY_CONTROLS.json` : Spécification vérifiée par `src/review/__tests__/documentaryControls.test.ts` garantissant que les données sans sources restent `UNKNOWN` ou `NOT_COMPARABLE`, et `remote_supabase_writes: 0`.
+  - `scripts/verify-supabase-readonly.mjs` : Script de sonde en lecture seule avec transport `GET`/`HEAD` exclusif (`guardedFetch`) et credentials `anon`, testé par `supabaseReadOnlyGuard.test.ts` (9 tests unitaires).
+- **5. Validation & Tests** :
+  - 34 fichiers de tests, 529 tests réussis (100% PASS), 0 échec.
+  - Suites dédiées `lot5Reconciliation.test.ts` (31 tests), `documents.test.ts` (30 tests couvrant les 14 cas limites), `financialEvidenceHardening.test.ts` (41 tests adversariaux), `supabaseReadOnlyGuard.test.ts` (9 tests).
+  - Validation visuelle Chromium : `CHROMIUM_CHECK = PASS` via Chrome DevTools MCP sur `review.html`.
+  - Production build PASS (`tsc && vite build`), Review build PASS (`vite build --config vite.review.config.ts`).
+  - Supabase distant : `REMOTE_SUPABASE_WRITES = 0`.
+
+---
+
 ## CHECKPOINT DE CLÔTURE TECHNIQUE & INTÉGRITÉ FINANCIÈRE PR #31 — 10 OCTOBRE 2026
 
 - **Statut PR #31** : Clôturée techniquement avec intégrité financière certifiée, 435 tests réussis (31 suites de tests), `tsc && vite build` 100% vert, GitHub Actions Quality (`verify`) et Vercel Preview validés avec succès sur le HEAD `5c69863` (ou son successeur direct).

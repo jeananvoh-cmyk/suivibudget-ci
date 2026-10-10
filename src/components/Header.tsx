@@ -57,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* MAIN NAVIGATION TABS */}
-          <nav className="hidden lg:flex items-center gap-8 text-sm font-semibold">
+          <nav aria-label="Navigation principale" className="hidden lg:flex items-center gap-8 text-sm font-semibold">
             <button
               onClick={() => setActiveTab('home')}
               className={`py-2 transition-all relative ${
@@ -98,7 +98,7 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
 
               {/* Dropdown Menu */}
-              <div className="absolute left-0 top-full pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 z-50">
+              <div className="absolute left-0 top-full pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:translate-y-0 group-focus-within:pointer-events-auto transition-all duration-200 z-50">
                 <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-2 w-72 space-y-1">
                   <button
                     onClick={() => {

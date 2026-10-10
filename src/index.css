@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Keyboard and touch affordances shared by the existing application. */
+:is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 3px solid #004c99;
+  outline-offset: 3px;
+}
+nav[aria-label="Navigation principale mobile"] button { min-height: 44px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
 @layer base {
   body {
     @apply bg-slate-50 text-slate-900 antialiased;
@@ -87,4 +97,3 @@
     display: none !important;
   }
 }
-
