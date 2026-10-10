@@ -18,7 +18,7 @@ Notre contrôle a réconcilié les crédits de paiement de **22 sections et 112 
 - Annexe 4, page PDF 906 (page imprimée 904), Tableau 6 : même intitulé et même montant 2026.
 - Annexe 4, pages PDF 907–909, Tableau 7 : le tableau affiche à nouveau le programme **22120**, d'un montant 2026 de **956 600 000 FCFA** ; aucun tableau d'actions identifiable sous le code 22121 n'a été trouvé dans ces pages.
 
-**Pièce demandée :** Tableau 7 détaillé, corrigé ou complémentaire, associé au programme 22121, avec les codes d'actions et CP 2026 permettant de rapprocher **8 052 936 059 FCFA**, ou confirmation écrite que le tirage officiel comporte une lacune de publication.
+**Constat financier complété :** la LFI 2026 donne elle-même les actions **2212101 (5 304 391 059 FCFA, PDF p. 502)** et **2212102 (2 748 545 000 FCFA, PDF p. 503)**, soit exactement **8 052 936 059 FCFA**. **Pièce facultative demandée uniquement pour la cohérence éditoriale :** version corrigée du Tableau 7 de l'Annexe 4 sous le code 22121, ou confirmation de la lacune de sa publication. Le rapprochement financier est désormais effectué et ne dépend pas de cette réponse.
 
 ## 2. Correspondance administrative entre LFI 2026 et gouvernement du 23 janvier 2026
 
@@ -41,9 +41,9 @@ Points de vigilance spécifiques :
 
 ## 3. Origine des montants historiques divergents
 
-Neuf anciennes valeurs enregistrées dans notre répertoire applicatif différaient des CP de sections candidates de la LFI : `gov-001`, `gov-006`, `gov-009`, `gov-011`, `gov-012`, `gov-013`, `gov-014`, `gov-022`, `gov-029`. Ces valeurs ont été retirées de la présentation comme budgets propres aux portefeuilles, et restent archivées à seules fins d'audit.
+Le tableau des **projets financés sur C2D** de la LFI 2026 (PDF p.565–569, total national **74 400 000 000 FCFA**) explique **exactement neuf des quinze divergences historiques** relevées dans notre répertoire, sans démontrer à lui seul la dotation autonome de chaque portefeuille. Deux autres valeurs historiques sont inférieures à la CP de leur section du montant exact d'une action LFI : affaires maritimes **553 500 000 FCFA** (activité 78045200134, PDF p.554) et enseignement technique **4 362 218 FCFA** (activité 78098000984, PDF p.384). Nous ne présumons pas que ces lignes ont été omises dans le calcul d'origine.
 
-**Clarification demandée :** existe-t-il une publication officielle ou un acte budgétaire ultérieur permettant d'expliquer ces différences, plutôt que de supposer qu'elles constituent nécessairement des erreurs ?
+**Clarification ciblée souhaitée :** les quatre différences qui ne bénéficient toujours pas de rapprochement exact : Intérieur/Sécurité (−370 246 FCFA après prise en compte du C2D), Hydraulique/Assainissement (+481 394 FCFA), Santé (+283 456 FCFA) et Infrastructures/Entretien routier (+239 982 FCFA sans ligne C2D rattachée). Il ne s'agit pas d'allégations d'erreurs de l'administration : ce sont des écarts constatés dans d'anciennes valeurs de notre répertoire citoyen, dont nous cherchons les sources originales ou correctifs.
 
 ## 4. Format souhaité et droit de réponse
 
