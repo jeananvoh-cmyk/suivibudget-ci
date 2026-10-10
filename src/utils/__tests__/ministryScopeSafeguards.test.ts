@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GOVERNMENT_OFFICIALS } from '../../data/governmentData';
-import { SCOPE_EXCEPTIONS, MINISTRY_DOCUMENTARY_DISCREPANCIES } from '../../data/ministryScopeExceptions';
+import { SCOPE_EXCEPTIONS, MINISTRY_DOCUMENTARY_DISCREPANCIES, MINISTRY_CANDIDATE_CP_2026 } from '../../data/ministryScopeExceptions';
 
 describe('2026 ministerial portfolio documentary safeguards', () => {
   const officials = new Map(GOVERNMENT_OFFICIALS.map(o => [o.id, o]));
@@ -33,6 +33,11 @@ describe('2026 ministerial portfolio documentary safeguards', () => {
 
   it('flags precisely the 9 unresolved numeric section differences for every ministry detail', () => {
     expect(Object.keys(MINISTRY_DOCUMENTARY_DISCREPANCIES).sort()).toEqual(["gov-001","gov-006","gov-009","gov-011","gov-012","gov-013","gov-014","gov-022","gov-029"]);
+    expect(Object.keys(MINISTRY_CANDIDATE_CP_2026).sort()).toEqual(Object.keys(MINISTRY_DOCUMENTARY_DISCREPANCIES).sort());
+    for (const amount of Object.values(MINISTRY_CANDIDATE_CP_2026)) {
+      expect(Number.isSafeInteger(amount)).toBe(true);
+      expect(amount).toBeGreaterThan(0);
+    }
     for (const [id, section] of Object.entries(MINISTRY_DOCUMENTARY_DISCREPANCIES)) {
       expect(officials.has(id)).toBe(true);
       expect(section).toMatch(/^\d{3}$/);
