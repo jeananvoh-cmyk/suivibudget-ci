@@ -1,0 +1,910 @@
+{
+  "fiscal_year": 2026,
+  "source": "Annexe 4 DPPD-PAP 2026-2028, Tableau 7 budget détaillé du programme",
+  "source_sha256": "0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10",
+  "method": "Within each of 22 Annex 4 section PDF ranges, identify seven-digit action codes with a prefix identical to the LFI five-digit programme code; read the first succeeding numeric 2026 CP amount, deduplicate identical action codes, sum the unique action CP amounts, compare to LFI programme CP. Does not add underlying budget activities or projects. The three institutional 130xx dotations in section 108 have no action breakdown; section 352 programme 22121 has amount in Tableau 6 but is not present as a distinct code in Tableau 7.",
+  "totals": {
+    "programme_rows": 112,
+    "action_reconciled_programmes": 108,
+    "unique_actions": 340,
+    "unresolved_programmes": 4
+  },
+  "programs": [
+    {
+      "section_code": "108",
+      "program_code": "13010",
+      "actions_count": 0,
+      "actions_sum_fcfa": 0,
+      "first_action_pdf_page": 0,
+      "status": "INSTITUTIONAL_DOTATION_NO_ACTION_LEVEL"
+    },
+    {
+      "section_code": "108",
+      "program_code": "13011",
+      "actions_count": 0,
+      "actions_sum_fcfa": 0,
+      "first_action_pdf_page": 0,
+      "status": "INSTITUTIONAL_DOTATION_NO_ACTION_LEVEL"
+    },
+    {
+      "section_code": "108",
+      "program_code": "13013",
+      "actions_count": 0,
+      "actions_sum_fcfa": 0,
+      "first_action_pdf_page": 0,
+      "status": "INSTITUTIONAL_DOTATION_NO_ACTION_LEVEL"
+    },
+    {
+      "section_code": "226",
+      "program_code": "21074",
+      "actions_count": 4,
+      "actions_sum_fcfa": 152149614286,
+      "first_action_pdf_page": 38,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "226",
+      "program_code": "22075",
+      "actions_count": 3,
+      "actions_sum_fcfa": 198907665491,
+      "first_action_pdf_page": 44,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "226",
+      "program_code": "22076",
+      "actions_count": 3,
+      "actions_sum_fcfa": 129984548218,
+      "first_action_pdf_page": 50,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "229",
+      "program_code": "21047",
+      "actions_count": 5,
+      "actions_sum_fcfa": 17143084583,
+      "first_action_pdf_page": 70,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "229",
+      "program_code": "22048",
+      "actions_count": 6,
+      "actions_sum_fcfa": 93194334889,
+      "first_action_pdf_page": 77,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "229",
+      "program_code": "22049",
+      "actions_count": 7,
+      "actions_sum_fcfa": 106292029836,
+      "first_action_pdf_page": 82,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "229",
+      "program_code": "22214",
+      "actions_count": 5,
+      "actions_sum_fcfa": 25204640218,
+      "first_action_pdf_page": 86,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "229",
+      "program_code": "23210",
+      "actions_count": 1,
+      "actions_sum_fcfa": 13300000000,
+      "first_action_pdf_page": 89,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "229",
+      "program_code": "23211",
+      "actions_count": 1,
+      "actions_sum_fcfa": 10615000000,
+      "first_action_pdf_page": 91,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "229",
+      "program_code": "23212",
+      "actions_count": 2,
+      "actions_sum_fcfa": 49832000000,
+      "first_action_pdf_page": 93,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "229",
+      "program_code": "23213",
+      "actions_count": 1,
+      "actions_sum_fcfa": 18297000000,
+      "first_action_pdf_page": 94,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "321",
+      "program_code": "21070",
+      "actions_count": 6,
+      "actions_sum_fcfa": 68755415667,
+      "first_action_pdf_page": 126,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "321",
+      "program_code": "22071",
+      "actions_count": 2,
+      "actions_sum_fcfa": 68063835678,
+      "first_action_pdf_page": 129,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "321",
+      "program_code": "22072",
+      "actions_count": 2,
+      "actions_sum_fcfa": 9561143802,
+      "first_action_pdf_page": 137,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "321",
+      "program_code": "22073",
+      "actions_count": 3,
+      "actions_sum_fcfa": 348000000,
+      "first_action_pdf_page": 140,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "322",
+      "program_code": "21032",
+      "actions_count": 7,
+      "actions_sum_fcfa": 369535050547,
+      "first_action_pdf_page": 168,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "322",
+      "program_code": "22034",
+      "actions_count": 4,
+      "actions_sum_fcfa": 12847326386,
+      "first_action_pdf_page": 179,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "322",
+      "program_code": "22084",
+      "actions_count": 4,
+      "actions_sum_fcfa": 21460519567,
+      "first_action_pdf_page": 197,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "322",
+      "program_code": "22085",
+      "actions_count": 5,
+      "actions_sum_fcfa": 21362947078,
+      "first_action_pdf_page": 200,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "322",
+      "program_code": "22086",
+      "actions_count": 5,
+      "actions_sum_fcfa": 64941585484,
+      "first_action_pdf_page": 214,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "322",
+      "program_code": "22224",
+      "actions_count": 4,
+      "actions_sum_fcfa": 4020829721,
+      "first_action_pdf_page": 221,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "322",
+      "program_code": "22232",
+      "actions_count": 5,
+      "actions_sum_fcfa": 5389327020,
+      "first_action_pdf_page": 225,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "322",
+      "program_code": "23214",
+      "actions_count": 1,
+      "actions_sum_fcfa": 56500000000,
+      "first_action_pdf_page": 228,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "322",
+      "program_code": "23215",
+      "actions_count": 1,
+      "actions_sum_fcfa": 91248460491,
+      "first_action_pdf_page": 229,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "322",
+      "program_code": "23216",
+      "actions_count": 1,
+      "actions_sum_fcfa": 13439617131,
+      "first_action_pdf_page": 231,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "322",
+      "program_code": "23217",
+      "actions_count": 1,
+      "actions_sum_fcfa": 10578300000,
+      "first_action_pdf_page": 232,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "323",
+      "program_code": "21038",
+      "actions_count": 4,
+      "actions_sum_fcfa": 101798828700,
+      "first_action_pdf_page": 250,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "323",
+      "program_code": "22039",
+      "actions_count": 4,
+      "actions_sum_fcfa": 246936755701,
+      "first_action_pdf_page": 254,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "323",
+      "program_code": "22040",
+      "actions_count": 3,
+      "actions_sum_fcfa": 237873882190,
+      "first_action_pdf_page": 274,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "323",
+      "program_code": "22041",
+      "actions_count": 3,
+      "actions_sum_fcfa": 86672782583,
+      "first_action_pdf_page": 342,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "323",
+      "program_code": "22216",
+      "actions_count": 2,
+      "actions_sum_fcfa": 17671080278,
+      "first_action_pdf_page": 363,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "323",
+      "program_code": "23218",
+      "actions_count": 1,
+      "actions_sum_fcfa": 255010000000,
+      "first_action_pdf_page": 365,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "328",
+      "program_code": "21054",
+      "actions_count": 3,
+      "actions_sum_fcfa": 12893923764,
+      "first_action_pdf_page": 404,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "328",
+      "program_code": "22033",
+      "actions_count": 4,
+      "actions_sum_fcfa": 2322971492,
+      "first_action_pdf_page": 408,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "328",
+      "program_code": "22055",
+      "actions_count": 4,
+      "actions_sum_fcfa": 3812144370,
+      "first_action_pdf_page": 411,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "328",
+      "program_code": "22056",
+      "actions_count": 3,
+      "actions_sum_fcfa": 1483513571,
+      "first_action_pdf_page": 415,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "328",
+      "program_code": "22057",
+      "actions_count": 3,
+      "actions_sum_fcfa": 14015706905,
+      "first_action_pdf_page": 417,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "328",
+      "program_code": "23250",
+      "actions_count": 3,
+      "actions_sum_fcfa": 9666000000,
+      "first_action_pdf_page": 420,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "331",
+      "program_code": "21060",
+      "actions_count": 4,
+      "actions_sum_fcfa": 121396189006,
+      "first_action_pdf_page": 456,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "331",
+      "program_code": "22061",
+      "actions_count": 4,
+      "actions_sum_fcfa": 849707918059,
+      "first_action_pdf_page": 464,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "331",
+      "program_code": "22062",
+      "actions_count": 2,
+      "actions_sum_fcfa": 591842059537,
+      "first_action_pdf_page": 485,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "331",
+      "program_code": "22064",
+      "actions_count": 2,
+      "actions_sum_fcfa": 775200000,
+      "first_action_pdf_page": 513,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "333",
+      "program_code": "21093",
+      "actions_count": 5,
+      "actions_sum_fcfa": 24951460632,
+      "first_action_pdf_page": 526,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "333",
+      "program_code": "22094",
+      "actions_count": 3,
+      "actions_sum_fcfa": 233945569392,
+      "first_action_pdf_page": 529,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "333",
+      "program_code": "22095",
+      "actions_count": 5,
+      "actions_sum_fcfa": 67106546257,
+      "first_action_pdf_page": 534,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "333",
+      "program_code": "22096",
+      "actions_count": 5,
+      "actions_sum_fcfa": 12775831965,
+      "first_action_pdf_page": 537,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "335",
+      "program_code": "21067",
+      "actions_count": 4,
+      "actions_sum_fcfa": 386390670357,
+      "first_action_pdf_page": 576,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "335",
+      "program_code": "22068",
+      "actions_count": 5,
+      "actions_sum_fcfa": 243944049750,
+      "first_action_pdf_page": 585,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "335",
+      "program_code": "22069",
+      "actions_count": 4,
+      "actions_sum_fcfa": 175357438807,
+      "first_action_pdf_page": 627,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "335",
+      "program_code": "23221",
+      "actions_count": 1,
+      "actions_sum_fcfa": 990000000,
+      "first_action_pdf_page": 630,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "335",
+      "program_code": "23222",
+      "actions_count": 1,
+      "actions_sum_fcfa": 2310000000,
+      "first_action_pdf_page": 631,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "340",
+      "program_code": "21112",
+      "actions_count": 5,
+      "actions_sum_fcfa": 10483960604,
+      "first_action_pdf_page": 666,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "340",
+      "program_code": "22113",
+      "actions_count": 4,
+      "actions_sum_fcfa": 41918600000,
+      "first_action_pdf_page": 670,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "340",
+      "program_code": "22114",
+      "actions_count": 4,
+      "actions_sum_fcfa": 250777054478,
+      "first_action_pdf_page": 673,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "340",
+      "program_code": "23226",
+      "actions_count": 1,
+      "actions_sum_fcfa": 2295000000,
+      "first_action_pdf_page": 676,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "340",
+      "program_code": "23227",
+      "actions_count": 2,
+      "actions_sum_fcfa": 2295000000,
+      "first_action_pdf_page": 678,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "346",
+      "program_code": "21097",
+      "actions_count": 4,
+      "actions_sum_fcfa": 13835893251,
+      "first_action_pdf_page": 742,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "346",
+      "program_code": "22098",
+      "actions_count": 4,
+      "actions_sum_fcfa": 5131941800,
+      "first_action_pdf_page": 746,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "346",
+      "program_code": "22099",
+      "actions_count": 2,
+      "actions_sum_fcfa": 1793938806,
+      "first_action_pdf_page": 749,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "346",
+      "program_code": "22100",
+      "actions_count": 2,
+      "actions_sum_fcfa": 3277857930,
+      "first_action_pdf_page": 751,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "346",
+      "program_code": "22226",
+      "actions_count": 2,
+      "actions_sum_fcfa": 592488633,
+      "first_action_pdf_page": 753,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "346",
+      "program_code": "23229",
+      "actions_count": 1,
+      "actions_sum_fcfa": 12566500000,
+      "first_action_pdf_page": 754,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "346",
+      "program_code": "23242",
+      "actions_count": 1,
+      "actions_sum_fcfa": 240000000,
+      "first_action_pdf_page": 755,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "346",
+      "program_code": "23243",
+      "actions_count": 1,
+      "actions_sum_fcfa": 160000000,
+      "first_action_pdf_page": 757,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "347",
+      "program_code": "21101",
+      "actions_count": 5,
+      "actions_sum_fcfa": 14003862146,
+      "first_action_pdf_page": 779,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "347",
+      "program_code": "22102",
+      "actions_count": 5,
+      "actions_sum_fcfa": 4924344052,
+      "first_action_pdf_page": 785,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "347",
+      "program_code": "22103",
+      "actions_count": 4,
+      "actions_sum_fcfa": 2365616153,
+      "first_action_pdf_page": 788,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "347",
+      "program_code": "22104",
+      "actions_count": 8,
+      "actions_sum_fcfa": 36338192773,
+      "first_action_pdf_page": 791,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "347",
+      "program_code": "22233",
+      "actions_count": 4,
+      "actions_sum_fcfa": 39234856598,
+      "first_action_pdf_page": 795,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "350",
+      "program_code": "21108",
+      "actions_count": 4,
+      "actions_sum_fcfa": 6977145562,
+      "first_action_pdf_page": 844,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "350",
+      "program_code": "22109",
+      "actions_count": 6,
+      "actions_sum_fcfa": 5229257356,
+      "first_action_pdf_page": 847,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "350",
+      "program_code": "22111",
+      "actions_count": 3,
+      "actions_sum_fcfa": 800883134,
+      "first_action_pdf_page": 851,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "350",
+      "program_code": "23235",
+      "actions_count": 2,
+      "actions_sum_fcfa": 2700000000,
+      "first_action_pdf_page": 852,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "350",
+      "program_code": "23236",
+      "actions_count": 2,
+      "actions_sum_fcfa": 3500000000,
+      "first_action_pdf_page": 855,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "351",
+      "program_code": "21132",
+      "actions_count": 5,
+      "actions_sum_fcfa": 11095321403,
+      "first_action_pdf_page": 869,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "351",
+      "program_code": "22133",
+      "actions_count": 2,
+      "actions_sum_fcfa": 2819855421,
+      "first_action_pdf_page": 876,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "351",
+      "program_code": "22134",
+      "actions_count": 2,
+      "actions_sum_fcfa": 11118502743,
+      "first_action_pdf_page": 878,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "351",
+      "program_code": "22135",
+      "actions_count": 2,
+      "actions_sum_fcfa": 1667232461,
+      "first_action_pdf_page": 880,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "352",
+      "program_code": "21118",
+      "actions_count": 4,
+      "actions_sum_fcfa": 16254527519,
+      "first_action_pdf_page": 892,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "352",
+      "program_code": "22119",
+      "actions_count": 4,
+      "actions_sum_fcfa": 5998995287,
+      "first_action_pdf_page": 896,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "352",
+      "program_code": "22120",
+      "actions_count": 2,
+      "actions_sum_fcfa": 956600000,
+      "first_action_pdf_page": 907,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "352",
+      "program_code": "22121",
+      "actions_count": 0,
+      "actions_sum_fcfa": 0,
+      "first_action_pdf_page": 0,
+      "status": "MISSING_ANNEX4_PROGRAM_22121_DETAILS"
+    },
+    {
+      "section_code": "356",
+      "program_code": "21235",
+      "actions_count": 3,
+      "actions_sum_fcfa": 1704184519,
+      "first_action_pdf_page": 922,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "356",
+      "program_code": "22126",
+      "actions_count": 2,
+      "actions_sum_fcfa": 45991319076,
+      "first_action_pdf_page": 925,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "356",
+      "program_code": "23237",
+      "actions_count": 1,
+      "actions_sum_fcfa": 33000000000,
+      "first_action_pdf_page": 928,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "356",
+      "program_code": "23238",
+      "actions_count": 1,
+      "actions_sum_fcfa": 2580000000,
+      "first_action_pdf_page": 929,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "357",
+      "program_code": "21127",
+      "actions_count": 4,
+      "actions_sum_fcfa": 6395282843,
+      "first_action_pdf_page": 941,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "357",
+      "program_code": "22128",
+      "actions_count": 3,
+      "actions_sum_fcfa": 885002094,
+      "first_action_pdf_page": 949,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "357",
+      "program_code": "22129",
+      "actions_count": 2,
+      "actions_sum_fcfa": 54319474813,
+      "first_action_pdf_page": 951,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "357",
+      "program_code": "22139",
+      "actions_count": 2,
+      "actions_sum_fcfa": 15075185874,
+      "first_action_pdf_page": 954,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "357",
+      "program_code": "23248",
+      "actions_count": 4,
+      "actions_sum_fcfa": 4300000000,
+      "first_action_pdf_page": 956,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "357",
+      "program_code": "23252",
+      "actions_count": 1,
+      "actions_sum_fcfa": 509250000,
+      "first_action_pdf_page": 957,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "358",
+      "program_code": "21050",
+      "actions_count": 4,
+      "actions_sum_fcfa": 16387778395,
+      "first_action_pdf_page": 972,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "358",
+      "program_code": "22051",
+      "actions_count": 3,
+      "actions_sum_fcfa": 16302276827,
+      "first_action_pdf_page": 981,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "358",
+      "program_code": "22052",
+      "actions_count": 2,
+      "actions_sum_fcfa": 3009475173,
+      "first_action_pdf_page": 984,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "358",
+      "program_code": "22053",
+      "actions_count": 2,
+      "actions_sum_fcfa": 87548184003,
+      "first_action_pdf_page": 986,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "366",
+      "program_code": "21147",
+      "actions_count": 1,
+      "actions_sum_fcfa": 8621283913,
+      "first_action_pdf_page": 1032,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "366",
+      "program_code": "22131",
+      "actions_count": 4,
+      "actions_sum_fcfa": 126703064215,
+      "first_action_pdf_page": 1036,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "366",
+      "program_code": "22148",
+      "actions_count": 2,
+      "actions_sum_fcfa": 139226132928,
+      "first_action_pdf_page": 1040,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "366",
+      "program_code": "22149",
+      "actions_count": 2,
+      "actions_sum_fcfa": 19190669907,
+      "first_action_pdf_page": 1042,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "366",
+      "program_code": "23239",
+      "actions_count": 4,
+      "actions_sum_fcfa": 184539000000,
+      "first_action_pdf_page": 1044,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "366",
+      "program_code": "23240",
+      "actions_count": 2,
+      "actions_sum_fcfa": 24613000000,
+      "first_action_pdf_page": 1047,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "369",
+      "program_code": "21122",
+      "actions_count": 5,
+      "actions_sum_fcfa": 4453244145,
+      "first_action_pdf_page": 1062,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "369",
+      "program_code": "22123",
+      "actions_count": 5,
+      "actions_sum_fcfa": 4207204503,
+      "first_action_pdf_page": 1065,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "369",
+      "program_code": "22124",
+      "actions_count": 3,
+      "actions_sum_fcfa": 42037873689,
+      "first_action_pdf_page": 1068,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "369",
+      "program_code": "22227",
+      "actions_count": 2,
+      "actions_sum_fcfa": 6663427862,
+      "first_action_pdf_page": 1070,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "376",
+      "program_code": "21236",
+      "actions_count": 3,
+      "actions_sum_fcfa": 40514471209,
+      "first_action_pdf_page": 1080,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "376",
+      "program_code": "22087",
+      "actions_count": 3,
+      "actions_sum_fcfa": 7998654189,
+      "first_action_pdf_page": 1083,
+      "status": "ACTION_SUM_RECONCILED"
+    },
+    {
+      "section_code": "376",
+      "program_code": "22239",
+      "actions_count": 2,
+      "actions_sum_fcfa": 700000000,
+      "first_action_pdf_page": 1086,
+      "status": "ACTION_SUM_RECONCILED"
+    }
+  ]
+}
