@@ -1,0 +1,70 @@
+{
+  "fiscal_year": 2026,
+  "source_pdf": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
+  "source_pdf_sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76",
+  "source_table": "Détail du Budget Général Hors Dette et Hors Comptes Spéciaux",
+  "source_type": "OFFICIAL_LFI_BUDGET_DETAIL",
+  "scope": "SUPPLEMENTAL_ACTION_EVIDENCE_WHERE_ANNEX4_TABLEAU7_MISSING_OR_NOT_APPLICABLE",
+  "records": [
+    {
+      "section_code": "108",
+      "program_code": "13010",
+      "program_total_cp_fcfa": 24053045398,
+      "actions": [
+        {
+          "code": "1301001",
+          "name": "Coordination et Exécution de l'Action Gouvernementale",
+          "cp_fcfa": 24053045398,
+          "lfi_pdf_page": 83
+        }
+      ]
+    },
+    {
+      "section_code": "108",
+      "program_code": "13011",
+      "program_total_cp_fcfa": 2155227371,
+      "actions": [
+        {
+          "code": "1301101",
+          "name": "Coordination du travail du Gouvernement",
+          "cp_fcfa": 2155227371,
+          "lfi_pdf_page": 84
+        }
+      ]
+    },
+    {
+      "section_code": "108",
+      "program_code": "13013",
+      "program_total_cp_fcfa": 45118493530,
+      "actions": [
+        {
+          "code": "1301301",
+          "name": "Structures sous-tutelles de la Primature",
+          "cp_fcfa": 45118493530,
+          "lfi_pdf_page": 84
+        }
+      ]
+    },
+    {
+      "section_code": "352",
+      "program_code": "22121",
+      "program_total_cp_fcfa": 8052936059,
+      "actions": [
+        {
+          "code": "2212101",
+          "name": "Amélioration du dispositif de prise en charge des enfants et adolescents vulnérables",
+          "cp_fcfa": 5304391059,
+          "lfi_pdf_page": 502
+        },
+        {
+          "code": "2212102",
+          "name": "Renforcement de la lutte contre la traite, l'exploitation et les violences faites aux enfants",
+          "cp_fcfa": 2748545000,
+          "lfi_pdf_page": 503
+        }
+      ]
+    }
+  ],
+  "annex4_missing_details_note": "The corresponding Annexe 4 Tableau 7 details are not located under these codes in the available version. This complementary official LFI 2026 source supplies action CPs for exact programme reconciliation without inventing rows.",
+  "administrative_attribution_note": "Action and programme CP reconciliation does not prove post-January-2026 ministerial portfolio budget redistribution."
+}
