@@ -1742,16 +1742,16 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   <FileText className="w-8 h-8 text-slate-300 mx-auto" />
                   <div className="space-y-1">
                     <h5 className="text-xs font-black text-slate-800 uppercase tracking-wider">
-                      Ventilation Officielle du Budget 2026 (Loi de Finances)
+                      Ventilation budgétaire 2026 — provenance à vérifier
                     </h5>
                     <p className="text-xs text-slate-500 max-w-md mx-auto">
                       {hasInstBreakdown ? (
                         <>
-                          Les montants officiels votés pour <strong>{institution.name}</strong> s'élèvent à <strong>{formatFCFA(institution.budget_functioning_fcfa)}</strong> ({formatAmountInWords(institution.budget_functioning_fcfa)} — {functioningPct}%) en fonctionnement et <strong>{formatFCFA(institution.budget_investment_fcfa)}</strong> ({formatAmountInWords(institution.budget_investment_fcfa)} — {investmentPct}%) en investissements publics.
+                          Les montants enregistrés pour <strong>{institution.name}</strong> s'élèvent à <strong>{formatFCFA(institution.budget_functioning_fcfa)}</strong> ({formatAmountInWords(institution.budget_functioning_fcfa)} — {functioningPct}%) en fonctionnement et <strong>{formatFCFA(institution.budget_investment_fcfa)}</strong> ({formatAmountInWords(institution.budget_investment_fcfa)} — {investmentPct}%) en investissements publics.
                         </>
                       ) : (
                         <>
-                          La ventilation officielle entre dépenses de fonctionnement et investissements pour <strong>{institution.name}</strong> est en cours de centralisation via les documents budgétaires officiels.
+                          La ventilation entre dépenses de fonctionnement et investissements pour <strong>{institution.name}</strong> n'est pas encore documentée dans les données disponibles.
                         </>
                       )}
                     </p>
