@@ -32,7 +32,7 @@ describe('independent 2026 LFI CP and Annexe 4 section/program documentary cross
       expect(section.attribution_status).not.toBe('CERTIFIED_PORTFOLIO');
       expect(section.action_documentary_status).toBe('NOT_YET_VERIFIED');
       for (const p of section.programs) {
-        expect(p.official_code).toMatch(/^\\d{5}$/);
+        expect(p.official_code).toMatch(/^\d{5}$/);
         expect(Number.isSafeInteger(p.cp_2026_fcfa)).toBe(true);
         expect(p.cp_2026_fcfa).toBeGreaterThan(0);
         expect(p.annex4_pdf_page).toBeGreaterThanOrEqual(section.annex4_pdf_page_range[0]);
