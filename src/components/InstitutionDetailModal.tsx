@@ -1017,11 +1017,6 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   const isDistrict = institution.type === 'DISTRICT';
                   const primTotal = prim.total_voted_fcfa;
                   const exactPrimitive = !prim.precision || prim.precision === 'EXACT';
-                  const stateTotal = institution.total_budget_fcfa ?? null;
-                  const hasStateTotal = stateTotal !== null;
-                  const localRev = (hasStateTotal && primTotal > 0) ? Math.max(0, primTotal - stateTotal) : null;
-                  const statePct = (hasStateTotal && primTotal > 0) ? Math.round((stateTotal / primTotal) * 100) : null;
-                  const localPct = statePct !== null ? 100 - statePct : null;
                   const hasBreakdown = prim.investment_voted_fcfa != null && prim.functioning_voted_fcfa != null;
                   const primInvPct = (hasBreakdown && primTotal > 0) ? Math.round((prim.investment_voted_fcfa! / primTotal) * 100) : null;
                   const primFonctPct = primInvPct !== null ? 100 - primInvPct : null;
@@ -1057,7 +1052,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                           </div>
                           <div>
                             <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
-                              Montant Total Équilibré Voté
+                              Montant du budget primitif rapporté
                             </span>
                             <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
 
@@ -1084,7 +1079,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                                 className="text-brand-blue hover:underline inline-flex items-center gap-0.5 ml-1 font-bold"
                                 title="Consulter la communication officielle"
                               >
-                                Délibération officielle <ExternalLink className="w-3 h-3 inline" />
+                                Consulter la publication source <ExternalLink className="w-3 h-3 inline" />
                               </a>
                             )}
                           </div>
@@ -1096,148 +1091,14 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                         </div>
                       </div>
 
-                      {/* DOUBLE LECTURE : STRUCTURE & ORIGINE DES RECETTES */}
-                      <div className="space-y-3">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                          <span className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
-                            <Layers className="w-4 h-4 text-brand-blue" />
-                            Origine des Ressources Budgétaires (D'où vient l'argent ?)
-                          </span>
-                          <span className="text-[11px] font-semibold text-slate-500">
-                            {isDistrict ? "Concours de l'État vs Recettes du District" : isRegion ? "Concours de l'État vs Recettes Régionales Propres" : "Concours de l'État vs Recettes Communales Propres"}
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
-                          {/* Volet 1 : Subvention de l'État */}
-                          <div className="p-4 sm:p-5 bg-blue-50/50 rounded-2xl border border-blue-100 space-y-3 flex flex-col justify-between">
-                            <div className="space-y-2.5">
-                              <div className="flex items-center justify-between">
-                                <span className="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-brand-blue border border-blue-200">
-                                  1. Subvention & Financement de l'État
-                                </span>
-                                <span className="text-xs font-black text-brand-blue bg-white px-2.5 py-0.5 rounded-full border border-blue-200 shadow-2xs">
-                                  {exactPrimitive && statePct !== null ? `${statePct}% du total` : 'Part non calculée'}
-                                </span>
-                              </div>
-
-                              <div>
-                                <span className="text-xl sm:text-2xl font-black text-slate-900 block">
-                                  {formatFCFA(stateTotal)}
-                                </span>
-                                <span className="text-[11px] font-bold text-brand-blue block">
-                                  ({formatAmountInWords(stateTotal)})
-                                </span>
-                              </div>
-
-                              {stateTotal != null && stateTotal > 0 ? (
-                                <div className="p-2.5 bg-white rounded-xl border border-blue-100 text-xs space-y-1.5 shadow-2xs">
-                                  <div className="flex justify-between text-[11px]">
-                                    <span className="text-slate-600">• Fonctionnement (DGF) :</span>
-                                    <strong className="text-slate-900">{formatFCFA(institution.budget_functioning_fcfa)} ({formatAmountInWords(institution.budget_functioning_fcfa)})</strong>
-                                  </div>
-                                  <div className="flex justify-between text-[11px]">
-                                    <span className="text-slate-600">• Équipement & Chantiers (DGE) :</span>
-                                    <strong className="text-slate-900">{formatFCFA(institution.budget_investment_fcfa)} ({formatAmountInWords(institution.budget_investment_fcfa)})</strong>
-                                  </div>
-                                </div>
-                              ) : stateTotal === null ? (
-                                <div className="p-2.5 bg-amber-50/70 rounded-xl border border-amber-200 text-[11px] text-amber-900 shadow-2xs leading-snug">
-                                  Dotation globale de l'État non consolidée pour cet exercice. En attente de publication des répartitions DGF/DGE.
-                                </div>
-                              ) : (
-                                <div className="p-2.5 bg-white rounded-xl border border-blue-100 text-[11px] text-slate-600 shadow-2xs leading-snug">
-                                  Aucune dotation directe de l'État n'est renseignée pour cette composante dans les données actuellement disponibles.
-                                </div>
-                              )}
-                            </div>
-
-                            {relatedProjects.length > 0 ? (
-                              <p className="text-[11px] text-brand-blue font-semibold flex items-center gap-1.5 pt-1">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-brand-blue flex-shrink-0" />
-                                <span>{relatedProjects.length} projets d'investissements publics inscrits au Budget National</span>
-                              </p>
-                            ) : (
-                              <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5 pt-1">
-                                <Info className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                                <span>Projets gérés sous maîtrise d'ouvrage directe de la collectivité décentralisée</span>
-                              </p>
-                            )}
-                          </div>
-
-                          {/* Volet 2 : Recettes Propres de la Mairie / Région / District */}
-                          <div className="p-4 sm:p-5 bg-slate-50/80 rounded-2xl border border-slate-200 space-y-3 flex flex-col justify-between">
-                            <div className="space-y-2.5">
-                              <div className="flex items-center justify-between">
-                                <span className="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-200 text-slate-800 border border-slate-300">
-                                  2. Recettes Propres {isDistrict ? 'du District' : isRegion ? 'de la Région' : 'de la Mairie'}
-                                </span>
-                                <span className="text-xs font-black text-white bg-navy-900 px-2.5 py-0.5 rounded-full shadow-2xs">
-                                  {exactPrimitive && localPct !== null ? `${localPct}% du total` : 'Part non calculée'}
-                                </span>
-                              </div>
-
-                              <div>
-                                <span className="text-xl sm:text-2xl font-black text-slate-900 block">
-                                  {exactPrimitive && localRev !== null ? formatFCFA(localRev) : 'Montant non calculé'}
-                                </span>
-                                <span className="text-[11px] font-bold text-slate-600 block">
-                                  {exactPrimitive && localRev !== null ? `(${formatAmountInWords(localRev)})` : ''}
-                                </span>
-                              </div>
-
-                              <div className="p-2.5 bg-white rounded-xl border border-slate-200 text-[11px] text-slate-700 space-y-1.5 shadow-2xs">
-                                {isDistrict ? (
-                                  <>
-                                    <p className="leading-snug">
-                                      • <strong>Impôts & Taxes du District</strong> : Quotes-parts sur taxes foncières, droits de mutation et taxes spécifiques du District Autonome reversés par le Trésor Public.
-                                    </p>
-                                    <p className="leading-snug">
-                                      • <strong>Ressources & Domaines du District</strong> : Redevances d'équipements métropolitains, droits de stationnement, marchés de gros et contributions partenaires.
-                                    </p>
-                                  </>
-                                ) : isRegion ? (
-                                  <>
-                                    <p className="leading-snug">
-                                      • <strong>Impôts & Taxes régionaux</strong> : Quotes-parts sur taxes foncières, droits de mutation, taxes sur les véhicules et carburants reversés par le Trésor Public.
-                                    </p>
-                                    <p className="leading-snug">
-                                      • <strong>Ressources & Domaines régionaux</strong> : Redevances d'équipements structurants, marchés régionaux et contributions partenaires.
-                                    </p>
-                                  </>
-                                ) : (
-                                  <>
-                                    <p className="leading-snug">
-                                      • <strong>Impôts & Patentes reversés</strong> : Patentes d'entreprises locales, impôt foncier bâti, impôt synthétique reversés par la DGI.
-                                    </p>
-                                    <p className="leading-snug">
-                                      • <strong>Taxes directes de la commune</strong> : Droits de place sur les marchés, gares routières, actes d'état civil, redevances du domaine public.
-                                    </p>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="p-2 bg-amber-50/80 rounded-xl border border-amber-200/70 text-[11px] text-amber-900 flex items-start gap-1.5">
-                              <Info className="w-3.5 h-3.5 text-amber-600 flex-shrink-0 mt-0.5" />
-                              <span className="leading-snug">
-                                Le grand livre comptable détaillé poste par poste des recettes propres est en cours de transmission officielle via notre demande CAIDP.
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Jauge Bicolore Origine des Fonds */}
-                        <div hidden={!exactPrimitive} className="space-y-1.5 pt-2">
-                          <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden flex shadow-inner">
-                            <div className="bg-brand-blue h-full transition-all" style={{ width: `${statePct}%` }} title={`Subvention de l'État: ${statePct}%`}></div>
-                            <div className="bg-navy-900 h-full transition-all" style={{ width: `${localPct}%` }} title={`Recettes propres: ${localPct}%`}></div>
-                          </div>
-                          <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] font-bold gap-1">
-                            <span className="text-brand-blue break-words">■ Subvention de l'État : {statePct}% ({formatFCFA(stateTotal)} — {formatAmountInWords(stateTotal)} FCFA)</span>
-                            <span className="text-navy-900 break-words">■ Recettes propres {isDistrict ? 'District' : isRegion ? 'Région' : 'Mairie'} : {localPct}% ({formatFCFA(localRev)} — {formatAmountInWords(localRev)} FCFA)</span>
-                          </div>
-                        </div>
+                      {/* Origine des recettes : aucune part déduite par différence sans source analytique */}
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-700 space-y-1.5" role="note">
+                        <h4 className="font-black text-slate-900">Origine des recettes : détail non établi</h4>
+                        <p>Le budget primitif total ne permet pas de déduire la répartition exacte
+                          entre subventions de l'État, impôts reversés et autres ressources propres.
+                          Ces postes seront chiffrés seulement à partir du tableau officiel des recettes
+                          de cette collectivité. Aucune soustraction entre budgets de périmètres
+                          différents n'est utilisée.</p>
                       </div>
 
                       {/* ORIENTATION DES DÉPENSES DU CONSEIL */}
