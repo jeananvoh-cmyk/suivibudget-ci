@@ -74,7 +74,16 @@
         ]
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 2,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-002",
@@ -127,7 +136,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 2,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-003",
@@ -160,7 +178,16 @@
       "budget_2026_fcfa": 45121940916,
       "program_count": 3,
       "action_count": 7,
-      "arithmetic_delta_fcfa": 0
+      "arithmetic_delta_fcfa": 0,
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 2,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-004",
@@ -213,7 +240,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 2,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-005",
@@ -240,7 +276,16 @@
       "notes": "Ministère pilote LOT 4 (Justice et Droits de l'Homme). 4 programmes, 14 actions réconciliés à 100% (delta 0).",
       "documentary_status": "READY_FOR_CANONICAL",
       "reconciliation_status": "RECONCILED",
-      "publication_status": "STAGED"
+      "publication_status": "STAGED",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 3,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-006",
@@ -293,7 +338,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 3,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-007",
@@ -346,7 +400,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 3,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-008",
@@ -373,7 +436,16 @@
       "notes": "Ministère pilote validé et publié (LOT 2). 10 programmes, 21 actions, 18 projets majeurs.",
       "documentary_status": "READY_FOR_CANONICAL",
       "reconciliation_status": "RECONCILED",
-      "publication_status": "PUBLISHED"
+      "publication_status": "PUBLISHED",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 4,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-009",
@@ -426,7 +498,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 4,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-010",
@@ -479,7 +560,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 5,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-011",
@@ -532,7 +622,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 5,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-012",
@@ -585,7 +684,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 5,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-013",
@@ -638,7 +746,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 5,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-014",
@@ -691,7 +808,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 6,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-015",
@@ -744,7 +870,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 6,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-016",
@@ -797,7 +932,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 6,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-017",
@@ -830,7 +974,16 @@
       "budget_2026_fcfa": 39806735298,
       "program_count": 5,
       "action_count": 9,
-      "arithmetic_delta_fcfa": 0
+      "arithmetic_delta_fcfa": 0,
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 6,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-018",
@@ -857,7 +1010,16 @@
       "notes": "Ministère pilote LOT 4 (Eaux et Forêts). 5 programmes dont Fonds Forestier National (23228), 18 actions réconciliés à 100% (delta 0).",
       "documentary_status": "READY_FOR_CANONICAL",
       "reconciliation_status": "RECONCILED",
-      "publication_status": "STAGED"
+      "publication_status": "STAGED",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 7,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-019",
@@ -910,7 +1072,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 7,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-020",
@@ -963,7 +1134,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 7,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-021",
@@ -1016,7 +1196,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 7,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-022",
@@ -1069,7 +1258,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 8,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-023",
@@ -1102,7 +1300,16 @@
       "budget_2026_fcfa": 91411414044,
       "program_count": 4,
       "action_count": 15,
-      "arithmetic_delta_fcfa": 0
+      "arithmetic_delta_fcfa": 0,
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 8,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-024",
@@ -1155,7 +1362,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 9,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-025",
@@ -1182,7 +1398,16 @@
       "notes": "Ministère pilote LOT 4 (Équipement et Entretien Routier). 3 programmes dont FER (23219), 11 actions réconciliés à 100% (delta 0).",
       "documentary_status": "READY_FOR_CANONICAL",
       "reconciliation_status": "RECONCILED",
-      "publication_status": "STAGED"
+      "publication_status": "STAGED",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 9,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-026",
@@ -1235,7 +1460,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 9,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-027",
@@ -1288,7 +1522,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 10,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-028",
@@ -1343,7 +1586,16 @@
         ]
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 10,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-029",
@@ -1396,7 +1648,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 10,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-030",
@@ -1429,7 +1690,16 @@
       "budget_2026_fcfa": 70427777385,
       "program_count": 4,
       "action_count": 11,
-      "arithmetic_delta_fcfa": 0
+      "arithmetic_delta_fcfa": 0,
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 11,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-031",
@@ -1456,7 +1726,16 @@
       "notes": "Ministère pilote LOT 4 (Environnement et Transition Écologique). 2 programmes, 9 actions réconciliés à 100% (delta 0).",
       "documentary_status": "READY_FOR_CANONICAL",
       "reconciliation_status": "RECONCILED",
-      "publication_status": "STAGED"
+      "publication_status": "STAGED",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 11,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-032",
@@ -1489,7 +1768,16 @@
       "budget_2026_fcfa": 13746365872,
       "program_count": 2,
       "action_count": 7,
-      "arithmetic_delta_fcfa": 0
+      "arithmetic_delta_fcfa": 0,
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 5,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-033",
@@ -1522,7 +1810,16 @@
       "budget_2026_fcfa": 5122516889,
       "program_count": 3,
       "action_count": 7,
-      "arithmetic_delta_fcfa": 0
+      "arithmetic_delta_fcfa": 0,
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 2,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-034",
@@ -1555,7 +1852,16 @@
       "budget_2026_fcfa": 182301855312,
       "program_count": 4,
       "action_count": 10,
-      "arithmetic_delta_fcfa": 0
+      "arithmetic_delta_fcfa": 0,
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 9,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     },
     {
       "institution_id": "gov-035",
@@ -1608,7 +1914,16 @@
         "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
-      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
+      "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION",
+      "administrative_attribution_provenance": {
+        "decree": "2026-84",
+        "date": "2026-03-04",
+        "source_url": "https://www.gouv.ci/uploads/publications/177580607447.pdf",
+        "annex_pdf_page": 4,
+        "provenance_level": "OFFICIAL_GOVERNMENT_ANNEX",
+        "scope_status": "ADMINISTRATIVE_TUTELLE_CONFIRMED",
+        "budget_CP_reallocation_certified": false
+      }
     }
   ]
 }
