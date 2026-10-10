@@ -15,6 +15,20 @@ Cela clôt la **suppression des attributions non justifiées dans le répertoire
 
 **Périmètre de la décision :** fichiers GitHub de la branche PR #31 uniquement ; aucune écriture Supabase, aucune fusion ni déploiement demandé. Une donnée provenant d'une autre source de l'application doit faire l'objet d'un contrôle distinct.
 
+## Contrôle indépendant additionnel — sections, programmes et actions (10 octobre 2026)
+
+Les **PDF originaux fournis par le porteur du projet** ont été relus et leurs empreintes SHA-256 enregistrées :
+- LFI 2026 : récapitulatif officiel sections/programmes, pages physiques PDF 45–54.
+- Annexe 4 DPPD-PAP 2026–2028 : pages physiques PDF 27–1178 selon les sections.
+
+Un **nouveau registre source-contrôlé** couvre les **22 sections distinctes des 23 portefeuilles précédemment sans référentiel canonique** : 112 programmes ; somme des CP programme = CP de section pour 22/22 ; les 112 montants de programme sont retrouvés numériquement dans l'Annexe 4. **340 actions distinctes** ont été identifiées dans les Tableaux 7 ; **108/112 programmes** ont une somme des actions 2026 exactement égale à leur CP programme.
+
+Quatre exceptions explicites : **section 108** (dotations 13010, 13011, 13013, sans tableau détaillé d'actions correspondant) et **section 352 / programme 22121**, dont le total 2026 est confirmé par le Tableau 6 de l'Annexe 4 (page PDF 906) mais le Tableau 7 (pages PDF 907–909) reproduit le programme 22120 au lieu de fournir le détail sous le code 22121. Voir `PR31_SOURCE_GAP_SECTION_352_PROGRAM_22121.md`.
+
+**Restent non certifiées :** l'attribution juridique et administrative des crédits votés en décembre 2025 aux portefeuilles du Gouvernement nommé en janvier 2026, les périmètres partagés, la ventilation des quatre exceptions et toute donnée d'exécution. Le décret n°2026-08 du 23 janvier 2026 portant nomination des membres du Gouvernement est publié par la Présidence : https://www.presidence.ci/communiques-presidence/communique-de-la-presidence-de-la-republique-8/ . Le décret de nomination n'est pas une preuve de transfert ou de répartition de crédits budgétaires.
+
+**Preuves GitHub :** `SECTION_PROGRAM_CROSSCHECK_22_2026.json`, `ANNEX4_ACTION_SUM_CROSSCHECK_2026.json`, `PR31_CERTIFICATION_EVIDENCE_MATRIX_35.md` et `scripts/verify_ministry_section_pdfs.py`. Aucun montant inconnu n'a été inventé. La publication de montants par portefeuille non attribuables reste bloquée.
+
 **Périmètre :** rapprochement du registre applicatif des 35 portefeuilles gouvernementaux et des sections candidates de la Loi de finances initiale 2026. Ce rapport ne constitue **pas** une certification des 35 fiches. Il constitue la clôture du contrôle technique et de la qualification des écarts, avec les points non résolus explicitement conservés.
 
 ## Sources et méthode
