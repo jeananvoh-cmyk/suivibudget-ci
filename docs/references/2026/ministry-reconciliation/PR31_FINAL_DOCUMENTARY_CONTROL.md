@@ -3,6 +3,8 @@
 > **Mise à jour du 10 octobre 2026 — postérieure au rapport ci-dessous :** six montants du répertoire applicatif `src/data/governmentData.ts` ont été alignés sur leurs référentiels canoniques CP 2026 (gov-005, gov-018, gov-025, gov-031, gov-032, gov-034). Le rapport initial ci-dessous conserve l'historique des 15 écarts *avant correction*. Neuf écarts numériques demeurent : gov-001, gov-006, gov-009, gov-011, gov-012, gov-013, gov-014, gov-022, gov-029. Les correspondances administratives de périmètre et les situations composites ne sont pas certifiées automatiquement. Aucune fusion ni modification Supabase.
 
 
+**Contrôle complémentaire du 10 octobre 2026 :** `gov-035` ne présente plus de dotation autonome sur sa fiche publique : le montant identique à l'Agriculture (gov-009) a été supprimé de `governmentData.ts` pour éviter une double attribution. L'ancienne valeur demeure exclusivement dans le CSV d'audit sous le statut `HISTORICAL_VALUE_ONLY`. Absence de montant individualisé = inconnu, jamais zéro. Les neuf écarts encore ouverts ne doivent pas être qualifiés de réconciliés sur la seule base des crédits de section candidate.
+
 **Périmètre :** rapprochement du registre applicatif des 35 portefeuilles gouvernementaux et des sections candidates de la Loi de finances initiale 2026. Ce rapport ne constitue **pas** une certification des 35 fiches. Il constitue la clôture du contrôle technique et de la qualification des écarts, avec les points non résolus explicitement conservés.
 
 ## Sources et méthode
