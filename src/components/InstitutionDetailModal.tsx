@@ -1352,7 +1352,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                               Dotation Budgétaire Non Individualisée — Répartition Constitutionnelle
                             </h3>
                             <p className="text-xs text-slate-600 leading-relaxed">
-                              Conformément à la Constitution ivoirienne de 2016 (Titre VII), les compétences juridictionnelles historiques de la Cour Suprême sont exercées par trois juridictions suprêmes autonomes, chacune dotée de sa propre section budgétaire dans la Loi de Finances 2026 : la <strong>Cour de Cassation</strong> (Section 023 — 7 931 309 608 FCFA), le <strong>Conseil d'État</strong> (Section 022 — 5 164 531 081 FCFA) et la <strong>Cour des Comptes</strong> (Section 015 — 8 851 161 351 FCFA). Aucune dotation distincte n'est individualisée pour la Cour Suprême dans le budget général de l'État.
+                              Conformément à la Constitution ivoirienne de 2016 (Titre VII), les compétences juridictionnelles historiques de la Cour Suprême sont exercées par trois juridictions suprêmes autonomes, chacune dotée de sa propre section budgétaire dans la Loi de Finances 2026 : la <strong>Cour de Cassation</strong> (Section 114 — 7 931 309 608 FCFA), le <strong>Conseil d'État</strong> (Section 118 — 5 164 531 081 FCFA) et la <strong>Cour des Comptes</strong> (Section 115 — 8 851 161 351 FCFA). Aucune dotation distincte n'est individualisée pour la Cour Suprême dans le budget général de l'État.
                             </p>
                           </div>
                         </div>
