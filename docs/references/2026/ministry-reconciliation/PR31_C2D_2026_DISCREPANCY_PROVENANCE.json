@@ -263,7 +263,16 @@
       "discrepancy_minus_c2d_fcfa": null,
       "classification": "NO_C2D_SECTION_ENTRY",
       "c2d_lfi_pdf_page": null,
-      "portfolio_allocation_certified": false
+      "portfolio_allocation_certified": false,
+      "same_magnitude_official_lfi_activity": {
+        "activity_code": "78045200134",
+        "activity_cp_fcfa": 553500000,
+        "lfi_pdf_page": 554,
+        "activity_name": "LPSI - Animer les structures opérationnelles de la DGAMP",
+        "relation": "THE_MAGNITUDE_OF_THE_NEGATIVE_LEGACY_DIFFERENCE_EQUALS_THIS_ACTIVITY_CP",
+        "proof_limit": "Coincident amount does NOT prove whether the historical registry accidentally excluded this activity; its original transformation/source must be traced.",
+        "pdf_sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76"
+      }
     },
     {
       "portfolio_id": "gov-034",
@@ -275,12 +284,22 @@
       "discrepancy_minus_c2d_fcfa": null,
       "classification": "NO_C2D_SECTION_ENTRY",
       "c2d_lfi_pdf_page": null,
-      "portfolio_allocation_certified": false
+      "portfolio_allocation_certified": false,
+      "same_magnitude_official_lfi_activity": {
+        "activity_code": "78098000984",
+        "activity_cp_fcfa": 4362218,
+        "lfi_pdf_page": 384,
+        "activity_name": "Encadrer et certifier les stagiaires de l'IPNETP sur le terrain",
+        "relation": "THE_MAGNITUDE_OF_THE_NEGATIVE_LEGACY_DIFFERENCE_EQUALS_THIS_ACTIVITY_CP",
+        "proof_limit": "Coincident amount does NOT prove whether the historical registry accidentally excluded this activity; its original transformation/source must be traced.",
+        "pdf_sha256": "f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76"
+      }
     }
   ],
   "classifications": {
     "EXACTLY_EXPLAINED_BY_C2D": "The historical difference equals the C2D CP amount for the corresponding official section exactly. This explains numeric provenance but does NOT establish unique ministerial ownership or additive budget interpretation.",
     "C2D_CLOSE_WITH_RESIDUAL_UNEXPLAINED": "Most of the discrepancy equals the C2D CP row; nonzero remaining francs require further audit.",
     "NO_C2D_SECTION_ENTRY": "The source C2D table lists no project on that section; cannot explain this historical difference through C2D."
-  }
+  },
+  "follow_up_note": "gov-032 and gov-034 negative legacy differences have exact-magnitude matches to a 2026 LFI activity within the same section. Do not treat a magnitude match as definitive provenance or restore those amounts without evidence."
 }
