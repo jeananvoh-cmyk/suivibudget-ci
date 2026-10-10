@@ -127,71 +127,71 @@ export interface InstitutionBudgetAssessment {
 }
 
 /**
- * Section mapping pour les grandes institutions de la République (LFI 2026, pp. 45-54)
+ * Registre LFI 2026 : recapitulatif par section/dotation/programme (PDF pp.45-54).
+ * Pour IGE/HABG, la section 103 est la PRESIDENCE ; leurs montants sont des
+ * PROGRAMMES INTERNES 13003/13004 (ne JAMAIS les ajouter au total section 103).
  */
 export const NATIONAL_INSTITUTIONS_SECTIONS: Record<string, {
-  section_code: string;
-  pdf_page: number;
-  doc_page: number;
+  section_code: string; pdf_page: number; doc_page: number;
+  lfi_amount_fcfa: number; program_code?: string;
 }> = {
-  'inst-presidence': { section_code: '001', pdf_page: 45, doc_page: 45 },
-  'inst-assnat': { section_code: '011', pdf_page: 45, doc_page: 45 },
-  'inst-senat': { section_code: '012', pdf_page: 45, doc_page: 45 },
-  'inst-conseil-const': { section_code: '013', pdf_page: 45, doc_page: 45 },
-  'inst-cesec': { section_code: '014', pdf_page: 45, doc_page: 45 },
-  'inst-cour-comptes': { section_code: '015', pdf_page: 45, doc_page: 45 },
-  'inst-chancellerie': { section_code: '016', pdf_page: 45, doc_page: 45 },
-  'inst-mediateur': { section_code: '017', pdf_page: 45, doc_page: 45 },
-  'inst-habg': { section_code: '020', pdf_page: 45, doc_page: 45 },
-  'inst-cnrct': { section_code: '021', pdf_page: 45, doc_page: 45 },
-  'inst-conseil-etat': { section_code: '022', pdf_page: 45, doc_page: 45 },
-  'inst-cour-cassation': { section_code: '023', pdf_page: 45, doc_page: 45 },
-  'inst-ige': { section_code: '001-IGE', pdf_page: 45, doc_page: 45 },
+  'inst-presidence': { section_code: '103', pdf_page: 45, doc_page: 1, lfi_amount_fcfa: 193633705615 },
+  'inst-assnat': { section_code: '101', pdf_page: 45, doc_page: 1, lfi_amount_fcfa: 38578972451 },
+  'inst-senat': { section_code: '102', pdf_page: 45, doc_page: 1, lfi_amount_fcfa: 14665806742 },
+  'inst-conseil-const': { section_code: '106', pdf_page: 45, doc_page: 1, lfi_amount_fcfa: 3860437235 },
+  'inst-cesec': { section_code: '105', pdf_page: 45, doc_page: 1, lfi_amount_fcfa: 8069692846 },
+  'inst-cour-comptes': { section_code: '115', pdf_page: 46, doc_page: 2, lfi_amount_fcfa: 8851161351 },
+  'inst-chancellerie': { section_code: '107', pdf_page: 45, doc_page: 1, lfi_amount_fcfa: 3743870172 },
+  'inst-mediateur': { section_code: '109', pdf_page: 45, doc_page: 1, lfi_amount_fcfa: 8285468221 },
+  'inst-habg': { section_code: '103', pdf_page: 45, doc_page: 1, lfi_amount_fcfa: 5552174916, program_code: '13004' },
+  'inst-cnrct': { section_code: '111', pdf_page: 46, doc_page: 2, lfi_amount_fcfa: 5794171874 },
+  'inst-conseil-etat': { section_code: '118', pdf_page: 46, doc_page: 2, lfi_amount_fcfa: 5164531081 },
+  'inst-cour-cassation': { section_code: '114', pdf_page: 46, doc_page: 2, lfi_amount_fcfa: 7931309608 },
+  'inst-ige': { section_code: '103', pdf_page: 45, doc_page: 1, lfi_amount_fcfa: 9872577575, program_code: '13003' },
 };
 
 /**
- * DGBF Section codes pour les 35 départements ministériels officiels (LFI 2026 & DPPD-PAP)
+ * Sections LFI 2026 des portefeuilles 2026 (35 portefeuilles, 34 sections).
+ * Les crédits des sections et les budgets de portefeuille ne sont PAS synonymes.
+ * Source: LFI 2026 PDF pp.45-54. Le poste gov-035 n'a pas de section autonome.
  */
 export const MINISTRIES_SECTIONS: Record<string, {
-  section_code: string;
-  pdf_page?: number;
-  doc_page?: number;
+  section_code: string; pdf_page: number; doc_page: number; lfi_amount_fcfa: number;
 }> = {
-  'gov-001': { section_code: '108', pdf_page: 1171, doc_page: 1169 },
-  'gov-002': { section_code: '226', pdf_page: 27, doc_page: 25 },
-  'gov-003': { section_code: '237', pdf_page: 95, doc_page: 93 },
-  'gov-004': { section_code: '301', pdf_page: 153, doc_page: 151 },
-  'gov-005': { section_code: '325', pdf_page: 497, doc_page: 495 },
-  'gov-006': { section_code: '201', pdf_page: 63, doc_page: 61 },
-  'gov-007': { section_code: '202', pdf_page: 79, doc_page: 77 },
-  'gov-008': { section_code: '348', pdf_page: 801, doc_page: 799 },
-  'gov-009': { section_code: '330', pdf_page: 541, doc_page: 539 },
-  'gov-010': { section_code: '302', pdf_page: 175, doc_page: 173 },
-  'gov-011': { section_code: '303', pdf_page: 195, doc_page: 193 },
-  'gov-012': { section_code: '304', pdf_page: 219, doc_page: 217 },
-  'gov-013': { section_code: '305', pdf_page: 243, doc_page: 241 },
-  'gov-014': { section_code: '306', pdf_page: 267, doc_page: 265 },
-  'gov-015': { section_code: '307', pdf_page: 289, doc_page: 287 },
-  'gov-016': { section_code: '308', pdf_page: 311, doc_page: 309 },
-  'gov-017': { section_code: '309', pdf_page: 333, doc_page: 331 },
-  'gov-018': { section_code: '310', pdf_page: 355, doc_page: 353 },
-  'gov-019': { section_code: '311', pdf_page: 377, doc_page: 375 },
-  'gov-020': { section_code: '312', pdf_page: 399, doc_page: 397 },
-  'gov-021': { section_code: '313', pdf_page: 419, doc_page: 417 },
-  'gov-022': { section_code: '314', pdf_page: 439, doc_page: 437 },
-  'gov-023': { section_code: '315', pdf_page: 459, doc_page: 457 },
-  'gov-024': { section_code: '316', pdf_page: 479, doc_page: 477 },
-  'gov-025': { section_code: '326', pdf_page: 519, doc_page: 517 },
-  'gov-026': { section_code: '331', pdf_page: 563, doc_page: 561 },
-  'gov-027': { section_code: '332', pdf_page: 585, doc_page: 583 },
-  'gov-028': { section_code: '333', pdf_page: 607, doc_page: 605 },
-  'gov-029': { section_code: '334', pdf_page: 629, doc_page: 627 },
-  'gov-030': { section_code: '335', pdf_page: 651, doc_page: 649 },
-  'gov-031': { section_code: '336', pdf_page: 673, doc_page: 671 },
-  'gov-032': { section_code: '337', pdf_page: 695, doc_page: 693 },
-  'gov-033': { section_code: '338', pdf_page: 717, doc_page: 715 },
-  'gov-034': { section_code: '339', pdf_page: 739, doc_page: 737 },
-  'gov-035': { section_code: '340', pdf_page: 761, doc_page: 759 },
+  'gov-001': { section_code: '108', pdf_page: 45, doc_page: 1, lfi_amount_fcfa: 71326766299 },
+  'gov-002': { section_code: '226', pdf_page: 46, doc_page: 2, lfi_amount_fcfa: 481041827995 },
+  'gov-003': { section_code: '237', pdf_page: 47, doc_page: 3, lfi_amount_fcfa: 45121940916 },
+  'gov-004': { section_code: '321', pdf_page: 47, doc_page: 3, lfi_amount_fcfa: 146728395147 },
+  'gov-005': { section_code: '325', pdf_page: 48, doc_page: 4, lfi_amount_fcfa: 129151307791 },
+  'gov-006': { section_code: '323', pdf_page: 48, doc_page: 4, lfi_amount_fcfa: 945963329452 },
+  'gov-007': { section_code: '322', pdf_page: 46, doc_page: 2, lfi_amount_fcfa: 8699982915992 },
+  'gov-008': { section_code: '348', pdf_page: 51, doc_page: 7, lfi_amount_fcfa: 706060209015 },
+  'gov-009': { section_code: '229', pdf_page: 47, doc_page: 3, lfi_amount_fcfa: 333878089526 },
+  'gov-010': { section_code: '340', pdf_page: 50, doc_page: 6, lfi_amount_fcfa: 307769615082 },
+  'gov-011': { section_code: '366', pdf_page: 53, doc_page: 9, lfi_amount_fcfa: 502893150963 },
+  'gov-012': { section_code: '357', pdf_page: 52, doc_page: 8, lfi_amount_fcfa: 81484195624 },
+  'gov-013': { section_code: '335', pdf_page: 49, doc_page: 5, lfi_amount_fcfa: 808992158914 },
+  'gov-014': { section_code: '358', pdf_page: 52, doc_page: 8, lfi_amount_fcfa: 123247714398 },
+  'gov-015': { section_code: '351', pdf_page: 52, doc_page: 8, lfi_amount_fcfa: 26700912028 },
+  'gov-016': { section_code: '376', pdf_page: 53, doc_page: 9, lfi_amount_fcfa: 49213125398 },
+  'gov-017': { section_code: '336', pdf_page: 49, doc_page: 5, lfi_amount_fcfa: 39806735298 },
+  'gov-018': { section_code: '345', pdf_page: 50, doc_page: 6, lfi_amount_fcfa: 103197582643 },
+  'gov-019': { section_code: '347', pdf_page: 51, doc_page: 7, lfi_amount_fcfa: 96866871722 },
+  'gov-020': { section_code: '350', pdf_page: 51, doc_page: 7, lfi_amount_fcfa: 19207286052 },
+  'gov-021': { section_code: '328', pdf_page: 48, doc_page: 4, lfi_amount_fcfa: 44194260102 },
+  'gov-022': { section_code: '333', pdf_page: 49, doc_page: 5, lfi_amount_fcfa: 338779408246 },
+  'gov-023': { section_code: '362', pdf_page: 53, doc_page: 9, lfi_amount_fcfa: 91411414044 },
+  'gov-024': { section_code: '331', pdf_page: 49, doc_page: 5, lfi_amount_fcfa: 1563721366602 },
+  'gov-025': { section_code: '330', pdf_page: 49, doc_page: 5, lfi_amount_fcfa: 734442904943 },
+  'gov-026': { section_code: '369', pdf_page: 53, doc_page: 9, lfi_amount_fcfa: 57361750199 },
+  'gov-027': { section_code: '356', pdf_page: 52, doc_page: 8, lfi_amount_fcfa: 83275503595 },
+  'gov-028': { section_code: '352', pdf_page: 52, doc_page: 8, lfi_amount_fcfa: 31263058865 },
+  'gov-029': { section_code: '346', pdf_page: 50, doc_page: 6, lfi_amount_fcfa: 37598620420 },
+  'gov-030': { section_code: '444', pdf_page: 54, doc_page: 10, lfi_amount_fcfa: 70427777385 },
+  'gov-031': { section_code: '343', pdf_page: 50, doc_page: 6, lfi_amount_fcfa: 36680067253 },
+  'gov-032': { section_code: '440', pdf_page: 54, doc_page: 10, lfi_amount_fcfa: 13746365872 },
+  'gov-033': { section_code: '439', pdf_page: 53, doc_page: 9, lfi_amount_fcfa: 5122516889 },
+  'gov-034': { section_code: '334', pdf_page: 49, doc_page: 5, lfi_amount_fcfa: 182301855312 },
 };
 
 /**
@@ -236,7 +236,7 @@ export function calculateSafePercentages(
 
   // 3. Cas particulier : Total nul (0 FCFA) officiellement documenté
   if (total === 0) {
-    if ((functioning == null || functioning === 0) && (investment == null || investment === 0)) {
+    if (functioning === 0 && investment === 0) {
       return {
         status: 'ZERO_TOTAL',
         functioningPct: null,
@@ -246,7 +246,12 @@ export function calculateSafePercentages(
         reason: 'Dotation totale nulle (0 FCFA) officiellement documentée sans ventilation active.'
       };
     }
-    const nonZeroParts = (functioning ?? 0) + (investment ?? 0);
+    if (functioning == null || investment == null) {
+      return { status: 'NO_BREAKDOWN', functioningPct: null, investmentPct: null,
+        deltaFcfa: null, isBalanced: false,
+        reason: 'Ventilation manquante : un total nul ne prouve pas les composantes.' };
+    }
+    const nonZeroParts = functioning + investment;
     return {
       status: 'UNRECONCILED',
       functioningPct: null,
@@ -273,7 +278,7 @@ export function calculateSafePercentages(
   }
 
   // 5. Validation des composantes
-  if (!Number.isFinite(functioning) || !Number.isFinite(investment) ||
+  if (!Number.isSafeInteger(functioning) || !Number.isSafeInteger(investment) ||
       functioning < 0 || investment < 0 ||
       functioning > Number.MAX_SAFE_INTEGER || investment > Number.MAX_SAFE_INTEGER) {
     return {
@@ -404,7 +409,7 @@ export function resolveInstitutionFinancialView(
       verification_status: 'NOT_DOCUMENTED',
       reconciliation_status: 'NO_BREAKDOWN',
       blocking_reasons: [
-        "Compétences juridictionnelles réparties sous la Constitution de 2016 entre Cassation (023), Conseil d'État (022) et Cour des Comptes (015). Aucune section budgétaire autonome propre dans la LFI 2026."
+        "Compétences juridictionnelles réparties sous la Constitution de 2016 entre Cassation (114), Conseil d'État (118) et Cour des Comptes (115). Aucune section budgétaire autonome propre dans la LFI 2026."
       ],
       badge_text: 'Dotation non individualisée (LFI 2026)',
       badge_class: 'bg-slate-100 text-slate-700 border-slate-300',
@@ -550,12 +555,12 @@ export function resolveInstitutionFinancialView(
         pdf_page: null,
         sha256: LFI_2026_DOCUMENT.sha256,
       },
-      verification_status: 'VERIFIED_ZERO',
+      verification_status: 'NOT_DOCUMENTED',
       reconciliation_status: 'ZERO_TOTAL',
       blocking_reasons: [],
-      badge_text: 'Dotation 0 FCFA',
+      badge_text: 'Zéro à justifier par document',
       badge_class: 'bg-slate-100 text-slate-600 border-slate-200',
-      notice_text: 'Aucun crédit direct alloué au titre de cet exercice dans la Loi de Finances.',
+      notice_text: 'La valeur zéro n\'est pas certifiée en l\'absence d\'une preuve nominative de dotation nulle.',
       is_cour_supreme: false,
       is_tax_quota_commune: false,
       status: 'AVAILABLE'
@@ -573,8 +578,8 @@ export function resolveInstitutionFinancialView(
   const nationalSection = NATIONAL_INSTITUTIONS_SECTIONS[instId];
   const ministrySection = MINISTRIES_SECTIONS[instId];
   const officialSectionCode = nationalSection?.section_code || ministrySection?.section_code || null;
-  const pdfPage = nationalSection?.pdf_page || ministrySection?.pdf_page || 45;
-  const docPage = nationalSection?.doc_page || ministrySection?.doc_page || 45;
+  const pdfPage = nationalSection?.pdf_page ?? ministrySection?.pdf_page ?? null;
+  const docPage = nationalSection?.doc_page ?? ministrySection?.doc_page ?? null;
 
   // Provenance documentaire par défaut selon l'entité
   const provenance: DocumentaryProvenance = {
@@ -589,6 +594,13 @@ export function resolveInstitutionFinancialView(
     table_or_line: "Tableau des crédits par section et par programme"
   };
 
+  // Verification documentaire INDEPENDANTE de l'egalite arithmetique.
+  // Aucune preuve PDF = jamais VERIFIED_AMOUNT, meme si les composantes s'additionnent.
+  const amountEvidence = nationalSection ?? ministrySection;
+  const isLfi2026AmountConfirmed = fiscalYear === 2026 && requestedBasis !== 'RECTIFICATIF' &&
+    requestedBasis !== 'ADMINISTRATIVE_ACCOUNT' &&
+    amountEvidence != null && amountEvidence.lfi_amount_fcfa === total;
+  const documentaryDiscrepancy = amountEvidence != null && !isLfi2026AmountConfirmed;
   const isReconciled = pctResult.status === 'RECONCILED';
   const hasBreakdown = fonct != null && inv != null;
 
@@ -615,14 +627,24 @@ export function resolveInstitutionFinancialView(
     programs: [],
     actions: [],
     documentary_provenance: provenance,
-    verification_status: isReconciled ? 'VERIFIED_AMOUNT' : (pctResult.status === 'UNRECONCILED' ? 'UNRECONCILED' : 'PARTIAL_BREAKDOWN'),
+    verification_status: pctResult.status === 'UNRECONCILED' ? 'UNRECONCILED'
+      : !isLfi2026AmountConfirmed ? 'NOT_DOCUMENTED'
+      : isReconciled ? 'VERIFIED_AMOUNT' : 'PARTIAL_BREAKDOWN',
     reconciliation_status: pctResult.status,
-    blocking_reasons: pctResult.reason ? [pctResult.reason] : [],
-    badge_text: isReconciled ? 'Dotation Officielle (LFI 2026)' : 'Dotation en Cours de Réconciliation',
-    badge_class: isReconciled 
+    blocking_reasons: [
+      ...(pctResult.reason ? [pctResult.reason] : []),
+      ...(!isLfi2026AmountConfirmed ? [documentaryDiscrepancy
+        ? `Montant de la fiche non identique aux credits de la section LFI ${officialSectionCode} : ${total} FCFA affiche contre ${amountEvidence!.lfi_amount_fcfa} FCFA section. Portefeuille, C2D et transferts a rapprocher sans remplacement automatique.`
+        : 'Aucune ligne officielle LFI 2026 probante pour ce montant et ce perimetre.'] : []),
+    ],
+    badge_text: isLfi2026AmountConfirmed ? 'Montant recoupe LFI 2026' : 'Montant a rapprocher - source insuffisante',
+    badge_class: isLfi2026AmountConfirmed && isReconciled 
       ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
       : 'bg-amber-100 text-amber-800 border-amber-300',
-    notice_text: !isReconciled ? `${pctResult.reason || 'Déséquilibre ou ventilation incomplète.'} Périmètre et provenance documentaire à vérifier.` : null,
+    notice_text: !isLfi2026AmountConfirmed
+      ? 'Le montant actuellement reference ne peut etre certifie comme credit de section LFI 2026. Voir les reserves documentaires ; les ecarts C2D ou de portefeuille necessitent un acte de rapprochement.'
+      : !isReconciled ? `${pctResult.reason || 'Ventilation incomplète.'} La concordance du total LFI ne certifie pas les ratios.`
+      : null,
     is_cour_supreme: false,
     is_tax_quota_commune: false,
     status: pctResult.status === 'UNRECONCILED' ? 'UNRECONCILED' : 'AVAILABLE'
