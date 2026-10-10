@@ -61,7 +61,17 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 0,
+        "action_programmes_total": 3,
+        "actions_individually_identified": 0,
+        "action_numeric_reconciliation_complete": false,
+        "unresolved_action_programme_codes": [
+          "13010",
+          "13011",
+          "13013"
+        ]
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -108,7 +118,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 3,
+        "action_programmes_total": 3,
+        "actions_individually_identified": 10,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -188,7 +204,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 4,
+        "action_programmes_total": 4,
+        "actions_individually_identified": 13,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -262,7 +284,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 6,
+        "action_programmes_total": 6,
+        "actions_individually_identified": 17,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -309,7 +337,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 11,
+        "action_programmes_total": 11,
+        "actions_individually_identified": 38,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -383,7 +417,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": true
+        "shared_section": true,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 8,
+        "action_programmes_total": 8,
+        "actions_individually_identified": 28,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -430,7 +470,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 5,
+        "action_programmes_total": 5,
+        "actions_individually_identified": 16,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -477,7 +523,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 6,
+        "action_programmes_total": 6,
+        "actions_individually_identified": 15,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -524,7 +576,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 6,
+        "action_programmes_total": 6,
+        "actions_individually_identified": 16,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -571,7 +629,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 5,
+        "action_programmes_total": 5,
+        "actions_individually_identified": 15,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -618,7 +682,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 4,
+        "action_programmes_total": 4,
+        "actions_individually_identified": 11,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -665,7 +735,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 4,
+        "action_programmes_total": 4,
+        "actions_individually_identified": 11,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -712,7 +788,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 3,
+        "action_programmes_total": 3,
+        "actions_individually_identified": 8,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -819,7 +901,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 5,
+        "action_programmes_total": 5,
+        "actions_individually_identified": 26,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -866,7 +954,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 5,
+        "action_programmes_total": 5,
+        "actions_individually_identified": 17,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -913,7 +1007,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 6,
+        "action_programmes_total": 6,
+        "actions_individually_identified": 20,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -960,7 +1060,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 4,
+        "action_programmes_total": 4,
+        "actions_individually_identified": 18,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -1040,7 +1146,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 4,
+        "action_programmes_total": 4,
+        "actions_individually_identified": 12,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -1114,7 +1226,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 4,
+        "action_programmes_total": 4,
+        "actions_individually_identified": 15,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -1161,7 +1279,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 4,
+        "action_programmes_total": 4,
+        "actions_individually_identified": 7,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -1208,7 +1332,15 @@
         "programme_codes_individually_found": false,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 3,
+        "action_programmes_total": 4,
+        "actions_individually_identified": 10,
+        "action_numeric_reconciliation_complete": false,
+        "unresolved_action_programme_codes": [
+          "22121"
+        ]
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -1255,7 +1387,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": false
+        "shared_section": false,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 8,
+        "action_programmes_total": 8,
+        "actions_individually_identified": 17,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
@@ -1461,7 +1599,13 @@
         "programme_codes_individually_found": true,
         "action_level_certified": false,
         "portfolio_allocation_certified": false,
-        "shared_section": true
+        "shared_section": true,
+        "action_evidence_path": "docs/references/2026/ministry-reconciliation/ANNEX4_ACTION_SUM_CROSSCHECK_2026.json",
+        "action_programme_sums_reconciled": 8,
+        "action_programmes_total": 8,
+        "actions_individually_identified": 28,
+        "action_numeric_reconciliation_complete": true,
+        "unresolved_action_programme_codes": []
       },
       "section_program_validation_status": "LFI_CP_AND_ANNEX4_PROGRAM_TOTALS_MATCH",
       "section_program_certification_scope": "SECTION_ONLY_NOT_PORTFOLIO_ALLOCATION"
