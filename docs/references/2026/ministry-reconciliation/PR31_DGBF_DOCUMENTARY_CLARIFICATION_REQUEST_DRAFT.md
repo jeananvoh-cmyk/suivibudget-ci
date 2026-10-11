@@ -19,7 +19,7 @@ Madame, Monsieur,
 
 Dans le cadre d'un travail citoyen, non partisan, de présentation fidèle et sourcée du budget de l'État pour l'année 2026, nous avons rapproché les tableaux officiels de la Loi de finances n°2025-987 du 19 décembre 2025 et de son Annexe 4 DPPD-PAP 2026–2028.
 
-Notre contrôle a réconcilié les crédits de paiement de **22 sections et 112 programmes** dans les deux documents. Le détail du Tableau 7 permet également de rapprocher les sommes de **340 actions distinctes et 108 programmes**. Nous souhaiterions lever les réserves suivantes avant de qualifier les fiches gouvernementales de certifiées :
+Notre contrôle consolidé a identifié **34 sections LFI distinctes pour 35 portefeuilles**, avec les CP initiaux votés dans les articles 14 et 15. Les **112 programmes** sont rapprochés aux sommes de leurs actions : **108 programmes / 340 actions** dans l'Annexe 4 et **4 programmes / 5 actions complémentaires** dans le détail de la LFI. Les montants de section ne valent pas preuve de dotation autonome à chaque portefeuille après le remaniement. Nous souhaiterions lever les réserves suivantes avant de qualifier les fiches gouvernementales de certifiées :
 
 ## 1. Clarification sur le programme 22121 — Section 352
 
