@@ -43,3 +43,25 @@ Les différences entre montants de CP par section et dotations directes ne sont 
 ## Décisions
 
 **Aucune mutation des montants applicatifs, aucune écriture Supabase, pas de déploiement, pas de fusion automatique de cette branche.** Ce rapport distingue les montants institutionnels **retrouvés dans l'Annexe 7** et les CP de **sections** déjà documentés, avant de poursuivre la vérification de détail des 89 pages.
+
+
+## Complément : inventaire intégral des 89 pages physiques de l'Annexe 7
+
+**89/89 pages parcourues par extraction native**, sans saut de page. Structure reconnue :
+- p.1–8 : couverture, avant-propos et pages intercalaires ;
+- p.9–13 : 5 pages du récapitulatif des dotations des institutions (**14/14 chapitres et montant général confirmés**) ;
+- p.14–18 : sommaire et intercalaires ;
+- p.19–24 : détail Assemblée nationale ;
+- p.25–30 : intercalaires et détail Sénat ;
+- p.31–42 : intercalaires et détail Présidence / IGE / HABG ;
+- p.43–47 : intercalaires et détail Grande Chancellerie ;
+- p.48–60 : intercalaires et détail Conseil constitutionnel, Cour de cassation et Conseil d'État ;
+- p.61–69 : intercalaires et détail des parquets/cour des comptes ;
+- p.70–77 : intercalaires et détail parquet Cour des comptes / Conseil supérieur de la magistrature ;
+- p.78–89 : intercalaires et détail CESEC, Médiateur, Chambre des rois et chefs traditionnels.
+
+Les pages dépourvues de texte extractible (pages physiques **2, 4, 6, 8, 14, 18, 26, 32, 44, 48, 50, 52, 54, 58, 62, 66, 70, 72, 74, 76, 78, 80, 84, 86, 88** notamment) sont des pages intercalaires ou de présentation dans l'inventaire textuel : elles ont été **comptées**, pas omises. **Le parcours textuel des 89 pages n'équivaut pas à une transcription et validation arithmétique de chaque sous-ligne économique**. Cette réserve reste ouverte pour les pages denses.
+
+Les lignes budgétaires directes p.19–89 détaillent les postes d'immobilisations, biens et services, salaires/transferts par nature. Les activités `121590201` (IGE) et `121591501` (HABG) sont expressément présentes dans l'Annexe 7 : les chiffres de ces activités ne doivent pas être réinterprétés comme budgets autonomes en supplément de la section 103.
+
+**Aucune page budgétaire dense n'a été exclue de l'inventaire.** Aucune correction applicative chiffrée ne résulte du seul tableau agrégé.
