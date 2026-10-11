@@ -142,90 +142,10 @@ export const REGULATORY_AUTHORITIES_BUDGET_LINES: Record<string, BudgetLineItem[
       year: 2026
     }
   ],
-  "aai-artci": [
-    {
-      libelle: "Masse salariale et traitements des ingénieurs télécoms, juristes et experts de l'ARTCI",
-      montant_fcfa: 8500000000,
-      nature: "Personnel",
-      categorie: "REGULATION_TELECOMS",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "ARTCI",
-      sous_categorie_3: "Personnel Technique & Juridique",
-      year: 2026
-    },
-    {
-      libelle: "Contrôle de la qualité de service (QoS) des opérateurs et gestion des fréquences télécoms",
-      montant_fcfa: 4200000000,
-      nature: "Biens et services",
-      categorie: "REGULATION_TELECOMS",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "ARTCI",
-      sous_categorie_3: "Qualité de Service & Fréquences",
-      year: 2026
-    },
-    {
-      libelle: "Protection des données à caractère personnel, autorité de certification CERTINUM et cybersécurité",
-      montant_fcfa: 3800000000,
-      nature: "Biens et services",
-      categorie: "REGULATION_TELECOMS",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "ARTCI",
-      sous_categorie_3: "Protection des Données & CERTINUM",
-      year: 2026
-    },
-    {
-      libelle: "Infrastructures de métrologie, sondes de mesure de débit internet et équipements de contrôle",
-      montant_fcfa: 2500000000,
-      nature: "Investissements",
-      categorie: "REGULATION_TELECOMS",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "ARTCI",
-      sous_categorie_3: "Équipements & Laboratoires Techniques",
-      year: 2026
-    }
-  ],
-  "aai-anare": [
-    {
-      libelle: "Salaires et indemnités des ingénieurs énergéticiens, contrôleurs et collège de régulation",
-      montant_fcfa: 2650000000,
-      nature: "Personnel",
-      categorie: "REGULATION_ENERGIE",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "ANARE-CI",
-      sous_categorie_3: "Personnel & Collège Régulateur",
-      year: 2026
-    },
-    {
-      libelle: "Instruction et arbitrage des réclamations des consommateurs d'électricité (factures, pannes, compteurs)",
-      montant_fcfa: 1350000000,
-      nature: "Biens et services",
-      categorie: "REGULATION_ENERGIE",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "ANARE-CI",
-      sous_categorie_3: "Protection des Usagers & Arbitrage",
-      year: 2026
-    },
-    {
-      libelle: "Contrôle technique de conformité du réseau électrique national et audit de concession de service public",
-      montant_fcfa: 800000000,
-      nature: "Biens et services",
-      categorie: "REGULATION_ENERGIE",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "ANARE-CI",
-      sous_categorie_3: "Contrôle Technique des Réseaux",
-      year: 2026
-    },
-    {
-      libelle: "Observatoire des coûts de production d'électricité, modélisation des tarifs et vulgarisation",
-      montant_fcfa: 400000000,
-      nature: "Biens et services",
-      categorie: "REGULATION_ENERGIE",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "ANARE-CI",
-      sous_categorie_3: "Études Économiques & Tarification",
-      year: 2026
-    }
-  ],
+  // aai-artci: no officially evidenced 2026 breakdown; keep historical values in audit archive only.
+  "aai-artci": [],
+  // aai-anare: no officially evidenced 2026 breakdown; keep historical values in audit archive only.
+  "aai-anare": [],
   "aai-cndh": [
     {
       libelle: "Indemnités des Conseillers des Droits de l'Homme et traitements des observateurs terrain",
@@ -413,6 +333,11 @@ export function getBudgetLinesForEntity(
   entityId?: string
 ): BudgetLineItem[] {
   if (!entityName && !entityId) return [];
+
+  // Never expose legacy, unverified 2026 ARTCI/ANARE breakdowns via IDs, aliases or fallback datasets.
+  if (entityId === 'aai-artci' || entityId === 'aai-anare') return [];
+  const regulatorQuery = (entityName || '').toUpperCase();
+  if (entityType === 'AUTORITE_REGULATION' && (regulatorQuery.includes('ARTCI') || regulatorQuery.includes('ANARE'))) return [];
 
   // 1. Direct ID match (Deterministic, Highest Priority)
   if (entityId) {
