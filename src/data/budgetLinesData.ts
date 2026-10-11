@@ -15,228 +15,22 @@ for (const [alias, canonical] of Object.entries(budgetLinesAliases)) {
   }
 }
 
+/**
+ * No 2026 per-line appropriations for regulators have been independently documented.
+ * Annex 6 global ASS budget figures do not justify invented personnel/activity breakdowns.
+ * Reintroduce lines only with per-line official provenance, year and explicit measure.
+ */
 export const REGULATORY_AUTHORITIES_BUDGET_LINES: Record<string, BudgetLineItem[]> = {
-  "aai-arcop": [
-    {
-      libelle: "Dépenses de Personnel (Conseil de Régulation tripartite État/Secteur Privé/Société Civile, Secrétariat Général & Experts)",
-      montant_fcfa: 2450000000,
-      nature: "Personnel",
-      categorie: "REGULATION_MARCHES",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "ARCOP",
-      sous_categorie_3: "Gouvernance & Administration",
-      year: 2026
-    },
-    {
-      libelle: "Instruction des recours gracieux, contentieux et conciliation des litiges de marchés publics",
-      montant_fcfa: 980000000,
-      nature: "Biens et services",
-      categorie: "REGULATION_MARCHES",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "ARCOP",
-      sous_categorie_3: "Règlement des Différends",
-      year: 2026
-    },
-    {
-      libelle: "Audits indépendants annuels de conformité de la commande publique sur l'ensemble du territoire",
-      montant_fcfa: 820000000,
-      nature: "Biens et services",
-      categorie: "REGULATION_MARCHES",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "ARCOP",
-      sous_categorie_3: "Audits & Contrôles Indépendants",
-      year: 2026
-    },
-    {
-      libelle: "Formation certifiante et renforcement des capacités des acteurs publics et privés de la commande publique",
-      montant_fcfa: 600000000,
-      nature: "Transferts",
-      categorie: "REGULATION_MARCHES",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "ARCOP",
-      sous_categorie_3: "Formation & Professionnalisation",
-      year: 2026
-    }
-  ],
-  "aai-haca": [
-    {
-      libelle: "Rémunération et indemnités des Conseillers de la HACA, monitoring et personnel technique",
-      montant_fcfa: 2100000000,
-      nature: "Personnel",
-      categorie: "REGULATION_AUDIOVISUEL",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "HACA",
-      sous_categorie_3: "Collège & Personnel de Régulation",
-      year: 2026
-    },
-    {
-      libelle: "Surveillance et monitoring numérique 24h/24 des médias audiovisuels, chaînes TNT et réseaux sociaux",
-      montant_fcfa: 1150000000,
-      nature: "Biens et services",
-      categorie: "REGULATION_AUDIOVISUEL",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "HACA",
-      sous_categorie_3: "Centre National de Monitoring",
-      year: 2026
-    },
-    {
-      libelle: "Régulation des fréquences TNT, attribution des licences et gestion du spectre audiovisuel",
-      montant_fcfa: 550000000,
-      nature: "Biens et services",
-      categorie: "REGULATION_AUDIOVISUEL",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "HACA",
-      sous_categorie_3: "Fréquences & Nouveaux Médias",
-      year: 2026
-    },
-    {
-      libelle: "Campagnes d'éducation aux médias, protection des mineurs et respect de l'éthique journalistique",
-      montant_fcfa: 400000000,
-      nature: "Transferts",
-      categorie: "REGULATION_AUDIOVISUEL",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "HACA",
-      sous_categorie_3: "Éthique, Pluralisme & Protection",
-      year: 2026
-    }
-  ],
-  "aai-caidp": [
-    {
-      libelle: "Traitements et indemnités des Commissaires et du Secrétariat Général de la CAIDP",
-      montant_fcfa: 1050000000,
-      nature: "Personnel",
-      categorie: "ACCES_INFORMATION",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "CAIDP",
-      sous_categorie_3: "Commissaires & Personnel Administratif",
-      year: 2026
-    },
-    {
-      libelle: "Instruction des saisines citoyennes et décisions d'injonction de communication de documents (Loi 2013-867)",
-      montant_fcfa: 480000000,
-      nature: "Biens et services",
-      categorie: "ACCES_INFORMATION",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "CAIDP",
-      sous_categorie_3: "Contentieux & Recours Citoyens",
-      year: 2026
-    },
-    {
-      libelle: "Animation, formation et supervision du réseau national des Responsables de l'Information (RI)",
-      montant_fcfa: 370000000,
-      nature: "Biens et services",
-      categorie: "ACCES_INFORMATION",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "CAIDP",
-      sous_categorie_3: "Réseau National des RI",
-      year: 2026
-    },
-    {
-      libelle: "Vulgarisation citoyenne du droit d'accès à l'information, baromètre annuel et plateforme numérique",
-      montant_fcfa: 250000000,
-      nature: "Transferts",
-      categorie: "ACCES_INFORMATION",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "CAIDP",
-      sous_categorie_3: "Plateforme & Baromètre Annuel",
-      year: 2026
-    }
-  ],
-  // aai-artci: no officially evidenced 2026 breakdown; keep historical values in audit archive only.
+  "aai-arcop": [],
+  "aai-haca": [],
+  "aai-caidp": [],
   "aai-artci": [],
-  // aai-anare: no officially evidenced 2026 breakdown; keep historical values in audit archive only.
   "aai-anare": [],
-  "aai-cndh": [
-    {
-      libelle: "Indemnités des Conseillers des Droits de l'Homme et traitements des observateurs terrain",
-      montant_fcfa: 1600000000,
-      nature: "Personnel",
-      categorie: "DROITS_HOMME",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "CNDH",
-      sous_categorie_3: "Conseillers & Observateurs",
-      year: 2026
-    },
-    {
-      libelle: "Fonctionnement opérationnel des 31 Commissions Régionales des Droits de l'Homme sur le territoire",
-      montant_fcfa: 750000000,
-      nature: "Biens et services",
-      categorie: "DROITS_HOMME",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "CNDH",
-      sous_categorie_3: "Commissions Régionales Décentralisées",
-      year: 2026
-    },
-    {
-      libelle: "Enquêtes sur les violations des droits humains et visites inopinées des lieux de privation de liberté",
-      montant_fcfa: 450000000,
-      nature: "Biens et services",
-      categorie: "DROITS_HOMME",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "CNDH",
-      sous_categorie_3: "Visites Pénitentiaires & Enquêtes",
-      year: 2026
-    },
-    {
-      libelle: "Plaidoyer citoyen, formation aux droits de l'enfant et de la femme et publication du Rapport National",
-      montant_fcfa: 300000000,
-      nature: "Transferts",
-      categorie: "DROITS_HOMME",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "CNDH",
-      sous_categorie_3: "Plaidoyer & Rapport Annuel",
-      year: 2026
-    }
-  ],
-  "aai-airp": [
-    {
-      libelle: "Traitements et honoraires des pharmaciens régulateurs, inspecteurs et évaluateurs scientifiques",
-      montant_fcfa: 1850000000,
-      nature: "Personnel",
-      categorie: "REGULATION_SANTE",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "AIRP",
-      sous_categorie_3: "Évaluateurs Scientifiques & Inspecteurs",
-      year: 2026
-    },
-    {
-      libelle: "Instruction scientifique des dossiers d'Autorisation de Mise sur le Marché (AMM) des médicaments",
-      montant_fcfa: 850000000,
-      nature: "Biens et services",
-      categorie: "REGULATION_SANTE",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "AIRP",
-      sous_categorie_3: "Homologation & Dossiers AMM",
-      year: 2026
-    },
-    {
-      libelle: "Inspections des établissements pharmaceutiques et opérations nationales contre les médicaments falsifiés",
-      montant_fcfa: 600000000,
-      nature: "Biens et services",
-      categorie: "REGULATION_SANTE",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "AIRP",
-      sous_categorie_3: "Lutte contre les Médicaments Falsifiés",
-      year: 2026
-    },
-    {
-      libelle: "Dispositif national de pharmacovigilance, réactovigilance et alertes sanitaires aux populations",
-      montant_fcfa: 350000000,
-      nature: "Biens et services",
-      categorie: "REGULATION_SANTE",
-      sous_categorie_1: "AUTORITES_REGULATION",
-      sous_categorie_2: "AIRP",
-      sous_categorie_3: "Pharmacovigilance & Veille Sanitaire",
-      year: 2026
-    }
-  ]
+  "aai-cndh": [],
+  "aai-airp": [],
 };
 
-// Communes du District Autonome d'Abidjan :
-// Les budgets primitifs autonomes ne figurent pas dans la LFI de l'État central.
-// Des courriers officiels de demande de documents (Loi CAIDP n°2013-867) sont en cours de dépôt
-// auprès de ces mairies pour obtenir et certifier leurs budgets municipaux officiels.
-// Aucune donnée non sourcée n'est publiée.
+// Municipal figures must be proven by the municipality's own budget, not by the State grant.
 export const ABIDJAN_COMMUNES_BUDGET_LINES: Record<string, BudgetLineItem[]> = {};
 
 export const NATIONAL_INSTITUTIONS_MAP: Record<string, string> = {
@@ -334,10 +128,11 @@ export function getBudgetLinesForEntity(
 ): BudgetLineItem[] {
   if (!entityName && !entityId) return [];
 
-  // Never expose legacy, unverified 2026 ARTCI/ANARE breakdowns via IDs, aliases or fallback datasets.
-  if (entityId === 'aai-artci' || entityId === 'aai-anare') return [];
-  const regulatorQuery = (entityName || '').toUpperCase();
-  if (entityType === 'AUTORITE_REGULATION' && (regulatorQuery.includes('ARTCI') || regulatorQuery.includes('ANARE'))) return [];
+  // Global regulator budgets (when proven) are not substitutes for per-line evidence.
+  const regulatorIds = new Set(['aai-arcop', 'aai-haca', 'aai-caidp', 'aai-artci', 'aai-anare', 'aai-cndh', 'aai-airp']);
+  if (entityId && regulatorIds.has(entityId)) return [];
+  const query = (entityName || '').toUpperCase();
+  if (entityType === 'AUTORITE_REGULATION' || ['ARCOP', 'HACA', 'CAIDP', 'ARTCI', 'ANARE', 'CNDH', 'AIRP'].some(acronym => query.includes(acronym))) return [];
 
   // 1. Direct ID match (Deterministic, Highest Priority)
   if (entityId) {
