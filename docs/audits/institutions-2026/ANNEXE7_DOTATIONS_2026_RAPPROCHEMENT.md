@@ -65,3 +65,25 @@ Les pages dépourvues de texte extractible (pages physiques **2, 4, 6, 8, 14, 18
 Les lignes budgétaires directes p.19–89 détaillent les postes d'immobilisations, biens et services, salaires/transferts par nature. Les activités `121590201` (IGE) et `121591501` (HABG) sont expressément présentes dans l'Annexe 7 : les chiffres de ces activités ne doivent pas être réinterprétés comme budgets autonomes en supplément de la section 103.
 
 **Aucune page budgétaire dense n'a été exclue de l'inventaire.** Aucune correction applicative chiffrée ne résulte du seul tableau agrégé.
+
+## Vérification arithmétique exhaustive des niveaux du récapitulatif Annexe 7 — 11 octobre 2026
+
+**Méthode reproductible :** extraction structurée du PDF original aux pages physiques 9–13, sans reconstituer les chiffres par intuition : identification du code **chapitre (4 chiffres)**, du code **destination (9 chiffres)** et du code **nature économique (4 chiffres)**. Contrôle des deux identités :
+
+- **14 chapitres sur 14 :** somme des destinations rattachées = dotation 2026 affichée au chapitre (**14/14 exacts, zéro écart**).
+- **32 destinations sur 32 :** somme des natures économiques rattachées = dotation 2026 de la destination (**32/32 exactes, zéro écart**).
+- **66 lignes de nature économique 2026** extraites, chacune conservant chapitre, destination et code économique.
+- Somme des 14 chapitres = **120 267 274 548 FCFA**, identique au total général imprimé.
+
+**Couverture :** 89 pages physiques examinées pour l'existence de contenu ; 39 pages physiques post-récapitulatif contiennent directement des données budgétaires textuellement exploitables. Les **40 pages** de faible extraction textuelle (<80 caractères), recensées dans le précédent audit local, sont listées ci-dessous de façon exhaustive, y compris pages de titre ou intercalaires :
+
+`2, 4, 6, 7, 8, 14, 17, 18, 25, 26, 31, 32, 43, 44, 48, 49, 50, 52, 53, 54, 57, 58, 61, 62, 65, 66, 70, 71, 72, 74, 75, 76, 78, 79, 80, 83, 84, 86, 87, 88`.
+
+**Réserve résiduelle précisément circonscrite :** les 39 pages de détail par emplois/ressources contiennent davantage de sous-lignes que les **66 natures économiques du récapitulatif**. Elles ont été parcourues et inventoriées mais la somme indépendante de chacune de ces sous-lignes de détail n'est **pas** certifiée par ce contrôle automatisé. C'est une limite de granularité, **pas un écart découvert**.
+
+**Conséquence pour SuiviBudget :** les chiffres de section LFI ont un autre périmètre comptable, expliqué explicitement dans l'**avant-propos de l'Annexe 7, page physique 5** : cette annexe couvre les crédits **gérés directement** par l'institution ; elle exclut les crédits des services rattachés et des dépenses centralisées (salaires, abonnements notamment). Ne remplacer aucun CP de section par une dotation directe sans changement explicite de la définition du champ. Les 14 lignes institutionnelles de l'Annexe 7 sont donc **confirmées au niveau chapitre, destination et nature économique**.
+
+### Correctif de traçabilité
+
+La première version de ce rapport parlait de « 25 pages intercalaires » à titre indicatif. Le contrôle de densité textuelle donne **40 pages avec moins de 80 caractères** : le détail exact ci-dessus constitue l'inventaire de référence. Une page avec peu de texte ne prouve pas qu'elle est vide ; aucune d'elles n'est exclue sans signalement.
+
