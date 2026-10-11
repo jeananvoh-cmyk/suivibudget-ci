@@ -87,3 +87,9 @@ Les lignes budgétaires directes p.19–89 détaillent les postes d'immobilisati
 
 La première version de ce rapport parlait de « 25 pages intercalaires » à titre indicatif. Le contrôle de densité textuelle donne **40 pages avec moins de 80 caractères** : le détail exact ci-dessus constitue l'inventaire de référence. Une page avec peu de texte ne prouve pas qu'elle est vide ; aucune d'elles n'est exclue sans signalement.
 
+
+### Vérification croisée des fiches détaillées d'emplois et ressources
+
+La lecture structurée des pages PDF physiques **19–89** fait apparaître **39 pages détaillées**, rattachées par leur premier code de destination à **29 destinations distinctes**. Le récapitulatif contient 32 destinations ; les **trois absentes du détail courant 2026 ont toutes un crédit CP 2026 égal à zéro**, et correspondent à des lignes historiques 2025 non reconduites : `111591101` (indemnités mandat écourté), `132960501` (construction du siège de la Cour de cassation) et `132960601` (réhabilitation des locaux de la Cour de cassation). **Ne pas considérer ces trois lignes nulles de 2026 comme montants absents ou manquants.** Elles sont explicitement imprimées à 0 dans le récapitulatif ; zéro attesté par le document est différent d'une valeur inconnue.
+
+Parmi les 29 destinations actives, dix occupent **deux pages de détail**, ce qui explique pourquoi il existe 39 pages de détail pour 29 destinations actives. **29/29 codes actifs retrouvés**, aucune destination active manquante dans les pages de détail.
