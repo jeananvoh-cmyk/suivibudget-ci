@@ -1,3 +1,6 @@
+
+> **MISE À JOUR DOCUMENTAIRE DU 11 OCTOBRE 2026 — PRIORITAIRE SUR LE CLASSEMENT CI-DESSOUS.** Les cinq réserves d'affectation exposées ci-dessous ont été **levées par l'Annexe 8 officielle DGBF 2026**, découverte après la création de ce rapport. Les sept codes sont rattachés nominativement à leurs cinq communes dans la ventilation détaillée : Kouassi-Kouassikro **541 581 189 FCFA**, Tafiré **561 980 194 FCFA**, Komborodougou **525 311 968 FCFA**, Gohitafla **581 777 666 FCFA**, Logoualé **570 129 295 FCFA**. Les rubriques '5 incertaines' décrivent donc **l'état historique avant cette découverte**, pas le statut actuel. Voir [preuves Annexe 8](ANNEXE8_PREUVES_SEPT_ACTIVITES_2026.md). Aucune correction des chiffres des cinq communes n'est nécessaire.
+
 # Rapport nominatif de vérification des dotations locales — exercice 2026
 
 **Date du contrôle : 10 octobre 2026**. Sources : Loi de finances 2026 et Annexe 4 DPPD-PAP 2026–2028 ; rapprochement exact des codes d'activité et des CP, à partir des fichiers documentaires de la PR #37. **Ce rapport porte sur les crédits de paiement (CP) de dotations identifiés, PAS sur les budgets primitifs complets.** La concordance arithmétique n'est pas une preuve de paiement effectif ni une certification externe d'exécution.
