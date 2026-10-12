@@ -201,6 +201,8 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
+                  aria-label="Identifiant ou adresse email de connexion"
+                  autoComplete="username"
                   required
                   disabled={lockoutSecs > 0}
                   value={identifier}
@@ -219,6 +221,8 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
+                  aria-label="Mot de passe de connexion"
+                  autoComplete="current-password"
                   required
                   disabled={lockoutSecs > 0}
                   value={password}
