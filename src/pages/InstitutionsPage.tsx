@@ -109,6 +109,7 @@ export const InstitutionsPage: React.FC<InstitutionsPageProps> = ({
             <button
               key={pill.id}
               onClick={() => handleNavigateToSection(pill.id)}
+              aria-current={isActive ? 'page' : undefined}
               className={`flex-shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 isActive
                   ? 'bg-slate-900 text-white shadow-sm'

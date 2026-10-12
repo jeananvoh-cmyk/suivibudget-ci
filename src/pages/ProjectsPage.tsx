@@ -378,6 +378,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
             <div className="lg:col-span-12 relative">
               <input
                 type="text"
+                aria-label="Rechercher un projet par nom, commune ou catégorie"
                 placeholder="Rechercher un chantier, une commune, un collège, un hôpital..."
                 value={searchQuery}
                 onChange={(e) => {
@@ -389,6 +390,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
+                  aria-label="Effacer la recherche de projets"
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded-full"
                 >
                   ✕
@@ -401,6 +403,8 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
           <div className="flex lg:hidden items-center justify-between gap-2 pt-1">
             <button
               onClick={() => setShowMobileFilters(!showMobileFilters)}
+              aria-expanded={showMobileFilters}
+              aria-controls="project-advanced-filters"
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-3.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                 showMobileFilters || activeFiltersCount > 0
                   ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
@@ -429,10 +433,11 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
           </div>
 
           {/* Advanced Dropdowns (Collapsible on Mobile, always visible on Desktop) */}
-          <div className={`${showMobileFilters ? 'grid' : 'hidden lg:grid'} grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 pt-1`}>
+          <div id="project-advanced-filters" className={`${showMobileFilters ? 'grid' : 'hidden lg:grid'} grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 pt-1`}>
             {/* Region Dropdown */}
             <div className="lg:col-span-5">
               <select
+                aria-label="Filtrer les projets par région"
                 value={selectedRegion}
                 onChange={(e) => {
                   setSelectedRegion(e.target.value);
@@ -450,6 +455,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
             {/* Sort Dropdown */}
             <div className="lg:col-span-4">
               <select
+                aria-label="Trier les projets"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
                 className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-900 cursor-pointer transition-all truncate"
