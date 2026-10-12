@@ -570,14 +570,13 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                   return (
                     <tr 
                       key={p.id} 
-                      onClick={() => onSelectProject(p)}
-                      className="hover:bg-blue-50/40 cursor-pointer transition-colors group"
+                      className="hover:bg-blue-50/40 transition-colors group"
                     >
                       {/* Col 1: Intitulé du Chantier */}
                       <td className="py-3 px-3 font-bold text-slate-900">
-                        <div className="line-clamp-2 group-hover:text-brand-blue transition-colors text-xs font-black leading-snug">
+                        <button type="button" onClick={() => onSelectProject(p)} aria-label={`Consulter la fiche du projet : ${p.title}`} className="text-left line-clamp-2 group-hover:text-brand-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue transition-colors text-xs font-black leading-snug">
                           {p.title}
-                        </div>
+                        </button>
                       </td>
 
                       {/* Col 2: Entité en Charge (Maître d'ouvrage) */}
