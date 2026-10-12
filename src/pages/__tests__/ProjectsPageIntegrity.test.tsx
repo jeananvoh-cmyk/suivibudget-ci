@@ -224,4 +224,13 @@ describe('BLOC B — INTÉGRITÉ DES PROJETS ET MARCHÉS PUBLICS (LOT 9)', () =>
     // En l'absence de correspondance certifiée, procurement doit être undefined
     expect(procurement).toBeUndefined();
   });
+
+  it('structure le conteneur du modal projet avec role dialog, aria-modal et gestion de fermeture', () => {
+    const project: BudgetProject = { id: 'project-a11y', title: 'Route Yopougon', commune_name: 'Yopougon', region_name: 'Abidjan', category: 'Infrastructures', nature_expense: 'Investissements', budget_amount_fcfa: 50000000, fiscal_year: 2026, current_status: 'IN_PROGRESS', progress_percentage: 10, created_at: '2026-10-12' };
+    const modal = renderToStaticMarkup(<ProjectDetailModal project={project} onClose={() => {}} onOpenSendProof={() => {}} onOpenShare={() => {}} onOpenDocRequest={() => {}} />);
+    expect(modal).toContain('role="dialog"');
+    expect(modal).toContain('aria-modal="true"');
+    expect(modal).toContain('aria-label="Détails du projet : Route Yopougon"');
+    expect(modal).toContain('cursor-pointer');
+  });
 });

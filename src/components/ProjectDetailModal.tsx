@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BudgetProject, CitizenProof } from '../types';
 import { formatFCFA, formatAmountInWords, formatDateFR, getStatusConfig, getProjectEntityInfo, getProjectTypeActionInfo, getProjectTier, getProjectTierBadge } from '../utils/formatters';
 import { 
@@ -11,7 +11,7 @@ import {
   Video, 
   Share2, 
   Clock, 
-  ShieldCheck,
+  ShieldCheck, 
   AlertCircle,
   FileText,
   Printer,
@@ -49,6 +49,17 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   // 3-Tab Navigation: 'budget' (Données & Budget) | 'passport' (Passeport de Redevabilité) | 'proofs' (Constats & Vidéos Citoyennes)
   const [activeTab, setActiveTab] = useState<'budget' | 'passport' | 'proofs'>('budget');
 
+  // Close modal on Escape key press for keyboard accessibility (WCAG)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const proofs = dataStore.getProofsForProject(project.id);
   const matchedCa = findMatchingCaOperation(project);
   const matchedDgmp = findMatchingDgmpProcurement(project);
@@ -81,14 +92,17 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 md:p-6 animate-in fade-in duration-200">
+    <div 
+      className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 md:p-6 animate-in fade-in duration-200 cursor-pointer"
+      onClick={onClose}
+    >
       
       {/* Modal Container */}
       <div 
         role="dialog"
         aria-modal="true"
         aria-label={`Détails du projet : ${project.title}`}
-        className="bg-white rounded-3xl w-full max-w-3xl shadow-2xl border border-slate-200 overflow-hidden my-auto max-h-[92vh] flex flex-col print:max-h-none print:shadow-none print:border-none"
+        className="bg-white rounded-3xl w-full max-w-3xl shadow-2xl border border-slate-200 overflow-hidden my-auto max-h-[92vh] flex flex-col print:max-h-none print:shadow-none print:border-none cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         
