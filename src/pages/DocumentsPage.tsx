@@ -322,6 +322,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="Rechercher un document officiel par titre, institution ou empreinte SHA-256"
               placeholder="Rechercher par titre, institution, empreinte SHA-256 (ex: Loi de Finances, DPPD-PAP, DGBF)..."
               className="w-full pl-10 pr-16 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue transition-all"
             />
@@ -338,6 +339,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
           {/* Year Filter */}
           <div className="flex items-center gap-2">
             <select
+              aria-label="Filtrer les documents par année"
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
               className="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-blue/20 cursor-pointer"
@@ -351,6 +353,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
             {(searchQuery || selectedCategory !== 'ALL' || selectedYear !== 'ALL') && (
               <button
                 onClick={handleResetFilters}
+                aria-label="Réinitialiser tous les filtres documentaires"
                 className="p-2.5 text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
                 title="Réinitialiser les filtres"
               >
