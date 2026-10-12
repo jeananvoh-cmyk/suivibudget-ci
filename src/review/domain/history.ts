@@ -146,3 +146,31 @@ export function aggregateObservations(
 
   return { value: sum, status: 'AVAILABLE', reasons: [] };
 }
+
+/**
+ * Construit la liste d'observations financières vérifiées issues des contrôles d'audit officiels.
+ * Utilisé pour générer les exports Open Data CSV et JSON complets.
+ */
+export function auditedObservationsFromCatalog(
+  audits: readonly FinancialAuditRecord[] = OFFICIAL_FINANCIAL_AUDITS,
+): FinancialObservation[] {
+  return audits.map(a => ({
+    institutionId: a.institutionId,
+    sectionCode: a.sectionCode,
+    fiscalYear: a.fiscalYear,
+    scope: a.scope,
+    periodEnd: `${a.fiscalYear}-12-31`,
+    currency: a.currency,
+    measure: a.measure,
+    basis: a.basis,
+    amount: a.auditedAmount,
+    precision: 'EXACT',
+    evidence: {
+      documentId: a.documentId,
+      fiscalYear: a.fiscalYear,
+      page: a.page ?? 1,
+      reference: a.reportRef,
+      verification: 'VERIFIED',
+    },
+  }));
+}

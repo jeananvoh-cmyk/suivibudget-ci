@@ -1490,22 +1490,29 @@ export function exportLocalBudgetsToCsv(budgets: LocalBudget[]): string {
     'URL_Source'
   ];
 
+  function safeCell(value: string | number | null | undefined): string {
+    if (value === null || value === undefined) return '""';
+    const text = String(value);
+    const sanitized = /^[\s]*[=+@-]/.test(text) ? `'${text}` : text;
+    return `"${sanitized.replace(/"/g, '""')}"`;
+  }
+
   const rows = budgets.map(b => [
-    `"${b.id}"`,
-    `"${b.institution_name.replace(/"/g, '""')}"`,
-    `"${b.institution_type}"`,
+    safeCell(b.id),
+    safeCell(b.institution_name),
+    safeCell(b.institution_type),
     b.fiscal_year,
-    `"${b.budget_type}"`,
+    safeCell(b.budget_type),
     b.version_number,
     b.total_amount,
     b.operating_amount,
     b.investment_amount,
-    `"${amountPrecision(b, 'total_amount')}"`,
-    `"${amountPrecision(b, 'operating_amount')}"`,
-    `"${amountPrecision(b, 'investment_amount')}"`,
-    `"${b.adoption_date || ''}"`,
-    `"${(b.primary_source_label || '').replace(/"/g, '""')}"`,
-    `"${(b.primary_source_url || '').replace(/"/g, '""')}"`
+    safeCell(amountPrecision(b, 'total_amount')),
+    safeCell(amountPrecision(b, 'operating_amount')),
+    safeCell(amountPrecision(b, 'investment_amount')),
+    safeCell(b.adoption_date || ''),
+    safeCell(b.primary_source_label || ''),
+    safeCell(b.primary_source_url || '')
   ]);
 
   return [headers.join(','), ...rows.map(r => r.join(','))].join('\n');

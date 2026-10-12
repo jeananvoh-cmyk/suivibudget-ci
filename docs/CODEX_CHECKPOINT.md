@@ -174,3 +174,60 @@ GitHub : master distant `529db22012848e34afdf8b286983eebfc917b9f7`. Branche PR a
 - **Validation** : 10 fichiers de test validés (**116/116 tests réussis**), `npm run build` propre (0 erreur, 1722 modules). Validation visuelle multi-viewports (375px mobile et 1440px desktop) avec zéro overflow horizontal.
 
 
+
+## Correctif des bloqueurs PR #44–#48 — 12 octobre 2026
+
+Base exacte : PR #48, `antigravity/bloc-e-final-validation-closure`, `326558f48ba2e8cd960f1e3fd2f9b34be20f6204`. Branche corrective : `codex/pr48-integrity-privacy-fixes`. Dépendances : #44 → #45 → #46 → #47 → #48 ; PR corrective ciblant la branche #48 pour isoler le diff. Validation humaine finale : ChatGPT / responsable désigné. Aucune fusion automatique.
+
+### Avant / après
+
+| Périmètre | Avant | Après |
+|---|---|---|
+| Annexes officielles | Annexes 6, 7 et concours locaux réutilisant la LFI et son hash | URL et empreinte propres aux annexes 6, 7 et 8 ; 179, 89 et 322 pages vérifiées par lecture des PDF |
+| CAIDP | Empreinte du fichier vide, statut VERIFIED | Lien primaire retrouvé dans l’index public, réponse HTTP 404 au contrôle ; empreinte supprimée, authenticité/extraction TO_VERIFY |
+| RAP 2022 | HTTP 200 et extraction VERIFIED imposés | HTTP 404 constaté ; SHA historique conservé avec provenance dans docs/overnight/DOCUMENTS.json ; extraction TO_VERIFY |
+| Conversion documentaire | Date de publication assimilée à une date de contrôle ; AVAILABLE / VERIFIED forcés | Contrôle exact ID / exercice / URL / SHA ; inconnus et ambiguïtés UNKNOWN / TO_VERIFY ; date de contrôle réelle ; extraction liée aux audits indépendants existants et à leur portée |
+| Contributions | APPROVED présenté comme constat certifié ou réalisation établie | Approbation de publication et déclaration citoyenne ; aucune certification physique déduite |
+| Identité | Noms libres publics ; suppression de certaines identités au dépôt | Identité publique anonyme sans consentement explicite au pseudonyme ; nom/contact privés conservés pour instruction autorisée |
+| Cache et médias | Fusion public/privé alimentant les pages publiques | Projections séparées ; liste explicite des champs publics ; signatures privées jamais réutilisées publiquement |
+
+### Contrôle des sources, sans mutation distante
+
+GET HTTPS en lecture seule, réponse binaire vérifiée comme PDF, SHA-256 calculé sur les octets complets. Les cinq PDF DGBF acquis sont identiques aux empreintes ci-dessous. Contrôle des pages : LFI 583, annexe 4 1229, annexe 6 179, annexe 7 89, annexe 8 322. Aucune extraction financière nouvelle n’est certifiée par ce téléchargement. Seuls les contrôles indépendants déjà traçables LFI / DPPD-PAP conservent leur statut d’extraction, limité à leur périmètre documentaire.
+
+| Fichier | HTTP le 12/10/2026 | Octets reçus | SHA-256 du PDF acquis |
+|---|---:|---:|---|
+| LFI | 200 | 13706025 | f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76 |
+| ANNEXE4 | 200 | 21007442 | 0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10 |
+| ANNEXE6 | 200 | 11145331 | 3186dc17e1ba51ba1b69b3eed8ee3e40083a8eb0ddd56861dfdd0aa4b8c9bb2e |
+| ANNEXE7 | 200 | 10849930 | 567810702fb7ed7cb83945a0af18ef23ee52bf617a305bac36243c08de4a1842 |
+| ANNEXE8 | 200 | 13841186 | b3c2d9b90d847fdefb20d100c606cba0b6430e00f94306da6377ce56014128fc |
+| RAP | 404 | 108203 | Aucune empreinte calculée : réponse non PDF |
+| CAIDP | 404 | 28985 | Aucune empreinte calculée : réponse non PDF |
+
+- LFI : [URL contrôlée](https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf), 2026-10-12T10:30:17.907Z.
+- ANNEXE4 : [URL contrôlée](https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-4-DPPD-PAP-2026-2028.pdf), 2026-10-12T10:30:16.049Z.
+- ANNEXE6 : [URL contrôlée](https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-6-Budgets-des-EPN-2026.pdf), 2026-10-12T10:30:12.596Z.
+- ANNEXE7 : [URL contrôlée](https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-7-Dotations-des-Institutions-2026.pdf), 2026-10-12T10:30:07.808Z.
+- ANNEXE8 : [URL contrôlée](https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-8-Concours-financiers-aux-collectivites-territoriales-et-aux-districts-autonomes-2026.pdf), 2026-10-12T10:30:15.462Z.
+- RAP : [URL contrôlée](https://www.dgbf.ci/wp-content/uploads/2024/04/Rapport-Annuel-de-Performance-2022.pdf), 2026-10-12T10:30:05.987Z.
+- CAIDP : [URL contrôlée](https://caidp.ci/uploads/86dc0b7227c41f5053334147b7ec76a6.pdf), 2026-10-12T10:30:05.067Z.
+
+Le RAP conserve uniquement l’empreinte historique `b62b716caf5efe9ce8fa6f5edfa853e530f2fb183ff4530689950553ba346156`, enregistrée lors d’une acquisition antérieure. Aucun hash n’est attribué aux pages d’erreur HTTP 404.
+
+### Confidentialité et limites
+
+- La vue SQL existante `public_citizen_proofs` masque nom réel, téléphone, identifiant utilisateur, code de suivi et notes de modération. Les politiques du dépôt ont été exécutées localement avec PGlite : anonymes refusés sur la table privée, autres citoyens isolés, propriétaires et modérateurs autorisés. Aucune inspection ou écriture de la base distante ; le déploiement effectif de ces règles reste à confirmer par le responsable avant mise en production.
+- Les getters publics ne reprennent aucun nom/contact/champ privé ni coordonnées GPS dédiées du dossier privé. Le filtre propriétaire est explicite pour les non-modérateurs. L’historique privé et les preuves restent accessibles dans le circuit autorisé.
+- Aucun consentement de pseudonyme public n’existe dans le schéma actuel : anonymat public systématique. Le nom et le contact ne sont plus enregistrés dans les nouveaux brouillons localStorage ; ils restent dans le formulaire puis dans le dépôt privé.
+- Le commentaire, le repère du chantier et les médias sont des contenus destinés à la publication après modération. Leur rédaction/anonymisation humaine reste nécessaire ; les tests ne certifient pas l’absence de données personnelles dans du texte libre ou une image. L’ajout GPS est volontaire, arrondi par le mécanisme existant et explicitement présenté comme localisation publique du chantier. Aucun changement SQL ou Storage.
+- La disponibilité des liens externes peut changer ; les états affichés sont datés. La certification CAIDP et l’extraction RAP / annexes 6, 7, 8 demeurent bloquées dans ce catalogue.
+- Les avertissements Vite de taille des bundles préexistants restent hors périmètre. Dépendances, Tailwind, PR #33, migrations et montants financiers inchangés.
+
+### Validation
+
+Base PR #48 : 55 fichiers, 694/694 tests réussis localement. Les quatre premiers tests adversariaux du catalogue échouaient avant correction. Résultats finaux et CI à reporter après exécution. Les commandes locales utilisent `--configLoader native` et un préchargement local de `__dirname` pour contourner l’accès esbuild interdit à un dossier parent Windows ; aucune configuration du dépôt n’est modifiée. GitHub Actions utilisera les scripts standard sous Node 22.
+
+Critères : suite complète, TypeScript, builds public/revue ; liens exacts et HTTP daté ; aucun certificat tiré de APPROVED ; anonymat public et identité privée préservée ; rendu navigateur à 390/640/768/1024/1440 px. Les essais de dépôt utilisent exclusivement un stockage simulé local, aucune écriture Supabase.
+
+NEXT_EXECUTABLE_TASK : revoir la PR corrective et sa CI ; confirmer les politiques distantes en lecture seule avant une éventuelle mise en production autorisée. Ne pas fusionner #48 seule en conservant ses anciens bloqueurs.

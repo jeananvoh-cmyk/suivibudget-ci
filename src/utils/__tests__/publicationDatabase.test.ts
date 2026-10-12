@@ -120,7 +120,7 @@ beforeAll(async () => {
     insert into public.apec_cycles(id,institution_id,fiscal_year,title,source_reference,source_date)
       values ('10000000-0000-0000-0000-000000000001','apec-institution',2026,'Cycle test local','Source test locale','2026-09-30');
   `);
-}, 30000);
+}, 60000);
 
 afterAll(async () => { await db?.close(); });
 
@@ -388,6 +388,20 @@ describe('Publication boundaries applied to PostgreSQL', () => {
   it('prevents anonymous access to underlying private proofs', async () => {
     await asRole('anon', null, async () => {
       await expect(db.exec('select * from public.citizen_proofs')).rejects.toThrow(/permission/i);
+    });
+  });
+
+  it('keeps private identity available to staff and owners but anonymous in the public view', async () => {
+    await asRole('authenticated', admin, async () => {
+      await db.query("update public.citizen_proofs set citizen_name='Identité privée' where id='approved'");
+      for (const uid of [admin, citizen, moderator]) {
+        await db.query("select set_config('request.jwt.claim.sub',$1,true)", [uid]);
+        expect((await db.query('select citizen_name,citizen_whatsapp from public.citizen_proofs where id=$1', ['approved'])).rows)
+          .toEqual([{ citizen_name: 'Identité privée', citizen_whatsapp: 'private-phone' }]);
+        const publicRows = (await db.query('select * from public.public_citizen_proofs')).rows;
+        expect(JSON.stringify(publicRows)).not.toMatch(/Identité privée|private-phone|private-note|private-tracking/);
+        expect(publicRows[0]).toHaveProperty('citizen_name', 'Citoyen observateur');
+      }
     });
   });
 

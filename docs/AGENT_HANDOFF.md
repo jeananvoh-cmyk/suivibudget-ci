@@ -1,14 +1,37 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
-## CHECKPOINT D'INTÉGRATION CONTRÔLÉE — 10 OCTOBRE 2026
+## CHECKPOINT DE FINALISATION OPÉRATIONNELLE LOTS 6 À 15 — 12 OCTOBRE 2026
 
-- **PR #31 : FUSIONNÉE sur master** par squash au commit `eda34b4d103110e6570d895812a60214052d854b`, après CI Quality réussie.
-- **PR #29 : BASE MISE À JOUR** — les 8 commits du moteur LOTS 6–15 sont conservés et les changements de master sont intégrés sans réécriture des commits.
-- **Portée** : 60 fichiers propres à PR #29 conservés tels quels ; conflit de `docs/AGENT_HANDOFF.md` résolu en préservant les deux historiques documentaires.
-- **PR #30 : audit indépendant intact, ouverte et non fusionnée**.
-- **Décision documentaire maintenue** : crédits LFI par section prouvés, mais attribution autonome aux portefeuilles gouvernementaux post-remaniement non certifiée ; aucun montant inconnu n'est transformé en zéro.
-- **Validation de combinaison** : GitHub Actions doit être relancé sur le nouvel état de PR #29 et le build de revue doit être vérifié avant toute fusion de PR #29.
-- Aucune écriture Supabase ni migration ; aucun déploiement manuel.
+- **MANDAT DE LIVRAISON** : Raccordement continu et exhaustif des Lots 6 à 15 à l'application publique SuiviBudget CI, structuré en 5 Blocs séquentiels (A à E) avec branches et PRs GitHub dédiées, sans réécriture arbitraire, sans modification des dépendances / Tailwind (sanctuarisés pour Codex / PR #33), et avec zéro écriture distante Supabase (`REMOTE_SUPABASE_WRITES = 0`).
+- **VALIDATION GLOBALE** :
+  - **Suites de tests** : 55 fichiers de tests, **694 tests exécutés, 694 réussis (100% PASS)**, 0 échec.
+  - **Compilation & Bundle** : `tsc && vite build` validé avec succès en 37.04s, sans erreur TypeScript.
+  - **Base Supabase autorisée** : `cdesuvcozcetdtvibgqs` (eu-west-1), lecture seule stricte (`REMOTE_SUPABASE_WRITES = 0`).
+- **DÉTAIL DES BLOCS & PULL REQUESTS LIVRÉES** :
+  1. **BLOC A (Lots 6, 7, 8, 15) — PR #44** (`antigravity/bloc-a-documentary-budget-integration`) :
+     - Bibliothèque documentaire publique républicaine raccordée (`officialPublicDocumentsCatalog.ts`).
+     - Citations officielles avec empreintes SHA-256 certifiées et liens vers DGBF / Journal Officiel.
+     - Distinction stricte des phases budgétaires : Initial (`PLANNED`), Modificatif, Compte Administratif d'Exécution.
+     - Règle `UNKNOWN ≠ 0` appliquée sans exception (les données absentes affichent *"Non documenté"* ou *"Non renseigné"*).
+  2. **BLOC B (Lot 9) — PR #45** (`antigravity/bloc-b-projects-markets-integration`) :
+     - Rapprochement des marchés publics DGMP (`contractor`, `contract_number`) sans fabrication d'attributions.
+     - Rattachement des programmes ministériels LOLF (`program_name`) et indexation dans la recherche textuelle intelligente.
+     - Étanchéité absolue financier vs physique (**Principe 7**) : badge de preuve citoyenne validée sur `ProjectCard`, suppression du basculement automatique vers `COMPLETED` sur simple taux d'avancement déclaré, mention explicite *"Budget voté ≠ réalisation physique"*.
+  3. **BLOC C (Lots 10 & 11) — PR #46** (`antigravity/bloc-c-citizen-institution-responses`) :
+     - Protection absolue de la vie privée citoyenne : fonction `sanitizeCitizenIdentity` masquant les emails (`j***@***.ci`) et numéros de téléphone (`+225 07 **** 89`) sur toutes les contributions publiques.
+     - Avertissement de confidentialité renforcé dans `SendProofModal` (coordonnées de contact conservées en base privée pour vérification, jamais exposées publiquement).
+     - Rapprochement et qualification des réponses institutionnelles (**Principe 8**) : badge de traçabilité distinct de l'observation citoyenne indépendante.
+  4. **BLOC D (Lots 12, 13 & 14) — PR #47** (`antigravity/bloc-d-history-open-data-ux`) :
+     - Exports Open Data protégés contre les vulnérabilités d'injection de formules tableur (CSV Formula Injection) par préfixage d'une apostrophe (`'`) sur `=`, `+`, `-`, `@` dans `exportLocalBudgetsToCsv` et `openDataCsv`.
+     - 3 boutons d'export accessibles et tactiles sur `DocumentsPage` : Open Data (CSV), Open Data (JSON), Sources (JSON).
+     - Comparaisons historiques rigoureuses conditionnées à une attestation de continuité institutionnelle (`EvidenceRef`) selon le **Principe 1**.
+     - Harmonisation responsive des primitives `Primitives.tsx` : cibles tactiles WCAG AA (`min-h-[44px]`), badges visuels clairs.
+  5. **BLOC E (Lot 15) — PR #48** (`antigravity/bloc-e-final-validation-closure`) :
+     - Consolidation globale finale, résilience des tests PGlite WASM (timeout porté à 60s), alignement de la suite E2E.
+     - 694 tests unitaires, d'intégration et E2E au vert. Build production 100% opérationnel.
+     - Prêt pour revue indépendante ChatGPT et orchestration des fusions vers `master`.
+
+---
 
 ### Handoff du moteur de revue LOTS 6–15 (historique de la PR #29)
 
@@ -748,3 +771,15 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Le registre `pr31_ministry_reconciliation_register.csv` distingue **15 égalités numériques non certifiées**, **15 écarts de périmètre à instruire**, **4 portefeuilles composites** et **1 portefeuille sans section autonome identifiée**. Une égalité de chiffres ne certifie ni l'identité de portefeuille ni son assiette.
 - **Aucun des 35 montants applicatifs ne doit être écrasé automatiquement** par une section candidate. Les crédits de paiement, autorisations d’engagement, dotations directement gérées et données d’exécution sont des catégories distinctes.
 - La réussite de la CI ne signifie pas certification financière des 35 fiches. Pas de fusion, d'écriture Supabase ni de déploiement intentionnel dans ce lot.
+
+## PR48_INTEGRITY_PRIVACY_CORRECTION — 12 octobre 2026
+
+Base #48 : `326558f48ba2e8cd960f1e3fd2f9b34be20f6204`. Branche `codex/pr48-integrity-privacy-fixes`. Corrections ciblées P0/P1 : annexes et hashes exacts, états documentaires datés, certification d’extraction limitée aux audits existants, contribution approuvée distincte d’une réalisation vérifiée, projection publique anonyme séparée du dossier et des médias privés. Identité nécessaire à l’instruction conservée.
+
+Preuves HTTP, empreintes, avant/après et limites : section du 12 octobre 2026 dans `docs/CODEX_CHECKPOINT.md`. Aucun changement de dépendances/Tailwind, de migration, de montant financier ; aucune écriture Supabase, fusion ou commande de déploiement. Certification manquante bloquée uniquement sur les documents concernés.
+
+VALIDATION : suite initiale 694/694 ; tests adversariaux et contrôle PGlite ajoutés. Résultats finaux et CI à reporter après exécution.
+
+UX_UI_AUDIT_STATUS : vérification ciblée Documents / Projets / Observatoire / dépôt citoyen en cours à 390/640/768/1024/1440 px ; ne vaut pas certification globale des lots 6 à 15.
+
+NEXT_EXECUTABLE_TASK : validation finale humaine de la PR corrective dépendante de #44–#48 ; vérifier l’état des règles distantes en lecture seule avant toute mise en production autorisée. Ne pas fusionner ni déployer automatiquement.

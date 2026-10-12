@@ -1,4 +1,4 @@
-import type { ApecPublicNeed } from '../../types';
+import type { ApecPublicNeed, CitizenProof } from '../../types';
 import { assessTarget, type DocumentedTarget } from './projects';
 import type { SourceDocument } from './documents';
 import { isCalendarDate } from './evidence';
@@ -40,5 +40,46 @@ export function citizenTrack(need: ApecPublicNeed, target: DocumentedTarget | nu
     // Participation is not representativeness, and a FOLLOW_UP is not evidence of resolution.
     representativeness: null,
     resolution: 'UNKNOWN' as const,
+  };
+}
+
+export function publicCitizenIdentity(): string {
+  return 'Sentinelle citoyenne';
+}
+
+export function publicCitizenProof(proof: CitizenProof): CitizenProof | null {
+  if (proof.verification_status !== 'APPROVED') return null;
+  return {
+    id: proof.id,
+    project_id: proof.project_id,
+    project_title: proof.project_title,
+    commune_name: proof.commune_name,
+    region_name: proof.region_name,
+    citizen_name: publicCitizenIdentity(),
+    user_name: publicCitizenIdentity(),
+    image_url: proof.image_url,
+    photo_url: proof.photo_url,
+    secondary_image_url: proof.secondary_image_url,
+    video_url: proof.video_url,
+    media_type: proof.media_type,
+    citizen_status_claim: proof.citizen_status_claim,
+    comment: proof.comment,
+    locality_details: proof.locality_details,
+    verification_status: proof.verification_status,
+    confirmations_count: proof.confirmations_count,
+    is_demo: proof.is_demo,
+    created_at: proof.created_at,
+    signboard_status: proof.signboard_status,
+  };
+}
+
+/**
+ * Garantit qu'une observation citoyenne n'est jamais confondue avec une validation officielle (Principe 7).
+ */
+export function buildCitizenObservationBadge(provenance: 'CITIZEN_OBSERVATION' = 'CITIZEN_OBSERVATION') {
+  return {
+    label: 'Observation Citoyenne',
+    disclaimer: 'Constat de terrain indépendant — ne constitue pas une validation administrative (Principe 7)',
+    provenance,
   };
 }

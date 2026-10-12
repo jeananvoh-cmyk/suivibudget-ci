@@ -384,7 +384,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
   const handleQuickSaveProgress = (projectId: string, newRate: number) => {
     const clampedRate = Math.min(100, Math.max(0, Math.round(newRate)));
-    const newStatus: ProjectStatus = clampedRate >= 100 ? 'COMPLETED' : clampedRate > 0 ? 'IN_PROGRESS' : 'NOT_STARTED';
+    // Principe 7 (Charte SuiviBudget) : Une déclaration d'avancement administratif ne prouve jamais l'achèvement physique réel sans constat certifié
+    const newStatus: ProjectStatus = clampedRate > 0 ? 'IN_PROGRESS' : 'NOT_STARTED';
     
     dataStore.updateProject(projectId, {
       progress_percentage: clampedRate,
@@ -392,7 +393,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     });
     
     setQuickEditProjectId(null);
-    showToast(`Avancement physique mis à jour : ${clampedRate}% (${newStatus === 'COMPLETED' ? 'Terminé' : newStatus === 'IN_PROGRESS' ? 'En cours' : 'Non démarré'})`);
+    showToast(`Avancement administratif déclaré : ${clampedRate}% (${newStatus === 'IN_PROGRESS' ? 'En cours' : 'Non démarré'})`);
   };
 
   const handleSaveProject = (e: React.FormEvent) => {

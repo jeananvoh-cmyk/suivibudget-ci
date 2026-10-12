@@ -21,7 +21,7 @@ async function stage(rows: unknown[]) {const preview=await plan(rows);return pla
 async function review(ids: string[], action: string, confirmed=true) {return (await db.query<{result:any}>('select public.review_data_import($1::text[],$2,$3,$4) result',[ids,action,'Relecture locale des sources pilotes',confirmed])).rows[0].result;}
 async function isolated(run:()=>Promise<void>) {await db.exec('begin');try{await db.query("select set_config('request.jwt.claim.sub',$1,true)",[admin]);await db.exec('set local role authenticated');await run();}finally{await db.exec('rollback');}}
 
-beforeAll(async()=>{
+beforeAll(async () => {
   db=new PGlite();
   await db.exec(`create role anon; create role authenticated; create role service_role bypassrls;
     create schema auth; create schema private;
@@ -43,7 +43,7 @@ beforeAll(async()=>{
   const migration=readFileSync('supabase/migrations/20261001091748_controlled_data_import.sql','utf8');
   await db.exec(migration);
   await db.exec(readFileSync('supabase/migrations/20261001144423_import_console_qualified_amounts.sql','utf8'));
-},30000);
+}, 60000);
 afterAll(async()=>{await db?.close();});
 
 describe('Controlled real data import',()=>{

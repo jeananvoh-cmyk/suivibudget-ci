@@ -122,6 +122,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
         p.category,
         p.locality_village_neighborhood,
         p.contractor_name,
+        p.program_name,
         p.institution_name,
         p.ministry_name || '',
       ],
