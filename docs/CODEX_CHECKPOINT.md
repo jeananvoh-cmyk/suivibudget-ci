@@ -1,3 +1,16 @@
+## 12 octobre 2026 — Présentation budgétaire commune avant relais Antigravity
+
+- MASTER_BASE_SHA : ab159d4e3de829e11d1e146c8d9b0f9dbfb72bfe (PR #57 incluse).
+- Branche : codex/budget-presentation-final. Lots 1–15, PR #33, dépendances et données financières canoniques inchangés.
+- Avant : dotation locale utilisée à défaut de BP dans des cartes ; ratios arithmétiques sans preuve de ventilation ; fiche nationale présentant un montant LFI comme DGF/DGE ; détail CESEC/Annexe 7 absent.
+- Après : même présentation de référence pour cartes, fiches, exports individuels CSV/JSON ; sections LFI prioritaires, programmes HABG/IGE internes, sections partagées non additives ; BP propres rapportés séparés des concours de l’État ; budgets des régulateurs inconnus conservés inconnus.
+- Annexe 7 : les 11 chapitres nationaux et 2 destinations IGE/HABG proviennent des rapprochements existants dans docs/audits/institutions-2026/. Aucun nouveau dépouillement PDF ni écrasement des CP LFI. Les valeurs supplémentaires ne sont jamais additionnées à la référence.
+- CESEC : 8 069 692 846 FCFA LFI, 7 962 130 354 FCFA Annexe 7 ; différence 107 562 492 FCFA égale arithmétiquement à « Abonnements ». Cause administrative non établie, aucune inférence d’irrégularité.
+- Contrôles : base 715/715 ; après correction 740/740 tests (57 fichiers), TypeScript PASS, build public PASS, build revue PASS. Avertissement préexistant sur les chunks de données volumineux.
+- UX_UI_AUDIT_STATUS : navigateur en cours, aucune validation globale revendiquée à ce checkpoint.
+- REMOTE_SUPABASE_WRITES = 0 ; migrations = 0 ; fusion = non ; déploiement = non tenté.
+- NEXT_EXECUTABLE_TASK : terminer les contrôles navigateur, publier la PR corrective sur master et consigner ses URLs/SHAs et sa CI ci-dessous.
+
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
 ## 9 octobre — Clôture définitive des bloqueurs financiers de l'audit indépendant (PR #30) sur PR #29

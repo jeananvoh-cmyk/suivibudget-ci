@@ -5,7 +5,7 @@ import {
   assessInstitutionBudget,
 } from '../institutionBudgetHelper';
 import { NATIONAL_INSTITUTIONS_DATA } from '../../data/nationalBudgetData';
-import { GOVERNMENT_OFFICIALS } from '../../data/governmentData';
+
 import { REGULATORY_AUTHORITIES_DATA } from '../../data/regulatoryAuthoritiesData';
 import { ALL_COMMUNES_DATA } from '../../data/communesData';
 import { MMPE_MINISTRY_BUDGET_2026, OFFICIAL_MINISTRY_BUDGETS } from '../../data/ministryPilotReferential';
@@ -113,7 +113,7 @@ describe('Adversarial & E2E Financial Integrity Suite (Section 7)', () => {
   // Scenario 7: Actions are not double-counted with programs
   it('Scenario 7: Actions are secondary granular units and never double-counted into program sum', () => {
     const canonical = MMPE_MINISTRY_BUDGET_2026;
-    
+
     // In LFI / DPPD-PAP, total ministry budget = sum(programs).
     // Actions are subsets of programs, so sum(programs) is the authoritative total.
     const programSum = canonical.programs.reduce((sum, p) => sum + (p.amount_fcfa || 0), 0);
@@ -246,5 +246,111 @@ describe('Adversarial & E2E Financial Integrity Suite (Section 7)', () => {
 
     expect(() => calculateSafePercentages(Infinity, 50, 100)).not.toThrow();
     expect(calculateSafePercentages(Infinity, 50, 100).status).toBe('UNRECONCILED');
+  });
+});
+
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { resolveInstitutionBudgetPresentation, exportInstitutionBudget } from '../institutionBudgetHelper';
+import { OFFICIAL_PRIMITIVE_BUDGETS } from '../../data/officialPrimitiveBudgets';
+import { ALL_REGIONS_DATA } from '../../data/officialDataFromCsv';
+import { BudgetReferenceHeader } from '../../components/institutions/MinistryBudgetHeader';
+import legalCP from '../../../docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json';
+
+describe('Budget de référence commun aux cartes, fiches et exports', () => {
+  it.each(NATIONAL_INSTITUTIONS_DATA)('préserve le montant LFI de $id sans inventer de ventilation', institution => {
+    const view = resolveInstitutionBudgetPresentation(institution);
+    expect(view.reference.amount_fcfa).toBe(institution.total_budget_fcfa);
+    expect(view.functioning_fcfa).toBeNull();
+    expect(view.investment_fcfa).toBeNull();
+    expect(view.functioning_pct).toBeNull();
+    const exported = JSON.parse(exportInstitutionBudget(institution, 'JSON'));
+    expect(exported.reference).toEqual(view.reference);
+    expect(exported.supplements).toEqual(view.supplements);
+    if (view.supplements.length) expect(exportInstitutionBudget(institution, 'CSV')).toContain('COMPLEMENT_NON_ADDITIF');
+  });
+
+  it('sépare CESEC LFI, Annexe 7 et explication administrative non établie', () => {
+    const institution = NATIONAL_INSTITUTIONS_DATA.find(i => i.id === 'inst-cesec')!;
+    const view = resolveInstitutionBudgetPresentation(institution);
+    expect(view.reference.amount_fcfa).toBe(8069692846);
+    expect(view.supplements[0].amount_fcfa).toBe(7962130354);
+    expect(view.reference.amount_fcfa! - view.supplements[0].amount_fcfa!).toBe(107562492);
+    expect(view.supplements[0].source?.pdf_page).toBe(13);
+    expect(view.notice).toContain('Abonnements');
+    expect(view.notice).toContain('explication administrative précise reste non établie');
+    expect(view.notice).toContain('aucune irrégularité');
+    const markup = renderToStaticMarkup(createElement(BudgetReferenceHeader, { institution }));
+    expect(markup).toContain('8 069 692 846');
+    expect(markup).toContain('7 962 130 354');
+    expect(markup).toContain('107 562 492');
+    expect(markup).toContain('Vérifier');
+    expect(markup).toContain('Exporter cette fiche (JSON)');
+  });
+
+  it.each(['inst-habg', 'inst-ige'])('ne crée pas de section autonome pour %s', id => {
+    const view = resolveInstitutionBudgetPresentation({ id, type: 'INSTITUTION' });
+    expect(view.section_code).toBe('103');
+    expect(view.program_code).toBe(id === 'inst-habg' ? '13004' : '13003');
+    expect(view.aggregation).toBe('INCLUDED_IN_PARENT');
+    expect(view.notice).toContain('déjà inclus');
+  });
+
+  it('présente 35 portefeuilles avec 34 sections, sans redistribuer les crédits', () => {
+    const views = legalCP.rows.map(row => resolveInstitutionBudgetPresentation({ id: row.portfolio_id, type: 'MINISTERE', total_budget_fcfa: 1 }));
+    expect(new Set(views.map(view => view.section_code)).size).toBe(34);
+    for (const [index, view] of views.entries()) {
+      expect(view.reference.amount_fcfa).toBe(legalCP.rows[index].voted_section_cp_2026_fcfa);
+      expect(view.notice).toContain('portefeuille remanié');
+      expect(view.supplements[0]).toMatchObject({ amount_fcfa: 1, verification: 'TO_VERIFY', source: null });
+    }
+    expect(views.find(view => view.institution_id === 'gov-035')?.aggregation).toBe('SHARED_SECTION');
+    expect(views.find(view => view.institution_id === 'gov-009')?.aggregation).toBe('SHARED_SECTION');
+  });
+
+  it('retient les 46 BP rapportés, distincts des dotations et non certifiés', () => {
+    for (const [id, primitive] of Object.entries(OFFICIAL_PRIMITIVE_BUDGETS)) {
+      const view = resolveInstitutionBudgetPresentation({ id, type: id.startsWith('inst-com-') ? 'MAIRIE' : 'REGION', total_budget_fcfa: 123 });
+      expect(view.reference.amount_fcfa, id).toBe(primitive.total_voted_fcfa);
+      expect(view.reference.verification, id).toBe('SECONDARY_SOURCE');
+      expect(view.reference.source?.source_url, id).toBe(primitive.source_url);
+      expect(view.supplements[0], id).toMatchObject({ amount_fcfa: 123, verification: 'TO_VERIFY' });
+      if (primitive.precision !== 'EXACT' || !calculateSafePercentages(primitive.functioning_voted_fcfa, primitive.investment_voted_fcfa, primitive.total_voted_fcfa).isBalanced) {
+        expect(view.functioning_pct, id).toBeNull();
+        expect(view.investment_pct, id).toBeNull();
+      }
+    }
+  });
+
+  it.each(['MAIRIE', 'REGION', 'DISTRICT', 'AUTORITE_REGULATION'] as const)('ne transforme pas une dotation en budget global pour %s', type => {
+    const entity = { id: 'test-budget', name: '=SOMME(1)', type, total_budget_fcfa: 100, budget_functioning_fcfa: 60, budget_investment_fcfa: 40 };
+    const view = resolveInstitutionBudgetPresentation(entity);
+    expect(view.reference).toMatchObject({ amount_fcfa: null, verification: 'UNKNOWN', source: null });
+    expect(view.supplements[0]).toMatchObject({ amount_fcfa: 100, verification: 'TO_VERIFY', source: null });
+    expect(view.functioning_pct).toBeNull();
+    const json = JSON.parse(exportInstitutionBudget(entity, 'JSON'));
+    expect(json.reference.amount_fcfa).toBeNull();
+    const csv = exportInstitutionBudget(entity, 'CSV');
+    expect(csv).toContain('"\'=SOMME(1)"');
+    expect(csv.split('\n')[1]).toContain(';"";"UNKNOWN";"UNKNOWN";');
+    const markup = renderToStaticMarkup(createElement(BudgetReferenceHeader, { institution: entity, compact: true }));
+    expect(markup).toContain('Non documenté');
+    expect(markup).not.toContain('100 FCFA');
+  });
+
+  it('ne publie aucun nouveau montant ARTCI ou ANARE ni ratio sans preuve', () => {
+    for (const regulator of REGULATORY_AUTHORITIES_DATA) {
+      expect(resolveInstitutionBudgetPresentation(regulator).reference.amount_fcfa).toBeNull();
+    }
+    const raw = resolveInstitutionFinancialView({ id: 'unverified', total_budget_fcfa: 100, budget_functioning_fcfa: 60, budget_investment_fcfa: 40 });
+    expect(raw.has_breakdown).toBe(false);
+    expect(raw.functioning_pct).toBeNull();
+    expect(raw.documentary_provenance).toBeNull();
+  });
+
+  it('préserve l’inconnu pour toutes les régions sans BP documenté', () => {
+    for (const region of ALL_REGIONS_DATA.filter(r => !OFFICIAL_PRIMITIVE_BUDGETS[r.id])) {
+      expect(resolveInstitutionBudgetPresentation(region).reference.amount_fcfa, region.id).toBeNull();
+    }
   });
 });

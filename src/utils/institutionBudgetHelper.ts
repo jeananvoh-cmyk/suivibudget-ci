@@ -1,5 +1,8 @@
 import { Institution } from '../types';
 import { formatFCFA, formatAmountInWords } from './formatters';
+import { OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
+import { NATIONAL_DIRECT_ALLOCATIONS_2026 } from '../data/nationalBudgetData';
+import legalCP from '../../docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json';
 
 export const LFI_2026_DOCUMENT = {
   title: "Loi de Finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
@@ -604,7 +607,7 @@ export function resolveInstitutionFinancialView(
     amountEvidence != null && amountEvidence.lfi_amount_fcfa === total;
   const documentaryDiscrepancy = amountEvidence != null && !isLfi2026AmountConfirmed;
   const isReconciled = pctResult.status === 'RECONCILED';
-  const hasBreakdown = fonct != null && inv != null;
+
 
   return {
     institution_id: instId,
@@ -624,13 +627,13 @@ export function resolveInstitutionFinancialView(
     total_words: formatAmountInWords(total),
     functioning_formatted: fonct != null ? formatFCFA(fonct) : null,
     investment_formatted: inv != null ? formatFCFA(inv) : null,
-    functioning_pct: pctResult.functioningPct,
-    investment_pct: pctResult.investmentPct,
-    has_breakdown: hasBreakdown && isReconciled,
+    functioning_pct: null,
+    investment_pct: null,
+    has_breakdown: false,
     delta_fcfa: pctResult.deltaFcfa,
     programs: [],
     actions: [],
-    documentary_provenance: provenance,
+    documentary_provenance: isLfi2026AmountConfirmed ? provenance : null,
     verification_status: pctResult.status === 'UNRECONCILED' ? 'UNRECONCILED'
       : !isLfi2026AmountConfirmed ? 'NOT_DOCUMENTED'
       : isReconciled ? 'VERIFIED_AMOUNT' : 'PARTIAL_BREAKDOWN',
@@ -686,4 +689,125 @@ export function assessInstitutionBudget(
     verificationStatus: view.verification_status,
     deltaFcfa: view.delta_fcfa,
   };
+}
+
+export interface BudgetPresentationAmount {
+  amount_fcfa: number | null;
+  label: string;
+  precision: 'EXACT' | 'APPROXIMATE' | 'LOWER_BOUND' | 'UPPER_BOUND' | 'UNKNOWN';
+  verification: 'VERIFIED_AMOUNT' | 'SECONDARY_SOURCE' | 'TO_VERIFY' | 'UNKNOWN';
+  source: DocumentaryProvenance | null;
+}
+
+export interface InstitutionBudgetPresentation {
+  institution_id: string;
+  fiscal_year: number;
+  reference: BudgetPresentationAmount;
+  supplements: BudgetPresentationAmount[];
+  section_code: string | null;
+  program_code: string | null;
+  aggregation: 'UNIQUE_SECTION' | 'SHARED_SECTION' | 'INCLUDED_IN_PARENT' | 'SEPARATE_SCOPE';
+  notice: string;
+  functioning_fcfa: number | null;
+  investment_fcfa: number | null;
+  functioning_pct: number | null;
+  investment_pct: number | null;
+}
+
+export function resolveInstitutionBudgetPresentation(institution: Partial<Institution>): InstitutionBudgetPresentation {
+  const id = institution.id || 'unknown-institution';
+  const local = ['MAIRIE', 'REGION', 'DISTRICT'].includes(institution.type || '');
+  const national = institution.type === 'INSTITUTION' ? NATIONAL_INSTITUTIONS_SECTIONS[id] : undefined;
+  const ministry = institution.type === 'MINISTERE' ? legalCP.rows.find(row => row.portfolio_id === id) : undefined;
+  const primitive = local ? OFFICIAL_PRIMITIVE_BUDGETS[id] : undefined;
+  const result: InstitutionBudgetPresentation = {
+    institution_id: id, fiscal_year: 2026,
+    reference: {
+      amount_fcfa: null,
+      label: local ? 'Budget primitif propre (BP)' : institution.type === 'AUTORITE_REGULATION' ? 'Budget global de l’autorité' : 'Crédits de paiement (CP) votés — LFI',
+      precision: 'UNKNOWN', verification: 'UNKNOWN', source: null,
+    },
+    supplements: [], section_code: null, program_code: null, aggregation: 'SEPARATE_SCOPE',
+    notice: local
+      ? 'Budget primitif propre non documenté. Les concours de l’État ne le remplacent pas. BP, BS et BM décrivent des prévisions ; le compte administratif (CA) décrit l’exécution.'
+      : institution.type === 'AUTORITE_REGULATION'
+        ? 'Budget global non documenté. Une subvention de l’État ou une recette affectée ne représente pas à elle seule le budget global.'
+        : 'Montant de référence non documenté pour ce périmètre. Inconnu ne signifie pas zéro.',
+    functioning_fcfa: null, investment_fcfa: null, functioning_pct: null, investment_pct: null,
+  };
+  if (ministry || national) {
+    const section = ministry?.section_code ?? national!.section_code;
+    const program = national?.program_code ?? null;
+    result.section_code = section;
+    result.program_code = program;
+    result.aggregation = program ? 'INCLUDED_IN_PARENT' : ministry?.section_shared_with_other_portfolio ? 'SHARED_SECTION' : 'UNIQUE_SECTION';
+    result.reference = {
+      amount_fcfa: ministry?.voted_section_cp_2026_fcfa ?? national!.lfi_amount_fcfa,
+      label: program ? `CP votés — programme ${program}, inclus dans la section ${section}` : `CP votés — section ${section} (LFI initiale)`,
+      precision: 'EXACT', verification: 'VERIFIED_AMOUNT',
+      source: {
+        document_title: LFI_2026_DOCUMENT.title, document_reference: ministry ? `Article ${ministry.legal_article}, section ${section}` : `Section ${section}${program ? `, programme ${program}` : ''}`,
+        source_url: LFI_2026_DOCUMENT.url, pdf_page: ministry?.official_lfi_pdf_page ?? national!.pdf_page,
+        sha256: LFI_2026_DOCUMENT.sha256,
+      },
+    };
+    result.notice = program
+      ? `Programme interne de la Présidence, déjà inclus dans les 193 633 705 615 FCFA de la section 103. Ne pas additionner au total de la section.`
+      : ministry
+        ? `${ministry.section_shared_with_other_portfolio ? 'Section partagée : compter une seule fois. ' : ''}Le vote porte sur la section historique de la LFI ; l’affectation au portefeuille remanié n’est pas établie. L’Annexe 4 décrit les programmes et actions, sans prouver un transfert de crédits.`
+        : 'Crédits votés pour la section, distincts des dépenses exécutées. La concordance du total ne certifie pas une ventilation fonctionnement/investissement.';
+  }
+  if (primitive) {
+    result.reference = {
+      amount_fcfa: primitive.total_voted_fcfa, label: 'Budget primitif propre (BP) rapporté',
+      precision: primitive.precision ?? 'UNKNOWN', verification: 'SECONDARY_SOURCE',
+      source: { document_title: primitive.source, document_reference: primitive.session_notes ?? 'Publication relative au BP 2026', source_url: primitive.source_url ?? null, pdf_page: null },
+    };
+    result.notice = 'Publication secondaire : délibération originale à obtenir avant certification. La ventilation des recettes propres et concours de l’État ne se déduit pas du total. BP/BS/BM : prévisions ; CA : exécution.';
+    result.functioning_fcfa = primitive.functioning_voted_fcfa;
+    result.investment_fcfa = primitive.investment_voted_fcfa;
+    const arithmetic = calculateSafePercentages(primitive.functioning_voted_fcfa, primitive.investment_voted_fcfa, primitive.total_voted_fcfa);
+    if (primitive.precision === 'EXACT' && primitive.source_url && arithmetic.isBalanced) {
+      result.functioning_pct = arithmetic.functioningPct;
+      result.investment_pct = arithmetic.investmentPct;
+    }
+  }
+  const direct = national ? NATIONAL_DIRECT_ALLOCATIONS_2026[id] : undefined;
+  if (direct) {
+    result.supplements.push({
+      amount_fcfa: direct.amount_fcfa, label: 'Dotation gérée directement — Annexe 7 (périmètre distinct)', precision: 'EXACT', verification: 'VERIFIED_AMOUNT',
+      source: {
+        document_title: 'Annexe 7 — Dotations des institutions 2026', document_reference: `Chapitre / destination ${direct.chapter}`,
+        source_url: 'https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-7-Dotations-des-Institutions-2026.pdf', pdf_page: direct.pdf_page,
+        sha256: '567810702fb7ed7cb83945a0af18ef23ee52bf617a305bac36243c08de4a1842',
+      },
+    });
+    result.notice += ' Ne pas additionner la dotation directe Annexe 7 au montant LFI : les périmètres diffèrent.';
+    if (id === 'inst-cesec') result.notice += ' Écart arithmétique : 107 562 492 FCFA, égal à la ligne « Abonnements ». L’explication administrative précise reste non établie ; cette égalité ne démontre aucune irrégularité.';
+  }
+  const recorded = institution.total_budget_fcfa;
+  if (recorded != null && Number.isSafeInteger(recorded) && recorded >= 0 && (local || institution.type === 'AUTORITE_REGULATION' || recorded !== result.reference.amount_fcfa)) {
+    result.supplements.push({
+      amount_fcfa: recorded, precision: 'UNKNOWN', verification: 'TO_VERIFY', source: null,
+      label: local ? 'Concours de l’État enregistrés — source individuelle à confirmer' : 'Montant historique enregistré — périmètre et source à confirmer',
+    });
+  }
+  if (id === 'inst-cour-supreme') result.notice = 'Aucune section LFI autonome pour la Cour Suprême. Les sections 114 (Cassation), 118 (Conseil d’État) et 115 (Cour des comptes) sont distinctes.';
+  return result;
+}
+
+export function exportInstitutionBudget(institution: Partial<Institution>, format: 'CSV' | 'JSON'): string {
+  const view = resolveInstitutionBudgetPresentation(institution);
+  if (format === 'JSON') return JSON.stringify({ schema_version: 1, name: institution.name, ...view }, null, 2);
+  const cell = (value: unknown) => {
+    const text = value == null ? '' : String(value);
+    return `"${(/^[\s]*[=+@-]/.test(text) ? "'" + text : text).replace(/"/g, '""')}"`;
+  };
+  const headers = ['identifiant', 'nom', 'exercice', 'role', 'nature', 'montant_fcfa', 'precision', 'verification', 'section', 'programme', 'aggregation', 'source_url', 'page_pdf', 'document', 'sha256', 'limites'];
+  const rows = [view.reference, ...view.supplements].map((amount, index) => [
+    view.institution_id, institution.name, view.fiscal_year, index === 0 ? 'REFERENCE' : 'COMPLEMENT_NON_ADDITIF',
+    amount.label, amount.amount_fcfa, amount.precision, amount.verification, view.section_code, view.program_code,
+    index === 0 ? view.aggregation : 'SEPARATE_SCOPE', amount.source?.source_url, amount.source?.pdf_page, amount.source?.document_title, amount.source?.sha256, view.notice,
+  ]);
+  return [headers, ...rows].map(row => row.map(cell).join(';')).join('\n');
 }
