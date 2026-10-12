@@ -61,9 +61,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* Clean Harmonized Search Bar */}
-        <div className="mt-9 max-w-3xl mx-auto">
-          <div className="bg-slate-50 p-2 sm:p-2.5 rounded-2xl sm:rounded-full border border-slate-200 shadow-sm hover:border-slate-300 focus-within:border-brand-blue focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-blue/20 transition-all flex flex-col sm:flex-row items-center gap-2">
-            <div className="relative w-full flex items-center">
+        <div className="mt-9 max-w-3xl mx-auto w-full">
+          <div className="bg-slate-50 p-2 sm:p-2.5 rounded-2xl sm:rounded-full border border-slate-200 shadow-sm hover:border-slate-300 focus-within:border-brand-blue focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-blue/20 transition-all flex flex-col sm:flex-row items-center gap-2 max-w-full">
+            <div className="relative w-full sm:flex-1 min-w-0 flex items-center">
               <Search className="absolute left-4.5 w-5 h-5 text-slate-400" />
               <input
                 type="text"
@@ -79,7 +79,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               />
             </div>
             
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-2 w-full sm:w-auto flex-shrink-0">
               <button
                 onClick={onExploreClick}
                 className="flex-1 sm:flex-none px-6 py-3 bg-brand-blue hover:bg-brand-blue-dark active:scale-95 text-white text-sm font-bold rounded-full shadow-sm transition-all flex items-center justify-center gap-2 flex-shrink-0"
