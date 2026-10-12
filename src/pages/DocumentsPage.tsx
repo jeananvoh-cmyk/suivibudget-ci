@@ -21,6 +21,7 @@ import { supabase, isSupabaseConfigured } from '../services/supabase';
 import { PublicDocument, DocumentCategory } from '../types';
 import { matchesSmartSearch } from '../utils/searchHelpers';
 import { publicDocumentMetadata } from '../review/domain/documents';
+import { openDataCsv, openDataJson, auditedObservationsFromCatalog } from '../review/domain/history';
 import { getReviewSourceDocuments, findOfficialDocumentByChecksum } from '../data/officialPublicDocumentsCatalog';
 
 interface DocumentsPageProps {
@@ -172,6 +173,34 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
     });
   };
 
+  const handleExportOpenDataCsv = () => {
+    const yearNumber = selectedYear !== 'ALL' ? Number(selectedYear) : 2026;
+    const sourceDocs = getReviewSourceDocuments();
+    const obs = auditedObservationsFromCatalog();
+    const csvContent = openDataCsv(obs, sourceDocs);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `suivibudget-opendata-certifie-${yearNumber}.csv`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  const handleExportOpenDataJson = () => {
+    const yearNumber = selectedYear !== 'ALL' ? Number(selectedYear) : 2026;
+    const sourceDocs = getReviewSourceDocuments();
+    const obs = auditedObservationsFromCatalog();
+    const jsonContent = openDataJson(obs, sourceDocs);
+    const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `suivibudget-opendata-certifie-${yearNumber}.json`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   const handleExportCatalogJson = () => {
     const yearNumber = selectedYear !== 'ALL' ? Number(selectedYear) : 2026;
     const sourceDocs = getReviewSourceDocuments();
@@ -246,14 +275,37 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
               </div>
             </div>
 
-            <button
-              onClick={handleExportCatalogJson}
-              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs border border-white/20 backdrop-blur-md transition-all cursor-pointer shadow-2xs"
-              title="Télécharger l'inventaire officiel certifié au format JSON"
-            >
-              <Download className="w-4 h-4" />
-              <span>Exporter (JSON)</span>
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={handleExportOpenDataCsv}
+                className="min-h-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs border border-white/20 backdrop-blur-md transition-all cursor-pointer shadow-2xs"
+                title="Télécharger les observations financières vérifiées au format Open Data CSV"
+                aria-label="Exporter les observations financières au format Open Data CSV"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Open Data (CSV)</span>
+              </button>
+
+              <button
+                onClick={handleExportOpenDataJson}
+                className="min-h-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs border border-white/20 backdrop-blur-md transition-all cursor-pointer shadow-2xs"
+                title="Télécharger les observations financières vérifiées au format Open Data JSON"
+                aria-label="Exporter les observations financières au format Open Data JSON"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Open Data (JSON)</span>
+              </button>
+
+              <button
+                onClick={handleExportCatalogJson}
+                className="min-h-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs border border-white/20 backdrop-blur-md transition-all cursor-pointer shadow-2xs"
+                title="Télécharger l'inventaire officiel certifié des sources au format JSON"
+                aria-label="Exporter le catalogue des sources au format JSON"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Sources (JSON)</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
