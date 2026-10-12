@@ -3,7 +3,7 @@ import { CitizenProof, ProjectStatus, BudgetProject } from '../types';
 import { dataStore } from '../services/dataStore';
 import { formatFCFA, formatAmountInWords, formatDateFR, getStatusConfig } from '../utils/formatters';
 import { BudgetReportsView } from '../components/BudgetReportsView';
-import { sanitizeCitizenIdentity, buildCitizenObservationBadge } from '../review/domain/citizen';
+import { publicCitizenIdentity, buildCitizenObservationBadge } from '../review/domain/citizen';
 import { buildInstitutionalResponseBadge } from '../review/domain/responses';
 import { STRATEGIC_PROJECTS_LIST, StrategicProject } from '../data/strategicProjectsData';
 import { 
@@ -1048,7 +1048,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                             <div className="absolute top-3 right-3 pointer-events-none">
                               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-md bg-white/95 border ${status.badgeClass}`}>
                                 <span className={`w-2 h-2 rounded-full ${status.dotClass}`}></span>
-                                <span>{status.label}</span>
+                                <span>Déclaré : {status.label}</span>
                               </span>
                             </div>
 
@@ -1141,7 +1141,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                         {/* Card Footer: Anonymisation & Confirmation Counter */}
                         <div className="p-4 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between">
                           <div className="text-xs text-slate-600 font-semibold">
-                            <span>Par <strong>{sanitizeCitizenIdentity(proof.user_name)}</strong></span>
+                            <span>Par <strong>{publicCitizenIdentity()}</strong></span>
                           </div>
 
                           {(() => {

@@ -771,3 +771,15 @@ Les validations suivantes proviennent du bloc antérieur. Le contrôle de ce blo
 - Le registre `pr31_ministry_reconciliation_register.csv` distingue **15 égalités numériques non certifiées**, **15 écarts de périmètre à instruire**, **4 portefeuilles composites** et **1 portefeuille sans section autonome identifiée**. Une égalité de chiffres ne certifie ni l'identité de portefeuille ni son assiette.
 - **Aucun des 35 montants applicatifs ne doit être écrasé automatiquement** par une section candidate. Les crédits de paiement, autorisations d’engagement, dotations directement gérées et données d’exécution sont des catégories distinctes.
 - La réussite de la CI ne signifie pas certification financière des 35 fiches. Pas de fusion, d'écriture Supabase ni de déploiement intentionnel dans ce lot.
+
+## PR48_INTEGRITY_PRIVACY_CORRECTION — 12 octobre 2026
+
+Base #48 : `326558f48ba2e8cd960f1e3fd2f9b34be20f6204`. Branche `codex/pr48-integrity-privacy-fixes`. Corrections ciblées P0/P1 : annexes et hashes exacts, états documentaires datés, certification d’extraction limitée aux audits existants, contribution approuvée distincte d’une réalisation vérifiée, projection publique anonyme séparée du dossier et des médias privés. Identité nécessaire à l’instruction conservée.
+
+Preuves HTTP, empreintes, avant/après et limites : section du 12 octobre 2026 dans `docs/CODEX_CHECKPOINT.md`. Aucun changement de dépendances/Tailwind, de migration, de montant financier ; aucune écriture Supabase, fusion ou commande de déploiement. Certification manquante bloquée uniquement sur les documents concernés.
+
+VALIDATION : suite initiale 694/694 ; tests adversariaux et contrôle PGlite ajoutés. Résultats finaux et CI à reporter après exécution.
+
+UX_UI_AUDIT_STATUS : vérification ciblée Documents / Projets / Observatoire / dépôt citoyen en cours à 390/640/768/1024/1440 px ; ne vaut pas certification globale des lots 6 à 15.
+
+NEXT_EXECUTABLE_TASK : validation finale humaine de la PR corrective dépendante de #44–#48 ; vérifier l’état des règles distantes en lecture seule avant toute mise en production autorisée. Ne pas fusionner ni déployer automatiquement.

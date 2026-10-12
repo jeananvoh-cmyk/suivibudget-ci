@@ -288,7 +288,7 @@ describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
     const physicalStage = passport.stages.find(s => s.id === 'PHYSICAL_REALIZATION');
     
     expect(physicalStage?.status).toBe('CITIZEN_DOCUMENTED');
-    const citizenProofDp = physicalStage?.dataPoints.find(dp => dp.label.includes('Constats'));
+    const citizenProofDp = physicalStage?.dataPoints.find(dp => dp.label === 'Contributions citoyennes publiées');
     expect(citizenProofDp?.provenance).toBe('CITIZEN_OBSERVATION');
     expect(citizenProofDp?.provenance).not.toBe('OFFICIAL_SOURCE');
   });

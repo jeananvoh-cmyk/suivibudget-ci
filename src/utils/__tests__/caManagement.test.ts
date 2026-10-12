@@ -258,6 +258,49 @@ describe('Preuves citoyennes — persistance serveur', () => {
     expect(dataStore.getAllProofs().map(row => row.id)).toEqual([proof.id]);
   });
 
+  it('conserve le nom et le contact pour l’instruction privée autorisée', async () => {
+    storageMock.getUser.mockResolvedValue({ data: { user: { id: 'auth-citizen' } }, error: null });
+    storageMock.query.mockResolvedValueOnce({ error: null });
+    const proof = await dataStore.submitProof({ ...input, citizen_name: 'Kouassi Jean', citizen_whatsapp: '+2250102030405' });
+    expect(storageMock.insert).toHaveBeenCalledWith([expect.objectContaining({ citizen_name: 'Kouassi Jean', citizen_whatsapp: '+2250102030405' })]);
+    expect(proof.citizen_name).toBe('Kouassi Jean');
+    expect(dataStore.getAllProofs()[0].citizen_whatsapp).toBe('+2250102030405');
+    expect(dataStore.getApprovedProofs()).toEqual([]);
+  });
+
+  it('sépare le contenu public du dossier privé même pour un propriétaire connecté', async () => {
+    storageMock.getUser.mockResolvedValue({ data: { user: { id: 'owner' } }, error: null });
+    const published = { id: 'approved', project_id: 'project', citizen_name: 'Citoyen observateur', verification_status: 'APPROVED', comment: 'Texte public modéré', created_at: '2026-10-12', image_url: '' };
+    const privateRow = { ...published, citizen_name: 'Identité privée', citizen_whatsapp: '+2250102030405', comment: 'Texte privé', moderator_notes: 'Note privée', tracking_code: 'private-code', geo_latitude: 5.123, geo_longitude: -4.123 };
+    storageMock.query.mockResolvedValueOnce({ data: [published], error: null })
+      .mockResolvedValueOnce({ data: [privateRow, { ...privateRow, id: 'not-in-public-view' }], error: null });
+    await dataStore.refreshProofs();
+    expect(dataStore.getAllProofs()[0].citizen_name).toBe('Identité privée');
+    expect(dataStore.getApprovedProofs()).toHaveLength(1);
+    expect(dataStore.getProofsForProject('project')).toEqual(dataStore.getApprovedProofs());
+    const proof = dataStore.getApprovedProofs()[0];
+    expect(proof).toMatchObject({ citizen_name: 'Sentinelle citoyenne', comment: 'Texte public modéré' });
+    for (const key of ['citizen_whatsapp', 'moderator_notes', 'tracking_code', 'geo_latitude', 'geo_longitude']) expect(proof).not.toHaveProperty(key);
+    proof.user_name = 'Mutation externe';
+    expect(dataStore.getApprovedProofs()[0].user_name).toBe('Sentinelle citoyenne');
+    storageMock.configured.mockReturnValue(false);
+    await dataStore.refreshProofs();
+    expect(dataStore.getApprovedProofs()).toEqual([]);
+  });
+
+  it('ne réutilise jamais une signature privée pour illustrer une projection publique', async () => {
+    storageMock.getUser.mockResolvedValue({ data: { user: { id: 'owner' } }, error: null });
+    const published = { id: 'same-id', project_id: 'project', verification_status: 'APPROVED', created_at: '2026-10-12', image_url: 'published/image.jpg' };
+    storageMock.query.mockResolvedValueOnce({ data: [published], error: null })
+      .mockResolvedValueOnce({ data: [{ ...published, verification_status: 'PENDING', image_url: 'private/replacement.jpg' }], error: null });
+    storageMock.invoke.mockResolvedValue({ data: null, error: new Error('Publication retirée') });
+    storageMock.createSignedUrl.mockResolvedValue({ data: { signedUrl: 'https://private.example/owner-only' }, error: null });
+    await dataStore.refreshProofs();
+    expect(dataStore.getAllProofs()[0].image_url).toBe('https://private.example/owner-only');
+    expect(dataStore.getApprovedProofs()[0].image_url).toBeUndefined();
+    expect(JSON.stringify(dataStore.getApprovedProofs())).not.toContain('owner-only');
+  });
+
   it('ne conserve pas les données privées du dépôt anonyme', async () => {
     storageMock.query.mockResolvedValueOnce({ error: null });
     await dataStore.submitProof(input);

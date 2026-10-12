@@ -1,4 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { ProjectCard } from '../../components/ProjectCard';
+import { ProjectDetailModal } from '../../components/ProjectDetailModal';
+import { dataStore } from '../../services/dataStore';
 import { 
   evaluateProjectIntegrity, 
   assertNotBudgetLineAsProject, 
@@ -6,9 +11,26 @@ import {
 } from '../../review/domain/projects';
 import type { SourceDocument } from '../../review/domain/documents';
 import { findMatchingDgmpProcurement } from '../../utils/projectPassport';
-import type { BudgetProject } from '../../types';
+import type { BudgetProject, CitizenProof } from '../../types';
 
 describe('BLOC B — INTÉGRITÉ DES PROJETS ET MARCHÉS PUBLICS (LOT 9)', () => {
+  it('une contribution APPROVED ne certifie jamais la réalisation physique dans les vues publiques', () => {
+    const project: BudgetProject = { id: 'project-1', title: 'École test', commune_name: 'Abobo', region_name: 'Abidjan', category: 'Éducation', nature_expense: 'Investissements', budget_amount_fcfa: 1000, fiscal_year: 2026, current_status: 'IN_PROGRESS', progress_percentage: 0, created_at: '2026-10-12' };
+    const proof: CitizenProof = { id: 'proof-1', project_id: project.id, citizen_name: 'Identité privée', citizen_status_claim: 'COMPLETED', verification_status: 'APPROVED', comment: 'Déclaration citoyenne', image_url: 'photo.jpg', confirmations_count: 0, created_at: '2026-10-12' };
+    const getter = vi.spyOn(dataStore, 'getProofsForProject').mockReturnValue([proof]);
+    try {
+      const card = renderToStaticMarkup(<ProjectCard project={project} onSelect={() => {}} />);
+      expect(card).toContain('contribution(s) citoyenne(s) publiée(s)');
+      expect(card).not.toContain('constat(s) certifié(s)');
+      const modal = renderToStaticMarkup(<ProjectDetailModal project={project} onClose={() => {}} onOpenSendProof={() => {}} onOpenShare={() => {}} onOpenDocRequest={() => {}} />);
+      expect(modal).toContain('Réalisation physique non certifiée');
+      expect(modal).toContain('Achèvement déclaré par un citoyen');
+      expect(modal).not.toMatch(/Constaté sur le terrain|Terminé sur le terrain|Identité privée/);
+      expect(proof.verification_status).toBe('APPROVED');
+    } finally {
+      getter.mockRestore();
+    }
+  });
   const verifiedDoc: SourceDocument = {
     id: 'lfi-2026-annexe-investissements',
     title: 'Loi de Finances 2026 — Annexe Investissements',
@@ -17,7 +39,7 @@ describe('BLOC B — INTÉGRITÉ DES PROJETS ET MARCHÉS PUBLICS (LOT 9)', () =>
     fiscalYear: 2026,
     accessedAt: '2026-10-12',
     httpStatus: 200,
-    sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    sha256: 'c'.repeat(64),
     pageCount: 300,
     verification: 'VERIFIED',
     visibility: 'PUBLIC',

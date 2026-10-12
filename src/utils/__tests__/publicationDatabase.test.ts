@@ -391,6 +391,20 @@ describe('Publication boundaries applied to PostgreSQL', () => {
     });
   });
 
+  it('keeps private identity available to staff and owners but anonymous in the public view', async () => {
+    await asRole('authenticated', admin, async () => {
+      await db.query("update public.citizen_proofs set citizen_name='Identité privée' where id='approved'");
+      for (const uid of [admin, citizen, moderator]) {
+        await db.query("select set_config('request.jwt.claim.sub',$1,true)", [uid]);
+        expect((await db.query('select citizen_name,citizen_whatsapp from public.citizen_proofs where id=$1', ['approved'])).rows)
+          .toEqual([{ citizen_name: 'Identité privée', citizen_whatsapp: 'private-phone' }]);
+        const publicRows = (await db.query('select * from public.public_citizen_proofs')).rows;
+        expect(JSON.stringify(publicRows)).not.toMatch(/Identité privée|private-phone|private-note|private-tracking/);
+        expect(publicRows[0]).toHaveProperty('citizen_name', 'Citoyen observateur');
+      }
+    });
+  });
+
   it('lets owners and moderators read pending proofs but not other citizens', async () => {
     for (const [uid, expected] of [[citizen,2],[moderator,2],['00000000-0000-0000-0000-000000000099',0]] as const) {
       await asRole('authenticated', uid, async () => {

@@ -23,6 +23,7 @@ export {
 };
 
 export type DocumentAvailability =
+  | 'UNKNOWN'
   | 'AVAILABLE'
   | 'AVAILABLE_FROM_PRIOR_OFFICIAL_ACQUISITION'
   | 'PENDING'
@@ -113,7 +114,7 @@ export function verifyDocumentaryAudit(
   if (!doc.id?.trim() || !doc.sha256?.trim()) {
     return { verified: false, matchingAudit: null, reasons: ['MISSING_DOCUMENT_IDENTITY_OR_HASH'] };
   }
-  if (!/^[a-f0-9]{64}$/i.test(doc.sha256)) {
+  if (!isDocumentSha256(doc.sha256)) {
     return { verified: false, matchingAudit: null, reasons: ['INVALID_DOCUMENT_SHA256'] };
   }
   const matching = audits.find(a =>
@@ -133,7 +134,11 @@ export function verifyDocumentaryAudit(
   return { verified: true, matchingAudit: matching, reasons: [] };
 }
 
-/** Only direct public HTTPS references; never display signed storage URLs or credentials. */
+export function isDocumentSha256(value: string | null | undefined): value is string {
+  return !!value && /^[a-f0-9]{64}$/i.test(value)
+    && value.toLowerCase() !== 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+}
+
 export function safeOfficialUrl(value: string | null): string | null {
   if (!value) return null;
   try {
@@ -173,7 +178,7 @@ export function resolveCitation(ref: EvidenceRef | null, documents: readonly Sou
   const doc = documents.find(d => d.id === ref.documentId);
   if (!doc || doc.verification !== 'VERIFIED' || doc.visibility !== 'PUBLIC'
     || doc.fiscalYear !== ref.fiscalYear || doc.httpStatus !== 200
-    || !doc.sha256 || !/^[a-f0-9]{64}$/i.test(doc.sha256) || !doc.accessedAt || !isCalendarDate(doc.accessedAt)
+    || !isDocumentSha256(doc.sha256) || !doc.accessedAt || !isCalendarDate(doc.accessedAt)
     || !doc.title.trim() || !doc.publisher.trim()) return null;
   if (doc.provenance === 'UNVERIFIED') return null;
   if (doc.availability && doc.availability !== 'AVAILABLE') return null;

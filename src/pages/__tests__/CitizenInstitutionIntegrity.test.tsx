@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { 
   citizenTrack, 
-  sanitizeCitizenIdentity, 
+  publicCitizenProof,
   buildCitizenObservationBadge,
   type PublicTrackingEvent 
 } from '../../review/domain/citizen';
@@ -10,7 +10,7 @@ import {
   buildInstitutionalResponseBadge, 
   type InstitutionalStatement 
 } from '../../review/domain/responses';
-import type { ApecPublicNeed } from '../../types';
+import type { ApecPublicNeed, CitizenProof } from '../../types';
 import type { SourceDocument } from '../../review/domain/documents';
 import type { DocumentedTarget } from '../../review/domain/projects';
 
@@ -54,13 +54,25 @@ describe('BLOC C — SUIVI CITOYEN ET RÉPONSES INSTITUTIONNELLES (LOTS 10 & 11)
     privacyReviewed: true,
   };
 
-  it('anonymise systématiquement les emails et numéros de téléphone des citoyens (Principe 4 & 5)', () => {
-    expect(sanitizeCitizenIdentity('kouassi.jean@gmail.com')).toBe('Sentinelle citoyenne certifiée');
-    expect(sanitizeCitizenIdentity('+225 07 01 02 03 04')).toBe('Sentinelle citoyenne certifiée');
-    expect(sanitizeCitizenIdentity('0102030405')).toBe('Sentinelle citoyenne certifiée');
-    expect(sanitizeCitizenIdentity('')).toBe('Sentinelle citoyenne');
-    expect(sanitizeCitizenIdentity(null)).toBe('Sentinelle citoyenne');
-    expect(sanitizeCitizenIdentity('Sentinelle San-Pédro')).toBe('Sentinelle San-Pédro');
+  it.each(['Kouassi Jean', 'kouassi.jean@gmail.com', '+225 07 01 02 03 04', 'Appeler au 0102030405', 'Sentinelle San-Pédro', ''])('rend anonyme une identité sans consentement public : %s', name => {
+    const privateProof: CitizenProof = {
+      id: 'proof-1', project_id: 'project-1', image_url: 'photo.jpg', created_at: '2026-10-12',
+      citizen_status_claim: 'COMPLETED', comment: 'Observation publique', confirmations_count: 0,
+      verification_status: 'APPROVED', citizen_name: name, user_name: name, citizen_whatsapp: '+2250102030405',
+      moderator_notes: 'Instruction privée', tracking_code: 'private-tracking', geo_latitude: 5.123, geo_longitude: -4.123,
+    };
+    const publicProof = publicCitizenProof(privateProof)!;
+    expect(publicProof.citizen_name).toBe('Sentinelle citoyenne');
+    expect(publicProof.user_name).toBe('Sentinelle citoyenne');
+    for (const key of ['citizen_whatsapp', 'tracking_code', 'moderator_notes', 'geo_latitude', 'geo_longitude']) {
+      expect(publicProof).not.toHaveProperty(key);
+    }
+    expect(privateProof.citizen_name).toBe(name);
+    expect(privateProof.citizen_whatsapp).toBe('+2250102030405');
+    expect(publicProof).toMatchObject({ id: 'proof-1', comment: 'Observation publique', created_at: '2026-10-12', citizen_status_claim: 'COMPLETED' });
+    expect(JSON.stringify(publicProof)).not.toContain('certifiée');
+    expect(publicCitizenProof({ ...privateProof, verification_status: 'PENDING' })).toBeNull();
+    expect(publicCitizenProof({ ...privateProof, verification_status: 'REJECTED' })).toBeNull();
   });
 
   it('qualifie explicitement la provenance citoyenne sans prétendre à une validation officielle (Principe 7)', () => {
