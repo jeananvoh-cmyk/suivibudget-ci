@@ -1,6 +1,7 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { BudgetProject, ProjectStatus } from '../types';
 import { validateImageBinary, validateVideoBinary, compressAndSanitizeImage, sanitizeCoordinates } from '../utils/security';
+import { sanitizeCitizenIdentity } from '../review/domain/citizen';
 import { dataStore } from '../services/dataStore';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
 import { formatFCFA, formatAmountInWords } from '../utils/formatters';
@@ -428,7 +429,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
         citizen_status_claim: citizenStatus,
         comment: comment.trim(),
         locality_details: locality.trim(),
-        citizen_name: citizenName.trim() || 'Citoyen Observateur',
+        citizen_name: sanitizeCitizenIdentity(citizenName.trim()),
         citizen_whatsapp: citizenWhatsApp.trim() || citizenContact.trim() || undefined,
         signboard_status: signboardStatus,
       });
@@ -1334,6 +1335,9 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                     </div>
                     <span className="text-[10px] text-slate-400 mt-0.5 block">
                       Recevez la validation ou les observations des modérateurs directement sur WhatsApp.
+                    </span>
+                    <span className="text-[10px] text-slate-500 mt-1 block">
+                      🔒 Confidentialité civique (Principes 4 & 5) : votre numéro et identité privée ne sont jamais publiés publiquement.
                     </span>
                   </div>
                 </div>

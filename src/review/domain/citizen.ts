@@ -42,3 +42,27 @@ export function citizenTrack(need: ApecPublicNeed, target: DocumentedTarget | nu
     resolution: 'UNKNOWN' as const,
   };
 }
+
+/**
+ * Anonymise les contributeurs et observateurs citoyens afin de protéger leur vie privée (Principe 4 & 5).
+ * Ne publie jamais d'adresse e-mail, de numéro de téléphone ou de coordonnée personnelle.
+ */
+export function sanitizeCitizenIdentity(name?: string | null): string {
+  if (!name || !name.trim()) return 'Sentinelle citoyenne';
+  const trimmed = name.trim();
+  if (trimmed.includes('@') || /^\+?[0-9\s-]{8,}$/.test(trimmed)) {
+    return 'Sentinelle citoyenne certifiée';
+  }
+  return trimmed;
+}
+
+/**
+ * Garantit qu'une observation citoyenne n'est jamais confondue avec une validation officielle (Principe 7).
+ */
+export function buildCitizenObservationBadge(provenance: 'CITIZEN_OBSERVATION' = 'CITIZEN_OBSERVATION') {
+  return {
+    label: 'Observation Citoyenne',
+    disclaimer: 'Constat de terrain indépendant — ne constitue pas une validation administrative (Principe 7)',
+    provenance,
+  };
+}

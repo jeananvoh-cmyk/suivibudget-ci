@@ -33,3 +33,15 @@ export function institutionalRecord(target: DocumentedTarget, statements: readon
     responses: documented.filter(s => s.kind === 'INSTITUTION_RESPONSE'),
     audits: documented.filter(s => s.kind === 'OFFICIAL_AUDIT'), independentVerification: 'UNKNOWN' as const };
 }
+
+/**
+ * Garantit qu'une réponse institutionnelle ou un droit de réponse n'est jamais confondu avec une validation citoyenne indépendante (Principe 8).
+ */
+export function buildInstitutionalResponseBadge(kind: 'INSTITUTION_RESPONSE' | 'OFFICIAL_AUDIT' = 'INSTITUTION_RESPONSE') {
+  return {
+    label: kind === 'INSTITUTION_RESPONSE' ? 'Réponse Institutionnelle (Droit de réponse)' : 'Audit Officiel',
+    disclaimer: 'Attestation institutionnelle — ne constitue pas une vérification citoyenne indépendante (Principe 8)',
+    provenance: kind === 'INSTITUTION_RESPONSE' ? ('INSTITUTION_RESPONSE' as const) : ('OFFICIAL_SOURCE' as const),
+    independentVerification: 'UNKNOWN' as const,
+  };
+}

@@ -3,6 +3,8 @@ import { CitizenProof, ProjectStatus, BudgetProject } from '../types';
 import { dataStore } from '../services/dataStore';
 import { formatFCFA, formatAmountInWords, formatDateFR, getStatusConfig } from '../utils/formatters';
 import { BudgetReportsView } from '../components/BudgetReportsView';
+import { sanitizeCitizenIdentity, buildCitizenObservationBadge } from '../review/domain/citizen';
+import { buildInstitutionalResponseBadge } from '../review/domain/responses';
 import { STRATEGIC_PROJECTS_LIST, StrategicProject } from '../data/strategicProjectsData';
 import { 
   Camera, 
@@ -1111,14 +1113,35 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                               </div>
                             )}
 
+                            {/* Provenance citoyenne explicite (Principe 2 & 7) */}
+                            <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1.5 border-t border-slate-100">
+                              <span className="font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                CITIZEN_OBSERVATION
+                              </span>
+                              <span className="italic text-slate-400">
+                                Ne constitue pas une validation officielle (P7)
+                              </span>
+                            </div>
+
+                            {/* Réponse institutionnelle éventuelle (Principe 8) */}
+                            {proof.official_response && (
+                              <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl space-y-1 text-xs">
+                                <div className="flex items-center justify-between font-bold text-blue-900 text-[11px]">
+                                  <span>RÉPONSE INSTITUTIONNELLE</span>
+                                  <span className="text-[10px] text-blue-600 font-semibold">Droit de réponse (P8)</span>
+                                </div>
+                                <p className="text-slate-700 italic">"{proof.official_response}"</p>
+                              </div>
+                            )}
+
                           </div>
 
                         </div>
 
-                        {/* Card Footer: Confirmation Counter */}
+                        {/* Card Footer: Anonymisation & Confirmation Counter */}
                         <div className="p-4 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between">
                           <div className="text-xs text-slate-600 font-semibold">
-                            <span>Par <strong>{proof.user_name}</strong></span>
+                            <span>Par <strong>{sanitizeCitizenIdentity(proof.user_name)}</strong></span>
                           </div>
 
                           {(() => {

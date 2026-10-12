@@ -225,6 +225,8 @@ export interface CitizenProof {
   citizen_whatsapp?: string;
   signboard_status?: 'PRESENT' | 'ABSENT' | 'UNSPECIFIED';
   secondary_image_url?: string;
+  official_response?: string;
+  institution_response?: string;
 }
 
 export interface ImpactStats {
