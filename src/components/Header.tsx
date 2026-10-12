@@ -28,8 +28,10 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center justify-between h-20 sm:h-24">
           
           {/* SUIVI BUDGET CI BRANDING & LOGO */}
-          <div 
-            className="flex items-center gap-3 cursor-pointer group flex-shrink-0"
+          <button
+            type="button"
+            aria-label="SuiviBudget Côte d’Ivoire — retour à l’accueil"
+            className="flex items-center gap-3 cursor-pointer group flex-shrink-0 text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-blue"
             onClick={() => setActiveTab('home')}
           >
             <div className="flex flex-col">
@@ -54,7 +56,7 @@ export const Header: React.FC<HeaderProps> = ({
                 Côte d'Ivoire
               </span>
             </div>
-          </div>
+          </button>
 
           {/* MAIN NAVIGATION TABS */}
           <nav aria-label="Navigation principale" className="hidden lg:flex items-center gap-8 text-sm font-semibold">
