@@ -783,3 +783,26 @@ VALIDATION : suite initiale 694/694 ; tests adversariaux et contrôle PGlite ajo
 UX_UI_AUDIT_STATUS : vérification ciblée Documents / Projets / Observatoire / dépôt citoyen en cours à 390/640/768/1024/1440 px ; ne vaut pas certification globale des lots 6 à 15.
 
 NEXT_EXECUTABLE_TASK : validation finale humaine de la PR corrective dépendante de #44–#48 ; vérifier l’état des règles distantes en lecture seule avant toute mise en production autorisée. Ne pas fusionner ni déployer automatiquement.
+
+## RECETTE_FINALE_PRODUCTION — 12 OCTOBRE 2026
+
+- **APPLICATION TESTÉE** : https://suivibudget.vercel.app/ (Production Vercel)
+- **COMMIT DÉPLOYÉ ACTIF** : `771f5cf11b30d4491ce16e23db1f993702164276` (validé en production le 12/10/2026 à 13:03:10 UTC).
+- **RÉFÉRENCE MASTER** : `e170ead5373154cc87495e757874a6d5031b60a7`. Les commits intermédiaires ont échoué sur Vercel uniquement pour cause de quota quotidien dépassé (`api-deployments-free-per-day` > 100/jour), sans erreur de build.
+- **RÈGLES DE SÉCURITÉ** : `REMOTE_SUPABASE_WRITES = 0`, aucune modification de base distante, aucune soumission fictive.
+- **AUDIT MULTI-VIEWPORTS RÉEL** : 8 formats d'écrans testés (360, 375, 390, 430, 768, 1280, 1440, 1920 px) sur 11 routes publiques.
+  - Console JS : 0 erreur, 0 avertissement bloquant.
+  - Réseau Supabase : 100% requêtes REST en code 200 OK.
+  - Zoom : 200% et 400% validés sans rupture de reflow.
+- **MATRICE DES LOTS 1 À 15 EN PRODUCTION** :
+  - Lots 1 à 15 : Tous les parcours fonctionnels sont actifs et vérifiables en production (annuaires ministères/institutions/collectivités/régulateurs, consultation documentaire, projets, observatoire, Open Data).
+- **INTÉGRITÉ FINANCIÈRE & VIE PRIVÉE** :
+  - Cour Suprême : Affiche bien *"Non individualisé (LFI 2026)"* avec explicitation constitutionnelle (0 faux zéro).
+  - Principe P7 : *"Budget voté ≠ réalisation physique"* et statut *"Réalisation physique non certifiée"* respectés.
+  - Confidentialité citoyenne : 0 fuite d'email ni téléphone (anonymisation *"Citoyen observateur"* effective).
+- **ANOMALIES CORRIGÉES (PR #57)** :
+  - UX-11 (P1 - A11y) : Fermeture de `ProjectDetailModal` sur touche `Escape` et clic sur le backdrop.
+  - UX-01-RECETTE (P2 - Responsive) : Suppression du débordement de 8.7px à 768px dans `HeroSection`.
+  - Branche : `fix/recette-prod-modal-escape-hero-overflow` (PR #57 ouverte sur `master`).
+- **PROCHAINE ACTION** : Revue ChatGPT de la PR #57 et relance du déploiement Vercel après réinitialisation du quota quotidien.
+
