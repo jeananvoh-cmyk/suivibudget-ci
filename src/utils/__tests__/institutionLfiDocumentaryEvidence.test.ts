@@ -36,7 +36,10 @@ describe('LFI 2026 — source, section, page and entity invariants', () => {
       const matrixRow = matrixById.get(row.id)!;
       expect(financial.official_section_code, row.id).toBe(row.section_code);
       expect(financial.documentary_provenance?.pdf_page, row.id).toBe(row.pdf_page);
-      expect(financial.verification_status, row.id).toBe('VERIFIED_AMOUNT');
+      expect(financial.verification_status, row.id).toBe('PARTIAL_BREAKDOWN');
+      expect(financial.has_breakdown, row.id).toBe(false);
+      expect(financial.functioning_pct, row.id).toBeNull();
+      expect(financial.investment_pct, row.id).toBeNull();
       expect(matrixRow.provenance?.pdf_page, row.id).toBe(row.pdf_page);
       expect(matrixRow.official_section_code, row.id).toBe(row.section_code);
       expect(matrixRow.verification_status, row.id).toBe('VERIFIED_AMOUNT');
