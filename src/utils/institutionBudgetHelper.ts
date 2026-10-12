@@ -1,4 +1,4 @@
-import { Institution } from '../types';
+import { Institution, PrimitiveBudgetInfo } from '../types';
 import { formatFCFA, formatAmountInWords } from './formatters';
 import { OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
 import { NATIONAL_DIRECT_ALLOCATIONS_2026 } from '../data/nationalBudgetData';
@@ -608,6 +608,26 @@ export function resolveInstitutionFinancialView(
   const documentaryDiscrepancy = amountEvidence != null && !isLfi2026AmountConfirmed;
   const isReconciled = pctResult.status === 'RECONCILED';
 
+  // REGLE NON NEGOCIABLE (Point A ChatGPT) :
+  // Une somme arithmetiquement equilibree (60 + 40 === 100) ne constitue pas une preuve officielle.
+  // Une ventilation n'est conservee que si elle est officiellement prouvee avec le meme exercice,
+  // la meme assiette et la meme nature de credits (ex: Budget Primitif reference avec precision EXACT).
+  const primitiveInfo = OFFICIAL_PRIMITIVE_BUDGETS[instId] || (institution as { primitive_budget?: PrimitiveBudgetInfo }).primitive_budget;
+  const isPrimitiveBreakdownProven = Boolean(
+    primitiveInfo != null &&
+    primitiveInfo.precision === 'EXACT' &&
+    primitiveInfo.source_url &&
+    primitiveInfo.functioning_voted_fcfa != null &&
+    primitiveInfo.investment_voted_fcfa != null &&
+    calculateSafePercentages(
+      primitiveInfo.functioning_voted_fcfa,
+      primitiveInfo.investment_voted_fcfa,
+      primitiveInfo.total_voted_fcfa
+    ).isBalanced &&
+    total === primitiveInfo.total_voted_fcfa
+  );
+  const isExplicitlyProven = Boolean((institution as { has_verified_breakdown?: boolean }).has_verified_breakdown);
+  const isBreakdownProven = isPrimitiveBreakdownProven || isExplicitlyProven;
 
   return {
     institution_id: instId,
@@ -627,19 +647,20 @@ export function resolveInstitutionFinancialView(
     total_words: formatAmountInWords(total),
     functioning_formatted: fonct != null ? formatFCFA(fonct) : null,
     investment_formatted: inv != null ? formatFCFA(inv) : null,
-    functioning_pct: null,
-    investment_pct: null,
-    has_breakdown: false,
+    functioning_pct: isBreakdownProven ? pctResult.functioningPct : null,
+    investment_pct: isBreakdownProven ? pctResult.investmentPct : null,
+    has_breakdown: isBreakdownProven && isReconciled,
     delta_fcfa: pctResult.deltaFcfa,
     programs: [],
     actions: [],
     documentary_provenance: isLfi2026AmountConfirmed ? provenance : null,
     verification_status: pctResult.status === 'UNRECONCILED' ? 'UNRECONCILED'
-      : !isLfi2026AmountConfirmed ? 'NOT_DOCUMENTED'
-      : isReconciled ? 'VERIFIED_AMOUNT' : 'PARTIAL_BREAKDOWN',
-    reconciliation_status: pctResult.status,
+      : !isLfi2026AmountConfirmed ? (isPrimitiveBreakdownProven ? 'VERIFIED_AMOUNT' : 'NOT_DOCUMENTED')
+      : isBreakdownProven && isReconciled ? 'VERIFIED_AMOUNT' : 'PARTIAL_BREAKDOWN',
+    reconciliation_status: !isBreakdownProven && pctResult.status === 'RECONCILED' ? 'NO_BREAKDOWN' : pctResult.status,
     blocking_reasons: [
       ...(pctResult.reason ? [pctResult.reason] : []),
+      ...(!isBreakdownProven && fonct != null && inv != null ? ['Ventilation fonctionnement/investissement non documentée sur cette assiette officielle.'] : []),
       ...(nationalSection?.program_code ? [`Le programme ${nationalSection.program_code} est déjà inclus dans les 193 633 705 615 FCFA de la Présidence (section 103). Ne pas additionner.`] : []),
       ...(!isLfi2026AmountConfirmed ? [documentaryDiscrepancy
         ? `Montant de la fiche non identique aux credits de la section LFI ${officialSectionCode} : ${total} FCFA affiche contre ${amountEvidence!.lfi_amount_fcfa} FCFA section. Portefeuille, C2D et transferts a rapprocher sans remplacement automatique.`
@@ -647,13 +668,15 @@ export function resolveInstitutionFinancialView(
     ],
     badge_text: nationalSection?.program_code ? 'Programme Présidence - non additif'
       : isLfi2026AmountConfirmed ? 'Montant recoupe LFI 2026' : 'Montant a rapprocher - source insuffisante',
-    badge_class: isLfi2026AmountConfirmed && isReconciled 
+    badge_class: isLfi2026AmountConfirmed && isReconciled && isBreakdownProven
       ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
       : 'bg-amber-100 text-amber-800 border-amber-300',
     notice_text: nationalSection?.program_code
-      ? `Crédits du programme ${nationalSection.program_code}, inclus dans le total de la section 103 Présidence ; ils ne constituent pas une dotation autonome supplémentaire.`
+      ? `Crédits du programme ${nationalSection.program_code}, inclus dans le total de la section 103 Présidence ; ils ne constituent pas une dotation autonome supplémentaire. Ventilation fonctionnement/investissement non documentée.`
       : !isLfi2026AmountConfirmed
       ? 'Le montant actuellement reference ne peut etre certifie comme credit de section LFI 2026. provenance documentaire insuffisante ; les ecarts C2D ou de portefeuille necessitent un acte de rapprochement.'
+      : !isBreakdownProven
+      ? 'Ventilation fonctionnement/investissement non documentée sur cette assiette officielle.'
       : !isReconciled ? `${pctResult.reason || 'Ventilation incomplète.'} La concordance du total LFI ne certifie pas les ratios.`
       : null,
     is_cour_supreme: false,

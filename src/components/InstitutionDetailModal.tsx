@@ -120,6 +120,15 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   const [selectedProjectForDoc, setSelectedProjectForDoc] = useState<BudgetProject | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
 
+  useEffect(() => {
+    if (!isOpen || docModalOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [isOpen, docModalOpen, onClose]);
+
   // Sync tab states when opening or props change
   useEffect(() => {
     if (isOpen) {
@@ -314,8 +323,11 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 md:p-6 animate-in fade-in duration-200">
+    <div onClick={docModalOpen ? undefined : onClose} className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 md:p-6 animate-in fade-in duration-200">
       <div 
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Fiche budgétaire — ${institution.name}`}
         className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
