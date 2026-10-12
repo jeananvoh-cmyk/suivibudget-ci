@@ -38,7 +38,7 @@
 
 ## Résultat des 14 contrôles de ventilation
 
-Le fichier `src/data/nationalBudgetData.ts` présentait **12 fiches à montant total positif avec ventilation fonctionnement/investissement numérique** (dont neuf investissements à zéro), et deux fiches HABG/IGE déjà neutralisées après l'alerte précédente ; la Cour suprême n'affiche aucun montant. **Aucune référence justificative de ventilation de même assiette n'accompagne ces champs dans le référentiel de ces fiches.**
+Le fichier `src/data/nationalBudgetData.ts` présentait **11 fiches à montant total positif avec ventilation fonctionnement/investissement numérique** (dont huit investissements à zéro), et deux fiches HABG/IGE déjà neutralisées après l'alerte précédente ; la Cour suprême n'affiche aucun montant. **Aucune référence justificative de ventilation de même assiette n'accompagne ces champs dans le référentiel de ces fiches.**
 
 **Décision conservatoire documentée :** conserver intégralement les **13 montants positifs retrouvés dans la LFI**, conserver la Cour suprême inconnue, et neutraliser dans les **14 fiches** les champs de répartition `budget_functioning_fcfa` / `budget_investment_fcfa` (valeur `null`, jamais `0`). Le moteur `calculateSafePercentages` affiche alors **« ventilation non disponible »** plutôt que **100 % / 0 %** sans fondement. Cela ne constitue PAS l'affirmation selon laquelle il n'existe aucune dotation d'investissement : la ventilation est simplement **non certifiée pour la même assiette LFI**.
 
