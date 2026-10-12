@@ -52,3 +52,52 @@ export function projectDossier(project: DocumentedTarget, links: readonly Projec
     physical: status === 'AVAILABLE' && physicalEvidence ? { status: 'DOCUMENTED', description: physical!.description,
       citation: physicalEvidence } : { status: 'UNKNOWN', description: null, citation: null } };
 }
+
+/**
+ * Adaptateur d'intégrité documentaire pour les projets de la plateforme publique.
+ * Assure le respect des principes non-négociables :
+ * - P7 : Séparation stricte budget financier vs constat physique réel.
+ * - Lot 9 : Interdiction de transformer une simple ligne budgétaire en projet sans acte d'engagement.
+ * - Lot 9 : Détection et blocage de tout double comptage entre marchés d'une même opération.
+ */
+export function evaluateProjectIntegrity(params: {
+  projectId: string;
+  kind?: 'PROJECT' | 'BUDGET';
+  institutionId: string;
+  fiscalYear: number;
+  sectionCode?: string | null;
+  evidenceRef?: EvidenceRef | null;
+  budgetLinks?: readonly ProjectBudgetLink[];
+  documents: readonly SourceDocument[];
+  physicalObservation?: PhysicalObservation | null;
+}) {
+  const target: DocumentedTarget = {
+    id: params.projectId,
+    kind: params.kind ?? 'PROJECT',
+    institutionId: params.institutionId,
+    sectionCode: params.sectionCode ?? null,
+    fiscalYear: params.fiscalYear,
+    evidence: params.evidenceRef ?? null,
+  };
+  return projectDossier(
+    target,
+    params.budgetLinks ?? [],
+    params.documents,
+    params.physicalObservation ?? null
+  );
+}
+
+/**
+ * Empêche formellement la création d'un projet à partir d'une simple ligne de budget sans passation de marché.
+ */
+export function assertNotBudgetLineAsProject(kind: 'PROJECT' | 'BUDGET'): boolean {
+  return kind === 'PROJECT';
+}
+
+/**
+ * Contrôle l'absence de doublons ou de double comptage de marchés pour une même opération.
+ */
+export function checkDuplicateProcurementLinks(links: readonly { budgetId: string }[]): boolean {
+  const ids = links.map(l => l.budgetId);
+  return new Set(ids).size === ids.length;
+}

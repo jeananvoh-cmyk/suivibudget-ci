@@ -258,7 +258,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                       
                       <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">
                         <span className="w-2 h-2 rounded-full bg-slate-400"></span>
-                        <span>Voté au Budget</span>
+                        <span>{verifiedProofs.length > 0 ? 'Constaté sur le terrain' : 'Voté au Budget (P7 : physique non certifié)'}</span>
                       </span>
                     </div>
                     
@@ -390,21 +390,35 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                     <div>
                       <span className="text-xs text-slate-500 block">Entreprise Adjudicataire & Marché</span>
                       <span className="font-semibold text-slate-900">
-                        {project.contractor_name && !project.contractor_name.includes('Bailleurs')
-                          ? project.contractor_name
-                          : "Marché public / Appel d'offres ouvert"}
+                        {matchedDgmp?.contractor
+                          ? matchedDgmp.contractor
+                          : (project.contractor_name && !project.contractor_name.includes('Bailleurs') && !project.contractor_name.toLowerCase().includes('appel d\'offres'))
+                            ? project.contractor_name
+                            : "Attribution non renseignée publiquement (DGMP)"}
                       </span>
+                      {matchedDgmp?.contract_number && (
+                        <span className="text-[11px] text-brand-blue font-bold block mt-0.5">
+                          Réf. Marché DGMP : {matchedDgmp.contract_number}
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  {!isDetailsRedundant && (
+                  {(project.program_name || !isDetailsRedundant) && (
                     <div className="flex items-start gap-2.5 sm:col-span-2">
                       <FileText className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
                       <div>
-                        <span className="text-xs text-slate-500 block">Programme & Spécifications</span>
-                        <span className="text-xs font-normal text-slate-700 leading-relaxed">
-                          {project.details}
-                        </span>
+                        <span className="text-xs text-slate-500 block">Programme LOLF & Spécifications</span>
+                        {project.program_name && (
+                          <span className="text-xs font-black text-slate-800 block mb-1">
+                            Programme : {project.program_name}
+                          </span>
+                        )}
+                        {!isDetailsRedundant && (
+                          <span className="text-xs font-normal text-slate-700 leading-relaxed">
+                            {project.details}
+                          </span>
+                        )}
                       </div>
                     </div>
                   )}

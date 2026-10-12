@@ -3,6 +3,7 @@ import { BudgetProject } from '../types';
 import { formatFCFA, formatAmountInWords, getProjectEntityInfo, getProjectTier, getProjectTierBadge } from '../utils/formatters';
 import { getCategoryBadgeClass } from '../data/categories';
 import { MapPin, ArrowRight, Camera, Share2, Landmark, CheckCircle2 } from 'lucide-react';
+import { dataStore } from '../services/dataStore';
 
 interface ProjectCardProps {
   project: BudgetProject;
@@ -20,6 +21,9 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   const entityInfo = getProjectEntityInfo(project.commune_name, project.region_name, project.ministry_name);
   const tier = getProjectTier(project);
   const tierBadge = getProjectTierBadge(tier);
+  const verifiedProofsCount = dataStore
+    .getProofsForProject(project.id)
+    .filter(p => p.verification_status === 'APPROVED').length;
 
   // Clean location display for the bottom line
   const locationText = project.locality_village_neighborhood ||
@@ -110,9 +114,19 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
             <span className="truncate">{locationText}</span>
           </div>
+          {project.program_name && (
+            <div className="text-[11px] text-brand-blue font-semibold truncate" title={`Programme LOLF : ${project.program_name}`}>
+              Programme : <span className="text-slate-800">{project.program_name}</span>
+            </div>
+          )}
           {project.master_builder && (
             <div className="text-[11px] text-slate-500 font-semibold truncate">
               Maître d'ouvrage : <span className="text-slate-800">{project.master_builder}</span>
+            </div>
+          )}
+          {project.contractor_name && !project.contractor_name.toLowerCase().includes('appel d\'offres') && (
+            <div className="text-[11px] text-slate-500 font-semibold truncate" title={`Attributaire : ${project.contractor_name}`}>
+              Attributaire : <span className="text-slate-800">{project.contractor_name}</span>
             </div>
           )}
         </div>
@@ -129,6 +143,9 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             <div className="text-[11px] font-bold text-brand-blue">
               ({formatAmountInWords(project.budget_amount_fcfa)} FCFA)
             </div>
+            <div className="text-[9px] text-slate-400 font-medium">
+              Budget voté ≠ réalisation physique (P7)
+            </div>
           </div>
         </div>
 
@@ -144,7 +161,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             </div>
             <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
                 style={{ width: `${Math.min(100, project.progress_percentage)}%` }}
               />
             </div>
@@ -159,10 +176,17 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         {/* Citizen Status Info */}
         <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between">
           <span className="text-[11px] font-bold text-slate-500">Contrôle citoyen</span>
-          <span className="text-[11px] font-semibold text-slate-600 inline-flex items-center gap-1.5 bg-white px-2.5 py-0.5 rounded-full border border-slate-200">
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-            <span>En attente de constat</span>
-          </span>
+          {verifiedProofsCount > 0 ? (
+            <span className="text-[11px] font-bold text-emerald-800 inline-flex items-center gap-1.5 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+              <Camera className="w-3 h-3 text-emerald-600" />
+              <span>{verifiedProofsCount} constat(s) certifié(s)</span>
+            </span>
+          ) : (
+            <span className="text-[11px] font-semibold text-slate-600 inline-flex items-center gap-1.5 bg-white px-2.5 py-0.5 rounded-full border border-slate-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+              <span>En attente de constat</span>
+            </span>
+          )}
         </div>
       </div>
 
