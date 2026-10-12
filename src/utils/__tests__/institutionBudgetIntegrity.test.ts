@@ -158,8 +158,8 @@ describe('Institution Budget Integrity & Safe Rendering', () => {
       const assessment = assessInstitutionBudget(cassation);
       expect(assessment.status).toBe('AVAILABLE');
       expect(assessment.totalFormatted).toContain('7 931 309 608 FCFA');
-      expect(assessment.functioningPct).toBe(100);
-      expect(assessment.investmentPct).toBe(0);
+      expect(assessment.functioningPct).toBeNull();
+      expect(assessment.investmentPct).toBeNull();
     });
 
     it('Conseil d\'État has authentic verified allocation (Section 118: 5 164 531 081 FCFA)', () => {
@@ -169,8 +169,8 @@ describe('Institution Budget Integrity & Safe Rendering', () => {
       const assessment = assessInstitutionBudget(conseilEtat);
       expect(assessment.status).toBe('AVAILABLE');
       expect(assessment.totalFormatted).toContain('5 164 531 081 FCFA');
-      expect(assessment.functioningPct).toBe(100);
-      expect(assessment.investmentPct).toBe(0);
+      expect(assessment.functioningPct).toBeNull();
+      expect(assessment.investmentPct).toBeNull();
     });
 
     it('Cour des Comptes has authentic verified allocation (Section 115: 8 851 161 351 FCFA)', () => {
@@ -180,9 +180,9 @@ describe('Institution Budget Integrity & Safe Rendering', () => {
       const assessment = assessInstitutionBudget(courComptes);
       expect(assessment.status).toBe('AVAILABLE');
       expect(assessment.totalFormatted).toContain('8 851 161 351 FCFA');
-      expect(assessment.hasBreakdown).toBe(true);
-      expect(assessment.functioningPct).toBe(78);
-      expect(assessment.investmentPct).toBe(22);
+      expect(assessment.hasBreakdown).toBe(false);
+      expect(assessment.functioningPct).toBeNull();
+      expect(assessment.investmentPct).toBeNull();
     });
   });
 

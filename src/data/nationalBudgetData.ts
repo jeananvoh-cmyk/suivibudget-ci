@@ -60,8 +60,8 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "contact_phone": "+225 27 20 31 40 00",
     "info_officer_phone": "",
     "info_officer_title": "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    "budget_functioning_fcfa": 142426183115,
-    "budget_investment_fcfa": 51207522500,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
     "total_budget_fcfa": 193633705615,
     "budget_not_published": false
   },
@@ -122,8 +122,8 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "info_officer_email": "",
     "info_officer_phone": "",
     "info_officer_title": "Secrétaire Général (Responsable de l'Information CAIDP)",
-    "budget_functioning_fcfa": 36878972451,
-    "budget_investment_fcfa": 1700000000,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
     "total_budget_fcfa": 38578972451,
     "budget_not_published": false
   },
@@ -181,8 +181,8 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "info_officer_email": "",
     "info_officer_phone": "",
     "info_officer_title": "Directeur de l'Information Documentaire et de la Communication (RI CAIDP)",
-    "budget_functioning_fcfa": 14665806742,
-    "budget_investment_fcfa": 0,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
     "total_budget_fcfa": 14665806742,
     "budget_not_published": false
   },
@@ -235,8 +235,8 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
       }
     ],
     "info_officer_title": "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    "budget_functioning_fcfa": 3860437235,
-    "budget_investment_fcfa": 0,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
     "total_budget_fcfa": 3860437235,
     "budget_not_published": false
   },
@@ -337,8 +337,8 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "info_officer_email": "",
     "info_officer_phone": "",
     "info_officer_title": "Directeur de Cabinet (Responsable de l'Information CAIDP)",
-    "budget_functioning_fcfa": 6916461351,
-    "budget_investment_fcfa": 1934700000,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
     "total_budget_fcfa": 8851161351,
     "budget_not_published": false
   },
@@ -389,8 +389,8 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
       }
     ],
     "info_officer_title": "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    "budget_functioning_fcfa": 5164531081,
-    "budget_investment_fcfa": 0,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
     "total_budget_fcfa": 5164531081,
     "budget_not_published": false
   },
@@ -443,8 +443,8 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
       }
     ],
     "info_officer_title": "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    "budget_functioning_fcfa": 7931309608,
-    "budget_investment_fcfa": 0,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
     "total_budget_fcfa": 7931309608,
     "budget_not_published": false
   },
@@ -502,8 +502,8 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "info_officer_phone": "",
     "info_officer_title": "Directeur de la Communication et de l'Informatique (RI CAIDP)",
     "green_line_number": "1320",
-    "budget_functioning_fcfa": 8285468221,
-    "budget_investment_fcfa": 0,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
     "total_budget_fcfa": 8285468221,
     "budget_not_published": false
   },
@@ -556,8 +556,8 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
       }
     ],
     "info_officer_title": "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    "budget_functioning_fcfa": 8429477575,
-    "budget_investment_fcfa": 1443100000,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
     "total_budget_fcfa": 9872577575,
     "budget_not_published": false
   },
@@ -610,8 +610,8 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
       }
     ],
     "info_officer_title": "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    "budget_functioning_fcfa": 3743870172,
-    "budget_investment_fcfa": 0,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
     "total_budget_fcfa": 3743870172,
     "budget_not_published": false
   },
@@ -669,8 +669,8 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "info_officer_email": "",
     "info_officer_phone": "",
     "info_officer_title": "Directeur de la Communication et de l'Information Multimédia (RI CAIDP)",
-    "budget_functioning_fcfa": 8069692846,
-    "budget_investment_fcfa": 0,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
     "total_budget_fcfa": 8069692846,
     "budget_not_published": false
   },
@@ -723,8 +723,8 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
       }
     ],
     "info_officer_title": "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    "budget_functioning_fcfa": 5794171874,
-    "budget_investment_fcfa": 0,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
     "total_budget_fcfa": 5794171874,
     "budget_not_published": false
   },
@@ -783,8 +783,8 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "info_officer_phone": "",
     "info_officer_title": "Chef de Service Média et Événementiel (RI CAIDP)",
     "green_line_number": "800 00 900",
-    "budget_functioning_fcfa": 5552174916,
-    "budget_investment_fcfa": 0,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
     "total_budget_fcfa": 5552174916,
     "budget_not_published": false
   }
