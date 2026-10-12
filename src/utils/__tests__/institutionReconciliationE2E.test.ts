@@ -208,19 +208,21 @@ describe('Adversarial & E2E Financial Integrity Suite (Section 7)', () => {
   });
 
   // Scenario 13: Integrity of canonical values across all verified institutions
-  it('Scenario 13: All verified published national institutions strictly satisfy functioning + investment === total down to 1 FCFA', () => {
+  it('Scenario 13: LFI section/program totals remain sourced even when component breakdown is not evidenced', () => {
     const published = NATIONAL_INSTITUTIONS_DATA.filter(i => !i.budget_not_published && i.total_budget_fcfa !== null);
     expect(published.length).toBe(13); // 13 published, 1 Cour Suprême unpublished
 
     published.forEach(inst => {
       const view = resolveInstitutionFinancialView(inst, 2026, 'LFI');
-      expect(view.verification_status).toBe('VERIFIED_AMOUNT');
-      expect(view.reconciliation_status).toBe('RECONCILED');
-      expect(view.delta_fcfa).toBe(0);
-      expect((view.functioning_amount_fcfa || 0) + (view.investment_amount_fcfa || 0)).toBe(view.total_amount_fcfa);
-      if (view.has_breakdown) {
-        expect((view.functioning_pct || 0) + (view.investment_pct || 0)).toBe(100);
-      }
+      expect(view.verification_status).toBe('PARTIAL_BREAKDOWN');
+      expect(view.reconciliation_status).toBe('NO_BREAKDOWN');
+      expect(view.total_amount_fcfa).toBe(inst.total_budget_fcfa);
+      expect(view.functioning_amount_fcfa).toBeNull();
+      expect(view.investment_amount_fcfa).toBeNull();
+      expect(view.delta_fcfa).toBeNull();
+      expect(view.has_breakdown).toBe(false);
+      expect(view.functioning_pct).toBeNull();
+      expect(view.investment_pct).toBeNull();
     });
   });
 
