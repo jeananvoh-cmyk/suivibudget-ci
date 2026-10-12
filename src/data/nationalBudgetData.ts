@@ -556,8 +556,8 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
       }
     ],
     "info_officer_title": "Service d'Accès aux Documents Publics (Loi n°2013-867)",
-    "budget_functioning_fcfa": 8429477575,
-    "budget_investment_fcfa": 1443100000,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
     "total_budget_fcfa": 9872577575,
     "budget_not_published": false
   },
@@ -783,8 +783,8 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
     "info_officer_phone": "",
     "info_officer_title": "Chef de Service Média et Événementiel (RI CAIDP)",
     "green_line_number": "800 00 900",
-    "budget_functioning_fcfa": 5552174916,
-    "budget_investment_fcfa": 0,
+    "budget_functioning_fcfa": null,
+    "budget_investment_fcfa": null,
     "total_budget_fcfa": 5552174916,
     "budget_not_published": false
   }
