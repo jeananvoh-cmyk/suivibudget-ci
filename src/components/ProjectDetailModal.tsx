@@ -85,6 +85,9 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
       
       {/* Modal Container */}
       <div 
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Détails du projet : ${project.title}`}
         className="bg-white rounded-3xl w-full max-w-3xl shadow-2xl border border-slate-200 overflow-hidden my-auto max-h-[92vh] flex flex-col print:max-h-none print:shadow-none print:border-none"
         onClick={(e) => e.stopPropagation()}
       >
