@@ -1,5 +1,19 @@
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 
+## CHECKPOINT DÉPENDANCES PR #33 — 11 OCTOBRE 2026
+
+- **STATUS** : `LOCAL_VALIDATED_AWAITING_PR_CI_AND_HUMAN_REVIEW` ; aucune fusion.
+- **BASE_MASTER_SHA** : `4b78a502aa469f809ef68d392fef62b91d559366` ; **PR33_HEAD** : `671a219fc5e4ec5d7136a7a35742b86a94dd414b`.
+- **CURRENT_BRANCH** : `codex/pr33-tailwind3-minimal`.
+- **Cause** : Tailwind 4.3.3 chargé comme plugin PostCSS v3 ; échec du build public confirmé dans la CI #33 et reproduit localement.
+- **Correction** : maintien de Tailwind 3.4.19 ; override exact `postcss-selector-parser` 7.1.6 et lockfile `source-map-js` 1.2.2. Aucun autre changement de dépendance.
+- **Validation** : 51 fichiers / 666 tests PASS avant et après, TypeScript PASS, builds public et revue PASS ; 23 assets publics et 2 assets de revue identiques octet par octet à master.
+- **Validation locale Windows** : Vite/Vitest utilisent `--configLoader native` avec préchargement externe de `__dirname` pour éviter une ACL parent bloquante dans esbuild ; configurations du dépôt intactes. CI Linux attendue avec commandes standard.
+- **UX_UI_REGRESSION_STATUS** : accueil, projets, institutions (index, ministères, grandes institutions, régulateurs, mairies, régions), observatoire, documents : 100 mesures DOM/styles identiques sur 10 largeurs de 360 à 1920 px ; aucune erreur JavaScript. Captures : 20/30 paires exactes, 10 avec faibles variations de rastérisation ; aucune revendication de comparaison PNG strictement identique. Débordement préexistant de 8 px sur l’accueil à 640/768 px conservé. Contrôle Chromium local avec requêtes externes bloquées, hors polices et contenus distants ; aucune nouvelle certification UX globale.
+- **AUDIT_NPM** : 8 alertes avant, 5 hautes après, toutes restantes liées à `braces` (GHSA-vfj7-8cjw-p6xm) ; traitement distinct requis.
+- **PÉRIMÈTRE** : lots 6–15, Supabase, migrations, données financières, code applicatif et configurations CSS/PostCSS/Vite inchangés ; aucun accès Supabase distant.
+- **NEXT_EXECUTABLE_TASK** : examiner la PR corrective et sa CI, puis décider humainement de son intégration et de la fermeture de #33 comme remplacée. Ne pas fusionner #33 en l’état.
+
 ## CHECKPOINT D'INTÉGRATION CONTRÔLÉE — 10 OCTOBRE 2026
 
 - **PR #31 : FUSIONNÉE sur master** par squash au commit `eda34b4d103110e6570d895812a60214052d854b`, après CI Quality réussie.

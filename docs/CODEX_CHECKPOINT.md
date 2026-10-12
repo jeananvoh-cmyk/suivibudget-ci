@@ -1,5 +1,19 @@
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
+## 11 octobre 2026 — correction minimale de la PR dépendances #33
+
+Base master réelle : `4b78a502aa469f809ef68d392fef62b91d559366`. PR #33 : `671a219fc5e4ec5d7136a7a35742b86a94dd414b`. Branche : `codex/pr33-tailwind3-minimal`.
+
+La CI #33 passe 664 tests puis échoue au build : Tailwind 4.3.3 ne fournit plus le plugin PostCSS utilisé par `postcss.config.js`. Les directives `@tailwind`, le thème JavaScript et les utilitaires existants nécessiteraient une migration spécifique. Maintien de Tailwind 3.4.19 ; seules mises à jour effectives : `postcss-selector-parser` 6.1.4 → 7.1.6 (override exact nécessaire pour les dépendances Tailwind/postcss-nested) et `source-map-js` 1.2.1 → 1.2.2. L’échec Vercel historique de #33 est séparément lié au quota de déploiements.
+
+Avant/après sur master : 666/666 tests, 51 fichiers ; TypeScript et builds public/revue PASS. Les 23 assets CSS/JS publics et les 2 de revue sont identiques octet par octet. CSS public : 103599 octets, SHA-256 `2c37533e907bf18caea18ad6b23aaf29fe949b2f434478c131fdc3000ec7e0ec`. CSS de revue : 5874 octets, SHA-256 `ba57a71dd0147d93358cc16852ac065a5fea879cbed0486cfbbb366b8ab0a1d0`.
+
+Contrôle navigateur : 10 routes publiques × 10 largeurs (360, 375, 390, 430, 640, 768, 1024, 1280, 1440, 1920), mesures DOM/styles identiques, zéro erreur JS et aucun nouveau débordement. Aléatoire de l’accueil stabilisé uniquement dans le script de test. 30 paires de captures : 20 exactes, 10 avec faibles variations de rastérisation ; le SHA strict des PNG n’est pas un contrôle réussi. Le débordement préexistant de l’accueil à 640/768 px reste de 8 px. Requêtes externes bloquées, aucun accès Supabase.
+
+Environnement Windows : ACL parent bloquante pour le bundler de configuration esbuild ; validation Vite/Vitest via `--configLoader native` avec préchargement externe de `__dirname`. Les configurations du dépôt restent intactes ; la CI Linux doit confirmer les commandes standard. `npm audit` : 8 alertes → 5 hautes, toutes restantes liées à braces (GHSA-vfj7-8cjw-p6xm), hors de ces deux mises à jour ciblées.
+
+Lots 6–15, code applicatif, données financières, Supabase et migrations inchangés. Recommandation : remplacer #33 par cette correction après CI et validation humaine. Aucune fusion ni fermeture exécutée.
+
 ## 9 octobre — Clôture définitive des bloqueurs financiers de l'audit indépendant (PR #30) sur PR #29
 
 Sur la branche `antigravity/reconcile-lots6-15-post-lot5` (PR #29) :
