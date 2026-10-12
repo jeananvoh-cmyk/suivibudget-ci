@@ -67,6 +67,11 @@ export function getBudgetLinesForEntity(
   const query = (entityName || '').toUpperCase();
   if (entityType === 'AUTORITE_REGULATION' || ['ARCOP', 'HACA', 'CAIDP', 'ARTCI', 'ANARE', 'CNDH', 'AIRP'].some(acronym => query.includes(acronym))) return [];
 
+  // HABG/IGE have official programme amounts but no independently sourced detailed lines.
+  // Block alias/fallback matching from reintroducing legacy illustrative allocations.
+  if (entityId === 'inst-habg' || entityId === 'inst-ige' ||
+      (entityType === 'GRANDE_INSTITUTION' && /\b(HABG|HAUTE AUTORITÉ POUR LA BONNE GOUVERNANCE|HAUTE AUTORITE POUR LA BONNE GOUVERNANCE|IGE|INSPECTION GÉNÉRALE D['’]ÉTAT|INSPECTION GENERALE D['’]ETAT)\b/i.test(entityName))) return [];
+
   // 1. Direct ID match (Deterministic, Highest Priority)
   if (entityId) {
     if (REGULATORY_AUTHORITIES_BUDGET_LINES[entityId]) {
