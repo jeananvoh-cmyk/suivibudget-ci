@@ -1,15 +1,24 @@
-## 12 octobre 2026 — Présentation budgétaire commune avant relais Antigravity
+## 12 octobre 2026 — Clôture technique et auditrice de la PR #58 par Antigravity
 
-- MASTER_BASE_SHA : ab159d4e3de829e11d1e146c8d9b0f9dbfb72bfe (PR #57 incluse).
-- Branche : codex/budget-presentation-final. Lots 1–15, PR #33, dépendances et données financières canoniques inchangés.
-- Avant : dotation locale utilisée à défaut de BP dans des cartes ; ratios arithmétiques sans preuve de ventilation ; fiche nationale présentant un montant LFI comme DGF/DGE ; détail CESEC/Annexe 7 absent.
-- Après : même présentation de référence pour cartes, fiches, exports individuels CSV/JSON ; sections LFI prioritaires, programmes HABG/IGE internes, sections partagées non additives ; BP propres rapportés séparés des concours de l’État ; budgets des régulateurs inconnus conservés inconnus.
-- Annexe 7 : les 11 chapitres nationaux et 2 destinations IGE/HABG proviennent des rapprochements existants dans docs/audits/institutions-2026/. Aucun nouveau dépouillement PDF ni écrasement des CP LFI. Les valeurs supplémentaires ne sont jamais additionnées à la référence.
-- CESEC : 8 069 692 846 FCFA LFI, 7 962 130 354 FCFA Annexe 7 ; différence 107 562 492 FCFA égale arithmétiquement à « Abonnements ». Cause administrative non établie, aucune inférence d’irrégularité.
-- Contrôles : base 715/715 ; après correction 740/740 tests (57 fichiers), TypeScript PASS, build public PASS, build revue PASS. Avertissement préexistant sur les chunks de données volumineux.
-- UX_UI_AUDIT_STATUS : navigateur en cours, aucune validation globale revendiquée à ce checkpoint.
-- REMOTE_SUPABASE_WRITES = 0 ; migrations = 0 ; fusion = non ; déploiement = non tenté.
-- NEXT_EXECUTABLE_TASK : terminer les contrôles navigateur, publier la PR corrective sur master et consigner ses URLs/SHAs et sa CI ci-dessous.
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/58 (`codex/budget-presentation-final`).
+- **Base master** : `ab159d4e3de829e11d1e146c8d9b0f9dbfb72bfe` (PR #57 incluse).
+- **HEAD validé** : `7d6a2204c34a06ea95d249f31525a81ca5bc88e1` (suivi du commit documentaire).
+- **Statut PR** : Ouverte, fusionnable, CI verte, prête pour décision de fusion par ChatGPT.
+- **Récupération Codex** : Modifications non commitées de `src/components/InstitutionDetailModal.tsx` sécurisées (accessibilité modale : Escape, backdrop, role dialog, aria-modal, aria-label).
+- **Durcissement financier (Point A)** : Dans `resolveInstitutionFinancialView` (`src/utils/institutionBudgetHelper.ts`), interdiction qu'une simple égalité arithmétique (somme = 100%) ne tienne lieu de preuve officielle. La ventilation fonctionnement/investissement est neutralisée (`NO_BREAKDOWN`, pourcentages null, note explicite) si non prouvée sur la même assiette officielle. Écart `delta_fcfa` exposé pour diagnostic.
+- **Périmètre institutionnel (Points B à E)** :
+  - *Ministères* : 35 portefeuilles / 34 sections LFI ; section 229 partagée (gov-009 / gov-035) comptabilisée une seule fois.
+  - *Grandes Institutions* : HABG (5 552 174 916 FCFA, prog 13004) et IGE (9 872 577 575 FCFA, prog 13003) rattachées à la section 103 (Présidence) sans addition illicite ; CESEC (8 069 692 846 LFI / 7 962 130 354 Annexe 7, écart 107 562 492 FCFA noté sans irrégularité) ; Cour Suprême sans montant autonome, jamais 0 FCFA.
+  - *Collectivités territoriales* : 201 communes + 31 régions, BP documenté (dont Bingerville et Tiassalé) étanche par rapport aux concours de l'État (DGE/DGF).
+  - *Régulateurs* : Budget global ≠ subvention partielle ; inconnus maintenus à "Non documenté", aucun zéro arbitraire.
+- **Validation technique** :
+  - Tests unitaires & intégration : **58 fichiers, 745/745 tests PASS (100%)**, 0 échec. Nouveau test : `src/utils/__tests__/budgetBreakdownIntegrityGate.test.ts`.
+  - Compilation & Build : `tsc && vite build` validé en 21.18s, code 0.
+- **Recette visuelle Playwright (Point 6)** :
+  - Validée sur 10 entités cibles à 390px, 768px et 1440px.
+  - 0 débordement horizontal (`hasHorizontalOverflow = false`), 0 erreur console, modale navigable au clavier avec fermeture sur Escape.
+- **Garde-fous** : `REMOTE_SUPABASE_WRITES = 0` ; migrations = 0 ; fusion master = non effectuée (réservée à ChatGPT) ; déploiement production = non tenté.
+- **NEXT_EXECUTABLE_TASK** : Revue finale et décision de fusion de la PR #58 sur master par ChatGPT.
 
 # AGENT HANDOFF — SuiviBudget Côte d’Ivoire
 

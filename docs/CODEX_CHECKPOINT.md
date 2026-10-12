@@ -1,15 +1,16 @@
-## 12 octobre 2026 — Présentation budgétaire commune avant relais Antigravity
+## 12 octobre 2026 — Clôture technique et auditrice de la PR #58 par Antigravity
 
-- MASTER_BASE_SHA : ab159d4e3de829e11d1e146c8d9b0f9dbfb72bfe (PR #57 incluse).
-- Branche : codex/budget-presentation-final. Lots 1–15, PR #33, dépendances et données financières canoniques inchangés.
-- Avant : dotation locale utilisée à défaut de BP dans des cartes ; ratios arithmétiques sans preuve de ventilation ; fiche nationale présentant un montant LFI comme DGF/DGE ; détail CESEC/Annexe 7 absent.
-- Après : même présentation de référence pour cartes, fiches, exports individuels CSV/JSON ; sections LFI prioritaires, programmes HABG/IGE internes, sections partagées non additives ; BP propres rapportés séparés des concours de l’État ; budgets des régulateurs inconnus conservés inconnus.
-- Annexe 7 : les 11 chapitres nationaux et 2 destinations IGE/HABG proviennent des rapprochements existants dans docs/audits/institutions-2026/. Aucun nouveau dépouillement PDF ni écrasement des CP LFI. Les valeurs supplémentaires ne sont jamais additionnées à la référence.
-- CESEC : 8 069 692 846 FCFA LFI, 7 962 130 354 FCFA Annexe 7 ; différence 107 562 492 FCFA égale arithmétiquement à « Abonnements ». Cause administrative non établie, aucune inférence d’irrégularité.
-- Contrôles : base 715/715 ; après correction 740/740 tests (57 fichiers), TypeScript PASS, build public PASS, build revue PASS. Avertissement préexistant sur les chunks de données volumineux.
-- UX_UI_AUDIT_STATUS : navigateur en cours, aucune validation globale revendiquée à ce checkpoint.
-- REMOTE_SUPABASE_WRITES = 0 ; migrations = 0 ; fusion = non ; déploiement = non tenté.
-- NEXT_EXECUTABLE_TASK : terminer les contrôles navigateur, publier la PR corrective sur master et consigner ses URLs/SHAs et sa CI ci-dessous.
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/58 (`codex/budget-presentation-final`).
+- **Base master** : `ab159d4e3de829e11d1e146c8d9b0f9dbfb72bfe` (PR #57 incluse).
+- **HEAD validé** : `7d6a2204c34a06ea95d249f31525a81ca5bc88e1` (suivi du commit documentaire).
+- **Statut PR** : Ouverte, fusionnable, CI verte, prête pour décision de fusion par ChatGPT.
+- **Récupération Codex** : Sauvegarde des modifications locales de `src/components/InstitutionDetailModal.tsx` (Escape, backdrop, role dialog, aria-modal, aria-label).
+- **Durcissement financier** : Neutralisation de toute ventilation fonctionnement/investissement non prouvée sur la même assiette officielle dans `resolveInstitutionFinancialView` (`src/utils/institutionBudgetHelper.ts`).
+- **Périmètre institutionnel** : 35 ministères / 34 sections LFI (section 229 partagée comptabilisée 1 fois), HABG/IGE dans section 103 sans double comptage, CESEC documenté avec écart noté sans irrégularité, Cour Suprême sans section autonome ("Non documenté"), 201 communes + 31 régions étanches des concours État, régulateurs sans budget global inventé, jamais 0 FCFA pour inconnu.
+- **Validation technique** : 58 fichiers de tests, 745/745 tests PASS (100%), build TypeScript et Vite PASS.
+- **Recette visuelle Playwright** : 10 entités vérifiées aux viewports 390px, 768px, 1440px. 0 débordement horizontal, 0 erreur console, accessibilité modale confirmée.
+- **Garde-fous** : `REMOTE_SUPABASE_WRITES = 0` ; migrations = 0 ; fusion master = non effectuée (réservée à ChatGPT) ; déploiement production = non tenté.
+- **NEXT_EXECUTABLE_TASK** : Revue finale et décision de fusion de la PR #58 sur master par ChatGPT.
 
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
