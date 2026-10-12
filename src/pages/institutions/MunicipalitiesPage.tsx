@@ -592,6 +592,24 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                     );
                   }
 
+                  const hasValidTotal = inst.total_budget_fcfa != null && Number.isFinite(inst.total_budget_fcfa) && inst.total_budget_fcfa > 0;
+
+                  if (!hasValidTotal) {
+                    return (
+                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-1 mt-3">
+                        <div className="flex items-center justify-between text-xs font-bold text-slate-600">
+                          <span className="uppercase text-[10px] tracking-wider text-slate-500">Budget communal 2026</span>
+                          <span className="text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md text-[10px] font-black">
+                            Non documenté publiquement
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 leading-snug">
+                          Délibération du budget primitif non transmise ou en attente d'approbation préfectorale. Aucun montant arbitraire n'est affiché.
+                        </p>
+                      </div>
+                    );
+                  }
+
                   return (
                     <div className="space-y-2 pt-2 mt-2">
                       <div className="flex justify-between items-center text-xs">

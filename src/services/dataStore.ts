@@ -35,6 +35,7 @@ import {
   exportLocalBudgetsToJson 
 } from '../data/localBudgetsReferential';
 import { validateAllLocalBudgets } from '../utils/budgetValidation';
+import { getOfficialPublicDocuments } from '../data/officialPublicDocumentsCatalog';
 
 const STORAGE_KEYS = {
   PROJECTS: 'civicdata_projects_v2026_clean_v4',
@@ -730,7 +731,7 @@ class DataStore {
       this.authState = { isAuthenticated: false, email: '', fullName: '', role: 'CITIZEN' };
     }
 
-    this.documents = [];
+    this.documents = getOfficialPublicDocuments();
 
     // 9. CAIDP Requests Log (Telemetry)
     this.caidpLogs = [];
@@ -794,15 +795,27 @@ class DataStore {
           .eq('status', 'PUBLISHED')
           .order('published_at', { ascending: false });
         if (!docsError && Array.isArray(remoteDocs) && remoteDocs.length > 0) {
-          // Merge preserving download counts and local additions
-          this.documents = remoteDocs.map(remoteDoc => {
-            const localDoc = this.documents.find(d => d.id === remoteDoc.id);
-            return {
-              ...remoteDoc,
-              downloads_count: Math.max(remoteDoc.downloads_count || 0, localDoc?.downloads_count || 0),
-            };
-          });
-                this.notify();
+          // Merge preserving official baseline and remote additions
+          const remoteMap = new Map(remoteDocs.map(d => [d.id, d]));
+          const merged: PublicDocument[] = [];
+          for (const localDoc of this.documents) {
+            const remoteDoc = remoteMap.get(localDoc.id);
+            if (remoteDoc) {
+              merged.push({
+                ...localDoc,
+                ...remoteDoc,
+                downloads_count: Math.max(remoteDoc.downloads_count || 0, localDoc.downloads_count || 0),
+              });
+              remoteMap.delete(localDoc.id);
+            } else {
+              merged.push(localDoc);
+            }
+          }
+          for (const newDoc of remoteMap.values()) {
+            merged.push(newDoc as PublicDocument);
+          }
+          this.documents = merged;
+          this.notify();
         }
       } catch (err) {
         // Table not present yet, silent fallback
@@ -1109,7 +1122,7 @@ class DataStore {
     const signOut = AuthSecurityService.clearSession();
     this.proofRefreshGeneration++;
     this.proofs = [];
-    this.documents = [];
+    this.documents = getOfficialPublicDocuments();
     this.authState = {
       isAuthenticated: false,
       email: '',
