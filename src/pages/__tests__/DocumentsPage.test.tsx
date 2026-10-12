@@ -150,7 +150,9 @@ describe('BLOC A — Intégration Documentaire & Budgétaire Publique (Lots 6, 7
       expect(html).toContain('Transparence &amp; Accès aux Documents (CAIDP)');
       expect(html).toContain('Loi de finances n° 2025-987');
       expect(html).toContain('Annexe 4 : Documents de Programmation Pluriannuelle');
-      expect(html).toContain('Exporter (JSON)');
+      expect(html).toContain('Open Data (JSON)');
+      expect(html).toContain('Open Data (CSV)');
+      expect(html).toContain('Sources (JSON)');
     });
 
     it('affiche les badges de source républicaine et les empreintes SHA-256 abrégées', () => {

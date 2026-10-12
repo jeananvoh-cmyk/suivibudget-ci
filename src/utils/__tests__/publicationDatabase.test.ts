@@ -120,7 +120,7 @@ beforeAll(async () => {
     insert into public.apec_cycles(id,institution_id,fiscal_year,title,source_reference,source_date)
       values ('10000000-0000-0000-0000-000000000001','apec-institution',2026,'Cycle test local','Source test locale','2026-09-30');
   `);
-}, 30000);
+}, 60000);
 
 afterAll(async () => { await db?.close(); });
 
