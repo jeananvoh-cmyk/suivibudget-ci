@@ -491,6 +491,10 @@ export const HomePage: React.FC<HomePageProps> = ({
           {heroFeatured && (
             <div 
               onClick={() => onSelectProject(heroFeatured)}
+              role="button"
+              tabIndex={0}
+              aria-label={`Consulter le projet : ${heroFeatured.title}`}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelectProject(heroFeatured); } }}
               className="lg:col-span-7 bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden cursor-pointer group hover:shadow-md hover:border-brand-blue/30 transition-all flex flex-col justify-between p-6 sm:p-8"
             >
               <div className="space-y-4">
@@ -554,6 +558,10 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div
                 key={article.id}
                 onClick={() => onSelectProject(article)}
+                role="button"
+                tabIndex={0}
+                aria-label={`Consulter le projet : ${article.title}`}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelectProject(article); } }}
                 className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm hover:border-brand-blue/40 hover:shadow-md transition-all cursor-pointer group"
               >
                 {/* Header Tag + Ministry */}
