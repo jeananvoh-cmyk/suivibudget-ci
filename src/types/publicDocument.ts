@@ -3,6 +3,8 @@
 // SuiviBudget Côte d'Ivoire - Architecture Multi-Exercices & Matrice 232
 // =========================================================================
 
+import type { DocumentAvailability, DocumentProvenance, ExtractionVerificationStatus } from '../review/domain/documents';
+
 export type DocumentCategory = 
   | 'RAPPORT_AUDIT' 
   | 'MARCHE_PUBLIC' 
@@ -80,6 +82,12 @@ export interface PublicDocument {
   verification_status?: DocumentLifecycleStatus | 'REJECTED' | 'SOURCE_CONFLICT';
   version?: number;
   checksum_sha256?: string | null;
+  source_provenance?: DocumentProvenance;
+  extraction_status?: ExtractionVerificationStatus;
+  availability?: DocumentAvailability;
+  accessed_at?: string | null;
+  http_status?: number | null;
+  control_scope?: string | null;
   replaces_document_id?: string | null;
   replacement_reason?: string | null;
   created_by?: string;

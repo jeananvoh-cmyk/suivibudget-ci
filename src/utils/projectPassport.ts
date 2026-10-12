@@ -652,7 +652,7 @@ export function generateProjectPassport(
 
   if (hasFieldProofs) {
     physicalStatus = 'CITIZEN_DOCUMENTED';
-    physicalLabel = `${approvedProofs.length} observation(s) citoyenne(s) validée(s)`;
+    physicalLabel = `${approvedProofs.length} observation(s) citoyenne(s) publiée(s)`;
   } else if (hasOfficialRate) {
     // Un taux officiel déclaré reste une déclaration administrative en attente de constat citoyen
     physicalStatus = 'PENDING_DOCUMENTATION';
@@ -675,14 +675,14 @@ export function generateProjectPassport(
         sourceDetails: project.official_progress_source || project.master_builder || 'Déclaration administrative non corroborée par constat indépendant (Principe 7).',
       },
       {
-        label: 'Constats citoyens vérifiés',
+        label: 'Contributions citoyennes publiées',
         value: hasFieldProofs ? `${approvedProofs.length} constat(s) photo/vidéo approuvé(s)` : '0 constat pour l\'instant',
         provenance: 'CITIZEN_OBSERVATION',
       },
       {
         label: 'Dernier statut terrain observé',
         value: hasFieldProofs 
-          ? (approvedProofs[0].citizen_status_claim === 'COMPLETED' ? 'Terminé sur le terrain' : approvedProofs[0].citizen_status_claim === 'IN_PROGRESS' ? 'En cours d\'exécution' : 'Non démarré')
+          ? (approvedProofs[0].citizen_status_claim === 'COMPLETED' ? 'Achèvement déclaré par un citoyen' : approvedProofs[0].citizen_status_claim === 'IN_PROGRESS' ? 'Travaux déclarés en cours' : 'Non démarré selon le citoyen')
           : 'Non documenté sur place',
         provenance: 'CITIZEN_OBSERVATION',
       },

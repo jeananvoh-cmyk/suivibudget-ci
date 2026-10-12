@@ -1,7 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { BudgetProject, ProjectStatus } from '../types';
 import { validateImageBinary, validateVideoBinary, compressAndSanitizeImage, sanitizeCoordinates } from '../utils/security';
-import { sanitizeCitizenIdentity } from '../review/domain/citizen';
 import { dataStore } from '../services/dataStore';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
 import { formatFCFA, formatAmountInWords } from '../utils/formatters';
@@ -153,8 +152,6 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
         if (draft.comment) setComment(draft.comment);
         if (draft.locality) setLocality(draft.locality);
         if (draft.observationDate) setObservationDate(draft.observationDate);
-        if (draft.citizenName) setCitizenName(draft.citizenName);
-        if (draft.citizenContact) setCitizenContact(draft.citizenContact);
         setHasDraftRestored(true);
       }
     } catch (e) {
@@ -174,8 +171,6 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
         comment,
         locality,
         observationDate,
-        citizenName,
-        citizenContact,
         updatedAt: new Date().toISOString(),
       };
       localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
@@ -429,7 +424,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
         citizen_status_claim: citizenStatus,
         comment: comment.trim(),
         locality_details: locality.trim(),
-        citizen_name: sanitizeCitizenIdentity(citizenName.trim()),
+        citizen_name: citizenName.trim(),
         citizen_whatsapp: citizenWhatsApp.trim() || citizenContact.trim() || undefined,
         signboard_status: signboardStatus,
       });
@@ -1194,7 +1189,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                   <div className="sm:col-span-8 space-y-1.5">
                     <div className="flex items-center justify-between">
                       <label className="block text-xs font-black uppercase tracking-wider text-slate-700">
-                        Localisation précise (Quartier, Rue, Repère) *
+                        Repère public du chantier (sans adresse privée) *
                       </label>
                       <button
                         type="button"
@@ -1203,7 +1198,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                         className="text-[11px] font-bold text-brand-blue hover:underline flex items-center gap-1"
                       >
                         <Navigation className={`w-3 h-3 ${isLocating ? 'animate-spin' : ''}`} />
-                        <span>{isLocating ? 'Géolocalisation...' : gpsSuccess ? '✓ Position ajoutée' : 'Ma position GPS'}</span>
+                        <span>{isLocating ? 'Géolocalisation...' : gpsSuccess ? 'Position publique ajoutée' : 'Ajouter la position publique du chantier'}</span>
                       </button>
                     </div>
                     <div className="relative">
@@ -1297,11 +1292,11 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                   />
                 </div>
 
-                {/* 2. Optional Citizen Identification */}
+                <p className="text-xs text-slate-600">Le commentaire, le lieu du chantier et les médias peuvent être publiés après modération. N’y incluez ni coordonnées personnelles ni adresse privée.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                      Votre Nom ou Pseudo (Facultatif)
+                      Nom pour le suivi privé (facultatif)
                     </label>
                     <div className="relative">
                       <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
@@ -1337,7 +1332,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                       Recevez la validation ou les observations des modérateurs directement sur WhatsApp.
                     </span>
                     <span className="text-[10px] text-slate-500 mt-1 block">
-                      🔒 Confidentialité civique (Principes 4 & 5) : votre numéro et identité privée ne sont jamais publiés publiquement.
+                      Votre nom et votre numéro sont réservés à l’instruction privée autorisée. La contribution publique est anonyme.
                     </span>
                   </div>
                 </div>

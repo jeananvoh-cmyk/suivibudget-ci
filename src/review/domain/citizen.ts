@@ -1,4 +1,4 @@
-import type { ApecPublicNeed } from '../../types';
+import type { ApecPublicNeed, CitizenProof } from '../../types';
 import { assessTarget, type DocumentedTarget } from './projects';
 import type { SourceDocument } from './documents';
 import { isCalendarDate } from './evidence';
@@ -43,17 +43,34 @@ export function citizenTrack(need: ApecPublicNeed, target: DocumentedTarget | nu
   };
 }
 
-/**
- * Anonymise les contributeurs et observateurs citoyens afin de protéger leur vie privée (Principe 4 & 5).
- * Ne publie jamais d'adresse e-mail, de numéro de téléphone ou de coordonnée personnelle.
- */
-export function sanitizeCitizenIdentity(name?: string | null): string {
-  if (!name || !name.trim()) return 'Sentinelle citoyenne';
-  const trimmed = name.trim();
-  if (trimmed.includes('@') || /^\+?[0-9\s-]{8,}$/.test(trimmed)) {
-    return 'Sentinelle citoyenne certifiée';
-  }
-  return trimmed;
+export function publicCitizenIdentity(): string {
+  return 'Sentinelle citoyenne';
+}
+
+export function publicCitizenProof(proof: CitizenProof): CitizenProof | null {
+  if (proof.verification_status !== 'APPROVED') return null;
+  return {
+    id: proof.id,
+    project_id: proof.project_id,
+    project_title: proof.project_title,
+    commune_name: proof.commune_name,
+    region_name: proof.region_name,
+    citizen_name: publicCitizenIdentity(),
+    user_name: publicCitizenIdentity(),
+    image_url: proof.image_url,
+    photo_url: proof.photo_url,
+    secondary_image_url: proof.secondary_image_url,
+    video_url: proof.video_url,
+    media_type: proof.media_type,
+    citizen_status_claim: proof.citizen_status_claim,
+    comment: proof.comment,
+    locality_details: proof.locality_details,
+    verification_status: proof.verification_status,
+    confirmations_count: proof.confirmations_count,
+    is_demo: proof.is_demo,
+    created_at: proof.created_at,
+    signboard_status: proof.signboard_status,
+  };
 }
 
 /**

@@ -21,7 +21,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   const entityInfo = getProjectEntityInfo(project.commune_name, project.region_name, project.ministry_name);
   const tier = getProjectTier(project);
   const tierBadge = getProjectTierBadge(tier);
-  const verifiedProofsCount = dataStore
+  const approvedContributionsCount = dataStore
     .getProofsForProject(project.id)
     .filter(p => p.verification_status === 'APPROVED').length;
 
@@ -176,10 +176,10 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         {/* Citizen Status Info */}
         <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between">
           <span className="text-[11px] font-bold text-slate-500">Contrôle citoyen</span>
-          {verifiedProofsCount > 0 ? (
+          {approvedContributionsCount > 0 ? (
             <span className="text-[11px] font-bold text-emerald-800 inline-flex items-center gap-1.5 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
               <Camera className="w-3 h-3 text-emerald-600" />
-              <span>{verifiedProofsCount} constat(s) certifié(s)</span>
+              <span>{approvedContributionsCount} contribution(s) citoyenne(s) publiée(s)</span>
             </span>
           ) : (
             <span className="text-[11px] font-semibold text-slate-600 inline-flex items-center gap-1.5 bg-white px-2.5 py-0.5 rounded-full border border-slate-200">

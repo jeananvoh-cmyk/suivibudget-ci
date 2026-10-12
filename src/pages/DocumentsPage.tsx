@@ -22,7 +22,7 @@ import { PublicDocument, DocumentCategory } from '../types';
 import { matchesSmartSearch } from '../utils/searchHelpers';
 import { publicDocumentMetadata } from '../review/domain/documents';
 import { openDataCsv, openDataJson, auditedObservationsFromCatalog } from '../review/domain/history';
-import { getReviewSourceDocuments, findOfficialDocumentByChecksum } from '../data/officialPublicDocumentsCatalog';
+import { getReviewSourceDocuments } from '../data/officialPublicDocumentsCatalog';
 
 interface DocumentsPageProps {
   onNavigateToCaidp?: () => void;
@@ -47,10 +47,10 @@ export function getBudgetNatureLabel(doc: PublicDocument): string {
     return 'Programmation Pluriannuelle (DPPD-PAP)';
   }
   if (id.includes('TRANSFERT') || id.includes('LOCAL')) {
-    return 'Concours Collectivités (234 CT)';
+    return 'Concours Collectivités et Districts';
   }
   if (id.includes('ANNEXE-6')) {
-    return 'Subventions AAI (Régulateurs)';
+    return 'Budgets EPN et structures assimilées';
   }
   if (id.includes('ANNEXE-7')) {
     return 'Dotations Directes Institutions';
@@ -248,7 +248,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
               Bibliothèque Publique & Documents Administratifs
             </h1>
             <p className="text-xs sm:text-sm text-slate-200 mt-1.5 max-w-2xl leading-relaxed">
-              Consultez et téléchargez librement les rapports officiels, budgets, audits et textes de lois de la République de Côte d'Ivoire (Loi n° 2013-867). Chaque document officiel bénéficie d'une empreinte SHA-256 infalsifiable.
+            Consultez les sources publiques et leur état de contrôle. Une empreinte identifie le fichier acquis ; elle ne certifie ni son contenu ni l’ensemble de son extraction.
             </p>
           </div>
 
@@ -299,7 +299,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
               <button
                 onClick={handleExportCatalogJson}
                 className="min-h-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs border border-white/20 backdrop-blur-md transition-all cursor-pointer shadow-2xs"
-                title="Télécharger l'inventaire officiel certifié des sources au format JSON"
+                title="Télécharger les métadonnées des originaux contrôlés au format JSON"
                 aria-label="Exporter le catalogue des sources au format JSON"
               >
                 <Download className="w-3.5 h-3.5" />
@@ -418,8 +418,8 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredDocuments.map((doc) => {
-            const isOfficial = doc.is_official || Boolean(doc.checksum_sha256);
-            const isVerified = doc.verification_status === 'VERIFIED';
+            const isOfficial = doc.is_official && doc.source_provenance === 'OFFICIAL_SOURCE';
+            const isVerified = doc.extraction_status === 'VERIFIED' && !!doc.control_scope;
             const budgetNature = getBudgetNatureLabel(doc);
             const hasSha256 = Boolean(doc.checksum_sha256);
             const isCopied = copiedHashId === doc.id;
@@ -476,15 +476,22 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                       </span>
                     )}
 
-                    {isVerified && (
+                    {isVerified ? (
                       <span className="inline-flex items-center gap-1 text-[10px] font-black text-blue-800 bg-blue-50 border border-blue-200/90 px-2 py-0.5 rounded-md">
                         <CheckCircle2 className="w-3 h-3 text-blue-600" />
-                        <span>Extraction Contrôlée</span>
+                        <span title={doc.control_scope || undefined}>Extraction partiellement contrôlée</span>
                       </span>
+                    ) : (
+                      <span className="text-xs text-amber-800">Extraction à vérifier</span>
                     )}
                   </div>
 
-                  {/* Empreinte Cryptographique SHA-256 */}
+                  <p className="text-xs text-slate-600">
+                    {doc.verification_status === 'VERIFIED' ? 'Original contrôlé' : 'Authenticité à vérifier'}
+                    {' · '}{doc.http_status === 200 ? 'Lien accessible lors du contrôle' : doc.http_status === 404 ? 'Lien indisponible (HTTP 404)' : 'Disponibilité inconnue'}
+                    {doc.accessed_at && ` — ${doc.accessed_at}`}
+                    {doc.availability === 'AVAILABLE_FROM_PRIOR_OFFICIAL_ACQUISITION' && ' · Empreinte de l’acquisition antérieure'}
+                  </p>
                   {hasSha256 && (
                     <div className="pt-1">
                       <div className="bg-slate-50 border border-slate-200 rounded-xl p-2 flex items-center justify-between gap-2">
@@ -498,6 +505,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                           type="button"
                           onClick={() => handleCopySha256(doc.id, doc.checksum_sha256!)}
                           className="flex-shrink-0 p-1 text-slate-400 hover:text-slate-800 rounded-md hover:bg-slate-200/70 transition-colors cursor-pointer"
+                          aria-label="Copier l’empreinte SHA-256"
                           title="Copier l'empreinte SHA-256 complète pour vérification"
                         >
                           {isCopied ? (
@@ -547,17 +555,19 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-2 text-slate-500 hover:text-slate-800 rounded-xl hover:bg-slate-200/60 transition-colors"
-                        title="Ouvrir le document officiel dans un nouvel onglet"
+                        aria-label="Ouvrir la source documentaire dans un nouvel onglet"
+                        title="Ouvrir la source documentaire dans un nouvel onglet"
                       >
                         <ExternalLink className="w-4 h-4" />
                       </a>
                     )}
                     <button
+                      disabled={doc.http_status === 404 || !doc.file_url && !doc.storage_path}
                       onClick={() => handleDownload(doc)}
                       className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-brand-blue hover:bg-blue-700 active:scale-95 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
                     >
                       <Download className="w-3.5 h-3.5" />
-                      <span>Télécharger</span>
+                      <span>{doc.http_status === 404 ? 'Lien indisponible' : 'Télécharger'}</span>
                     </button>
                   </div>
                 </div>

@@ -19,6 +19,7 @@ import { CAIDP_MASTER_DIRECTORY, CaidpEntity } from '../data/caidpRiData';
 import { AuthSecurityService } from './authSecurity';
 import { sanitizeCsvCell } from '../utils/security';
 import { supabase, isSupabaseConfigured } from './supabase';
+import { publicCitizenProof } from '../review/domain/citizen';
 import { refreshPublishedAdministrativeAccounts } from '../data/administrativeAccountsData';
 import { fetchPublishedLocalBudgets } from './administrativeAccountsService';
 import { enrichWithPrimitiveBudgets, OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
@@ -490,6 +491,7 @@ class DataStore {
   private institutions: Institution[] = [];
   private localBudgets: LocalBudget[] = [];
   private proofs: CitizenProof[] = [];
+  private publicProofs: CitizenProof[] = [];
   private proofRefreshGeneration = 0;
   private articles: NewsArticle[] = [];
   private documents: PublicDocument[] = [];
@@ -861,6 +863,7 @@ class DataStore {
     const generation = ++this.proofRefreshGeneration;
     if (!isSupabaseConfigured()) {
       this.proofs = [];
+      this.publicProofs = [];
       this.notify();
       return;
     }
@@ -869,16 +872,17 @@ class DataStore {
     const { data: published, error: publicError } = await supabase.from('public_citizen_proofs')
       .select('*').order('created_at', { ascending: false });
     if (publicError) throw publicError;
-    let rows = published || [];
+    let privateRows: NonNullable<typeof published> = [];
     if (identity.user) {
-      const { data: accessible, error } = await supabase.from('citizen_proofs')
-        .select('*').order('created_at', { ascending: false });
+      let query = supabase.from('citizen_proofs').select('*');
+      if (!['ADMIN', 'MODERATOR'].includes(this.getAuth().role)) {
+        query = query.eq('citizen_user_id', identity.user.id);
+      }
+      const { data: accessible, error } = await query.order('created_at', { ascending: false });
       if (error) throw error;
-      const byId = new Map(rows.map(row => [row.id, row]));
-      (accessible || []).forEach(row => byId.set(row.id, row));
-      rows = Array.from(byId.values());
+      privateRows = accessible || [];
     }
-    const resolved = await Promise.all(rows.map(async row => {
+    const resolveMedia = async (rows: NonNullable<typeof published>) => Promise.all(rows.map(async row => {
       const media = await Promise.all(['image', 'secondary_image', 'video'].map(async kind => {
         const path = row[`${kind}_url`];
         if (!path) return [kind, undefined];
@@ -901,8 +905,16 @@ class DataStore {
         confirmations_count: row.confirmations_count ?? 0,
       };
     }));
+    const [resolvedPublic, resolvedPrivate] = await Promise.all([
+      resolveMedia(published || []), resolveMedia(privateRows),
+    ]);
     if (generation !== this.proofRefreshGeneration) return;
-    this.proofs = resolved.sort((left, right) => right.created_at.localeCompare(left.created_at));
+    this.publicProofs = resolvedPublic.flatMap(row => {
+      const proof = publicCitizenProof(row);
+      return proof ? [proof] : [];
+    });
+    const byId = new Map([...resolvedPublic, ...resolvedPrivate].map(row => [row.id, row]));
+    this.proofs = [...byId.values()].sort((left, right) => right.created_at.localeCompare(left.created_at));
     this.notify();
   }
 
@@ -1024,11 +1036,11 @@ class DataStore {
   }
 
   public getApprovedProofs(): CitizenProof[] {
-    return this.proofs.filter(p => p.verification_status === 'APPROVED');
+    return this.publicProofs.map(proof => ({ ...proof }));
   }
 
   public hasRealProofs(): boolean {
-    return this.proofs.some(p => p.verification_status === 'APPROVED' && !p.is_demo);
+    return this.publicProofs.some(p => !p.is_demo);
   }
 
   public getAllProofs(): CitizenProof[] {
@@ -1062,7 +1074,7 @@ class DataStore {
   }
 
   public getProofsForProject(projectId: string): CitizenProof[] {
-    return this.proofs.filter(p => p.project_id === projectId && p.verification_status === 'APPROVED');
+    return this.getApprovedProofs().filter(p => p.project_id === projectId);
   }
 
   public getAuth(): AuthState {
@@ -1122,6 +1134,7 @@ class DataStore {
     const signOut = AuthSecurityService.clearSession();
     this.proofRefreshGeneration++;
     this.proofs = [];
+    this.publicProofs = [];
     this.documents = getOfficialPublicDocuments();
     this.authState = {
       isAuthenticated: false,
@@ -1307,6 +1320,7 @@ class DataStore {
     const { error } = await supabase.from('citizen_proofs').delete().eq('id', proofId).select('id').single();
     if (error) throw error;
     this.proofs = this.proofs.filter(proof => proof.id !== proofId);
+    this.publicProofs = this.publicProofs.filter(proof => proof.id !== proofId);
     this.notify();
   }
   // --- PROJECT CRUD ---

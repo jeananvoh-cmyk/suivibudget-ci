@@ -25,6 +25,7 @@ import {
   Landmark
 } from 'lucide-react';
 import { dataStore } from '../services/dataStore';
+import { publicCitizenIdentity } from '../review/domain/citizen';
 import { ProjectAccountabilityPassport } from './ProjectAccountabilityPassport';
 import { findMatchingCaOperation, findMatchingDgmpProcurement } from '../utils/projectPassport';
 
@@ -49,7 +50,6 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   const [activeTab, setActiveTab] = useState<'budget' | 'passport' | 'proofs'>('budget');
 
   const proofs = dataStore.getProofsForProject(project.id);
-  const verifiedProofs = proofs.filter(p => p.verification_status === 'APPROVED');
   const matchedCa = findMatchingCaOperation(project);
   const matchedDgmp = findMatchingDgmpProcurement(project);
   const entityInfo = getProjectEntityInfo(project.commune_name, project.region_name, project.ministry_name);
@@ -258,7 +258,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                       
                       <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">
                         <span className="w-2 h-2 rounded-full bg-slate-400"></span>
-                        <span>{verifiedProofs.length > 0 ? 'Constaté sur le terrain' : 'Voté au Budget (P7 : physique non certifié)'}</span>
+                        <span>Réalisation physique non certifiée</span>
                       </span>
                     </div>
                     
@@ -284,7 +284,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                         >
                           <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
                             <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            <span>{proofs[0].citizen_status_claim === 'COMPLETED' ? 'Terminé sur le terrain' : proofs[0].citizen_status_claim === 'IN_PROGRESS' ? 'En cours d\'exécution' : 'Non démarré'}</span>
+                            <span>{proofs[0].citizen_status_claim === 'COMPLETED' ? 'Achèvement déclaré par un citoyen' : proofs[0].citizen_status_claim === 'IN_PROGRESS' ? 'Travaux déclarés en cours' : 'Non démarré selon le citoyen'}</span>
                           </div>
                           <span className="text-xs font-semibold text-slate-600 hover:text-slate-900 inline-flex items-center gap-1">
                             Voir les médias <ArrowRight className="w-3.5 h-3.5" />
@@ -292,7 +292,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                         </div>
                       ) : (
                         <div className="p-3 bg-white rounded-xl border border-slate-200 text-xs text-slate-500 italic">
-                          Aucun constat photo/vidéo validé pour l'instant.
+                          Aucune contribution photo/vidéo publiée pour l'instant.
                         </div>
                       )}
                     </div>
@@ -503,7 +503,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                     <span>Constats et Preuves Multimédias ({proofs.length})</span>
                   </h4>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Photographies et courtes vidéos (15-30s) vérifiées et publiées par les riverains
+                          Contributions des riverains approuvées pour publication. Elles ne certifient pas la réalisation physique.
                   </p>
                 </div>
 
@@ -570,7 +570,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                                 proof.citizen_status_claim === 'COMPLETED' ? 'bg-emerald-600 text-white' :
                                 proof.citizen_status_claim === 'IN_PROGRESS' ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'
                               }`}>
-                                {proof.citizen_status_claim === 'COMPLETED' ? 'Terminé' :
+                                Déclaré : {proof.citizen_status_claim === 'COMPLETED' ? 'Terminé' :
                                  proof.citizen_status_claim === 'IN_PROGRESS' ? 'En chantier' : 'Non démarré'}
                               </span>
                             </div>
@@ -590,12 +590,12 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                           <div className="p-4 space-y-3">
                             <div className="flex items-center justify-between text-xs text-slate-500">
                               <span className="font-bold text-slate-800">
-                                {proof.citizen_name || 'Citoyen Observateur'}
+                                {publicCitizenIdentity()}
                               </span>
                               {proof.verification_status === 'APPROVED' && (
                                 <span className="text-emerald-700 font-bold flex items-center gap-1 text-[10px]">
                                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                                  Vérifié
+                                  Publication approuvée
                                 </span>
                               )}
                             </div>
