@@ -47,77 +47,10 @@ export const NATIONAL_INSTITUTIONS_MAP: Record<string, string> = {
   'inst-cnrct': 'Chambre Nationale des Rois et Chefs Traditionnels',
 };
 
+/** No detailed 2026 budget lines are published for HABG or IGE without per-line official provenance. */
 export const NATIONAL_INSTITUTIONS_EXTRA_LINES: Record<string, BudgetLineItem[]> = {
-  "inst-habg": [
-    {
-      libelle: "Digitalisation de la plateforme des déclarations de patrimoine et outils d'investigation financière",
-      montant_fcfa: 1425000000,
-      evolution_pct: 15.0,
-      categorie: "NUMERIQUE",
-      sous_categorie_1: "INSTITUTIONS",
-      sous_categorie_2: "HABG",
-      sous_categorie_3: "Digitalisation & Systèmes Anti-Corruption",
-      nature: "Investissements",
-      year: 2026
-    },
-    {
-      libelle: "Traitements et salaires des Commissaires, enquêteurs et juristes d'investigation",
-      montant_fcfa: 2327500000,
-      evolution_pct: 4.1,
-      categorie: "PERSONNEL",
-      sous_categorie_1: "INSTITUTIONS",
-      sous_categorie_2: "HABG",
-      sous_categorie_3: "Direction des Enquêtes & Commissaires",
-      nature: "Personnel",
-      year: 2026
-    },
-    {
-      libelle: "Campagnes de sensibilisation citoyenne, enquêtes terrain et coopération internationale",
-      montant_fcfa: 997500000,
-      evolution_pct: 3.5,
-      categorie: "FONCTIONNEMENT",
-      sous_categorie_1: "INSTITUTIONS",
-      sous_categorie_2: "HABG",
-      sous_categorie_3: "Prévention & Sensibilisation",
-      nature: "Biens et services",
-      year: 2026
-    }
-  ],
-  "inst-ige": [
-    {
-      libelle: "Construire les bâtiments annexes et réhabiliter le siège de l'Inspection Générale d'Etat (IGE)",
-      montant_fcfa: 1443100000,
-      evolution_pct: 7.2,
-      categorie: "INFRASTRUCTURE",
-      sous_categorie_1: "INSTITUTIONS",
-      sous_categorie_2: "IGE",
-      sous_categorie_3: "Infrastructures d'Inspection & Contrôle",
-      nature: "Investissements",
-      year: 2026
-    },
-    {
-      libelle: "Rémunérations et traitements des Inspecteurs d'État et vérificateurs de conformité administrative",
-      montant_fcfa: 2150000000,
-      evolution_pct: 4.0,
-      categorie: "PERSONNEL",
-      sous_categorie_1: "INSTITUTIONS",
-      sous_categorie_2: "IGE",
-      sous_categorie_3: "Inspecteurs d'État & Auditeurs",
-      nature: "Personnel",
-      year: 2026
-    },
-    {
-      libelle: "Missions d'audit public, inspections de conformité et contrôle de gestion des administrations publiques",
-      montant_fcfa: 950000000,
-      evolution_pct: 3.5,
-      categorie: "FONCTIONNEMENT",
-      sous_categorie_1: "INSTITUTIONS",
-      sous_categorie_2: "IGE",
-      sous_categorie_3: "Audits & Contrôle Général",
-      nature: "Biens et services",
-      year: 2026
-    }
-  ]
+  'inst-habg': [],
+  'inst-ige': [],
 };
 
 export function getBudgetLinesForEntity(
@@ -133,6 +66,11 @@ export function getBudgetLinesForEntity(
   if (entityId && regulatorIds.has(entityId)) return [];
   const query = (entityName || '').toUpperCase();
   if (entityType === 'AUTORITE_REGULATION' || ['ARCOP', 'HACA', 'CAIDP', 'ARTCI', 'ANARE', 'CNDH', 'AIRP'].some(acronym => query.includes(acronym))) return [];
+
+  // HABG/IGE have official programme amounts but no independently sourced detailed lines.
+  // Block alias/fallback matching from reintroducing legacy illustrative allocations.
+  if (entityId === 'inst-habg' || entityId === 'inst-ige' ||
+      (entityType === 'GRANDE_INSTITUTION' && /\b(HABG|HAUTE AUTORITÉ POUR LA BONNE GOUVERNANCE|HAUTE AUTORITE POUR LA BONNE GOUVERNANCE|IGE|INSPECTION GÉNÉRALE D['’]ÉTAT|INSPECTION GENERALE D['’]ETAT)\b/i.test(entityName))) return [];
 
   // 1. Direct ID match (Deterministic, Highest Priority)
   if (entityId) {
