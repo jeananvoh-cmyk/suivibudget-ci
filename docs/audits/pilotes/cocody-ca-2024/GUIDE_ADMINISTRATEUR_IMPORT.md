@@ -50,12 +50,17 @@ Certains documents officiels issus de photocopieurs haute résolution dépassent
 
 1. Dans la fenêtre de dépôt, cochez l'option **Document scanné en plusieurs parties (multi-fascicules)**.
 2. Cochez également la case **Scan image / Pas de couche de texte exploitable** si le document est une série d'images scannées sans OCR préalable.
-3. Indiquez le **Nombre total de pages physiques** (ex. : `44`).
-4. Dans la section **Détail des fascicules** :
-   - Cliquez sur **+ Ajouter un fascicule**.
-   - Fascicule 1 : Entrez le nom (`Cocody_CA_2024_pages_01-22.pdf`), la plage de pages (`1 à 22`), et téléversez le premier fichier.
-   - Fascicule 2 : Entrez le nom (`Cocody_CA_2024_pages_23-44.pdf`), la plage de pages (`23 à 44`), et téléversez le second fichier.
-5. Indiquez l'**Empreinte globale SHA-256** certifiée du document d'origine si disponible (ex. : `941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf`).
+3. Dans la section **Détail des fascicules** :
+   - Le formulaire présente initialement deux volets. Vous pouvez en ajouter ou en retirer avec les boutons dédiés.
+   - **Volet 1** : Cliquez sur *Parcourir* et sélectionnez le premier fichier PDF (`Cocody_CA_2024_pages_01-22.pdf`). Saisissez la plage de pages : `1` à `22`.
+   - **Volet 2** : Cliquez sur *Parcourir* et sélectionnez le second fichier PDF (`Cocody_CA_2024_pages_23-44.pdf`). Saisissez la plage de pages : `23` à `44`.
+4. **Calcul automatique et transparent des empreintes SHA-256** :
+   - Dès la sélection de chaque fichier sur votre ordinateur, votre navigateur calcule instantanément son empreinte SHA-256 réelle en lisant ses octets.
+   - Le système calcule automatiquement l'empreinte globale du manifeste (ex. `ace0243d9ed0cae9e6ee24c420f554751893eecff79f4202007d1c48f5d19928` pour Cocody 2024). **Aucune saisie manuelle de code cryptographique n'est requise.**
+5. **Contrôle automatique de continuité des pages** :
+   - Le formulaire vérifie en direct l'absence de chevauchement ou de saut de pages entre volets (le volet 2 doit débuter à la page qui suit la fin du volet 1).
+6. **Sécurité et atomicité du téléversement** :
+   - Les fichiers sont téléversés séquentiellement dans le bucket privé sécurisé. En cas de coupure de réseau ou d'erreur sur un volet ultérieur, un mécanisme de rollback automatique supprime immédiatement les fichiers partiels déjà envoyés.
 
 ---
 
@@ -112,14 +117,20 @@ Avant tout enregistrement en base :
 
 ## 7. Examen, Validation (`VERIFIED`) et Publication (`PUBLISHED`)
 
-1. Dans la liste des documents à vérifier, ouvrez le document.
+1. Dans la liste des documents à vérifier, cliquez sur **Examiner** en face de la ligne correspondante.
 2. L'écran d'examen affiche :
-   - La visionneuse du document scanné et la liste de ses fascicules.
-   - Le tableau comparatif des chiffres saisis et des calculs vérifiés.
+   - La liste des fascicules du document avec, pour chaque volet, un bouton direct **« Consulter le PDF (Volet X) »**. Ce bouton génère une URL signée temporaire sécurisée pour ouvrir directement le volet concerné sans exposer le bucket privé.
+   - L'empreinte SHA-256 du manifeste avec le badge *« Multi-parties (X volets) »*.
+   - Le tableau comparatif des chiffres saisis et des équilibres vérifiés.
    - Les alertes de contrôle et les visas légaux.
-3. Un réviseur indépendant (Modérateur ou Data Manager) clique sur **Marquer comme Vérifié (`VERIFIED`)**.
-4. Enfin, pour ouvrir l'accès aux citoyens, cliquez sur **Publier officiellement (`PUBLISHED`)**.
-5. Les données alimentent immédiatement les fiches territoriales, les graphiques d'exécution et les indicateurs civiques.
+3. **Validation intermédiaire (`VERIFIED`)** :
+   - Un réviseur (rôle `MODERATOR`, `DATA_MANAGER` ou `ADMIN`) examine les justificatifs et clique sur **Marquer comme Vérifié (`VERIFIED`)**.
+   - Le statut passe immédiatement à `VERIFIED`. L'affichage de la liste des 232 collectivités s'actualise instantanément.
+4. **Publication officielle (`PUBLISHED`)** :
+   - **Règle stricte :** Le bouton de publication est désactivé tant que le document n'a pas été préalablement marqué comme vérifié.
+   - **Privilèges requis (RBAC) :** Seuls les utilisateurs avec le rôle `ADMIN` ou `DATA_MANAGER` peuvent procéder à la publication. Les modérateurs civiques (`MODERATOR`) ne disposent pas du droit de publication unilatérale.
+   - L'administrateur clique sur **Publier officiellement (`PUBLISHED`)**.
+5. Les données alimentent immédiatement les fiches territoriales, les graphiques d'exécution et les indicateurs civiques accessibles aux citoyens.
 
 ---
 

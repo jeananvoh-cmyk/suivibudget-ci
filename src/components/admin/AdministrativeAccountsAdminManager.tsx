@@ -154,15 +154,17 @@ export const AdministrativeAccountsAdminManager: React.FC<AdministrativeAccounts
     }
     tab.opener = null;
     try {
-      let url = doc.file_url;
-      if (doc.storage_path) {
+      const targetStoragePath = doc.storage_path || (doc.document_parts && doc.document_parts[0]?.storage_path);
+      const targetFileUrl = doc.file_url || (doc.document_parts && doc.document_parts[0]?.file_url);
+      let url = targetFileUrl;
+      if (targetStoragePath) {
         const { data, error } = await supabase.storage
           .from(doc.storage_bucket || 'public_documents')
-          .createSignedUrl(doc.storage_path, 300);
+          .createSignedUrl(targetStoragePath, 300);
         if (error || !data?.signedUrl) throw new Error('Lien temporaire du PDF indisponible.');
         url = data.signedUrl;
       }
-      if (!isSafeUrl(url)) throw new Error('Lien documentaire invalide.');
+      if (!url || !isSafeUrl(url)) throw new Error('Lien documentaire invalide.');
       tab.location.href = url;
     } catch (error) {
       tab.close();
@@ -595,8 +597,13 @@ export const AdministrativeAccountsAdminManager: React.FC<AdministrativeAccounts
                             <div className="font-semibold text-slate-900 truncate" title={doc?.file_name}>
                               {doc?.file_name}
                             </div>
-                            <div className="text-[10px] text-slate-400 font-mono mt-0.5 flex items-center gap-2">
+                            <div className="text-[10px] text-slate-400 font-mono mt-0.5 flex flex-wrap items-center gap-1.5">
                               <span>{doc?.file_size || 'PDF'}</span>
+                              {doc?.is_multipart && (
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-blue-100 text-brand-blue">
+                                  {doc.parts_count || doc.document_parts?.length || 2} volets
+                                </span>
+                              )}
                               {doc?.checksum_sha256 && (
                                 <span title={doc.checksum_sha256}>
                                   • #{doc.checksum_sha256.substring(0, 6)}...
@@ -704,7 +711,15 @@ export const AdministrativeAccountsAdminManager: React.FC<AdministrativeAccounts
         selectedYear={selectedYear}
         existingDocument={selectedDocForEdit}
         onSuccess={(savedDoc) => {
-          // updated
+          setDocuments(prev => {
+            const existingIndex = prev.findIndex(d => d.id === savedDoc.id);
+            if (existingIndex >= 0) {
+              const updated = [...prev];
+              updated[existingIndex] = savedDoc;
+              return updated;
+            }
+            return [savedDoc, ...prev];
+          });
         }}
         onShowToast={onShowToast}
       />
@@ -719,7 +734,28 @@ export const AdministrativeAccountsAdminManager: React.FC<AdministrativeAccounts
         document={selectedDocForExamine}
         onOpenEdit={(doc) => handleOpenEdit(doc)}
         onStatusChange={(docId, newStatus) => {
-          // updated
+          setDocuments(prev => prev.map(d => {
+            if (d.id !== docId) return d;
+            return {
+              ...d,
+              status: newStatus,
+              verification_status: newStatus === 'PUBLISHED' ? 'VERIFIED' : (newStatus === 'VERIFIED' ? 'VERIFIED' : d.verification_status),
+              document_status: newStatus,
+              is_official: newStatus === 'PUBLISHED',
+              verified_at: (newStatus === 'VERIFIED' || newStatus === 'PUBLISHED') ? (d.verified_at || new Date().toISOString()) : d.verified_at,
+              published_at: newStatus === 'PUBLISHED' ? (d.published_at || new Date().toISOString()) : d.published_at,
+              updated_at: new Date().toISOString()
+            };
+          }));
+          if (selectedDocForExamine && selectedDocForExamine.id === docId) {
+            setSelectedDocForExamine(prev => prev ? {
+              ...prev,
+              status: newStatus,
+              verification_status: newStatus === 'PUBLISHED' ? 'VERIFIED' : (newStatus === 'VERIFIED' ? 'VERIFIED' : prev.verification_status),
+              document_status: newStatus,
+              is_official: newStatus === 'PUBLISHED',
+            } : undefined);
+          }
         }}
         onShowToast={onShowToast}
       />

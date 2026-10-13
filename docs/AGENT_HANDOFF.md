@@ -1,3 +1,37 @@
+## 13 octobre 2026 — Correction Finale PR #62 : Ingestion Multi-PDF Réelle et Validation Administrateur (Antigravity)
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62
+- **Branche Git** : `feat/admin-financial-document-ingestion-pilot`
+- **Revue traitée** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62#issuecomment-6150297544
+- **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0` (tests et simulations 100% locaux sous PGlite WASM / vitest ; zéro écriture sur la base Supabase distante).
+- **Problèmes résolus et durcissements appliqués** :
+  1. **Téléversement multi-fascicules réel & Rollback atomique** (`SingleCAUploadModal.tsx`, `documentStorageService.ts`) :
+     - Sélection physique et téléversement séquentiel de chaque fichier PDF dans le bucket privé `public_documents`.
+     - Nettoyage automatique et suppression des volets déjà téléversés en cas d'échec sur un volet ultérieur.
+     - Chemins de stockage canoniques standardisés : `comptes-administratifs/communes/{institutionId}/{fiscalYear}/compte-administratif-{fiscalYear}-v{version}-part-{partNumber}.pdf`.
+  2. **Calcul d'empreinte 100% client et transparent** :
+     - Calcul automatique du SHA-256 pour chaque fascicule dès la sélection de fichier par l'administrateur (zéro saisie manuelle de hash).
+     - Calcul déterministe du SHA-256 du manifeste (hash trié des volets séparés par `:`) : pour Cocody 2024, `ace0243d9ed0cae9e6ee24c420f554751893eecff79f4202007d1c48f5d19928`.
+  3. **Contrôle strict des plages de pages** (`validateDocumentPageRanges`) :
+     - Vérification de contiguïté sans trou ni chevauchement (ex. Volet 1 : 1–22, Volet 2 : 23–44 $\rightarrow$ Total 44 pages).
+  4. **Cycle découplé et synchronisation bivalente des statuts** (`dataStore.ts`) :
+     - `updateDocumentLifecycleStatus` met à jour simultanément `status` et `verification_status` (`TO_VERIFY` $\rightarrow$ `VERIFIED` $\rightarrow$ `PUBLISHED`).
+     - Garde-fou métier : blocage strict de la publication si le document n'a pas été préalablement vérifié (`isVerified`).
+     - Contrôle d'accès RBAC : Seuls `ADMIN` et `DATA_MANAGER` peuvent publier ; `MODERATOR` peut uniquement vérifier (`VERIFIED`) ; utilisateurs non autorisés rejetés.
+     - Résilience de mise à jour sous PostgreSQL (gestion des timestamps et retry).
+  5. **Examen unitaire par fascicule & Réactivité UI** (`ExamineCADocumentModal.tsx`, `AdministrativeAccountsAdminManager.tsx`) :
+     - Boutons dédiés *« Consulter le PDF (Volet X) »* générant des URLs signées temporaires via `documentStorageService.createSignedUrl`.
+     - Mise à jour instantanée de l'état React local de la matrice des 232 collectivités sans nécessiter de rechargement de page.
+     - Badges multi-parties dans le tableau d'administration.
+- **Migration SQL** :
+  - `supabase/migrations/20261013200000_multipart_ca_documents.sql` : colonnes `is_multipart`, `parts_count`, `document_parts` (JSONB), `is_scanned`, `has_text_layer`, `ocr_status` (`CHECK (ocr_status IN ('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'MANUAL_TRANSCRIPTION', 'FAILED'))`).
+- **Tests & Validation** :
+  - Suite dédiée multi-parties & cycle : `src/utils/__tests__/caMultipartAndValidation.test.ts` (**14/14 tests passés**).
+  - Suite pilote Cocody 2024 : `src/utils/__tests__/cocodyCa2024Pilot.test.ts` (**11/11 tests passés**).
+  - Couverture globale : **62 fichiers de tests, 807 tests exécutés, 807 tests réussis (100% PASS, 0 FAIL)**.
+  - Compilation TypeScript & Build Vite : `npm run build` réussi sans erreur (**code 0**).
+- **NEXT_EXECUTABLE_TASK** : Revue finale par ChatGPT, approbation et fusion de la PR #62 sur `master`.
+
 ## 13 octobre 2026 — Pilote Réel d'Ingestion Documentaire et Financière : Cocody 2024 (Antigravity)
 
 - **Mission** : Réalisation du pilote réel d'ingestion administrative du Compte Administratif (CA) 2024 de la Commune de Cocody (`inst-com-cocody`), fiabilisation générique du circuit administratif complet (Dépôt -> Identification -> Extraction -> Rapprochement -> Contrôle humain -> Simulation Dry-Run -> Import Staging -> Vérification -> Publication) et production de 6 livrables d'audit et méthodologie.

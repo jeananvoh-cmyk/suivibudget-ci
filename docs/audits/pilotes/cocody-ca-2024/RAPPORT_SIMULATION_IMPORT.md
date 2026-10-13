@@ -96,7 +96,9 @@ L'enveloppe standard d'import générée par `buildStandardImportEnvelope` est e
 
 ---
 
-## 4. Synthèse des Tests Automatisés (PGlite WASM)
+## 4. Synthèse des Tests Automatisés (PGlite WASM & Vitest)
+
+### 4.1. Suite d'Intégration Pilote Cocody 2024 (`cocodyCa2024Pilot.test.ts`)
 
 | Test ID | Libellé du Test | Statut | Temps d'exécution |
 |:---|:---|:---:|:---:|
@@ -112,7 +114,30 @@ L'enveloppe standard d'import générée par `buildStandardImportEnvelope` est e
 | T-COCODY-10 | Isolation stricte et non-altération du BP 2026 de Cocody | PASS | 19 ms |
 | T-COCODY-11 | Préservation des valeurs `null` / inconnues sans forçage à 0 | PASS | 11 ms |
 
-**Total :** 11 tests dédiés exécutés avec succès sous Vitest / PGlite WASM.
+**Sous-total :** 11 tests dédiés exécutés avec succès sous Vitest / PGlite WASM.
+
+### 4.2. Suite Multi-Parties, Hashes et Validation Découlplée (`caMultipartAndValidation.test.ts`)
+
+| Test ID | Libellé du Test | Statut |
+|:---|:---|:---:|
+| T-MULTI-01 | Calcul déterministe du hash SHA-256 du manifeste (Cocody 2024) | PASS |
+| T-MULTI-02 | Détection d'altération si une partie change de hash | PASS |
+| T-MULTI-03 | Validation de plages de pages contiguës sans chevauchement (1–22 et 23–44) | PASS |
+| T-MULTI-04 | Rejet de plages discontinues (trou dans la pagination) | PASS |
+| T-MULTI-05 | Rejet de chevauchement de pages entre fascicules | PASS |
+| T-MULTI-06 | Construction des chemins de stockage canoniques standardisés | PASS |
+| T-MULTI-07 | Téléversement multi-parties séquentiel avec calcul d'URL | PASS |
+| T-MULTI-08 | Rollback et nettoyage automatique du bucket en cas d'échec partiel | PASS |
+| T-LIFECYCLE-09 | Validation et transition vers `VERIFIED` avec synchronisation bivalente | PASS |
+| T-LIFECYCLE-10 | Refus de publication directe si non vérifié au préalable | PASS |
+| T-LIFECYCLE-11 | Autorisation de publication après vérification conforme | PASS |
+| T-RBAC-12 | Rejet de mise à jour pour utilisateur sans droits (CITIZEN) | PASS |
+| T-RBAC-13 | Interdiction de publication pour modérateur non-administrateur | PASS |
+| T-UI-14 | Reflet immédiat dans la matrice des 232 collectivités | PASS |
+
+**Sous-total :** 14 tests dédiés exécutés avec succès.
+
+**Totalité de la suite du projet :** **62 fichiers de tests, 807 tests exécutés, 807 tests réussis (100% PASS, 0 FAIL)**.
 
 ---
 
@@ -120,5 +145,7 @@ L'enveloppe standard d'import générée par `buildStandardImportEnvelope` est e
 
 La simulation démontre que le système est prêt pour le traitement sécurisé des documents financiers réels. Le protocole garantit :
 - L'exactitude des calculs au franc près.
-- La traçabilité documentaire intégrale (SHA-256, fascicules, pagination physique).
+- La traçabilité documentaire intégrale (SHA-256 calculé côté client, hash de manifeste déterministe `ace0243d9ed0cae9e6ee24c420f554751893eecff79f4202007d1c48f5d19928`, fascicules, pagination physique sans trou ni chevauchement).
+- L'intégrité du stockage privé avec rollback atomique en cas d'erreur réseau.
+- Le respect strict du cycle découplé `TO_VERIFY` $\rightarrow$ `VERIFIED` $\rightarrow$ `PUBLISHED` avec contrôle RBAC et mise à jour instantanée de l'interface d'administration.
 - L'absence absolue d'écrasement involontaire ou de publication de données non vérifiées.

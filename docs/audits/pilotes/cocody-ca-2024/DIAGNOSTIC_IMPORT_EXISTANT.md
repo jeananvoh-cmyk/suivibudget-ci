@@ -60,3 +60,21 @@ Ce diagnostic prend comme cas concret d'évaluation le **Compte Administratif (C
 ### 3.4. Métadonnées d'Enveloppe pour les CA
 * **Constat initial :** Lors de la construction de l'enveloppe standardisée (`buildStandardImportEnvelope`), le champ obligatoire `verification_status` n'était injecté que pour les budgets primitifs (`kind = 'BP'`), risquant de provoquer un blocage serveur lors de la transition vers `PUBLISHED`.
 * **Correctif apporté :** Injection systématique de `verification_status`, `approval_date`, `prefecture_visa_date` et `notes` dans la charge utile des Comptes Administratifs (`kind = 'CA'`).
+
+### 3.5. Téléversement Réel Multi-Fascicules, Calcul Automatique du Hash et Rollback Atomique
+* **Constat de revue (PR #62) :** L'interface déclarait des fascicules mais ne permettait le téléversement physique que du premier fichier. De plus, la saisie manuelle des empreintes cryptographiques était source d'erreurs, et aucun contrôle de contiguïté des pages n'était appliqué.
+* **Correctifs apportés :**
+  1. **Téléversement physique séquentiel de chaque tome** : `documentStorageService.uploadMultiPartDocument` procède au téléversement réel de chaque volet PDF dans le bucket privé `public_documents` sous des chemins canoniques standardisés (`...-part-X.pdf`).
+  2. **Calcul d'empreinte 100% client et transparent** : Dès la sélection des fichiers locaux par l'administrateur, le navigateur calcule le SHA-256 octet par octet pour chaque fascicule, éliminant toute saisie manuelle de hash.
+  3. **Empreinte de manifeste déterministe** : Le système calcule un SHA-256 canonique du manifeste (concaténation triée des empreintes de volets séparées par `:`), produisant pour Cocody 2024 l'empreinte vérifiée `ace0243d9ed0cae9e6ee24c420f554751893eecff79f4202007d1c48f5d19928`.
+  4. **Validation stricte de la pagination** : `validateDocumentPageRanges` vérifie la continuité sans trou ni chevauchement (ex. Volet 1 : 1–22, Volet 2 : 23–44 $\rightarrow$ Total 44 pages).
+  5. **Rollback automatique en cas d'échec** : Si le téléversement du volet $N$ échoue, les volets 1 à $N-1$ déjà envoyés sont immédiatement purgés du bucket de stockage.
+
+### 3.6. Découplage et Synchronisation des Statuts (Examine -> Verify -> Publish) et RBAC
+* **Constat de revue (PR #62) :** `updateDocumentLifecycleStatus` ne modifiait que `status = 'VERIFIED'` sans mettre à jour `verification_status = 'VERIFIED'`, provoquant un blocage lors de la tentative de publication. De plus, le gestionnaire `AdministrativeAccountsAdminManager` ne mettait pas à jour son état React local après vérification.
+* **Correctifs apportés :**
+  1. **Synchronisation bivalente des statuts** : `updateDocumentLifecycleStatus` met à jour simultanément `status` et `verification_status` (`TO_VERIFY` $\rightarrow$ `VERIFIED` $\rightarrow$ `PUBLISHED`).
+  2. **Garde-fou de publication** : La règle métier vérifie que le document a été préalablement validé (`isVerified`) avant d'autoriser la publication, rejetant toute publication prématurée avec un message explicite.
+  3. **Contrôle d'accès strict (RBAC)** : Les rôles `ADMIN` et `DATA_MANAGER` peuvent vérifier et publier ; les `MODERATOR` peuvent vérifier mais ont interdiction de publier ; les utilisateurs non autorisés sont rejetés.
+  4. **Réactivité immédiate de l'interface** : Le tableau des 232 collectivités met à jour son état React dès la fermeture de la modale de validation sans nécessiter de rechargement de page.
+

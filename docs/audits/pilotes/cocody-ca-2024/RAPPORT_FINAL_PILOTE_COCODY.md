@@ -68,20 +68,29 @@ Le pilote a été couronné d'un succès technique complet :
 
 ### 3.3. Interface Utilisateur d'Administration
 - `src/components/admin/SingleCAUploadModal.tsx` :
-  - Support interactif du formulaire multi-fascicules (ajout/suppression dynamique de tomes).
-  - Saisie des plages de pages, noms de fichiers et empreintes SHA-256 par partie.
-  - Case à cocher pour les documents scannés raser sans couche de texte.
+  - Support interactif du téléversement réel multi-fascicules (sélection individuelle de chaque fichier PDF).
+  - Calcul automatique et transparent de l'empreinte SHA-256 côté client par lecture d'octets.
+  - Calcul déterministe de l'empreinte SHA-256 du manifeste (`ace0243d9ed0cae9e6ee24c420f554751893eecff79f4202007d1c48f5d19928` pour Cocody 2024).
+  - Contrôle automatique de continuité des pages (aucun trou ni chevauchement).
+  - Rollback automatique nettoyant le stockage en cas d'échec sur un volet.
 - `src/components/admin/ExamineCADocumentModal.tsx` :
-  - Affichage détaillé de la composition en fascicules du document.
-  - Alerte visuelle claire sur le statut scanné / OCR en attente.
-  - Restitution des métadonnées de visa préfectoral.
+  - Boutons indépendants « Consulter le PDF (Volet X) » générant des URL signées temporaires.
+  - Affichage détaillé de la composition en fascicules avec badge multi-parties.
+  - Découplage strict entre vérification (`VERIFIED`) et publication (`PUBLISHED`) avec contrôle RBAC.
+- `src/components/admin/AdministrativeAccountsAdminManager.tsx` :
+  - Synchronisation réactive immédiate de l'état local dès validation/publication.
+  - Badges multi-parties dans le tableau récapitulatif des 232 collectivités.
 
-### 3.4. Suite de Tests Automatisée (`src/utils/__tests__/cocodyCa2024Pilot.test.ts`)
-- 11 tests d'intégration complets exécutés sur une instance PGlite WASM locale.
-- Vérification des transitions d'états : Staging (`TO_VERIFY`) $\rightarrow$ Examen (`VERIFIED`) $\rightarrow$ Publication (`PUBLISHED`).
-- Blocage strict de la publication prématurée sans examen préalable.
-- Détection des doublons et conflits.
-- Préservation des données existantes (le BP 2026 de Cocody et les valeurs inconnues restent intacts).
+### 3.4. Suites de Tests Automatisées
+- `src/utils/__tests__/cocodyCa2024Pilot.test.ts` (11 tests complets sous PGlite WASM) :
+  - Vérification des équilibres arithmétiques du CA Cocody 2024.
+  - Cycle Staging (`TO_VERIFY`) $\rightarrow$ Examen (`VERIFIED`) $\rightarrow$ Publication (`PUBLISHED`).
+  - Détection des doublons et isolation stricte du BP 2026 de Cocody.
+- `src/utils/__tests__/caMultipartAndValidation.test.ts` (14 tests complets) :
+  - Empreinte déterministe du manifeste et détection d'altération.
+  - Validation de continuité et rejet de chevauchement de plages de pages.
+  - Téléversement séquentiel et rollback atomique de stockage.
+  - Synchronisation bivalente des statuts et application stricte des rôles RBAC (`ADMIN`, `DATA_MANAGER`, `MODERATOR`).
 
 ---
 
@@ -90,9 +99,9 @@ Le pilote a été couronné d'un succès technique complet :
 1. **Aucune écriture distante (`REMOTE_SUPABASE_WRITES = 0`) :**
    Tous les essais, validations d'enveloppe et simulations ont été exécutés en mémoire locale. La table de production Supabase `cdesuvcozcetdtvibgqs` n'a reçu aucune mutation de staging ou d'essai.
 2. **Aucune régression logicielle :**
-   La suite de tests globale du projet compte désormais **60 suites de tests et 789 tests unitaires/intégration**, tous verts (`789 passed`).
+   La suite de tests globale du projet compte désormais **62 suites de tests et 807 tests unitaires/intégration**, tous verts (**807 passed, 100% PASS, 0 FAIL**).
 3. **Compilation TypeScript & Vite :**
-   Le build de production (`npm run build`) est strictement propre (0 erreur, 0 avertissement bloquant).
+   Le build de production (`npm run build`) est strictement propre (**code 0**, 0 erreur, 0 avertissement bloquant).
 4. **Pas de faux zéros :**
    Conformément au principe *UNKNOWN != 0*, les champs non renseignés demeurent `null` et ne sont jamais écrasés par un zéro artificiel.
 
