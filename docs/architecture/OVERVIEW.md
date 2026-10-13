@@ -99,7 +99,7 @@ sequenceDiagram
     participant Modal as InstitutionDetailModal
 
     Citoyen->>Page: Clic sur "Fiche" d'une commune
-    Page->>Helper: getInstitutionBudgetPresentation(commune)
+    Page->>Helper: resolveInstitutionBudgetPresentation(commune)
     Helper->>Claims: Vérification URL, SHA-256 & réclamation auditée
     Claims-->>Helper: Statut vérifié (VERIFIED ou TO_VERIFY)
     Helper-->>Page: Objet présentation budgétaire sécurisé
