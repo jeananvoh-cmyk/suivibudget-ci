@@ -1,3 +1,38 @@
+## 13 octobre 2026 — Clôture technique finale, recette production et transmission autonome à un développeur humain (Antigravity)
+
+- **Objectif de mission** : Stabilisation technique finale, recette complète de production Vercel (`https://suivibudget.vercel.app/`), audit de maintenabilité du code et rédaction de la documentation intégrale permettant une maintenance 100% autonome par un développeur humain sans recourir aux agents IA.
+- **État de production** :
+  - `MASTER_SHA` = `18dba91f6098d40d150506476ea3e4dc8ce94e5c` (fusion PR #58).
+  - `PRODUCTION_DEPLOYMENT_SHA` = `18dba91f6098d40d150506476ea3e4dc8ce94e5c` (GitHub Deployment #7034805135, state `success`).
+  - `PRODUCTION_SYNCED` = `true` (validé par ETag, HTTP 200 et inspection des chunks `InstitutionsPage-DBlcQIMy.js` contenant `checkVisibility` et `78016001400`).
+  - `VERCEL_STATUS` = `READY`.
+- **Recette de production (Playwright MCP)** :
+  - **10 routes publiques et administratives testées** : `/`, `/institutions/ministeres`, `/institutions/grandes-institutions`, `/institutions/mairies`, `/institutions/regions`, `/institutions/regulateurs`, `/projets`, `/documents`, `/observatoire`, `/admin/login`.
+  - **7 résolutions responsives validées** : 360, 390, 430, 768, 1024, 1440, 1920 px (aucun débordement horizontal, `scrollWidth <= clientWidth`).
+  - **Erreurs console navigateur** : 0 erreur, 0 avertissement bloquant.
+  - **Accessibilité réelle mobile** : focus initial sur bouton fermeture, boucle `Shift+Tab` / `Tab` circulaire étanche, fermeture `Escape` de modale fille isolée (`stopPropagation()`) avec focus restauré sur le déclencheur CAIDP, puis fermeture modale parente avec focus restauré sur le bouton `Fiche`.
+  - **Intégrité financière** : `UNKNOWN ≠ 0` respecté (commune de Bouna et région de l'Iffou affichent *« Non documenté »* sans faux zéros) ; dotation Attécoubé certifiée (LFI 2026 p. 207, action 78016001400, 300M FCFA) ; BP Bingerville et Tiassalé qualifiés de *« Publication secondaire — à confirmer »* ; CA 2024 de Tiassalé consultable séparément ; Section 103 Présidence intégrant HABG et IGE sans double comptage.
+  - **Sécurité et confidentialité** : protection anti-injection CSV/Excel active (`sanitizeCsvCell`), clé `service_role` protégée contre toute fuite client, route `/admin` protégée.
+- **Documentation rédigée pour développeur humain** :
+  - `README.md` (racine) : Objectif, prérequis, installation, `.env`, commandes et architecture résumée.
+  - `docs/architecture/OVERVIEW.md` : Schéma d'architecture, responsabilités des modules, flux de données et points d'extension.
+  - `docs/architecture/DATA_MODEL.md` : Modèle TypeScript/PostgreSQL, tables Supabase, RLS, buckets privés et migrations.
+  - `docs/architecture/BUDGET_RULES.md` : Définitions légales (LFI, BP, CA), périmètres, non-double comptage et `AUDITED_FINANCIAL_CLAIMS`.
+  - `docs/maintenance/RUNBOOK.md` : Diagnostic, tests ciblés, incidents fréquents et résolutions, escalade et rollback.
+  - `docs/maintenance/DEPLOYMENT.md` : Pipeline CI GitHub Actions, Vercel, vérification de SHA et rollback instantané.
+  - `docs/maintenance/CHANGE_GUIDE.md` : Procédure pas à pas pour modifier un chiffre, ajouter une entité ou écrire un test.
+  - `docs/maintenance/START_HERE.md` : Guide de prise en main en 1 jour répondant aux 10 questions clés avec chemins exacts et commandes sans dépendance IA.
+  - `docs/audits/final/FINAL_PRODUCTION_AND_MAINTENANCE_REPORT.md` : Rapport de clôture officiel complet avec tous les indicateurs exigés.
+- **Simulation Clean-Room (PHASE D)** :
+  - Exécutée dans un worktree vierge `.clean-room-sim` sans cache ni node_modules.
+  - `npm install` : 43s (184 packages).
+  - `npm test` : **59 fichiers, 778 tests réussis sur 778 (100% PASS, 0 FAIL)** en 150.51s.
+  - `npm run build` : réussi en 28.18s sans erreur TypeScript.
+  - Repérage des 3 parcours de développement validé selon `START_HERE.md`.
+- **Garde-fous** : `REMOTE_SUPABASE_WRITES = 0` ; migrations distantes = 0 ; pas d'intervention payante Vercel.
+- **Branche de livraison** : `docs/final-production-maintenance-handoff`.
+- **NEXT_EXECUTABLE_TASK** : Revue finale de la PR documentaire par ChatGPT et fusion sur `master`.
+
 ## 13 octobre 2026 — Clôture définitive du piège de focus mobile et accessibilité multi-viewports PR #58 (Antigravity)
 
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/58 (`codex/budget-presentation-final`).
