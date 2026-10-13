@@ -1,3 +1,18 @@
+## 13 octobre 2026 — Verrou de certification documentaire PR #58
+
+- HEAD avant correction : `8e1b6e052292a30af40ebe690502081d709210ef`. Branche : `codex/budget-presentation-final` ; master : `ab159d4e3de829e11d1e146c8d9b0f9dbfb72bfe`.
+- Revue traitée : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/58#issuecomment-6140460629.
+- Avant : URL arbitraire, SHA-256 syntaxiquement valide, page et montants équilibrés suffisaient pour `VERIFIED_AMOUNT`. Après : document contrôlé ET ligne auditée indépendante obligatoires, avec concordance d'entité, exercice, assiette, nature, page et montants exacts.
+- `isValidPrimarySha256` reconnaît uniquement les empreintes déjà contrôlées du catalogue. Cette reconnaissance ne certifie aucune ligne financière à elle seule.
+- Preuves BP déclarées non auditées : `TO_VERIFY`. Publications secondaires : `SECONDARY_SOURCE`, même avec précision `EXACT`. Aucun BP primaire audité n'est actuellement autorisé ; aucune fixture fictive n'est promue en preuve primaire.
+- Cas positif réel : LFI 2026, PDF p. 207, action 78016001400, Attécoubé, 300 000 000 FCFA de crédits votés pour le fonctionnement des services (transfert). Référence existante : `docs/audits/local-2026/LFI_2026_PROGRAMME_2204040_2380_ACTIONS.csv`, ligne 256. Ce montant n'est ni un BP, ni une DGF, ni une dépense exécutée. Le test réutilise la ligne déjà auditée ; aucune donnée de collectivité n'est modifiée ou importée.
+- Les deux résolveurs choisissent le même BP pour le même exercice ; les montants historiques ne remplacent pas un BP absent. Les BP secondaires partiels restent rapportés, sans inventer une ventilation. Les districts suivent aussi l'assiette BP.
+- Préservés : HABG/IGE inclus dans la section 103 ; CESEC LFI / Annexe 7 non additifs ; Cour Suprême sans section autonome ; sections ministérielles partagées ; historique Bingerville/Tiassalé ; BP Doropo/Iffou inconnus ; subventions des régulateurs distinctes du budget global. Métadonnées des cinq PDF DGBF contrôlés inchangées. Aucun nouvel audit PDF général.
+- Validation locale : 58 fichiers, 767 tests dont 27 dans `budgetBreakdownIntegrityGate.test.ts` ; TypeScript, build public et build review vérifiés avant publication. Le contrôle GitHub du nouveau HEAD sera consigné dans la mise à jour de clôture.
+- `REMOTE_SUPABASE_WRITES = 0` ; migrations = 0 ; `PR_MERGED = false` ; `PRODUCTION_DEPLOYED = false`. Dépendances, Tailwind, routes et accessibilité des modales inchangés.
+- Limite documentaire conservée : absence de pièces BP primaires auditables ; seule leur certification reste bloquée. Les sources secondaires restent consultables.
+- NEXT_EXECUTABLE_TASK : contrôler la CI du nouveau HEAD, puis soumettre la PR #58 à la validation humaine sans fusion ni déploiement.
+
 ## 13 octobre 2026 — Corrections finales de la PR #58 (Revue ChatGPT P1 #1, P1 #2, P2 #3, P2 #4, P2 #5)
 
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/58 (`codex/budget-presentation-final`).

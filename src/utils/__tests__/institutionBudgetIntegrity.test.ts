@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { 
+  resolveInstitutionBudgetPresentation,
   assessInstitutionBudget, 
   calculateSafePercentages, 
   InstitutionBudgetAssessment 
@@ -135,10 +136,16 @@ describe('Institution Budget Integrity & Safe Rendering', () => {
       });
     });
 
-    it('assesses Grand Abidjan communes as TAX_AUTONOMY with municipal revenue notice, never 0 FCFA', () => {
+    it('preserves fiscal autonomy without BP and identifies reported BP without certification', () => {
       taxQuotaCommuneIds.forEach(id => {
         const com = ALL_COMMUNES_DATA.find(c => c.id === id)!;
         const assessment = assessInstitutionBudget(com);
+        const presentation = resolveInstitutionBudgetPresentation(com);
+        if (presentation.reference.amount_fcfa != null) {
+          expect(assessment.verificationStatus).toBe('SECONDARY_SOURCE');
+          expect(assessment.totalFormatted).toBe(formatFCFA(presentation.reference.amount_fcfa));
+          return;
+        }
         expect(assessment.status).toBe('TAX_AUTONOMY');
         expect(assessment.isTaxQuotaCommune).toBe(true);
         expect(assessment.totalFormatted).toBe('Budget municipal propre');

@@ -1,5 +1,10 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import {
+  isValidPrimarySha256,
+  isValidBreakdownDocumentaryEvidence,
+  LFI_2026_DOCUMENT,
+  exportInstitutionBudget,
   resolveInstitutionFinancialView,
   assessInstitutionBudget,
   resolveInstitutionBudgetPresentation,
@@ -11,7 +16,7 @@ import { REGULATORY_AUTHORITIES_DATA } from '../../data/regulatoryAuthoritiesDat
 import { getModalFocusableElements, handleModalKeyDown, manageModalFocusLifecycle } from '../../components/InstitutionDetailModal';
 import { Institution } from '../../types';
 
-const VALID_PRIMARY_SHA256 = 'a1b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef0123456789abcdef0';
+const UNREGISTERED_SHA256 = 'a1b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef0123456789abcdef0';
 const EMPTY_FILE_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
 describe('Point A & Corrections PR #58 — Intégrité des ventilations, provenance et modales', () => {
@@ -50,8 +55,7 @@ describe('Point A & Corrections PR #58 — Intégrité des ventilations, provena
     expect(assessment.verificationStatus).toBe('SECONDARY_SOURCE');
   });
 
-  // P1 #1 (b) : BP avec preuve documentaire primaire valide -> VERIFIED_AMOUNT
-  it('P1 #1 (b) : certifie VERIFIED_AMOUNT un budget primitif accompagné d’une preuve primaire complète (page PDF + SHA-256)', () => {
+  it('P1 #1 (b) : rejette un BP fictif malgré URL, page PDF, empreinte et montants équilibrés', () => {
     const primaryProvenPrimitiveInst: Partial<Institution> = {
       id: 'inst-com-primary-test',
       name: 'Mairie avec Délibération Officielle PDF',
@@ -70,24 +74,26 @@ describe('Point A & Corrections PR #58 — Intégrité des ventilations, provena
         precision: 'EXACT',
         verification_status: 'OFFICIAL_DOCUMENT',
         pdf_page: 12,
-        sha256: VALID_PRIMARY_SHA256,
+        sha256: UNREGISTERED_SHA256,
       },
     };
 
     const view = resolveInstitutionFinancialView(primaryProvenPrimitiveInst, 2026, 'PRIMITIVE');
-    expect(view.has_breakdown).toBe(true);
-    expect(view.functioning_pct).toBe(40);
-    expect(view.investment_pct).toBe(60);
-    expect(view.verification_status).toBe('VERIFIED_AMOUNT');
-    expect(view.documentary_provenance?.pdf_page).toBe(12);
-    expect(view.documentary_provenance?.sha256).toBe(VALID_PRIMARY_SHA256);
+    expect(view.has_breakdown).toBe(false);
+    expect(view.functioning_pct).toBeNull();
+    expect(view.investment_pct).toBeNull();
+    expect(view.verification_status).toBe('TO_VERIFY');
+    expect(view.documentary_provenance).toBeNull();
 
     const presentation = resolveInstitutionBudgetPresentation(primaryProvenPrimitiveInst);
-    expect(presentation.reference.verification).toBe('VERIFIED_AMOUNT');
-    expect(presentation.reference.source?.pdf_page).toBe(12);
-    expect(presentation.reference.source?.sha256).toBe(VALID_PRIMARY_SHA256);
-    expect(presentation.functioning_pct).toBe(40);
-    expect(presentation.investment_pct).toBe(60);
+    expect(presentation.reference.verification).toBe('TO_VERIFY');
+    expect(presentation.reference.amount_fcfa).toBe(4_000_000_000);
+    expect(presentation.reference.precision).toBe('EXACT');
+    expect(presentation.reference.source?.pdf_page).toBeNull();
+    expect(presentation.reference.source?.sha256).toBeNull();
+    expect(presentation.functioning_pct).toBeNull();
+    expect(presentation.investment_pct).toBeNull();
+    expect(exportInstitutionBudget(primaryProvenPrimitiveInst, 'CSV')).not.toContain('VERIFIED_AMOUNT');
   });
 
   // P1 #1 (c) : BP avec ventilation déséquilibrée -> UNRECONCILED, ratios neutralisés
@@ -125,8 +131,7 @@ describe('Point A & Corrections PR #58 — Intégrité des ventilations, provena
     expect(presentation.investment_pct).toBeNull();
   });
 
-  // P1 #2 (a) : Preuve documentaire structurée complète (BreakdownDocumentaryEvidence) -> certifiée
-  it('P1 #2 (a) : certifie la ventilation uniquement avec un objet BreakdownDocumentaryEvidence complet et concordant', () => {
+  it('P1 #2 (a) : rejette une preuve structurée complète sans ligne auditée indépendante', () => {
     const provenEntity: Partial<Institution> = {
       id: 'inst-test-proven',
       name: 'Entité Test Prouvée',
@@ -142,7 +147,7 @@ describe('Point A & Corrections PR #58 — Intégrité des ventilations, provena
         document_reference: 'DELIB-2026-004',
         source_url: 'https://dgbf.ci/docs/delib-2026-004.pdf',
         pdf_page: 8,
-        sha256: VALID_PRIMARY_SHA256,
+        sha256: UNREGISTERED_SHA256,
         total_fcfa: 10_000_000,
         functioning_fcfa: 7_000_000,
         investment_fcfa: 3_000_000,
@@ -150,12 +155,11 @@ describe('Point A & Corrections PR #58 — Intégrité des ventilations, provena
     };
 
     const view = resolveInstitutionFinancialView(provenEntity, 2026, 'PRIMITIVE');
-    expect(view.has_breakdown).toBe(true);
-    expect(view.functioning_pct).toBe(70);
-    expect(view.investment_pct).toBe(30);
-    expect(view.verification_status).toBe('VERIFIED_AMOUNT');
-    expect(view.documentary_provenance?.pdf_page).toBe(8);
-    expect(view.documentary_provenance?.sha256).toBe(VALID_PRIMARY_SHA256);
+    expect(view.has_breakdown).toBe(false);
+    expect(view.functioning_pct).toBeNull();
+    expect(view.investment_pct).toBeNull();
+    expect(view.verification_status).not.toBe('VERIFIED_AMOUNT');
+    expect(isValidBreakdownDocumentaryEvidence(provenEntity.breakdown_evidence, provenEntity.id!, 2026, 'PRIMITIVE', 10_000_000, 7_000_000, 3_000_000)).toBe(false);
   });
 
   // P1 #2 (b) : Test adversarial obligatoire -> has_verified_breakdown: true sans document officiel est rejeté
@@ -198,7 +202,7 @@ describe('Point A & Corrections PR #58 — Intégrité des ventilations, provena
             document_reference: 'Ref',
             source_url: 'https://dgbf.ci/doc.pdf',
             pdf_page: 4,
-            sha256: VALID_PRIMARY_SHA256,
+            sha256: UNREGISTERED_SHA256,
             total_fcfa: 10_000_000,
             functioning_fcfa: 7_000_000,
             investment_fcfa: 3_000_000,
@@ -283,9 +287,9 @@ describe('Point A & Corrections PR #58 — Intégrité des ventilations, provena
       total_budget_fcfa: null,
     };
     const taxQuotaView = resolveInstitutionFinancialView(taxQuotaEntity, 2026, 'PRIMITIVE');
-    expect(taxQuotaView.total_amount_fcfa).toBeNull();
-    expect(taxQuotaView.total_formatted).not.toContain('0 FCFA');
-    expect(taxQuotaView.total_formatted).toBe('Budget municipal propre');
+    expect(taxQuotaView.total_amount_fcfa).toBe(OFFICIAL_PRIMITIVE_BUDGETS['inst-com-cocody'].total_voted_fcfa);
+    expect(taxQuotaView.verification_status).toBe('SECONDARY_SOURCE');
+    expect(taxQuotaView.total_amount_fcfa).toBe(resolveInstitutionBudgetPresentation(taxQuotaEntity).reference.amount_fcfa);
   });
 
   // P2 #3 : Ne pas transformer un montant historique en concours de l'État sans source explicite
@@ -348,8 +352,84 @@ describe('Point A & Corrections PR #58 — Intégrité des ventilations, provena
     };
     const doropoGrantPres = resolveInstitutionBudgetPresentation(doropoWithExplicitGrant);
     expect(doropoGrantPres.reference.amount_fcfa).toBeNull(); // Le concours de l'État ne remplace JAMAIS le BP manquant
-    expect(doropoGrantPres.supplements[0].label).toContain('Concours de l’État (ANNEXE_8)');
-    expect(doropoGrantPres.supplements[0].verification).toBe('VERIFIED_AMOUNT');
+    expect(doropoGrantPres.supplements[0].label).toBe('Montant historique enregistré — nature et source à confirmer');
+    expect(doropoGrantPres.supplements[0].verification).toBe('TO_VERIFY');
+  });
+
+  it('ne reconnaît que les empreintes contrôlées, sans certifier une ventilation dans le PDF', () => {
+    expect(isValidPrimarySha256(UNREGISTERED_SHA256)).toBe(false);
+    expect(isValidPrimarySha256(EMPTY_FILE_SHA256)).toBe(false);
+    expect(isValidPrimarySha256(LFI_2026_DOCUMENT.sha256)).toBe(true);
+    const evidence = {
+      audit_id: 'LFI-2026-78016001400', credit_nature: 'VOTED_CP_FUNCTIONING_TRANSFER',
+      institution_id: 'inst-com-attecoube', fiscal_year: 2026, budget_basis: 'LFI' as const,
+      document_title: LFI_2026_DOCUMENT.title, document_reference: 'Action 78016001400',
+      source_url: LFI_2026_DOCUMENT.url, pdf_page: 207, sha256: LFI_2026_DOCUMENT.sha256,
+      total_fcfa: 300_000_000, functioning_fcfa: 200_000_000, investment_fcfa: 100_000_000,
+    };
+    for (const patch of [{}, { institution_id: 'inst-com-doropo' }, { fiscal_year: 2025 },
+      { budget_basis: 'PRIMITIVE' as const }, { credit_nature: 'PAID' }, { total_fcfa: 400_000_000, investment_fcfa: 200_000_000 }]) {
+      const forged = { ...evidence, ...patch };
+      expect(isValidBreakdownDocumentaryEvidence(forged, forged.institution_id, forged.fiscal_year, forged.budget_basis,
+        forged.total_fcfa, forged.functioning_fcfa, forged.investment_fcfa)).toBe(false);
+    }
+  });
+
+  const auditedGrant: NonNullable<Institution['state_grant_evidence']> = {
+    audit_id: 'LFI-2026-78016001400', institution_id: 'inst-com-attecoube', fiscal_year: 2026,
+    budget_basis: 'LFI', credit_nature: 'VOTED_CP_FUNCTIONING_TRANSFER', grant_type: 'CONCOURS_ETAT', amount_fcfa: 300_000_000,
+    source: { document_title: LFI_2026_DOCUMENT.title, document_reference: 'Action 78016001400',
+      source_url: LFI_2026_DOCUMENT.url, sha256: LFI_2026_DOCUMENT.sha256, pdf_page: 207 },
+  };
+
+  it('certifie seulement la ligne réelle LFI auditée d’Attécoubé, sans en faire un BP ou une DGF', () => {
+    const extraction = readFileSync('docs/audits/local-2026/LFI_2026_PROGRAMME_2204040_2380_ACTIONS.csv', 'utf8');
+    expect(extraction.split(/\r?\n/)).toContain("207,TRANSFERT,78016001400,Assurer le fonctionnement des services de la commune d'attecoube,300000000");
+    const institution: Partial<Institution> = { id: auditedGrant.institution_id, type: 'MAIRIE',
+      total_budget_fcfa: auditedGrant.amount_fcfa, state_grant_evidence: auditedGrant };
+    const view = resolveInstitutionBudgetPresentation(institution);
+    expect(view.supplements[0].verification).toBe('VERIFIED_AMOUNT');
+    expect(view.supplements[0].amount_fcfa).toBe(300_000_000);
+    expect(view.supplements[0].source?.pdf_page).toBe(207);
+    expect(view.supplements[0].label).not.toMatch(/DGF|DGE/);
+    expect(view.reference.verification).not.toBe('VERIFIED_AMOUNT');
+    expect(JSON.parse(exportInstitutionBudget(institution, 'JSON')).supplements[0].verification).toBe('VERIFIED_AMOUNT');
+  });
+
+  it.each([
+    ['URL fictive', { source: { ...auditedGrant.source, source_url: 'https://example.com/faux.pdf' } }],
+    ['empreinte fictive', { source: { ...auditedGrant.source, sha256: UNREGISTERED_SHA256 } }],
+    ['autre document officiel', { source: { ...auditedGrant.source, sha256: '567810702fb7ed7cb83945a0af18ef23ee52bf617a305bac36243c08de4a1842' } }],
+    ['montant', { amount_fcfa: 301_000_000 }], ['entité', { institution_id: 'inst-com-doropo' }],
+    ['exercice', { fiscal_year: 2025 }], ['assiette', { budget_basis: 'PRIMITIVE' }],
+    ['nature', { credit_nature: 'PAID' }], ['DGF non établie', { grant_type: 'DGF' }],
+    ['page', { source: { ...auditedGrant.source, pdf_page: 208 } }], ['audit absent', { audit_id: undefined }],
+    ['audit inventé', { audit_id: 'AUDIT-FAKE' }], ['source absente', { source: undefined }],
+  ])('rejette la réutilisation de la preuve réelle avec %s falsifié', (_label, patch) => {
+    const forged = { ...auditedGrant, ...patch } as NonNullable<Institution['state_grant_evidence']>;
+    const view = resolveInstitutionBudgetPresentation({ id: forged.institution_id, type: 'MAIRIE', total_budget_fcfa: forged.amount_fcfa, state_grant_evidence: forged });
+    expect(view.supplements[0].verification).toBe('TO_VERIFY');
+    expect(view.supplements[0].label).toBe('Montant historique enregistré — nature et source à confirmer');
+  });
+
+  it('aligne les deux résolveurs sur le même BP, sans transformer les valeurs historiques ou la précision en certification', () => {
+    const bingerville = ALL_COMMUNES_DATA.find(c => c.id === 'inst-com-bingerville')!;
+    for (const entity of [bingerville, { ...bingerville, type: 'DISTRICT' as const }, { ...bingerville, primitive_budget: { ...OFFICIAL_PRIMITIVE_BUDGETS[bingerville.id], verification_status: 'OFFICIAL_DOCUMENT' as const,
+      source_url: LFI_2026_DOCUMENT.url, sha256: LFI_2026_DOCUMENT.sha256, pdf_page: 207 } }]) {
+      const detail = resolveInstitutionFinancialView(entity, 2026, 'PRIMITIVE');
+      const presentation = resolveInstitutionBudgetPresentation(entity);
+      expect(detail.total_amount_fcfa).toBe(presentation.reference.amount_fcfa);
+      expect(detail.verification_status).toBe(presentation.reference.verification);
+      expect(detail.functioning_pct).toBe(presentation.functioning_pct);
+      expect(detail.verification_status).not.toBe('VERIFIED_AMOUNT');
+    }
+    for (const entity of [ALL_COMMUNES_DATA.find(c => c.id === 'inst-com-doropo')!, ALL_REGIONS_DATA.find(c => c.id === 'inst-reg-conseil-regional-de-l-iffou')!]) {
+      expect(resolveInstitutionFinancialView(entity, 2026, 'PRIMITIVE').total_amount_fcfa).toBeNull();
+      expect(resolveInstitutionBudgetPresentation(entity).reference.amount_fcfa).toBeNull();
+    }
+    const old = { ...bingerville, primitive_budget: { ...OFFICIAL_PRIMITIVE_BUDGETS[bingerville.id], fiscal_year: 2025 } };
+    expect(resolveInstitutionFinancialView(old, 2026, 'PRIMITIVE').total_amount_fcfa).toBeNull();
+    expect(resolveInstitutionBudgetPresentation(old).reference.amount_fcfa).toBeNull();
   });
 
   // P2 #4 : Régulateurs et périmètre officiel (7 autorités)

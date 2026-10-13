@@ -60,6 +60,8 @@ export interface Institution {
 }
 
 export interface BreakdownDocumentaryEvidence {
+  audit_id?: string;
+  credit_nature?: string;
   institution_id: string;
   fiscal_year: number;
   budget_basis: 'LFI' | 'PRIMITIVE' | 'CA_EXECUTED' | 'UNKNOWN';
@@ -74,6 +76,9 @@ export interface BreakdownDocumentaryEvidence {
 }
 
 export interface StateGrantDocumentaryEvidence {
+  audit_id?: string;
+  budget_basis?: 'LFI' | 'PRIMITIVE' | 'CA_EXECUTED' | 'UNKNOWN';
+  credit_nature?: string;
   institution_id: string;
   fiscal_year: number;
   amount_fcfa: number;
@@ -89,6 +94,9 @@ export interface StateGrantDocumentaryEvidence {
 }
 
 export interface PrimitiveBudgetInfo {
+  audit_id?: string;
+  fiscal_year?: number;
+  credit_nature?: string;
   total_voted_fcfa: number;
   investment_voted_fcfa: number | null;
   functioning_voted_fcfa: number | null;

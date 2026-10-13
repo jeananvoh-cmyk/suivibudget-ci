@@ -1,4 +1,5 @@
-import { Institution, PrimitiveBudgetInfo, BreakdownDocumentaryEvidence } from '../types';
+import { Institution, PrimitiveBudgetInfo, BreakdownDocumentaryEvidence, StateGrantDocumentaryEvidence } from '../types';
+import { DOCUMENT_CONTROLS } from '../data/officialPublicDocumentsCatalog';
 import { formatFCFA, formatAmountInWords } from './formatters';
 import { OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
 import { NATIONAL_DIRECT_ALLOCATIONS_2026 } from '../data/nationalBudgetData';
@@ -25,13 +26,45 @@ export const ANNEXE_6_EPN_2026_DOCUMENT = {
   sha256: "3186dc17e1ba51ba1b69b3eed8ee3e40083a8eb0ddd56861dfdd0aa4b8c9bb2e",
 };
 
-const SHA256_HEX_REGEX = /^[a-f0-9]{64}$/i;
-const EMPTY_FILE_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+type AuditedFinancialClaim = {
+  audit_id: string;
+  document_id: string;
+  institution_id: string;
+  fiscal_year: number;
+  budget_basis: BreakdownDocumentaryEvidence['budget_basis'];
+  credit_nature: string;
+  pdf_page: number;
+  audit_reference: string;
+} & ({
+  kind: 'BREAKDOWN';
+  total_fcfa: number;
+  functioning_fcfa: number;
+  investment_fcfa: number;
+} | {
+  kind: 'STATE_GRANT';
+  grant_type: StateGrantDocumentaryEvidence['grant_type'];
+  amount_fcfa: number;
+});
+
+// A controlled PDF does not authorize every amount within it. No primary BP breakdown has been audited yet.
+const AUDITED_FINANCIAL_CLAIMS: readonly AuditedFinancialClaim[] = [{
+  audit_id: 'LFI-2026-78016001400', document_id: 'DGBF-LFI-2026',
+  institution_id: 'inst-com-attecoube', fiscal_year: 2026, budget_basis: 'LFI',
+  credit_nature: 'VOTED_CP_FUNCTIONING_TRANSFER', pdf_page: 207,
+  audit_reference: 'docs/audits/local-2026/LFI_2026_PROGRAMME_2204040_2380_ACTIONS.csv',
+  kind: 'STATE_GRANT', grant_type: 'CONCOURS_ETAT', amount_fcfa: 300_000_000,
+}];
 
 export function isValidPrimarySha256(hash: string | null | undefined): boolean {
-  if (typeof hash !== 'string') return false;
-  const normalized = hash.trim().toLowerCase();
-  return SHA256_HEX_REGEX.test(normalized) && normalized !== EMPTY_FILE_SHA256;
+  return typeof hash === 'string' && DOCUMENT_CONTROLS.some(document =>
+    document.verification === 'VERIFIED' && document.sha256 === hash.toLowerCase());
+}
+
+function matchesAuditedDocument(claim: AuditedFinancialClaim, sourceUrl: string, hash: string | undefined, page: number | undefined): boolean {
+  return isValidPrimarySha256(hash) && DOCUMENT_CONTROLS.some(document =>
+    document.id === claim.document_id && document.verification === 'VERIFIED' &&
+    document.officialUrl === sourceUrl && document.sha256 === hash!.toLowerCase() &&
+    Number.isInteger(page) && page === claim.pdf_page && page > 0 && page <= (document.pageCount ?? 0));
 }
 
 export function isValidBreakdownDocumentaryEvidence(
@@ -43,19 +76,39 @@ export function isValidBreakdownDocumentaryEvidence(
   functioning: number | null | undefined,
   investment: number | null | undefined
 ): boolean {
-  if (!evidence) return false;
-  if (evidence.institution_id !== institutionId) return false;
-  if (evidence.fiscal_year !== fiscalYear) return false;
-  if (evidence.budget_basis !== expectedBasis) return false;
-  if (typeof evidence.document_title !== 'string' || evidence.document_title.trim().length === 0) return false;
-  if (typeof evidence.document_reference !== 'string' || evidence.document_reference.trim().length === 0) return false;
-  if (typeof evidence.source_url !== 'string' || !/^https?:\/\/.+/i.test(evidence.source_url.trim())) return false;
-  if (typeof evidence.pdf_page !== 'number' || !Number.isInteger(evidence.pdf_page) || evidence.pdf_page <= 0) return false;
-  if (!isValidPrimarySha256(evidence.sha256)) return false;
-  if (typeof total !== 'number' || typeof functioning !== 'number' || typeof investment !== 'number') return false;
-  if (evidence.total_fcfa !== total || evidence.functioning_fcfa !== functioning || evidence.investment_fcfa !== investment) return false;
-  if (functioning + investment !== total) return false;
-  return true;
+  if (!evidence || ![total, functioning, investment].every(value => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0)) return false;
+  return evidence.institution_id === institutionId && evidence.fiscal_year === fiscalYear &&
+    evidence.budget_basis === expectedBasis && evidence.total_fcfa === total &&
+    evidence.functioning_fcfa === functioning && evidence.investment_fcfa === investment &&
+    functioning! + investment! === total && AUDITED_FINANCIAL_CLAIMS.some(claim =>
+      claim.kind === 'BREAKDOWN' && claim.audit_id === evidence.audit_id &&
+      claim.institution_id === institutionId && claim.fiscal_year === fiscalYear &&
+      claim.budget_basis === expectedBasis && claim.credit_nature === evidence.credit_nature &&
+      claim.total_fcfa === total && claim.functioning_fcfa === functioning && claim.investment_fcfa === investment &&
+      matchesAuditedDocument(claim, evidence.source_url, evidence.sha256, evidence.pdf_page));
+}
+
+function isValidStateGrantEvidence(evidence: StateGrantDocumentaryEvidence | undefined, institutionId: string, amount: number): boolean {
+  return Boolean(evidence && evidence.institution_id === institutionId && evidence.fiscal_year === 2026 &&
+    evidence.amount_fcfa === amount && AUDITED_FINANCIAL_CLAIMS.some(claim =>
+      claim.kind === 'STATE_GRANT' && claim.audit_id === evidence.audit_id &&
+      claim.institution_id === institutionId && claim.fiscal_year === evidence.fiscal_year &&
+      claim.budget_basis === evidence.budget_basis && claim.credit_nature === evidence.credit_nature &&
+      claim.grant_type === evidence.grant_type && claim.amount_fcfa === amount &&
+      matchesAuditedDocument(claim, evidence.source?.source_url, evidence.source?.sha256, evidence.source?.pdf_page)));
+}
+
+function primitiveVerification(primitive: PrimitiveBudgetInfo, institutionId: string, fiscalYear: number): BudgetPresentationAmount['verification'] {
+  const verified = isValidBreakdownDocumentaryEvidence({
+    audit_id: primitive.audit_id, institution_id: institutionId, fiscal_year: primitive.fiscal_year ?? 2026,
+    budget_basis: 'PRIMITIVE', credit_nature: primitive.credit_nature,
+    document_title: primitive.source, document_reference: primitive.document_reference ?? '',
+    source_url: primitive.source_url ?? '', pdf_page: primitive.pdf_page ?? 0, sha256: primitive.sha256 ?? '',
+    total_fcfa: primitive.total_voted_fcfa, functioning_fcfa: primitive.functioning_voted_fcfa!, investment_fcfa: primitive.investment_voted_fcfa!,
+  }, institutionId, fiscalYear, 'PRIMITIVE', primitive.total_voted_fcfa, primitive.functioning_voted_fcfa, primitive.investment_voted_fcfa);
+  if (verified) return 'VERIFIED_AMOUNT';
+  return (primitive.fiscal_year ?? 2026) === fiscalYear && primitive.verification_status !== 'OFFICIAL_DOCUMENT' &&
+    Boolean(primitive.source?.trim()) && /^https?:\/\//i.test(primitive.source_url ?? '') ? 'SECONDARY_SOURCE' : 'TO_VERIFY';
 }
 
 export type InstitutionBudgetStatus = 
@@ -76,6 +129,7 @@ export type InstitutionBudgetVerificationStatus =
   | 'VERIFIED_AMOUNT'
   | 'VERIFIED_ZERO'
   | 'SECONDARY_SOURCE'
+  | 'TO_VERIFY'
   | 'UNKNOWN'
   | 'NOT_DOCUMENTED'
   | 'NOT_PUBLISHED'
@@ -420,6 +474,18 @@ export function resolveInstitutionFinancialView(
   const instName = institution.name || 'Institution non dénommée';
   const instType = institution.type || 'INSTITUTION';
 
+  const localPrimitiveBasis = ['MAIRIE', 'REGION', 'DISTRICT'].includes(instType) && (requestedBasis == null || requestedBasis === 'PRIMITIVE');
+  if (localPrimitiveBasis) {
+    const candidate = institution.primitive_budget ?? OFFICIAL_PRIMITIVE_BUDGETS[instId];
+    const primitive = candidate && (candidate.fiscal_year ?? 2026) === fiscalYear ? candidate : undefined;
+    institution = { ...institution,
+      total_budget_fcfa: primitive?.total_voted_fcfa ?? null,
+      budget_functioning_fcfa: primitive?.functioning_voted_fcfa ?? null,
+      budget_investment_fcfa: primitive?.investment_voted_fcfa ?? null,
+      budget_not_published: primitive ? false : institution.budget_not_published,
+    };
+  }
+
   const isCourSupreme = instId === 'inst-cour-supreme' || 
     (instName.toLowerCase().includes('cour suprême') && 
      !instName.toLowerCase().includes('cassation') && 
@@ -529,7 +595,7 @@ export function resolveInstitutionFinancialView(
   // 3. CAS DU BUDGET NON PUBLIÉ OU NON DOCUMENTÉ
   if (institution.budget_not_published || institution.total_budget_fcfa == null) {
     const isExplicitlyUnpublished = institution.budget_not_published === true;
-    const vStatus: InstitutionBudgetVerificationStatus = isExplicitlyUnpublished ? 'NOT_PUBLISHED' : 'NOT_DOCUMENTED';
+    const vStatus: InstitutionBudgetVerificationStatus = institution.breakdown_evidence ? 'TO_VERIFY' : isExplicitlyUnpublished ? 'NOT_PUBLISHED' : 'NOT_DOCUMENTED';
     const sStatus: InstitutionBudgetStatus = isExplicitlyUnpublished ? 'NOT_PUBLISHED' : 'NOT_DOCUMENTED';
     const referenceOnly = fiscalYear === 2026 && (requestedBasis == null || requestedBasis === 'LFI')
       ? (NATIONAL_INSTITUTIONS_SECTIONS[instId] ?? MINISTRIES_SECTIONS[instId]) : undefined;
@@ -543,7 +609,7 @@ export function resolveInstitutionFinancialView(
       official_section_code: referenceOnly?.section_code ?? null,
       fiscal_year: fiscalYear,
       nature_credits: null,
-      budget_basis: requestedBasis || (instType === 'MAIRIE' || instType === 'REGION' ? 'PRIMITIVE' : 'LFI'),
+      budget_basis: requestedBasis || (['MAIRIE', 'REGION', 'DISTRICT'].includes(instType) ? 'PRIMITIVE' : 'LFI'),
       budget_measure: isExplicitlyUnpublished ? 'NON_PUBLIE' : 'NON_INDIVIDUALISE',
       total_amount_fcfa: null,
       functioning_amount_fcfa: null,
@@ -592,7 +658,7 @@ export function resolveInstitutionFinancialView(
     return {
       institution_id: instId, institution_name: instName, institution_type: instType,
       official_section_code: null, fiscal_year: fiscalYear, nature_credits: null,
-      budget_basis: requestedBasis || 'LFI', budget_measure: 'CREDITS_VOTES',
+      budget_basis: requestedBasis || (localPrimitiveBasis ? 'PRIMITIVE' : 'LFI'), budget_measure: 'CREDITS_VOTES',
       total_amount_fcfa: 0,
       functioning_amount_fcfa: institution.budget_functioning_fcfa ?? null,
       investment_amount_fcfa: institution.budget_investment_fcfa ?? null,
@@ -648,40 +714,17 @@ export function resolveInstitutionFinancialView(
     amountEvidence != null && amountEvidence.lfi_amount_fcfa === total;
   const documentaryDiscrepancy = amountEvidence != null && !isLfi2026AmountConfirmed;
   const isReconciled = pctResult.status === 'RECONCILED';
-  const effectiveBasis = requestedBasis || (instType === 'MAIRIE' || instType === 'REGION' ? 'PRIMITIVE' : 'LFI');
+  const effectiveBasis = requestedBasis || (['MAIRIE', 'REGION', 'DISTRICT'].includes(instType) ? 'PRIMITIVE' : 'LFI');
 
-  // CORRECTION P1 #1 & P1 #2 :
-  // Séparer rigoureusement :
-  // 1) la précision numérique (precision === 'EXACT' et équilibre arithmétique) ;
-  // 2) la provenance documentaire (source secondaire rapportée vs document officiel primaire avec page PDF et SHA-256) ;
-  // 3) le statut de certification (SECONDARY_SOURCE vs VERIFIED_AMOUNT).
-  // Le raccourci booléen `has_verified_breakdown` est intégralement supprimé au profit de `BreakdownDocumentaryEvidence`.
-  const primitiveInfo = OFFICIAL_PRIMITIVE_BUDGETS[instId] || institution.primitive_budget;
+  const primitiveInfo = ['MAIRIE', 'REGION', 'DISTRICT'].includes(instType) && effectiveBasis === 'PRIMITIVE'
+    ? institution.primitive_budget ?? OFFICIAL_PRIMITIVE_BUDGETS[instId] : undefined;
+  const primitiveStatus = primitiveInfo ? primitiveVerification(primitiveInfo, instId, fiscalYear) : undefined;
   const isPrimitiveBalancedAndMatching = Boolean(
-    primitiveInfo != null &&
-    primitiveInfo.precision === 'EXACT' &&
-    typeof primitiveInfo.source_url === 'string' &&
-    /^https?:\/\/.+/i.test(primitiveInfo.source_url.trim()) &&
-    primitiveInfo.functioning_voted_fcfa != null &&
-    primitiveInfo.investment_voted_fcfa != null &&
-    calculateSafePercentages(
-      primitiveInfo.functioning_voted_fcfa,
-      primitiveInfo.investment_voted_fcfa,
-      primitiveInfo.total_voted_fcfa
-    ).isBalanced &&
-    total === primitiveInfo.total_voted_fcfa &&
-    fonct === primitiveInfo.functioning_voted_fcfa &&
-    inv === primitiveInfo.investment_voted_fcfa
+    primitiveInfo && primitiveInfo.precision === 'EXACT' &&
+    calculateSafePercentages(primitiveInfo.functioning_voted_fcfa, primitiveInfo.investment_voted_fcfa, primitiveInfo.total_voted_fcfa).status === 'RECONCILED' &&
+    total === primitiveInfo.total_voted_fcfa && fonct === primitiveInfo.functioning_voted_fcfa && inv === primitiveInfo.investment_voted_fcfa
   );
-
-  const isPrimitivePrimaryCertified = Boolean(
-    isPrimitiveBalancedAndMatching &&
-    primitiveInfo!.verification_status === 'OFFICIAL_DOCUMENT' &&
-    typeof primitiveInfo!.pdf_page === 'number' &&
-    Number.isInteger(primitiveInfo!.pdf_page) &&
-    primitiveInfo!.pdf_page > 0 &&
-    isValidPrimarySha256(primitiveInfo!.sha256)
-  );
+  const isPrimitivePrimaryCertified = isPrimitiveBalancedAndMatching && primitiveStatus === 'VERIFIED_AMOUNT';
 
   const hasStructuredBreakdownEvidence = isValidBreakdownDocumentaryEvidence(
     institution.breakdown_evidence,
@@ -693,8 +736,9 @@ export function resolveInstitutionFinancialView(
     inv
   );
 
+  const isPrimitiveSecondaryReported = primitiveStatus === 'SECONDARY_SOURCE' && primitiveInfo?.total_voted_fcfa === total;
   const isBreakdownPrimaryVerified = (isPrimitivePrimaryCertified || hasStructuredBreakdownEvidence) && isReconciled;
-  const isBreakdownSecondaryReported = !isBreakdownPrimaryVerified && isPrimitiveBalancedAndMatching && isReconciled;
+  const isBreakdownSecondaryReported = !isBreakdownPrimaryVerified && isPrimitiveBalancedAndMatching && primitiveStatus === 'SECONDARY_SOURCE' && isReconciled;
   const isBreakdownDisplayable = isBreakdownPrimaryVerified || isBreakdownSecondaryReported;
 
   const resolvedProvenance: DocumentaryProvenance | null = isLfi2026AmountConfirmed
@@ -717,7 +761,7 @@ export function resolveInstitutionFinancialView(
         sha256: primitiveInfo!.sha256!,
         table_or_line: 'Délibération / document budgétaire primaire vérifié',
       }
-    : isBreakdownSecondaryReported
+    : isPrimitiveSecondaryReported
     ? {
         document_title: primitiveInfo!.source,
         document_reference: primitiveInfo!.session_notes ?? 'Publication secondaire relative au BP',
@@ -733,11 +777,11 @@ export function resolveInstitutionFinancialView(
       ? 'UNRECONCILED'
       : isBreakdownPrimaryVerified
       ? 'VERIFIED_AMOUNT'
-      : isBreakdownSecondaryReported
+      : isPrimitiveSecondaryReported
       ? 'SECONDARY_SOURCE'
       : isLfi2026AmountConfirmed
       ? 'PARTIAL_BREAKDOWN'
-      : 'NOT_DOCUMENTED';
+      : primitiveInfo || institution.breakdown_evidence ? 'TO_VERIFY' : 'NOT_DOCUMENTED';
 
   return {
     institution_id: instId,
@@ -745,7 +789,7 @@ export function resolveInstitutionFinancialView(
     institution_type: instType,
     official_section_code: officialSectionCode,
     fiscal_year: fiscalYear,
-    nature_credits: nationalSection?.program_code
+    nature_credits: localPrimitiveBasis ? 'Budget primitif local déclaré — prévision' : nationalSection?.program_code
       ? `Programme interne ${nationalSection.program_code} de la Présidence, non additif au total de la section 103`
       : "Autorisations d'Engagement & Crédits de Paiement (LFI 2026)",
     budget_basis: effectiveBasis,
@@ -779,7 +823,7 @@ export function resolveInstitutionFinancialView(
       ? 'Programme Présidence - non additif'
       : isBreakdownPrimaryVerified
       ? (isLfi2026AmountConfirmed ? 'Montant recoupé LFI 2026' : 'Ventilation officielle vérifiée')
-      : isBreakdownSecondaryReported
+      : isPrimitiveSecondaryReported
       ? 'Montant rapporté — à confirmer'
       : isLfi2026AmountConfirmed
       ? 'Montant recoupe LFI 2026'
@@ -789,7 +833,7 @@ export function resolveInstitutionFinancialView(
       : 'bg-amber-100 text-amber-800 border-amber-300',
     notice_text: nationalSection?.program_code
       ? `Crédits du programme ${nationalSection.program_code}, inclus dans le total de la section 103 Présidence ; ils ne constituent pas une dotation autonome supplémentaire. Ventilation fonctionnement/investissement non documentée.`
-      : isBreakdownSecondaryReported
+      : isPrimitiveSecondaryReported
       ? 'Publication secondaire : montants et ventilation rapportés à confirmer par la délibération originale ou le document budgétaire primaire.'
       : isBreakdownPrimaryVerified && !isLfi2026AmountConfirmed
       ? 'Ventilation fonctionnement/investissement certifiée par une preuve documentaire primaire vérifiée.'
@@ -812,7 +856,7 @@ export function resolveInstitutionFinancialView(
 export function assessInstitutionBudget(
   inst: Partial<Institution>
 ): InstitutionBudgetAssessment {
-  const view = resolveInstitutionFinancialView(inst, 2026, 'LFI');
+  const view = resolveInstitutionFinancialView(inst, 2026);
 
   return {
     status: view.status,
@@ -1115,7 +1159,8 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
   const local = ['MAIRIE', 'REGION', 'DISTRICT'].includes(institution.type || '');
   const national = institution.type === 'INSTITUTION' ? NATIONAL_INSTITUTIONS_SECTIONS[id] : undefined;
   const ministry = institution.type === 'MINISTERE' ? legalCP.rows.find(row => row.portfolio_id === id) : undefined;
-  const primitive = local ? (institution.primitive_budget ?? OFFICIAL_PRIMITIVE_BUDGETS[id]) : undefined;
+  const candidate = local ? (institution.primitive_budget ?? OFFICIAL_PRIMITIVE_BUDGETS[id]) : undefined;
+  const primitive = candidate && (candidate.fiscal_year ?? 2026) === 2026 ? candidate : undefined;
   const regulatorScope = institution.type === 'AUTORITE_REGULATION' ? REGULATOR_2026_DOCUMENTED_SCOPES[id] : undefined;
   const result: InstitutionBudgetPresentation = {
     institution_id: id, fiscal_year: 2026,
@@ -1162,19 +1207,13 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
   if (primitive) {
     const arithmetic = calculateSafePercentages(primitive.functioning_voted_fcfa, primitive.investment_voted_fcfa, primitive.total_voted_fcfa);
     const isBalancedExact = primitive.precision === 'EXACT' && Boolean(primitive.source_url) && arithmetic.isBalanced && arithmetic.status === 'RECONCILED';
-    const isPrimaryDoc = Boolean(
-      isBalancedExact &&
-      primitive.verification_status === 'OFFICIAL_DOCUMENT' &&
-      typeof primitive.pdf_page === 'number' &&
-      Number.isInteger(primitive.pdf_page) &&
-      primitive.pdf_page > 0 &&
-      isValidPrimarySha256(primitive.sha256)
-    );
+    const verification = primitiveVerification(primitive, id, 2026);
+    const isPrimaryDoc = verification === 'VERIFIED_AMOUNT';
     result.reference = {
       amount_fcfa: primitive.total_voted_fcfa,
-      label: isPrimaryDoc ? 'Budget primitif propre (BP) — délibération officielle' : 'Budget primitif propre (BP) rapporté',
+      label: isPrimaryDoc ? 'Budget primitif propre (BP) — délibération officielle' : verification === 'SECONDARY_SOURCE' ? 'Budget primitif propre (BP) rapporté' : 'Budget primitif déclaré — preuve à vérifier',
       precision: primitive.precision ?? 'UNKNOWN',
-      verification: isPrimaryDoc ? 'VERIFIED_AMOUNT' : 'SECONDARY_SOURCE',
+      verification,
       source: {
         document_title: primitive.source,
         document_reference: primitive.document_reference ?? primitive.session_notes ?? 'Publication relative au BP 2026',
@@ -1185,8 +1224,9 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
     };
     result.notice = isPrimaryDoc
       ? 'Budget primitif voté documenté par une source primaire vérifiée. BP/BS/BM : prévisions ; CA : exécution.'
+      : verification === 'TO_VERIFY' ? 'Preuve déclarée non auditée : le document et la ligne budgétaire doivent être contrôlés avant certification. BP : prévision ; CA : exécution.'
       : 'Publication secondaire : délibération originale à obtenir avant certification. La ventilation des recettes propres et concours de l’État ne se déduit pas du total. BP/BS/BM : prévisions ; CA : exécution.';
-    if (isBalancedExact) {
+    if (isBalancedExact && verification !== 'TO_VERIFY') {
       result.functioning_fcfa = primitive.functioning_voted_fcfa;
       result.investment_fcfa = primitive.investment_voted_fcfa;
       result.functioning_pct = arithmetic.functioningPct;
@@ -1219,36 +1259,16 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
   const recorded = institution.total_budget_fcfa;
   if (recorded != null && Number.isSafeInteger(recorded) && recorded >= 0 && (local || institution.type === 'AUTORITE_REGULATION' || recorded !== result.reference.amount_fcfa)) {
     const grantEvidence = institution.state_grant_evidence;
-    const hasExplicitStateGrantSource = Boolean(
-      local &&
-      grantEvidence &&
-      grantEvidence.institution_id === id &&
-      grantEvidence.fiscal_year === 2026 &&
-      grantEvidence.amount_fcfa === recorded &&
-      typeof grantEvidence.source?.document_title === 'string' &&
-      grantEvidence.source.document_title.trim().length > 0 &&
-      typeof grantEvidence.source?.source_url === 'string' &&
-      /^https?:\/\/.+/i.test(grantEvidence.source.source_url.trim())
-    );
-    if (hasExplicitStateGrantSource) {
-      const isPrimaryGrantDoc = Boolean(
-        typeof grantEvidence!.source.pdf_page === 'number' &&
-        Number.isInteger(grantEvidence!.source.pdf_page) &&
-        grantEvidence!.source.pdf_page > 0 &&
-        isValidPrimarySha256(grantEvidence!.source.sha256)
-      );
+    if (local && isValidStateGrantEvidence(grantEvidence, id, recorded)) {
       result.supplements.push({
-        amount_fcfa: recorded,
-        precision: 'EXACT',
-        verification: isPrimaryGrantDoc ? 'VERIFIED_AMOUNT' : 'SECONDARY_SOURCE',
+        amount_fcfa: recorded, precision: 'EXACT', verification: 'VERIFIED_AMOUNT',
         source: {
-          document_title: grantEvidence!.source.document_title,
-          document_reference: grantEvidence!.source.document_reference ?? grantEvidence!.grant_type ?? 'Concours financiers de l’État',
-          source_url: grantEvidence!.source.source_url,
-          pdf_page: grantEvidence!.source.pdf_page ?? null,
-          sha256: grantEvidence!.source.sha256 ?? null,
+          document_title: LFI_2026_DOCUMENT.title,
+          document_reference: 'LFI 2026 • Action 78016001400 • Crédits de paiement votés',
+          source_url: LFI_2026_DOCUMENT.url, pdf_page: 207, sha256: LFI_2026_DOCUMENT.sha256,
+          table_or_line: 'Fonctionnement des services de la commune d’Attécoubé — transfert',
         },
-        label: `Concours de l’État (${grantEvidence!.grant_type || 'DGF / DGE / Annexe 8'}) — distinct du budget primitif`,
+        label: 'Crédits de l’État pour le fonctionnement des services — distincts du budget primitif',
       });
     } else if (recorded !== result.reference.amount_fcfa) {
       result.supplements.push({

@@ -8,7 +8,7 @@ type OfficialPublicDocument = PublicDocument & {
 
 // GET et SHA-256 des octets PDF contrôlés le 12 octobre 2026 : docs/CODEX_CHECKPOINT.md.
 // Le hash RAP provient de l’acquisition antérieure tracée dans docs/overnight/DOCUMENTS.json.
-const DOCUMENT_CONTROLS: readonly Pick<SourceDocument, 'id' | 'officialUrl' | 'sha256' | 'pageCount' | 'accessedAt' | 'httpStatus' | 'availability' | 'verification'>[] = [
+export const DOCUMENT_CONTROLS: readonly Readonly<Pick<SourceDocument, 'id' | 'officialUrl' | 'sha256' | 'pageCount' | 'accessedAt' | 'httpStatus' | 'availability' | 'verification'>>[] = [
   {
     "id": "DGBF-LFI-2026",
     "officialUrl": "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
