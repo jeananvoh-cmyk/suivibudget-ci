@@ -154,6 +154,11 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (editingDoc) {
+      onShowToast('Fichier immuable : pour remplacer le binaire, créez une nouvelle version documentaire.', 'error');
+      e.target.value = '';
+      return;
+    }
 
     const lower = file.name.toLowerCase();
     let format: DocumentFormat = 'PDF';
@@ -625,6 +630,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
                   <label className="block font-bold text-slate-700 mb-1">Format *</label>
                   <select
                     value={formData.file_format}
+                    disabled={Boolean(editingDoc)}
                     onChange={(e) => setFormData(p => ({ ...p, file_format: e.target.value as DocumentFormat }))}
                     className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
                   >
@@ -640,6 +646,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
                   <input
                     type="text"
                     value={formData.file_size}
+                    disabled={Boolean(editingDoc)}
                     onChange={(e) => setFormData(p => ({ ...p, file_size: e.target.value }))}
                     placeholder="Ex: 3.5 Mo"
                     className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
@@ -657,10 +664,11 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
                 <div className="flex items-center gap-2">
                   <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300 font-bold transition-colors">
                     <Upload className="w-3.5 h-3.5" />
-                    <span>Choisir un fichier local</span>
+                    <span>{editingDoc ? 'Fichier verrouillé (créez une nouvelle version)' : 'Choisir un fichier local'}</span>
                     <input
                       type="file"
                       accept=".pdf,.xlsx,.xls,.docx,.doc,.csv"
+                      disabled={Boolean(editingDoc)}
                       onChange={handleFileUpload}
                       className="hidden"
                     />
@@ -677,8 +685,9 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
                   <span className="text-[10px] text-slate-400 block mb-1">Ou saisissez une URL directe (lien web) :</span>
                   <input
                     type="text"
-                    required
-                    value={formData.file_url}
+                    required={!editingDoc}
+                    disabled={Boolean(editingDoc)}
+                    value={editingDoc?.storage_path || formData.file_url}
                     onChange={(e) => setFormData(p => ({ ...p, file_url: e.target.value }))}
                     placeholder="https://caidp.ci/documents/mon_rapport.pdf"
                     className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl font-mono text-[11px] focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
