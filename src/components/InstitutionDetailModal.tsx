@@ -107,11 +107,94 @@ const ModalLeaderAvatar: React.FC<{
 const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+export function isElementEffectivelyVisible(
+  el: HTMLElement | null,
+  container?: HTMLElement | null
+): boolean {
+  if (!el) return false;
+
+  // 1. Direct attribute and property checks
+  if (el.hidden || el.hasAttribute('hidden')) return false;
+  if (el.getAttribute('aria-hidden') === 'true') return false;
+  if (el.hasAttribute('inert') || (el as any).inert === true) return false;
+  if ((el as any).disabled || el.hasAttribute('disabled')) return false;
+  const tabIndexAttr = el.getAttribute('tabindex');
+  if (tabIndexAttr !== null && parseInt(tabIndexAttr, 10) < 0) return false;
+
+  // 2. Browser checkVisibility API if available (Chrome 105+, Firefox 106+, Safari 17.4+)
+  if (typeof el.checkVisibility === 'function') {
+    try {
+      if (!el.checkVisibility({ checkVisibilityCSS: true })) {
+        return false;
+      }
+    } catch {
+      // Fallback if checkVisibility throws in mock environments
+    }
+  }
+
+  // 3. Traversal of element and ancestors up to container (or root)
+  let curr: HTMLElement | null = el;
+  while (curr) {
+    if (curr.hidden || curr.hasAttribute('hidden')) return false;
+    if (curr.getAttribute('aria-hidden') === 'true') return false;
+    if (curr.hasAttribute('inert') || (curr as any).inert === true) return false;
+    if (curr.tagName === 'FIELDSET' && (curr as HTMLFieldSetElement).disabled) return false;
+
+    // Direct style attribute checks
+    if (curr.style) {
+      if (curr.style.display === 'none') return false;
+      if (curr.style.visibility === 'hidden' || curr.style.visibility === 'collapse') return false;
+    }
+
+    // Computed style check
+    if (typeof window !== 'undefined' && typeof window.getComputedStyle === 'function') {
+      try {
+        const computed = window.getComputedStyle(curr);
+        if (computed) {
+          if (computed.display === 'none') return false;
+          if (computed.visibility === 'hidden' || computed.visibility === 'collapse') return false;
+        }
+      } catch {
+        // Fallback in mock environments
+      }
+    }
+
+    // ClassList check for hidden or invisible utility classes
+    if (curr.classList) {
+      if (curr.classList.contains('hidden') || curr.classList.contains('invisible')) {
+        let isResponsiveVisibleOverride = false;
+        if (typeof curr.checkVisibility === 'function') {
+          try {
+            isResponsiveVisibleOverride = curr.checkVisibility({ checkVisibilityCSS: true });
+          } catch {}
+        }
+        if (!isResponsiveVisibleOverride && typeof window !== 'undefined' && typeof window.getComputedStyle === 'function') {
+          try {
+            const computed = window.getComputedStyle(curr);
+            if (computed && computed.display && computed.display !== 'none' && computed.display !== '') {
+              if (curr.offsetWidth !== 0 || curr.offsetHeight !== 0) {
+                isResponsiveVisibleOverride = true;
+              }
+            }
+          } catch {}
+        }
+        if (!isResponsiveVisibleOverride) {
+          return false;
+        }
+      }
+    }
+
+    if (container && curr === container) break;
+    curr = curr.parentElement;
+  }
+
+  return true;
+}
+
 export function getModalFocusableElements(container: HTMLElement | null): HTMLElement[] {
   if (!container || typeof container.querySelectorAll !== 'function') return [];
-  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
-    (el) => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true' && !el.hidden
-  );
+  const candidates = Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+  return candidates.filter((el) => isElementEffectivelyVisible(el, container));
 }
 
 export function handleModalKeyDown(
@@ -139,16 +222,28 @@ export function handleModalKeyDown(
 
     const first = focusables[0];
     const last = focusables[focusables.length - 1];
-    const currentActive = (activeElement !== undefined ? activeElement : (typeof document !== 'undefined' ? document.activeElement : null)) as HTMLElement | null;
-    const isInside = Boolean(currentActive && dialogEl && typeof dialogEl.contains === 'function' && dialogEl.contains(currentActive));
+    const currentActive = (activeElement !== undefined
+      ? activeElement
+      : (typeof document !== 'undefined' ? document.activeElement : null)) as HTMLElement | null;
+
+    const isInside = Boolean(
+      currentActive &&
+      dialogEl &&
+      typeof dialogEl.contains === 'function' &&
+      dialogEl.contains(currentActive)
+    );
+
+    const activeIndex = currentActive ? focusables.indexOf(currentActive) : -1;
 
     if (event.shiftKey) {
-      if (!isInside || currentActive === first || currentActive === dialogEl) {
+      // Shift+Tab: If outside, on container, or at/before first element, wrap to last
+      if (!isInside || activeIndex <= 0 || currentActive === dialogEl) {
         event.preventDefault();
         last.focus();
       }
     } else {
-      if (!isInside || currentActive === last) {
+      // Tab: If outside, on container, at/after last element, or unfocusable child, wrap to first
+      if (!isInside || activeIndex === -1 || activeIndex >= focusables.length - 1 || currentActive === dialogEl) {
         event.preventDefault();
         first.focus();
       }
@@ -167,15 +262,19 @@ export function manageModalFocusLifecycle(
       ? (document.activeElement as HTMLElement)
       : null;
 
-  const initialTarget =
-    closeBtnEl ||
-    getModalFocusableElements(dialogEl)[0] ||
-    dialogEl;
+  const focusables = getModalFocusableElements(dialogEl);
+  const isCloseBtnFocusable = closeBtnEl && focusables.includes(closeBtnEl);
+  const initialTarget = isCloseBtnFocusable
+    ? closeBtnEl
+    : (focusables[0] || dialogEl);
+
   initialTarget?.focus?.();
 
   return () => {
     if (previousActive && typeof previousActive.focus === 'function') {
-      previousActive.focus();
+      try {
+        previousActive.focus();
+      } catch {}
     }
   };
 }
@@ -195,6 +294,23 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   const [docModalOpen, setDocModalOpen] = useState(false);
   const [selectedProjectForDoc, setSelectedProjectForDoc] = useState<BudgetProject | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+  const docTriggerRef = useRef<HTMLElement | null>(null);
+
+  const openDocModal = (proj: BudgetProject | null = null) => {
+    docTriggerRef.current = (typeof document !== 'undefined' ? document.activeElement : null) as HTMLElement | null;
+    setSelectedProjectForDoc(proj);
+    setDocModalOpen(true);
+  };
+
+  const closeDocModal = () => {
+    setDocModalOpen(false);
+    setSelectedProjectForDoc(null);
+    if (docTriggerRef.current && typeof docTriggerRef.current.focus === 'function') {
+      try {
+        docTriggerRef.current.focus();
+      } catch {}
+    }
+  };
 
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -384,8 +500,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   };
 
   const handleRequestProjectDoc = (proj: BudgetProject) => {
-    setSelectedProjectForDoc(proj);
-    setDocModalOpen(true);
+    openDocModal(proj);
   };
 
   // Helper to clean redundant project location text
@@ -1178,7 +1293,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     </p>
                   </div>
                   <button
-                    onClick={() => setDocModalOpen(true)}
+                    onClick={() => openDocModal(null)}
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white hover:bg-slate-800 transition-colors cursor-pointer shadow-2xs"
                   >
                     <FileText className="w-3.5 h-3.5 text-amber-300" />
@@ -1194,10 +1309,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     {financeSubTab === 'EXECUTION' && (
                       <AdministrativeAccountView
                         institution={institution}
-                        onOpenDocRequest={() => {
-                          setSelectedProjectForDoc(null);
-                          setDocModalOpen(true);
-                        }}
+                        onOpenDocRequest={() => openDocModal(null)}
                       />
                     )}
 
@@ -1205,10 +1317,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     {financeSubTab === 'HISTORY' && (
                       <LocalBudgetHistoryView
                         institution={institution}
-                        onOpenDocRequest={() => {
-                          setSelectedProjectForDoc(null);
-                          setDocModalOpen(true);
-                        }}
+                        onOpenDocRequest={() => openDocModal(null)}
                       />
                     )}
                   </>
@@ -1411,10 +1520,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   )}
 
                   <button
-                    onClick={() => {
-                      setSelectedProjectForDoc(null);
-                      setDocModalOpen(true);
-                    }}
+                    onClick={() => openDocModal(null)}
                     className="w-full mt-2 py-2 bg-brand-orange hover:bg-brand-orange/90 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                   >
                     <FileText className="w-3.5 h-3.5" />
@@ -1433,10 +1539,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
         {/* ========================================================= */}
         <div className="p-3.5 sm:px-6 bg-white border-t border-slate-200 flex flex-wrap items-center justify-between gap-2.5 flex-shrink-0">
           <button
-            onClick={() => {
-              setSelectedProjectForDoc(null);
-              setDocModalOpen(true);
-            }}
+            onClick={() => openDocModal(null)}
             className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-bold transition-all flex items-center gap-2 shadow-2xs cursor-pointer"
           >
             <FileText className="w-3.5 h-3.5 text-brand-orange" />
@@ -1456,10 +1559,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
       {/* SOUS-MODAL DEMANDE CAIDP */}
       <OfficialDocRequestModal
         isOpen={docModalOpen}
-        onClose={() => {
-          setDocModalOpen(false);
-          setSelectedProjectForDoc(null);
-        }}
+        onClose={closeDocModal}
         institution={institution}
         project={selectedProjectForDoc}
       />

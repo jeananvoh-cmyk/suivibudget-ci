@@ -71,6 +71,20 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
   const [customNotes, setCustomNotes] = useState('');
   const [isCopied, setIsCopied] = useState(false);
 
+  // Keyboard navigation: Escape key closes the request modal cleanly
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   // Determine target entity info & resolved type
   const targetEntityName = project 
     ? (project.ministry_name || project.institution_name || project.commune_name || project.region_name || 'Autorité Publique')

@@ -89,6 +89,8 @@ describe('Point A & Corrections PR #58 — Intégrité des ventilations, provena
     expect(presentation.reference.verification).toBe('TO_VERIFY');
     expect(presentation.reference.amount_fcfa).toBe(4_000_000_000);
     expect(presentation.reference.precision).toBe('EXACT');
+    expect(presentation.functioning_fcfa).toBe(1_600_000_000);
+    expect(presentation.investment_fcfa).toBe(2_400_000_000);
     expect(presentation.reference.source?.pdf_page).toBeNull();
     expect(presentation.reference.source?.sha256).toBeNull();
     expect(presentation.functioning_pct).toBeNull();

@@ -1,3 +1,36 @@
+## 13 octobre 2026 — Clôture définitive du piège de focus mobile et accessibilité multi-viewports PR #58 (Antigravity)
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/58 (`codex/budget-presentation-final`).
+- **Base master** : `ab159d4e3de829e11d1e146c8d9b0f9dbfb72bfe` (PR #57 incluse).
+- **HEAD précédent Codex** : `59d12cdea0c5af7de71634dfe5efb709721ac783` (verrou documentaire et réconciliation Attécoubé).
+- **Statut PR** : Ouverte, fusionnable, CI verte, prête pour décision de fusion par ChatGPT (`MERGED = false`, `PRODUCTION_DEPLOYED = false`).
+- **Travail Codex vérifié & conservé** :
+  - Verrou de certification documentaire `AUDITED_FINANCIAL_CLAIMS` dans `src/utils/institutionBudgetHelper.ts`.
+  - Rejet absolu des faux SHA-256 et URL non auditées pour `VERIFIED_AMOUNT` (exigé `TO_VERIFY`).
+  - Preuve légale réelle d'Attécoubé (LFI 2026 p. 207, action 78016001400, 300 000 000 FCFA de transferts fonctionnement).
+  - 27 tests d'intégrité financière et documentaire dans `src/utils/__tests__/budgetBreakdownIntegrityGate.test.ts`.
+- **Anomalie de focus mobile résolue (`src/components/InstitutionDetailModal.tsx`)** :
+  - *Constat* : En affichage mobile (< 640px), les liens d'en-tête (site web et page Facebook avec classe `hidden sm:inline-flex`) étaient inclus dans `getModalFocusableElements` car l'attribut HTML `hidden` était absent. Lors d'un `Shift+Tab` depuis le bouton de fermeture d'en-tête, le focus tentait de se déplacer sur l'élément masqué précédent et s'échappait de la modale.
+  - *Cause technique* : Absence de filtrage de la visibilité effective et des styles CSS (`display: none`, `visibility: hidden`), et non-prise en compte de la hiérarchie des conteneurs parents (`inert`, `display: none`).
+  - *Correctif apporté* :
+    1. `isElementEffectivelyVisible` : intègre l'API standard `checkVisibility({ checkVisibilityCSS: true })` en navigateur réel, et parcourt récursivement tous les ancêtres jusqu'au conteneur dialog pour détecter `hidden`, `inert`, `aria-hidden="true"`, `disabled`, `display: none`, `visibility: hidden`, et les classes Tailwind `hidden`/`invisible`.
+    2. `handleModalKeyDown` : confinement de focus circulaire renforcé (`Shift+Tab` sur ou avant le premier élément visible boucle vers le dernier élément visible ; `Tab` sur le dernier boucle vers le premier ; rapatriement automatique si le focus est sur le conteneur ou hors modale).
+    3. Gestion des sous-modales : suspension propre du gestionnaire parent lorsque la sous-modale CAIDP est ouverte (`docModalOpen`), écouteur `Escape` dédié dans `OfficialDocRequestModal` avec `e.stopPropagation()`, et mémorisation du bouton déclencheur (`docTriggerRef`) pour restitution automatique du focus à la fermeture.
+    4. Restitution du focus au bouton déclencheur d'origine (`manageModalFocusLifecycle`).
+- **Validation technique** :
+  - **59 fichiers de tests, 778 tests exécutés, 778 tests réussis (100% PASS, 0 FAIL)**.
+  - Nouvelle suite dédiée : `src/components/__tests__/institutionDetailModalFocusTrap.test.ts` (11 tests unitaires et d'interaction DOM).
+  - Compilation TypeScript & Build Vite : `tsc && vite build` (code 0) et `vite build --config vite.review.config.ts` (code 0).
+  - Recette multi-viewports Playwright réelle (360px, 390px, 768px, 1440px) :
+    * `initialFocusIsCloseButton = true` (100% PASS sur les 4 résolutions)
+    * `shiftTabTrappedInside = true` (100% PASS, 0 fuite vers les liens masqués)
+    * `tabLoopsToStart = true` (100% PASS, boucle circulaire fermée)
+    * `closedOnEscape = true` (100% PASS)
+    * `focusRestoredToTrigger = true` (100% PASS)
+    * `hasHorizontalOverflow = false` (100% PASS)
+- **Garde-fous** : `REMOTE_SUPABASE_WRITES = 0` ; migrations = 0 ; fusion master = non effectuée (réservée à ChatGPT) ; déploiement production = non tenté.
+- **NEXT_EXECUTABLE_TASK** : Revue finale et décision de fusion de la PR #58 sur master par ChatGPT.
+
 ## 13 octobre 2026 — Verrou de certification documentaire PR #58
 
 - HEAD avant correction : `8e1b6e052292a30af40ebe690502081d709210ef`. Branche : `codex/budget-presentation-final` ; master : `ab159d4e3de829e11d1e146c8d9b0f9dbfb72bfe`.

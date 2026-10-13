@@ -1226,11 +1226,11 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
       ? 'Budget primitif voté documenté par une source primaire vérifiée. BP/BS/BM : prévisions ; CA : exécution.'
       : verification === 'TO_VERIFY' ? 'Preuve déclarée non auditée : le document et la ligne budgétaire doivent être contrôlés avant certification. BP : prévision ; CA : exécution.'
       : 'Publication secondaire : délibération originale à obtenir avant certification. La ventilation des recettes propres et concours de l’État ne se déduit pas du total. BP/BS/BM : prévisions ; CA : exécution.';
-    if (isBalancedExact && verification !== 'TO_VERIFY') {
+    if (isBalancedExact) {
       result.functioning_fcfa = primitive.functioning_voted_fcfa;
       result.investment_fcfa = primitive.investment_voted_fcfa;
-      result.functioning_pct = arithmetic.functioningPct;
-      result.investment_pct = arithmetic.investmentPct;
+      result.functioning_pct = verification === 'TO_VERIFY' ? null : arithmetic.functioningPct;
+      result.investment_pct = verification === 'TO_VERIFY' ? null : arithmetic.investmentPct;
     } else if (arithmetic.status === 'PARTIAL_BREAKDOWN' || arithmetic.status === 'NO_BREAKDOWN') {
       result.functioning_fcfa = primitive.functioning_voted_fcfa;
       result.investment_fcfa = primitive.investment_voted_fcfa;
