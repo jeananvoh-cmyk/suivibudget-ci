@@ -133,7 +133,7 @@ Pour vérifier que la documentation est immédiatement utilisable par un nouveau
    - `npm test` : **778 tests réussis sur 778 (59 fichiers de test, 0 échec)** en 150.51s.
    - `npm run build` : Compilation TypeScript et build de production Vite terminés en 28.18s sans avertissement bloquant.
 4. Les 3 parcours de développement ont été repérés avec succès selon les instructions de [START_HERE.md](../../maintenance/START_HERE.md) :
-   - **Fiche budgétaire :** `getInstitutionBudgetPresentation` dans [institutionBudgetHelper.ts](../../../src/utils/institutionBudgetHelper.ts) et [InstitutionDetailModal.tsx](../../../src/components/InstitutionDetailModal.tsx).
+   - **Fiche budgétaire :** `resolveInstitutionBudgetPresentation` dans [institutionBudgetHelper.ts](../../../src/utils/institutionBudgetHelper.ts) et [InstitutionDetailModal.tsx](../../../src/components/InstitutionDetailModal.tsx).
    - **Projet citoyen :** [ProjectDetailModal.tsx](../../../src/components/ProjectDetailModal.tsx) et [ProjectsPage.tsx](../../../src/pages/ProjectsPage.tsx).
    - **Export de données :** `exportInstitutionBudget` dans [institutionBudgetHelper.ts](../../../src/utils/institutionBudgetHelper.ts) et `sanitizeCsvCell` dans [security.ts](../../../src/utils/security.ts).
 
