@@ -29,7 +29,7 @@ export interface AdminWorkTask {
   due_date?: string;
   completed_at?: string;
   completed_by?: string;
-  target_tab: 'moderation' | 'documents_manager' | 'caidp_manager' | 'caidp_analytics' | 'digital_opportunities' | 'budget_table';
+  target_tab: 'moderation' | 'documents_manager' | 'comptes_administratifs' | 'caidp_manager' | 'caidp_analytics' | 'digital_opportunities' | 'budget_table';
   target_filter?: Record<string, string>;
   source_id: string; // ID de la preuve, du document, de l'entité CAIDP ou de la demande
   metadata?: Record<string, any>;
