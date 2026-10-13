@@ -68,7 +68,7 @@ Tous les calculs, vérifications et affichages budgétaires passent par un point
 
 - **Pour une commune ou une région :**
   - Données sources dans `src/data/officialDataFromCsv.ts` (ou `src/data/localBudgetsReferential.ts`).
-  - La fonction `getInstitutionBudgetPresentation(institution)` calcule les montants bruts, le statut de vérification (`VERIFIED`, `TO_VERIFY`, `NOT_FOUND_PUBLICLY`) et les libellés affichés.
+  - La fonction `resolveInstitutionBudgetPresentation(institution)` calcule les montants bruts, le statut de vérification (`VERIFIED`, `TO_VERIFY`, `NOT_FOUND_PUBLICLY`) et les libellés affichés.
 - **Pour une dotation État certifiée (ex: Attécoubé) :**
   - Cherchez le registre `AUDITED_FINANCIAL_CLAIMS` dans `src/utils/institutionBudgetHelper.ts`.
   - C'est ce tableau qui autorise la certification `VERIFIED` en exigeant le montant exact, l'action LOLF et le hash SHA-256 du document officiel.
