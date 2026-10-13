@@ -45,18 +45,27 @@ import { ExamineCADocumentModal } from './ExamineCADocumentModal';
 
 interface AdministrativeAccountsAdminManagerProps {
   onShowToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
+  initialYear?: number;
+  initialSearch?: string;
 }
 
 const AVAILABLE_YEARS = [2024, 2025, 2026, 2027];
 
 export const AdministrativeAccountsAdminManager: React.FC<AdministrativeAccountsAdminManagerProps> = ({
   onShowToast,
+  initialYear = 2025,
+  initialSearch = '',
 }) => {
-  const [selectedYear, setSelectedYear] = useState<number>(2025);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedYear, setSelectedYear] = useState<number>(initialYear);
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [typeFilter, setTypeFilter] = useState<'ALL' | 'MAIRIE' | 'REGION'>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'MISSING' | 'TO_VERIFY' | 'VERIFIED' | 'PUBLISHED' | 'ARCHIVED'>('ALL');
   const [regionFilter, setRegionFilter] = useState<string>('ALL');
+
+  useEffect(() => {
+    setSelectedYear(initialYear);
+    setSearchQuery(initialSearch);
+  }, [initialYear, initialSearch]);
 
   // Modals state
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
