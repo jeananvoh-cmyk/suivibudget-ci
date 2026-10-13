@@ -1753,6 +1753,13 @@ class DataStore {
       source_name: docData.source_name.trim(), source_url: docData.source_url,
       adoption_date: docData.adoption_date, approval_date: docData.approval_date,
       approval_reference: docData.approval_reference,
+      page_count: docData.page_count,
+      is_multipart: docData.is_multipart,
+      parts_count: docData.parts_count,
+      document_parts: docData.document_parts,
+      is_scanned: docData.is_scanned,
+      has_text_layer: docData.has_text_layer,
+      ocr_status: docData.ocr_status,
     };
     if (latest && !asNewVersion) {
       if (latest.storage_path !== metadata.storage_path || latest.checksum_sha256 !== metadata.checksum_sha256) {

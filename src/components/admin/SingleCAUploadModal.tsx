@@ -18,7 +18,7 @@ import {
   Copy,
   Check
 } from 'lucide-react';
-import { Institution, PublicDocument, OfficialDocumentSource } from '../../types';
+import { Institution, PublicDocument, OfficialDocumentSource, DocumentPartInfo } from '../../types';
 import { calculateFileSha256 } from '../../utils/caFileMatcher';
 import { DocumentStorageService } from '../../services/documentStorageService';
 import { dataStore } from '../../services/dataStore';
@@ -74,6 +74,21 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
 
+  // Multi-parties & numérisation
+  const [isMultipart, setIsMultipart] = useState<boolean>(Boolean(existingDocument?.is_multipart));
+  const [totalPageCount, setTotalPageCount] = useState<number | undefined>(existingDocument?.page_count);
+  const [isScannedPdf, setIsScannedPdf] = useState<boolean>(Boolean(existingDocument?.is_scanned));
+  const [combinedChecksum, setCombinedChecksum] = useState<string>(existingDocument?.checksum_sha256 || '');
+  const [documentParts, setDocumentParts] = useState<DocumentPartInfo[]>(() => {
+    if (existingDocument?.document_parts && existingDocument.document_parts.length > 0) {
+      return existingDocument.document_parts;
+    }
+    return [
+      { part_number: 1, file_name: '', page_range: 'Pages 1 à 22', checksum_sha256: '', file_size: '' },
+      { part_number: 2, file_name: '', page_range: 'Pages 23 à 44', checksum_sha256: '', file_size: '' },
+    ];
+  });
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Synchronisation lors de l'ouverture
@@ -93,6 +108,13 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       setAdoptionDate(existingDocument.adoption_date || '');
       setApprovalDate(existingDocument.approval_date || '');
       setApprovalReference(existingDocument.approval_reference || '');
+      setIsMultipart(Boolean(existingDocument.is_multipart));
+      setTotalPageCount(existingDocument.page_count);
+      setIsScannedPdf(Boolean(existingDocument.is_scanned));
+      setCombinedChecksum(existingDocument.checksum_sha256 || '');
+      if (existingDocument.document_parts && existingDocument.document_parts.length > 0) {
+        setDocumentParts(existingDocument.document_parts);
+      }
     } else {
       setFiscalYear(selectedYear);
       setSelectedFile(null);
@@ -108,6 +130,14 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       setApprovalReference('');
       setIsAsNewVersion(false);
       setDuplicateWarning(null);
+      setIsMultipart(false);
+      setTotalPageCount(undefined);
+      setIsScannedPdf(false);
+      setCombinedChecksum('');
+      setDocumentParts([
+        { part_number: 1, file_name: '', page_range: 'Pages 1 à 22', checksum_sha256: '', file_size: '' },
+        { part_number: 2, file_name: '', page_range: 'Pages 23 à 44', checksum_sha256: '', file_size: '' },
+      ]);
     }
   }, [isOpen, targetCollectivite, existingDocument, selectedYear]);
 
@@ -215,12 +245,19 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
         file_size_bytes: finalSizeBytes,
         storage_bucket: finalStorageBucket,
         storage_path: finalStoragePath,
-        checksum_sha256: finalSha256,
+        checksum_sha256: (isMultipart && combinedChecksum.trim()) ? combinedChecksum.trim() : finalSha256,
         source_name: sourceName,
         source_url: sourceUrl || undefined,
         adoption_date: adoptionDate || undefined,
         approval_date: approvalDate || undefined,
         approval_reference: approvalReference || undefined,
+        page_count: totalPageCount,
+        is_multipart: isMultipart,
+        parts_count: isMultipart ? documentParts.filter(p => p.file_name.trim()).length : undefined,
+        document_parts: isMultipart ? documentParts.filter(p => p.file_name.trim()) : undefined,
+        is_scanned: isScannedPdf,
+        has_text_layer: !isScannedPdf,
+        ocr_status: isScannedPdf ? 'MANUAL_TRANSCRIPTION' : 'PROCESSED',
       }, isAsNewVersion);
 
       onSuccess(savedDoc);
@@ -456,6 +493,138 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
               placeholder="Ex: Arrêté n° 024/MIS/DGDDL du 14 mars 2025"
               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
             />
+          </div>
+
+          {/* Numérisation & Documents Multi-Parties / Fascicules */}
+          <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-3">
+            <h4 className="text-xs font-black uppercase text-slate-800 tracking-wider flex items-center gap-1.5">
+              <Layers className="w-4 h-4 text-brand-blue" />
+              <span>Numérisation & Documents Multi-Parties (Fascicules)</span>
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={isScannedPdf}
+                  onChange={e => setIsScannedPdf(e.target.checked)}
+                  className="rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
+                />
+                <span>Document scanné (sans couche texte)</span>
+              </label>
+
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={isMultipart}
+                  onChange={e => setIsMultipart(e.target.checked)}
+                  className="rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
+                />
+                <span>Document scindé en plusieurs parties (Fascicules)</span>
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Nombre Total de Pages du Document
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={totalPageCount ?? ''}
+                  onChange={e => {
+                    const val = parseInt(e.target.value, 10);
+                    setTotalPageCount(Number.isNaN(val) ? undefined : val);
+                  }}
+                  placeholder="Ex: 44"
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
+                />
+              </div>
+
+              {isMultipart && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    SHA-256 Combiné du Document Complet
+                  </label>
+                  <input
+                    type="text"
+                    value={combinedChecksum}
+                    onChange={e => setCombinedChecksum(e.target.value.trim().toLowerCase())}
+                    placeholder="941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
+                  />
+                </div>
+              )}
+            </div>
+
+            {isMultipart && (
+              <div className="space-y-2 pt-2 border-t border-slate-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-700">Détail des volets / parties ({documentParts.length}) :</span>
+                  <button
+                    type="button"
+                    onClick={() => setDocumentParts(prev => [
+                      ...prev,
+                      { part_number: prev.length + 1, file_name: '', page_range: '', checksum_sha256: '', file_size: '' }
+                    ])}
+                    className="text-xs font-bold text-brand-blue hover:underline cursor-pointer"
+                  >
+                    + Ajouter une partie
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {documentParts.map((part, index) => (
+                    <div key={index} className="p-2.5 rounded-xl bg-white border border-slate-200 grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase block">Volet</span>
+                        <span className="font-bold text-slate-800">Partie {part.part_number}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase block">Nom du fichier</span>
+                        <input
+                          type="text"
+                          value={part.file_name}
+                          onChange={e => {
+                            const val = e.target.value;
+                            setDocumentParts(prev => prev.map((p, idx) => idx === index ? { ...p, file_name: val } : p));
+                          }}
+                          placeholder="Ex: Cocody_CA_2024_pages_01-22.pdf"
+                          className="w-full p-1 border rounded text-xs border-slate-200"
+                        />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase block">Pages couvertes</span>
+                        <input
+                          type="text"
+                          value={part.page_range}
+                          onChange={e => {
+                            const val = e.target.value;
+                            setDocumentParts(prev => prev.map((p, idx) => idx === index ? { ...p, page_range: val } : p));
+                          }}
+                          placeholder="Ex: Pages 1 à 22"
+                          className="w-full p-1 border rounded text-xs border-slate-200"
+                        />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase block">SHA-256 du volet</span>
+                        <input
+                          type="text"
+                          value={part.checksum_sha256 || ''}
+                          onChange={e => {
+                            const val = e.target.value;
+                            setDocumentParts(prev => prev.map((p, idx) => idx === index ? { ...p, checksum_sha256: val } : p));
+                          }}
+                          placeholder="Empreinte SHA-256"
+                          className="w-full p-1 border rounded text-[11px] font-mono border-slate-200"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {isAsNewVersion && <label className="block text-sm font-semibold text-slate-700">

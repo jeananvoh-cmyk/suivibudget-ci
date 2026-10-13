@@ -191,10 +191,26 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                 <div className="font-mono text-sm font-black text-slate-900 mt-0.5 break-all">
                   {document.file_name}
                 </div>
-                <div className="text-xs text-slate-500 mt-1 flex items-center gap-2">
+                <div className="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-2">
                   <span>Taille : <strong>{document.file_size || 'Non renseignée'}</strong></span>
                   <span>•</span>
                   <span>Source : <strong>{document.source_name || 'Non spécifiée'}</strong></span>
+                  {document.page_count && (
+                    <>
+                      <span>•</span>
+                      <span>Pages : <strong>{document.page_count}</strong></span>
+                    </>
+                  )}
+                  {document.is_scanned && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
+                      Scan raster (sans couche texte)
+                    </span>
+                  )}
+                  {document.is_multipart && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-brand-blue">
+                      Document multi-parties ({document.parts_count || document.document_parts?.length || 2} volets)
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -207,10 +223,33 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
               </button>
             </div>
 
+            {/* Volets multi-parties si existants */}
+            {document.is_multipart && document.document_parts && document.document_parts.length > 0 && (
+              <div className="pt-2 border-t border-slate-100 space-y-1.5">
+                <span className="text-[11px] font-bold text-slate-600 block">Fascicules & volets du document :</span>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {document.document_parts.map((p, idx) => (
+                    <div key={idx} className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                      <div className="flex items-center justify-between font-bold text-slate-800">
+                        <span>Partie {p.part_number}</span>
+                        <span className="text-[10px] text-slate-500">{p.page_range}</span>
+                      </div>
+                      <div className="text-[11px] font-mono text-slate-600 truncate mt-0.5">{p.file_name}</div>
+                      {p.checksum_sha256 && (
+                        <div className="text-[10px] font-mono text-slate-400 truncate mt-0.5">SHA: {p.checksum_sha256}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Checksum SHA-256 */}
             <div className="pt-2 border-t border-slate-100">
               <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-                <span className="font-bold">Empreinte numérique (SHA-256) :</span>
+                <span className="font-bold">
+                  {document.is_multipart ? 'Empreinte numérique combinée (SHA-256) :' : 'Empreinte numérique (SHA-256) :'}
+                </span>
                 <button
                   onClick={handleCopyHash}
                   className="text-brand-blue hover:underline flex items-center gap-1 text-[11px] font-semibold"
