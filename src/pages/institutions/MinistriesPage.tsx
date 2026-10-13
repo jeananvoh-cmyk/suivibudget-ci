@@ -1,10 +1,11 @@
+import { BudgetReferenceHeader } from '../../components/institutions/MinistryBudgetHeader';
 import { BudgetDataDownloads } from '../../components/institutions/BudgetDataDownloads';
 import React, { useState } from 'react';
-import { ArrowLeft, Search, ChevronDown, ArrowRight, Globe, FileText } from 'lucide-react';
+import { Search, ArrowRight, Globe, FileText } from 'lucide-react';
 import { GOVERNMENT_OFFICIALS, OfficialLeader } from '../../data/governmentData';
 import { dataStore } from '../../services/dataStore';
 import { BudgetProject, Institution } from '../../types';
-import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
+
 import { InstitutionDetailModal } from '../../components/InstitutionDetailModal';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
 import { isPilotMinistry } from '../../data/ministryPilotReferential';
@@ -151,40 +152,11 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
   // Les crédits votés de la section sont disponibles pour les 35 portefeuilles.
   // Une section de la LFI n'est jamais présentée comme une dotation propre
   // certifiée du ministre nommé après l'adoption de la loi.
-  const renderOfficialBudget = (official: OfficialLeader, textClass = 'text-[11px]') => {
-    const section = legalCP.rows.find(row => row.portfolio_id === official.id);
-    if (!section) {
-      return <p className={`${textClass} text-slate-600`}>Crédits LFI 2026 : non renseignés</p>;
-    }
-    const shared = section.section_shared_with_other_portfolio;
-    return (
-      <div className={`${textClass} pt-1 space-y-1 min-w-0`}>
-        <p className="font-bold text-slate-700">
-          Section budgétaire {section.section_code} — crédits votés 2026 (CP)
-        </p>
-        <p className="text-brand-blue font-black text-sm whitespace-normal break-words">
-          {formatFCFA(section.voted_section_cp_2026_fcfa)}
-        </p>
-        <p className="text-slate-600 text-[10px] leading-relaxed break-words">
-          {formatAmountInWords(section.voted_section_cp_2026_fcfa)}
-        </p>
-        <p className="text-slate-500 text-[10px] leading-snug">
-          {shared
-            ? 'Section partagée : montant affiché sur plusieurs fiches, à comptabiliser une seule fois.'
-            : 'Crédit voté pour la section LFI ; affectation au portefeuille actuel non établie.'}
-        </p>
-        <a
-          href={`${legalCP.source_pdf_url}#page=${section.official_lfi_pdf_page}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={event => event.stopPropagation()}
-          className="inline-block text-[10px] underline text-brand-blue hover:text-slate-900"
-        >
-          Lire la LFI 2026 — art. {section.legal_article}, PDF p. {section.official_lfi_pdf_page}
-        </a>
-      </div>
-    );
-  };
+  const renderOfficialBudget = (official: OfficialLeader, textClass = 'text-[11px]') => (
+    <div className={textClass}>
+      <BudgetReferenceHeader institution={{ id: official.id, name: official.department_ministry, type: 'MINISTERE' }} compact />
+    </div>
+  );
 
   const renderCardFooter = (official: OfficialLeader) => (
     <div className="pt-3 mt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2.5">
@@ -260,7 +232,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
   return (
     <div className="space-y-10 animate-in fade-in duration-300">
       <BudgetDataDownloads scope="MINISTERE" />
-      
+
       {/* Header Banner */}
       <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm flex flex-col md:flex-row items-center gap-6">
         <div className="w-full md:w-5/12 h-44 sm:h-48 rounded-2xl overflow-hidden border border-slate-200 shadow-2xs flex-shrink-0">

@@ -79,7 +79,7 @@ describe('LFI 2026 — source, section, page and entity invariants', () => {
         type: 'MINISTERE', total_budget_fcfa: official.budget_fcfa ?? null
       }, 2026, 'LFI');
       expect(view.official_section_code, row.id).toBe(row.section_code);
-      expect(view.documentary_provenance?.pdf_page, row.id).toBe(row.pdf_page);
+      expect(view.documentary_provenance?.pdf_page, row.id).toBe(official.budget_fcfa != null && official.budget_fcfa !== row.amount_fcfa ? undefined : row.pdf_page);
       const matrixRow = matrixById.get(row.id)!;
       expect(matrixRow.official_section_code, row.id).toBe(row.section_code);
       expect(matrixRow.provenance?.pdf_page, row.id).toBe(row.pdf_page);

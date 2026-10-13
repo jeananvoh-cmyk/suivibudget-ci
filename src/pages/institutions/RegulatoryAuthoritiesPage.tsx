@@ -1,16 +1,9 @@
+import { BudgetReferenceHeader } from '../../components/institutions/MinistryBudgetHeader';
 import React, { useState, useMemo } from 'react';
-import { 
-  ArrowLeft, 
-  ArrowRight,
-  Search, 
-  FileText, 
-  Info, 
-  ExternalLink, 
-  Globe 
-} from 'lucide-react';
+import { ArrowRight, Search, FileText, Globe } from 'lucide-react';
 import { Institution, BudgetProject } from '../../types';
-import { formatFCFA, formatAmountInWords } from '../../utils/formatters';
-import { assessInstitutionBudget } from '../../utils/institutionBudgetHelper';
+
+
 import { matchesSmartSearch, normalizeSearchText } from '../../utils/searchHelpers';
 import { REGULATORY_AUTHORITIES_DATA } from '../../data/regulatoryAuthoritiesData';
 import { dataStore } from '../../services/dataStore';
@@ -139,7 +132,7 @@ export const RegulatoryAuthoritiesPage: React.FC<RegulatoryAuthoritiesPageProps>
 
   return (
     <div className="space-y-10 animate-in fade-in duration-300">
-      
+
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight font-sans">
@@ -195,7 +188,7 @@ export const RegulatoryAuthoritiesPage: React.FC<RegulatoryAuthoritiesPageProps>
             className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs hover:shadow-xl hover:border-brand-blue/40 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden cursor-pointer"
           >
             <div className="space-y-4">
-              
+
               {/* Header: Title, Leader Info & Optional Photo */}
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1 flex-1">
@@ -222,51 +215,7 @@ export const RegulatoryAuthoritiesPage: React.FC<RegulatoryAuthoritiesPageProps>
                 {item.mission_summary}
               </p>
 
-              {/* Budget Block */}
-              {(() => {
-                const assessment = assessInstitutionBudget(item);
-                return (
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2">
-                    <div className="flex items-center justify-between text-[10px] font-black uppercase text-slate-400">
-                      <span>Dotation Budgétaire</span>
-                      <span className="text-slate-600 font-bold">2026</span>
-                    </div>
-                    
-                    <div>
-                      <div className="text-sm font-black text-slate-900 break-words">
-                        {assessment.totalFormatted}
-                      </div>
-                      {assessment.totalWords && (
-                        <div className="text-[11px] text-slate-500 font-semibold break-words">
-                          ({assessment.totalWords})
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Operating vs Investment mini-bar */}
-                    {assessment.hasBreakdown && assessment.functioningPct !== null && assessment.investmentPct !== null && (
-                      <div className="space-y-1 pt-1">
-                        <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden flex">
-                          <div 
-                            className="bg-brand-blue h-full" 
-                            style={{ width: `${assessment.functioningPct}%` }} 
-                          />
-                          <div 
-                            className="bg-emerald-500 h-full" 
-                            style={{ width: `${assessment.investmentPct}%` }} 
-                          />
-                        </div>
-                        <div className="flex justify-between text-[9px] font-bold text-slate-500">
-                          <span>Fonct. {assessment.functioningPct}%</span>
-                          {assessment.investmentPct > 0 && (
-                            <span>Invest. {assessment.investmentPct}%</span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
+              <BudgetReferenceHeader institution={item} compact />
 
             </div>
 

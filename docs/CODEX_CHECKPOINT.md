@@ -1,3 +1,66 @@
+## 13 octobre 2026 — Clôture définitive du piège de focus mobile et accessibilité multi-viewports PR #58 (Antigravity)
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/58 (`codex/budget-presentation-final`).
+- **Base master** : `ab159d4e3de829e11d1e146c8d9b0f9dbfb72bfe` (PR #57 incluse).
+- **HEAD précédent Codex** : `59d12cdea0c5af7de71634dfe5efb709721ac783` (verrou documentaire et réconciliation Attécoubé).
+- **Statut PR** : Ouverte, fusionnable, CI verte, prête pour décision de fusion par ChatGPT (`MERGED = false`, `PRODUCTION_DEPLOYED = false`).
+- **Travail Codex vérifié & conservé** :
+  - Verrou de certification documentaire `AUDITED_FINANCIAL_CLAIMS` dans `src/utils/institutionBudgetHelper.ts`.
+  - Rejet absolu des faux SHA-256 et URL non auditées pour `VERIFIED_AMOUNT` (exigé `TO_VERIFY`).
+  - Preuve légale réelle d'Attécoubé (LFI 2026 p. 207, action 78016001400, 300 000 000 FCFA de transferts fonctionnement).
+  - 27 tests d'intégrité financière et documentaire dans `src/utils/__tests__/budgetBreakdownIntegrityGate.test.ts`.
+- **Anomalie de focus mobile résolue (`src/components/InstitutionDetailModal.tsx`)** :
+  - *Constat* : En affichage mobile (< 640px), les liens d'en-tête (site web et page Facebook avec classe `hidden sm:inline-flex`) étaient inclus dans `getModalFocusableElements` car l'attribut HTML `hidden` était absent. Lors d'un `Shift+Tab` depuis le bouton de fermeture d'en-tête, le focus tentait de se déplacer sur l'élément masqué précédent et s'échappait de la modale.
+  - *Cause technique* : Absence de filtrage de la visibilité effective et des styles CSS (`display: none`, `visibility: hidden`), et non-prise en compte de la hiérarchie des conteneurs parents (`inert`, `display: none`).
+  - *Correctif apporté* :
+    1. `isElementEffectivelyVisible` : intègre l'API standard `checkVisibility({ checkVisibilityCSS: true })` en navigateur réel, et parcourt récursivement tous les ancêtres jusqu'au conteneur dialog pour détecter `hidden`, `inert`, `aria-hidden="true"`, `disabled`, `display: none`, `visibility: hidden`, et les classes Tailwind `hidden`/`invisible`.
+    2. `handleModalKeyDown` : confinement de focus circulaire renforcé (`Shift+Tab` sur ou avant le premier élément visible boucle vers le dernier élément visible ; `Tab` sur le dernier boucle vers le premier ; rapatriement automatique si le focus est sur le conteneur ou hors modale).
+    3. Gestion des sous-modales : suspension propre du gestionnaire parent lorsque la sous-modale CAIDP est ouverte (`docModalOpen`), écouteur `Escape` dédié dans `OfficialDocRequestModal` avec `e.stopPropagation()`, et mémorisation du bouton déclencheur (`docTriggerRef`) pour restitution automatique du focus à la fermeture.
+    4. Restitution du focus au bouton déclencheur d'origine (`manageModalFocusLifecycle`).
+- **Validation technique** :
+  - **59 fichiers de tests, 778 tests exécutés, 778 tests réussis (100% PASS, 0 FAIL)**.
+  - Nouvelle suite dédiée : `src/components/__tests__/institutionDetailModalFocusTrap.test.ts` (11 tests unitaires et d'interaction DOM).
+  - Compilation TypeScript & Build Vite : `tsc && vite build` (code 0) et `vite build --config vite.review.config.ts` (code 0).
+  - Recette multi-viewports Playwright réelle (360px, 390px, 768px, 1440px) :
+    * `initialFocusIsCloseButton = true` (100% PASS sur les 4 résolutions)
+    * `shiftTabTrappedInside = true` (100% PASS, 0 fuite vers les liens masqués)
+    * `tabLoopsToStart = true` (100% PASS, boucle circulaire fermée)
+    * `closedOnEscape = true` (100% PASS)
+    * `focusRestoredToTrigger = true` (100% PASS)
+    * `hasHorizontalOverflow = false` (100% PASS)
+- **Garde-fous** : `REMOTE_SUPABASE_WRITES = 0` ; migrations = 0 ; fusion master = non effectuée (réservée à ChatGPT) ; déploiement production = non tenté.
+- **NEXT_EXECUTABLE_TASK** : Revue finale et décision de fusion de la PR #58 sur master par ChatGPT.
+
+## 13 octobre 2026 — Verrou de certification documentaire PR #58
+
+- HEAD avant correction : `8e1b6e052292a30af40ebe690502081d709210ef`. Branche : `codex/budget-presentation-final` ; master : `ab159d4e3de829e11d1e146c8d9b0f9dbfb72bfe`.
+- Revue traitée : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/58#issuecomment-6140460629.
+- Avant : URL arbitraire, SHA-256 syntaxiquement valide, page et montants équilibrés suffisaient pour `VERIFIED_AMOUNT`. Après : document contrôlé ET ligne auditée indépendante obligatoires, avec concordance d'entité, exercice, assiette, nature, page et montants exacts.
+- `isValidPrimarySha256` reconnaît uniquement les empreintes déjà contrôlées du catalogue. Cette reconnaissance ne certifie aucune ligne financière à elle seule.
+- Preuves BP déclarées non auditées : `TO_VERIFY`. Publications secondaires : `SECONDARY_SOURCE`, même avec précision `EXACT`. Aucun BP primaire audité n'est actuellement autorisé ; aucune fixture fictive n'est promue en preuve primaire.
+- Cas positif réel : LFI 2026, PDF p. 207, action 78016001400, Attécoubé, 300 000 000 FCFA de crédits votés pour le fonctionnement des services (transfert). Référence existante : `docs/audits/local-2026/LFI_2026_PROGRAMME_2204040_2380_ACTIONS.csv`, ligne 256. Ce montant n'est ni un BP, ni une DGF, ni une dépense exécutée. Le test réutilise la ligne déjà auditée ; aucune donnée de collectivité n'est modifiée ou importée.
+- Les deux résolveurs choisissent le même BP pour le même exercice ; les montants historiques ne remplacent pas un BP absent. Les BP secondaires partiels restent rapportés, sans inventer une ventilation. Les districts suivent aussi l'assiette BP.
+- Préservés : HABG/IGE inclus dans la section 103 ; CESEC LFI / Annexe 7 non additifs ; Cour Suprême sans section autonome ; sections ministérielles partagées ; historique Bingerville/Tiassalé ; BP Doropo/Iffou inconnus ; subventions des régulateurs distinctes du budget global. Métadonnées des cinq PDF DGBF contrôlés inchangées. Aucun nouvel audit PDF général.
+- Validation locale : 58 fichiers, 767 tests dont 27 dans `budgetBreakdownIntegrityGate.test.ts` ; TypeScript, build public et build review vérifiés avant publication. Le contrôle GitHub du nouveau HEAD sera consigné dans la mise à jour de clôture.
+- `REMOTE_SUPABASE_WRITES = 0` ; migrations = 0 ; `PR_MERGED = false` ; `PRODUCTION_DEPLOYED = false`. Dépendances, Tailwind, routes et accessibilité des modales inchangés.
+- Limite documentaire conservée : absence de pièces BP primaires auditables ; seule leur certification reste bloquée. Les sources secondaires restent consultables.
+- NEXT_EXECUTABLE_TASK : contrôler la CI du nouveau HEAD, puis soumettre la PR #58 à la validation humaine sans fusion ni déploiement.
+
+## 13 octobre 2026 — Corrections finales de la PR #58 (Revue ChatGPT P1 #1, P1 #2, P2 #3, P2 #4, P2 #5)
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/58 (`codex/budget-presentation-final`).
+- **Base master** : `ab159d4e3de829e11d1e146c8d9b0f9dbfb72bfe` (PR #57 incluse).
+- **Commentaire de revue traité** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/58#issuecomment-6131545700.
+- **Statut PR** : Ouverte, fusionnable, CI verte, prête pour décision de fusion par ChatGPT (`MERGED = false`, `PRODUCTION_DEPLOYED = false`).
+- **P1 #1 (Provenance BP secondaire vs certification primaire)** : Séparation stricte dans `resolveInstitutionFinancialView` entre précision numérique (`EXACT`), source secondaire rapportée (`SECONDARY_SOURCE` : *« Montant rapporté — à confirmer »*) et certification primaire (`VERIFIED_AMOUNT`). Un budget primitif issu d'une source secondaire équilibrée conserve l'affichage de ses montants et pourcentages de ventilation sans jamais être présenté comme officiellement certifié.
+- **P1 #2 (Suppression du booléen `has_verified_breakdown`)** : Remplacement du raccourci déclaratif par `BreakdownDocumentaryEvidence` et le validateur `isValidBreakdownDocumentaryEvidence` exigeant : concordance d'institution, d'exercice et d'assiette, titre, référence, URL, `pdf_page > 0`, `sha256` hexadécimal 64 caractères et égalité arithmétique exacte.
+- **P2 #3 (Qualification des montants historiques des collectivités)** : Dans `resolveInstitutionBudgetPresentation`, interdiction de baptiser par défaut un montant historique de collectivité *« Concours de l'État »*. Ce libellé exige désormais `state_grant_evidence` avec preuve documentaire complète ; à défaut, le montant est qualifié de *« Montant historique enregistré — nature et source à confirmer »* (`TO_VERIFY`) et ne se substitue jamais à un Budget Primitif manquant.
+- **P2 #4 (Régulateurs et composantes Annexe 6 ASS / LFI 2026)** : Le budget global de référence des 7 régulateurs (ARCOP, HACA, CAIDP, CNDH, AIRP, ARTCI, ANARE-CI) demeure à `null` (*« Non documenté »*), tandis que les composantes officielles non globales (Annexe 6 ASS 2026, SHA-256 `e8ba2e9dc9ffdc6d268c60eccecfbe51ee57adc6ca639923f8a3be78cece8cf6`, ou LFI 2026) sont exposées de manière transparente dans `supplements`.
+- **P2 #5 (Accessibilité complète de `InstitutionDetailModal.tsx`)** : Placement initial du focus sur le bouton de fermeture à l'ouverture, piège de focus clavier circulaire (`Tab` / `Shift+Tab`), fermeture sur `Escape` respectant la sous-modale documentaire (`docModalOpen`), et restauration du focus sur l'élément déclencheur à la fermeture.
+- **Validation technique** : 58 fichiers de tests, **751/751 tests PASS (100%)**, dont 11 tests dans `budgetBreakdownIntegrityGate.test.ts` ; build TypeScript et Vite PASS.
+- **Garde-fous** : `REMOTE_SUPABASE_WRITES = 0` ; migrations = 0 ; fusion master = non effectuée (réservée à ChatGPT) ; déploiement production = non tenté.
+- **NEXT_EXECUTABLE_TASK** : Revue finale et décision de fusion de la PR #58 sur master par ChatGPT.
+
 # Checkpoint — 29 septembre 2026 (Relais Antigravity après Codex)
 
 ## 9 octobre — Clôture définitive des bloqueurs financiers de l'audit indépendant (PR #30) sur PR #29

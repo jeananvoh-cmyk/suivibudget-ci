@@ -792,3 +792,19 @@ export const NATIONAL_INSTITUTIONS_DATA: Institution[] = [
 
 export const NATIONAL_BUDGET_PROJECTS: BudgetProject[] = [];
 
+
+export const NATIONAL_DIRECT_ALLOCATIONS_2026: Record<string, { amount_fcfa: number; chapter: string; pdf_page: number }> = {
+  'inst-assnat': { amount_fcfa: 38322939714, chapter: '1111', pdf_page: 9 },
+  'inst-senat': { amount_fcfa: 14515653094, chapter: '1112', pdf_page: 9 },
+  'inst-presidence': { amount_fcfa: 19024752491, chapter: '1211', pdf_page: 10 },
+  'inst-chancellerie': { amount_fcfa: 3507262564, chapter: '1231', pdf_page: 10 },
+  'inst-conseil-const': { amount_fcfa: 3812435664, chapter: '1321', pdf_page: 11 },
+  'inst-cour-cassation': { amount_fcfa: 4572242642, chapter: '1323', pdf_page: 11 },
+  'inst-conseil-etat': { amount_fcfa: 3225548443, chapter: '1325', pdf_page: 11 },
+  'inst-cour-comptes': { amount_fcfa: 5309062743, chapter: '1327', pdf_page: 12 },
+  'inst-cesec': { amount_fcfa: 7962130354, chapter: '1421', pdf_page: 13 },
+  'inst-mediateur': { amount_fcfa: 8211539880, chapter: '1431', pdf_page: 13 },
+  'inst-cnrct': { amount_fcfa: 5632596195, chapter: '5221', pdf_page: 13 },
+  'inst-ige': { amount_fcfa: 8329477575, chapter: '121590201 (destination)', pdf_page: 10 },
+  'inst-habg': { amount_fcfa: 4164103471, chapter: '121591501 (destination)', pdf_page: 10 },
+};
