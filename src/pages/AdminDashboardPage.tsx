@@ -261,7 +261,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [csvUploadText, setCsvUploadText] = useState('');
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [importTargetYear, setImportTargetYear] = useState<string>('AUTO');
-  const [importMode, setImportMode] = useState<'REPLACE_YEAR' | 'APPEND'>('REPLACE_YEAR');
+  const [importMode, setImportMode] = useState<'REPLACE_YEAR' | 'APPEND'>('APPEND');
   const [importStatus, setImportStatus] = useState<{ success?: number; error?: number; detectedYear?: number; totalAmount?: number } | null>(null);
 
   // Handle direct file upload via input
@@ -2869,11 +2869,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <div className="flex items-center gap-2">
                 <Database className="w-5 h-5 text-indigo-600" />
                 <h3 className="text-xl font-extrabold text-navy-900">
-                  Sauvegarde & Restauration Totale des Données
+                  Sauvegarde locale et restauration du navigateur
                 </h3>
               </div>
               <p className="text-xs text-slate-500 mt-1">
-                Téléchargez une copie de secours intégrale contenant tous vos projets, entités, photos et articles personnalisés, ou restaurez-la en 1 clic.
+                Ces outils sauvegardent uniquement les données conservées dans ce navigateur. Ils ne sauvegardent ni ne restaurent les tables, documents et fichiers Supabase de production.
               </p>
             </div>
 
@@ -2884,10 +2884,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 font-black text-indigo-900 text-sm">
                     <Download className="w-4 h-4 text-indigo-600" />
-                    <span>Exporter la Sauvegarde Complète</span>
+                    <span>Exporter les données locales</span>
                   </div>
                   <p className="text-[11px] text-indigo-800 leading-relaxed">
-                    Télécharge un fichier <code>.json</code> complet contenant toutes les données modifiées. Idéal pour garder une copie de sécurité ou migrer.
+                    Exporte le cache local en <code>.json</code>. N’est pas une sauvegarde officielle ou exhaustive de la production.
                   </p>
                 </div>
                 <button
@@ -2904,10 +2904,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 font-black text-emerald-900 text-sm">
                     <Upload className="w-4 h-4 text-emerald-600" />
-                    <span>Restaurer une Sauvegarde</span>
+                    <span>Restaurer les données locales</span>
                   </div>
                   <p className="text-[11px] text-emerald-800 leading-relaxed">
-                    Importez un fichier de sauvegarde préalablement exporté pour rétablir instantanément toutes vos informations.
+                    Recharge les données locales à partir d’un JSON. Aucune écriture n’est faite dans Supabase.
                   </p>
                 </div>
                 <button
@@ -2924,10 +2924,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 font-black text-red-900 text-sm">
                     <RefreshCw className="w-4 h-4 text-red-600" />
-                    <span>Réinitialisation d'Origine</span>
+                    <span>Réinitialisation locale d’origine</span>
                   </div>
                   <p className="text-[11px] text-red-800 leading-relaxed">
-                    Rétablit les données initiales officielles du gouvernement (192 maires, 31 présidents, 14 institutions et ministères).
+                    Réinitialise uniquement les données du navigateur aux jeux intégrés à l’application. Les données Supabase ne sont pas modifiées.
                   </p>
                 </div>
                 <button
@@ -5114,10 +5114,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               </span>
               <div>
                 <h4 className="font-extrabold text-slate-900 text-base">
-                  Zone Critique : Réinitialisation Usine
+                  Réinitialiser les données locales
                 </h4>
                 <p className="text-[11px] text-slate-500">
-                  Cette action réinitialisera toutes les données modifiées aux valeurs officielles d'origine.
+                  Cette action écrase les données locales affichées dans ce navigateur ; elle ne réinitialise pas la base Supabase.
                 </p>
               </div>
             </div>
@@ -5125,7 +5125,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             <div className="p-3 bg-red-50 rounded-2xl border border-red-100 text-red-900 text-xs space-y-1">
               <p className="font-bold">Attention, action irréversible :</p>
               <p className="text-[11px] text-red-800">
-                Les projets personnalisés, ajouts récents et coordonnées modifiées seront remplacés par le jeu de données officiel initial. Pensez à exporter une sauvegarde JSON avant de procéder.
+                Les modifications non synchronisées de ce navigateur seront perdues. Un export JSON local ne couvre pas les données de production.
               </p>
             </div>
 
@@ -5156,7 +5156,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 onClick={handleConfirmResetFactory}
                 className="px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white rounded-xl font-black shadow-md cursor-pointer transition-all"
               >
-                Réinitialiser définitivement
+                Réinitialiser localement
               </button>
             </div>
           </div>
