@@ -21,46 +21,7 @@ interface TaskOverride {
   completed_by?: string;
 }
 
-// Initial demo activity logs to provide rich initial traceability
-const INITIAL_ACTIVITY_LOGS: AdminActivityLog[] = [
-  {
-    id: 'log-init-1',
-    timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
-    actor_name: 'Jean Anvoh',
-    actor_email: 'admin@suivibudget.ci',
-    actor_role: 'ADMIN',
-    action_type: 'UPDATE_RI_CONTACT',
-    entity_type: 'MAIRIE',
-    entity_name: 'Mairie de Tiassalé',
-    summary: 'Email officiel et téléphone du Responsable de l\'Information mis à jour.',
-    details: 'Coordonnées certifiées conformes au registre officiel CAIDP.',
-  },
-  {
-    id: 'log-init-2',
-    timestamp: new Date(Date.now() - 3600000 * 5).toISOString(),
-    actor_name: 'Koffi Modérateur',
-    actor_email: 'moderateur@suivibudget.ci',
-    actor_role: 'MODERATOR',
-    action_type: 'MODERATE_PROOF',
-    entity_type: 'SIGNALEMENT',
-    entity_name: 'Chantier EPP Danho Paulin',
-    summary: 'Signalement citoyen validé avec photo de conformité.',
-    details: 'Preuve photographique vérifiée sur site à Attécoubé.',
-  },
-  {
-    id: 'log-init-3',
-    timestamp: new Date(Date.now() - 3600000 * 12).toISOString(),
-    actor_name: 'Jean Anvoh',
-    actor_email: 'admin@suivibudget.ci',
-    actor_role: 'ADMIN',
-    action_type: 'VALIDATE_DOCUMENT',
-    entity_type: 'DOCUMENT',
-    entity_name: 'Budget Primitif 2026 - Mairie de Cocody',
-    summary: 'Document certifié officiel visé par le Conseil Municipal.',
-    details: 'Montant consolidé : 19 764 660 000 FCFA.',
-  }
-];
-
+// Aucun journal fictif ne doit apparaître comme une action administrative réelle.
 class AdminTaskService {
   private taskOverrides: Record<string, TaskOverride> = {};
   private activityLogs: AdminActivityLog[] = [];
@@ -82,15 +43,14 @@ class AdminTaskService {
 
     try {
       const storedLogs = localStorage.getItem(STORAGE_KEYS.ACTIVITY_LOGS);
-      if (storedLogs) {
-        this.activityLogs = JSON.parse(storedLogs);
-      } else {
-        this.activityLogs = [...INITIAL_ACTIVITY_LOGS];
-        this.saveActivityLogs();
-      }
+      const parsed = storedLogs ? JSON.parse(storedLogs) : [];
+      this.activityLogs = Array.isArray(parsed)
+        ? parsed.filter((entry: AdminActivityLog) => entry && typeof entry.id === 'string' && !entry.id.startsWith('log-init-'))
+        : [];
+      this.saveActivityLogs();
     } catch (e) {
       console.warn('Error loading activity logs from localStorage', e);
-      this.activityLogs = [...INITIAL_ACTIVITY_LOGS];
+      this.activityLogs = [];
     }
   }
 
@@ -236,7 +196,8 @@ class AdminTaskService {
     const allDocuments = dataStore.getDocuments();
     allDocuments.forEach(doc => {
       // Missing verification or uploaded documents needing validation
-      const needsReview = !doc.is_official || !doc.year || !doc.file_url;
+      const needsReview = doc.status === 'TO_VERIFY' || doc.status === 'UPLOADED' ||
+        (doc.status === 'VERIFIED' && doc.verification_status !== 'VERIFIED');
       if (needsReview) {
         const taskId = `task-doc-${doc.id}`;
         const override = this.taskOverrides[taskId] || {};
@@ -254,7 +215,11 @@ class AdminTaskService {
           created_at: doc.published_at || new Date().toISOString(),
           completed_at: override.completed_at,
           completed_by: override.completed_by,
-          target_tab: 'documents_manager',
+          target_tab: doc.document_type === 'COMPTE_ADMINISTRATIF' || doc.category === 'COMPTE_ADMINISTRATIF'
+            ? 'comptes_administratifs' : 'documents_manager',
+          target_filter: doc.document_type === 'COMPTE_ADMINISTRATIF' || doc.category === 'COMPTE_ADMINISTRATIF'
+            ? { year: String(doc.fiscal_year || doc.year), search: doc.institution_name }
+            : { filter: 'unverified', search: doc.title },
           source_id: doc.id,
           metadata: {
             category: doc.category,
@@ -416,7 +381,10 @@ class AdminTaskService {
   public getActionKpis() {
     const pendingProofsCount = dataStore.getPendingProofs().length;
     const documents = dataStore.getDocuments();
-    const unverifiedDocsCount = documents.filter(d => !d.is_official || !d.file_url).length;
+    const unverifiedDocsCount = documents.filter(d =>
+      d.status === 'TO_VERIFY' || d.status === 'UPLOADED' ||
+      (d.status === 'VERIFIED' && d.verification_status !== 'VERIFIED')
+    ).length;
     
     const caidpEntities = dataStore.getCaidpDirectory();
     const incompleteRiCount = caidpEntities.filter(e => 

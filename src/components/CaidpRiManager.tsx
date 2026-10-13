@@ -33,6 +33,7 @@ import {
 interface CaidpRiManagerProps {
   onShowToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   initialFilter?: CompletionFilter;
+  initialSearch?: string;
 }
 
 type CompletionFilter =
@@ -47,7 +48,7 @@ type CompletionFilter =
   | 'COMPLETE'
   | 'UNVERIFIED';
 
-export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, initialFilter = 'ALL' }) => {
+export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, initialFilter = 'ALL', initialSearch = '' }) => {
   const auth = dataStore.getAuth();
 
   // Directory state from dataStore
@@ -61,7 +62,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
   }, []);
 
   // Filter & Search states
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [categoryFilter, setCategoryFilter] = useState<'ALL' | EntityPublicCategory>('ALL');
   const [completionFilter, setCompletionFilter] = useState<CompletionFilter>(initialFilter);
 
@@ -70,6 +71,11 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
       setCompletionFilter(initialFilter);
     }
   }, [initialFilter]);
+
+  useEffect(() => {
+    setSearchQuery(initialSearch);
+    setCurrentPage(1);
+  }, [initialSearch]);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);

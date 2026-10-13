@@ -19,9 +19,12 @@ import { dataStore } from '../services/dataStore';
 import { supabase } from '../services/supabase';
 import { PublicDocument, DocumentCategory, DocumentFormat, OfficialDocumentType } from '../types';
 import { matchesSmartSearch } from '../utils/searchHelpers';
+import { isSafeUrl } from '../utils/security';
 
 interface DocumentManagerProps {
   onShowToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
+  initialFilter?: 'ALL' | 'unverified';
+  initialSearch?: string;
 }
 
 const CATEGORIES: { value: DocumentCategory; label: string }[] = [
@@ -34,11 +37,12 @@ const CATEGORIES: { value: DocumentCategory; label: string }[] = [
   { value: 'GUIDE_CITOYEN', label: "Guide Pratique Citoyen" },
 ];
 
-export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast }) => {
+export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, initialFilter = 'ALL', initialSearch = '' }) => {
   const [documentType, setDocumentType] = useState<OfficialDocumentType>('AUTRE_DOCUMENT_OFFICIEL');
   const [sourceName, setSourceName] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [reviewFilter, setReviewFilter] = useState<'ALL' | 'unverified'>(initialFilter);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   
   // Modal states
@@ -85,8 +89,14 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    setReviewFilter(initialFilter);
+    setSearchQuery(initialSearch);
+  }, [initialFilter, initialSearch]);
+
   const filteredDocs = useMemo(() => {
     return documents.filter(doc => {
+      if (reviewFilter === 'unverified' && doc.status !== 'TO_VERIFY' && doc.status !== 'UPLOADED') return false;
       if (selectedCategory !== 'ALL' && doc.category !== selectedCategory) {
         return false;
       }
@@ -95,7 +105,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
       }
       return true;
     });
-  }, [documents, selectedCategory, searchQuery]);
+  }, [documents, selectedCategory, reviewFilter, searchQuery]);
 
   const handleOpenAdd = () => {
     setDocumentType('AUTRE_DOCUMENT_OFFICIEL');
@@ -120,6 +130,9 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
   };
 
   const handleOpenEdit = (doc: PublicDocument) => {
+    setDocumentType(doc.document_type || 'AUTRE_DOCUMENT_OFFICIEL');
+    setSourceName(doc.source_name || '');
+    setSourceUrl(doc.source_url || '');
     setEditingDoc(doc);
     setFormData({
       title: doc.title,
@@ -141,6 +154,11 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (editingDoc) {
+      onShowToast('Fichier immuable : pour remplacer le binaire, créez une nouvelle version documentaire.', 'error');
+      e.target.value = '';
+      return;
+    }
 
     const lower = file.name.toLowerCase();
     let format: DocumentFormat = 'PDF';
@@ -188,7 +206,8 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
 
     if (!sourceName.trim()) { onShowToast('Indiquez la source du document.', 'error'); return; }
 
-    if (!formData.title.trim() || !formData.institution_name.trim() || !formData.file_url.trim()) {
+    if (!formData.title.trim() || !formData.institution_name.trim() ||
+      (!editingDoc && !formData.file_url.trim())) {
       onShowToast('Veuillez renseigner au moins le titre, l\'institution et l\'URL/Fichier.', 'error');
       return;
     }
@@ -206,19 +225,14 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
         institution_name: formData.institution_name.trim(),
         year: formData.year,
         description: formData.description.trim(),
-        file_url: formData.file_url.trim(),
-        file_name: formData.file_name.trim() || 'document.pdf',
-        file_size: formData.file_size.trim(),
-        file_format: formData.file_format,
+        // Les fichiers téléversés sont immuables : une édition ne change
+        // jamais fichier, empreinte, chemin de stockage ou identité documentaire.
         tags: tagList,
-        is_official: formData.is_official,
-        storage_path: formData.file_url.startsWith('staging/') ? formData.file_url : null,
         status: 'TO_VERIFY',
         verification_status: 'TO_VERIFY',
         fiscal_year: formData.year,
         document_type: documentType,
         source_name: sourceName.trim(), source_url: sourceUrl.trim() || null,
-        checksum_sha256: formData.checksum_sha256 || null,
       });
       onShowToast('Document public mis à jour avec succès.');
     } else {
@@ -252,15 +266,9 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
   };
 
   const handleVerify = async (doc: PublicDocument) => {
+    if (!window.confirm(`Avez-vous ouvert et contrôlé le document « ${doc.title} » (source, lisibilité, intégralité et correspondance avec l'exercice) ?\n\nConfirmer la vérification documentaire ?`)) return;
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error('Session Supabase requise');
-      await dataStore.updateDocument(doc.id, {
-        status: 'VERIFIED',
-        verification_status: 'VERIFIED',
-        verified_by: userData.user.id,
-        verified_at: new Date().toISOString(),
-      });
+      await dataStore.updateDocumentLifecycleStatus(doc.id, 'VERIFIED');
       onShowToast('Document vérifié. Il peut maintenant être publié.', 'success');
     } catch (error: any) {
       onShowToast(`Vérification refusée : ${error.message}`, 'error');
@@ -269,7 +277,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
 
   const handlePublish = async (doc: PublicDocument) => {
     try {
-      if (doc.verification_status !== 'VERIFIED') {
+      if (doc.status !== 'VERIFIED' || doc.verification_status !== 'VERIFIED') {
         onShowToast('Le document doit être vérifié avant publication.', 'error');
         return;
       }
@@ -281,16 +289,27 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
   };
 
   const handleAdminOpen = async (doc: PublicDocument) => {
-    if (doc.storage_path) {
-      const { data, error } = await supabase.storage.from('public_documents').createSignedUrl(doc.storage_path, 300);
-      if (error || !data?.signedUrl) {
-        onShowToast('Impossible de créer le lien temporaire.', 'error');
-        return;
-      }
-      window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+    const tab = window.open('about:blank', '_blank');
+    if (!tab) {
+      onShowToast('Autorisez les nouveaux onglets pour consulter ce document.', 'error');
       return;
     }
-    if (doc.file_url) window.open(doc.file_url, '_blank', 'noopener,noreferrer');
+    tab.opener = null;
+    try {
+      let url = doc.file_url;
+      if (doc.storage_path) {
+        const { data, error } = await supabase.storage
+          .from(doc.storage_bucket || 'public_documents')
+          .createSignedUrl(doc.storage_path, 300);
+        if (error || !data?.signedUrl) throw new Error('Lien temporaire indisponible.');
+        url = data.signedUrl;
+      }
+      if (!isSafeUrl(url)) throw new Error('Adresse du document invalide.');
+      tab.location.href = url;
+    } catch (error) {
+      tab.close();
+      onShowToast(error instanceof Error ? error.message : 'Consultation impossible.', 'error');
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -351,6 +370,15 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
         </div>
 
         <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto">
+          <select
+            aria-label="État de vérification documentaire"
+            value={reviewFilter}
+            onChange={(e) => setReviewFilter(e.target.value as 'ALL' | 'unverified')}
+            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700"
+          >
+            <option value="ALL">Tous les états</option>
+            <option value="unverified">À vérifier</option>
+          </select>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -431,7 +459,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
                         >
                           <ExternalLink className="w-4 h-4" />
                         </button>
-                        {doc.verification_status !== 'VERIFIED' && doc.status !== 'ARCHIVED' && (
+                        {(doc.status === 'TO_VERIFY' || doc.status === 'UPLOADED') && (
                           <button
                             onClick={() => handleVerify(doc)}
                             className="p-1.5 rounded-lg text-slate-500 hover:text-emerald-700 hover:bg-emerald-50"
@@ -440,7 +468,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
                             <CheckCircle2 className="w-4 h-4" />
                           </button>
                         )}
-                        {doc.verification_status === 'VERIFIED' && doc.status !== 'PUBLISHED' && doc.status !== 'ARCHIVED' && (
+                        {doc.verification_status === 'VERIFIED' && doc.status === 'VERIFIED' && (
                           <button
                             onClick={() => handlePublish(doc)}
                             className="p-1.5 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-blue-50"
@@ -497,7 +525,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
                 onClick={() => handleDelete(deleteConfirmId)}
                 className="flex-1 py-2.5 rounded-xl bg-rose-600 text-xs font-bold text-white hover:bg-rose-700 shadow-sm"
               >
-                Supprimer
+                Archiver
               </button>
             </div>
           </div>
@@ -602,6 +630,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
                   <label className="block font-bold text-slate-700 mb-1">Format *</label>
                   <select
                     value={formData.file_format}
+                    disabled={Boolean(editingDoc)}
                     onChange={(e) => setFormData(p => ({ ...p, file_format: e.target.value as DocumentFormat }))}
                     className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
                   >
@@ -617,6 +646,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
                   <input
                     type="text"
                     value={formData.file_size}
+                    disabled={Boolean(editingDoc)}
                     onChange={(e) => setFormData(p => ({ ...p, file_size: e.target.value }))}
                     placeholder="Ex: 3.5 Mo"
                     className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
@@ -634,10 +664,11 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
                 <div className="flex items-center gap-2">
                   <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300 font-bold transition-colors">
                     <Upload className="w-3.5 h-3.5" />
-                    <span>Choisir un fichier local</span>
+                    <span>{editingDoc ? 'Fichier verrouillé (créez une nouvelle version)' : 'Choisir un fichier local'}</span>
                     <input
                       type="file"
                       accept=".pdf,.xlsx,.xls,.docx,.doc,.csv"
+                      disabled={Boolean(editingDoc)}
                       onChange={handleFileUpload}
                       className="hidden"
                     />
@@ -654,8 +685,9 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast })
                   <span className="text-[10px] text-slate-400 block mb-1">Ou saisissez une URL directe (lien web) :</span>
                   <input
                     type="text"
-                    required
-                    value={formData.file_url}
+                    required={!editingDoc}
+                    disabled={Boolean(editingDoc)}
+                    value={editingDoc?.storage_path || formData.file_url}
                     onChange={(e) => setFormData(p => ({ ...p, file_url: e.target.value }))}
                     placeholder="https://caidp.ci/documents/mon_rapport.pdf"
                     className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl font-mono text-[11px] focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
