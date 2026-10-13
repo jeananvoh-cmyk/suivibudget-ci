@@ -1,4 +1,4 @@
-import { Institution, PrimitiveBudgetInfo } from '../types';
+import { Institution, PrimitiveBudgetInfo, BreakdownDocumentaryEvidence } from '../types';
 import { formatFCFA, formatAmountInWords } from './formatters';
 import { OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
 import { NATIONAL_DIRECT_ALLOCATIONS_2026 } from '../data/nationalBudgetData';
@@ -18,6 +18,46 @@ export const DPPD_PAP_2026_DOCUMENT = {
   sha256: "0f8c7a91b577129ff71677793ed7d6580ab3affb65e7fa3ba112c0ffed0ffe10",
 };
 
+export const ANNEXE_6_EPN_2026_DOCUMENT = {
+  title: "Annexe 6 — Budgets des Établissements Publics Nationaux (EPN) et Structures Assimilées (ASS) 2026",
+  reference: "Annexe 6 LFI 2026 • État récapitulatif ASS • DGBF",
+  url: "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-6-Budgets-des-EPN-2026.pdf",
+  sha256: "3186dc17e1ba51ba1b69b3eed8ee3e40083a8eb0ddd56861dfdd0aa4b8c9bb2e",
+};
+
+const SHA256_HEX_REGEX = /^[a-f0-9]{64}$/i;
+const EMPTY_FILE_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+
+export function isValidPrimarySha256(hash: string | null | undefined): boolean {
+  if (typeof hash !== 'string') return false;
+  const normalized = hash.trim().toLowerCase();
+  return SHA256_HEX_REGEX.test(normalized) && normalized !== EMPTY_FILE_SHA256;
+}
+
+export function isValidBreakdownDocumentaryEvidence(
+  evidence: BreakdownDocumentaryEvidence | undefined | null,
+  institutionId: string,
+  fiscalYear: number,
+  expectedBasis: string,
+  total: number | null | undefined,
+  functioning: number | null | undefined,
+  investment: number | null | undefined
+): boolean {
+  if (!evidence) return false;
+  if (evidence.institution_id !== institutionId) return false;
+  if (evidence.fiscal_year !== fiscalYear) return false;
+  if (evidence.budget_basis !== expectedBasis) return false;
+  if (typeof evidence.document_title !== 'string' || evidence.document_title.trim().length === 0) return false;
+  if (typeof evidence.document_reference !== 'string' || evidence.document_reference.trim().length === 0) return false;
+  if (typeof evidence.source_url !== 'string' || !/^https?:\/\/.+/i.test(evidence.source_url.trim())) return false;
+  if (typeof evidence.pdf_page !== 'number' || !Number.isInteger(evidence.pdf_page) || evidence.pdf_page <= 0) return false;
+  if (!isValidPrimarySha256(evidence.sha256)) return false;
+  if (typeof total !== 'number' || typeof functioning !== 'number' || typeof investment !== 'number') return false;
+  if (evidence.total_fcfa !== total || evidence.functioning_fcfa !== functioning || evidence.investment_fcfa !== investment) return false;
+  if (functioning + investment !== total) return false;
+  return true;
+}
+
 export type InstitutionBudgetStatus = 
   | 'AVAILABLE' 
   | 'NOT_DOCUMENTED' 
@@ -35,6 +75,7 @@ export type BudgetReconciliationStatus =
 export type InstitutionBudgetVerificationStatus =
   | 'VERIFIED_AMOUNT'
   | 'VERIFIED_ZERO'
+  | 'SECONDARY_SOURCE'
   | 'UNKNOWN'
   | 'NOT_DOCUMENTED'
   | 'NOT_PUBLISHED'
@@ -607,16 +648,20 @@ export function resolveInstitutionFinancialView(
     amountEvidence != null && amountEvidence.lfi_amount_fcfa === total;
   const documentaryDiscrepancy = amountEvidence != null && !isLfi2026AmountConfirmed;
   const isReconciled = pctResult.status === 'RECONCILED';
+  const effectiveBasis = requestedBasis || (instType === 'MAIRIE' || instType === 'REGION' ? 'PRIMITIVE' : 'LFI');
 
-  // REGLE NON NEGOCIABLE (Point A ChatGPT) :
-  // Une somme arithmetiquement equilibree (60 + 40 === 100) ne constitue pas une preuve officielle.
-  // Une ventilation n'est conservee que si elle est officiellement prouvee avec le meme exercice,
-  // la meme assiette et la meme nature de credits (ex: Budget Primitif reference avec precision EXACT).
-  const primitiveInfo = OFFICIAL_PRIMITIVE_BUDGETS[instId] || (institution as { primitive_budget?: PrimitiveBudgetInfo }).primitive_budget;
-  const isPrimitiveBreakdownProven = Boolean(
+  // CORRECTION P1 #1 & P1 #2 :
+  // Séparer rigoureusement :
+  // 1) la précision numérique (precision === 'EXACT' et équilibre arithmétique) ;
+  // 2) la provenance documentaire (source secondaire rapportée vs document officiel primaire avec page PDF et SHA-256) ;
+  // 3) le statut de certification (SECONDARY_SOURCE vs VERIFIED_AMOUNT).
+  // Le raccourci booléen `has_verified_breakdown` est intégralement supprimé au profit de `BreakdownDocumentaryEvidence`.
+  const primitiveInfo = OFFICIAL_PRIMITIVE_BUDGETS[instId] || institution.primitive_budget;
+  const isPrimitiveBalancedAndMatching = Boolean(
     primitiveInfo != null &&
     primitiveInfo.precision === 'EXACT' &&
-    primitiveInfo.source_url &&
+    typeof primitiveInfo.source_url === 'string' &&
+    /^https?:\/\/.+/i.test(primitiveInfo.source_url.trim()) &&
     primitiveInfo.functioning_voted_fcfa != null &&
     primitiveInfo.investment_voted_fcfa != null &&
     calculateSafePercentages(
@@ -624,10 +669,75 @@ export function resolveInstitutionFinancialView(
       primitiveInfo.investment_voted_fcfa,
       primitiveInfo.total_voted_fcfa
     ).isBalanced &&
-    total === primitiveInfo.total_voted_fcfa
+    total === primitiveInfo.total_voted_fcfa &&
+    fonct === primitiveInfo.functioning_voted_fcfa &&
+    inv === primitiveInfo.investment_voted_fcfa
   );
-  const isExplicitlyProven = Boolean((institution as { has_verified_breakdown?: boolean }).has_verified_breakdown);
-  const isBreakdownProven = isPrimitiveBreakdownProven || isExplicitlyProven;
+
+  const isPrimitivePrimaryCertified = Boolean(
+    isPrimitiveBalancedAndMatching &&
+    primitiveInfo!.verification_status === 'OFFICIAL_DOCUMENT' &&
+    typeof primitiveInfo!.pdf_page === 'number' &&
+    Number.isInteger(primitiveInfo!.pdf_page) &&
+    primitiveInfo!.pdf_page > 0 &&
+    isValidPrimarySha256(primitiveInfo!.sha256)
+  );
+
+  const hasStructuredBreakdownEvidence = isValidBreakdownDocumentaryEvidence(
+    institution.breakdown_evidence,
+    instId,
+    fiscalYear,
+    effectiveBasis,
+    total,
+    fonct,
+    inv
+  );
+
+  const isBreakdownPrimaryVerified = (isPrimitivePrimaryCertified || hasStructuredBreakdownEvidence) && isReconciled;
+  const isBreakdownSecondaryReported = !isBreakdownPrimaryVerified && isPrimitiveBalancedAndMatching && isReconciled;
+  const isBreakdownDisplayable = isBreakdownPrimaryVerified || isBreakdownSecondaryReported;
+
+  const resolvedProvenance: DocumentaryProvenance | null = isLfi2026AmountConfirmed
+    ? provenance
+    : hasStructuredBreakdownEvidence
+    ? {
+        document_title: institution.breakdown_evidence!.document_title,
+        document_reference: institution.breakdown_evidence!.document_reference,
+        source_url: institution.breakdown_evidence!.source_url,
+        pdf_page: institution.breakdown_evidence!.pdf_page,
+        sha256: institution.breakdown_evidence!.sha256,
+        table_or_line: 'Ventilation fonctionnement/investissement vérifiée sur source primaire',
+      }
+    : isPrimitivePrimaryCertified
+    ? {
+        document_title: primitiveInfo!.source,
+        document_reference: primitiveInfo!.document_reference ?? primitiveInfo!.session_notes ?? 'Délibération budgétaire primitive officielle',
+        source_url: primitiveInfo!.source_url ?? null,
+        pdf_page: primitiveInfo!.pdf_page!,
+        sha256: primitiveInfo!.sha256!,
+        table_or_line: 'Délibération / document budgétaire primaire vérifié',
+      }
+    : isBreakdownSecondaryReported
+    ? {
+        document_title: primitiveInfo!.source,
+        document_reference: primitiveInfo!.session_notes ?? 'Publication secondaire relative au BP',
+        source_url: primitiveInfo!.source_url ?? null,
+        pdf_page: null,
+        sha256: null,
+        table_or_line: 'Source secondaire rapportée — délibération originale à confirmer',
+      }
+    : null;
+
+  const resolvedVerificationStatus: InstitutionBudgetVerificationStatus =
+    pctResult.status === 'UNRECONCILED'
+      ? 'UNRECONCILED'
+      : isBreakdownPrimaryVerified
+      ? 'VERIFIED_AMOUNT'
+      : isBreakdownSecondaryReported
+      ? 'SECONDARY_SOURCE'
+      : isLfi2026AmountConfirmed
+      ? 'PARTIAL_BREAKDOWN'
+      : 'NOT_DOCUMENTED';
 
   return {
     institution_id: instId,
@@ -638,7 +748,7 @@ export function resolveInstitutionFinancialView(
     nature_credits: nationalSection?.program_code
       ? `Programme interne ${nationalSection.program_code} de la Présidence, non additif au total de la section 103`
       : "Autorisations d'Engagement & Crédits de Paiement (LFI 2026)",
-    budget_basis: requestedBasis || (instType === 'MAIRIE' || instType === 'REGION' ? 'PRIMITIVE' : 'LFI'),
+    budget_basis: effectiveBasis,
     budget_measure: 'CREDITS_VOTES',
     total_amount_fcfa: total,
     functioning_amount_fcfa: fonct ?? null,
@@ -647,35 +757,45 @@ export function resolveInstitutionFinancialView(
     total_words: formatAmountInWords(total),
     functioning_formatted: fonct != null ? formatFCFA(fonct) : null,
     investment_formatted: inv != null ? formatFCFA(inv) : null,
-    functioning_pct: isBreakdownProven ? pctResult.functioningPct : null,
-    investment_pct: isBreakdownProven ? pctResult.investmentPct : null,
-    has_breakdown: isBreakdownProven && isReconciled,
+    functioning_pct: isBreakdownDisplayable ? pctResult.functioningPct : null,
+    investment_pct: isBreakdownDisplayable ? pctResult.investmentPct : null,
+    has_breakdown: isBreakdownDisplayable && isReconciled,
     delta_fcfa: pctResult.deltaFcfa,
     programs: [],
     actions: [],
-    documentary_provenance: isLfi2026AmountConfirmed ? provenance : null,
-    verification_status: pctResult.status === 'UNRECONCILED' ? 'UNRECONCILED'
-      : !isLfi2026AmountConfirmed ? (isPrimitiveBreakdownProven ? 'VERIFIED_AMOUNT' : 'NOT_DOCUMENTED')
-      : isBreakdownProven && isReconciled ? 'VERIFIED_AMOUNT' : 'PARTIAL_BREAKDOWN',
-    reconciliation_status: !isBreakdownProven && pctResult.status === 'RECONCILED' ? 'NO_BREAKDOWN' : pctResult.status,
+    documentary_provenance: resolvedProvenance,
+    verification_status: resolvedVerificationStatus,
+    reconciliation_status: !isBreakdownDisplayable && pctResult.status === 'RECONCILED' ? 'NO_BREAKDOWN' : pctResult.status,
     blocking_reasons: [
       ...(pctResult.reason ? [pctResult.reason] : []),
-      ...(!isBreakdownProven && fonct != null && inv != null ? ['Ventilation fonctionnement/investissement non documentée sur cette assiette officielle.'] : []),
+      ...(!isBreakdownDisplayable && fonct != null && inv != null ? ['Ventilation fonctionnement/investissement non documentée sur cette assiette officielle.'] : []),
+      ...(isBreakdownSecondaryReported ? ['Ventilation issue d’une publication secondaire citée : délibération budgétaire primaire (page PDF et SHA-256) requise avant certification officielle.'] : []),
       ...(nationalSection?.program_code ? [`Le programme ${nationalSection.program_code} est déjà inclus dans les 193 633 705 615 FCFA de la Présidence (section 103). Ne pas additionner.`] : []),
-      ...(!isLfi2026AmountConfirmed ? [documentaryDiscrepancy
+      ...(!isLfi2026AmountConfirmed && !isBreakdownDisplayable ? [documentaryDiscrepancy
         ? `Montant de la fiche non identique aux credits de la section LFI ${officialSectionCode} : ${total} FCFA affiche contre ${amountEvidence!.lfi_amount_fcfa} FCFA section. Portefeuille, C2D et transferts a rapprocher sans remplacement automatique.`
         : 'Aucune ligne officielle LFI 2026 probante pour ce montant et ce perimetre.'] : []),
     ],
-    badge_text: nationalSection?.program_code ? 'Programme Présidence - non additif'
-      : isLfi2026AmountConfirmed ? 'Montant recoupe LFI 2026' : 'Montant a rapprocher - source insuffisante',
-    badge_class: isLfi2026AmountConfirmed && isReconciled && isBreakdownProven
+    badge_text: nationalSection?.program_code
+      ? 'Programme Présidence - non additif'
+      : isBreakdownPrimaryVerified
+      ? (isLfi2026AmountConfirmed ? 'Montant recoupé LFI 2026' : 'Ventilation officielle vérifiée')
+      : isBreakdownSecondaryReported
+      ? 'Montant rapporté — à confirmer'
+      : isLfi2026AmountConfirmed
+      ? 'Montant recoupe LFI 2026'
+      : 'Montant a rapprocher - source insuffisante',
+    badge_class: isBreakdownPrimaryVerified
       ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
       : 'bg-amber-100 text-amber-800 border-amber-300',
     notice_text: nationalSection?.program_code
       ? `Crédits du programme ${nationalSection.program_code}, inclus dans le total de la section 103 Présidence ; ils ne constituent pas une dotation autonome supplémentaire. Ventilation fonctionnement/investissement non documentée.`
+      : isBreakdownSecondaryReported
+      ? 'Publication secondaire : montants et ventilation rapportés à confirmer par la délibération originale ou le document budgétaire primaire.'
+      : isBreakdownPrimaryVerified && !isLfi2026AmountConfirmed
+      ? 'Ventilation fonctionnement/investissement certifiée par une preuve documentaire primaire vérifiée.'
       : !isLfi2026AmountConfirmed
       ? 'Le montant actuellement reference ne peut etre certifie comme credit de section LFI 2026. provenance documentaire insuffisante ; les ecarts C2D ou de portefeuille necessitent un acte de rapprochement.'
-      : !isBreakdownProven
+      : !isBreakdownDisplayable
       ? 'Ventilation fonctionnement/investissement non documentée sur cette assiette officielle.'
       : !isReconciled ? `${pctResult.reason || 'Ventilation incomplète.'} La concordance du total LFI ne certifie pas les ratios.`
       : null,
@@ -737,12 +857,266 @@ export interface InstitutionBudgetPresentation {
   investment_pct: number | null;
 }
 
+export interface RegulatorDocumentedScope {
+  id: string;
+  dgbf_ass_code: string | null;
+  ass_state_subsidy_2026_fcfa: number | null;
+  ass_other_resources_2026_fcfa: number | null;
+  ass_total_2026_fcfa: number | null;
+  lfi_partial_activity_code: string | null;
+  lfi_partial_subsidy_2026_fcfa: number | null;
+  notice: string;
+  supplements: BudgetPresentationAmount[];
+}
+
+export const REGULATOR_2026_DOCUMENTED_SCOPES: Record<string, RegulatorDocumentedScope> = {
+  'aai-arcop': {
+    id: 'aai-arcop',
+    dgbf_ass_code: '32040003',
+    ass_state_subsidy_2026_fcfa: 200_000_000,
+    ass_other_resources_2026_fcfa: 11_087_646_212,
+    ass_total_2026_fcfa: 11_287_646_212,
+    lfi_partial_activity_code: null,
+    lfi_partial_subsidy_2026_fcfa: null,
+    notice: 'Classée parmi les Structures Assimilées (ASS, code DGBF 32040003) dans l’Annexe 6 EPN 2026 (200 000 000 FCFA de subventions État + 11 087 646 212 FCFA d’autres ressources = 11 287 646 212 FCFA). Ces composantes sont conservées hors de la dotation principale sans élargir le produit aux EPN généraux ni assimiler une subvention isolée au budget global.',
+    supplements: [
+      {
+        amount_fcfa: 200_000_000,
+        label: 'Subventions État 2026 — Annexe 6 ASS (code DGBF 32040003, composante non globale)',
+        precision: 'EXACT',
+        verification: 'SECONDARY_SOURCE',
+        source: {
+          document_title: ANNEXE_6_EPN_2026_DOCUMENT.title,
+          document_reference: 'État récapitulatif ASS • Code DGBF 32040003 (Subventions État)',
+          source_url: ANNEXE_6_EPN_2026_DOCUMENT.url,
+          pdf_page: null,
+          sha256: ANNEXE_6_EPN_2026_DOCUMENT.sha256,
+        },
+      },
+      {
+        amount_fcfa: 11_087_646_212,
+        label: 'Autres ressources 2026 (ressources propres / excédents) — Annexe 6 ASS (code DGBF 32040003)',
+        precision: 'EXACT',
+        verification: 'SECONDARY_SOURCE',
+        source: {
+          document_title: ANNEXE_6_EPN_2026_DOCUMENT.title,
+          document_reference: 'État récapitulatif ASS • Code DGBF 32040003 (Autres ressources)',
+          source_url: ANNEXE_6_EPN_2026_DOCUMENT.url,
+          pdf_page: null,
+          sha256: ANNEXE_6_EPN_2026_DOCUMENT.sha256,
+        },
+      },
+      {
+        amount_fcfa: 11_287_646_212,
+        label: 'Total prévisionnel Structure Assimilée (ASS) — Annexe 6 DGBF (code 32040003, hors dotation principale)',
+        precision: 'EXACT',
+        verification: 'SECONDARY_SOURCE',
+        source: {
+          document_title: ANNEXE_6_EPN_2026_DOCUMENT.title,
+          document_reference: 'État récapitulatif ASS • Code DGBF 32040003 (Total 2026)',
+          source_url: ANNEXE_6_EPN_2026_DOCUMENT.url,
+          pdf_page: null,
+          sha256: ANNEXE_6_EPN_2026_DOCUMENT.sha256,
+        },
+      },
+    ],
+  },
+  'aai-haca': {
+    id: 'aai-haca',
+    dgbf_ass_code: '32040004',
+    ass_state_subsidy_2026_fcfa: 1_454_056_138,
+    ass_other_resources_2026_fcfa: 1_471_878_928,
+    ass_total_2026_fcfa: 2_925_935_066,
+    lfi_partial_activity_code: null,
+    lfi_partial_subsidy_2026_fcfa: null,
+    notice: 'Classée parmi les Structures Assimilées (ASS, code DGBF 32040004) dans l’Annexe 6 EPN 2026 (1 454 056 138 FCFA de subventions État + 1 471 878 928 FCFA d’autres ressources = 2 925 935 066 FCFA). Composantes conservées hors de la dotation principale.',
+    supplements: [
+      {
+        amount_fcfa: 1_454_056_138,
+        label: 'Subventions État 2026 — Annexe 6 ASS (code DGBF 32040004, composante non globale)',
+        precision: 'EXACT',
+        verification: 'SECONDARY_SOURCE',
+        source: {
+          document_title: ANNEXE_6_EPN_2026_DOCUMENT.title,
+          document_reference: 'État récapitulatif ASS • Code DGBF 32040004 (Subventions État)',
+          source_url: ANNEXE_6_EPN_2026_DOCUMENT.url,
+          pdf_page: null,
+          sha256: ANNEXE_6_EPN_2026_DOCUMENT.sha256,
+        },
+      },
+      {
+        amount_fcfa: 1_471_878_928,
+        label: 'Autres ressources 2026 (ressources propres / excédents) — Annexe 6 ASS (code DGBF 32040004)',
+        precision: 'EXACT',
+        verification: 'SECONDARY_SOURCE',
+        source: {
+          document_title: ANNEXE_6_EPN_2026_DOCUMENT.title,
+          document_reference: 'État récapitulatif ASS • Code DGBF 32040004 (Autres ressources)',
+          source_url: ANNEXE_6_EPN_2026_DOCUMENT.url,
+          pdf_page: null,
+          sha256: ANNEXE_6_EPN_2026_DOCUMENT.sha256,
+        },
+      },
+      {
+        amount_fcfa: 2_925_935_066,
+        label: 'Total prévisionnel Structure Assimilée (ASS) — Annexe 6 DGBF (code 32040004, hors dotation principale)',
+        precision: 'EXACT',
+        verification: 'SECONDARY_SOURCE',
+        source: {
+          document_title: ANNEXE_6_EPN_2026_DOCUMENT.title,
+          document_reference: 'État récapitulatif ASS • Code DGBF 32040004 (Total 2026)',
+          source_url: ANNEXE_6_EPN_2026_DOCUMENT.url,
+          pdf_page: null,
+          sha256: ANNEXE_6_EPN_2026_DOCUMENT.sha256,
+        },
+      },
+    ],
+  },
+  'aai-cndh': {
+    id: 'aai-cndh',
+    dgbf_ass_code: '32040005',
+    ass_state_subsidy_2026_fcfa: 1_927_737_123,
+    ass_other_resources_2026_fcfa: 6_000_000,
+    ass_total_2026_fcfa: 1_933_737_123,
+    lfi_partial_activity_code: null,
+    lfi_partial_subsidy_2026_fcfa: null,
+    notice: 'Classée parmi les Structures Assimilées (ASS, code DGBF 32040005) dans l’Annexe 6 EPN 2026 (1 927 737 123 FCFA de subventions État + 6 000 000 FCFA d’autres ressources = 1 933 737 123 FCFA). Composantes conservées hors de la dotation principale.',
+    supplements: [
+      {
+        amount_fcfa: 1_927_737_123,
+        label: 'Subventions État 2026 — Annexe 6 ASS (code DGBF 32040005, composante non globale)',
+        precision: 'EXACT',
+        verification: 'SECONDARY_SOURCE',
+        source: {
+          document_title: ANNEXE_6_EPN_2026_DOCUMENT.title,
+          document_reference: 'État récapitulatif ASS • Code DGBF 32040005 (Subventions État)',
+          source_url: ANNEXE_6_EPN_2026_DOCUMENT.url,
+          pdf_page: null,
+          sha256: ANNEXE_6_EPN_2026_DOCUMENT.sha256,
+        },
+      },
+      {
+        amount_fcfa: 6_000_000,
+        label: 'Autres ressources 2026 — Annexe 6 ASS (code DGBF 32040005)',
+        precision: 'EXACT',
+        verification: 'SECONDARY_SOURCE',
+        source: {
+          document_title: ANNEXE_6_EPN_2026_DOCUMENT.title,
+          document_reference: 'État récapitulatif ASS • Code DGBF 32040005 (Autres ressources)',
+          source_url: ANNEXE_6_EPN_2026_DOCUMENT.url,
+          pdf_page: null,
+          sha256: ANNEXE_6_EPN_2026_DOCUMENT.sha256,
+        },
+      },
+      {
+        amount_fcfa: 1_933_737_123,
+        label: 'Total prévisionnel Structure Assimilée (ASS) — Annexe 6 DGBF (code 32040005, hors dotation principale)',
+        precision: 'EXACT',
+        verification: 'SECONDARY_SOURCE',
+        source: {
+          document_title: ANNEXE_6_EPN_2026_DOCUMENT.title,
+          document_reference: 'État récapitulatif ASS • Code DGBF 32040005 (Total 2026)',
+          source_url: ANNEXE_6_EPN_2026_DOCUMENT.url,
+          pdf_page: null,
+          sha256: ANNEXE_6_EPN_2026_DOCUMENT.sha256,
+        },
+      },
+    ],
+  },
+  'aai-caidp': {
+    id: 'aai-caidp',
+    dgbf_ass_code: '32040018',
+    ass_state_subsidy_2026_fcfa: 938_179_346,
+    ass_other_resources_2026_fcfa: 0,
+    ass_total_2026_fcfa: 938_179_346,
+    lfi_partial_activity_code: null,
+    lfi_partial_subsidy_2026_fcfa: 419_179_346,
+    notice: 'Classée parmi les Structures Assimilées (ASS, code DGBF 32040018) dans l’Annexe 6 EPN 2026 (938 179 346 FCFA de subventions État, 0 FCFA d’autres ressources attesté ; dont 419 179 346 FCFA de ligne LFI de subvention de personnel non additionnelle). Composantes conservées hors de la dotation principale.',
+    supplements: [
+      {
+        amount_fcfa: 938_179_346,
+        label: 'Subventions État / Total prévisionnel ASS — Annexe 6 DGBF (code 32040018, autres ressources = 0 attesté)',
+        precision: 'EXACT',
+        verification: 'SECONDARY_SOURCE',
+        source: {
+          document_title: ANNEXE_6_EPN_2026_DOCUMENT.title,
+          document_reference: 'État récapitulatif ASS • Code DGBF 32040018 (Total ASS 2026)',
+          source_url: ANNEXE_6_EPN_2026_DOCUMENT.url,
+          pdf_page: null,
+          sha256: ANNEXE_6_EPN_2026_DOCUMENT.sha256,
+        },
+      },
+      {
+        amount_fcfa: 419_179_346,
+        label: 'Ligne LFI 2026 de subvention de personnel (composante partielle non additionnelle)',
+        precision: 'EXACT',
+        verification: 'SECONDARY_SOURCE',
+        source: {
+          document_title: LFI_2026_DOCUMENT.title,
+          document_reference: 'LFI 2026 • Subvention de personnel CAIDP (composante partielle)',
+          source_url: LFI_2026_DOCUMENT.url,
+          pdf_page: null,
+          sha256: LFI_2026_DOCUMENT.sha256,
+        },
+      },
+    ],
+  },
+  'aai-airp': {
+    id: 'aai-airp',
+    dgbf_ass_code: null,
+    ass_state_subsidy_2026_fcfa: null,
+    ass_other_resources_2026_fcfa: null,
+    ass_total_2026_fcfa: null,
+    lfi_partial_activity_code: '78074000605',
+    lfi_partial_subsidy_2026_fcfa: 996_632_520,
+    notice: 'Budget global non documenté. Seule une ligne partielle de subvention d’équilibre personnel (996 632 520 FCFA, code activité LFI 78074000605) est identifiée ; une subvention isolée ne représente pas le budget global.',
+    supplements: [
+      {
+        amount_fcfa: 996_632_520,
+        label: 'Subvention d’équilibre personnel uniquement — LFI 2026 (activité 78074000605, composante partielle non globale)',
+        precision: 'EXACT',
+        verification: 'SECONDARY_SOURCE',
+        source: {
+          document_title: LFI_2026_DOCUMENT.title,
+          document_reference: 'LFI 2026 • Code activité 78074000605 (Subventions équilibre personnel seulement)',
+          source_url: LFI_2026_DOCUMENT.url,
+          pdf_page: null,
+          sha256: LFI_2026_DOCUMENT.sha256,
+        },
+      },
+    ],
+  },
+  'aai-artci': {
+    id: 'aai-artci',
+    dgbf_ass_code: null,
+    ass_state_subsidy_2026_fcfa: null,
+    ass_other_resources_2026_fcfa: null,
+    ass_total_2026_fcfa: null,
+    lfi_partial_activity_code: null,
+    lfi_partial_subsidy_2026_fcfa: null,
+    notice: 'Budget global non documenté sur source primaire (budget approuvé / rapport financier officiel requis). Une subvention de l’État ou une recette affectée ne représente pas à elle seule le budget global.',
+    supplements: [],
+  },
+  'aai-anare': {
+    id: 'aai-anare',
+    dgbf_ass_code: null,
+    ass_state_subsidy_2026_fcfa: null,
+    ass_other_resources_2026_fcfa: null,
+    ass_total_2026_fcfa: null,
+    lfi_partial_activity_code: null,
+    lfi_partial_subsidy_2026_fcfa: null,
+    notice: 'Budget global non documenté sur source primaire (budget approuvé / rapport financier officiel requis). Une subvention de l’État ou une recette affectée ne représente pas à elle seule le budget global.',
+    supplements: [],
+  },
+};
+
 export function resolveInstitutionBudgetPresentation(institution: Partial<Institution>): InstitutionBudgetPresentation {
   const id = institution.id || 'unknown-institution';
   const local = ['MAIRIE', 'REGION', 'DISTRICT'].includes(institution.type || '');
   const national = institution.type === 'INSTITUTION' ? NATIONAL_INSTITUTIONS_SECTIONS[id] : undefined;
   const ministry = institution.type === 'MINISTERE' ? legalCP.rows.find(row => row.portfolio_id === id) : undefined;
-  const primitive = local ? OFFICIAL_PRIMITIVE_BUDGETS[id] : undefined;
+  const primitive = local ? (institution.primitive_budget ?? OFFICIAL_PRIMITIVE_BUDGETS[id]) : undefined;
+  const regulatorScope = institution.type === 'AUTORITE_REGULATION' ? REGULATOR_2026_DOCUMENTED_SCOPES[id] : undefined;
   const result: InstitutionBudgetPresentation = {
     institution_id: id, fiscal_year: 2026,
     reference: {
@@ -753,11 +1127,16 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
     supplements: [], section_code: null, program_code: null, aggregation: 'SEPARATE_SCOPE',
     notice: local
       ? 'Budget primitif propre non documenté. Les concours de l’État ne le remplacent pas. BP, BS et BM décrivent des prévisions ; le compte administratif (CA) décrit l’exécution.'
-      : institution.type === 'AUTORITE_REGULATION'
-        ? 'Budget global non documenté. Une subvention de l’État ou une recette affectée ne représente pas à elle seule le budget global.'
-        : 'Montant de référence non documenté pour ce périmètre. Inconnu ne signifie pas zéro.',
+      : regulatorScope
+        ? regulatorScope.notice
+        : institution.type === 'AUTORITE_REGULATION'
+          ? 'Budget global non documenté. Une subvention de l’État ou une recette affectée ne représente pas à elle seule le budget global.'
+          : 'Montant de référence non documenté pour ce périmètre. Inconnu ne signifie pas zéro.',
     functioning_fcfa: null, investment_fcfa: null, functioning_pct: null, investment_pct: null,
   };
+  if (regulatorScope && regulatorScope.supplements.length > 0) {
+    result.supplements.push(...regulatorScope.supplements);
+  }
   if (ministry || national) {
     const section = ministry?.section_code ?? national!.section_code;
     const program = national?.program_code ?? null;
@@ -781,18 +1160,47 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
         : 'Crédits votés pour la section, distincts des dépenses exécutées. La concordance du total ne certifie pas une ventilation fonctionnement/investissement.';
   }
   if (primitive) {
-    result.reference = {
-      amount_fcfa: primitive.total_voted_fcfa, label: 'Budget primitif propre (BP) rapporté',
-      precision: primitive.precision ?? 'UNKNOWN', verification: 'SECONDARY_SOURCE',
-      source: { document_title: primitive.source, document_reference: primitive.session_notes ?? 'Publication relative au BP 2026', source_url: primitive.source_url ?? null, pdf_page: null },
-    };
-    result.notice = 'Publication secondaire : délibération originale à obtenir avant certification. La ventilation des recettes propres et concours de l’État ne se déduit pas du total. BP/BS/BM : prévisions ; CA : exécution.';
-    result.functioning_fcfa = primitive.functioning_voted_fcfa;
-    result.investment_fcfa = primitive.investment_voted_fcfa;
     const arithmetic = calculateSafePercentages(primitive.functioning_voted_fcfa, primitive.investment_voted_fcfa, primitive.total_voted_fcfa);
-    if (primitive.precision === 'EXACT' && primitive.source_url && arithmetic.isBalanced) {
+    const isBalancedExact = primitive.precision === 'EXACT' && Boolean(primitive.source_url) && arithmetic.isBalanced && arithmetic.status === 'RECONCILED';
+    const isPrimaryDoc = Boolean(
+      isBalancedExact &&
+      primitive.verification_status === 'OFFICIAL_DOCUMENT' &&
+      typeof primitive.pdf_page === 'number' &&
+      Number.isInteger(primitive.pdf_page) &&
+      primitive.pdf_page > 0 &&
+      isValidPrimarySha256(primitive.sha256)
+    );
+    result.reference = {
+      amount_fcfa: primitive.total_voted_fcfa,
+      label: isPrimaryDoc ? 'Budget primitif propre (BP) — délibération officielle' : 'Budget primitif propre (BP) rapporté',
+      precision: primitive.precision ?? 'UNKNOWN',
+      verification: isPrimaryDoc ? 'VERIFIED_AMOUNT' : 'SECONDARY_SOURCE',
+      source: {
+        document_title: primitive.source,
+        document_reference: primitive.document_reference ?? primitive.session_notes ?? 'Publication relative au BP 2026',
+        source_url: primitive.source_url ?? null,
+        pdf_page: isPrimaryDoc ? primitive.pdf_page! : null,
+        sha256: isPrimaryDoc ? primitive.sha256! : null,
+      },
+    };
+    result.notice = isPrimaryDoc
+      ? 'Budget primitif voté documenté par une source primaire vérifiée. BP/BS/BM : prévisions ; CA : exécution.'
+      : 'Publication secondaire : délibération originale à obtenir avant certification. La ventilation des recettes propres et concours de l’État ne se déduit pas du total. BP/BS/BM : prévisions ; CA : exécution.';
+    if (isBalancedExact) {
+      result.functioning_fcfa = primitive.functioning_voted_fcfa;
+      result.investment_fcfa = primitive.investment_voted_fcfa;
       result.functioning_pct = arithmetic.functioningPct;
       result.investment_pct = arithmetic.investmentPct;
+    } else if (arithmetic.status === 'PARTIAL_BREAKDOWN' || arithmetic.status === 'NO_BREAKDOWN') {
+      result.functioning_fcfa = primitive.functioning_voted_fcfa;
+      result.investment_fcfa = primitive.investment_voted_fcfa;
+      result.functioning_pct = null;
+      result.investment_pct = null;
+    } else {
+      result.functioning_fcfa = null;
+      result.investment_fcfa = null;
+      result.functioning_pct = null;
+      result.investment_pct = null;
     }
   }
   const direct = national ? NATIONAL_DIRECT_ALLOCATIONS_2026[id] : undefined;
@@ -810,10 +1218,47 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
   }
   const recorded = institution.total_budget_fcfa;
   if (recorded != null && Number.isSafeInteger(recorded) && recorded >= 0 && (local || institution.type === 'AUTORITE_REGULATION' || recorded !== result.reference.amount_fcfa)) {
-    result.supplements.push({
-      amount_fcfa: recorded, precision: 'UNKNOWN', verification: 'TO_VERIFY', source: null,
-      label: local ? 'Concours de l’État enregistrés — source individuelle à confirmer' : 'Montant historique enregistré — périmètre et source à confirmer',
-    });
+    const grantEvidence = institution.state_grant_evidence;
+    const hasExplicitStateGrantSource = Boolean(
+      local &&
+      grantEvidence &&
+      grantEvidence.institution_id === id &&
+      grantEvidence.fiscal_year === 2026 &&
+      grantEvidence.amount_fcfa === recorded &&
+      typeof grantEvidence.source?.document_title === 'string' &&
+      grantEvidence.source.document_title.trim().length > 0 &&
+      typeof grantEvidence.source?.source_url === 'string' &&
+      /^https?:\/\/.+/i.test(grantEvidence.source.source_url.trim())
+    );
+    if (hasExplicitStateGrantSource) {
+      const isPrimaryGrantDoc = Boolean(
+        typeof grantEvidence!.source.pdf_page === 'number' &&
+        Number.isInteger(grantEvidence!.source.pdf_page) &&
+        grantEvidence!.source.pdf_page > 0 &&
+        isValidPrimarySha256(grantEvidence!.source.sha256)
+      );
+      result.supplements.push({
+        amount_fcfa: recorded,
+        precision: 'EXACT',
+        verification: isPrimaryGrantDoc ? 'VERIFIED_AMOUNT' : 'SECONDARY_SOURCE',
+        source: {
+          document_title: grantEvidence!.source.document_title,
+          document_reference: grantEvidence!.source.document_reference ?? grantEvidence!.grant_type ?? 'Concours financiers de l’État',
+          source_url: grantEvidence!.source.source_url,
+          pdf_page: grantEvidence!.source.pdf_page ?? null,
+          sha256: grantEvidence!.source.sha256 ?? null,
+        },
+        label: `Concours de l’État (${grantEvidence!.grant_type || 'DGF / DGE / Annexe 8'}) — distinct du budget primitif`,
+      });
+    } else if (recorded !== result.reference.amount_fcfa) {
+      result.supplements.push({
+        amount_fcfa: recorded,
+        precision: 'UNKNOWN',
+        verification: 'TO_VERIFY',
+        source: null,
+        label: 'Montant historique enregistré — nature et source à confirmer',
+      });
+    }
   }
   if (id === 'inst-cour-supreme') result.notice = 'Aucune section LFI autonome pour la Cour Suprême. Les sections 114 (Cassation), 118 (Conseil d’État) et 115 (Cour des comptes) sont distinctes.';
   return result;

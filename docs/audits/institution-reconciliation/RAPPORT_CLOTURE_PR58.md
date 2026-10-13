@@ -28,18 +28,20 @@ Suite à l'atteinte du quota de Codex, Antigravity a pris le relais intégral po
 
 ## 2. Synthèse des Contrôles et Corrections par Axe
 
-### A — Intégrité des ventilations budgétaires (Fonctionnement / Investissement)
-- **Constat d'audit initial** :
-  L'application pouvait afficher des pourcentages de ventilation basés sur des ratios ou montants saisis sans que la ventilation elle-même ne provienne de la même assiette officielle vérifiée.
-- **Correction apportée (`src/utils/institutionBudgetHelper.ts`)** :
-  Dans `resolveInstitutionFinancialView` :
-  - La ventilation fonctionnement/investissement n'est conservée que si elle est formellement prouvée sur la même assiette officielle (cas des budgets primitifs avec `precision: 'EXACT'`, URL de source documentaire vérifiée, montants équilibrés ou indicateur `has_verified_breakdown: true`).
-  - Si la ventilation n'est pas documentée ou non certifiée, les pourcentages sont immédiatement neutralisés (`functioning_pct: null, investment_pct: null, has_breakdown: false, reconciliation_status: 'NO_BREAKDOWN'`).
-  - La mention explicite *"Ventilation fonctionnement/investissement non documentée sur cette assiette officielle."* est affichée.
-  - L'écart arithmétique éventuel (`delta_fcfa`) est systématiquement conservé et exposé pour audit sans être dissimulé.
-  - Un inconnu n'est jamais transformé en 0 FCFA.
+### A — Intégrité des ventilations budgétaires & Provenance documentaire (Observations P1 #1 et P1 #2)
+- **Constat de la revue ChatGPT** :
+  1. **P1 #1 (Certification abusive des budgets primitifs)** : La logique précédente pouvait attribuer `VERIFIED_AMOUNT` dès lors que `precision === 'EXACT'`, qu'une `source_url` était renseignée et que `fonctionnement + investissement = total`, alors que `src/data/officialPrimitiveBudgets.ts` contient des publications secondaires (presse, articles).
+  2. **P1 #2 (Raccourci booléen `has_verified_breakdown`)** : Un simple booléen déclaratif permettait de débloquer une ventilation sans preuve documentaire primaire vérifiable.
+- **Corrections apportées (`src/types/index.ts`, `src/utils/institutionBudgetHelper.ts`)** :
+  - Ajout du statut explicite `SECONDARY_SOURCE` à `InstitutionBudgetVerificationStatus`.
+  - Séparation stricte entre :
+    - **Précision numérique** (`EXACT`, `ROUNDED_MILLIONS`, etc.)
+    - **Provenance documentaire** (`SECONDARY_SOURCE` vs `VERIFIED_AMOUNT`)
+    - **Preuve primaire de ventilation** (`BreakdownDocumentaryEvidence` vérifiée par `isValidBreakdownDocumentaryEvidence`)
+  - Suppression totale du raccourci booléen `has_verified_breakdown`. Une ventilation sur une assiette non-BP ou une certification primaire exige désormais une structure `BreakdownDocumentaryEvidence` valide comprenant : `institution_id`, `fiscal_year`, `basis`, `document_title`, `document_ref`, `source_url`, `pdf_page > 0`, `sha256` hexadécimal de 64 caractères, et égalité exacte `functioning_fcfa + investment_fcfa === total_fcfa`.
+  - Un budget primitif rapporté par une source secondaire avec une ventilation équilibrée (ex: Bingerville, Agnéby-Tiassa) conserve l'affichage de ses montants et pourcentages mais demeure qualifié `SECONDARY_SOURCE` (*« Montant rapporté — à confirmer »*), jamais `VERIFIED_AMOUNT`.
 - **Vérification par tests** :
-  Création de `src/utils/__tests__/budgetBreakdownIntegrityGate.test.ts` (5 tests dédiés, 100% PASS).
+  Suite `src/utils/__tests__/budgetBreakdownIntegrityGate.test.ts` enrichie à **11 tests** (100% PASS).
 
 ### B — Ministères (Pouvoir Exécutif)
 - **Structure vérifiée** :
@@ -60,24 +62,29 @@ Suite à l'atteinte du quota de Codex, Antigravity a pris le relais intégral po
 - **Cour Suprême (`inst-cour-supreme`)** :
   Aucun montant autonome dans la LFI (institutions judiciaires scindées en sections 114 Cassation, 118 Conseil d'État, 115 Cour des comptes). Affiche *"Non documenté"*, JAMAIS 0 FCFA.
 
-### D — Collectivités Territoriales (Communes & Régions)
-- **201 Communes** :
-  - Communes avec budget primitif rapporté (ex: Bingerville, 4 046 222 000 FCFA ; Tiassalé, 1 546 525 000 FCFA) : affichage du BP propre distinct des concours de l'État (DGE/DGF).
-  - Communes sans BP documenté (ex: Doropo) : affiche *"Non documenté"*, JAMAIS 0 FCFA.
-- **31 Conseils Régionaux** :
-  - Conseils avec BP rapporté (ex: Agnéby-Tiassa, 6 194 348 000 FCFA ; Indénié-Djuablin, 6 636 325 000 FCFA) : BP documenté affiché avec source et avertissement de publication secondaire.
-  - Conseils sans BP (ex: Iffou) : affiche *"Non documenté"*, JAMAIS 0 FCFA.
+### D — Collectivités Territoriales & Qualification des Montants Historiques (Observation P2 #3)
+- **Constat de la revue ChatGPT** :
+  Dans `resolveInstitutionBudgetPresentation`, tout montant résiduel de `institution.total_budget_fcfa` était qualifié par défaut de *« Concours de l'État »* avec provenance `OFFICIAL_SOURCE` / `VERIFIED`, alors que son origine documentaire (DGE, DGF, quote-part ou donnée historique) n'était pas systématiquement prouvée.
+- **Correction apportée (`src/utils/institutionBudgetHelper.ts`)** :
+  - Le libellé *« Concours de l'État »* (`OFFICIAL_SOURCE` / `VERIFIED`) est désormais strictement réservé aux cas disposant d'une preuve documentaire explicite `state_grant_evidence` (`document_title`, `document_ref`, `source_url`, `pdf_page > 0`, `sha256` 64 hex).
+  - En l'absence de `state_grant_evidence`, le montant complémentaire est libellé de façon neutre : *« Montant historique enregistré — nature et source à confirmer »* (`verification_status: 'TO_VERIFY'`, `source_type: 'OFFICIAL_SOURCE'`), avec mention explicative interdisant de le confondre avec le Budget Primitif ou un concours certifié de l'État.
+  - Pour les collectivités sans BP 2026 dans `OFFICIAL_PRIMITIVE_BUDGETS` (ex: Tiassalé, Doropo, Iffou), `reference.amount_fcfa` reste à `null` (*« Non documenté »*) et le montant historique ne remplace jamais le Budget Primitif.
 
-### E — Autorités & Régulateurs (AAI)
-- Les autorités indépendantes (ARTCI, ANARE-CI, ARCOP, HACA, CAIDP, CNDH, AIRP) n'ont pas de budget global assimilé à une subvention partielle.
-- ARTCI et ANARE-CI affichent *"Non documenté"* pour leur budget global, avec l'avertissement explicite : *"Une subvention de l'État ou une recette affectée ne représente pas à elle seule le budget global."*
-- Aucun régulateur n'affiche 0 FCFA à tort.
+### E — Autorités & Régulateurs et Périmètre Officiel Annexe 6 ASS / LFI 2026 (Observation P2 #4)
+- **Constat de la revue ChatGPT** :
+  Les régulateurs doivent conserver `reference.amount_fcfa: null` en l'absence de budget global officiel de l'entité, tout en restituant fidèlement ce que les documents officiels du dépôt (Annexe 6 ASS 2026, LFI 2026) établissent réellement sur leurs ressources affectées ou subventions partielles, sans élargir la page aux EPN généraux.
+- **Correction apportée (`src/utils/institutionBudgetHelper.ts`)** :
+  - Maintien strict des 7 régulateurs du périmètre (ARCOP, HACA, CAIDP, CNDH, AIRP, ARTCI, ANARE-CI) avec `reference.amount_fcfa: null` (*« Non documenté »*).
+  - Ajout de `REGULATOR_2026_DOCUMENTED_SCOPES` exposant dans `supplements` la traçabilité documentaire exacte (Annexe 6 EPN/ASS 2026 — SHA-256 `e8ba2e9dc9ffdc6d268c60eccecfbe51ee57adc6ca639923f8a3be78cece8cf6` — et LFI 2026) pour chaque régulateur, avec avertissement explicite qu'une subvention ou taxe affectée ne constitue pas le budget global de l'autorité.
 
-### F — Audit des suppressions de code Codex (1 027 lignes supprimées)
-- Vérification que la simplification du composant et la factorisation de la présentation budgétaire (`BudgetReferenceHeader`, `useInstitutionFinancialPresentation`) n'ont pas introduit de régression :
-  - 100% des routes et modales d'institution sont fonctionnelles.
-  - Les exports CSV et JSON individuels fonctionnent et utilisent la même observation financière que la carte et la fiche.
-  - Les onglets internes (Chantiers, Budget, Organisation, Participation APEC) sont intacts.
+### F — Accessibilité Complète de la Modale Institutionnelle (Observation P2 #5)
+- **Constat de la revue ChatGPT** :
+  `src/components/InstitutionDetailModal.tsx` gérait la fermeture sur `Escape` et les attributs ARIA de base, mais ne gérait pas le placement initial du focus, le piège de focus clavier (`Tab` / `Shift+Tab`), ni la restauration du focus à l'élément déclencheur à la fermeture.
+- **Correction apportée (`src/components/InstitutionDetailModal.tsx`)** :
+  - Ajout de `getModalFocusableElements`, `handleModalKeyDown` et `manageModalFocusLifecycle`.
+  - À l'ouverture : sauvegarde de `document.activeElement` et placement automatique du focus sur le bouton de fermeture (`closeButtonRef`, `aria-label="Fermer la fiche"`), ou à défaut sur le premier élément focusable / conteneur `dialogRef` (`tabIndex={-1}`).
+  - Pendant l'ouverture : piège de focus circulaire (`Tab` sur le dernier élément ramène au premier ; `Shift+Tab` sur le premier ramène au dernier) et fermeture sur `Escape` (suspendue lorsque la sous-modale `docModalOpen` est active).
+  - À la fermeture : restauration automatique du focus sur le bouton déclencheur d'origine.
 
 ---
 
@@ -92,37 +99,37 @@ La recette a été exécutée en local sur le serveur de prévisualisation Vite 
 
 | # | Entité testée | Page / URL | Résultat 390px | Résultat 768px | Résultat 1440px | Statut Intégrité & Accessibilité |
 |---|---|---|:---:|:---:|:---:|:---:|
-| 1 | Ministère Section Partagée (`gov-035` / `gov-009`) | `/institutions/ministeres` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | Section 229, 333,88 Mrds FCFA, "Section partagée : compter une seule fois". Modale accessible, touche Escape testée PASS. |
+| 1 | Ministère Section Partagée (`gov-035` / `gov-009`) | `/institutions/ministeres` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | Section 229, 333,88 Mrds FCFA, "Section partagée : compter une seule fois". Modale accessible, focus trap & Escape PASS. |
 | 2 | HABG (`inst-habg`) | `/institutions/grandes-institutions` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | Prog 13004, 5,55 Mrds FCFA, mention inclus dans Section 103, non additif. |
 | 3 | IGE (`inst-ige`) | `/institutions/grandes-institutions` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | Prog 13003, 9,87 Mrds FCFA, mention inclus dans Section 103, non additif. |
 | 4 | CESEC (`inst-cesec`) | `/institutions/grandes-institutions` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | Section 105, 8,07 Mrds FCFA, écart 107,56 M FCFA consigné sans allégation d'irrégularité. |
 | 5 | Cour Suprême (`inst-cour-supreme`) | `/institutions/grandes-institutions` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | "Non documenté", distinction sections 114/118/115, jamais 0 FCFA. |
-| 6 | Commune avec BP (Bingerville) | `/institutions/mairies` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | BP 4,05 Mrds FCFA rapporté, concours État 1,02 Mrd FCFA distincts, ventilation prouvée. |
-| 7 | Commune sans BP (Doropo) | `/institutions/mairies` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | "Non documenté", concours État ne remplacent pas le BP, jamais 0 FCFA. |
-| 8 | Conseil Régional (Agnéby-Tiassa / Iffou) | `/institutions/regions` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | Agnéby-Tiassa BP 6,19 Mrds FCFA ; Iffou "Non documenté", jamais 0 FCFA. |
-| 9 | Régulateur dotation partielle (ARCOP) | `/institutions/regulateurs` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | Budget global "Non documenté", pas d'assimilation subvention = budget global. |
-| 10 | Régulateur sans budget établi (ARTCI / ANARE-CI) | `/institutions/regulateurs` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | Budget global "Non documenté", jamais 0 FCFA. |
+| 6 | Commune avec BP (Bingerville) | `/institutions/mairies` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | BP 4,05 Mrds FCFA (`SECONDARY_SOURCE`), montant historique 1,02 Mrd FCFA qualifié neutre (`TO_VERIFY`). |
+| 7 | Commune sans BP (Tiassalé / Doropo) | `/institutions/mairies` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | BP "Non documenté" (`null`), montant historique en supplément à confirmer, jamais 0 FCFA. |
+| 8 | Conseil Régional (Agnéby-Tiassa / Iffou) | `/institutions/regions` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | Agnéby-Tiassa BP 6,19 Mrds FCFA (`SECONDARY_SOURCE`) ; Iffou "Non documenté", jamais 0 FCFA. |
+| 9 | Régulateur dotation partielle (ARCOP) | `/institutions/regulateurs` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | Budget global "Non documenté", supplément Annexe 6 ASS documenté sans assimilation au budget global. |
+| 10 | Régulateur sans budget établi (ARTCI / ANARE-CI) | `/institutions/regulateurs` | PASS (0 overflow) | PASS (0 overflow) | PASS (0 overflow) | Budget global "Non documenté", supplément périmètre Annexe 6 ASS documenté, jamais 0 FCFA. |
 
 ### Vérification de l'Accessibilité et Erreurs Navigateur :
 - **Erreurs console** : 0 erreur, 0 avertissement.
-- **Débordement horizontal** : `hasHorizontalOverflow = false` sur les 3 résolutions (scrollWidth === clientWidth).
+- **Débordement horizontal** : `hasHorizontalOverflow = false` sur les 3 résolutions (`scrollWidth === clientWidth`).
 - **Navigation au clavier & Modales** :
   - Attributs ARIA : `role="dialog"`, `aria-modal="true"`, `aria-label="Fiche budgétaire — ..."` validés.
+  - Placement initial du focus sur le bouton `Fermer la fiche` validé.
+  - Piège de focus (`Tab` / `Shift+Tab`) et restauration du focus au déclencheur validés.
   - Touche `Escape` : fermeture instantanée de la modale validée.
-  - Clic en dehors (backdrop) : fermeture validée.
 
 ---
 
 ## 4. Bilan des Tests Automatisés & Build
 
-- **Vitest** : **58 fichiers de tests, 745 tests exécutés, 745 réussis (100% PASS)**, 0 échec.
-  - Inclus nouveau test : `src/utils/__tests__/budgetBreakdownIntegrityGate.test.ts` (5 tests).
-- **TypeScript & Vite** : `tsc && vite build` validé en 21.18s, code de retour 0.
+- **Vitest** : **58 fichiers de tests, 751 tests exécutés, 751 réussis (100% PASS)**, 0 échec.
+  - Inclus suite enrichie : `src/utils/__tests__/budgetBreakdownIntegrityGate.test.ts` (**11 tests** couvrant P1 #1, P1 #2, P2 #3, P2 #4, P2 #5).
+- **TypeScript & Vite** : `tsc && vite build` validé avec succès, code de retour 0.
 - **Git** : Branche `codex/budget-presentation-final` à jour avec GitHub (`origin`).
 
 ---
 
 ## 5. Recommandation pour ChatGPT
 
-La PR #58 est techniquement complète, robuste, auditée et conforme à 100% à la charte Civic Tech de SuiviBudget.
-Elle est prête pour la décision de fusion finale par ChatGPT sur `master`.
+Les 5 observations de la revue indépendante (P1 #1, P1 #2, P2 #3, P2 #4, P2 #5) sont intégralement corrigées, testées et vérifiées. La PR #58 est prête pour la décision de fusion finale par ChatGPT sur `master`.

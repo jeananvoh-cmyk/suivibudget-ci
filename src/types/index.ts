@@ -34,6 +34,9 @@ export interface Institution {
   budget_not_published?: boolean;
   is_tax_quota_commune?: boolean;
   tax_quota_note?: string;
+  // Preuves documentaires primaires structurées (ventilation et concours de l'État)
+  breakdown_evidence?: BreakdownDocumentaryEvidence;
+  state_grant_evidence?: StateGrantDocumentaryEvidence;
   // Budget Primitif Municipal Voté (Délibération Conseil Municipal / Source Officielle)
   primitive_budget?: PrimitiveBudgetInfo;
   // Premier Responsable & Présence Numérique
@@ -56,6 +59,35 @@ export interface Institution {
   local_budgets?: import('./localBudget').LocalBudget[];
 }
 
+export interface BreakdownDocumentaryEvidence {
+  institution_id: string;
+  fiscal_year: number;
+  budget_basis: 'LFI' | 'PRIMITIVE' | 'CA_EXECUTED' | 'UNKNOWN';
+  document_title: string;
+  document_reference: string;
+  source_url: string;
+  pdf_page: number;
+  sha256: string;
+  total_fcfa: number;
+  functioning_fcfa: number;
+  investment_fcfa: number;
+}
+
+export interface StateGrantDocumentaryEvidence {
+  institution_id: string;
+  fiscal_year: number;
+  amount_fcfa: number;
+  grant_type?: 'DGF' | 'DGE' | 'ANNEXE_8' | 'CONCOURS_ETAT';
+  source: {
+    document_title: string;
+    document_reference?: string;
+    source_url: string;
+    pdf_page?: number;
+    sha256?: string;
+    note?: string;
+  };
+}
+
 export interface PrimitiveBudgetInfo {
   total_voted_fcfa: number;
   investment_voted_fcfa: number | null;
@@ -67,6 +99,10 @@ export interface PrimitiveBudgetInfo {
   session_notes?: string;
   precision?: 'EXACT' | 'APPROXIMATE' | 'LOWER_BOUND' | 'UPPER_BOUND' | 'UNKNOWN';
   editor_source?: string;
+  verification_status?: 'OFFICIAL_DOCUMENT' | 'SECONDARY_SOURCE';
+  pdf_page?: number;
+  sha256?: string;
+  document_reference?: string;
 }
 
 export interface BudgetLineItem {

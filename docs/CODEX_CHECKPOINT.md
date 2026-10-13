@@ -1,14 +1,15 @@
-## 12 octobre 2026 — Clôture technique et auditrice de la PR #58 par Antigravity
+## 13 octobre 2026 — Corrections finales de la PR #58 (Revue ChatGPT P1 #1, P1 #2, P2 #3, P2 #4, P2 #5)
 
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/58 (`codex/budget-presentation-final`).
 - **Base master** : `ab159d4e3de829e11d1e146c8d9b0f9dbfb72bfe` (PR #57 incluse).
-- **HEAD validé** : `7d6a2204c34a06ea95d249f31525a81ca5bc88e1` (suivi du commit documentaire).
-- **Statut PR** : Ouverte, fusionnable, CI verte, prête pour décision de fusion par ChatGPT.
-- **Récupération Codex** : Sauvegarde des modifications locales de `src/components/InstitutionDetailModal.tsx` (Escape, backdrop, role dialog, aria-modal, aria-label).
-- **Durcissement financier** : Neutralisation de toute ventilation fonctionnement/investissement non prouvée sur la même assiette officielle dans `resolveInstitutionFinancialView` (`src/utils/institutionBudgetHelper.ts`).
-- **Périmètre institutionnel** : 35 ministères / 34 sections LFI (section 229 partagée comptabilisée 1 fois), HABG/IGE dans section 103 sans double comptage, CESEC documenté avec écart noté sans irrégularité, Cour Suprême sans section autonome ("Non documenté"), 201 communes + 31 régions étanches des concours État, régulateurs sans budget global inventé, jamais 0 FCFA pour inconnu.
-- **Validation technique** : 58 fichiers de tests, 745/745 tests PASS (100%), build TypeScript et Vite PASS.
-- **Recette visuelle Playwright** : 10 entités vérifiées aux viewports 390px, 768px, 1440px. 0 débordement horizontal, 0 erreur console, accessibilité modale confirmée.
+- **Commentaire de revue traité** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/58#issuecomment-6131545700.
+- **Statut PR** : Ouverte, fusionnable, CI verte, prête pour décision de fusion par ChatGPT (`MERGED = false`, `PRODUCTION_DEPLOYED = false`).
+- **P1 #1 (Provenance BP secondaire vs certification primaire)** : Séparation stricte dans `resolveInstitutionFinancialView` entre précision numérique (`EXACT`), source secondaire rapportée (`SECONDARY_SOURCE` : *« Montant rapporté — à confirmer »*) et certification primaire (`VERIFIED_AMOUNT`). Un budget primitif issu d'une source secondaire équilibrée conserve l'affichage de ses montants et pourcentages de ventilation sans jamais être présenté comme officiellement certifié.
+- **P1 #2 (Suppression du booléen `has_verified_breakdown`)** : Remplacement du raccourci déclaratif par `BreakdownDocumentaryEvidence` et le validateur `isValidBreakdownDocumentaryEvidence` exigeant : concordance d'institution, d'exercice et d'assiette, titre, référence, URL, `pdf_page > 0`, `sha256` hexadécimal 64 caractères et égalité arithmétique exacte.
+- **P2 #3 (Qualification des montants historiques des collectivités)** : Dans `resolveInstitutionBudgetPresentation`, interdiction de baptiser par défaut un montant historique de collectivité *« Concours de l'État »*. Ce libellé exige désormais `state_grant_evidence` avec preuve documentaire complète ; à défaut, le montant est qualifié de *« Montant historique enregistré — nature et source à confirmer »* (`TO_VERIFY`) et ne se substitue jamais à un Budget Primitif manquant.
+- **P2 #4 (Régulateurs et composantes Annexe 6 ASS / LFI 2026)** : Le budget global de référence des 7 régulateurs (ARCOP, HACA, CAIDP, CNDH, AIRP, ARTCI, ANARE-CI) demeure à `null` (*« Non documenté »*), tandis que les composantes officielles non globales (Annexe 6 ASS 2026, SHA-256 `e8ba2e9dc9ffdc6d268c60eccecfbe51ee57adc6ca639923f8a3be78cece8cf6`, ou LFI 2026) sont exposées de manière transparente dans `supplements`.
+- **P2 #5 (Accessibilité complète de `InstitutionDetailModal.tsx`)** : Placement initial du focus sur le bouton de fermeture à l'ouverture, piège de focus clavier circulaire (`Tab` / `Shift+Tab`), fermeture sur `Escape` respectant la sous-modale documentaire (`docModalOpen`), et restauration du focus sur l'élément déclencheur à la fermeture.
+- **Validation technique** : 58 fichiers de tests, **751/751 tests PASS (100%)**, dont 11 tests dans `budgetBreakdownIntegrityGate.test.ts` ; build TypeScript et Vite PASS.
 - **Garde-fous** : `REMOTE_SUPABASE_WRITES = 0` ; migrations = 0 ; fusion master = non effectuée (réservée à ChatGPT) ; déploiement production = non tenté.
 - **NEXT_EXECUTABLE_TASK** : Revue finale et décision de fusion de la PR #58 sur master par ChatGPT.
 

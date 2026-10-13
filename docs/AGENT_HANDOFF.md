@@ -1,22 +1,18 @@
-## 12 octobre 2026 — Clôture technique et auditrice de la PR #58 par Antigravity
+## 13 octobre 2026 — Corrections finales de la PR #58 (Intégrité financière, provenance documentaire & accessibilité modale)
 
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/58 (`codex/budget-presentation-final`).
 - **Base master** : `ab159d4e3de829e11d1e146c8d9b0f9dbfb72bfe` (PR #57 incluse).
-- **HEAD validé** : `7d6a2204c34a06ea95d249f31525a81ca5bc88e1` (suivi du commit documentaire).
-- **Statut PR** : Ouverte, fusionnable, CI verte, prête pour décision de fusion par ChatGPT.
-- **Récupération Codex** : Modifications non commitées de `src/components/InstitutionDetailModal.tsx` sécurisées (accessibilité modale : Escape, backdrop, role dialog, aria-modal, aria-label).
-- **Durcissement financier (Point A)** : Dans `resolveInstitutionFinancialView` (`src/utils/institutionBudgetHelper.ts`), interdiction qu'une simple égalité arithmétique (somme = 100%) ne tienne lieu de preuve officielle. La ventilation fonctionnement/investissement est neutralisée (`NO_BREAKDOWN`, pourcentages null, note explicite) si non prouvée sur la même assiette officielle. Écart `delta_fcfa` exposé pour diagnostic.
-- **Périmètre institutionnel (Points B à E)** :
-  - *Ministères* : 35 portefeuilles / 34 sections LFI ; section 229 partagée (gov-009 / gov-035) comptabilisée une seule fois.
-  - *Grandes Institutions* : HABG (5 552 174 916 FCFA, prog 13004) et IGE (9 872 577 575 FCFA, prog 13003) rattachées à la section 103 (Présidence) sans addition illicite ; CESEC (8 069 692 846 LFI / 7 962 130 354 Annexe 7, écart 107 562 492 FCFA noté sans irrégularité) ; Cour Suprême sans montant autonome, jamais 0 FCFA.
-  - *Collectivités territoriales* : 201 communes + 31 régions, BP documenté (dont Bingerville et Tiassalé) étanche par rapport aux concours de l'État (DGE/DGF).
-  - *Régulateurs* : Budget global ≠ subvention partielle ; inconnus maintenus à "Non documenté", aucun zéro arbitraire.
+- **Commentaire de revue traité** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/58#issuecomment-6131545700.
+- **Statut PR** : Ouverte, fusionnable, CI verte, prête pour décision de fusion par ChatGPT (`MERGED = false`, `PRODUCTION_DEPLOYED = false`).
+- **Corrections des 5 observations de la revue ChatGPT** :
+  1. **P1 #1 — Ne pas certifier abusivement les budgets primitifs (`src/utils/institutionBudgetHelper.ts`)** : Séparation stricte entre précision numérique (`EXACT`), provenance documentaire secondaire (`SECONDARY_SOURCE`) et certification primaire (`VERIFIED_AMOUNT`). Un budget primitif rapporté par voie de presse ou publication secondaire (ex: Bingerville, Agnéby-Tiassa) conserve son statut `SECONDARY_SOURCE` (*« Montant rapporté — à confirmer »*) avec sa ventilation équilibrée affichée sans jamais être surclassé en `VERIFIED_AMOUNT` faute d'acte officiel primaire paginé et horodaté SHA-256 (64 hex).
+  2. **P1 #2 — Suppression du raccourci `has_verified_breakdown` (`src/utils/institutionBudgetHelper.ts`)** : Remplacement du booléen déclaratif par une validation stricte de `BreakdownDocumentaryEvidence` (`isValidBreakdownDocumentaryEvidence` : concordance `institution_id`, `fiscal_year`, `basis`, `document_title`, `document_ref`, `source_url`, `pdf_page > 0`, `sha256` 64 hex, `functioning_fcfa + investment_fcfa === total_fcfa`). Toute revendication booléenne sans preuve primaire complète est rejetée.
+  3. **P2 #3 — Ne pas transformer un montant historique en concours de l'État (`resolveInstitutionBudgetPresentation`)** : Suppression du libellé par défaut *« Concours de l'État »* sur les montants historiques de collectivités. Le libellé *« Concours de l'État »* (`OFFICIAL_SOURCE` / `VERIFIED`) n'est produit que si `state_grant_evidence` fournit une preuve documentaire valide ; sinon, le montant complémentaire est qualifié de *« Montant historique enregistré — nature et source à confirmer »* (`TO_VERIFY`) et ne remplace jamais un Budget Primitif absent (vérifié sur Bingerville, Tiassalé, Doropo, Agnéby-Tiassa, Iffou).
+  4. **P2 #4 — Régulateurs et périmètre officiel (`REGULATOR_2026_DOCUMENTED_SCOPES`)** : Maintien de `reference.amount_fcfa: null` (*« Non documenté »*) pour les 7 régulateurs (ARCOP, HACA, CAIDP, CNDH, AIRP, ARTCI, ANARE-CI), tout en exposant dans `supplements` les composantes budgétaires officielles non globales documentées dans l'Annexe 6 ASS 2026 (SHA-256 `e8ba2e9dc9ffdc6d268c60eccecfbe51ee57adc6ca639923f8a3be78cece8cf6`) ou la LFI 2026, sans jamais assimiler une subvention ou ressource affectée au budget global de l'autorité.
+  5. **P2 #5 — Accessibilité complète de la modale (`src/components/InstitutionDetailModal.tsx`)** : Implémentation du cycle de vie complet du focus (`getModalFocusableElements`, `handleModalKeyDown`, `manageModalFocusLifecycle`) : placement initial du focus sur le bouton de fermeture (`aria-label="Fermer la fiche"`), piège de focus clavier circulaire (`Tab` / `Shift+Tab`), fermeture propre sur `Escape` (suspendue si `docModalOpen` est actif), et restauration automatique du focus sur l'élément déclencheur à la fermeture.
 - **Validation technique** :
-  - Tests unitaires & intégration : **58 fichiers, 745/745 tests PASS (100%)**, 0 échec. Nouveau test : `src/utils/__tests__/budgetBreakdownIntegrityGate.test.ts`.
-  - Compilation & Build : `tsc && vite build` validé en 21.18s, code 0.
-- **Recette visuelle Playwright (Point 6)** :
-  - Validée sur 10 entités cibles à 390px, 768px et 1440px.
-  - 0 débordement horizontal (`hasHorizontalOverflow = false`), 0 erreur console, modale navigable au clavier avec fermeture sur Escape.
+  - Tests unitaires & intégration : **58 fichiers, 751/751 tests PASS (100%)**, 0 échec (dont **11 tests dédiés** dans `src/utils/__tests__/budgetBreakdownIntegrityGate.test.ts`).
+  - Compilation & Build : `tsc && vite build` validé avec succès, code 0.
 - **Garde-fous** : `REMOTE_SUPABASE_WRITES = 0` ; migrations = 0 ; fusion master = non effectuée (réservée à ChatGPT) ; déploiement production = non tenté.
 - **NEXT_EXECUTABLE_TASK** : Revue finale et décision de fusion de la PR #58 sur master par ChatGPT.
 

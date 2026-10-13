@@ -1,5 +1,5 @@
 import { BudgetReferenceHeader } from './institutions/MinistryBudgetHeader';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Institution, BudgetProject, BudgetLineItem } from '../types';
 import { formatFCFA, formatAmountInWords, getProjectTier, getProjectTierBadge } from '../utils/formatters';
 import { getProjectsForInstitution } from '../utils/institutionProjects';
@@ -104,6 +104,82 @@ const ModalLeaderAvatar: React.FC<{
   );
 };
 
+const FOCUSABLE_SELECTOR =
+  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+export function getModalFocusableElements(container: HTMLElement | null): HTMLElement[] {
+  if (!container || typeof container.querySelectorAll !== 'function') return [];
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (el) => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true' && !el.hidden
+  );
+}
+
+export function handleModalKeyDown(
+  event: Pick<KeyboardEvent, 'key' | 'shiftKey' | 'preventDefault'>,
+  dialogEl: HTMLElement | null,
+  docModalOpen: boolean,
+  onClose: () => void,
+  activeElement?: Element | null
+): void {
+  if (docModalOpen) return;
+
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    onClose();
+    return;
+  }
+
+  if (event.key === 'Tab') {
+    const focusables = getModalFocusableElements(dialogEl);
+    if (focusables.length === 0) {
+      event.preventDefault();
+      dialogEl?.focus?.();
+      return;
+    }
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const currentActive = (activeElement !== undefined ? activeElement : (typeof document !== 'undefined' ? document.activeElement : null)) as HTMLElement | null;
+    const isInside = Boolean(currentActive && dialogEl && typeof dialogEl.contains === 'function' && dialogEl.contains(currentActive));
+
+    if (event.shiftKey) {
+      if (!isInside || currentActive === first || currentActive === dialogEl) {
+        event.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (!isInside || currentActive === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+  }
+}
+
+export function manageModalFocusLifecycle(
+  dialogEl: HTMLElement | null,
+  closeBtnEl: HTMLElement | null
+): () => void {
+  const previousActive =
+    typeof document !== 'undefined' &&
+    document.activeElement &&
+    typeof (document.activeElement as HTMLElement).focus === 'function'
+      ? (document.activeElement as HTMLElement)
+      : null;
+
+  const initialTarget =
+    closeBtnEl ||
+    getModalFocusableElements(dialogEl)[0] ||
+    dialogEl;
+  initialTarget?.focus?.();
+
+  return () => {
+    if (previousActive && typeof previousActive.focus === 'function') {
+      previousActive.focus();
+    }
+  };
+}
+
 export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   isOpen,
   onClose,
@@ -120,14 +196,26 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   const [selectedProjectForDoc, setSelectedProjectForDoc] = useState<BudgetProject | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
 
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const isModalVisible = isOpen && Boolean(institution);
+
+  // Capture trigger focus on open, place initial focus inside dialog, and restore trigger focus on close
   useEffect(() => {
-    if (!isOpen || docModalOpen) return;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+    if (!isModalVisible) return;
+    return manageModalFocusLifecycle(dialogRef.current, closeButtonRef.current);
+  }, [isModalVisible]);
+
+  // Keyboard navigation: Escape to close and Tab / Shift+Tab focus trap (suspended while child modal is open)
+  useEffect(() => {
+    if (!isModalVisible || docModalOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      handleModalKeyDown(event, dialogRef.current, docModalOpen, onClose);
     };
-    window.addEventListener('keydown', closeOnEscape);
-    return () => window.removeEventListener('keydown', closeOnEscape);
-  }, [isOpen, docModalOpen, onClose]);
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isModalVisible, docModalOpen, onClose]);
 
   // Sync tab states when opening or props change
   useEffect(() => {
@@ -325,9 +413,11 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   return (
     <div onClick={docModalOpen ? undefined : onClose} className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 md:p-6 animate-in fade-in duration-200">
       <div 
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={`Fiche budgétaire — ${institution.name}`}
+        tabIndex={-1}
         className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -437,6 +527,9 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
               )}
 
               <button
+                ref={closeButtonRef}
+                type="button"
+                aria-label="Fermer la fiche"
                 onClick={onClose}
                 className="p-2 rounded-full bg-white hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-colors shadow-xs border border-slate-200 cursor-pointer"
                 title="Fermer la fiche"
