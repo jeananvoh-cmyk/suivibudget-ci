@@ -35,6 +35,8 @@ import {
   DocumentLifecycleStatus 
 } from '../../types';
 import { dataStore } from '../../services/dataStore';
+import { supabase } from '../../services/supabase';
+import { isSafeUrl } from '../../utils/security';
 import { sanitizeCsvCell } from '../../utils/security';
 import { matchesSmartSearch } from '../../utils/searchHelpers';
 import { BatchCAImportModal } from './BatchCAImportModal';
@@ -130,6 +132,33 @@ export const AdministrativeAccountsAdminManager: React.FC<AdministrativeAccounts
   const handleOpenExamine = (doc: PublicDocument) => {
     setSelectedDocForExamine(doc);
     setIsExamineModalOpen(true);
+  };
+
+  // Les documents téléversés possèdent un chemin privé, pas nécessairement une URL publique.
+  const handleOpenPDF = async (doc: PublicDocument) => {
+    // Ouvrir l'onglet immédiatement sur le geste utilisateur évite son blocage
+    // par le navigateur pendant la génération asynchrone d'une URL signée.
+    const tab = window.open('about:blank', '_blank');
+    if (!tab) {
+      onShowToast('Autorisez les nouveaux onglets pour ouvrir le PDF.', 'error');
+      return;
+    }
+    tab.opener = null;
+    try {
+      let url = doc.file_url;
+      if (doc.storage_path) {
+        const { data, error } = await supabase.storage
+          .from(doc.storage_bucket || 'public_documents')
+          .createSignedUrl(doc.storage_path, 300);
+        if (error || !data?.signedUrl) throw new Error('Lien temporaire du PDF indisponible.');
+        url = data.signedUrl;
+      }
+      if (!isSafeUrl(url)) throw new Error('Lien documentaire invalide.');
+      tab.location.href = url;
+    } catch (error) {
+      tab.close();
+      onShowToast(error instanceof Error ? error.message : 'Impossible d’ouvrir le PDF.', 'error');
+    }
   };
 
   // Export Matrix to CSV
@@ -603,15 +632,15 @@ export const AdministrativeAccountsAdminManager: React.FC<AdministrativeAccounts
                                 <span>Examiner</span>
                               </button>
 
-                              <a
-                                href={doc?.file_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                              <button
+                                type="button"
+                                onClick={() => void handleOpenPDF(doc!)}
                                 className="p-1.5 rounded-lg text-slate-500 hover:text-brand-blue hover:bg-slate-100"
                                 title="Ouvrir le PDF"
+                                aria-label={`Ouvrir le PDF du compte administratif de ${row.institution_name}`}
                               >
                                 <ExternalLink className="w-4 h-4" />
-                              </a>
+                              </button>
                             </>
                           ) : (
                             <button
