@@ -3,7 +3,7 @@
 // SuiviBudget Côte d'Ivoire - Découplage Validation/Publication & Audit
 // =========================================================================
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   X, 
   FileText, 
@@ -54,6 +54,18 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
     tutelleApproved: Boolean(document?.approval_reference || document?.approval_date),
     balancesCoherent: false,
   });
+
+  // Réinitialiser les cases lors de chaque examen : ne jamais réutiliser
+  // involontairement les contrôles confirmés pour un document précédent.
+  useEffect(() => {
+    if (!isOpen || !document) return;
+    setChecks({
+      formatValid: false,
+      deliberationAttached: false,
+      tutelleApproved: Boolean(document.approval_reference || document.approval_date),
+      balancesCoherent: false,
+    });
+  }, [isOpen, document?.id, document?.approval_reference, document?.approval_date]);
 
   if (!isOpen || !document) return null;
 
@@ -308,6 +320,13 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
             </div>
           </div>
 
+          {currentStatus === 'TO_VERIFY' && !checks.formatValid && (
+            <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2" role="status">
+              Pour activer « Valider », ouvrez le PDF et confirmez qu'il est officiel, lisible et complet.
+              La publication restera indisponible jusqu'à la vérification.
+            </p>
+          )}
+
           {/* Historique des Versions */}
           {previousVersions.length > 0 && (
             <div className="space-y-2">
@@ -369,14 +388,15 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
               <button
                 type="button"
                 onClick={() => handleUpdateStatus('VERIFIED')}
-                disabled={isProcessing}
-                className="px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-brand-blue text-brand-blue hover:bg-blue-50 text-xs font-black transition-colors"
+                disabled={isProcessing || !checks.formatValid}
+                title={!checks.formatValid ? 'Confirmez le contrôle du PDF dans la grille de vérification.' : undefined}
+                className="px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-brand-blue text-brand-blue hover:bg-blue-50 text-xs font-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Valider (Marquer VÉRIFIÉ)
               </button>
             )}
 
-            {currentStatus !== 'PUBLISHED' && (
+            {currentStatus === 'VERIFIED' && (
               <button
                 type="button"
                 onClick={() => handleUpdateStatus('PUBLISHED')}
