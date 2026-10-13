@@ -156,11 +156,17 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       setAdminTab('caidp_analytics');
     } else if (target === 'budget_table') {
       setOnlyAnomalyProjects(typeof filter === 'object' && filter?.filter === 'anomaly');
+      if (typeof filter === 'object' && filter?.search) setTableSearch(filter.search);
+      else if (typeof filter === 'object' && filter?.filter === 'anomaly') setTableSearch('');
       setCurrentPage(1);
       setAdminTab('budget_table');
     } else if (target === 'work_queue') {
       setAdminTab('work_queue');
     } else if (target === 'institutions_manager') {
+      if (typeof filter === 'object' && filter?.search) {
+        setInstSearch(filter.search);
+        setInstPage(1);
+      }
       setAdminTab('institutions_manager');
     } else if (target === 'comptes_administratifs') {
       const year = typeof filter === 'object' ? Number(filter.year) : NaN;
