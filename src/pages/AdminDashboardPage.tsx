@@ -3,6 +3,7 @@ import { AuthSecurityService } from '../services/authSecurity';
 import React, { useState, useMemo, useEffect } from 'react';
 import { BudgetProject, ProjectStatus, Institution, NewsArticle, SiteSettings, CitizenProof, PrimitiveBudgetInfo } from '../types';
 import { dataStore } from '../services/dataStore';
+import { sanitizeCsvCell } from '../utils/security';
 import { formatFCFA, formatDateFR, getStatusConfig, formatAmountInWords, calculateContractualElapsedPercentage } from '../utils/formatters';
 import { processLeaderPhotoFile } from '../utils/imageHelpers';
 import { SocialPostGenerator } from '../components/SocialPostGenerator';
@@ -126,12 +127,20 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const [caidpInitialFilter, setCaidpInitialFilter] = useState<'ALL' | 'INCOMPLETE' | 'WITH_EMAIL' | 'ONLY_EMAIL' | 'WITHOUT_EMAIL' | 'WITH_PHONE' | 'WITHOUT_PHONE' | 'COMPLETE' | 'UNVERIFIED'>('ALL');
+  const [caidpInitialFilter, setCaidpInitialFilter] = useState<'ALL' | 'INCOMPLETE' | 'WITH_EMAIL' | 'ONLY_EMAIL' | 'WITHOUT_EMAIL' | 'WITH_PHONE' | 'WITHOUT_PHONE' | 'WITHOUT_RI' | 'COMPLETE' | 'UNVERIFIED'>('ALL');
+  const [caidpInitialSearch, setCaidpInitialSearch] = useState('');
+  const [documentsInitialFilter, setDocumentsInitialFilter] = useState<'ALL' | 'unverified'>('ALL');
+  const [documentsInitialSearch, setDocumentsInitialSearch] = useState('');
+  const [caInitialYear, setCaInitialYear] = useState(2025);
+  const [caInitialSearch, setCaInitialSearch] = useState('');
+  const [onlyAnomalyProjects, setOnlyAnomalyProjects] = useState(false);
 
   const handleActionHeaderNavigate = (target: string, filter?: Record<string, string> | string) => {
     if (target === 'moderation') {
       setAdminTab('moderation');
     } else if (target === 'documents_manager') {
+      setDocumentsInitialFilter(typeof filter === 'object' && filter?.filter === 'unverified' ? 'unverified' : 'ALL');
+      setDocumentsInitialSearch(typeof filter === 'object' ? filter.search || '' : '');
       setAdminTab('documents_manager');
     } else if (target === 'caidp_manager') {
       if (filter) {
@@ -141,16 +150,28 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           setCaidpInitialFilter(filter.filter as any);
         }
       }
+      setCaidpInitialSearch(typeof filter === 'object' ? filter.search || '' : '');
       setAdminTab('caidp_manager');
     } else if (target === 'caidp_analytics') {
       setAdminTab('caidp_analytics');
     } else if (target === 'budget_table') {
+      setOnlyAnomalyProjects(typeof filter === 'object' && filter?.filter === 'anomaly');
+      if (typeof filter === 'object' && filter?.search) setTableSearch(filter.search);
+      else if (typeof filter === 'object' && filter?.filter === 'anomaly') setTableSearch('');
+      setCurrentPage(1);
       setAdminTab('budget_table');
     } else if (target === 'work_queue') {
       setAdminTab('work_queue');
     } else if (target === 'institutions_manager') {
+      if (typeof filter === 'object' && filter?.search) {
+        setInstSearch(filter.search);
+        setInstPage(1);
+      }
       setAdminTab('institutions_manager');
     } else if (target === 'comptes_administratifs') {
+      const year = typeof filter === 'object' ? Number(filter.year) : NaN;
+      if ([2024, 2025, 2026, 2027].includes(year)) setCaInitialYear(year);
+      setCaInitialSearch(typeof filter === 'object' ? filter.search || '' : '');
       setAdminTab('comptes_administratifs');
     }
   };
@@ -246,7 +267,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [csvUploadText, setCsvUploadText] = useState('');
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [importTargetYear, setImportTargetYear] = useState<string>('AUTO');
-  const [importMode, setImportMode] = useState<'REPLACE_YEAR' | 'APPEND'>('REPLACE_YEAR');
+  const [importMode, setImportMode] = useState<'REPLACE_YEAR' | 'APPEND'>('APPEND');
   const [importStatus, setImportStatus] = useState<{ success?: number; error?: number; detectedYear?: number; totalAmount?: number } | null>(null);
 
   // Handle direct file upload via input
@@ -352,10 +373,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       const matchesRegion = tableRegionFilter === 'ALL' || normalizeSearchText(p.region_name) === normalizeSearchText(tableRegionFilter);
       const matchesCat = tableCategoryFilter === 'ALL' || normalizeSearchText(p.category) === normalizeSearchText(tableCategoryFilter);
       const matchesStatus = tableStatusFilter === 'ALL' || p.current_status === tableStatusFilter;
+      const matchesAnomaly = !onlyAnomalyProjects ||
+        p.budget_amount_fcfa <= 0 ||
+        (p.progress_percentage === 0 && p.current_status === 'COMPLETED') ||
+        !p.commune_name;
 
-      return matchesSearch && matchesRegion && matchesCat && matchesStatus;
+      return matchesSearch && matchesRegion && matchesCat && matchesStatus && matchesAnomaly;
     });
-  }, [allProjects, tableSearch, tableRegionFilter, tableCategoryFilter, tableStatusFilter]);
+  }, [allProjects, tableSearch, tableRegionFilter, tableCategoryFilter, tableStatusFilter, onlyAnomalyProjects]);
 
   const sortedTableProjects = useMemo(() => {
     return [...filteredTableProjects].sort((a, b) => {
@@ -393,21 +418,21 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     });
     
     setQuickEditProjectId(null);
-    showToast(`Avancement administratif déclaré : ${clampedRate}% (${newStatus === 'IN_PROGRESS' ? 'En cours' : 'Non démarré'})`);
+    showToast(`Avancement enregistré localement : ${clampedRate}% (${newStatus === 'IN_PROGRESS' ? 'En cours' : 'Non démarré'}). Non synchronisé avec Supabase.`, 'info');
   };
 
   const handleSaveProject = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingProject) {
       dataStore.updateProject(editingProject.id, projectForm);
-      showToast('Projet mis à jour avec succès !');
+      showToast('Projet mis à jour dans ce navigateur uniquement ; publication serveur non confirmée.', 'info');
     } else {
       dataStore.addProject({
         ...projectForm,
         fiscal_year: siteSettings.fiscal_year || 2026,
         nature_expense: 'Investissements',
       });
-      showToast('Nouveau projet ajouté au catalogue !');
+      showToast('Projet ajouté localement. Aucun nouveau projet n’a été publié sur Supabase.', 'info');
     }
     setIsAddModalOpen(false);
     setEditingProject(null);
@@ -428,7 +453,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       totalAmount: result.totalAmountFcfa
     });
 
-    showToast(` ${result.successCount} projets importés avec succès pour l'exercice ${result.detectedYear} !`);
+    showToast(`${result.successCount} projets importés dans le navigateur pour ${result.detectedYear} (aucune publication Supabase).`, 'info');
     setTimeout(() => {
       setIsImportModalOpen(false);
       setCsvUploadText('');
@@ -439,24 +464,19 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const handleExportCSV = () => {
     const headers = ['ID', 'Commune', 'Region', 'Categorie', 'Titre', 'Budget_FCFA', 'Statut', 'Avancement'];
     const rows = sortedTableProjects.map(p => [
-      p.id,
-      `"${p.commune_name}"`,
-      `"${p.region_name}"`,
-      `"${p.category}"`,
-      `"${p.title.replace(/"/g, '""')}"`,
-      p.budget_amount_fcfa != null ? p.budget_amount_fcfa : '',
-      p.current_status,
-      `${p.progress_percentage}%`
-    ]);
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
+      p.id, p.commune_name, p.region_name, p.category, p.title,
+      p.budget_amount_fcfa ?? '', p.current_status, `${p.progress_percentage}%`
+    ].map(sanitizeCsvCell));
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(row => row.join(';'))].join('\n');
+    const url = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }));
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `suivibudget_projets_${new Date().toISOString().split('T')[0]}.csv`);
+    link.href = url;
+    link.download = `suivibudget_projets_${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast('Exportation CSV terminée !');
+    URL.revokeObjectURL(url);
+    showToast(`Export CSV réalisé : ${rows.length} projets.`);
   };
 
   // ==========================================
@@ -773,8 +793,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       || cleanSourceUrl
       || quickWebForm.primitive_source.trim().length > 0;
     if (hasPrimitiveData) {
+      if (quickWebForm.primitive_total_fcfa == null) {
+        showToast('Budget primitif non enregistré : le montant total est inconnu. Ne saisissez pas une valeur fictive de zéro.', 'error');
+        return;
+      }
       primitive = {
-        total_voted_fcfa: quickWebForm.primitive_total_fcfa ?? 0,
+        total_voted_fcfa: quickWebForm.primitive_total_fcfa,
         investment_voted_fcfa: quickWebForm.primitive_investment_fcfa,
         functioning_voted_fcfa: quickWebForm.primitive_functioning_fcfa,
         voted_date: quickWebForm.primitive_voted_date || new Date().toLocaleDateString('fr-FR'),
@@ -796,7 +820,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     };
 
     dataStore.updateInstitution(updated);
-    showToast(`Fiche de "${updated.name}" mise à jour et publiée instantanément !`);
+    showToast(`Fiche « ${updated.name} » modifiée localement. Synchronisation publique non garantie.`, 'info');
     setIsQuickWebModalOpen(false);
     setQuickWebInst(null);
   };
@@ -889,8 +913,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       || cleanSourceUrl
       || instForm.primitive_source.trim().length > 0;
     if (hasPrimitiveData) {
+      if (instForm.primitive_total_fcfa == null) {
+        showToast('Budget primitif non enregistré : le montant total est inconnu. Une source seule ne justifie pas zéro FCFA.', 'error');
+        return;
+      }
       primitive = {
-        total_voted_fcfa: instForm.primitive_total_fcfa ?? 0,
+        total_voted_fcfa: instForm.primitive_total_fcfa,
         investment_voted_fcfa: instForm.primitive_investment_fcfa,
         functioning_voted_fcfa: instForm.primitive_functioning_fcfa,
         voted_date: instForm.primitive_voted_date || new Date().toLocaleDateString('fr-FR'),
@@ -918,7 +946,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         total_budget_fcfa: resolvedTotal,
       };
       dataStore.updateInstitution(updated);
-      showToast('Informations de l\'entité mises à jour avec succès !');
+      showToast('Fiche modifiée dans le navigateur ; confirmez la synchronisation avant de la considérer publiée.', 'info');
       setIsEditInstModalOpen(false);
       setEditingInst(null);
     } else {
@@ -929,7 +957,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         primitive_budget: primitive,
         total_budget_fcfa: resolvedTotal,
       });
-      showToast('Nouvelle entité ajoutée avec succès !');
+      showToast('Entité ajoutée dans ce navigateur ; aucune publication serveur confirmée.', 'info');
       setIsCreateInstModalOpen(false);
     }
   };
@@ -937,7 +965,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const handleDeleteInstitution = (id: string, name: string) => {
     if (confirm(`Êtes-vous sûr de vouloir supprimer l'entité "${name}" ?`)) {
       dataStore.deleteInstitution(id);
-      showToast('Entité supprimée.');
+      showToast('Entité retirée de cette vue locale ; aucune suppression serveur confirmée.', 'info');
     }
   };
 
@@ -971,7 +999,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         leader_photo_url: optimizedUrl,
       };
       dataStore.updateInstitution(updated);
-      showToast(`Photo de ${inst.leader_name || inst.name} mise à jour avec succès !`);
+      showToast(`Photo de ${inst.leader_name || inst.name} mise à jour localement ; publication serveur à confirmer.`, 'info');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Erreur lors de l'import de la photo.";
       showToast(msg, 'error');
@@ -1033,10 +1061,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     e.preventDefault();
     if (editingArticle) {
       dataStore.updateArticle(editingArticle.id, articleForm);
-      showToast('Publication mise à jour !');
+      showToast('Article modifié dans ce navigateur, sans confirmation de publication serveur.', 'info');
     } else {
       dataStore.addArticle(articleForm);
-      showToast('Nouvel article / rapport publié avec succès !');
+      showToast('Article ajouté localement. Il n’est pas encore publié de façon persistante sur le serveur.', 'info');
     }
     setIsArticleModalOpen(false);
     setEditingArticle(null);
@@ -1045,7 +1073,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const handleDeleteArticle = (id: string, title: string) => {
     if (confirm(`Supprimer la publication "${title}" ?`)) {
       dataStore.deleteArticle(id);
-      showToast('Publication supprimée.');
+      showToast('Article retiré des données locales de ce navigateur uniquement.', 'info');
     }
   };
 
@@ -1059,7 +1087,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
     dataStore.updateSettings(settingsForm);
-    showToast('Paramètres généraux du site enregistrés !');
+    showToast('Préférences sauvegardées dans ce navigateur uniquement (pas de mise à jour des paramètres globaux en production).', 'info');
   };
 
   const handleDownloadBackup = () => {
@@ -1072,7 +1100,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast('Fichier de sauvegarde téléchargé ! Conservez-le précieusement.');
+    showToast('Copie locale téléchargée. Ceci n’est PAS une sauvegarde complète des tables Supabase.', 'info');
   };
 
   const handleRestoreBackup = () => {
@@ -1082,7 +1110,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     }
     const res = dataStore.importFullBackup(backupJsonInput);
     if (res.success) {
-      showToast(res.message, 'success');
+      showToast('Restauration effectuée dans ce navigateur uniquement ; aucune table Supabase restaurée.', 'info');
       setIsBackupModalOpen(false);
       setBackupJsonInput('');
     } else {
@@ -1098,11 +1126,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     dataStore.resetToFactoryDefaults();
     adminTaskService.logActivity({
       action_type: 'FACTORY_RESET',
-      description: 'Réinitialisation complète de la base de données aux valeurs officielles d\'origine',
+      description: 'Réinitialisation locale du navigateur aux valeurs intégrées (aucune base Supabase réinitialisée)',
       author: auth.fullName || 'Super Admin',
       author_role: auth.role,
     });
-    showToast('Plateforme réinitialisée avec les données officielles d\'origine.', 'info');
+    showToast('Affichage et données locales réinitialisés. Les données de production Supabase sont inchangées.', 'info');
     setIsResetModalOpen(false);
     setResetConfirmationInput('');
   };
@@ -1468,7 +1496,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       {/* TAB 0: CAIDP RI & PUBLIC ENTITIES DIRECTORY MANAGER */}
       {/* ========================================================================= */}
       {adminTab === 'caidp_manager' && (
-        <CaidpRiManager onShowToast={showToast} initialFilter={caidpInitialFilter} />
+        <CaidpRiManager onShowToast={showToast} initialFilter={caidpInitialFilter} initialSearch={caidpInitialSearch} />
       )}
 
       {/* ========================================================================= */}
@@ -1482,14 +1510,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       {/* TAB 0.5: PUBLIC DOCUMENTS MANAGER (CAIDP LIBRARY) */}
       {/* ========================================================================= */}
       {adminTab === 'documents_manager' && (
-        <DocumentManager onShowToast={showToast} />
+        <DocumentManager onShowToast={showToast} initialFilter={documentsInitialFilter} initialSearch={documentsInitialSearch} />
       )}
 
       {/* ========================================================================= */}
       {/* TAB 0.6: COMPTES ADMINISTRATIFS (CA 232) & PILOTAGE */}
       {/* ========================================================================= */}
       {adminTab === 'comptes_administratifs' && (
-        <AdministrativeAccountsAdminManager onShowToast={showToast} />
+        <AdministrativeAccountsAdminManager onShowToast={showToast} initialYear={caInitialYear} initialSearch={caInitialSearch} />
       )}
 
       {/* ========================================================================= */}
@@ -1986,6 +2014,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 <h3 className="text-xl font-extrabold text-navy-900">
                   Gestion des Lignes Budgétaires ({filteredTableProjects.length} projets filtrés)
                 </h3>
+                {onlyAnomalyProjects && (
+                  <button type="button" className="text-xs text-rose-700 underline"
+                    onClick={() => { setOnlyAnomalyProjects(false); setCurrentPage(1); }}>
+                    Filtre anomalies actif — afficher tous les projets
+                  </button>
+                )}
               </div>
               <p className="text-xs text-slate-500 mt-1">
                 Visualisez, modifiez ou ajoutez de nouvelles lignes de projets d'investissements pour toutes les localités.
@@ -2841,11 +2875,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <div className="flex items-center gap-2">
                 <Database className="w-5 h-5 text-indigo-600" />
                 <h3 className="text-xl font-extrabold text-navy-900">
-                  Sauvegarde & Restauration Totale des Données
+                  Sauvegarde locale et restauration du navigateur
                 </h3>
               </div>
               <p className="text-xs text-slate-500 mt-1">
-                Téléchargez une copie de secours intégrale contenant tous vos projets, entités, photos et articles personnalisés, ou restaurez-la en 1 clic.
+                Ces outils sauvegardent uniquement les données conservées dans ce navigateur. Ils ne sauvegardent ni ne restaurent les tables, documents et fichiers Supabase de production.
               </p>
             </div>
 
@@ -2856,10 +2890,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 font-black text-indigo-900 text-sm">
                     <Download className="w-4 h-4 text-indigo-600" />
-                    <span>Exporter la Sauvegarde Complète</span>
+                    <span>Exporter les données locales</span>
                   </div>
                   <p className="text-[11px] text-indigo-800 leading-relaxed">
-                    Télécharge un fichier <code>.json</code> complet contenant toutes les données modifiées. Idéal pour garder une copie de sécurité ou migrer.
+                    Exporte le cache local en <code>.json</code>. N’est pas une sauvegarde officielle ou exhaustive de la production.
                   </p>
                 </div>
                 <button
@@ -2876,10 +2910,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 font-black text-emerald-900 text-sm">
                     <Upload className="w-4 h-4 text-emerald-600" />
-                    <span>Restaurer une Sauvegarde</span>
+                    <span>Restaurer les données locales</span>
                   </div>
                   <p className="text-[11px] text-emerald-800 leading-relaxed">
-                    Importez un fichier de sauvegarde préalablement exporté pour rétablir instantanément toutes vos informations.
+                    Recharge les données locales à partir d’un JSON. Aucune écriture n’est faite dans Supabase.
                   </p>
                 </div>
                 <button
@@ -2896,10 +2930,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 font-black text-red-900 text-sm">
                     <RefreshCw className="w-4 h-4 text-red-600" />
-                    <span>Réinitialisation d'Origine</span>
+                    <span>Réinitialisation locale d’origine</span>
                   </div>
                   <p className="text-[11px] text-red-800 leading-relaxed">
-                    Rétablit les données initiales officielles du gouvernement (192 maires, 31 présidents, 14 institutions et ministères).
+                    Réinitialise uniquement les données du navigateur aux jeux intégrés à l’application. Les données Supabase ne sont pas modifiées.
                   </p>
                 </div>
                 <button
@@ -5086,10 +5120,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               </span>
               <div>
                 <h4 className="font-extrabold text-slate-900 text-base">
-                  Zone Critique : Réinitialisation Usine
+                  Réinitialiser les données locales
                 </h4>
                 <p className="text-[11px] text-slate-500">
-                  Cette action réinitialisera toutes les données modifiées aux valeurs officielles d'origine.
+                  Cette action écrase les données locales affichées dans ce navigateur ; elle ne réinitialise pas la base Supabase.
                 </p>
               </div>
             </div>
@@ -5097,7 +5131,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             <div className="p-3 bg-red-50 rounded-2xl border border-red-100 text-red-900 text-xs space-y-1">
               <p className="font-bold">Attention, action irréversible :</p>
               <p className="text-[11px] text-red-800">
-                Les projets personnalisés, ajouts récents et coordonnées modifiées seront remplacés par le jeu de données officiel initial. Pensez à exporter une sauvegarde JSON avant de procéder.
+                Les modifications non synchronisées de ce navigateur seront perdues. Un export JSON local ne couvre pas les données de production.
               </p>
             </div>
 
@@ -5128,7 +5162,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 onClick={handleConfirmResetFactory}
                 className="px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white rounded-xl font-black shadow-md cursor-pointer transition-all"
               >
-                Réinitialiser définitivement
+                Réinitialiser localement
               </button>
             </div>
           </div>

@@ -115,8 +115,11 @@ export const AdminGlobalSearchModal: React.FC<AdminGlobalSearchModalProps> = ({
           subtitle: `${doc.institution_name} • Exercice ${doc.year || 'Non spécifié'} • ${doc.category}`,
           badge: 'DOCUMENT',
           badgeColor: 'bg-purple-100 text-purple-900 border-purple-200',
-          targetTab: 'documents_manager',
-          targetFilter: { search: doc.title }
+          targetTab: doc.document_type === 'COMPTE_ADMINISTRATIF' || doc.category === 'COMPTE_ADMINISTRATIF'
+            ? 'comptes_administratifs' : 'documents_manager',
+          targetFilter: doc.document_type === 'COMPTE_ADMINISTRATIF' || doc.category === 'COMPTE_ADMINISTRATIF'
+            ? { year: String(doc.fiscal_year || doc.year), search: doc.institution_name }
+            : { search: doc.title }
         });
       }
     });

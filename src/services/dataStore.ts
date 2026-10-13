@@ -1782,7 +1782,12 @@ class DataStore {
     if (status === 'PUBLISHED' && (document.status !== 'VERIFIED' || document.verification_status !== 'VERIFIED')) {
       throw new Error('Vérifiez le document avant publication.');
     }
-    await this.updateDocument(id, { status });
+    // Le statut public doit être cohérent avec le badge « source officielle »
+    // sans préjuger du contenu du fichier avant sa vérification documentaire.
+    await this.updateDocument(id, {
+      status,
+      is_official: status === 'PUBLISHED',
+    });
     await this.refreshDocumentsFromSupabase(true);
     return true;
   }
