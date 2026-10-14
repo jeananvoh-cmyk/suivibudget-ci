@@ -1,3 +1,4 @@
+import * as accountService from '../../services/administrativeAccountsService';
 import { readFileSync } from 'node:fs';
 import { PGlite } from '@electric-sql/pglite';
 import { beforeAll, afterAll, describe, it, expect, vi } from 'vitest';
@@ -233,8 +234,9 @@ describe('Premier lot réel de bout en bout (Pilote)', () => {
       expect(formatQualifiedFCFA(published.total_amount, 'EXACT')).toMatch(/19[\s\u202f]764[\s\u202f]660[\s\u202f]000 FCFA/);
 
       // Contrôle de restitution citoyenne via dataStore pour un budget partiel publié
-      dataStore.saveLocalBudget(published);
-      dataStore.enrichInstitutionsWithBudgets();
+      const reread = vi.spyOn(accountService, 'fetchPublishedLocalBudgets').mockResolvedValue([published]);
+      await dataStore.refreshPublishedBudgets();
+      reread.mockRestore();
       const cocodyInst = dataStore.getInstitutions().find(i => i.id === 'inst-com-cocody');
       expect(cocodyInst).toBeDefined();
       expect(cocodyInst?.primitive_budget?.total_voted_fcfa).toBe(19764660000);

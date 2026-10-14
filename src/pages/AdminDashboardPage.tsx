@@ -1,3 +1,4 @@
+import { adminErrorMessage, readStaffOperators, requireAdminPersistence } from '../services/adminPersistenceService';
 import { matchesSmartSearch, normalizeSearchText } from '../utils/searchHelpers';
 import { AuthSecurityService } from '../services/authSecurity';
 import React, { useState, useMemo, useEffect } from 'react';
@@ -5,6 +6,7 @@ import { BudgetProject, ProjectStatus, Institution, NewsArticle, SiteSettings, C
 import { dataStore } from '../services/dataStore';
 import { sanitizeCsvCell } from '../utils/security';
 import { formatFCFA, formatDateFR, getStatusConfig, formatAmountInWords, calculateContractualElapsedPercentage } from '../utils/formatters';
+import { DocumentStorageService } from '../services/documentStorageService';
 import { processLeaderPhotoFile } from '../utils/imageHelpers';
 import { SocialPostGenerator } from '../components/SocialPostGenerator';
 import { CaidpRiManager } from '../components/CaidpRiManager';
@@ -18,19 +20,19 @@ import { AdminWorkQueue } from '../components/admin/AdminWorkQueue';
 import { AdminGlobalSearchModal } from '../components/admin/AdminGlobalSearchModal';
 import { AdministrativeAccountsAdminManager } from '../components/admin/AdministrativeAccountsAdminManager';
 import { adminTaskService } from '../services/adminTaskService';
-import { 
-  ShieldCheck, 
-  CheckCircle2, 
-  FileSpreadsheet, 
-  Upload, 
-  Download, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Search, 
-  Share2, 
-  Clock, 
-  Check, 
+import {
+  ShieldCheck,
+  CheckCircle2,
+  FileSpreadsheet,
+  Upload,
+  Download,
+  Plus,
+  Edit,
+  Trash2,
+  Search,
+  Share2,
+  Clock,
+  Check,
   X,
   ChevronLeft,
   ChevronRight,
@@ -77,23 +79,27 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [adminTab, setAdminTab] = useState<'data_import' | 'work_queue' | 'caidp_manager' | 'caidp_analytics' | 'documents_manager' | 'comptes_administratifs' | 'moderation' | 'budget_table' | 'institutions_manager' | 'news_manager' | 'social_generator' | 'site_settings' | 'digital_opportunities' | 'team_moderators'>(
     auth.role === 'MODERATOR' ? 'work_queue' : 'caidp_manager'
   );
-  
+
   // Data from store with automatic reactivity
   const [storeTick, setStoreTick] = useState(0);
   useEffect(() => {
     return dataStore.subscribe(() => setStoreTick(t => t + 1));
   }, []);
 
-  const allProjects = useMemo(() => dataStore.getProjects(), [storeTick]);
+  const allProjects = useMemo(() => dataStore.getProjects(true), [storeTick]);
   const pendingProofs = useMemo(() => dataStore.getPendingProofs(), [storeTick]);
-  const allInstitutions = useMemo(() => dataStore.getInstitutions(), [storeTick]);
-  const allArticles = useMemo(() => dataStore.getArticles(), [storeTick]);
+  const allInstitutions = useMemo(() => dataStore.getInstitutions(true), [storeTick]);
+  const allArticles = useMemo(() => dataStore.getArticles(true), [storeTick]);
   const siteSettings = useMemo(() => dataStore.getSettings(), [storeTick]);
   const caMatrixSummary = useMemo(() => dataStore.getCollectivitesCaMatrix(2025).summary, [storeTick]);
 
   // Notification Toast State
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
 
+  const saving=React.useRef(false);
+  const [adminSaving,setSaving]=useState(false);
+  const [serverContractError,setServerContractError]=useState('');
+  useEffect(()=>{void requireAdminPersistence().catch(error=>setServerContractError(adminErrorMessage(error)));},[]);
   const showToast = (text: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToastMessage({ text, type });
     setTimeout(() => setToastMessage(null), 3500);
@@ -112,8 +118,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [rejectWithWhatsApp, setRejectWithWhatsApp] = useState<boolean>(false);
 
   // Sensitive Factory Reset Confirmation Modal State
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  const [resetConfirmationInput, setResetConfirmationInput] = useState('');
+
+
 
   // Global Ctrl+K shortcut listener
   useEffect(() => {
@@ -214,14 +220,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   // Add / Edit Project Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<BudgetProject | null>(null);
-  const [projectForm, setProjectForm] = useState({
+  const [projectForm, setProjectForm] = useState<Partial<BudgetProject>>({
     title: '',
     commune_name: '',
     region_name: '',
     category: 'Santé',
-    budget_amount_fcfa: 25000000,
-    current_status: 'IN_PROGRESS' as ProjectStatus,
-    progress_percentage: 50,
+    budget_amount_fcfa: null,
+    current_status: 'NOT_STARTED' as ProjectStatus,
+    progress_percentage: 0,
     contractor_name: '',
     locality_village_neighborhood: '',
     details: '',
@@ -268,7 +274,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [importTargetYear, setImportTargetYear] = useState<string>('AUTO');
   const [importMode, setImportMode] = useState<'REPLACE_YEAR' | 'APPEND'>('APPEND');
-  const [importStatus, setImportStatus] = useState<{ success?: number; error?: number; detectedYear?: number; totalAmount?: number } | null>(null);
+  const [importStatus, setImportStatus] = useState<{ success?: number; error?: number; detectedYear?: number; totalAmount?: number | null; unknownAmounts?: number; knownAmount?: number; skipped?: number } | null>(null);
 
   // Handle direct file upload via input
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -287,21 +293,15 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
   // Moderation actions with audit trail and structured rejection
   const handleApproveProof = async (proof: CitizenProof, withWhatsApp = false) => {
+    if(saving.current) return;saving.current=true;setSaving(true);
     try {
       await dataStore.moderateProof(proof.id, 'APPROVED');
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Validation non enregistrée.', 'error');
       return;
-    }
-    adminTaskService.logActivity({
-      action_type: 'PROOF_APPROVED',
-      description: `Validation preuve citoyenne : ${proof.project_title || proof.commune_name}`,
-      author: auth.fullName || 'Modérateur',
-      author_role: auth.role,
-      target_id: proof.id,
-      target_type: 'PROOF',
-    });
-    showToast('Preuve citoyenne validée et publiée avec succès !', 'success');
+    } finally {saving.current=false;setSaving(false);}
+
+    showToast('Contribution approuvée pour publication ; réalisation physique non certifiée.', 'success');
 
     if (withWhatsApp && proof.citizen_whatsapp) {
       let phone = proof.citizen_whatsapp.replace(/\D/g, '');
@@ -324,7 +324,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   };
 
   const handleConfirmRejection = async () => {
-    if (!rejectingProof) return;
+    if (!rejectingProof || saving.current) return;
+    saving.current=true;setSaving(true);
     const finalReason = rejectionReason === 'Autre raison'
       ? (rejectionCustomText.trim() || 'Preuve non conforme')
       : rejectionReason;
@@ -334,16 +335,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Rejet non enregistré.', 'error');
       return;
-    }
-    adminTaskService.logActivity({
-      action_type: 'PROOF_REJECTED',
-      description: `Preuve citoyenne rejetée (${finalReason}) : ${rejectingProof.project_title || rejectingProof.commune_name}`,
-      author: auth.fullName || 'Modérateur',
-      author_role: auth.role,
-      target_id: rejectingProof.id,
-      target_type: 'PROOF',
-      metadata: { reason: finalReason }
-    });
+    } finally {saving.current=false;setSaving(false);}
+
     showToast(`Preuve rejetée. Motif : "${finalReason}"`, 'info');
 
     if (rejectWithWhatsApp && rejectingProof.citizen_whatsapp) {
@@ -374,7 +367,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       const matchesCat = tableCategoryFilter === 'ALL' || normalizeSearchText(p.category) === normalizeSearchText(tableCategoryFilter);
       const matchesStatus = tableStatusFilter === 'ALL' || p.current_status === tableStatusFilter;
       const matchesAnomaly = !onlyAnomalyProjects ||
-        p.budget_amount_fcfa <= 0 ||
+        (p.budget_amount_fcfa != null && p.budget_amount_fcfa <= 0) ||
         (p.progress_percentage === 0 && p.current_status === 'COMPLETED') ||
         !p.commune_name;
 
@@ -390,7 +383,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       if (typeof aVal === 'number' && typeof bVal === 'number') {
         return sortAsc ? aVal - bVal : bVal - aVal;
       }
-      return sortAsc 
+      return sortAsc
         ? String(aVal).localeCompare(String(bVal))
         : String(bVal).localeCompare(String(aVal));
     });
@@ -407,66 +400,77 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     }
   };
 
-  const handleQuickSaveProgress = (projectId: string, newRate: number) => {
+  const handleQuickSaveProgress = async (projectId: string, newRate: number) => {
+    if (saving.current) return; saving.current=true; setSaving(true);
+    try {
+
     const clampedRate = Math.min(100, Math.max(0, Math.round(newRate)));
     // Principe 7 (Charte SuiviBudget) : Une déclaration d'avancement administratif ne prouve jamais l'achèvement physique réel sans constat certifié
     const newStatus: ProjectStatus = clampedRate > 0 ? 'IN_PROGRESS' : 'NOT_STARTED';
-    
-    dataStore.updateProject(projectId, {
+
+    await dataStore.updateProject(projectId, {
       progress_percentage: clampedRate,
       current_status: newStatus,
     });
-    
+
     setQuickEditProjectId(null);
-    showToast(`Avancement enregistré localement : ${clampedRate}% (${newStatus === 'IN_PROGRESS' ? 'En cours' : 'Non démarré'}). Non synchronisé avec Supabase.`, 'info');
+    showToast(`Avancement déclaré sauvegardé sur le serveur : ${clampedRate}%.`);
+
+    } catch (error) { showToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
 
-  const handleSaveProject = (e: React.FormEvent) => {
+  const handleSaveProject = async (e: React.FormEvent) => {
+    e.preventDefault(); if (saving.current) return; saving.current=true; setSaving(true);
+    try {
+
     e.preventDefault();
     if (editingProject) {
-      dataStore.updateProject(editingProject.id, projectForm);
-      showToast('Projet mis à jour dans ce navigateur uniquement ; publication serveur non confirmée.', 'info');
+      await dataStore.updateProject(editingProject.id, {...projectForm,revision:editingProject.revision});
+      showToast('Projet sauvegardé et relu sur le serveur ; avancement déclaré.');
     } else {
-      dataStore.addProject({
+      await dataStore.addProject({
         ...projectForm,
-        fiscal_year: siteSettings.fiscal_year || 2026,
+        title:projectForm.title || '',commune_name:projectForm.commune_name || '',region_name:projectForm.region_name || '',
+        category:projectForm.category || '',budget_amount_fcfa:projectForm.budget_amount_fcfa ?? null,
+        current_status:projectForm.current_status || 'NOT_STARTED',progress_percentage:projectForm.progress_percentage || 0,
+        fiscal_year: projectForm.fiscal_year!,
         nature_expense: 'Investissements',
       });
-      showToast('Projet ajouté localement. Aucun nouveau projet n’a été publié sur Supabase.', 'info');
+      showToast('Brouillon de projet sauvegardé et relu sur le serveur.');
     }
     setIsAddModalOpen(false);
     setEditingProject(null);
+
+    } catch (error) { showToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
 
-  const handleProcessImportCSV = () => {
+  const handleProcessImportCSV = async () => {
+    if (saving.current) return; saving.current=true; setSaving(true);
+    try {
+
     if (!csvUploadText.trim()) return;
     const targetYear = importTargetYear === 'AUTO' ? undefined : parseInt(importTargetYear, 10);
-    const result = dataStore.importFromCSV(csvUploadText, {
+    const result = await dataStore.importFromCSV(csvUploadText, {
       mode: importMode,
       targetYear
     });
 
-    setImportStatus({ 
-      success: result.successCount, 
+    setImportStatus({
+      success: result.successCount,
       error: result.errorCount,
       detectedYear: result.detectedYear,
-      totalAmount: result.totalAmountFcfa
+      totalAmount: result.totalAmountFcfa, unknownAmounts:result.unknownAmountCount, knownAmount:result.knownAmountFcfa, skipped:result.skippedCount
     });
 
-    showToast(`${result.successCount} projets importés dans le navigateur pour ${result.detectedYear} (aucune publication Supabase).`, 'info');
-    setTimeout(() => {
-      setIsImportModalOpen(false);
-      setCsvUploadText('');
-      setImportStatus(null);
-    }, 2500);
+    showToast(`${result.successCount} brouillons importés sur le serveur ; aucune certification automatique.`);
+    setCsvUploadText('');
+
+    } catch (error) { showToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
 
   const handleExportCSV = () => {
-    const headers = ['ID', 'Commune', 'Region', 'Categorie', 'Titre', 'Budget_FCFA', 'Statut', 'Avancement'];
-    const rows = sortedTableProjects.map(p => [
-      p.id, p.commune_name, p.region_name, p.category, p.title,
-      p.budget_amount_fcfa ?? '', p.current_status, `${p.progress_percentage}%`
-    ].map(sanitizeCsvCell));
+    const headers = ["id","revision","title","commune_name","region_name","category","fiscal_year","budget_amount_fcfa","source_url","source_document_id","source_page","current_status","progress_percentage"];
+    const rows = sortedTableProjects.map(project=>headers.map(key=>sanitizeCsvCell((project as unknown as Record<string,unknown>)[key] ?? '')));
     const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(row => row.join(';'))].join('\n');
     const url = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }));
     const link = document.createElement('a');
@@ -491,6 +495,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [isCreateInstModalOpen, setIsCreateInstModalOpen] = useState(false);
   const [isPrimitiveBudgetImporterOpen, setIsPrimitiveBudgetImporterOpen] = useState(false);
   const [editingInst, setEditingInst] = useState<Institution | null>(null);
+  const [institutionPublication,setInstitutionPublication]=useState<'DRAFT'|'IN_REVIEW'|'PUBLISHED'|'ARCHIVED'>('DRAFT');
   const [instForm, setInstForm] = useState({
     name: '',
     type: 'MAIRIE' as Institution['type'],
@@ -769,7 +774,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     setIsQuickWebModalOpen(true);
   };
 
-  const handleSaveQuickWeb = (e: React.FormEvent) => {
+  const handleSaveQuickWeb = async (e: React.FormEvent) => {
+    e.preventDefault(); if (saving.current) return; saving.current=true; setSaving(true);
+    try {
+
     e.preventDefault();
     if (!quickWebInst) return;
 
@@ -788,26 +796,6 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       cleanSourceUrl = `https://${cleanSourceUrl}`;
     }
 
-    let primitive: PrimitiveBudgetInfo | undefined = quickWebInst.primitive_budget;
-    const hasPrimitiveData = (quickWebForm.primitive_total_fcfa != null && quickWebForm.primitive_total_fcfa >= 0)
-      || cleanSourceUrl
-      || quickWebForm.primitive_source.trim().length > 0;
-    if (hasPrimitiveData) {
-      if (quickWebForm.primitive_total_fcfa == null) {
-        showToast('Budget primitif non enregistré : le montant total est inconnu. Ne saisissez pas une valeur fictive de zéro.', 'error');
-        return;
-      }
-      primitive = {
-        total_voted_fcfa: quickWebForm.primitive_total_fcfa,
-        investment_voted_fcfa: quickWebForm.primitive_investment_fcfa,
-        functioning_voted_fcfa: quickWebForm.primitive_functioning_fcfa,
-        voted_date: quickWebForm.primitive_voted_date || new Date().toLocaleDateString('fr-FR'),
-        source: quickWebForm.primitive_source.trim() || 'Source à confirmer',
-        source_url: cleanSourceUrl || undefined,
-        session_notes: quickWebForm.primitive_session_notes.trim() || undefined,
-      };
-    }
-
     const updated: Institution = {
       ...quickWebInst,
       website: cleanWebsite,
@@ -816,17 +804,19 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       contact_email: quickWebForm.contact_email.trim(),
       web_status: cleanWebsite ? (quickWebForm.web_status === 'AUCUN' ? 'FONCTIONNEL' : quickWebForm.web_status) : 'AUCUN',
       web_observations: quickWebForm.web_observations.trim(),
-      primitive_budget: primitive,
+      primitive_budget: quickWebInst.primitive_budget,
     };
 
-    dataStore.updateInstitution(updated);
-    showToast(`Fiche « ${updated.name} » modifiée localement. Synchronisation publique non garantie.`, 'info');
+    await dataStore.updateInstitution(updated);
+    showToast('Fiche sauvegardée et relue sur le serveur ; budgets conservés.');
     setIsQuickWebModalOpen(false);
     setQuickWebInst(null);
+
+    } catch (error) { showToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
 
   const handleOpenEditInst = (inst: Institution) => {
-    setEditingInst(inst);
+    setEditingInst(inst);setInstitutionPublication(inst.publication_status || 'DRAFT');
     const prim = inst.primitive_budget;
     setInstForm({
       name: inst.name,
@@ -859,7 +849,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   };
 
   const handleOpenCreateInst = () => {
-    setEditingInst(null);
+    setEditingInst(null);setInstitutionPublication('DRAFT');
     setInstForm({
       name: '',
       type: instTypeFilter === 'ALL' ? 'MAIRIE' : instTypeFilter,
@@ -890,7 +880,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     setIsCreateInstModalOpen(true);
   };
 
-  const handleSaveInstitution = (e: React.FormEvent) => {
+  const handleSaveInstitution = async (e: React.FormEvent) => {
+    e.preventDefault(); if (saving.current) return; saving.current=true; setSaving(true);
+    try {
+
     e.preventDefault();
 
     let cleanWebsite = instForm.website.trim();
@@ -908,65 +901,46 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       cleanSourceUrl = `https://${cleanSourceUrl}`;
     }
 
-    let primitive: PrimitiveBudgetInfo | undefined = editingInst?.primitive_budget;
-    const hasPrimitiveData = (instForm.primitive_total_fcfa != null && instForm.primitive_total_fcfa >= 0)
-      || cleanSourceUrl
-      || instForm.primitive_source.trim().length > 0;
-    if (hasPrimitiveData) {
-      if (instForm.primitive_total_fcfa == null) {
-        showToast('Budget primitif non enregistré : le montant total est inconnu. Une source seule ne justifie pas zéro FCFA.', 'error');
-        return;
-      }
-      primitive = {
-        total_voted_fcfa: instForm.primitive_total_fcfa,
-        investment_voted_fcfa: instForm.primitive_investment_fcfa,
-        functioning_voted_fcfa: instForm.primitive_functioning_fcfa,
-        voted_date: instForm.primitive_voted_date || new Date().toLocaleDateString('fr-FR'),
-        source: instForm.primitive_source.trim() || 'Source à confirmer',
-        source_url: cleanSourceUrl || undefined,
-        session_notes: instForm.primitive_session_notes.trim() || undefined,
-      };
-    }
-
-    const hasBothBreakdowns = instForm.budget_functioning_fcfa != null && instForm.budget_investment_fcfa != null;
-    const computedTotal = hasBothBreakdowns 
-      ? (instForm.budget_functioning_fcfa! + instForm.budget_investment_fcfa!) 
-      : null;
-    const resolvedTotal = computedTotal != null 
-      ? computedTotal 
-      : (instForm.total_budget_fcfa ?? (editingInst ? editingInst.total_budget_fcfa : null));
-
     if (editingInst) {
       const updated: Institution = {
         ...editingInst,
         ...instForm,
         website: cleanWebsite,
         facebook_url: cleanFacebook,
-        primitive_budget: primitive,
-        total_budget_fcfa: resolvedTotal,
+        publication_status:institutionPublication,
+        primitive_budget:editingInst.primitive_budget,
+        total_budget_fcfa:editingInst.total_budget_fcfa,
+        budget_functioning_fcfa:editingInst.budget_functioning_fcfa,
+        budget_investment_fcfa:editingInst.budget_investment_fcfa,
       };
-      dataStore.updateInstitution(updated);
-      showToast('Fiche modifiée dans le navigateur ; confirmez la synchronisation avant de la considérer publiée.', 'info');
+      await dataStore.updateInstitution(updated);
+      showToast('Fiche sauvegardée et relue sur le serveur ; budgets conservés.');
       setIsEditInstModalOpen(false);
       setEditingInst(null);
     } else {
-      dataStore.addInstitution({
+      await dataStore.addInstitution({
         ...instForm,
         website: cleanWebsite,
         facebook_url: cleanFacebook,
-        primitive_budget: primitive,
-        total_budget_fcfa: resolvedTotal,
+        primitive_budget:undefined,total_budget_fcfa:null,budget_functioning_fcfa:null,budget_investment_fcfa:null,
       });
-      showToast('Entité ajoutée dans ce navigateur ; aucune publication serveur confirmée.', 'info');
+      showToast('Brouillon de fiche sauvegardé et relu sur le serveur.');
       setIsCreateInstModalOpen(false);
     }
+
+    } catch (error) { showToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
 
-  const handleDeleteInstitution = (id: string, name: string) => {
+  const handleDeleteInstitution = async (id: string, name: string) => {
+    if (saving.current) return; saving.current=true; setSaving(true);
+    try {
+
     if (confirm(`Êtes-vous sûr de vouloir supprimer l'entité "${name}" ?`)) {
-      dataStore.deleteInstitution(id);
-      showToast('Entité retirée de cette vue locale ; aucune suppression serveur confirmée.', 'info');
+      await dataStore.deleteInstitution(id);
+      showToast('Fiche archivée sur le serveur ; références conservées.');
     }
+
+    } catch (error) { showToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
 
   const [isProcessingPhoto, setIsProcessingPhoto] = useState(false);
@@ -976,7 +950,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     if (!file) return;
     try {
       setIsProcessingPhoto(true);
-      const optimizedUrl = await processLeaderPhotoFile(file);
+      const preview = await processLeaderPhotoFile(file);
+      const image=await (await fetch(preview)).blob();
+      const optimizedUrl=await DocumentStorageService.uploadAdminMedia(new File([image],'leader.webp',{type:'image/webp'}));
       setInstForm(prev => ({ ...prev, leader_photo_url: optimizedUrl }));
       showToast('Photo importée et optimisée en WebP (format studio) !');
     } catch (err: unknown) {
@@ -989,6 +965,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   };
 
   const handleQuickPhotoUpload = async (inst: Institution, e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault(); if (saving.current) return; saving.current=true; setSaving(true);
+    try {
+
     const file = e.target.files?.[0];
     if (!file) return;
     try {
@@ -998,14 +977,16 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         ...inst,
         leader_photo_url: optimizedUrl,
       };
-      dataStore.updateInstitution(updated);
-      showToast(`Photo de ${inst.leader_name || inst.name} mise à jour localement ; publication serveur à confirmer.`, 'info');
+      await dataStore.updateInstitution(updated);
+      showToast('Photo sauvegardée et fiche relue sur le serveur.');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Erreur lors de l'import de la photo.";
       showToast(msg, 'error');
     } finally {
       e.target.value = '';
     }
+
+    } catch (error) { showToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
 
   // ==========================================
@@ -1014,6 +995,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<NewsArticle | null>(null);
   const [articleForm, setArticleForm] = useState({
+    workflow_status: 'DRAFT' as NonNullable<NewsArticle['workflow_status']>,
     title: '',
     category: 'ACTUALITE' as NewsArticle['category'],
     summary: '',
@@ -1028,6 +1010,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const handleOpenEditArticle = (art: NewsArticle) => {
     setEditingArticle(art);
     setArticleForm({
+      workflow_status:art.workflow_status || 'DRAFT',
       title: art.title,
       category: art.category,
       summary: art.summary,
@@ -1044,6 +1027,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const handleOpenCreateArticle = () => {
     setEditingArticle(null);
     setArticleForm({
+      workflow_status:'DRAFT',
       title: '',
       category: 'ACTUALITE',
       summary: '',
@@ -1057,37 +1041,62 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     setIsArticleModalOpen(true);
   };
 
-  const handleSaveArticle = (e: React.FormEvent) => {
+  const handleSaveArticle = async (e: React.FormEvent) => {
+    e.preventDefault(); if (saving.current) return; saving.current=true; setSaving(true);
+    try {
+
     e.preventDefault();
     if (editingArticle) {
-      dataStore.updateArticle(editingArticle.id, articleForm);
-      showToast('Article modifié dans ce navigateur, sans confirmation de publication serveur.', 'info');
+      await dataStore.updateArticle(editingArticle.id, {...articleForm,revision:editingArticle.revision});
+      showToast('Article sauvegardé et relu sur le serveur.');
     } else {
-      dataStore.addArticle(articleForm);
-      showToast('Article ajouté localement. Il n’est pas encore publié de façon persistante sur le serveur.', 'info');
+      await dataStore.addArticle(articleForm);
+      showToast('Brouillon éditorial sauvegardé et relu sur le serveur.');
     }
     setIsArticleModalOpen(false);
     setEditingArticle(null);
+
+    } catch (error) { showToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
 
-  const handleDeleteArticle = (id: string, title: string) => {
+  const handleArticleMediaUpload = async (event: React.ChangeEvent<HTMLInputElement>, field: 'cover_image_url' | 'document_url') => {
+    const file=event.target.files?.[0];if(!file || saving.current)return;
+    saving.current=true;setSaving(true);
+    try {
+      const reference=await DocumentStorageService.uploadAdminMedia(file);
+      setArticleForm(current=>({...current,[field]:reference,...(field==='document_url' ? {document_name:file.name} : {})}));
+      showToast('Fichier envoyé en stockage privé. Enregistrez le brouillon pour rattacher la pièce.','info');
+    }catch(error){showToast(adminErrorMessage(error),'error');}finally{saving.current=false;setSaving(false);event.target.value='';}
+  };
+
+  const handleDeleteArticle = async (id: string, title: string) => {
+    if (saving.current) return; saving.current=true; setSaving(true);
+    try {
+
     if (confirm(`Supprimer la publication "${title}" ?`)) {
-      dataStore.deleteArticle(id);
-      showToast('Article retiré des données locales de ce navigateur uniquement.', 'info');
+      await dataStore.deleteArticle(id);
+      showToast('Article archivé sur le serveur.');
     }
+
+    } catch (error) { showToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
 
   // ==========================================
   // 4. SITE SETTINGS & BACKUP / RESTORE
   // ==========================================
   const [settingsForm, setSettingsForm] = useState<SiteSettings>({ ...siteSettings });
-  const [backupJsonInput, setBackupJsonInput] = useState('');
-  const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
 
-  const handleSaveSettings = (e: React.FormEvent) => {
+
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault(); if (saving.current) return; saving.current=true; setSaving(true);
+    try {
+
     e.preventDefault();
-    dataStore.updateSettings(settingsForm);
-    showToast('Préférences sauvegardées dans ce navigateur uniquement (pas de mise à jour des paramètres globaux en production).', 'info');
+    await dataStore.updateSettings(settingsForm);
+    showToast('Paramètres globaux sauvegardés et relus sur le serveur.');
+
+    } catch (error) { showToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
 
   const handleDownloadBackup = () => {
@@ -1096,50 +1105,25 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `suivibudget_sauvegarde_complete_${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `suivibudget_copie_locale_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     showToast('Copie locale téléchargée. Ceci n’est PAS une sauvegarde complète des tables Supabase.', 'info');
   };
 
-  const handleRestoreBackup = () => {
-    if (!backupJsonInput.trim()) {
-      alert('Veuillez coller le contenu JSON de votre sauvegarde.');
-      return;
-    }
-    const res = dataStore.importFullBackup(backupJsonInput);
-    if (res.success) {
-      showToast('Restauration effectuée dans ce navigateur uniquement ; aucune table Supabase restaurée.', 'info');
-      setIsBackupModalOpen(false);
-      setBackupJsonInput('');
-    } else {
-      alert(res.message);
-    }
-  };
 
-  const handleConfirmResetFactory = () => {
-    if (resetConfirmationInput.trim() !== 'RESET') {
-      showToast('Veuillez taper "RESET" en majuscules pour confirmer.', 'error');
-      return;
-    }
-    dataStore.resetToFactoryDefaults();
-    adminTaskService.logActivity({
-      action_type: 'FACTORY_RESET',
-      description: 'Réinitialisation locale du navigateur aux valeurs intégrées (aucune base Supabase réinitialisée)',
-      author: auth.fullName || 'Super Admin',
-      author_role: auth.role,
-    });
-    showToast('Affichage et données locales réinitialisés. Les données de production Supabase sont inchangées.', 'info');
-    setIsResetModalOpen(false);
-    setResetConfirmationInput('');
-  };
+
 
   const uniqueRegions = Array.from(new Set(allProjects.map(p => p.region_name))).sort();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 pb-24">
-      
+    <fieldset disabled={adminSaving} aria-busy={adminSaving} className="min-w-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 pb-24">
+
+      <legend className="sr-only">Administration</legend>
+      <button type="button" onClick={()=>void dataStore.refreshAdminEntities().then(()=>showToast('Vue rechargée depuis le serveur.')).catch(error=>showToast(adminErrorMessage(error),'error'))} className="rounded-xl border px-3 py-2 text-xs font-bold">Recharger la version serveur</button>
+      {serverContractError && <p role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">{serverContractError}</p>}
+      {adminSaving && <p role="status" className="text-sm font-bold text-navy-700">Sauvegarde serveur et relecture en cours…</p>}
       {/* Toast notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 animate-bounce">
@@ -1155,7 +1139,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
       {/* 1. MODERN TOP HEADER WITH PROFILE & DIRECT ACTIONS */}
       <div className="bg-slate-900 rounded-3xl p-5 sm:p-6 text-white shadow-xl border border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        
+
         {/* Profile Info */}
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-brand-orange/20 border border-brand-orange/30 flex items-center justify-center text-brand-orange font-black text-lg flex-shrink-0">
@@ -1164,12 +1148,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-sm sm:text-base font-bold text-white">
-                {auth.role === 'ADMIN' ? "Espace d'Administration Générale" : "Espace de Modération Citoyenne"}
+                {auth.role === 'ADMIN' ? "Espace d'Administration Générale" : auth.role==='DATA_MANAGER' ? 'Espace de gestion des données' : "Espace de Modération Citoyenne"}
               </span>
               <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
                 auth.role === 'ADMIN' ? 'bg-brand-orange text-white' : 'bg-brand-blue text-white'
               }`}>
-                {auth.role === 'ADMIN' ? 'Super Admin' : 'Modérateur'}
+                {auth.role === 'ADMIN' ? 'Super Admin' : auth.role==='DATA_MANAGER' ? 'Gestionnaire de données' : 'Modérateur'}
               </span>
             </div>
             <p className="text-xs text-slate-300 mt-0.5">
@@ -1184,7 +1168,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           <button
             onClick={() => setAdminTab('moderation')}
             className="px-3.5 py-2 rounded-2xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 transition-all text-left cursor-pointer"
-            title="Accéder à la modération terrain"
+            title="Accéder à la modération terrain" aria-label="Accéder à la modération terrain"
           >
             <span className="text-slate-400 block text-[9px] uppercase font-bold">Signalements</span>
             <span className={`text-xs font-black ${pendingProofs.length > 0 ? 'text-amber-400 animate-pulse' : 'text-emerald-400'}`}>
@@ -1196,7 +1180,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           <button
             onClick={() => setAdminTab('budget_table')}
             className="px-3.5 py-2 rounded-2xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 transition-all text-left cursor-pointer"
-            title="Consulter le catalogue des investissements"
+            title="Consulter le catalogue des investissements" aria-label="Consulter le catalogue des investissements"
           >
             <span className="text-slate-400 block text-[9px] uppercase font-bold">Catalogue</span>
             <span className="text-xs font-black text-white">{allProjects.length} projets</span>
@@ -1206,7 +1190,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           <button
             onClick={() => setIsGlobalSearchOpen(true)}
             className="px-3.5 py-2 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700/80 transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
-            title="Recherche universelle rapide (Ctrl+K)"
+            title="Recherche universelle rapide (Ctrl+K)" aria-label="Recherche universelle rapide (Ctrl+K)"
           >
             <Search className="w-3.5 h-3.5 text-slate-400" />
             <span className="text-xs font-bold hidden sm:inline">Rechercher...</span>
@@ -1254,7 +1238,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       {/* 2. CATEGORIZED NAVIGATION BAR */}
       <div className="bg-white p-2 rounded-2xl border border-slate-200/90 shadow-2xs">
         <div className="flex flex-wrap items-center gap-1.5">
-          
+
           {/* SECTION 0: ESPACE OPÉRATIONNEL & FILE D'ATTENTE */}
           <button
             onClick={() => setAdminTab('work_queue')}
@@ -1291,7 +1275,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             <Building2 className="w-4 h-4 text-amber-500" />
             <span>Répertoire CAIDP</span>
             <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-800">
-              {dataStore.getCaidpDirectory().length}
+              {dataStore.getCaidpDirectory(true).length}
             </span>
           </button>
 
@@ -1370,7 +1354,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             }`}
           >
             <FileSpreadsheet className="w-4 h-4 text-brand-orange" />
-            <span>Lignes Budgétaires</span>
+            <span>Projets & investissements</span>
             <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-orange-100 text-brand-orange">
               {allProjects.length}
             </span>
@@ -1544,7 +1528,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <button
                 onClick={() => setIsPrimitiveBudgetImporterOpen(true)}
                 className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
-                title="Importer des budgets primitifs votés par fichier CSV pour les mairies et régions"
+                title="Importer des budgets primitifs votés par fichier CSV pour les mairies et régions" aria-label="Importer des budgets primitifs votés par fichier CSV pour les mairies et régions"
               >
                 <FileSpreadsheet className="w-4 h-4" />
                 <span>+ Importer Budgets Primitifs</span>
@@ -1564,13 +1548,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           {/* KPI METRIC CARDS : AUDIT, SOCIAL & BUDGETS */}
           {/* ========================================== */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-            
+
             {/* Card 1: Photos */}
-            <div 
+            <div
               onClick={() => { setInstStatusFilter(instStatusFilter === 'NO_PHOTO' ? 'ALL' : 'NO_PHOTO'); setInstPage(1); }}
               className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
-                instStatusFilter === 'NO_PHOTO' 
-                  ? 'bg-amber-500 text-white border-amber-500 shadow-md ring-2 ring-amber-300' 
+                instStatusFilter === 'NO_PHOTO'
+                  ? 'bg-amber-500 text-white border-amber-500 shadow-md ring-2 ring-amber-300'
                   : 'bg-amber-50/70 hover:bg-amber-100/70 border-amber-200 text-amber-900'
               }`}
             >
@@ -1589,11 +1573,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             </div>
 
             {/* Card 2: Sites Web */}
-            <div 
+            <div
               onClick={() => { setInstStatusFilter(instStatusFilter === 'NO_WEBSITE' ? 'ALL' : 'NO_WEBSITE'); setInstPage(1); }}
               className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
-                instStatusFilter === 'NO_WEBSITE' 
-                  ? 'bg-sky-600 text-white border-sky-600 shadow-md ring-2 ring-sky-300' 
+                instStatusFilter === 'NO_WEBSITE'
+                  ? 'bg-sky-600 text-white border-sky-600 shadow-md ring-2 ring-sky-300'
                   : 'bg-sky-50/70 hover:bg-sky-100/70 border-sky-200 text-sky-900'
               }`}
             >
@@ -1612,11 +1596,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             </div>
 
             {/* Card 3: Pages Facebook */}
-            <div 
+            <div
               onClick={() => { setInstStatusFilter(instStatusFilter === 'NO_FACEBOOK' ? 'ALL' : 'NO_FACEBOOK'); setInstPage(1); }}
               className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
-                instStatusFilter === 'NO_FACEBOOK' 
-                  ? 'bg-[#1877F2] text-white border-[#1877F2] shadow-md ring-2 ring-blue-300' 
+                instStatusFilter === 'NO_FACEBOOK'
+                  ? 'bg-[#1877F2] text-white border-[#1877F2] shadow-md ring-2 ring-blue-300'
                   : 'bg-blue-50/70 hover:bg-blue-100/70 border-blue-200 text-blue-900'
               }`}
             >
@@ -1635,11 +1619,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             </div>
 
             {/* Card 4: Budgets Primitifs Votés */}
-            <div 
+            <div
               onClick={() => { setInstStatusFilter(instStatusFilter === 'WITH_PRIMITIVE' ? 'ALL' : 'WITH_PRIMITIVE'); setInstPage(1); }}
               className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
-                instStatusFilter === 'WITH_PRIMITIVE' 
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-300' 
+                instStatusFilter === 'WITH_PRIMITIVE'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-300'
                   : 'bg-emerald-50/70 hover:bg-emerald-100/70 border-emerald-200 text-emerald-900'
               }`}
             >
@@ -1658,11 +1642,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             </div>
 
             {/* Card 5: 100% Numérique (Web + FB) */}
-            <div 
+            <div
               onClick={() => { setInstStatusFilter(instStatusFilter === 'NO_DIGITAL' ? 'ALL' : 'NO_DIGITAL'); setInstPage(1); }}
               className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
-                instStatusFilter === 'NO_DIGITAL' 
-                  ? 'bg-purple-600 text-white border-purple-600 shadow-md ring-2 ring-purple-300' 
+                instStatusFilter === 'NO_DIGITAL'
+                  ? 'bg-purple-600 text-white border-purple-600 shadow-md ring-2 ring-purple-300'
                   : 'bg-purple-50/70 hover:bg-purple-100/70 border-purple-200 text-purple-900'
               }`}
             >
@@ -1684,7 +1668,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
           {/* Search & Filters */}
           <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
-            
+
             {/* Search Input */}
             <div className="relative w-full">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -1696,7 +1680,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue font-medium"
               />
               {instSearch && (
-                <button
+                <button aria-label="Fermer"
                   onClick={() => { setInstSearch(''); setInstPage(1); }}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                 >
@@ -1765,7 +1749,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             {paginatedInstitutions.map((inst) => {
               const hasPhoto = Boolean(inst.leader_photo_url);
               return (
-                <div 
+                <div
                   key={inst.id}
                   className="bg-slate-50/70 hover:bg-white rounded-2xl border border-slate-200/80 p-4 transition-all duration-200 hover:shadow-md hover:border-brand-blue/40 flex flex-col justify-between group"
                 >
@@ -1774,8 +1758,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       {/* Photo / Avatar avec Importation Rapide */}
                       <div className="relative group/avatar w-16 h-16 rounded-xl overflow-hidden border border-slate-200 shadow-xs flex-shrink-0 bg-slate-900">
                         {hasPhoto ? (
-                          <img 
-                            src={inst.leader_photo_url} 
+                          <img
+                            src={inst.leader_photo_display_url || inst.leader_photo_url}
                             alt={inst.leader_name || inst.name}
                             className="w-full h-full object-cover object-[50%_15%] transition-transform duration-300 group-hover/avatar:scale-110"
                           />
@@ -1898,11 +1882,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       type="button"
                       onClick={() => handleOpenQuickWebEdit(inst, 'DIGITAL')}
                       className={`py-1.5 px-1.5 rounded-xl border text-[11px] font-bold transition-all flex items-center justify-center gap-1 shadow-2xs ${
-                        inst.website 
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
+                        inst.website
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
                           : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                       }`}
-                      title={inst.website ? `Modifier le site web (${inst.website})` : 'Ajouter un site web officiel'}
+                      title={inst.website ? `Modifier le site web (${inst.website})` : 'Ajouter un site web officiel'} aria-label={inst.website ? `Modifier le site web (${inst.website})` : 'Ajouter un site web officiel'}
                     >
                       <Globe className="w-3 h-3 shrink-0" />
                       <span className="truncate">{inst.website ? 'Site' : '+ Site'}</span>
@@ -1913,11 +1897,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       type="button"
                       onClick={() => handleOpenQuickWebEdit(inst, 'DIGITAL')}
                       className={`py-1.5 px-1.5 rounded-xl border text-[11px] font-bold transition-all flex items-center justify-center gap-1 shadow-2xs ${
-                        inst.facebook_url 
-                          ? 'bg-blue-50 text-[#1877F2] border-blue-200 hover:bg-blue-100' 
+                        inst.facebook_url
+                          ? 'bg-blue-50 text-[#1877F2] border-blue-200 hover:bg-blue-100'
                           : 'bg-blue-50/50 text-[#1877F2] border-dashed border-blue-300 hover:bg-blue-100 font-black'
                       }`}
-                      title={inst.facebook_url ? `Modifier la page Facebook (${inst.facebook_url})` : 'Ajouter la page Facebook officielle'}
+                      title={inst.facebook_url ? `Modifier la page Facebook (${inst.facebook_url})` : 'Ajouter la page Facebook officielle'} aria-label={inst.facebook_url ? `Modifier la page Facebook (${inst.facebook_url})` : 'Ajouter la page Facebook officielle'}
                     >
                       <span className="font-black text-xs">f</span>
                       <span className="truncate">{inst.facebook_url ? 'Page FB' : '+ FB'}</span>
@@ -1932,7 +1916,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                           ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
                           : 'bg-amber-50/40 text-amber-700 border-dashed border-amber-300 hover:bg-amber-100'
                       }`}
-                      title={inst.primitive_budget?.total_voted_fcfa ? `Modifier le budget primitif voté (${formatFCFA(inst.primitive_budget.total_voted_fcfa)})` : 'Ajouter le budget primitif voté et le lien de preuve'}
+                      title={inst.primitive_budget?.total_voted_fcfa ? `Modifier le budget primitif voté (${formatFCFA(inst.primitive_budget.total_voted_fcfa)})` : 'Ajouter le budget primitif voté et le lien de preuve'} aria-label={inst.primitive_budget?.total_voted_fcfa ? `Modifier le budget primitif voté (${formatFCFA(inst.primitive_budget.total_voted_fcfa)})` : 'Ajouter le budget primitif voté et le lien de preuve'}
                     >
                       <Receipt className="w-3 h-3 shrink-0 text-amber-600" />
                       <span className="truncate">{inst.primitive_budget?.total_voted_fcfa ? 'Budget' : '+ Budget'}</span>
@@ -1943,7 +1927,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       type="button"
                       onClick={() => handleOpenEditInst(inst)}
                       className="py-1.5 px-1.5 bg-white hover:bg-navy-900 hover:text-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition-all flex items-center justify-center gap-1 shadow-2xs"
-                      title="Modifier l'intégralité de la fiche"
+                      title="Modifier l'intégralité de la fiche" aria-label="Modifier l'intégralité de la fiche"
                     >
                       <Edit className="w-3 h-3 shrink-0" />
                       <span className="truncate">Fiche</span>
@@ -1962,14 +1946,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               </div>
 
               <div className="flex items-center gap-1">
-                <button
+                <button aria-label="Ouvrir le contrôle"
                   disabled={instPage === 1}
                   onClick={() => setInstPage(1)}
                   className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40"
                 >
                   <ChevronsLeft className="w-4 h-4" />
                 </button>
-                <button
+                <button aria-label="Page précédente"
                   disabled={instPage === 1}
                   onClick={() => setInstPage(instPage - 1)}
                   className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40"
@@ -1981,14 +1965,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   Page {instPage} / {totalInstPages}
                 </span>
 
-                <button
+                <button aria-label="Page suivante"
                   disabled={instPage === totalInstPages}
                   onClick={() => setInstPage(instPage + 1)}
                   className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
-                <button
+                <button aria-label="Ouvrir le contrôle"
                   disabled={instPage === totalInstPages}
                   onClick={() => setInstPage(totalInstPages)}
                   className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40"
@@ -2012,7 +1996,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <div className="flex items-center gap-2">
                 <span className="p-2 rounded-xl bg-orange-50 text-terracotta-500 font-bold text-lg"></span>
                 <h3 className="text-xl font-extrabold text-navy-900">
-                  Gestion des Lignes Budgétaires ({filteredTableProjects.length} projets filtrés)
+                  Gestion des projets ({filteredTableProjects.length} projets filtrés)
                 </h3>
                 {onlyAnomalyProjects && (
                   <button type="button" className="text-xs text-rose-700 underline"
@@ -2035,14 +2019,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     commune_name: '',
                     region_name: '',
                     category: 'Santé',
-                    budget_amount_fcfa: 25000000,
-                    current_status: 'IN_PROGRESS',
-                    progress_percentage: 50,
+                    budget_amount_fcfa: null,
+                    current_status: 'NOT_STARTED',
+                    progress_percentage: 0,
                     contractor_name: '',
                     locality_village_neighborhood: '',
                     details: '',
                     start_date: '',
-                    contractual_duration_months: 12,
+                    contractual_duration_months: undefined,
                   });
                   setIsAddModalOpen(true);
                 }}
@@ -2055,7 +2039,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <button
                 onClick={() => setIsImportModalOpen(true)}
                 className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold flex items-center gap-1.5"
-                title="Importer un fichier CSV"
+                title="Importer un fichier CSV" aria-label="Importer un fichier CSV"
               >
                 <Upload className="w-4 h-4" />
                 <span>Import CSV</span>
@@ -2064,7 +2048,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <button
                 onClick={handleExportCSV}
                 className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold flex items-center gap-1.5"
-                title="Exporter les projets filtrés en CSV"
+                title="Exporter les projets filtrés en CSV" aria-label="Exporter les projets filtrés en CSV"
               >
                 <Download className="w-4 h-4" />
                 <span>Export CSV</span>
@@ -2120,7 +2104,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <option value="ALL">Tous les Statuts</option>
               <option value="NOT_STARTED"> Non commencé</option>
               <option value="IN_PROGRESS"> En cours</option>
-              <option value="COMPLETED"> Livré / Terminé</option>
+              <option value="COMPLETED" disabled>Achèvement physique : vérification distincte requise</option>
             </select>
           </div>
 
@@ -2199,7 +2183,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                                 type="button"
                                 onClick={() => handleQuickSaveProgress(p.id, quickEditValue)}
                                 className="p-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg cursor-pointer"
-                                title="Valider"
+                                title="Valider" aria-label="Valider"
                               >
                                 <Check className="w-3.5 h-3.5" />
                               </button>
@@ -2207,7 +2191,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                                 type="button"
                                 onClick={() => setQuickEditProjectId(null)}
                                 className="p-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg cursor-pointer"
-                                title="Annuler"
+                                title="Annuler" aria-label="Annuler"
                               >
                                 <X className="w-3.5 h-3.5" />
                               </button>
@@ -2222,8 +2206,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                                     handleQuickSaveProgress(p.id, val);
                                   }}
                                   className={`px-1.5 py-0.5 text-[10px] font-bold rounded cursor-pointer transition-colors ${
-                                    quickEditValue === val 
-                                      ? 'bg-brand-blue text-white' 
+                                    quickEditValue === val
+                                      ? 'bg-brand-blue text-white'
                                       : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                                   }`}
                                 >
@@ -2243,7 +2227,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                                 setQuickEditValue(p.progress_percentage || 0);
                               }}
                               className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold border transition-all cursor-pointer group-hover/rate:ring-2 group-hover/rate:ring-brand-blue/30 ${status.badgeClass}`}
-                              title="Cliquer pour modifier rapidement l'avancement physique"
+                              title="Cliquer pour modifier rapidement l'avancement physique" aria-label="Cliquer pour modifier rapidement l'avancement physique"
                             >
                               <span>{status.icon}</span>
                               <span>{p.progress_percentage}%</span>
@@ -2267,6 +2251,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                             onClick={() => {
                               setEditingProject(p);
                               setProjectForm({
+                                publication_status:p.publication_status || 'PUBLISHED',institution_id:p.institution_id,source_document_id:p.source_document_id,source_page:p.source_page,source_url:p.source_url,
                                 title: p.title,
                                 commune_name: p.commune_name,
                                 region_name: p.region_name,
@@ -2277,32 +2262,34 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                                 contractor_name: p.contractor_name || '',
                                 locality_village_neighborhood: p.locality_village_neighborhood || '',
                                 details: p.details || '',
+                                fiscal_year:p.fiscal_year,
                                 start_date: p.start_date || '',
                                 contractual_duration_months: p.contractual_duration_months || 12,
                               });
                               setIsAddModalOpen(true);
                             }}
                             className="p-1.5 text-slate-500 hover:text-navy-900 hover:bg-slate-100 rounded-lg"
-                            title="Modifier ce projet"
+                            title="Modifier ce projet" aria-label="Modifier ce projet"
                           >
                             <Edit className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => onOpenShare(p)}
                             className="p-1.5 text-slate-500 hover:text-terracotta-600 hover:bg-terracotta-50 rounded-lg"
-                            title="Générer Post Social"
+                            title="Générer Post Social" aria-label="Générer Post Social"
                           >
                             <Share2 className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => {
-                              if (confirm(`Supprimer définitivement le projet "${p.title}" ?`)) {
-                                dataStore.deleteProject(p.id);
-                                showToast('Projet supprimé.');
-                              }
+                            onClick={async () => {
+                              if (saving.current || !confirm(`Archiver le projet "${p.title}" en conservant ses références ?`)) return;
+                              saving.current=true;setSaving(true);
+                              try {await dataStore.deleteProject(p.id);showToast('Projet archivé et relu sur le serveur.');}
+                              catch(error) {showToast(adminErrorMessage(error),'error');}
+                              finally {saving.current=false;setSaving(false);}
                             }}
                             className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
-                            title="Supprimer"
+                            title="Archiver le projet" aria-label="Archiver le projet"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -2333,14 +2320,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               </select>
 
               <div className="flex items-center gap-1">
-                <button
+                <button aria-label="Ouvrir le contrôle"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(1)}
                   className="p-1 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40"
                 >
                   <ChevronsLeft className="w-4 h-4" />
                 </button>
-                <button
+                <button aria-label="Page précédente"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(currentPage - 1)}
                   className="p-1 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40"
@@ -2352,14 +2339,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   Page {currentPage} / {totalPages}
                 </span>
 
-                <button
+                <button aria-label="Page suivante"
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage(currentPage + 1)}
                   className="p-1 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
-                <button
+                <button aria-label="Ouvrir le contrôle"
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage(totalPages)}
                   className="p-1 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40"
@@ -2401,16 +2388,16 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {allArticles.map((art) => (
-              <div 
+              <div
                 key={art.id}
                 className="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition-all group"
               >
                 <div>
                   {art.cover_image_url ? (
                     <div className="h-40 w-full overflow-hidden relative">
-                      <img 
-                        src={art.cover_image_url} 
-                        alt={art.title} 
+                      <img
+                        src={art.cover_image_display_url || art.cover_image_url}
+                        alt={art.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                       <span className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-navy-900/90 text-white">
@@ -2454,7 +2441,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     <Edit className="w-3 h-3" />
                     <span>Modifier</span>
                   </button>
-                  <button
+                  <button aria-label="Archiver"
                     onClick={() => handleDeleteArticle(art.id, art.title)}
                     className="p-2 bg-white hover:bg-red-50 text-slate-400 hover:text-red-600 border border-slate-200 rounded-xl transition-colors"
                   >
@@ -2508,20 +2495,20 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                         ) : proof.secondary_image_url ? (
                           <div className="w-full h-full grid grid-cols-2 gap-0.5">
                             <div className="relative h-full overflow-hidden">
-                              <img 
-                                src={proof.image_url || (proof as any).photo_url} 
+                              <img
+                                src={proof.image_url || (proof as any).photo_url}
                                 alt="Photo chantier 1"
-                                className="w-full h-full object-cover" 
+                                className="w-full h-full object-cover"
                               />
                               <span className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/70 text-white text-[9px] font-bold">
                                 1. Chantier
                               </span>
                             </div>
                             <div className="relative h-full overflow-hidden">
-                              <img 
-                                src={proof.secondary_image_url} 
+                              <img
+                                src={proof.secondary_image_url}
                                 alt="Photo repère / panneau 2"
-                                className="w-full h-full object-cover" 
+                                className="w-full h-full object-cover"
                               />
                               <span className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/70 text-white text-[9px] font-bold">
                                 2. {proof.signboard_status === 'PRESENT' ? 'Panneau' : 'Repère'}
@@ -2529,10 +2516,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                             </div>
                           </div>
                         ) : (
-                          <img 
-                            src={proof.image_url || (proof as any).photo_url} 
+                          <img
+                            src={proof.image_url || (proof as any).photo_url}
                             alt="Preuve terrain"
-                            className="w-full h-full object-cover" 
+                            className="w-full h-full object-cover"
                           />
                         )}
 
@@ -2601,7 +2588,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                             <button
                               onClick={() => handleApproveProof(proof, true)}
                               className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                              title="Valider la preuve et ouvrir WhatsApp avec le message pré-rempli"
+                              title="Valider la preuve et ouvrir WhatsApp avec le message pré-rempli" aria-label="Valider la preuve et ouvrir WhatsApp avec le message pré-rempli"
                             >
                               <Check className="w-4 h-4" />
                               <MessageCircle className="w-3.5 h-3.5" />
@@ -2610,7 +2597,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                             <button
                               onClick={() => handleInitiateReject(proof, true)}
                               className="py-2.5 px-3 bg-white hover:bg-red-50 text-red-600 border border-slate-200 rounded-xl text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
-                              title="Rejeter et ouvrir WhatsApp avec le motif structuré"
+                              title="Rejeter et ouvrir WhatsApp avec le motif structuré" aria-label="Rejeter et ouvrir WhatsApp avec le motif structuré"
                             >
                               <X className="w-4 h-4" />
                               <MessageCircle className="w-3.5 h-3.5" />
@@ -2673,7 +2660,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       {/* ========================================================================= */}
       {adminTab === 'site_settings' && (
         <div className="space-y-6">
-          
+
           {/* General Site Configuration */}
           <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
             <div className="border-b border-slate-100 pb-4">
@@ -2691,7 +2678,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             </div>
 
             <form onSubmit={handleSaveSettings} className="space-y-5 text-xs">
-              
+
               {/* Flash Announcement Banner */}
               <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
                 <div className="flex items-center justify-between">
@@ -2884,7 +2871,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              
+
               {/* Backup Card */}
               <div className="p-5 bg-indigo-50/70 border border-indigo-200 rounded-2xl space-y-3 flex flex-col justify-between">
                 <div className="space-y-1.5">
@@ -2901,7 +2888,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <Download className="w-4 h-4" />
-                  <span>Télécharger la Sauvegarde (.json)</span>
+                  <span>Exporter la copie locale (.json)</span>
                 </button>
               </div>
 
@@ -2910,14 +2897,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 font-black text-emerald-900 text-sm">
                     <Upload className="w-4 h-4 text-emerald-600" />
-                    <span>Restaurer les données locales</span>
+                    <span>Restauration serveur à valider</span>
                   </div>
                   <p className="text-[11px] text-emerald-800 leading-relaxed">
-                    Recharge les données locales à partir d’un JSON. Aucune écriture n’est faite dans Supabase.
+                    Restauration réservée à un opérateur autorisé, après recette sur un environnement isolé. Une copie JSON du navigateur ne restaure pas le serveur.
                   </p>
                 </div>
                 <button
-                  onClick={() => setIsBackupModalOpen(true)}
+                  disabled title="Restauration PostgreSQL et Storage à valider hors de l’application" aria-label="Restauration PostgreSQL et Storage à valider hors de l’application"
                   className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <Upload className="w-4 h-4" />
@@ -2930,18 +2917,18 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 font-black text-red-900 text-sm">
                     <RefreshCw className="w-4 h-4 text-red-600" />
-                    <span>Réinitialisation locale d’origine</span>
+                    <span>Réinitialisation globale désactivée</span>
                   </div>
                   <p className="text-[11px] text-red-800 leading-relaxed">
-                    Réinitialise uniquement les données du navigateur aux jeux intégrés à l’application. Les données Supabase ne sont pas modifiées.
+                    La remise à zéro et la restauration globale ne sont pas proposées dans ce dashboard. Consultez le runbook de sauvegarde PostgreSQL et Storage.
                   </p>
                 </div>
                 <button
-                  onClick={() => { setIsResetModalOpen(true); setResetConfirmationInput(''); }}
+                  disabled title="Réinitialisation globale désactivée" aria-label="Réinitialisation globale désactivée"
                   className="w-full py-2.5 px-4 bg-white hover:bg-red-600 hover:text-white text-red-600 border border-red-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <AlertTriangle className="w-4 h-4" />
-                  <span>Réinitialiser aux valeurs d'origine</span>
+                  <span>Réinitialisation indisponible</span>
                 </button>
               </div>
 
@@ -2956,11 +2943,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       {/* ========================================================================= */}
       {adminTab === 'digital_opportunities' && (
         <div className="space-y-8">
-          
+
           {/* Header Banner & Download Actions */}
           <div className="bg-gradient-to-r from-navy-950 via-sky-950 to-navy-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
             <div className="absolute right-0 top-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            
+
             <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
               <div className="space-y-2 max-w-3xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 text-xs font-black uppercase tracking-wider border border-sky-400/30">
@@ -3088,7 +3075,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              
+
               {/* Benchmark 1: Gov.uk / Bristol */}
               <div className="bg-slate-50 hover:bg-white rounded-2xl border border-slate-200 p-4 transition-all hover:shadow-md space-y-2.5 flex flex-col justify-between">
                 <div className="space-y-2">
@@ -3186,7 +3173,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              
+
               {/* Pilier 1 */}
               <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-50/80 to-white border border-blue-100 space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-base shadow-sm">
@@ -3272,7 +3259,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     if (firstTarget) handleOpenQuickWebEdit(firstTarget);
                   }}
                   className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 cursor-pointer transition-colors"
-                  title="Ajouter ou modifier l'adresse web d'une collectivité"
+                  title="Ajouter ou modifier l'adresse web d'une collectivité" aria-label="Ajouter ou modifier l'adresse web d'une collectivité"
                 >
                   <Plus className="w-4 h-4" />
                   <span>+ Renseigner un site web</span>
@@ -3299,7 +3286,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 font-medium"
                 />
                 {prospectSearch && (
-                  <button
+                  <button aria-label="Fermer"
                     onClick={() => { setProspectSearch(''); setProspectPage(1); }}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                   >
@@ -3362,8 +3349,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                           <td className="py-3 px-4 font-bold text-navy-900">
                             <div className="flex items-center gap-2">
                               <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
-                                inst.type === 'REGION' 
-                                  ? 'bg-purple-100 text-purple-800' 
+                                inst.type === 'REGION'
+                                  ? 'bg-purple-100 text-purple-800'
                                   : 'bg-sky-100 text-sky-800'
                               }`}>
                                 {inst.type === 'REGION' ? 'Conseil Régional' : 'Mairie'}
@@ -3424,7 +3411,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                               <button
                                 onClick={() => handleOpenQuickWebEdit(inst)}
                                 className="p-1 rounded-md text-slate-400 hover:text-sky-700 hover:bg-sky-50 transition-colors cursor-pointer"
-                                title="Modifier ou renseigner l'adresse web"
+                                title="Modifier ou renseigner l'adresse web" aria-label="Modifier ou renseigner l'adresse web"
                               >
                                 <Edit className="w-3.5 h-3.5" />
                               </button>
@@ -3437,10 +3424,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                           </td>
                           <td className="py-3 px-4">
                             {inst.facebook_url ? (
-                              <a 
-                                href={inst.facebook_url} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
+                              <a
+                                href={inst.facebook_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1 text-[11px] text-blue-600 hover:underline font-bold"
                               >
                                 <span>Facebook</span>
@@ -3462,7 +3449,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                                     ? 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
                                     : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600'
                                 }`}
-                                title="Renseigner ou corriger le site web officiel"
+                                title="Renseigner ou corriger le site web officiel" aria-label="Renseigner ou corriger le site web officiel"
                               >
                                 <Globe className="w-3 h-3" />
                                 <span>{hasRealWeb ? 'Modifier site' : '+ Ajouter site'}</span>
@@ -3470,7 +3457,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                               <button
                                 onClick={() => handleOpenEditInst(inst)}
                                 className="px-2.5 py-1 bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 rounded-lg text-[11px] font-bold shadow-2xs transition-all cursor-pointer"
-                                title="Modifier toute la fiche (responsable, budget, photo)"
+                                title="Modifier toute la fiche (responsable, budget, photo)" aria-label="Modifier toute la fiche (responsable, budget, photo)"
                               >
                                 Fiche
                               </button>
@@ -3557,8 +3544,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   </p>
                 </div>
               </div>
-              <button 
-                onClick={() => { setIsEditInstModalOpen(false); setIsCreateInstModalOpen(false); }} 
+              <button aria-label="Fermer"
+                onClick={() => { setIsEditInstModalOpen(false); setIsCreateInstModalOpen(false); }}
                 className="p-1.5 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
@@ -3566,7 +3553,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             </div>
 
             <form onSubmit={handleSaveInstitution} className="space-y-4 text-xs">
-              
+              <label className="block font-bold">Diffusion de la fiche (sans certification budgétaire)
+                <select aria-label="Diffusion de la fiche" disabled={!editingInst?.revision} value={institutionPublication} onChange={e=>setInstitutionPublication(e.target.value as 'DRAFT'|'IN_REVIEW'|'PUBLISHED'|'ARCHIVED')} className="w-full p-2 border rounded-xl"><option value="DRAFT">Brouillon privé</option><option value="IN_REVIEW">En revue</option><option value="PUBLISHED">Publication explicite de la fiche</option><option value="ARCHIVED">Archiver en conservant les références</option></select>
+              </label>
+              <p className="text-slate-600">Les budgets sont consultables ici. Leur modification passe par la console d’import qualifié.</p>
+
               {/* Photo Live Preview & Photo Import / URL Input */}
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -3574,8 +3565,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   <div className="relative group/avatar w-24 h-24 rounded-2xl overflow-hidden border-2 border-brand-blue shadow-sm flex-shrink-0 bg-slate-900">
                     {instForm.leader_photo_url ? (
                       <>
-                        <img 
-                          src={instForm.leader_photo_url} 
+                        <img
+                          src={instForm.leader_photo_url.startsWith('storage://') ? editingInst?.leader_photo_display_url : instForm.leader_photo_url}
                           alt="Aperçu de l'élu"
                           className="w-full h-full object-cover object-[50%_15%]"
                           onError={(e) => {
@@ -3845,7 +3836,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label className="block font-bold text-slate-800 mb-1">Budget Total Voté (FCFA)</label>
-                    <input
+                    <input disabled
                       type="number"
                       value={instForm.primitive_total_fcfa != null ? instForm.primitive_total_fcfa : ''}
                       onChange={(e) => {
@@ -3864,6 +3855,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     <label className="block font-bold text-slate-800 mb-1">Part Investissement (FCFA)</label>
                     <input
                       type="number"
+                      disabled
                       value={instForm.primitive_investment_fcfa != null ? instForm.primitive_investment_fcfa : ''}
                       onChange={(e) => {
                         const val = e.target.value.trim() === '' ? null : Number(e.target.value);
@@ -3878,6 +3870,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     <label className="block font-bold text-slate-800 mb-1">Part Fonctionnement (FCFA)</label>
                     <input
                       type="number"
+                      disabled
                       value={instForm.primitive_functioning_fcfa != null ? instForm.primitive_functioning_fcfa : ''}
                       onChange={(e) => {
                         const val = e.target.value.trim() === '' ? null : Number(e.target.value);
@@ -3894,6 +3887,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     <label className="block font-bold text-slate-800 mb-1">Date du Vote / Session</label>
                     <input
                       type="text"
+                      disabled
                       value={instForm.primitive_voted_date}
                       onChange={(e) => setInstForm({ ...instForm, primitive_voted_date: e.target.value })}
                       placeholder="Ex: 15 mars 2024 ou 2024-03-15"
@@ -3905,6 +3899,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     <label className="block font-bold text-slate-800 mb-1">Organe Délibérant / Source</label>
                     <input
                       type="text"
+                      disabled
                       value={instForm.primitive_source}
                       onChange={(e) => setInstForm({ ...instForm, primitive_source: e.target.value })}
                       placeholder="Ex: Conseil Municipal - 1ère session ordinaire (AIP)"
@@ -3933,7 +3928,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   </div>
                   <input
                     type="url"
-                    value={instForm.primitive_source_url}
+                    disabled
+                      value={instForm.primitive_source_url}
                     onChange={(e) => setInstForm({ ...instForm, primitive_source_url: e.target.value })}
                     placeholder="https://www.aip.ci/cote-divoire-la-mairie-de-...-adopte-son-budget-primitif/ ou page facebook de délibération"
                     className="w-full p-2.5 border border-amber-300 rounded-xl bg-white font-mono text-[11px] focus:ring-2 focus:ring-amber-500"
@@ -3948,7 +3944,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   <label className="block font-bold text-slate-800 mb-1">Synthèse des priorités votées / Notes de séance</label>
                   <input
                     type="text"
-                    value={instForm.primitive_session_notes}
+                    disabled
+                      value={instForm.primitive_session_notes}
                     onChange={(e) => setInstForm({ ...instForm, primitive_session_notes: e.target.value })}
                     placeholder="Ex: Priorité accordée à l'assainissement, à l'éclairage public et à la réhabilitation des marchés."
                     className="w-full p-2.5 border border-slate-300 rounded-xl bg-white text-slate-900"
@@ -3962,7 +3959,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   <label className="block font-bold text-slate-700 mb-1">Dotation Fonctionnement Annuelle (FCFA)</label>
                   <input
                     type="number"
-                    value={instForm.budget_functioning_fcfa != null ? instForm.budget_functioning_fcfa : ''}
+                    disabled
+                      value={instForm.budget_functioning_fcfa != null ? instForm.budget_functioning_fcfa : ''}
                     onChange={(e) => {
                       const val = e.target.value.trim() === '' ? null : Number(e.target.value);
                       setInstForm(prev => ({ ...prev, budget_functioning_fcfa: val }));
@@ -3975,7 +3973,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   <label className="block font-bold text-slate-700 mb-1">Dotation Investissement Annuelle (FCFA)</label>
                   <input
                     type="number"
-                    value={instForm.budget_investment_fcfa != null ? instForm.budget_investment_fcfa : ''}
+                    disabled
+                      value={instForm.budget_investment_fcfa != null ? instForm.budget_investment_fcfa : ''}
                     onChange={(e) => {
                       const val = e.target.value.trim() === '' ? null : Number(e.target.value);
                       setInstForm(prev => ({ ...prev, budget_investment_fcfa: val }));
@@ -4026,14 +4025,32 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4 my-8">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h4 className="text-lg font-extrabold text-navy-900">
-                {editingProject ? 'Modifier le projet budgétaire' : 'Ajouter une nouvelle ligne budgétaire'}
+                {editingProject ? 'Modifier le projet budgétaire' : 'Ajouter un projet déclaré'}
               </h4>
-              <button onClick={() => setIsAddModalOpen(false)} className="p-1 rounded-full text-slate-400 hover:text-slate-800">
+              <button aria-label="Fermer" onClick={() => setIsAddModalOpen(false)} className="p-1 rounded-full text-slate-400 hover:text-slate-800">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSaveProject} className="space-y-3 text-xs">
+              <p className="text-xs text-slate-600">Projet déclaré, sans certification physique ni exécution financière. Une création reste un brouillon.</p>
+              {editingProject?.revision && <button type="button" className="px-4 py-3 border rounded-xl font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-blue" onClick={async()=>{
+                const reason=window.prompt('Après comparaison du montant, de l’institution, de l’exercice et de la page du BP enregistré, indiquez le résultat du contrôle humain :');
+                if(!reason || saving.current) return;
+                saving.current=true;setSaving(true);
+                try {await dataStore.reviewProjectFinancialEvidence(editingProject.id,reason);showToast('Montant contrôlé sur le serveur. Publication distincte requise.');setIsAddModalOpen(false);setEditingProject(null);}
+                catch(error) {showToast(adminErrorMessage(error),'error');}
+                finally {saving.current=false;setSaving(false);}
+              }}>Contrôler le montant du brouillon enregistré</button>}
+              <label className="block text-xs font-bold">Publication du projet déclaré<select aria-label="Publication du projet" disabled={!editingProject?.revision} value={projectForm.publication_status || 'DRAFT'} onChange={e=>setProjectForm({...projectForm,publication_status:e.target.value as 'DRAFT'|'IN_REVIEW'|'PUBLISHED'})} className="w-full p-2 border rounded-xl"><option value="DRAFT">Brouillon privé</option><option value="IN_REVIEW">En revue</option><option value="PUBLISHED">Publication après contrôle documentaire</option></select></label>
+              <label className="block text-xs font-bold">Institution rattachée<select aria-label="Institution du projet" value={projectForm.institution_id || ''} onChange={e=>setProjectForm({...projectForm,institution_id:e.target.value || undefined})} className="w-full p-2 border rounded-xl"><option value="">Non rattaché : brouillon uniquement</option>{allInstitutions.map(inst=><option key={inst.id} value={inst.id}>{inst.name}</option>)}</select></label>
+              <label className="block text-xs font-bold">Document primaire<select aria-label="Document source du projet" value={projectForm.source_document_id || ''} onChange={e=>setProjectForm({...projectForm,source_document_id:e.target.value || undefined})} className="w-full p-2 border rounded-xl"><option value="">Source à relier</option>{dataStore.getDocuments().filter(doc=>doc.status==='PUBLISHED' && doc.verification_status==='VERIFIED' && ['BUDGET_PRIMITIF','BUDGET_MODIFICATIF'].includes(doc.document_type || '') && doc.institution_id===projectForm.institution_id && doc.fiscal_year===projectForm.fiscal_year).map(doc=><option key={doc.id} value={doc.id}>{doc.title}</option>)}</select></label>
+              <label className="block text-xs font-bold">Page source<input aria-label="Page source du projet" type="number" min="1" value={projectForm.source_page || ''} onChange={e=>setProjectForm({...projectForm,source_page:e.target.value ? Number(e.target.value) : undefined})} className="w-full p-2 border rounded-xl" /></label>
+              <label className="block text-xs font-bold">URL de provenance<input aria-label="URL source du projet" type="url" value={projectForm.source_url || ''} onChange={e=>setProjectForm({...projectForm,source_url:e.target.value})} className="w-full p-2 border rounded-xl" /></label>
+              <label className="block text-xs font-bold">Exercice fiscal explicite
+                <input aria-label="Exercice fiscal" type="number" min="1960" required disabled={!!editingProject?.revision} value={projectForm.fiscal_year || ''} onChange={e=>setProjectForm({...projectForm,fiscal_year:Number(e.target.value)})} className="w-full p-2 border rounded-xl" />
+              </label>
+
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Titre / Détails de l'investissement</label>
                 <input
@@ -4071,12 +4088,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Budget Voté (FCFA)</label>
+                  <label className="block font-bold text-slate-700 mb-1">Montant prévu déclaré (FCFA, facultatif)</label>
                   <input
                     type="number"
-                    required
-                    value={projectForm.budget_amount_fcfa}
-                    onChange={(e) => setProjectForm({ ...projectForm, budget_amount_fcfa: Number(e.target.value) })}
+                    value={projectForm.budget_amount_fcfa ?? ''}
+                    onChange={(e) => setProjectForm({ ...projectForm, budget_amount_fcfa: e.target.value.trim() ? Number(e.target.value) : null })}
                     className="w-full p-2 border rounded-xl"
                   />
                 </div>
@@ -4102,7 +4118,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Statut Terrain</label>
+                  <label className="block font-bold text-slate-700 mb-1">État administratif déclaré</label>
                   <select
                     value={projectForm.current_status}
                     onChange={(e) => setProjectForm({ ...projectForm, current_status: e.target.value as ProjectStatus })}
@@ -4110,7 +4126,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   >
                     <option value="NOT_STARTED"> Non commencé</option>
                     <option value="IN_PROGRESS"> En cours</option>
-                    <option value="COMPLETED"> Terminé</option>
+                    <option value="COMPLETED" disabled>Achèvement physique : vérification distincte requise</option>
                   </select>
                 </div>
                 <div>
@@ -4174,7 +4190,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 </div>
 
                 {/* Dynamic Auto-Calculation of Contractual Elapsed Time */}
-                {projectForm.start_date && projectForm.contractual_duration_months > 0 && (() => {
+                {projectForm.start_date && projectForm.contractual_duration_months != null && projectForm.contractual_duration_months > 0 && (() => {
                   const elapsed = calculateContractualElapsedPercentage(projectForm.start_date, projectForm.contractual_duration_months);
                   return (
                     <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-between text-xs">
@@ -4187,8 +4203,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                         </span>
                       </div>
                       <span className={`text-sm font-black px-2.5 py-1 rounded-lg ${
-                        elapsed.isOverdue 
-                          ? 'bg-rose-100 text-rose-800 border border-rose-300' 
+                        elapsed.isOverdue
+                          ? 'bg-rose-100 text-rose-800 border border-rose-300'
                           : 'bg-brand-blue text-white'
                       }`}>
                         {elapsed.percent}% {elapsed.isOverdue ? '(Hors délai)' : ''}
@@ -4238,12 +4254,20 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <h4 className="text-lg font-extrabold text-navy-900">
                 {editingArticle ? 'Modifier la publication' : 'Créer une nouvelle publication / rapport'}
               </h4>
-              <button onClick={() => setIsArticleModalOpen(false)} className="p-1 rounded-full text-slate-400 hover:text-slate-800">
+              <button aria-label="Fermer" onClick={() => setIsArticleModalOpen(false)} className="p-1 rounded-full text-slate-400 hover:text-slate-800">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSaveArticle} className="space-y-3 text-xs">
+              <label className="block font-bold">État éditorial
+                <select aria-label="État éditorial" disabled={!editingArticle?.revision} value={articleForm.workflow_status} onChange={e=>setArticleForm({...articleForm,workflow_status:e.target.value as NonNullable<NewsArticle['workflow_status']>})} className="w-full p-2 border rounded-xl">
+                  <option value="DRAFT">Brouillon privé</option><option value="IN_REVIEW">En revue</option><option value="PUBLISHED">Publier explicitement</option><option value="ARCHIVED">Archiver</option>
+                </select>
+              </label>
+              <label className="block font-bold">Téléverser une image privée<input aria-label="Image de l’article" type="file" accept="image/jpeg,image/png,image/webp" onChange={event=>handleArticleMediaUpload(event,'cover_image_url')} className="block w-full p-2" /></label>
+              <label className="block font-bold">Téléverser une pièce jointe privée<input aria-label="Pièce jointe de l’article" type="file" accept="application/pdf" onChange={event=>handleArticleMediaUpload(event,'document_url')} className="block w-full p-2" /></label>
+              <p className="text-slate-600">Une création reste un brouillon. Après relecture serveur, choisissez explicitement la publication.</p>
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Titre de la Publication</label>
                 <input
@@ -4366,7 +4390,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   type="submit"
                   className="px-5 py-2 bg-navy-900 text-white rounded-xl font-bold shadow"
                 >
-                  Publier
+                  Enregistrer sur le serveur
                 </button>
               </div>
             </form>
@@ -4394,7 +4418,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   </p>
                 </div>
               </div>
-              <button onClick={() => setIsImportModalOpen(false)} className="p-2 rounded-full hover:bg-slate-100 text-slate-400">
+              <button aria-label="Fermer" onClick={() => setIsImportModalOpen(false)} className="p-2 rounded-full hover:bg-slate-100 text-slate-400">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -4410,7 +4434,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   onChange={(e) => setImportTargetYear(e.target.value)}
                   className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
                 >
-                  <option value="AUTO"> Détection Automatique (depuis le CSV)</option>
+                  <option value="AUTO">Exercice explicite dans chaque ligne CSV</option>
                   <option value="2026">Exercice 2026</option>
                   <option value="2027">Exercice 2027 (Nouveau)</option>
                   <option value="2028">Exercice 2028 (Futur)</option>
@@ -4428,7 +4452,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   onChange={(e) => setImportMode(e.target.value as 'REPLACE_YEAR' | 'APPEND')}
                   className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
                 >
-                  <option value="REPLACE_YEAR"> Remplacer l'exercice entier (Recommandé)</option>
+                  <option value="REPLACE_YEAR" disabled>Remplacement d’exercice désactivé</option>
                   <option value="APPEND"> Ajouter aux projets existants</option>
                 </select>
               </div>
@@ -4439,7 +4463,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               <label className="cursor-pointer flex flex-col items-center justify-center gap-1.5">
                 <FileSpreadsheet className="w-8 h-8 text-brand-blue" />
                 <span className="text-xs font-black text-slate-800">
-                  Cliquez ici pour sélectionner un fichier CSV officiel (DGBF / DataIvoire)
+                  Sélectionnez un CSV déclaré avec exercice et source explicites
                 </span>
                 <span className="text-[11px] text-slate-400 font-semibold">
                   Encodage UTF-8 ou Latin-1 • Séparateur point-virgule (;) ou virgule (,)
@@ -4462,7 +4486,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 rows={5}
                 value={csvUploadText}
                 onChange={(e) => setCsvUploadText(e.target.value)}
-                placeholder="Annee;Type;Ministere;Service;Programme;Nature;Libelle;Valeur&#10;2027;EMPLOIS;MINISTERES;...;Travaux de construction;450000000"
+                placeholder="title;commune_name;region_name;category;fiscal_year;budget_amount_fcfa;source_url"
                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono select-all focus:bg-white transition-colors"
               />
             </div>
@@ -4475,7 +4499,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 </div>
                 <div className="text-[11px] text-emerald-800 font-semibold pl-7">
                   • {importStatus.success} projets importés et validés.<br />
-                  • Volume budgétaire : {importStatus.totalAmount ? (importStatus.totalAmount / 1000000000).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' Mrds FCFA' : 'Calculé'}
+                  • Volume budgétaire : {importStatus.totalAmount == null ? `Total incomplet : ${importStatus.unknownAmounts} montant(s) inconnu(s). Somme connue : ${(importStatus.knownAmount ?? 0).toLocaleString('fr-FR')} FCFA` : `${importStatus.totalAmount.toLocaleString('fr-FR')} FCFA`} · {importStatus.skipped ?? 0} ligne(s) déjà intégrée(s)
                 </div>
               </div>
             )}
@@ -4527,8 +4551,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   </p>
                 </div>
               </div>
-              <button 
-                onClick={() => { setIsQuickWebModalOpen(false); setQuickWebInst(null); }} 
+              <button aria-label="Fermer"
+                onClick={() => { setIsQuickWebModalOpen(false); setQuickWebInst(null); }}
                 className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
@@ -4547,7 +4571,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   {quickWebInst.type === 'REGION' ? 'Conseil Régional' : 'Mairie'} • {quickWebInst.region || 'Côte d\'Ivoire'}
                 </span>
               </div>
-              
+
               <select
                 value={quickWebInst.id}
                 onChange={(e) => {
@@ -4719,7 +4743,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                         </span>
                       )}
                     </div>
-                    <input
+                    <input disabled
                       type="number"
                       value={quickWebForm.primitive_total_fcfa != null ? quickWebForm.primitive_total_fcfa : ''}
                       onChange={(e) => {
@@ -4741,7 +4765,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       </label>
                       <input
                         type="number"
-                        value={quickWebForm.primitive_investment_fcfa != null ? quickWebForm.primitive_investment_fcfa : ''}
+                        disabled
+                      value={quickWebForm.primitive_investment_fcfa != null ? quickWebForm.primitive_investment_fcfa : ''}
                         onChange={(e) => {
                           const val = e.target.value.trim() === '' ? null : Number(e.target.value);
                           setQuickWebForm(prev => ({ ...prev, primitive_investment_fcfa: val }));
@@ -4757,7 +4782,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       </label>
                       <input
                         type="number"
-                        value={quickWebForm.primitive_functioning_fcfa != null ? quickWebForm.primitive_functioning_fcfa : ''}
+                        disabled
+                      value={quickWebForm.primitive_functioning_fcfa != null ? quickWebForm.primitive_functioning_fcfa : ''}
                         onChange={(e) => {
                           const val = e.target.value.trim() === '' ? null : Number(e.target.value);
                           setQuickWebForm(prev => ({ ...prev, primitive_functioning_fcfa: val }));
@@ -4775,7 +4801,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       </label>
                       <input
                         type="text"
-                        value={quickWebForm.primitive_voted_date}
+                        disabled
+                      value={quickWebForm.primitive_voted_date}
                         onChange={(e) => setQuickWebForm(prev => ({ ...prev, primitive_voted_date: e.target.value }))}
                         placeholder="Ex: 15 mars 2024 ou 2024-03-15"
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden"
@@ -4788,7 +4815,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       </label>
                       <input
                         type="text"
-                        value={quickWebForm.primitive_source}
+                        disabled
+                      value={quickWebForm.primitive_source}
                         onChange={(e) => setQuickWebForm(prev => ({ ...prev, primitive_source: e.target.value }))}
                         placeholder="Ex: Conseil Municipal (Session ordinaire)"
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-hidden"
@@ -4816,6 +4844,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     </div>
                     <input
                       type="url"
+                      disabled
                       value={quickWebForm.primitive_source_url}
                       onChange={(e) => setQuickWebForm(prev => ({ ...prev, primitive_source_url: e.target.value }))}
                       placeholder="https://www.aip.ci/... ou lien vers délibération municipale"
@@ -4832,6 +4861,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     </label>
                     <input
                       type="text"
+                      disabled
                       value={quickWebForm.primitive_session_notes}
                       onChange={(e) => setQuickWebForm(prev => ({ ...prev, primitive_session_notes: e.target.value }))}
                       placeholder="Ex: Vote à l'unanimité des conseillers municipaux."
@@ -4951,52 +4981,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       {/* ========================================================================= */}
       {/* MODAL: RESTORE BACKUP JSON */}
       {/* ========================================================================= */}
-      {isBackupModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <Upload className="w-5 h-5 text-emerald-600" />
-                <h4 className="text-base font-extrabold text-navy-900">
-                  Restaurer la Plateforme depuis un JSON de Sauvegarde
-                </h4>
-              </div>
-              <button onClick={() => setIsBackupModalOpen(false)} className="p-1 text-slate-400">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            <p className="text-xs text-slate-600">
-              Collez ci-dessous le contenu du fichier de sauvegarde <code>.json</code> préalablement téléchargé.
-            </p>
-
-            <textarea
-              rows={8}
-              value={backupJsonInput}
-              onChange={(e) => setBackupJsonInput(e.target.value)}
-              placeholder='{ "version": "6.0", "projects": [...], "institutions": [...] }'
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono"
-            />
-
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setIsBackupModalOpen(false)}
-                className="px-4 py-2 border rounded-xl text-xs font-bold"
-              >
-                Annuler
-              </button>
-              <button
-                type="button"
-                onClick={handleRestoreBackup}
-                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow"
-              >
-                Rétablir la sauvegarde
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ========================================================================= */}
       {/* MODAL: UNIVERSAL CTRL+K OMNIBOX SEARCH */}
@@ -5027,7 +5012,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   </p>
                 </div>
               </div>
-              <button
+              <button aria-label="Fermer"
                 onClick={() => setRejectingProof(null)}
                 className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer"
               >
@@ -5111,64 +5096,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       {/* ========================================================================= */}
       {/* MODAL: SENSITIVE FACTORY RESET CONFIRMATION */}
       {/* ========================================================================= */}
-      {isResetModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/75 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-red-200 space-y-4">
-            <div className="flex items-center gap-3">
-              <span className="p-3 rounded-2xl bg-red-100 text-red-600 font-bold shrink-0">
-                <AlertTriangle className="w-6 h-6 text-red-600" />
-              </span>
-              <div>
-                <h4 className="font-extrabold text-slate-900 text-base">
-                  Réinitialiser les données locales
-                </h4>
-                <p className="text-[11px] text-slate-500">
-                  Cette action écrase les données locales affichées dans ce navigateur ; elle ne réinitialise pas la base Supabase.
-                </p>
-              </div>
-            </div>
 
-            <div className="p-3 bg-red-50 rounded-2xl border border-red-100 text-red-900 text-xs space-y-1">
-              <p className="font-bold">Attention, action irréversible :</p>
-              <p className="text-[11px] text-red-800">
-                Les modifications non synchronisées de ce navigateur seront perdues. Un export JSON local ne couvre pas les données de production.
-              </p>
-            </div>
 
-            <div className="space-y-2 text-xs">
-              <label className="block font-bold text-slate-700">
-                Pour confirmer, veuillez taper le mot <strong className="text-red-600">RESET</strong> ci-dessous :
-              </label>
-              <input
-                type="text"
-                value={resetConfirmationInput}
-                onChange={(e) => setResetConfirmationInput(e.target.value)}
-                placeholder="Tapez RESET..."
-                className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono text-center uppercase tracking-widest font-black text-sm"
-              />
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 text-xs">
-              <button
-                type="button"
-                onClick={() => { setIsResetModalOpen(false); setResetConfirmationInput(''); }}
-                className="px-4 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-xl font-bold text-slate-600 cursor-pointer"
-              >
-                Annuler
-              </button>
-              <button
-                type="button"
-                disabled={resetConfirmationInput.trim() !== 'RESET'}
-                onClick={handleConfirmResetFactory}
-                className="px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white rounded-xl font-black shadow-md cursor-pointer transition-all"
-              >
-                Réinitialiser localement
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-    </div>
+    </fieldset>
   );
 };

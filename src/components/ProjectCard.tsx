@@ -27,29 +27,29 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
 
   // Clean location display for the bottom line
   const locationText = project.locality_village_neighborhood ||
-    (entityInfo.entityType === 'MAIRIE' 
+    (entityInfo.entityType === 'MAIRIE'
       ? (project.region_name && project.region_name !== 'Abidjan' ? `${project.commune_name} (${project.region_name})` : `Commune de ${project.commune_name}`)
-      : (entityInfo.entityType === 'REGION' 
+      : (entityInfo.entityType === 'REGION'
         ? `Région ${project.region_name || project.commune_name}`
         : (entityInfo.entityType === 'MINISTERE' ? (project.region_name ? `Région ${project.region_name}` : 'Envergure Nationale') : project.region_name || 'Côte d\'Ivoire')));
 
   return (
-    <div 
+    <div
       onClick={() => onSelect(project)}
       className="bg-white rounded-3xl border border-slate-200/90 shadow-2xs hover:shadow-xl hover:border-brand-blue/50 transition-all duration-300 flex flex-col justify-between overflow-hidden group cursor-pointer"
     >
-      
+
       {/* Visual Cover (If image available) */}
       {project.image_url ? (
         <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
-          <img 
-            src={project.image_url} 
+          <img
+            src={project.image_url}
             alt={project.title}
             loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-95 group-hover:opacity-100"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-black/30" />
-          
+
           {/* Top Badges over image */}
           <div className="absolute top-3 inset-x-3 flex items-center justify-between gap-1.5 pointer-events-none">
             <span className={`inline-flex items-center px-2.5 py-1 rounded-xl text-[11px] font-black border backdrop-blur-md shadow-xs ${tierBadge.badgeClass}`}>
@@ -100,7 +100,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           )}
 
           {/* Project Title / Investment Description */}
-          <h3 
+          <h3
             className="text-sm sm:text-base font-black text-slate-900 line-clamp-3 group-hover:text-brand-blue transition-colors leading-snug"
             title={project.title}
           >
@@ -135,7 +135,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       {/* Middle: Budget & Status */}
       <div className="px-5 py-3.5 bg-slate-50/70 border-t border-slate-100 space-y-2.5">
         <div className="flex items-baseline justify-between gap-2">
-          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Budget Alloué</span>
+          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{project.data_provenance === 'DECLARED_ADMIN' ? 'Montant prévu déclaré' : 'Budget Alloué'}</span>
           <div className="text-right">
             <div className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
               {formatFCFA(project.budget_amount_fcfa)}
@@ -160,8 +160,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               <span className="font-black text-emerald-700">{project.progress_percentage}%</span>
             </div>
             <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
+              <div
+                className="h-full bg-emerald-500 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(100, project.progress_percentage)}%` }}
               />
             </div>
@@ -191,7 +191,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       </div>
 
       {/* Bottom Footer Actions */}
-      <div 
+      <div
         className="p-3 sm:px-5 sm:py-3.5 bg-white border-t border-slate-100 flex items-center gap-2"
         onClick={(e) => e.stopPropagation()}
       >

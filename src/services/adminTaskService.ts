@@ -6,68 +6,42 @@
 import { AdminWorkTask, AdminActivityLog, TaskPriority, TaskStatus } from '../types/adminWorkflow';
 import { dataStore } from './dataStore';
 
-const STORAGE_KEYS = {
-  TASK_OVERRIDES: 'suivibudget_admin_task_overrides_v1',
-  ACTIVITY_LOGS: 'suivibudget_admin_activity_logs_v1',
-};
+import { mutateAdminBatch, readAdminRows, requireAdminPersistence, type AdminMutation } from './adminPersistenceService';
+import { supabase } from './supabase';
 
 interface TaskOverride {
   status?: TaskStatus;
   assigned_to?: string;
-  assigned_to_role?: 'ADMIN' | 'MODERATOR';
+  assigned_to_role?: 'ADMIN' | 'MODERATOR' | 'DATA_MANAGER';
   priority?: TaskPriority;
   notes?: string;
   completed_at?: string;
   completed_by?: string;
+  revision?: number;
 }
 
-// Aucun journal fictif ne doit apparaître comme une action administrative réelle.
 class AdminTaskService {
   private taskOverrides: Record<string, TaskOverride> = {};
+  private persistedTasks: AdminWorkTask[] = [];
   private activityLogs: AdminActivityLog[] = [];
   private listeners: (() => void)[] = [];
+  private refreshGeneration=0;
 
-  constructor() {
-    this.loadState();
-  }
-
-  private loadState() {
-    try {
-      const storedOverrides = localStorage.getItem(STORAGE_KEYS.TASK_OVERRIDES);
-      if (storedOverrides) {
-        this.taskOverrides = JSON.parse(storedOverrides);
-      }
-    } catch (e) {
-      console.warn('Error loading task overrides from localStorage', e);
-    }
-
-    try {
-      const storedLogs = localStorage.getItem(STORAGE_KEYS.ACTIVITY_LOGS);
-      const parsed = storedLogs ? JSON.parse(storedLogs) : [];
-      this.activityLogs = Array.isArray(parsed)
-        ? parsed.filter((entry: AdminActivityLog) => entry && typeof entry.id === 'string' && !entry.id.startsWith('log-init-'))
-        : [];
-      this.saveActivityLogs();
-    } catch (e) {
-      console.warn('Error loading activity logs from localStorage', e);
-      this.activityLogs = [];
-    }
-  }
-
-  private saveTaskOverrides() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.TASK_OVERRIDES, JSON.stringify(this.taskOverrides));
-    } catch (e) {
-      console.warn('Error saving task overrides to localStorage', e);
-    }
-  }
-
-  private saveActivityLogs() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.ACTIVITY_LOGS, JSON.stringify(this.activityLogs.slice(0, 200)));
-    } catch (e) {
-      console.warn('Error saving activity logs to localStorage', e);
-    }
+  public async refresh(): Promise<void> {
+    const generation=++this.refreshGeneration;
+    const auth=dataStore.getAuth();
+    await requireAdminPersistence();
+    const [tasks,logs] = await Promise.all([readAdminRows('admin_tasks'),
+      supabase.from('admin_audit_events').select('*').order('occurred_at',{ascending:false}).limit(200)]);
+    if(logs.error) throw logs.error;
+    if(generation!==this.refreshGeneration || !dataStore.getAuth().isAuthenticated || dataStore.getAuth().email!==auth.email) return;
+    this.persistedTasks=tasks as unknown as AdminWorkTask[];
+    this.taskOverrides=Object.fromEntries(this.persistedTasks.map(task=>[task.id,task]));
+    this.activityLogs=(logs.data || []).map(event=>({id:event.id,timestamp:event.occurred_at,
+      actor_name:event.actor_id,actor_email:'',actor_role:event.actor_role,action_type:event.action,
+      entity_type:event.entity_type,entity_name:event.entity_id,summary:event.reason,
+      details:JSON.stringify({before:event.before_data,after:event.after_data,result:event.result,provenance:event.provenance})}));
+    this.notify();
   }
 
   public subscribe(listener: () => void): () => void {
@@ -81,66 +55,8 @@ class AdminTaskService {
     this.listeners.forEach(l => l());
   }
 
-  /**
-   * Log an administrative activity for audit trail
-   */
-  public logActivity(
-    actorOrEntry: string | {
-      action_type?: string;
-      description?: string;
-      author?: string;
-      author_role?: string;
-      target_id?: string;
-      target_type?: string;
-      metadata?: any;
-    },
-    actorEmail?: string,
-    actorRole?: string,
-    actionType?: AdminActivityLog['action_type'],
-    entityType?: string,
-    entityName?: string,
-    summary?: string,
-    details?: string
-  ) {
-    if (typeof actorOrEntry === 'object') {
-      const entry = actorOrEntry;
-      const newLog: AdminActivityLog = {
-        id: `act-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-        timestamp: new Date().toISOString(),
-        actor_name: entry.author || 'Admin',
-        actor_email: 'admin@suivibudget.ci',
-        actor_role: (entry.author_role as any) || 'ADMIN',
-        action_type: (entry.action_type as any) || 'UPDATE_RI_CONTACT',
-        entity_type: entry.target_type || 'SYSTEM',
-        entity_name: entry.target_id || 'Platform',
-        summary: entry.description || 'Action administrative',
-        details: entry.metadata ? JSON.stringify(entry.metadata) : undefined
-      };
-      this.activityLogs.unshift(newLog);
-      this.saveActivityLogs();
-      this.notify();
-      return;
-    }
-
-    const newLog: AdminActivityLog = {
-      id: `act-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-      timestamp: new Date().toISOString(),
-      actor_name: actorOrEntry,
-      actor_email: actorEmail || 'admin@suivibudget.ci',
-      actor_role: actorRole || 'ADMIN',
-      action_type: actionType || 'UPDATE_RI_CONTACT',
-      entity_type: entityType || 'SYSTEM',
-      entity_name: entityName || 'Plateforme',
-      summary: summary || 'Action administrative',
-      details
-    };
-
-    this.activityLogs.unshift(newLog);
-    this.saveActivityLogs();
-    this.notify();
-  }
-
   public getActivityLogs(): AdminActivityLog[] {
+    if(!dataStore.getAuth().isAuthenticated) {this.activityLogs=[];this.persistedTasks=[];this.taskOverrides={};return [];}
     return [...this.activityLogs];
   }
 
@@ -153,12 +69,13 @@ class AdminTaskService {
    * 5. Key budget/project anomalies
    */
   public getWorkQueueTasks(): AdminWorkTask[] {
+    if(!dataStore.getAuth().isAuthenticated) {this.persistedTasks=[];this.taskOverrides={};this.activityLogs=[];}
     const tasks: AdminWorkTask[] = [];
 
     // 1. SIGNALEMENTS TERRAIN (CITIZEN PROOFS)
     const pendingProofs = dataStore.getPendingProofs();
     pendingProofs.forEach(proof => {
-      const isUrgent = Boolean(proof.image_url) || 
+      const isUrgent = Boolean(proof.image_url) ||
         (proof.comment && (
           proof.comment.toLowerCase().includes('retard') ||
           proof.comment.toLowerCase().includes('arrêt') ||
@@ -179,7 +96,7 @@ class AdminTaskService {
         status: override.status || 'PENDING',
         assigned_to: override.assigned_to,
         assigned_to_role: override.assigned_to_role,
-        created_at: proof.created_at || new Date().toISOString(),
+        created_at: proof.created_at || '',
         completed_at: override.completed_at,
         completed_by: override.completed_by,
         target_tab: 'moderation',
@@ -212,7 +129,7 @@ class AdminTaskService {
           status: override.status || 'PENDING',
           assigned_to: override.assigned_to,
           assigned_to_role: override.assigned_to_role,
-          created_at: doc.published_at || new Date().toISOString(),
+          created_at: doc.published_at || '',
           completed_at: override.completed_at,
           completed_by: override.completed_by,
           target_tab: doc.document_type === 'COMPTE_ADMINISTRATIF' || doc.category === 'COMPTE_ADMINISTRATIF'
@@ -232,7 +149,7 @@ class AdminTaskService {
 
     // 3. RÉPERTOIRE CAIDP — ORGANISMES INCOMPLETS PRIORITAIRES
     // Prioritize Ministères, Grandes Institutions, Conseils Régionaux, and major Mairies without email
-    const caidpEntities = dataStore.getCaidpDirectory();
+    const caidpEntities = dataStore.getCaidpDirectory(true);
     const priorityIncompleteEntities = caidpEntities.filter(e => {
       const hasValidEmail = e.email && e.email !== "Pas d'email" && e.email.includes('@');
       const hasValidPhone = e.phone && e.phone !== "Pas de numéro" && e.phone.length > 5;
@@ -241,8 +158,8 @@ class AdminTaskService {
       // Needs attention if missing email or RI
       const isIncomplete = !hasValidEmail || !hasValidRi;
       const isHighProfile = e.category === 'MINISTERE' || e.category === 'INSTITUTION' || e.category === 'REGION';
-      return isIncomplete && (isHighProfile || !hasValidPhone);
-    }).slice(0, 30); // Focus on top priority 30 to keep queue sharp and actionable
+      return (e.revision && e.verification_status!=='VERIFIED') || (isIncomplete && (isHighProfile || !hasValidPhone));
+    });
 
     priorityIncompleteEntities.forEach(entity => {
       const taskId = `task-caidp-${entity.id}`;
@@ -260,7 +177,7 @@ class AdminTaskService {
         status: override.status || 'PENDING',
         assigned_to: override.assigned_to,
         assigned_to_role: override.assigned_to_role,
-        created_at: new Date(Date.now() - 3600000 * 48).toISOString(),
+        created_at: '',
         completed_at: override.completed_at,
         completed_by: override.completed_by,
         target_tab: 'caidp_manager',
@@ -290,7 +207,7 @@ class AdminTaskService {
         status: override.status || 'PENDING',
         assigned_to: override.assigned_to,
         assigned_to_role: override.assigned_to_role,
-        created_at: event.created_at || new Date().toISOString(),
+        created_at: event.created_at || '',
         completed_at: override.completed_at,
         completed_by: override.completed_by,
         target_tab: 'caidp_analytics',
@@ -310,69 +227,58 @@ class AdminTaskService {
       LOW: 1
     };
 
-    return tasks.sort((a, b) => {
+    const result=tasks.map(task=>({...task,...this.persistedTasks.find(saved=>saved.id===task.id)}));
+    result.push(...this.persistedTasks.filter(saved=>!result.some(task=>task.id===saved.id)));
+    return result.sort((a, b) => {
       // Pending first, then completed
       if (a.status === 'COMPLETED' && b.status !== 'COMPLETED') return 1;
       if (a.status !== 'COMPLETED' && b.status === 'COMPLETED') return -1;
-      
+
       const pDiff = (priorityWeight[b.priority] || 1) - (priorityWeight[a.priority] || 1);
       if (pDiff !== 0) return pDiff;
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
   }
 
-  /**
-   * Update task state (mark completed, in progress, on hold, change priority)
-   */
-  public updateTask(taskId: string, updates: TaskOverride) {
-    this.taskOverrides[taskId] = {
-      ...(this.taskOverrides[taskId] || {}),
-      ...updates
-    };
-    this.saveTaskOverrides();
-    this.notify();
+  private mutation(taskId: string, updates: TaskOverride & {assignee_id?: string | null}): AdminMutation {
+    const task=this.getWorkQueueTasks().find(item=>item.id===taskId);
+    if(!task) throw new Error('Tâche introuvable.');
+    const patch: Record<string,unknown>={};
+    for(const field of ['status','priority','notes','assignee_id'] as const) if(updates[field]!==undefined) patch[field]=updates[field];
+    if(!task.revision) Object.assign(patch,{type:task.type,source_id:task.source_id,title:task.title,
+      entity_name:task.entity_name,description:task.description,target_tab:task.target_tab,target_filter:task.target_filter || {}});
+    return {table:'admin_tasks',id:taskId,revision:task.revision ?? null,patch,reason:'Décision de traitement de la file de travail'};
   }
 
-  /**
-   * Assign task to a user
-   */
-  public assignTask(taskId: string, assignedTo: string, assignedRole: 'ADMIN' | 'MODERATOR' = 'MODERATOR') {
-    this.updateTask(taskId, {
-      assigned_to: assignedTo,
-      assigned_to_role: assignedRole,
-      status: 'IN_PROGRESS'
-    });
+  public async updateTask(taskId: string, updates: TaskOverride): Promise<void> {
+    await mutateAdminBatch([this.mutation(taskId,updates)]);
+    await this.refresh();
   }
 
-  /**
-   * Bulk assign tasks
-   */
-  public bulkAssignTasks(taskIds: string[], assignedTo: string, assignedRole: 'ADMIN' | 'MODERATOR' = 'MODERATOR') {
-    taskIds.forEach(id => {
-      this.taskOverrides[id] = {
-        ...(this.taskOverrides[id] || {}),
-        assigned_to: assignedTo,
-        assigned_to_role: assignedRole,
-        status: 'IN_PROGRESS'
-      };
-    });
-    this.saveTaskOverrides();
-    this.notify();
+  private async assignee(value: string): Promise<string> {
+    const {data:identity,error}=await supabase.auth.getUser();
+    if(error || !identity.user) throw new Error('Authentication required');
+    if(value===dataStore.getAuth().email || value===dataStore.getAuth().fullName) return identity.user.id;
+    const {data,error:staffError}=await supabase.rpc('admin_staff_directory');
+    if(staffError) throw staffError;
+    const matches=(data || []).filter((staff: {id:string;full_name:string})=>staff.id===value || staff.full_name===value);
+    if(matches.length!==1) throw new Error('Sélectionnez un compte actif et identifiable dans la liste des opérateurs.');
+    return matches[0].id;
   }
 
-  /**
-   * Bulk status change
-   */
-  public bulkUpdateStatus(taskIds: string[], status: TaskStatus) {
-    taskIds.forEach(id => {
-      this.taskOverrides[id] = {
-        ...(this.taskOverrides[id] || {}),
-        status,
-        ...(status === 'COMPLETED' ? { completed_at: new Date().toISOString() } : {})
-      };
-    });
-    this.saveTaskOverrides();
-    this.notify();
+  public async assignTask(taskId: string, assignedTo: string): Promise<void> {
+    await this.bulkAssignTasks([taskId],assignedTo);
+  }
+
+  public async bulkAssignTasks(taskIds: string[], assignedTo: string): Promise<void> {
+    const id=await this.assignee(assignedTo);
+    await mutateAdminBatch(taskIds.map(taskId=>this.mutation(taskId,{assignee_id:id,status:'IN_PROGRESS'})));
+    await this.refresh();
+  }
+
+  public async bulkUpdateStatus(taskIds: string[], status: TaskStatus): Promise<void> {
+    await mutateAdminBatch(taskIds.map(taskId=>this.mutation(taskId,{status})));
+    await this.refresh();
   }
 
   /**
@@ -385,9 +291,9 @@ class AdminTaskService {
       d.status === 'TO_VERIFY' || d.status === 'UPLOADED' ||
       (d.status === 'VERIFIED' && d.verification_status !== 'VERIFIED')
     ).length;
-    
-    const caidpEntities = dataStore.getCaidpDirectory();
-    const incompleteRiCount = caidpEntities.filter(e => 
+
+    const caidpEntities = dataStore.getCaidpDirectory(true);
+    const incompleteRiCount = caidpEntities.filter(e =>
       !e.email || e.email === "Pas d'email" || !e.email.includes('@') || e.ri_name === 'Non désigné'
     ).length;
 
@@ -395,9 +301,9 @@ class AdminTaskService {
     const pendingCaidpCount = caidpRequests.totalRequests;
 
     // Anomalies on budget projects
-    const allProjects = dataStore.getProjects();
-    const anomaliesCount = allProjects.filter(p => 
-      p.budget_amount_fcfa <= 0 || 
+    const allProjects = dataStore.getProjects(true);
+    const anomaliesCount = allProjects.filter(p =>
+      (p.budget_amount_fcfa != null && p.budget_amount_fcfa <= 0) ||
       (p.progress_percentage === 0 && p.current_status === 'COMPLETED') ||
       !p.commune_name
     ).length;

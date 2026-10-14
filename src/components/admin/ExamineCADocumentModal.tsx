@@ -50,7 +50,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
 
   // Authentication & RBAC status
   const auth = dataStore.getAuthState();
-  const isStaff = auth.role === 'ADMIN' || auth.role === 'DATA_MANAGER' || auth.role === 'MODERATOR';
+  const isStaff = auth.role === 'ADMIN' || auth.role === 'DATA_MANAGER';
   const canPublish = auth.role === 'ADMIN' || auth.role === 'DATA_MANAGER';
 
   // Verification Checklist State
@@ -59,6 +59,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
     deliberationAttached: false,
     tutelleApproved: Boolean(document?.approval_reference || document?.approval_date),
     balancesCoherent: false,
+    pageRanges: false,
   });
 
   // Réinitialiser les cases lors de chaque examen : ne jamais réutiliser
@@ -69,24 +70,24 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
       formatValid: false,
       deliberationAttached: false,
       tutelleApproved: Boolean(document.approval_reference || document.approval_date),
-      balancesCoherent: false,
+      balancesCoherent: false, pageRanges: false,
     });
   }, [isOpen, document?.id, document?.approval_reference, document?.approval_date]);
 
   if (!isOpen || !document) return null;
 
   const handleCopyHash = () => {
-    if (!document.checksum_sha256) return;
-    navigator.clipboard.writeText(document.checksum_sha256);
+    if (!document.manifest_sha256 && !document.checksum_sha256) return;
+    navigator.clipboard.writeText(document.manifest_sha256 || document.checksum_sha256 || '');
     setCopiedHash(true);
     setTimeout(() => setCopiedHash(false), 2000);
-    onShowToast('Empreinte SHA-256 copiée dans le presse-papier.');
+    onShowToast('Empreinte copiée dans le presse-papier.');
   };
 
   const handleUpdateStatus = async (newStatus: DocumentLifecycleStatus) => {
     setIsProcessing(true);
     try {
-      if (newStatus === 'VERIFIED' && !checks.formatValid) {
+      if (newStatus === 'VERIFIED' && (!checks.formatValid || (document.is_multipart && !checks.pageRanges))) {
         throw new Error('Confirmez la vérification du document source dans la grille de contrôle.');
       }
       if (!isStaff) {
@@ -360,11 +361,11 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                 </button>
               </div>
               <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-700 break-all select-all">
-                {document.checksum_sha256 || 'Aucun checksum calculé (document antérieur)'}
+                {document.manifest_sha256 || document.checksum_sha256 || 'Empreinte inconnue'}
               </div>
               {document.is_multipart && (
                 <p className="text-[10px] text-slate-400 mt-1">
-                  Empreinte calculée de façon déterministe à partir de la concaténation ordonnée des empreintes de chaque volet ({document.document_parts?.length || 2} volets).
+                  SHA256_PARTS_MANIFEST_V1 : ordre, identité, chemin, taille, checksum et pages de chaque fascicule. Contrôle des octets : {document.checksum_status === 'COMPUTED' ? 'confirmé par le serveur' : 'à effectuer'}.
                 </p>
               )}
             </div>
@@ -411,6 +412,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
             </div>
 
             <div className="space-y-2">
+              {document.is_multipart && <label className="flex items-center gap-2.5 text-xs text-slate-700"><input type="checkbox" checked={checks.pageRanges} onChange={e=>setChecks(prev=>({...prev,pageRanges:e.target.checked}))} /><span>J’ai contrôlé chaque fascicule et la continuité des pages sur les originaux.</span></label>}
               <label className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer">
                 <input
                   type="checkbox"
@@ -521,7 +523,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
               <button
                 type="button"
                 onClick={() => handleUpdateStatus('VERIFIED')}
-                disabled={isProcessing || !checks.formatValid || !isStaff}
+                disabled={isProcessing || !checks.formatValid || (document.is_multipart && !checks.pageRanges) || !isStaff}
                 title={!checks.formatValid ? 'Confirmez le contrôle du PDF dans la grille de vérification.' : !isStaff ? 'Rôle administrateur requis.' : undefined}
                 className="px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-brand-blue text-brand-blue hover:bg-blue-50 text-xs font-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >

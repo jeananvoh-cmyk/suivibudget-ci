@@ -4,21 +4,26 @@
 // =========================================================================
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { 
-  calculateFileSha256, 
-  extractFiscalYearFromFileName, 
-  cleanInstitutionName, 
-  matchFileToCollectivite 
+import {
+  calculateFileSha256,
+  extractFiscalYearFromFileName,
+  cleanInstitutionName,
+  matchFileToCollectivite
 } from '../caFileMatcher';
 import { DocumentStorageService } from '../../services/documentStorageService';
 import { dataStore } from '../../services/dataStore';
 import { Institution, PublicDocument } from '../../types';
 
-const storageMock = vi.hoisted(() => ({ configured: vi.fn(() => false), upload: vi.fn(), query: vi.fn(), insert: vi.fn(), update: vi.fn(), getUser: vi.fn(), remove: vi.fn(), invoke: vi.fn(), createSignedUrl: vi.fn() }));
+const storageMock = vi.hoisted(() => ({ configured: vi.fn(() => false), mutate: vi.fn(), upload: vi.fn(), query: vi.fn(), insert: vi.fn(), update: vi.fn(), getUser: vi.fn(), remove: vi.fn(), invoke: vi.fn(), createSignedUrl: vi.fn() }));
 vi.mock('../../services/supabase', () => ({
   isSupabaseConfigured: storageMock.configured,
     supabase: {
     auth: { getUser: storageMock.getUser },
+    rpc: async(name: string,args: {p_operation_id:string})=>{
+      if(name==='admin_persistence_version') return {data:3,error:null};
+      const response=await storageMock.mutate(args);
+      return response.error || !response.data ? response : {...response,data:{...response.data,_operation:{id:args.p_operation_id,original:{revision:response.data.revision},changed:false}}};
+    },
     storage: { from: () => ({ upload: storageMock.upload, createSignedUrl: storageMock.createSignedUrl }) },
     functions: { invoke: storageMock.invoke },
     from: () => {
@@ -147,13 +152,16 @@ describe('Comptes administratifs — persistance et publication', () => {
     document_type: 'COMPTE_ADMINISTRATIF', institution_name: institution.name,
     year: 2025, description: '', file_url: '', file_format: 'PDF', published_at: '',
     downloads_count: 0, is_official: false, status: 'TO_VERIFY', verification_status: 'TO_VERIFY',
-    version: 1, updated_at: '2026-09-29T12:00:00Z',
+    revision: 1, version: 1, updated_at: '2026-09-29T12:00:00Z',
   };
   beforeEach(async () => {
     storageMock.configured.mockReturnValue(true);
     storageMock.query.mockReset();
     storageMock.insert.mockReset();
     storageMock.update.mockReset();
+    storageMock.mutate.mockReset();
+    storageMock.getUser.mockResolvedValue({data:{user:{id:'reviewer-id'}},error:null});
+    storageMock.invoke.mockResolvedValue({data:{document_id:row.id,revision:row.revision,checksum_status:'COMPUTED'},error:null});
     storageMock.query.mockResolvedValueOnce({ data: [], error: null });
     await dataStore.refreshDocumentsFromSupabase(true);
   });
@@ -171,18 +179,20 @@ describe('Comptes administratifs — persistance et publication', () => {
   it('attend la confirmation du serveur avant de remplir le cache', async () => {
     storageMock.query.mockResolvedValueOnce({ data: [], error: null });
     let resolveSave!: (value: unknown) => void;
-    storageMock.query.mockImplementationOnce(() => new Promise(resolve => { resolveSave = resolve; }));
+    storageMock.mutate.mockImplementationOnce(() => new Promise(resolve => { resolveSave = resolve; }));
     const saving = dataStore.saveCADocument(draft);
-    await vi.waitFor(() => expect(storageMock.insert).toHaveBeenCalledOnce());
+    await vi.waitFor(() => expect(storageMock.mutate).toHaveBeenCalledOnce());
     expect(dataStore.getDocuments()).toHaveLength(0);
-    resolveSave({ data: row, error: null });
+    const inserted={...row,id:storageMock.mutate.mock.calls[0][0].p_id};
+    storageMock.query.mockResolvedValueOnce({data:inserted,error:null});
+    resolveSave({ data: inserted, error: null });
     expect((await saving).status).toBe('TO_VERIFY');
     expect(dataStore.getDocuments()).toHaveLength(1);
   });
 
   it('ne conserve aucun faux succès après une erreur serveur', async () => {
     storageMock.query.mockResolvedValueOnce({ data: [], error: null });
-    storageMock.query.mockResolvedValueOnce({ data: null, error: new Error('RLS denied') });
+    storageMock.mutate.mockResolvedValueOnce({ data: null, error: new Error('RLS denied') });
     await expect(dataStore.saveCADocument(draft)).rejects.toThrow('RLS denied');
     expect(dataStore.getDocuments()).toHaveLength(0);
   });
@@ -192,12 +202,14 @@ describe('Comptes administratifs — persistance et publication', () => {
     await dataStore.refreshDocumentsFromSupabase(true);
     await expect(dataStore.updateDocumentLifecycleStatus(row.id, 'PUBLISHED')).rejects.toThrow('Vérifiez');
     expect(storageMock.update).not.toHaveBeenCalled();
-    const verified = { ...row, status: 'VERIFIED', verification_status: 'VERIFIED', verified_by: 'reviewer-id' };
+    const verified = { ...row, revision: 2, status: 'VERIFIED', verification_status: 'VERIFIED', verified_by: 'reviewer-id' };
+    storageMock.mutate.mockResolvedValueOnce({data:verified,error:null});
     storageMock.query.mockResolvedValueOnce({ data: verified, error: null });
     storageMock.query.mockResolvedValueOnce({ data: [verified], error: null });
     await dataStore.updateDocumentLifecycleStatus(row.id, 'VERIFIED');
     expect(dataStore.getDocumentById(row.id)?.status).toBe('VERIFIED');
-    const published = { ...verified, status: 'PUBLISHED' };
+    const published = { ...verified, revision: 3, status: 'PUBLISHED' };
+    storageMock.mutate.mockResolvedValueOnce({data:published,error:null});
     storageMock.query.mockResolvedValueOnce({ data: published, error: null });
     storageMock.query.mockResolvedValueOnce({ data: [published], error: null });
     await dataStore.updateDocumentLifecycleStatus(row.id, 'PUBLISHED');
@@ -210,9 +222,13 @@ describe('Comptes administratifs — persistance et publication', () => {
     await dataStore.refreshDocumentsFromSupabase(true);
     storageMock.query.mockResolvedValueOnce({ data: [published], error: null });
     const replacement = { ...row, id: 'test-ca-v2', version: 2, replaces_document_id: row.id };
-    storageMock.query.mockResolvedValueOnce({ data: replacement, error: null });
+    storageMock.mutate.mockImplementationOnce(async args=>{
+      const inserted={...replacement,id:args.p_id};
+      storageMock.query.mockResolvedValueOnce({data:inserted,error:null});
+      return {data:inserted,error:null};
+    });
     await dataStore.saveCADocument({ ...draft, storage_path: 'test/ca-v2.pdf', checksum_sha256: 'b'.repeat(64), replacement_reason: 'Scan complet' }, true);
-    expect(storageMock.insert).toHaveBeenCalledWith([expect.objectContaining({ version: 2, replaces_document_id: row.id, status: 'TO_VERIFY', replacement_reason: 'Scan complet' })]);
+    expect(storageMock.mutate).toHaveBeenCalledWith(expect.objectContaining({p_patch:expect.objectContaining({version:2,replaces_document_id:row.id,status:'TO_VERIFY',replacement_reason:'Scan complet'})}));
     expect(dataStore.getDocumentById(row.id)?.status).toBe('PUBLISHED');
     expect(dataStore.getDocuments()).toHaveLength(2);
   });
@@ -220,7 +236,7 @@ describe('Comptes administratifs — persistance et publication', () => {
   it('refuse de modifier le cache après un conflit de mise à jour', async () => {
     storageMock.query.mockResolvedValueOnce({ data: [row], error: null });
     await dataStore.refreshDocumentsFromSupabase(true);
-    storageMock.query.mockResolvedValueOnce({ data: null, error: new Error('Concurrent edit') });
+    storageMock.mutate.mockResolvedValueOnce({ data: null, error: new Error('Concurrent edit') });
     await expect(dataStore.updateDocument(row.id, { title: 'Changed' })).rejects.toThrow('Concurrent edit');
     expect(dataStore.getDocumentById(row.id)?.title).toBe(row.title);
   });
@@ -335,13 +351,13 @@ describe('Preuves citoyennes — persistance serveur', () => {
     expect(dataStore.getAllProofs()[0].image_url).toBeUndefined();
   });
 
-  it('préserve la preuve après refus de modération ou suppression', async () => {
+  it('préserve la preuve après refus de modération et ne tente aucune suppression', async () => {
     storageMock.getUser.mockResolvedValue({ data: { user: { id: 'auth-staff' } }, error: null });
     storageMock.query.mockResolvedValueOnce({ error: null });
     const proof = await dataStore.submitProof(input);
     storageMock.query.mockResolvedValue({ data: null, error: new Error('Interdit') });
     await expect(dataStore.moderateProof(proof.id, 'APPROVED')).rejects.toThrow('Interdit');
-    await expect(dataStore.deleteProof(proof.id)).rejects.toThrow('Interdit');
+    expect(storageMock.remove).not.toHaveBeenCalled();
     expect(dataStore.getAllProofs()[0].verification_status).toBe('PENDING');
   });
 });

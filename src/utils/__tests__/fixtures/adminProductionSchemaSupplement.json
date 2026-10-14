@@ -1,0 +1,156 @@
+{
+  "enums": [
+    {
+      "name": "institution_type",
+      "labels": [
+        "MAIRIE",
+        "REGION",
+        "DISTRICT",
+        "MINISTERE",
+        "INSTITUTION",
+        "AUTORITE_REGULATION"
+      ],
+      "schema": "public"
+    },
+    {
+      "name": "project_status",
+      "labels": [
+        "NOT_STARTED",
+        "IN_PROGRESS",
+        "COMPLETED",
+        "SUSPENDED"
+      ],
+      "schema": "public"
+    },
+    {
+      "name": "user_role",
+      "labels": [
+        "ADMIN",
+        "MODERATOR",
+        "DATA_MANAGER",
+        "CITIZEN"
+      ],
+      "schema": "public"
+    },
+    {
+      "name": "verification_status",
+      "labels": [
+        "PENDING",
+        "APPROVED",
+        "REJECTED"
+      ],
+      "schema": "public"
+    },
+    {
+      "name": "buckettype",
+      "labels": [
+        "STANDARD",
+        "ANALYTICS",
+        "VECTOR"
+      ],
+      "schema": "storage"
+    }
+  ],
+  "helpers": [
+    "CREATE OR REPLACE FUNCTION auth.uid()\n RETURNS uuid\n LANGUAGE sql\n STABLE\nAS $function$\n  select \n  coalesce(\n    nullif(current_setting('request.jwt.claim.sub', true), ''),\n    (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub')\n  )::uuid\n$function$\n",
+    "CREATE OR REPLACE FUNCTION auth.role()\n RETURNS text\n LANGUAGE sql\n STABLE\nAS $function$\n  select \n  coalesce(\n    nullif(current_setting('request.jwt.claim.role', true), ''),\n    (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'role')\n  )::text\n$function$\n",
+    "CREATE OR REPLACE FUNCTION storage.foldername(name text)\n RETURNS text[]\n LANGUAGE plpgsql\n IMMUTABLE\nAS $function$\nDECLARE\n    _parts text[];\nBEGIN\n    -- Split on \"/\" to get path segments\n    SELECT string_to_array(name, '/') INTO _parts;\n    -- Return everything except the last segment\n    RETURN _parts[1 : array_length(_parts,1) - 1];\nEND\n$function$\n",
+    "CREATE OR REPLACE FUNCTION auth.jwt()\n RETURNS jsonb\n LANGUAGE sql\n STABLE\nAS $function$\n  select \n    coalesce(\n        nullif(current_setting('request.jwt.claim', true), ''),\n        nullif(current_setting('request.jwt.claims', true), '')\n    )::jsonb\n$function$\n",
+    "CREATE OR REPLACE FUNCTION storage.filename(name text)\n RETURNS text\n LANGUAGE plpgsql\n IMMUTABLE\nAS $function$\nDECLARE\n    _parts text[];\nBEGIN\n    SELECT string_to_array(name, '/') INTO _parts;\n    RETURN _parts[array_length(_parts, 1)];\nEND\n$function$\n",
+    "CREATE OR REPLACE FUNCTION storage.extension(name text)\n RETURNS text\n LANGUAGE plpgsql\n IMMUTABLE\nAS $function$\nDECLARE\n    _parts text[];\n    _filename text;\nBEGIN\n    -- Split on \"/\" to get path segments\n    SELECT string_to_array(name, '/') INTO _parts;\n    -- Get the last path segment (the actual filename)\n    SELECT _parts[array_length(_parts, 1)] INTO _filename;\n    -- Extract extension: reverse, split on '.', then reverse again\n    RETURN reverse(split_part(reverse(_filename), '.', 1));\nEND\n$function$\n"
+  ],
+  "generated": [
+    {
+      "table": "users",
+      "column": "confirmed_at",
+      "schema": "auth",
+      "expression": "LEAST(email_confirmed_at, phone_confirmed_at)"
+    },
+    {
+      "table": "identities",
+      "column": "email",
+      "schema": "auth",
+      "expression": "lower((identity_data ->> 'email'::text))"
+    },
+    {
+      "table": "objects",
+      "column": "path_tokens",
+      "schema": "storage",
+      "expression": "string_to_array(name, '/'::text)"
+    },
+    {
+      "table": "scim_users",
+      "column": "user_name",
+      "schema": "auth",
+      "expression": "lower((resource ->> 'userName'::text))"
+    },
+    {
+      "table": "scim_users",
+      "column": "external_id",
+      "schema": "auth",
+      "expression": "(resource ->> 'externalId'::text)"
+    },
+    {
+      "table": "scim_users",
+      "column": "active",
+      "schema": "auth",
+      "expression": "COALESCE(((resource ->> 'active'::text))::boolean, true)"
+    }
+  ],
+  "storageConstraints": [
+    {
+      "name": "buckets_lifecycle_configuration_pair_check",
+      "type": "c",
+      "table": "buckets",
+      "definition": "CHECK (((lifecycle_configuration IS NULL) = (lifecycle_configuration_generation IS NULL)))"
+    },
+    {
+      "name": "buckets_lifecycle_configuration_shape_check",
+      "type": "c",
+      "table": "buckets",
+      "definition": "CHECK (((lifecycle_configuration IS NULL) OR ((jsonb_typeof(lifecycle_configuration) = 'object'::text) AND (lifecycle_configuration ? 'rules'::text) AND\nCASE\n    WHEN (jsonb_typeof((lifecycle_configuration -> 'rules'::text)) = 'array'::text) THEN ((jsonb_array_length((lifecycle_configuration -> 'rules'::text)) >= 1) AND (jsonb_array_length((lifecycle_configuration -> 'rules'::text)) <= 1000))\n    ELSE false\nEND)))"
+    },
+    {
+      "name": "buckets_lifecycle_configuration_standard_only_check",
+      "type": "c",
+      "table": "buckets",
+      "definition": "CHECK (((type = 'STANDARD'::storage.buckettype) OR ((lifecycle_configuration IS NULL) AND (lifecycle_configuration_generation IS NULL))))"
+    },
+    {
+      "name": "buckets_pkey",
+      "type": "p",
+      "table": "buckets",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "buckets_versioning_dark_check",
+      "type": "c",
+      "table": "buckets",
+      "definition": "CHECK ((versioning_status = 'DISABLED'::text))"
+    },
+    {
+      "name": "buckets_versioning_standard_only_check",
+      "type": "c",
+      "table": "buckets",
+      "definition": "CHECK (((type = 'STANDARD'::storage.buckettype) OR (versioning_status = 'DISABLED'::text)))"
+    },
+    {
+      "name": "buckets_versioning_status_check",
+      "type": "c",
+      "table": "buckets",
+      "definition": "CHECK ((versioning_status = ANY (ARRAY['DISABLED'::text, 'ENABLED'::text, 'SUSPENDED'::text])))"
+    },
+    {
+      "name": "objects_bucketId_fkey",
+      "type": "f",
+      "table": "objects",
+      "definition": "FOREIGN KEY (bucket_id) REFERENCES storage.buckets(id)"
+    },
+    {
+      "name": "objects_pkey",
+      "type": "p",
+      "table": "objects",
+      "definition": "PRIMARY KEY (id)"
+    }
+  ]
+}

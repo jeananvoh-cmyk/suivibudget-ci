@@ -3,14 +3,17 @@
 // SuiviBudget Côte d'Ivoire - Architecture Multi-Exercices & Matrice 232
 // =========================================================================
 
+import type { DocumentOcrStatus } from '../../supabase/functions/_shared/documentIntegrity';
+export type { DocumentOcrStatus } from '../../supabase/functions/_shared/documentIntegrity';
+
 import type { DocumentAvailability, DocumentProvenance, ExtractionVerificationStatus } from '../review/domain/documents';
 
-export type DocumentCategory = 
-  | 'RAPPORT_AUDIT' 
-  | 'MARCHE_PUBLIC' 
-  | 'BUDGET_OFFICIEL' 
-  | 'LOI_CAIDP' 
-  | 'ETUDE_TECHNIQUE' 
+export type DocumentCategory =
+  | 'RAPPORT_AUDIT'
+  | 'MARCHE_PUBLIC'
+  | 'BUDGET_OFFICIEL'
+  | 'LOI_CAIDP'
+  | 'ETUDE_TECHNIQUE'
   | 'GUIDE_CITOYEN'
   | 'COMPTE_ADMINISTRATIF';
 
@@ -95,33 +98,36 @@ export interface PublicDocument {
   verified_at?: string | null;
   created_at?: string;
   updated_at?: string;
-
-  // Extension multi-parties & numérisation (scans volumineux, fascicules)
-  is_multipart?: boolean;
-  parts_count?: number;
+  revision?: number;
+  is_multipart?: boolean | null;
+  parts_count?: number | null;
   document_parts?: DocumentPartInfo[];
-  is_scanned?: boolean;
-  has_text_layer?: boolean;
-  ocr_status?: DocumentOcrStatus;
+  is_scanned?: boolean | null;
+  has_text_layer?: boolean | null;
+  ocr_status?: DocumentOcrStatus | null;
+  checksum_status?: 'DECLARED' | 'COMPUTED';
+  checksum_algorithm?: 'SHA256_FILE_V1' | 'SHA256_PARTS_MANIFEST_V1';
+  manifest_sha256?: string | null;
+
 }
 
-export type DocumentOcrStatus = 'NOT_APPLICABLE' | 'NOT_IMPLEMENTED' | 'OCR_PENDING' | 'MANUAL_TRANSCRIPTION' | 'PROCESSED' | 'FAILED' | 'NONE';
-
-/**
- * Informations sur un fascicule / volet d'un document multi-parties
- */
 export interface DocumentPartInfo {
+  id?: string;
   part_number: number;
   file_name: string;
+  original_filename?: string;
+  notes?: string;
   page_range: string;
-  page_start?: number;
-  page_end?: number;
+  page_start?: number | null;
+  page_end?: number | null;
+  page_range_verified?: boolean;
   checksum_sha256?: string;
+  checksum_status?: 'DECLARED' | 'COMPUTED';
   file_size_bytes?: number;
   file_size?: string;
   storage_path?: string;
   file_url?: string;
-  notes?: string;
+  status?: DocumentLifecycleStatus;
 }
 
 /**

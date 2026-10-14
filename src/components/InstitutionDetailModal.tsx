@@ -83,7 +83,7 @@ const ModalLeaderAvatar: React.FC<{
           className="absolute inset-0 w-full h-full object-cover object-center filter blur-md scale-125 opacity-35 pointer-events-none"
         />
         {/* Filtre studio doux */}
-        <div 
+        <div
           className="absolute inset-0 pointer-events-none z-10 opacity-75"
           style={{
             background: 'radial-gradient(circle at 50% 35%, transparent 40%, rgba(15, 23, 42, 0.45) 75%, rgba(15, 23, 42, 0.75) 100%)'
@@ -379,8 +379,8 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
       .then(({ getBudgetLinesForEntity }) => {
         if (isMounted) {
           const lines = getBudgetLinesForEntity(
-            institution.name, 
-            institution.type, 
+            institution.name,
+            institution.type,
             institution.leader_title || institution.leader_name,
             institution.id
           );
@@ -409,7 +409,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
 
   // Filter lines
   const filteredLines = safeBudgetLines.filter(l => {
-    const matchesSearch = !lineSearch.trim() || 
+    const matchesSearch = !lineSearch.trim() ||
       l.libelle.toLowerCase().includes(lineSearch.toLowerCase().trim()) ||
       (l.sous_categorie_3 && l.sous_categorie_3.toLowerCase().includes(lineSearch.toLowerCase().trim()));
 
@@ -422,15 +422,15 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
 
   // Resolve CAIDP Information Officer accurately from registry
   const caidpMatch = dataStore.findCaidpEntity(institution.name) || findCaidpRI(institution.name);
-  const riName = (caidpMatch?.ri_name && caidpMatch.ri_name !== 'Non désigné') 
-    ? caidpMatch.ri_name 
+  const riName = (caidpMatch?.ri_name && caidpMatch.ri_name !== 'Non désigné')
+    ? caidpMatch.ri_name
     : (institution.info_officer_name || '');
   const riFunction = caidpMatch?.ri_function || institution.info_officer_title || "Service d'Accès aux Documents Publics (Loi n°2013-867)";
-  const riEmail = (caidpMatch?.email && caidpMatch.email !== "Pas d'email" && caidpMatch.email !== "") 
-    ? caidpMatch.email 
+  const riEmail = (caidpMatch?.email && caidpMatch.email !== "Pas d'email" && caidpMatch.email !== "")
+    ? caidpMatch.email
     : (institution.info_officer_email && institution.info_officer_email !== "Pas d'email" ? institution.info_officer_email : "");
-  const riPhone = (caidpMatch?.phone && caidpMatch.phone !== "Pas de numéro" && caidpMatch.phone !== "") 
-    ? caidpMatch.phone 
+  const riPhone = (caidpMatch?.phone && caidpMatch.phone !== "Pas de numéro" && caidpMatch.phone !== "")
+    ? caidpMatch.phone
     : (institution.info_officer_phone && institution.info_officer_phone !== "Pas de numéro" ? institution.info_officer_phone : "");
 
   // Clean entity name for project matching
@@ -527,7 +527,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
 
   return (
     <div onClick={docModalOpen ? undefined : onClose} className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 md:p-6 animate-in fade-in duration-200">
-      <div 
+      <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
@@ -546,7 +546,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
             <div className="flex items-center gap-3.5 sm:gap-4 flex-1 min-w-0">
               {/* Leader / Minister Photo (Format harmonieux avec gestion fallback) */}
               <ModalLeaderAvatar
-                photoUrl={institution.leader_photo_url}
+                photoUrl={institution.leader_photo_display_url || institution.leader_photo_url}
                 name={institution.leader_name || institution.name}
                 isPresidence={institution.id === 'inst-presidence'}
               />
@@ -556,14 +556,14 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide border shadow-2xs ${
                     institution.type === 'MINISTERE' ? 'bg-sky-50 text-sky-800 border-sky-200' :
                     institution.type === 'MAIRIE' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
-                    institution.type === 'REGION' ? 'bg-indigo-50 text-indigo-800 border-indigo-200' : 
+                    institution.type === 'REGION' ? 'bg-indigo-50 text-indigo-800 border-indigo-200' :
                     institution.type === 'DISTRICT' ? 'bg-purple-50 text-purple-800 border-purple-200' :
                     institution.type === 'AUTORITE_REGULATION' ? 'bg-amber-50 text-amber-800 border-amber-200' :
                     'bg-blue-50 text-brand-blue border-blue-200'
                   }`}>
-                    {institution.type === 'MINISTERE' ? 'Gouvernement de Côte d\'Ivoire' : 
-                     institution.type === 'MAIRIE' ? 'Collectivité Municipale' : 
-                     institution.type === 'REGION' ? 'Conseil Régional' : 
+                    {institution.type === 'MINISTERE' ? 'Gouvernement de Côte d\'Ivoire' :
+                     institution.type === 'MAIRIE' ? 'Collectivité Municipale' :
+                     institution.type === 'REGION' ? 'Conseil Régional' :
                      institution.type === 'DISTRICT' ? 'District Autonome' :
                      institution.type === 'AUTORITE_REGULATION' ? 'Autorité de Régulation' :
                      'Institution de la République'}
@@ -611,9 +611,9 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
             {/* Quick Actions & Close Button */}
             <div className="flex items-center gap-2 flex-shrink-0">
               {institution.website && isSafeUrl(institution.website) && (
-                <a 
-                  href={institution.website} 
-                  target="_blank" 
+                <a
+                  href={institution.website}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 hover:text-brand-blue hover:border-brand-blue/40 border border-slate-200 shadow-2xs transition-all"
                   title={`Site officiel : ${institution.website}`}
@@ -625,9 +625,9 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
               )}
 
               {institution.facebook_url && isSafeUrl(institution.facebook_url) && (
-                <a 
-                  href={institution.facebook_url} 
-                  target="_blank" 
+                <a
+                  href={institution.facebook_url}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 hover:text-[#1877F2] hover:border-blue-200 border border-slate-200 shadow-2xs transition-all"
                   title={`Page Facebook officielle : ${institution.facebook_url}`}
@@ -658,9 +658,9 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
           {(institution.website || institution.facebook_url) && (
             <div className="flex sm:hidden items-center gap-2 pt-2.5 mt-2 border-t border-slate-200/60">
               {institution.website && isSafeUrl(institution.website) && (
-                <a 
-                  href={institution.website} 
-                  target="_blank" 
+                <a
+                  href={institution.website}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 shadow-2xs active:scale-95 transition-all"
                 >
@@ -669,9 +669,9 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                 </a>
               )}
               {institution.facebook_url && isSafeUrl(institution.facebook_url) && (
-                <a 
-                  href={institution.facebook_url} 
-                  target="_blank" 
+                <a
+                  href={institution.facebook_url}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-50 text-[#1877F2] border border-blue-200 shadow-2xs active:scale-95 transition-all"
                 >
@@ -691,20 +691,20 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
         {/* ========================================================= */}
         <div className="px-4 sm:px-6 bg-white border-b border-slate-200 grid grid-cols-2 sm:flex sm:items-center gap-2 sm:overflow-x-auto scrollbar-none flex-shrink-0">
           {[
-            { 
-              id: 'PROJECTS', 
+            {
+              id: 'PROJECTS',
               label: 'Chantiers & Projets',
               badge: relatedProjects.length > 0 ? `${relatedProjects.length}` : undefined
             },
-            { 
-              id: 'FINANCES', 
+            {
+              id: 'FINANCES',
               label: institution.type === 'MINISTERE' ? 'Budget 2026 (Budget-Programmes)' : 'Budget & Finances',
               badge: institution.type === 'MINISTERE'
                 ? (isPilotMinistry(institution.id) ? '10 Programmes' : 'Exercice 2026')
                 : (isLoadingLines ? 'Chargement...' : (entityBudgetLines.length > 0 ? `${entityBudgetLines.length} lignes` : 'Exercice 2026'))
             },
-            { 
-              id: 'LEADER_MISSIONS', 
+            {
+              id: 'LEADER_MISSIONS',
               label: institution.type === 'MINISTERE' ? 'Le Ministre & Missions' :
                      institution.type === 'REGION' ? 'Présidence & Organisation' :
                      institution.type === 'MAIRIE' ? 'Le Maire & Organisation' : 'Direction & Missions',
@@ -933,19 +933,19 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     const pTierBadge = getProjectTierBadge(pTier);
 
                     return (
-                      <div 
-                        key={proj.id} 
+                      <div
+                        key={proj.id}
                         className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs hover:border-brand-blue/50 hover:shadow-xs transition-all space-y-3 group"
                       >
                         <div className="flex flex-col sm:flex-row gap-4">
                           {/* Photo miniature si disponible */}
                           {proj.image_url && (
                             <div className="w-full sm:w-44 h-28 sm:h-auto rounded-xl overflow-hidden bg-slate-900 flex-shrink-0 relative">
-                              <img 
-                                src={proj.image_url} 
-                                alt={proj.title} 
+                              <img
+                                src={proj.image_url}
+                                alt={proj.title}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                loading="lazy" 
+                                loading="lazy"
                               />
                               {proj.progress_percentage > 0 && (
                                 <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[10px] font-black text-emerald-300 border border-white/20">
@@ -1469,10 +1469,10 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                       Accès aux Documents Publics (Loi n°2013-867)
                     </h4>
                   </div>
-                  <a 
-                    href="https://caidp.ci/institutrecherche" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                  <a
+                    href="https://caidp.ci/institutrecherche"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-[10px] text-brand-orange hover:underline font-bold flex items-center gap-1"
                   >
                     <span>Registre CAIDP</span>

@@ -7,6 +7,9 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 import { calculateFileSha256 } from '../utils/caFileMatcher';
 import { OfficialDocumentType, DocumentPartInfo } from '../types';
+import { calculateManifestSha256 } from '../../supabase/functions/_shared/documentIntegrity';
+export { calculateManifestSha256 } from '../../supabase/functions/_shared/documentIntegrity';
+import { requireAdminPersistence } from './adminPersistenceService';
 
 export interface DocumentUploadOptions {
   institutionId: string;
@@ -61,22 +64,13 @@ export interface MultiPartUploadResult {
  * Calcule l'empreinte déterministe d'un manifeste multi-parties
  * à partir des empreintes ordonnées de chaque volet
  */
-export async function calculateManifestSha256(partHashes: string[]): Promise<string> {
-  const cleanHashes = partHashes.map(h => h.trim().toLowerCase()).filter(Boolean);
-  if (cleanHashes.length === 0) return '';
-  const manifestPayload = cleanHashes.join(':');
-  const encoder = new TextEncoder();
-  const data = encoder.encode(manifestPayload);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
+
 
 /**
  * Valide les plages de pages des fascicules
  */
 export function validateDocumentPageRanges(
-  parts: Array<{ part_number?: number; partNumber?: number; page_start?: number; pageStart?: number; page_end?: number; pageEnd?: number; page_range?: string; pageRange?: string }>
+  parts: Array<{ part_number?: number; partNumber?: number; page_start?: number | null; pageStart?: number; page_end?: number | null; pageEnd?: number; page_range?: string; pageRange?: string }>
 ): { isValid: boolean; error?: string; errors: string[]; totalPages?: number } {
   const errors: string[] = [];
   if (!parts || parts.length === 0) {
@@ -89,13 +83,14 @@ export function validateDocumentPageRanges(
     page_start: p.page_start ?? p.pageStart,
     page_end: p.page_end ?? p.pageEnd,
     page_range: p.page_range ?? p.pageRange,
-  })).sort((a, b) => a.part_number - b.part_number);
+  }));
 
   let lastEnd = 0;
   let isValid = true;
 
   for (let i = 0; i < sorted.length; i++) {
     const p = sorted[i];
+    if(p.part_number!==i+1) {errors.push("Ordre des fascicules invalide.");isValid=false;}
     let start = p.page_start;
     let end = p.page_end;
 
@@ -108,13 +103,13 @@ export function validateDocumentPageRanges(
       }
     }
 
-    if (start === undefined || end === undefined || isNaN(start) || isNaN(end)) {
+    if (start == null || end == null || isNaN(start) || isNaN(end)) {
       errors.push(`La plage de pages du fascicule ${p.part_number} est indéterminée.`);
       isValid = false;
       continue;
     }
 
-    if (start <= 0 || end <= 0) {
+    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start <= 0 || end <= 0 || (i===0 && start!==1)) {
       errors.push(`Les numéros de pages du fascicule ${p.part_number} doivent être strictement positifs.`);
       isValid = false;
       continue;
@@ -163,7 +158,42 @@ export function buildCanonicalStoragePath(
 }
 
 export class DocumentStorageService {
-  public static BUCKET_NAME = 'public_documents';
+  public static async uploadAdminMedia(file: File): Promise<string> {
+    await requireAdminPersistence();
+    if(file.size<1 || file.size>10*1024*1024) throw new Error('Média limité à 10 Mo.');
+    const bytes=new Uint8Array(await file.slice(0,16).arrayBuffer());
+    const prefix=new TextDecoder().decode(bytes);
+    const extensions: Record<string,string>={'image/webp':'webp','image/png':'png','image/jpeg':'jpg','application/pdf':'pdf'};
+    const extension=extensions[file.type];
+    const valid=(file.type==='image/webp' && prefix.startsWith('RIFF') && prefix.slice(8,12)==='WEBP')
+      || (file.type==='image/png' && bytes[0]===137 && prefix.slice(1,4)==='PNG')
+      || (file.type==='image/jpeg' && bytes[0]===255 && bytes[1]===216 && bytes[2]===255)
+      || (file.type==='application/pdf' && prefix.startsWith('%PDF-'));
+    if(!extension || !valid) throw new Error('Contenu ou type de média invalide. SVG et fichiers exécutables interdits.');
+    const {data,error}=await supabase.auth.getUser();
+    if(error || !data.user) throw new Error('Authentication required');
+    const checksum=await calculateFileSha256(file);
+    const path=`${data.user.id}/${checksum}.${extension}`;
+    const upload=await supabase.storage.from('admin_media').upload(path,file,{contentType:file.type,upsert:false});
+    if(upload.error) {
+      if(!['409','Duplicate'].includes(String(upload.error.statusCode)) && !/already exists/i.test(upload.error.message)) throw upload.error;
+      const existing=await supabase.functions.invoke('admin-media-url',{body:{action:'check-upload',path}});
+      if(existing.error || existing.data?.checksum_sha256!==checksum) throw new Error('Média existant non contrôlé : téléversement bloqué.');
+    }
+    return `storage://admin_media/${path}`;
+  }
+
+  private static BUCKET_NAME = 'public_documents';
+
+  public static calculateMultipartSha256(parts: DocumentPartInfo[]): Promise<string> { return calculateManifestSha256(parts); }
+
+  public static async uploadMultipartDocuments(inputs: {file:File;page_start:number;page_end:number}[], options: DocumentUploadOptions, pageCount?: number): Promise<{parts:DocumentPartInfo[];checksum:string}> {
+    const ranges=validateDocumentPageRanges(inputs);
+    if(!ranges.isValid || (pageCount!==undefined && pageCount!==ranges.totalPages)) throw new Error('Nombre total de pages incohérent ou plages invalides.');
+    const result=await this.uploadMultiPartDocument(inputs.map((part,index)=>({...part,partNumber:index+1,fileName:part.file.name})),options);
+    if(!result.success) throw new Error(result.error);
+    return {parts:result.documentParts,checksum:result.manifestChecksumSha256};
+  }
 
   /**
    * Construit le chemin de stockage canonique :
@@ -210,7 +240,9 @@ export class DocumentStorageService {
     originalFilename: string,
     options: DocumentUploadOptions
   ): Promise<DocumentUploadResult> {
-    const storagePath = this.buildCanonicalStoragePath(options, originalFilename, options.partNumber);
+    let storagePath = this.buildCanonicalStoragePath(options, originalFilename);
+    if(!/^[a-zA-Z0-9_-]+$/.test(options.institutionId) || !Number.isInteger(options.fiscalYear) || options.fiscalYear<1960 || !Number.isInteger(options.version ?? 1) || (options.version ?? 1)<1 ||
+      (options.partNumber!==undefined && (!Number.isInteger(options.partNumber) || options.partNumber<1 || options.partNumber>100))) throw new Error('Identité documentaire invalide.');
     const mimeType = file.type || 'application/pdf';
     const fileSizeBytes = file.size;
 
@@ -247,12 +279,18 @@ export class DocumentStorageService {
 
     try {
       result.checksumSha256 = await calculateFileSha256(file);
+      if(options.partNumber) storagePath=storagePath.replace(/\.[^.]+$/,`-part-${options.partNumber}-${result.checksumSha256}.pdf`);
+      result.storagePath=storagePath;
       const { data, error } = await supabase.storage
         .from(this.BUCKET_NAME)
         .upload(storagePath, file, { cacheControl: '300', upsert: false, contentType: mimeType });
 
       if (error || !data) {
-        return { ...result, error: error?.message || 'Téléversement non confirmé.' };
+        if(error && (/already exists|Duplicate/i.test(error.message) || String(error.statusCode)==='409')) {
+          const checked=await supabase.functions.invoke('admin-media-url',{body:{action:'check-upload',bucket:'public_documents',path:storagePath,checksum_sha256:result.checksumSha256,file_size_bytes:fileSizeBytes}});
+          if(!checked.error && checked.data?.checksum_sha256===result.checksumSha256) return {...result,success:true};
+        }
+        return { ...result, success: false, error: error?.message || 'Téléversement non confirmé.' };
       }
 
       return { ...result, success: true };
@@ -300,7 +338,7 @@ export class DocumentStorageService {
       }))
     );
 
-    if (!pageCheck.isValid) {
+    if (!pageCheck.isValid || normalizedParts.length<2 || normalizedParts.length>100) {
       return {
         success: false,
         documentParts: [],
@@ -316,6 +354,11 @@ export class DocumentStorageService {
 
     // 2. Traitement séquentiel de chaque partie
     try {
+      const hashes=new Set<string>();
+      for(const item of normalizedParts) {
+        if(item.file.size<1 || item.file.size>50*1024*1024 || item.file.type!=='application/pdf' || new TextDecoder().decode(await item.file.slice(0,5).arrayBuffer())!=='%PDF-') throw new Error('PDF réel requis pour chaque fascicule.');
+        const hash=await calculateFileSha256(item.file);if(hashes.has(hash)) throw new Error('Un original est présent deux fois.');hashes.add(hash);
+      }
       for (const item of normalizedParts) {
         const uploadRes = await this.uploadDocument(item.file, item.fileName, {
           ...options,
@@ -330,6 +373,7 @@ export class DocumentStorageService {
         totalBytes += uploadRes.fileSizeBytes;
 
         documentParts.push({
+          id:`part-${item.partNumber}-${uploadRes.checksumSha256}`,original_filename:item.fileName,status:'TO_VERIFY',checksum_status:'DECLARED',
           part_number: item.partNumber,
           file_name: item.fileName,
           page_range: item.pageRange,
@@ -344,8 +388,7 @@ export class DocumentStorageService {
       }
 
       // 3. Calcul déterministe de l'empreinte logique du manifeste
-      const partHashes = documentParts.map(p => p.checksum_sha256 || '');
-      const manifestChecksum = await calculateManifestSha256(partHashes);
+      const manifestChecksum = await calculateManifestSha256(documentParts);
 
       const sizeMb = (totalBytes / (1024 * 1024)).toFixed(1);
       const totalSizeFormatted = parseFloat(sizeMb) >= 1 ? `${sizeMb} Mo` : `${Math.round(totalBytes / 1024)} Ko`;
@@ -356,7 +399,7 @@ export class DocumentStorageService {
         manifestChecksumSha256: manifestChecksum,
         totalFileSizeBytes: totalBytes,
         totalFileSizeFormatted: totalSizeFormatted,
-        primaryStoragePath: uploadedPaths[0] || '',
+        primaryStoragePath: '',
         totalPageCount: pageCheck.totalPages || 0,
         uploadedPaths,
       };

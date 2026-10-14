@@ -63,7 +63,7 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
   const baseInstitutions = React.useMemo(() => {
     const list = (institutions && institutions.length > 0) ? institutions : dataStore.getInstitutions();
     const storeMap = new Map(list.map(i => [i.id, i]));
-    return NATIONAL_INSTITUTIONS_DATA.map(item => {
+    return NATIONAL_INSTITUTIONS_DATA.filter(item=>storeMap.has(item.id)).map(item => {
       const fromStore = storeMap.get(item.id);
       return fromStore ? { ...item, ...fromStore } : item;
     });
@@ -161,8 +161,8 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
               <div className="relative flex-shrink-0">
                 <div className="w-36 h-36 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-3xl overflow-hidden border-4 border-amber-400 shadow-2xl bg-[#081a2f] cursor-zoom-in group/pres">
-                  <img 
-                    src={presidence.leader_photo_url || "/images/presidence_alassane_ouattara.png"} 
+                  <img
+                    src={presidence.leader_photo_display_url || presidence.leader_photo_url || "/images/presidence_alassane_ouattara.png"}
                     alt={presidence.leader_name}
                     onError={(e) => {
                       const target = e.currentTarget;
@@ -170,7 +170,7 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
                         target.src = "https://www.gouv.ci/uploads/institutions/175277585572.png";
                       }
                     }}
-                    className="w-full h-full object-cover object-top transition-transform duration-500 ease-out group-hover/pres:scale-110" 
+                    className="w-full h-full object-cover object-top transition-transform duration-500 ease-out group-hover/pres:scale-110"
                   />
                 </div>
                 <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 text-[10px] sm:text-[11px] font-black uppercase px-3.5 py-0.5 rounded-full shadow-lg whitespace-nowrap">
@@ -204,9 +204,9 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
                 {/* Direct Links */}
                 <div className="flex flex-wrap items-center gap-2.5 pt-2 text-xs font-semibold text-slate-200">
                   {presidence.website && (
-                    <a 
-                      href={presidence.website} 
-                      target="_blank" 
+                    <a
+                      href={presidence.website}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-colors shadow-2xs font-bold text-xs"
                       title={`Site officiel : ${presidence.website}`}
@@ -217,9 +217,9 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
                     </a>
                   )}
                   {presidence.facebook_url && (
-                    <a 
-                      href={presidence.facebook_url} 
-                      target="_blank" 
+                    <a
+                      href={presidence.facebook_url}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-400/30 transition-colors shadow-2xs font-bold text-xs"
                       title={`Page Facebook : ${presidence.facebook_url}`}
@@ -283,7 +283,7 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
 
 
             return (
-              <div 
+              <div
                 key={inst.id}
                 onClick={() => setSelectedInstForDetail(inst)}
                 className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-brand-blue/50 transition-all flex flex-col justify-between group cursor-pointer"
@@ -292,7 +292,7 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
                   {/* Top: Header & Leader Photo */}
                   <div className="flex items-start gap-4 mb-4">
                     <InstitutionPhoto
-                      photoUrl={inst.leader_photo_url}
+                      photoUrl={inst.leader_photo_display_url || inst.leader_photo_url}
                       name={inst.leader_name || inst.name}
                       sizeClass="w-20 h-20 sm:w-24 sm:h-24"
                     />

@@ -16,7 +16,7 @@ import { matchesSmartSearch, normalizeSearchText, extractWords } from './searchH
 import type { AmountPrecision } from '../types/localBudget';
 import { formatFCFA, formatRecordAmount, amountPrecision, isExactAmount } from './formatters';
 
-export type PassportStageStatus = 
+export type PassportStageStatus =
   | 'VERIFIED_OFFICIAL'     // Documenté avec source officielle vérifiable
   | 'PROBABLE_MATCH'        // Rapprochement probable en attente de visa formel
   | 'CITIZEN_DOCUMENTED'    // Documenté par observations citoyennes validées
@@ -25,7 +25,7 @@ export type PassportStageStatus =
   | 'NOT_FOUND_PUBLICLY'    // Non retrouvé dans les sources publiques actuelles
   | 'SOURCE_CONFLICT';      // Divergence identifiée entre sources documentaires
 
-export type DataProvenance = 
+export type DataProvenance =
   | 'OFFICIAL_SOURCE'          // Document officiel vérifié (Loi, CA, DGMP)
   | 'SUIVIBUDGET_CALCULATION'  // Rapprochement ou calcul algorithmique SuiviBudget
   | 'CITIZEN_OBSERVATION'      // Constat de terrain ou preuve citoyenne
@@ -339,7 +339,7 @@ export function findMatchingDgmpProcurement(project: BudgetProject): Procurement
  * Construit le Passeport de Redevabilité complet pour un projet
  */
 export function generateProjectPassport(
-  project: BudgetProject, 
+  project: BudgetProject,
   citizenProofs: CitizenProof[] = [],
   accounts: AdministrativeAccount[] = ADMINISTRATIVE_ACCOUNTS_DATA
 ): ProjectAccountabilityPassportData {
@@ -358,22 +358,23 @@ export function generateProjectPassport(
   const response = responseCandidate?.response_status === 'PUBLISHED'
     && (!responseCandidate.operation_id || responseCandidate.operation_id === matchedOp?.id)
     && (!responseCandidate.ca_id || responseCandidate.ca_id === account?.id) ? responseCandidate : undefined;
+  const projectProvenance: DataProvenance=project.data_provenance==='DECLARED_ADMIN' ? 'UNVERIFIED_INPUT' : 'OFFICIAL_SOURCE';
   const facts: Record<PassportField, PassportFact> = {
-    institution_id: fact('Institution', project.institution_id, 'OFFICIAL_SOURCE', projectSource),
-    institution_type: fact('Type d’institution', account?.institution_type || project.institution_type, 'OFFICIAL_SOURCE', account ? caSource : projectSource),
-    fiscal_year: fact('Exercice', project.fiscal_year || null, 'OFFICIAL_SOURCE', projectSource),
-    object_label: fact('Quoi ?', project.title, 'OFFICIAL_SOURCE', projectSource),
-    localisation: fact('Où ?', project.locality_village_neighborhood || matchedOp?.location, 'OFFICIAL_SOURCE', project.locality_village_neighborhood ? projectSource : caSource),
-    budget_amount: fact('Budget prévu (FCFA)', project.budget_amount_fcfa, 'OFFICIAL_SOURCE', projectSource),
+    institution_id: fact('Institution', project.institution_id, projectProvenance, projectSource),
+    institution_type: fact('Type d’institution', account?.institution_type || project.institution_type, projectProvenance, account ? caSource : projectSource),
+    fiscal_year: fact('Exercice', project.fiscal_year || null, projectProvenance, projectSource),
+    object_label: fact('Quoi ?', project.title, projectProvenance, projectSource),
+    localisation: fact('Où ?', project.locality_village_neighborhood || matchedOp?.location, projectProvenance, project.locality_village_neighborhood ? projectSource : caSource),
+    budget_amount: fact('Budget prévu (FCFA)', project.budget_amount_fcfa, projectProvenance, projectSource),
     procurement_amount: fact('Marché attribué (FCFA)', matchedProc?.award_amount, 'OFFICIAL_SOURCE', marketSource),
     executed_amount: fact('Exécution indiquée au CA (FCFA)', matchedOp?.executed_amount, 'OFFICIAL_SOURCE', caSource),
     contract_reference: fact('Référence du marché / appel d’offres', matchedProc?.contract_number || matchedProc?.tender_number, 'OFFICIAL_SOURCE', marketSource),
     supplier: fact('Attributaire', matchedProc?.contractor, 'OFFICIAL_SOURCE', marketSource),
     source_document_id: fact('Document source relié', caSource.source_document_id, 'OFFICIAL_SOURCE', caSource),
     source_page: fact('Page source', caSource.source_page, 'OFFICIAL_SOURCE', caSource),
-    source_reference: fact('Libellé exact de la source', caSource.source_reference || project.source, 'OFFICIAL_SOURCE', account ? caSource : projectSource),
+    source_reference: fact('Libellé exact de la source', caSource.source_reference || project.source, account ? 'OFFICIAL_SOURCE' : projectProvenance, account ? caSource : projectSource),
     financial_status: fact('Situation financière', matchedOp && isExactAmount(matchedOp, 'executed_amount') ? (matchedOp.executed_amount === 0 ? 'CA_REPORTED_ZERO' : 'CA_REPORTED_EXECUTION') : null, 'SUIVIBUDGET_CALCULATION', caSource),
-    physical_status: fact('Réalisation physique', approvedProofs.length ? 'CITIZEN_OBSERVATION' : project.official_progress_source ? 'OFFICIAL_DECLARATION' : null, approvedProofs.length ? 'CITIZEN_OBSERVATION' : project.official_progress_source ? 'OFFICIAL_SOURCE' : 'UNVERIFIED_INPUT', approvedProofs.length ? { ...emptySource, source_reference: `Constat citoyen ${approvedProofs[0].id}` } : project.official_progress_source ? { ...emptySource, source_reference: project.official_progress_source } : emptySource),
+    physical_status: fact('Réalisation physique', approvedProofs.length ? 'CITIZEN_OBSERVATION' : project.official_progress_source ? 'OFFICIAL_DECLARATION' : null, approvedProofs.length ? 'CITIZEN_OBSERVATION' : project.official_progress_source ? projectProvenance : 'UNVERIFIED_INPUT', approvedProofs.length ? { ...emptySource, source_reference: `Constat citoyen ${approvedProofs[0].id}` } : project.official_progress_source ? { ...emptySource, source_reference: project.official_progress_source } : emptySource),
     citizen_evidence_status: fact('Preuves terrain', approvedProofs.length ? 'APPROVED' : 'NOT_FOUND_PUBLICLY', 'CITIZEN_OBSERVATION'),
     institution_response_status: fact('Réponse institutionnelle', response ? 'PUBLISHED' : 'NOT_FOUND_PUBLICLY', 'INSTITUTION_RESPONSE', response ? { ...emptySource, source_reference: response.supporting_document_name || response.response_text, source_url: response.supporting_document_url || null } : emptySource),
     matching_confidence: fact('Confiance du rapprochement', matchResult.confidence, 'SUIVIBUDGET_CALCULATION'),
@@ -397,18 +398,18 @@ export function generateProjectPassport(
     stepNumber: 1,
     label: 'Besoin & Programmation',
     shortDescription: 'Traçabilité du besoin citoyen d\'origine et inscription au programme d\'investissement',
-    status: hasProgram ? 'VERIFIED_OFFICIAL' : 'NOT_FOUND_PUBLICLY',
-    statusLabel: hasProgram ? 'Programmation Budgétaire Officielle' : 'Donnée non retrouvée publiquement',
+    status: hasProgram ? (projectProvenance==='OFFICIAL_SOURCE' ? 'VERIFIED_OFFICIAL' : 'PENDING_DOCUMENTATION') : 'NOT_FOUND_PUBLICLY',
+    statusLabel: hasProgram ? (projectProvenance==='OFFICIAL_SOURCE' ? 'Programmation Budgétaire Officielle' : 'Programmation déclarée') : 'Donnée non retrouvée publiquement',
     dataPoints: [
       {
         label: 'Programmation budgétaire',
         value: project.program_name || project.details || 'Ligne d\'investissement inscrite au budget',
-        provenance: 'OFFICIAL_SOURCE',
+        provenance: projectProvenance,
         sourceDetails: project.source || 'Document budgétaire source non relié',
       },
       {
         label: 'Expression du besoin citoyen',
-        value: citizenNeedRecorded 
+        value: citizenNeedRecorded
           ? citizenNeedOrigin!
           : 'Non documenté publiquement dans l\'extrait budgétaire',
         provenance: citizenNeedRecorded ? 'CITIZEN_OBSERVATION' : 'SUIVIBUDGET_CALCULATION',
@@ -420,12 +421,12 @@ export function generateProjectPassport(
       {
         label: 'Niveau d\'action',
         value: project.scope_level === 'NATIONAL' ? 'Projet d\'envergure nationale' : 'Projet local / communal',
-        provenance: 'OFFICIAL_SOURCE',
+        provenance: projectProvenance,
       },
       {
         label: 'Secteur public',
         value: project.category || 'Général',
-        provenance: 'OFFICIAL_SOURCE',
+        provenance: projectProvenance,
       },
     ],
   });
@@ -438,29 +439,29 @@ export function generateProjectPassport(
     stepNumber: 2,
     label: 'Budget Voté (BP)',
     shortDescription: 'Crédits votés par l\'autorité délibérante (Loi de Finances ou Conseil Municipal)',
-    status: project.budget_amount_fcfa > 0 ? 'VERIFIED_OFFICIAL' : 'PENDING_DOCUMENTATION',
-    statusLabel: project.budget_amount_fcfa > 0 ? 'Voté au Budget' : 'Montant non renseigné',
+    status: (project.data_provenance !== 'DECLARED_ADMIN' && project.publication_status !== 'DRAFT' && project.budget_amount_fcfa != null && project.budget_amount_fcfa > 0) ? 'VERIFIED_OFFICIAL' : 'PENDING_DOCUMENTATION',
+    statusLabel: project.data_provenance === 'DECLARED_ADMIN' ? 'Montant déclaré, vérification distincte requise' : (project.publication_status !== 'DRAFT' && project.budget_amount_fcfa != null && project.budget_amount_fcfa > 0) ? 'Voté au Budget' : 'Montant non renseigné',
     dataPoints: [
       {
         label: 'Exercice fiscal',
-        value: String(project.fiscal_year || 2026),
-        provenance: 'OFFICIAL_SOURCE',
+        value: project.fiscal_year ? String(project.fiscal_year) : 'Non renseigné',
+        provenance: projectProvenance,
       },
       {
         label: 'Montant inscrit',
-        value: project.budget_amount_fcfa > 0 ? formatFCFA(project.budget_amount_fcfa) : 'Non renseigné',
-        provenance: 'OFFICIAL_SOURCE',
+        value: (project.publication_status !== 'DRAFT' && project.budget_amount_fcfa != null && project.budget_amount_fcfa > 0) ? formatFCFA(project.budget_amount_fcfa) : 'Non renseigné',
+        provenance: projectProvenance,
         sourceDetails: project.source || 'Document budgétaire source non relié',
       },
       {
         label: 'Nature de la dépense',
         value: project.nature_expense || 'Investissements',
-        provenance: 'OFFICIAL_SOURCE',
+        provenance: projectProvenance,
       },
       {
         label: 'Maîtrise d\'Ouvrage',
         value: project.master_builder || project.commune_name || project.region_name || 'Collectivité / Ministère',
-        provenance: 'OFFICIAL_SOURCE',
+        provenance: projectProvenance,
       },
     ],
   });
@@ -563,8 +564,8 @@ export function generateProjectPassport(
     const isProbable = matchResult.confidence === 'PROBABLE';
 
     // Formulation factuelle et neutre obligatoire (Section 5.3)
-    const alertMessage = isZeroExecuted 
-      ? 'Le Compte Administratif consulté indique 0 FCFA exécuté/ordonnancé pour cette opération sur l’exercice observé. La cause de cet écart n’est pas établie par les sources actuellement reliées.' 
+    const alertMessage = isZeroExecuted
+      ? 'Le Compte Administratif consulté indique 0 FCFA exécuté/ordonnancé pour cette opération sur l’exercice observé. La cause de cet écart n’est pas établie par les sources actuellement reliées.'
       : matchResult.temporalJustification;
 
     stages.push({
@@ -671,7 +672,7 @@ export function generateProjectPassport(
       {
         label: 'Taux administratif déclaré',
         value: hasOfficialRate ? `${project.progress_percentage}%` : 'Non communiqué par la maîtrise d\'ouvrage',
-        provenance: 'INSTITUTION_RESPONSE',
+        provenance: project.data_provenance==='DECLARED_ADMIN' ? 'UNVERIFIED_INPUT' : 'INSTITUTION_RESPONSE',
         sourceDetails: project.official_progress_source || project.master_builder || 'Déclaration administrative non corroborée par constat indépendant (Principe 7).',
       },
       {
@@ -681,7 +682,7 @@ export function generateProjectPassport(
       },
       {
         label: 'Dernier statut terrain observé',
-        value: hasFieldProofs 
+        value: hasFieldProofs
           ? (approvedProofs[0].citizen_status_claim === 'COMPLETED' ? 'Achèvement déclaré par un citoyen' : approvedProofs[0].citizen_status_claim === 'IN_PROGRESS' ? 'Travaux déclarés en cours' : 'Non démarré selon le citoyen')
           : 'Non documenté sur place',
         provenance: 'CITIZEN_OBSERVATION',
@@ -724,7 +725,7 @@ export function generateProjectPassport(
   // Mesure exclusivement la complétude documentaire sur les 6 maillons civiques.
   // Ne constitue JAMAIS une note politique ou de gouvernance locale.
   // -------------------------------------------------------------------------
-  const documentedStagesCount = stages.filter(s => 
+  const documentedStagesCount = stages.filter(s =>
     s.status === 'VERIFIED_OFFICIAL' || s.status === 'PROBABLE_MATCH' || s.status === 'CITIZEN_DOCUMENTED'
   ).length;
   const documentationCompletenessPct = Math.round((documentedStagesCount / stages.length) * 100);

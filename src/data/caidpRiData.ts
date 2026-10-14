@@ -13,6 +13,9 @@ export interface CaidpEntityHistoryItem {
 }
 
 export interface CaidpEntity {
+  revision?: number;
+  publication_status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  archived_at?: string | null;
   id: string;
   company_name: string;
   category: EntityPublicCategory;

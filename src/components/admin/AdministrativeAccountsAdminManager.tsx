@@ -4,21 +4,21 @@
 // =========================================================================
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Building2, 
-  FileText, 
-  UploadCloud, 
-  Plus, 
-  Search, 
-  Filter, 
-  Download, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Clock, 
-  ShieldCheck, 
-  ExternalLink, 
-  Layers, 
-  Archive, 
+import {
+  Building2,
+  FileText,
+  UploadCloud,
+  Plus,
+  Search,
+  Filter,
+  Download,
+  CheckCircle2,
+  AlertTriangle,
+  Clock,
+  ShieldCheck,
+  ExternalLink,
+  Layers,
+  Archive,
   HelpCircle,
   TrendingUp,
   FileSpreadsheet,
@@ -27,12 +27,12 @@ import {
   Eye,
   FileCheck
 } from 'lucide-react';
-import { 
-  Institution, 
-  PublicDocument, 
-  CollectiviteCaStatus, 
-  CollectivitesCaMatrixSummary, 
-  DocumentLifecycleStatus 
+import {
+  Institution,
+  PublicDocument,
+  CollectiviteCaStatus,
+  CollectivitesCaMatrixSummary,
+  DocumentLifecycleStatus
 } from '../../types';
 import { dataStore } from '../../services/dataStore';
 import { supabase } from '../../services/supabase';
@@ -76,13 +76,13 @@ export const AdministrativeAccountsAdminManager: React.FC<AdministrativeAccounts
   const [selectedDocForExamine, setSelectedDocForExamine] = useState<PublicDocument | undefined>(undefined);
 
   // Live state from dataStore
-  const [institutions, setInstitutions] = useState<Institution[]>(() => dataStore.getInstitutions());
+  const [institutions, setInstitutions] = useState<Institution[]>(() => dataStore.getInstitutions(true));
   const [documents, setDocuments] = useState<PublicDocument[]>(() => dataStore.getDocuments());
 
   useEffect(() => {
     void dataStore.refreshDocumentsFromSupabase(true).catch(error => onShowToast(`Chargement impossible : ${error.message}`, 'error'));
     return dataStore.subscribe(() => {
-      setInstitutions(dataStore.getInstitutions());
+      setInstitutions(dataStore.getInstitutions(true));
       setDocuments(dataStore.getDocuments());
     });
   }, []);
@@ -394,17 +394,17 @@ export const AdministrativeAccountsAdminManager: React.FC<AdministrativeAccounts
         </div>
 
         <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden flex">
-          <div 
+          <div
             className="bg-emerald-500 h-full transition-all duration-500"
             style={{ width: `${(summary.publishedCount / summary.totalExpected) * 100}%` }}
             title={`Publiés : ${summary.publishedCount}`}
           />
-          <div 
+          <div
             className="bg-indigo-400 h-full transition-all duration-500"
             style={{ width: `${(summary.verifiedCount / summary.totalExpected) * 100}%` }}
             title={`Vérifiés : ${summary.verifiedCount}`}
           />
-          <div 
+          <div
             className="bg-amber-400 h-full transition-all duration-500"
             style={{ width: `${(summary.toVerifyCount / summary.totalExpected) * 100}%` }}
             title={`À vérifier : ${summary.toVerifyCount}`}

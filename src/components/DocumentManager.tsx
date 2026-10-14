@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  FileText, 
-  Plus, 
-  Search, 
-  Trash2, 
-  Edit, 
-  Download, 
-  ExternalLink, 
-  Upload, 
-  CheckCircle2, 
-  Building2, 
+import { adminErrorMessage, requireAdminPersistence } from '../services/adminPersistenceService';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import {
+  FileText,
+  Plus,
+  Search,
+  Trash2,
+  Edit,
+  Download,
+  ExternalLink,
+  Upload,
+  CheckCircle2,
+  Building2,
   Calendar,
   X,
   FileCheck,
@@ -38,13 +39,21 @@ const CATEGORIES: { value: DocumentCategory; label: string }[] = [
 ];
 
 export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, initialFilter = 'ALL', initialSearch = '' }) => {
+  const [busy,setBusy]=useState(false);
+  const inFlight=useRef(false);
+  const runAction=async(run:()=>Promise<void>)=>{
+    if(inFlight.current) return;inFlight.current=true;setBusy(true);
+    try{await requireAdminPersistence();await run();}catch(error){onShowToast(adminErrorMessage(error),'error');}
+    finally{inFlight.current=false;setBusy(false);}
+  };
   const [documentType, setDocumentType] = useState<OfficialDocumentType>('AUTRE_DOCUMENT_OFFICIEL');
   const [sourceName, setSourceName] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
+  const [uploadedFile,setUploadedFile]=useState<Pick<PublicDocument,'file_size_bytes'|'mime_type'|'original_filename'>>({});
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [reviewFilter, setReviewFilter] = useState<'ALL' | 'unverified'>(initialFilter);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
-  
+
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingDoc, setEditingDoc] = useState<PublicDocument | null>(null);
@@ -108,6 +117,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
   }, [documents, selectedCategory, reviewFilter, searchQuery]);
 
   const handleOpenAdd = () => {
+    setUploadedFile({});
     setDocumentType('AUTRE_DOCUMENT_OFFICIEL');
     setSourceName('');
     setSourceUrl('');
@@ -160,7 +170,13 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
       return;
     }
 
+    if(file.size===0 || file.size>50*1024*1024) throw new Error('Fichier de 1 octet à 50 Mo requis.');
+    const header=new Uint8Array(await file.slice(0,8).arrayBuffer());
     const lower = file.name.toLowerCase();
+    const pdf=lower.endsWith('.pdf') && new TextDecoder().decode(header).startsWith('%PDF-');
+    const excel=(lower.endsWith('.xlsx') && header[0]===0x50 && header[1]===0x4b) || (lower.endsWith('.xls') && header[0]===0xd0 && header[1]===0xcf);
+    const csv=lower.endsWith('.csv') && file.type==='text/csv' && !new TextDecoder().decode(header).includes('<');
+    if(!pdf && !excel && !csv) throw new Error('Contenu PDF, Excel ou CSV reconnu requis.');
     let format: DocumentFormat = 'PDF';
     if (lower.endsWith('.xlsx') || lower.endsWith('.xls')) format = 'EXCEL';
     else if (lower.endsWith('.docx') || lower.endsWith('.doc')) format = 'WORD';
@@ -170,7 +186,8 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
     const sizeStr = Number(sizeMb) >= 1 ? `${sizeMb} Mo` : `${Math.round(file.size / 1024)} Ko`;
     const hashBuffer = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
     const checksum = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-    const { data: duplicate } = await supabase.from('public_documents').select('id,title').eq('checksum_sha256', checksum).maybeSingle();
+    const { data: duplicate, error: duplicateError } = await supabase.from('public_documents').select('id,title').eq('checksum_sha256', checksum).maybeSingle();
+    if(duplicateError) throw duplicateError;
     if (duplicate) {
       onShowToast(`Doublon détecté : ce fichier existe déjà sous « ${duplicate.title} ».`, 'error');
       return;
@@ -198,6 +215,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
       is_official: false,
       checksum_sha256: checksum,
     }));
+    setUploadedFile({file_size_bytes:file.size,mime_type:file.type,original_filename:file.name});
     onShowToast(`Fichier "${file.name}" envoyé en zone de vérification.`, 'success');
   };
 
@@ -220,6 +238,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
     try {
     if (editingDoc) {
       await dataStore.updateDocument(editingDoc.id, {
+        revision:editingDoc.revision,
         title: formData.title.trim(),
         category: formData.category,
         institution_name: formData.institution_name.trim(),
@@ -237,6 +256,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
       onShowToast('Document public mis à jour avec succès.');
     } else {
       await dataStore.addDocument({
+        ...uploadedFile,
         title: formData.title.trim(),
         category: formData.category,
         institution_name: formData.institution_name.trim(),
@@ -281,7 +301,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
         onShowToast('Le document doit être vérifié avant publication.', 'error');
         return;
       }
-      await dataStore.updateDocument(doc.id, { status: 'PUBLISHED', is_official: true });
+      await dataStore.updateDocument(doc.id, { status: 'PUBLISHED' });
       onShowToast('Document publié dans la bibliothèque citoyenne.', 'success');
     } catch (error: any) {
       onShowToast(`Publication refusée : ${error.message}`, 'error');
@@ -314,7 +334,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
 
   const handleDelete = async (id: string) => {
     try {
-      await dataStore.updateDocument(id, { status: 'ARCHIVED', is_official: false });
+      await dataStore.updateDocument(id, { status: 'ARCHIVED' });
       setDeleteConfirmId(null);
       onShowToast('Document archivé. Le fichier et sa traçabilité sont conservés.');
     } catch (error: any) {
@@ -323,7 +343,8 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
   };
 
   return (
-    <div className="space-y-6">
+    <fieldset disabled={busy} className="space-y-6 disabled:opacity-60">
+      {busy && <p role="status" aria-live="polite">Transaction documentaire en cours…</p>}
       {/* Top Banner & Stats */}
       <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -455,24 +476,24 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
                         <button
                           onClick={() => handleAdminOpen(doc)}
                           className="p-1.5 rounded-lg text-slate-500 hover:text-brand-blue hover:bg-slate-100"
-                          title="Consulter"
+                          title="Consulter" aria-label="Consulter"
                         >
                           <ExternalLink className="w-4 h-4" />
                         </button>
                         {(doc.status === 'TO_VERIFY' || doc.status === 'UPLOADED') && (
                           <button
-                            onClick={() => handleVerify(doc)}
+                            onClick={() => void runAction(()=>handleVerify(doc))}
                             className="p-1.5 rounded-lg text-slate-500 hover:text-emerald-700 hover:bg-emerald-50"
-                            title="Vérifier"
+                            title="Vérifier" aria-label="Vérifier"
                           >
                             <CheckCircle2 className="w-4 h-4" />
                           </button>
                         )}
                         {doc.verification_status === 'VERIFIED' && doc.status === 'VERIFIED' && (
                           <button
-                            onClick={() => handlePublish(doc)}
+                            onClick={() => void runAction(()=>handlePublish(doc))}
                             className="p-1.5 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-blue-50"
-                            title="Publier"
+                            title="Publier" aria-label="Publier"
                           >
                             <FileCheck className="w-4 h-4" />
                           </button>
@@ -480,14 +501,14 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
                         <button
                           onClick={() => handleOpenEdit(doc)}
                           className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50"
-                          title="Modifier"
+                          title="Modifier" aria-label="Modifier"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setDeleteConfirmId(doc.id)}
                           className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50"
-                          title="Archiver"
+                          title="Archiver" aria-label="Archiver"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -522,7 +543,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
                 Annuler
               </button>
               <button
-                onClick={() => handleDelete(deleteConfirmId)}
+                onClick={() => void runAction(()=>handleDelete(deleteConfirmId))}
                 className="flex-1 py-2.5 rounded-xl bg-rose-600 text-xs font-bold text-white hover:bg-rose-700 shadow-sm"
               >
                 Archiver
@@ -543,7 +564,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
                   {editingDoc ? 'Modifier le Document Public' : 'Ajouter un Document Public (CAIDP)'}
                 </h3>
               </div>
-              <button
+              <button aria-label="Fermer"
                 onClick={() => setIsAddModalOpen(false)}
                 className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
               >
@@ -551,7 +572,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+            <form onSubmit={event=>{event.preventDefault();void runAction(()=>handleSubmit(event));}} className="space-y-4 text-xs">
               <label className="block font-bold text-slate-700">Type de document
                 <select value={documentType} onChange={e => setDocumentType(e.target.value as OfficialDocumentType)} className="mt-1 w-full rounded-xl border border-slate-300 p-3 focus-visible:outline-brand-blue">
                   <option value="BUDGET_PRIMITIF">Budget primitif</option>
@@ -659,7 +680,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
                 <label className="block font-bold text-slate-800">
                   Fichier ou Lien de Téléchargement Direct *
                 </label>
-                
+
                 {/* Upload Local File */}
                 <div className="flex items-center gap-2">
                   <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300 font-bold transition-colors">
@@ -669,7 +690,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
                       type="file"
                       accept=".pdf,.xlsx,.xls,.docx,.doc,.csv"
                       disabled={Boolean(editingDoc)}
-                      onChange={handleFileUpload}
+                      onChange={event=>void runAction(()=>handleFileUpload(event))}
                       className="hidden"
                     />
                   </label>
@@ -739,6 +760,6 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ onShowToast, i
           </div>
         </div>
       )}
-    </div>
+    </fieldset>
   );
 };

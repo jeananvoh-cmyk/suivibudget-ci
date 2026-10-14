@@ -55,8 +55,8 @@ interface PartItemState {
   file_size: string;
   file_size_bytes: number;
   checksum_sha256: string;
-  page_start: number;
-  page_end: number;
+  page_start: number | undefined;
+  page_end: number | undefined;
   page_range: string;
   storage_path?: string;
   isCalculating: boolean;
@@ -99,7 +99,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
 
   // Multi-parties & numérisation
   const [isMultipart, setIsMultipart] = useState<boolean>(Boolean(existingDocument?.is_multipart));
-  const [isScannedPdf, setIsScannedPdf] = useState<boolean>(Boolean(existingDocument?.is_scanned));
+  const [isScannedPdf, setIsScannedPdf] = useState<boolean | null>(existingDocument?.is_scanned ?? null);
   const [manifestSha256, setManifestSha256] = useState<string>('');
 
   // Liste interactive des volets / parties
@@ -111,9 +111,9 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       file_size: '',
       file_size_bytes: 0,
       checksum_sha256: '',
-      page_start: 1,
-      page_end: 22,
-      page_range: 'Pages 1 à 22',
+      page_start: undefined,
+      page_end: undefined,
+      page_range: '',
       isCalculating: false,
     },
     {
@@ -123,9 +123,9 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       file_size: '',
       file_size_bytes: 0,
       checksum_sha256: '',
-      page_start: 23,
-      page_end: 44,
-      page_range: 'Pages 23 à 44',
+      page_start: undefined,
+      page_end: undefined,
+      page_range: '',
       isCalculating: false,
     },
   ]);
@@ -150,7 +150,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       setApprovalDate(existingDocument.approval_date || '');
       setApprovalReference(existingDocument.approval_reference || '');
       setIsMultipart(Boolean(existingDocument.is_multipart));
-      setIsScannedPdf(Boolean(existingDocument.is_scanned));
+      setIsScannedPdf(existingDocument.is_scanned ?? null);
 
       if (existingDocument.is_multipart && existingDocument.document_parts && existingDocument.document_parts.length > 0) {
         setParts(
@@ -161,9 +161,9 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
             file_size: p.file_size || '',
             file_size_bytes: p.file_size_bytes || 0,
             checksum_sha256: p.checksum_sha256 || '',
-            page_start: p.page_start || 1,
-            page_end: p.page_end || 1,
-            page_range: p.page_range || `Pages ${p.page_start || 1} à ${p.page_end || 1}`,
+            page_start: p.page_start ?? undefined,
+            page_end: p.page_end ?? undefined,
+            page_range: p.page_range || '',
             storage_path: p.storage_path,
             isCalculating: false,
           }))
@@ -185,7 +185,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       setIsAsNewVersion(false);
       setDuplicateWarning(null);
       setIsMultipart(false);
-      setIsScannedPdf(false);
+      setIsScannedPdf(null);
       setManifestSha256('');
       setParts([
         {
@@ -195,9 +195,9 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
           file_size: '',
           file_size_bytes: 0,
           checksum_sha256: '',
-          page_start: 1,
-          page_end: 22,
-          page_range: 'Pages 1 à 22',
+          page_start: undefined,
+          page_end: undefined,
+          page_range: '',
           isCalculating: false,
         },
         {
@@ -207,9 +207,9 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
           file_size: '',
           file_size_bytes: 0,
           checksum_sha256: '',
-          page_start: 23,
-          page_end: 44,
-          page_range: 'Pages 23 à 44',
+          page_start: undefined,
+          page_end: undefined,
+          page_range: '',
           isCalculating: false,
         },
       ]);
@@ -222,17 +222,16 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       setManifestSha256('');
       return;
     }
-    const hashes = parts.map(p => p.checksum_sha256).filter(Boolean);
-    if (hashes.length === parts.length && hashes.length > 0) {
-      void calculateManifestSha256(hashes).then(h => setManifestSha256(h));
-    } else {
-      setManifestSha256('');
-    }
-  }, [isMultipart, parts]);
+    const preview=parts.map(p=>({part_number:p.part_number,id:`part-${p.part_number}-${p.checksum_sha256}`,checksum_sha256:p.checksum_sha256,file_size_bytes:p.file_size_bytes,page_start:p.page_start,page_end:p.page_end,
+      storage_path:p.storage_path || DocumentStorageService.buildCanonicalStoragePath({institutionId,institutionType:targetCollectivite?.type==='REGION'?'REGION':'MAIRIE',fiscalYear,documentType:'COMPTE_ADMINISTRATIF',version:isAsNewVersion?(existingDocument?.version || 1)+1:existingDocument?.version || 1},p.file_name).replace(/\.[^.]+$/,`-part-${p.part_number}-${p.checksum_sha256}.pdf`)}));
+    let active=true;
+    void calculateManifestSha256(preview).then(hash=>{if(active)setManifestSha256(hash);}).catch(()=>{if(active)setManifestSha256('');});
+    return ()=>{active=false;};
+  }, [isMultipart, parts, institutionId, fiscalYear, isAsNewVersion, existingDocument]);
 
   // Validation des plages de pages en temps réel
   const pageRangeValidation = useMemo(() => {
-    if (!isMultipart) return { isValid: true, error: undefined, errors: [] as string[], totalPages: 1 };
+    if (!isMultipart) return { isValid: true, error: undefined, errors: [] as string[], totalPages: undefined };
     return validateDocumentPageRanges(
       parts.map(p => ({
         part_number: p.part_number,
@@ -323,9 +322,6 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
   const handleAddPart = () => {
     setParts(prev => {
       const nextNum = prev.length + 1;
-      const lastPart = prev[prev.length - 1];
-      const nextStart = lastPart ? lastPart.page_end + 1 : 1;
-      const nextEnd = nextStart + 21;
       return [
         ...prev,
         {
@@ -335,9 +331,9 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
           file_size: '',
           file_size_bytes: 0,
           checksum_sha256: '',
-          page_start: nextStart,
-          page_end: nextEnd,
-          page_range: `Pages ${nextStart} à ${nextEnd}`,
+          page_start: undefined,
+          page_end: undefined,
+          page_range: '',
           isCalculating: false,
         },
       ];
@@ -367,7 +363,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
     });
   };
 
-  const handlePageChange = (index: number, field: 'start' | 'end', value: number) => {
+  const handlePageChange = (index: number, field: 'start' | 'end', value: number | undefined) => {
     setParts(prev => prev.map((p, idx) => {
       if (idx !== index) return p;
       const newStart = field === 'start' ? value : p.page_start;
@@ -394,7 +390,8 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
         onShowToast(pageRangeValidation.error || 'Plages de pages invalides.', 'error');
         return;
       }
-      const missingFiles = parts.some(p => !p.file && !p.storage_path);
+      if(existingDocument && !isAsNewVersion && parts.some(p=>p.file)) {onShowToast('Créez une nouvelle version pour remplacer les originaux.','error');return;}
+      const missingFiles = parts.some(p => (isAsNewVersion ? !p.file : !p.file && !p.storage_path));
       if (missingFiles) {
         onShowToast('Veuillez sélectionner un fichier PDF pour chaque volet.', 'error');
         return;
@@ -416,7 +413,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       let finalSizeBytes = fileSizeBytes;
       let finalSha256 = checksumSha256;
       let finalParts: DocumentPartInfo[] | undefined = undefined;
-      let finalTotalPages = pageRangeValidation.totalPages || 1;
+      let finalTotalPages = isMultipart ? pageRangeValidation.totalPages : existingDocument?.page_count;
 
       const uploadOptions = {
         institutionId,
@@ -455,18 +452,8 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
           finalTotalPages = multiRes.totalPageCount;
         } else {
           // Métadonnées sans nouveau fichier (modification)
-          finalParts = parts.map(p => ({
-            part_number: p.part_number,
-            file_name: p.file_name,
-            page_range: p.page_range,
-            page_start: p.page_start,
-            page_end: p.page_end,
-            checksum_sha256: p.checksum_sha256,
-            file_size: p.file_size,
-            file_size_bytes: p.file_size_bytes,
-            storage_path: p.storage_path,
-          }));
-          finalSha256 = manifestSha256 || checksumSha256;
+          finalParts = existingDocument?.document_parts;
+          finalSha256 = existingDocument?.manifest_sha256 || checksumSha256;
         }
       } else if (selectedFile) {
         // Mode document unique
@@ -486,7 +473,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       }
 
       // Statut OCR rigoureux : pas de fausse extraction automatique annoncée
-      const finalOcrStatus: DocumentOcrStatus = isScannedPdf ? 'MANUAL_TRANSCRIPTION' : 'NOT_APPLICABLE';
+      const finalOcrStatus: DocumentOcrStatus | null = existingDocument?.ocr_status ?? (isScannedPdf===true ? 'NOT_IMPLEMENTED' : null);
 
       const savedDoc = await dataStore.saveCADocument({
         replacement_reason: replacementReason,
@@ -502,8 +489,9 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
         file_size: finalSizeStr || undefined,
         file_size_bytes: finalSizeBytes,
         storage_bucket: finalStorageBucket,
-        storage_path: finalStoragePath,
-        checksum_sha256: finalSha256,
+        storage_path: isMultipart ? null : finalStoragePath,
+        checksum_sha256: isMultipart ? null : finalSha256,
+        manifest_sha256: isMultipart ? finalSha256 : null,
         source_name: sourceName,
         source_url: sourceUrl || undefined,
         adoption_date: adoptionDate || undefined,
@@ -511,10 +499,10 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
         approval_reference: approvalReference || undefined,
         page_count: finalTotalPages,
         is_multipart: isMultipart,
-        parts_count: isMultipart ? (finalParts?.length || parts.length) : undefined,
+        parts_count: isMultipart ? finalParts?.length : 1,
         document_parts: finalParts,
         is_scanned: isScannedPdf,
-        has_text_layer: !isScannedPdf,
+        has_text_layer: existingDocument?.has_text_layer ?? null,
         ocr_status: finalOcrStatus,
       }, isAsNewVersion);
 
@@ -609,7 +597,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
           </div>
 
           {/* Existing Document / Version Warning */}
-          {alreadyExistingDoc && alreadyExistingDoc.id !== existingDocument?.id && (
+          {alreadyExistingDoc && (
             <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-2">
               <div className="flex items-center gap-2 font-bold text-amber-800">
                 <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
@@ -641,7 +629,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
               <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
                 <input
                   type="checkbox"
-                  checked={isScannedPdf}
+                  checked={isScannedPdf===true}
                   onChange={e => setIsScannedPdf(e.target.checked)}
                   className="rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
                 />
@@ -705,7 +693,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
               {checksumSha256 && !isCalculatingHash && (
                 <div className="text-[11px] text-slate-500 mt-2 p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono flex items-center justify-between">
                   <span className="truncate max-w-md">SHA-256: {checksumSha256}</span>
-                  <span className="text-[10px] text-emerald-600 font-bold px-1.5 py-0.5 bg-emerald-50 rounded">Vérifié</span>
+                  <span className="text-[10px] text-emerald-600 font-bold px-1.5 py-0.5 bg-emerald-50 rounded">Calculé localement</span>
                 </div>
               )}
               {duplicateWarning && (
@@ -768,7 +756,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
                           onClick={() => handleMovePart(index, 'UP')}
                           disabled={index === 0}
                           className="p-1 rounded text-slate-400 hover:text-slate-700 disabled:opacity-30"
-                          title="Déplacer vers le haut"
+                          aria-label={`Monter le fascicule ${part.part_number}`} title="Déplacer vers le haut"
                         >
                           <ArrowUp className="w-3.5 h-3.5" />
                         </button>
@@ -777,7 +765,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
                           onClick={() => handleMovePart(index, 'DOWN')}
                           disabled={index === parts.length - 1}
                           className="p-1 rounded text-slate-400 hover:text-slate-700 disabled:opacity-30"
-                          title="Déplacer vers le bas"
+                          aria-label={`Descendre le fascicule ${part.part_number}`} title="Déplacer vers le bas"
                         >
                           <ArrowDown className="w-3.5 h-3.5" />
                         </button>
@@ -786,7 +774,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
                           onClick={() => handleRemovePart(index)}
                           disabled={parts.length <= 2}
                           className="p-1 rounded text-rose-500 hover:bg-rose-50 disabled:opacity-30"
-                          title="Supprimer cette partie"
+                          aria-label={`Supprimer le fascicule ${part.part_number}`} title="Supprimer cette partie"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -802,7 +790,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
                         <input
                           type="file"
                           accept=".pdf,application/pdf"
-                          onChange={e => handlePartFileChange(index, e)}
+                          aria-label={`Fichier PDF du fascicule ${part.part_number}`} onChange={e => handlePartFileChange(index, e)}
                           className="text-xs file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-brand-blue hover:file:bg-blue-100"
                         />
                       </div>
@@ -816,8 +804,8 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
                           <input
                             type="number"
                             min={1}
-                            value={part.page_start}
-                            onChange={e => handlePageChange(index, 'start', parseInt(e.target.value, 10) || 1)}
+                            aria-label={`Première page du fascicule ${part.part_number}`} value={part.page_start ?? ''}
+                            onChange={e => handlePageChange(index, 'start', e.target.value ? Number(e.target.value) : undefined)}
                             className="w-full p-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-center"
                           />
                         </div>
@@ -828,8 +816,8 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
                           <input
                             type="number"
                             min={part.page_start}
-                            value={part.page_end}
-                            onChange={e => handlePageChange(index, 'end', parseInt(e.target.value, 10) || part.page_start)}
+                            aria-label={`Dernière page du fascicule ${part.part_number}`} value={part.page_end ?? ''}
+                            onChange={e => handlePageChange(index, 'end', e.target.value ? Number(e.target.value) : undefined)}
                             className="w-full p-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-center"
                           />
                         </div>

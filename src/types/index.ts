@@ -9,6 +9,9 @@ export type UserRole = 'ADMIN' | 'MODERATOR' | 'DATA_MANAGER' | 'CITIZEN';
 export type InstitutionType = 'MAIRIE' | 'REGION' | 'DISTRICT' | 'MINISTERE' | 'INSTITUTION' | 'AUTORITE_REGULATION';
 
 export interface Institution {
+  revision?: number;
+  publication_status?: 'DRAFT' | 'IN_REVIEW' | 'PUBLISHED' | 'ARCHIVED';
+  archived_at?: string | null;
   id: string;
   name: string;
   type: InstitutionType;
@@ -44,6 +47,7 @@ export interface Institution {
   leader_gender?: 'M' | 'F';
   leader_title?: string;
   leader_photo_url?: string;
+  leader_photo_display_url?: string;
   leader_bio?: string;
   political_party?: string;
   mandature?: string;
@@ -193,6 +197,13 @@ export interface ApecEvent {
 }
 
 export interface BudgetProject {
+  financial_verification_status?: 'TO_VERIFY' | 'VERIFIED';
+  financial_verified_by?: string | null;
+  financial_verified_at?: string | null;
+  data_provenance?: 'OFFICIAL_SOURCE' | 'DECLARED_ADMIN';
+  revision?: number;
+  publication_status?: 'DRAFT' | 'IN_REVIEW' | 'PUBLISHED' | 'ARCHIVED';
+  archived_at?: string | null;
   institution_type?: import('./localBudget').LocalInstitutionType;
   source_document_id?: string;
   source_page?: number;
@@ -211,7 +222,7 @@ export interface BudgetProject {
   sub_nature_expense?: string;
   title: string;
   details?: string;
-  budget_amount_fcfa: number;
+  budget_amount_fcfa: number | null;
   fiscal_year: number; // 2026
   fiscal_year_label?: string; // ex: "Marché Pluriannuel (Engagé en 2021)"
   current_status: ProjectStatus;
@@ -284,12 +295,17 @@ export interface ImpactStats {
 }
 
 export interface NewsArticle {
+  revision?: number;
+  workflow_status?: 'DRAFT' | 'IN_REVIEW' | 'PUBLISHED' | 'ARCHIVED';
+  archived_at?: string | null;
   id: string;
   title: string;
   category: 'ACTUALITE' | 'RAPPORT' | 'COMMUNIQUE' | 'GUIDE';
   summary: string;
   content: string;
   cover_image_url?: string;
+  cover_image_display_url?: string;
+  document_display_url?: string;
   document_url?: string;
   document_name?: string;
   published_at: string;

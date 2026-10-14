@@ -1,5 +1,58 @@
 # Runbook d’Exploitation & Guide de Dépannage (RUNBOOK)
 
+## Dashboard admin : sauvegarde, restauration et contrat différé
+
+La correction `codex/admin-dashboard-persistence-hardening` reste non déployée. Son contrat serveur version 2, la migration `20261013165625_admin_dashboard_persistence_hardening.sql` et les fonctions Edge `admin-media-url` / `public-document-url` doivent être approuvés et testés ensemble avant tout frontend correspondant. Attendre la fusion ou fermeture de la PR #62 avant la PR corrective. Le [rapport de sécurité](../audits/admin/ADMIN_DASHBOARD_SECURITY_REMEDIATION.md) détaille la recette bloquée et l'ordre migration, Edge, frontend.
+
+Le contrat 2 cloisonne les journaux par domaine et conserve les reçus d'opération atomiques. La lecture directe admin_media est refusée ; les signatures sont bornées à 60 secondes, sans révocation instantanée des liens déjà émis. Les six métadonnées documentaires sont additives ; une empreinte reste DECLARED jusqu'au contrôle serveur des octets, sans qualification humaine automatique. En incident, bloquer les mutations affectées et conserver reçus, audit, attestations, originaux et historiques ; ne pas restaurer une policy permissive, supprimer les colonnes ou certifier Cocody pour réparer un accès.
+
+L’export JSON du dashboard est une copie locale de cache. Il ne contient ni toutes les tables PostgreSQL, ni Auth, ni les fichiers privés. Une sauvegarde de base Supabase contient les métadonnées Storage, pas les fichiers eux-mêmes. [Documentation Supabase sur les sauvegardes](https://supabase.com/docs/guides/platform/backups).
+
+### Préparer une sauvegarde opérateur
+
+1. Relever les SHAs, la version PostgreSQL, les migrations appliquées, extensions, rôles et ACL/RLS. Conserver un inventaire des tables, volumes, statuts, versions et sommes financières qualifiées. Ne pas afficher les secrets dans des logs ; utiliser un service libpq protégé ou le gestionnaire de secrets de l’exploitant.
+2. Définir une fenêtre cohérente DB/Storage et suspendre les écritures administratives pendant la capture si nécessaire. Produire une archive PostgreSQL chiffrée et une copie distincte des fichiers des buckets privés autorisés. Ne pas réutiliser les identifiants de production dans un navigateur de recette.
+3. Avec un client PostgreSQL compatible, l’exemple ci-dessous lit la base via un service libpq configuré par l’opérateur ; il n’a pas été exécuté sur la production par Codex :
+
+   ```powershell
+   $env:PGSERVICE = 'suivibudget_backup_readonly'
+   pg_dump --format=custom --file=work/suivibudget-postgres.dump
+   if ($LASTEXITCODE -ne 0) { throw 'Sauvegarde PostgreSQL échouée' }
+   pg_restore --list work/suivibudget-postgres.dump > work/restore-toc.txt
+   Get-FileHash -Algorithm SHA256 -LiteralPath work/suivibudget-postgres.dump
+   ```
+
+   Le format custom permet l’inventaire et la restauration sélective. [Documentation PostgreSQL de pg_dump](https://www.postgresql.org/docs/current/app-pgdump.html).
+
+4. Exporter séparément les objets par API Storage/S3 autorisée : bucket, chemin complet, version, octets et SHA-256 du fichier téléchargé. Copier les paramètres des buckets et leurs politiques. Ne pas utiliser des URL signées expirantes comme fichiers de sauvegarde ; ne pas rendre un bucket public pour exporter. [Téléchargement des objets Supabase](https://supabase.com/docs/guides/storage/management/download-objects).
+5. Chiffrer les archives et manifestes, limiter leurs droits d’accès, conserver la clé de restauration séparément. Comparer le manifeste aux références `public_documents`, pièces jointes et photos. Une différence de taille/hash ou un objet absent bloque la qualification de la sauvegarde.
+
+### Recette de restauration isolée
+
+1. Choisir un projet de recette autorisé ou une instance locale avec rôles, extensions et schémas Supabase compatibles. Vérifier explicitement son identifiant et son endpoint ; bloquer tout egress vers la production. Les sauvegardes peuvent contenir des données privées : limiter l’accès et neutraliser courriels, cron, webhooks et fonctions sortantes avant toute utilisation.
+2. Relire le TOC de l’archive et les contraintes des schémas gérés. Pour un projet Supabase déjà initialisé, utiliser la procédure officielle de [sauvegarde/restauration Supabase](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore), avec la version de CLI validée par l’exploitant. Ne pas appliquer aveuglément un dump intégral sur les schémas Auth/Storage existants.
+3. Sur une base PostgreSQL isolée vide préparée avec les prérequis compatibles, la restauration peut être atomique et arrêtée à la première erreur :
+
+   ```powershell
+   $env:PGSERVICE = 'suivibudget_isolated_restore'
+   pg_restore --dbname=service=suivibudget_isolated_restore --exit-on-error --single-transaction --no-owner work/suivibudget-postgres.dump
+   if ($LASTEXITCODE -ne 0) { throw 'Restauration isolée échouée : ne pas poursuivre' }
+   ```
+
+   Aucune restauration concurrente `--jobs` n’est combinée à `--single-transaction`. [Documentation PostgreSQL de pg_restore](https://www.postgresql.org/docs/current/app-pgrestore.html).
+
+4. Restaurer les blobs avec l’API Storage dans les buckets privés de recette. Les lignes `storage.objects` seules ne recréent pas les octets. Sur un service Storage initialisé, préparer l’import des métadonnées avec la procédure Supabase afin de ne pas entrer en conflit avec les objets que l’API recrée ; conserver les chemins référencés et rapprocher les propriétaires autorisés. Ne pas écrire directement dans les tables Storage pour simuler une restauration de fichiers.
+5. Vérifier counts, FK, révisions, versions, statuts et hashes des fichiers ; vérifier la lecture des fichiers privés, les refus anon/citoyen, les rôles staff, la file, le journal, les montants historiques et UNKNOWN ≠ 0. Tester deux sessions, réponse perdue, publication/dépublication et retrait de source. La copie de Cocody 2024 demeure TO_VERIFY sans examen humain réel.
+6. Signer le procès-verbal de recette avec les anomalies et le temps de reprise. Cette mission a testé une sauvegarde/restauration **PGlite isolée** ; elle n’a pas exécuté cette procédure PostgreSQL/Storage avec un dump de production. Ne pas la déclarer validée sans exercice opérateur.
+
+### Retour arrière du contrat admin
+
+Bloquer les mutations administratives et préserver les lignes, événements et objets ajoutés. Un retour frontend ne doit pas réactiver les anciennes fausses sauvegardes locales : garder le dashboard indisponible jusqu’à un frontend compatible. Les pages publiques peuvent revenir au déploiement stable après validation.
+
+Conserver les tables et colonnes additives ; ne pas supprimer le journal ou les nouvelles versions. Ne rétablir NOT NULL sur les montants que si aucune ligne inconnue n’existe. Préparer le retour des ACL/RLS à partir de la capture antérieure et le tester isolément. Un rollback de politiques n’est pas une restauration de données. Toute intervention distante et toute promotion de production demandent une validation explicite du responsable.
+
+En cas de sauvegarde confirmée mais relecture indisponible, réessayer le même formulaire sans modifier son contenu. En cas de conflit de révision, conserver la saisie, recharger la version serveur puis comparer les deux versions. Ne jamais contourner RLS ni forcer une révision pour faire disparaître le conflit.
+
 Ce runbook fournit aux développeurs et exploitants les procédures opérationnelles pour diagnostiquer, isoler et résoudre les incidents sur la plateforme SuiviBudget Côte d’Ivoire.
 
 ---

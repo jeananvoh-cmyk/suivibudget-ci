@@ -149,11 +149,11 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
     });
   }, [documents, selectedCategory, selectedYear, searchQuery]);
 
-  const handleDownload = async (doc: PublicDocument) => {
+  const handleDownload = async (doc: PublicDocument, partId?: string) => {
     let targetUrl = doc.file_url;
-    if (doc.storage_path && isSupabaseConfigured()) {
+    if ((doc.storage_path || doc.is_multipart) && isSupabaseConfigured()) {
       const { data, error } = await supabase.functions.invoke('public-document-url', {
-        body: { document_id: doc.id },
+        body: { document_id: doc.id, ...(partId ? {part_id:partId} : {}) },
       });
       if (error || !data?.url) return;
       targetUrl = data.url;
@@ -564,14 +564,16 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                         <ExternalLink className="w-4 h-4" />
                       </a>
                     )}
-                    <button
+                    {doc.is_multipart ? <div className="flex flex-wrap gap-2">
+                      {doc.document_parts?.map(part=><button key={part.id || part.part_number} onClick={()=>void handleDownload(doc,part.id)} className="rounded-xl bg-brand-blue px-3 py-2 text-xs font-bold text-white hover:bg-blue-700 focus-visible:outline-brand-blue">Fascicule {part.part_number}</button>)}
+                    </div> : <button
                       disabled={doc.http_status === 404 || !doc.file_url && !doc.storage_path}
                       onClick={() => handleDownload(doc)}
                       className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-brand-blue hover:bg-blue-700 active:scale-95 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>{doc.http_status === 404 ? 'Lien indisponible' : 'Télécharger'}</span>
-                    </button>
+                    </button>}
                   </div>
                 </div>
               </div>
