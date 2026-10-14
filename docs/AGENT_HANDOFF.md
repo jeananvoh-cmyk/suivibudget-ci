@@ -1,3 +1,39 @@
+## 14 octobre 2026 — Correction de Clôture PR #62 : Sécurité RBAC Fail-Closed, Intégrité Multi-PDF et Validation Finale (Antigravity)
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62
+- **Branche Git** : `feat/admin-financial-document-ingestion-pilot`
+- **Revue traitée** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62#issuecomment-6157235505
+- **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0` (100% simulations et tests sous PGlite WASM / Vitest, zéro écriture sur Supabase production).
+- **Problèmes résolus et durcissements appliqués** :
+  1. **Contrôle d'accès RBAC Fail-Closed** (`dataStore.ts`) :
+     - Rejet immédiat de toute tentative non authentifiée ou avec session expirée (`expiresAt <= Date.now()`).
+     - Rôle `CITIZEN` formellement bloqué.
+     - Rôle `MODERATOR` strictement limité à la vérification (`VERIFIED`), interdiction de publication ou d'archivage.
+     - Rôles `ADMIN` et `DATA_MANAGER` seuls habilités à publier, avec vérification préalable obligatoire (`isVerified`).
+  2. **Intégrité des fichiers & Élimination définitive des Blobs vides** (`SingleCAUploadModal.tsx`, `documentStorageService.ts`) :
+     - Suppression de tout dummy Blob (`new Blob([], ...)`).
+     - Validation préalable rejetant les fichiers de taille 0 octet.
+     - Remplacement partiel sécurisé : les volets inchangés conservent fidèlement leur `storage_path` et `checksum_sha256` existants sans re-téléversement inutile.
+     - Recalcul déterministe du SHA-256 du manifeste combinant volets mis à jour et préservés.
+  3. **Compensation transactionnelle Storage / PostgreSQL** (`SingleCAUploadModal.tsx`, `documentStorageService.ts`) :
+     - Suivi précis des fichiers créés lors de la session (`newlyUploadedPaths`).
+     - Si la persistance PostgreSQL échoue, appel automatique de `deleteStorageFiles` sur les seuls fichiers orphelins nouvellement téléversés, sans jamais affecter les fichiers historiques.
+     - Reporting d'anomalie critique pour l'administrateur si le nettoyage Storage échoue.
+     - Protection anti-double soumission `if (isSubmitting) return;`.
+  4. **Résolution de l'erreur de validation initiale du CA Cocody 2024** (`dataStore.ts`) :
+     - Diagnostic : la colonne `verified_by` est de type `UUID references profiles(id)` sous PostgreSQL. L'envoi d'une chaîne textuelle telle que `'Administrateur'` provoquait `invalid input syntax for type uuid: "Administrateur"`.
+     - Correction : validation regex du format UUID (`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`). Seul un UUID valide (`userId`) est transmis, sinon `null`/`undefined` est passé pour laisser le trigger PostgreSQL assigner `auth.uid()`.
+  5. **Schéma & Migration SQL Locale (PGlite)** :
+     - Validation sous PGlite (WASM) de la migration `supabase/migrations/20261013200000_multipart_ca_documents.sql`.
+     - Vérification de la rétrocompatibilité (défauts `is_multipart = false`, `parts_count = null`, `ocr_status = 'NOT_APPLICABLE'`).
+     - Vérification de la contrainte `chk_pubdocs_ocr_status`.
+- **Validation Globale** :
+  - `src/utils/__tests__/caMultipartAndValidation.test.ts` : **27/27 tests passés**.
+  - `src/utils/__tests__/caManagement.test.ts` : **26/26 tests passés**.
+  - Couverture totale : **62 fichiers de tests, 820 tests exécutés, 820 tests réussis (100% PASS, 0 FAIL)**.
+  - Compilation TypeScript & Build Vite : `npm run build` réussi sans erreur (**code 0**).
+- **NEXT_EXECUTABLE_TASK** : Revue finale et approbation de la PR #62 par ChatGPT pour fusion sur `master`.
+
 ## 13 octobre 2026 — Correction Finale PR #62 : Ingestion Multi-PDF Réelle et Validation Administrateur (Antigravity)
 
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62

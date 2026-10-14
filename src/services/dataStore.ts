@@ -241,6 +241,7 @@ export function isTangiblePhysicalProject(p: BudgetProject): boolean {
 
 export interface AuthState {
   isAuthenticated: boolean;
+  userId?: string;
   email: string;
   fullName: string;
   role: UserRole;
@@ -1082,6 +1083,7 @@ class DataStore {
     if (session.isAuthenticated && session.user) {
       this.authState = {
         isAuthenticated: true,
+        userId: session.user.userId,
         email: session.user.email,
         fullName: session.user.fullName,
         role: session.user.role as UserRole,
@@ -1090,7 +1092,7 @@ class DataStore {
       return { ...this.authState };
     }
     // Si authState a été explicitement initialisé (ex: tests, session active)
-    if (this.authState.isAuthenticated && (!this.authState.expiresAt || this.authState.expiresAt > Date.now())) {
+    if (this.authState.isAuthenticated) {
       return { ...this.authState };
     }
     this.authState = { isAuthenticated: false, email: '', fullName: '', role: 'CITIZEN', expiresAt: 0 };
@@ -1105,7 +1107,7 @@ class DataStore {
     this.authState = {
       ...this.authState,
       ...state,
-      expiresAt: state.expiresAt || (Date.now() + 3600 * 1000)
+      expiresAt: state.expiresAt !== undefined ? state.expiresAt : (Date.now() + 3600 * 1000)
     };
     this.notify();
   }
@@ -1584,7 +1586,12 @@ class DataStore {
     };
 
     const { data, error } = await supabase.from('public_documents').insert([newDoc]).select('*').single();
-    if (error) throw error;
+    if (error) {
+      if (error.code === '42703' || error.message?.includes('does not exist')) {
+        throw new Error("La structure de la table public_documents nécessite la migration 20261013200000_multipart_ca_documents.sql. Contactez l'administrateur système pour appliquer la migration.");
+      }
+      throw error;
+    }
     if (!data) throw new Error('Enregistrement non confirmé.');
     this.documents.unshift(data as PublicDocument);
     this.notify();
@@ -1630,7 +1637,14 @@ class DataStore {
 
     if (error) {
       if (error.code === '42501' || error.message?.includes('policy') || error.message?.includes('permission')) {
-        throw new Error('Action refusée par la politique de sécurité (RLS) : rôle non autorisé ou session expirée.');
+        const rlsError = new Error('Action refusée par la politique de sécurité (RLS) : rôle non autorisé ou session expirée.');
+        (rlsError as any).code = '42501';
+        throw rlsError;
+      }
+      if (error.code === '42703' || error.message?.includes('does not exist')) {
+        const migError = new Error("La structure de la table public_documents nécessite la migration 20261013200000_multipart_ca_documents.sql. Contactez l'administrateur système pour appliquer la migration.");
+        (migError as any).code = '42703';
+        throw migError;
       }
       throw error;
     }
@@ -1845,22 +1859,34 @@ class DataStore {
     const document = this.getDocumentById(id);
     if (!document) throw new Error('Document introuvable.');
 
-    // 1. Garde-fou strict de publication : le document doit être préalablement vérifié
-    const isVerified = document.status === 'VERIFIED' || document.verification_status === 'VERIFIED';
-    if (status === 'PUBLISHED' && !isVerified) {
-      throw new Error('Vérifiez le document avant publication.');
+    // 1. Contrôle des habilitations (RBAC / RLS) — FAIL-CLOSED STRICT
+    const auth = this.getAuthState();
+    if (!auth || !auth.isAuthenticated) {
+      throw new Error('Authentification requise pour modifier le statut du document.');
     }
 
-    // 2. Contrôle des habilitations (RBAC / RLS)
-    const auth = this.getAuthState();
-    if (auth.isAuthenticated) {
-      const isStaff = auth.role === 'ADMIN' || auth.role === 'DATA_MANAGER' || auth.role === 'MODERATOR';
-      if (!isStaff) {
-        throw new Error('Action non autorisée : permissions insuffisantes (administrateur ou modérateur requis).');
-      }
+    if (auth.expiresAt && auth.expiresAt <= Date.now()) {
+      throw new Error('Session expirée. Veuillez vous reconnecter.');
+    }
 
-      if (status === 'PUBLISHED' && auth.role !== 'ADMIN' && auth.role !== 'DATA_MANAGER') {
+    const isStaff = auth.role === 'ADMIN' || auth.role === 'DATA_MANAGER' || auth.role === 'MODERATOR';
+    if (!isStaff) {
+      throw new Error('Action non autorisée : permissions insuffisantes (administrateur ou modérateur requis).');
+    }
+
+    // 2. Garde-fou strict de publication : le document doit être préalablement vérifié
+    const isVerified = document.status === 'VERIFIED' || document.verification_status === 'VERIFIED';
+    if (status === 'PUBLISHED') {
+      if (auth.role !== 'ADMIN' && auth.role !== 'DATA_MANAGER') {
         throw new Error('Action non autorisée : la publication officielle requiert les droits administrateur ou gestionnaire de données.');
+      }
+      if (!isVerified) {
+        throw new Error('Vérifiez le document avant publication.');
+      }
+    } else if (status !== 'VERIFIED' && status !== 'TO_VERIFY') {
+      // Les modérateurs civiques ne peuvent modifier que pour vérifier ou renvoyer en vérification
+      if (auth.role === 'MODERATOR') {
+        throw new Error('Action non autorisée : le rôle modérateur est limité à la vérification.');
       }
     }
 
@@ -1870,6 +1896,19 @@ class DataStore {
       ? 'VERIFIED'
       : (status === 'TO_VERIFY' ? 'TO_VERIFY' : (document.verification_status || 'TO_VERIFY'));
 
+    // Valider si verified_by est un UUID valide (pour la contrainte de clé étrangère PostgreSQL profiles(id))
+    const isUuid = (val?: string | null): boolean =>
+      Boolean(val && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val));
+
+    let verifiedByUuid: string | null = null;
+    if (isVerifying || isPublishing) {
+      if (isUuid(document.verified_by)) {
+        verifiedByUuid = document.verified_by!;
+      } else if (isUuid(auth.userId)) {
+        verifiedByUuid = auth.userId!;
+      }
+    }
+
     // 3. Mise à jour synchronisée des statuts
     await this.updateDocument(id, {
       status,
@@ -1878,9 +1917,7 @@ class DataStore {
       verified_at: (isVerifying || isPublishing)
         ? (document.verified_at || new Date().toISOString())
         : (status === 'TO_VERIFY' ? undefined : document.verified_at),
-      verified_by: (isVerifying || isPublishing)
-        ? (document.verified_by || (auth as any).userId || auth.fullName || auth.email || 'Administrateur')
-        : (status === 'TO_VERIFY' ? undefined : document.verified_by),
+      verified_by: verifiedByUuid,
       published_at: isPublishing ? (document.published_at || new Date().toISOString()) : (status === 'TO_VERIFY' ? undefined : document.published_at),
     });
 

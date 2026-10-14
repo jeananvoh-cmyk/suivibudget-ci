@@ -1,3 +1,18 @@
+## 14 octobre 2026 — Correction de Clôture PR #62 : Sécurité RBAC Fail-Closed, Intégrité Multi-PDF et Validation Finale (Antigravity)
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62
+- **Branche Git** : `feat/admin-financial-document-ingestion-pilot`
+- **Revue traitée** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62#issuecomment-6157235505
+- **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0` (100% simulations et tests sous PGlite WASM / Vitest, zéro écriture sur Supabase production).
+- **Corrections appliquées** :
+  1. RBAC Fail-Closed strict dans `updateDocumentLifecycleStatus` (rejet sans session valide, session expirée, citoyen bloqué, modérateur limité à la vérification, publication réservée aux administrateurs/gestionnaires de données).
+  2. Élimination totale des Blobs vides (`new Blob([], ...)`), validation préalable de non-vacuité et politique de remplacement partiel avec préservation des métadonnées existantes.
+  3. Compensation automatique Storage en cas d'échec d'enregistrement PostgreSQL via `deleteStorageFiles` sur `newlyUploadedPaths` uniquement.
+  4. Résolution de l'incompatibilité de type UUID dans `verified_by` sous PostgreSQL.
+  5. Validation PGlite de la migration `20261013200000_multipart_ca_documents.sql`.
+- **Statut de validation** : 820/820 tests passés (62 suites), `npm run build` réussi sans erreur (code 0).
+- **Prochaine étape** : Revue et fusion de la PR #62 sur `master`.
+
 ## 13 octobre 2026 — Correction Finale PR #62 : Ingestion Multi-PDF Réelle et Validation Administrateur (Antigravity)
 
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62
