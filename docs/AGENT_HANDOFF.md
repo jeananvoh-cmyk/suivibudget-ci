@@ -6,7 +6,7 @@
 - Validation locale : 868/868 tests (34 PostgreSQL/RLS, 13 médias/Edge, 13 services), TypeScript et builds public/review PASS ; navigateur 16/16, transport Auth/REST/Storage simulé et SQL/RLS réels. Dashboard 360/640/768/1024/1440 px sans débordement ; contrôle visuel mobile effectué. Pages publiques : tests automatisés et accueil navigateur, audit visuel exhaustif non réalisé.
 - Supabase réel : BLOCKED (supabase start tenté, moteur Docker absent). Aucun test d’écriture distant. Données financières, Cocody et Bingerville inchangés ; aucune migration, fusion ou action de déploiement distante.
 - L’autorisation courante permet une PR empilée sur #62 ouverte : elle remplace l’ancienne consigne d’attente ci-dessous. La branche Antigravity n’a pas été modifiée.
-- NEXT_EXECUTABLE_TASK : publier la branche de revue, vérifier la CI et compléter le rapport unique ADMIN_DASHBOARD_FINAL_INTEGRATION.md avec les liens exacts. Fusion et production restent interdites avant validation, rebasage/cible finale et recette réelle du backend.
+- PR #63 publiée, code ec134cf4951095d8b60f58274020f0f066517b59, arbre 5390eb7e4b104db72f3f6882d692f61f725a452e. CI Quality 38589329556 PASS ; rapport unique ADMIN_DASHBOARD_FINAL_INTEGRATION.md. NEXT_EXECUTABLE_TASK : revue indépendante et recette Supabase complète autorisée, puis validation ordonnée du backend, Edge et frontend. Fusion et production restent interdites avant validation, rebasage/cible finale et recette réelle du backend.
 
 ## 13 octobre 2026 — Audit de sécurité admin : correctifs locaux validés, contrat 2
 
