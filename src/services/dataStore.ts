@@ -1626,13 +1626,10 @@ class DataStore {
 
     let { data, error } = await query.select('*').single();
 
-    // Fallback de résilience si la précision temporelle updated_at divergeait (0 lignes retournées sans erreur SQL)
-    if (!error && !data && current.updated_at) {
-      const retry = await supabase.from('public_documents').update(payload).eq('id', id).select('*').single();
-      if (retry && !retry.error && retry.data) {
-        data = retry.data;
-        error = null;
-      }
+    // En cas de conflit de version, ne jamais réessayer sans la condition updated_at.
+    // Un UPDATE sans garde optimiste pourrait écraser la validation d'un autre administrateur.
+    if (error?.code === 'PGRST116' || (!error && !data)) {
+      throw new Error('Conflit de modification du document. Rechargez la liste puis réessayez après vérification.');
     }
 
     if (error) {
