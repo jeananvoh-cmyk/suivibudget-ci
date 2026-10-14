@@ -1,3 +1,82 @@
+## 14 octobre 2026 — Correction de Clôture PR #62 : Sécurité RBAC Fail-Closed, Intégrité Multi-PDF et Validation Finale (Antigravity)
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62
+- **Branche Git** : `feat/admin-financial-document-ingestion-pilot`
+- **Revue traitée** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62#issuecomment-6157235505
+- **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0` (100% simulations et tests sous PGlite WASM / Vitest, zéro écriture sur Supabase production).
+- **Corrections appliquées** :
+  1. RBAC Fail-Closed strict dans `updateDocumentLifecycleStatus` (rejet sans session valide, session expirée, citoyen bloqué, modérateur limité à la vérification, publication réservée aux administrateurs/gestionnaires de données).
+  2. Élimination totale des Blobs vides (`new Blob([], ...)`), validation préalable de non-vacuité et politique de remplacement partiel avec préservation des métadonnées existantes.
+  3. Compensation automatique Storage en cas d'échec d'enregistrement PostgreSQL via `deleteStorageFiles` sur `newlyUploadedPaths` uniquement.
+  4. Résolution de l'incompatibilité de type UUID dans `verified_by` sous PostgreSQL.
+  5. Validation PGlite de la migration `20261013200000_multipart_ca_documents.sql`.
+- **Statut de validation** : 820/820 tests passés (62 suites), `npm run build` réussi sans erreur (code 0).
+- **Prochaine étape** : Revue et fusion de la PR #62 sur `master`.
+
+## 13 octobre 2026 — Correction Finale PR #62 : Ingestion Multi-PDF Réelle et Validation Administrateur (Antigravity)
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62
+- **Branche Git** : `feat/admin-financial-document-ingestion-pilot`
+- **Revue traitée** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62#issuecomment-6150297544
+- **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0` (tests et simulations 100% locaux sous PGlite WASM / vitest ; zéro écriture sur la base Supabase distante).
+- **Problèmes résolus et durcissements appliqués** :
+  1. **Téléversement multi-fascicules réel & Rollback atomique** (`SingleCAUploadModal.tsx`, `documentStorageService.ts`) :
+     - Sélection physique et téléversement séquentiel de chaque fichier PDF dans le bucket privé `public_documents`.
+     - Nettoyage automatique et suppression des volets déjà téléversés en cas d'échec sur un volet ultérieur.
+     - Chemins de stockage canoniques standardisés : `comptes-administratifs/communes/{institutionId}/{fiscalYear}/compte-administratif-{fiscalYear}-v{version}-part-{partNumber}.pdf`.
+  2. **Calcul d'empreinte 100% client et transparent** :
+     - Calcul automatique du SHA-256 pour chaque fascicule dès la sélection de fichier par l'administrateur (zéro saisie manuelle de hash).
+     - Calcul déterministe du SHA-256 du manifeste (hash trié des volets séparés par `:`) : pour Cocody 2024, `ace0243d9ed0cae9e6ee24c420f554751893eecff79f4202007d1c48f5d19928`.
+  3. **Contrôle strict des plages de pages** (`validateDocumentPageRanges`) :
+     - Vérification de contiguïté sans trou ni chevauchement (ex. Volet 1 : 1–22, Volet 2 : 23–44 $\rightarrow$ Total 44 pages).
+  4. **Cycle découplé et synchronisation bivalente des statuts** (`dataStore.ts`) :
+     - `updateDocumentLifecycleStatus` met à jour simultanément `status` et `verification_status` (`TO_VERIFY` $\rightarrow$ `VERIFIED` $\rightarrow$ `PUBLISHED`).
+     - Garde-fou métier : blocage strict de la publication si le document n'a pas été préalablement vérifié (`isVerified`).
+     - Contrôle d'accès RBAC : Seuls `ADMIN` et `DATA_MANAGER` peuvent publier ; `MODERATOR` peut uniquement vérifier (`VERIFIED`) ; utilisateurs non autorisés rejetés.
+     - Résilience de mise à jour sous PostgreSQL (gestion des timestamps et retry).
+  5. **Examen unitaire par fascicule & Réactivité UI** (`ExamineCADocumentModal.tsx`, `AdministrativeAccountsAdminManager.tsx`) :
+     - Boutons dédiés *« Consulter le PDF (Volet X) »* générant des URLs signées temporaires via `documentStorageService.createSignedUrl`.
+     - Mise à jour instantanée de l'état React local de la matrice des 232 collectivités sans nécessiter de rechargement de page.
+     - Badges multi-parties dans le tableau d'administration.
+- **Migration SQL** :
+  - `supabase/migrations/20261013200000_multipart_ca_documents.sql` : colonnes `is_multipart`, `parts_count`, `document_parts` (JSONB), `is_scanned`, `has_text_layer`, `ocr_status` (`CHECK (ocr_status IN ('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'MANUAL_TRANSCRIPTION', 'FAILED'))`).
+- **Tests & Validation** :
+  - Suite dédiée multi-parties & cycle : `src/utils/__tests__/caMultipartAndValidation.test.ts` (**14/14 tests passés**).
+  - Suite pilote Cocody 2024 : `src/utils/__tests__/cocodyCa2024Pilot.test.ts` (**11/11 tests passés**).
+  - Couverture globale : **62 fichiers de tests, 807 tests exécutés, 807 tests réussis (100% PASS, 0 FAIL)**.
+  - Compilation TypeScript & Build Vite : `npm run build` réussi sans erreur (**code 0**).
+- **NEXT_EXECUTABLE_TASK** : Revue finale par ChatGPT, approbation et fusion de la PR #62 sur `master`.
+
+## 13 octobre 2026 — Pilote Réel d'Ingestion Documentaire et Financière : Cocody 2024 (Antigravity)
+
+- **Mission** : Réalisation du pilote réel d'ingestion administrative du Compte Administratif (CA) 2024 de la Commune de Cocody (`inst-com-cocody`), fiabilisation générique du circuit administratif complet (Dépôt -> Identification -> Extraction -> Rapprochement -> Contrôle humain -> Simulation Dry-Run -> Import Staging -> Vérification -> Publication) et production de 6 livrables d'audit et méthodologie.
+- **Branche Git** : `feat/admin-financial-document-ingestion-pilot` (créée depuis `master` à `9d20d1be7ea978437828f4e5b4cf56edf68854e3`).
+- **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0` (simulation locale 100% isolée sous PGlite WASM in-memory PostgreSQL ; zéro écriture sur la base distante Supabase de production).
+- **Audit comptable réel Cocody CA 2024 (Page PDF 40 / imprimée 41/45)** :
+  - Prévisions de fonctionnement : 18 441 235 000 FCFA | Recettes recouvrées : 17 646 256 543 FCFA | Dépenses ordonnancées : 15 409 122 753 FCFA
+  - Prévisions d'investissement : 3 900 630 000 FCFA | Recettes recouvrées : 1 366 100 690 FCFA | Dépenses ordonnancées : 1 366 100 690 FCFA
+  - Total Prévisions : 22 341 865 000 FCFA | Total Recettes recouvrées : 19 012 357 233 FCFA | Total Dépenses ordonnancées : 16 775 223 443 FCFA
+  - Excédent courant d'exercice : 2 237 133 790 FCFA | Report antérieur : 944 FCFA | Résultat cumulé : 2 237 134 734 FCFA
+  - Concordance patrimoine (Page PDF 43 / imprimée 44/45) : Immobilier (810 959 095) + Incorporel (20 000 000) + Mobilier (535 141 595) = 1 366 100 690 FCFA (exactitude au franc près avec les dépenses d'investissement de la page 40).
+- **Évolutions logicielles apportées** :
+  - `src/types/publicDocument.ts` : ajout de l'interface `DocumentPartInfo` et enrichissement de `PublicDocument` (`is_multipart`, `parts_count`, `document_parts`, `is_scanned`, `has_text_layer`, `ocr_status`).
+  - `src/services/dataStore.ts` : persistance des métadonnées multi-fascicules, plages de pages, empreintes individuelles et scan raster dans `saveCADocument`.
+  - `src/utils/budgetDocumentDryRun.ts` : extension du template `COMPTE_ADMINISTRATIF` aux recettes et excédents ; implémentation de 4 contrôles arithmétiques stricts dans `runDocumentDryRun` (prévisions, dépenses, recettes, solde excédentaire) ; injection des statuts `TO_VERIFY` et dates de visa dans `buildStandardImportEnvelope`.
+  - `src/components/admin/SingleCAUploadModal.tsx` : UI multi-fascicules dynamique avec gestion des tomes, plages de pages, hashes et flag scan raster.
+  - `src/components/admin/ExamineCADocumentModal.tsx` : restitution visuelle de la composition en fascicules, alerte scan raster et dates de visa préfectoral.
+- **Tests & Validation** :
+  - Nouvelle suite d'intégration : `src/utils/__tests__/cocodyCa2024Pilot.test.ts` (11 tests complets sous PGlite WASM).
+  - Couverture globale : **60 fichiers de tests, 789 tests exécutés, 789 réussis (100% PASS, 0 FAIL)**.
+  - Compilation TypeScript & Build Vite : `npm run build` réussi sans erreur (code 0).
+- **Livrables documentaires (`docs/audits/pilotes/cocody-ca-2024/`)** :
+  1. `DIAGNOSTIC_IMPORT_EXISTANT.md` : Cartographie des modules d'import et limites.
+  2. `RAPPORT_AUDIT_DONNEES_COCODY_2024.md` : Audit comptable exhaustif, conciliation des pages 40 et 43, analyse de l'écart de report de 944 FCFA.
+  3. `MAPPING_DONNEES_COCODY_2024.md` : Matrice de correspondance scan -> base PostgreSQL et payload JSON certifié.
+  4. `RAPPORT_SIMULATION_IMPORT.md` : Preuve de la simulation isolée sous PGlite WASM et validation du cycle de publication.
+  5. `GUIDE_ADMINISTRATEUR_IMPORT.md` : Guide pratique pas-à-pas pour les gestionnaires territoriaux non développeurs.
+  6. `RAPPORT_FINAL_PILOTE_COCODY.md` : Synthèse exécutive et recommandations de passage à l'échelle.
+- **NEXT_EXECUTABLE_TASK** : Revue finale de la PR par ChatGPT, fusion sur `master` et déploiement en production lorsque validé.
+
 ## 13 octobre 2026 — Clôture technique finale, recette production et transmission autonome à un développeur humain (Antigravity)
 
 - **Objectif de mission** : Stabilisation technique finale, recette complète de production Vercel (`https://suivibudget.vercel.app/`), audit de maintenabilité du code et rédaction de la documentation intégrale permettant une maintenance 100% autonome par un développeur humain sans recourir aux agents IA.

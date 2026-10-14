@@ -1,9 +1,9 @@
 // =========================================================================
 // COMPOSANT : MODAL D'AJOUT & MISE À JOUR INDIVIDUELLE D'UN COMPTE ADMINISTRATIF
-// SuiviBudget Côte d'Ivoire - Dépôt Sécurisé, Versioning & Audit
+// SuiviBudget Côte d'Ivoire - Dépôt Sécurisé Multi-Fascicules, Versioning & Audit
 // =========================================================================
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   X, 
   Upload, 
@@ -13,14 +13,19 @@ import {
   Building2, 
   Calendar, 
   ShieldCheck, 
-  ExternalLink,
   Layers,
-  Copy,
-  Check
+  Plus,
+  Trash2,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
-import { Institution, PublicDocument, OfficialDocumentSource } from '../../types';
+import { Institution, PublicDocument, OfficialDocumentSource, DocumentPartInfo, DocumentOcrStatus } from '../../types';
 import { calculateFileSha256 } from '../../utils/caFileMatcher';
-import { DocumentStorageService } from '../../services/documentStorageService';
+import { 
+  DocumentStorageService, 
+  calculateManifestSha256, 
+  validateDocumentPageRanges 
+} from '../../services/documentStorageService';
 import { dataStore } from '../../services/dataStore';
 
 interface SingleCAUploadModalProps {
@@ -43,6 +48,21 @@ const SOURCES: { value: OfficialDocumentSource; label: string }[] = [
   { value: 'AUTRE_SOURCE_OFFICIELLE', label: 'Autre Source Officielle' },
 ];
 
+interface PartItemState {
+  part_number: number;
+  file: File | null;
+  file_name: string;
+  file_size: string;
+  file_size_bytes: number;
+  checksum_sha256: string;
+  page_start: number;
+  page_end: number;
+  page_range: string;
+  storage_path?: string;
+  isCalculating: boolean;
+  notes?: string;
+}
+
 export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
   isOpen,
   onClose,
@@ -55,24 +75,61 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
 }) => {
   const [institutionId, setInstitutionId] = useState<string>(targetCollectivite?.id || '');
   const [fiscalYear, setFiscalYear] = useState<number>(existingDocument?.year || existingDocument?.fiscal_year || selectedYear || 2025);
+  
+  // Mode document unique
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState<string>(existingDocument?.file_url || '');
   const [fileName, setFileName] = useState<string>(existingDocument?.file_name || '');
   const [fileSizeFormatted, setFileSizeFormatted] = useState<string>(existingDocument?.file_size || '');
   const [fileSizeBytes, setFileSizeBytes] = useState<number>(existingDocument?.file_size_bytes || 0);
   const [checksumSha256, setChecksumSha256] = useState<string>(existingDocument?.checksum_sha256 || '');
-  
-  // Official Metadata
-  const [sourceName, setSourceName] = useState<string>(existingDocument?.source_name || 'DGDDL');
+  const [isCalculatingHash, setIsCalculatingHash] = useState<boolean>(false);
+
+  // Métadonnées officielles
+  const [sourceName, setSourceName] = useState<OfficialDocumentSource>(
+    (existingDocument?.source_name as OfficialDocumentSource) || 'DGDDL'
+  );
   const [sourceUrl, setSourceUrl] = useState<string>(existingDocument?.source_url || '');
   const [adoptionDate, setAdoptionDate] = useState<string>(existingDocument?.adoption_date || '');
   const [approvalDate, setApprovalDate] = useState<string>(existingDocument?.approval_date || '');
   const [approvalReference, setApprovalReference] = useState<string>(existingDocument?.approval_reference || '');
   const [isAsNewVersion, setIsAsNewVersion] = useState<boolean>(false);
   const [replacementReason, setReplacementReason] = useState('');
-  const [isCalculatingHash, setIsCalculatingHash] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
+
+  // Multi-parties & numérisation
+  const [isMultipart, setIsMultipart] = useState<boolean>(Boolean(existingDocument?.is_multipart));
+  const [isScannedPdf, setIsScannedPdf] = useState<boolean>(Boolean(existingDocument?.is_scanned));
+  const [manifestSha256, setManifestSha256] = useState<string>('');
+
+  // Liste interactive des volets / parties
+  const [parts, setParts] = useState<PartItemState[]>([
+    {
+      part_number: 1,
+      file: null,
+      file_name: '',
+      file_size: '',
+      file_size_bytes: 0,
+      checksum_sha256: '',
+      page_start: 1,
+      page_end: 22,
+      page_range: 'Pages 1 à 22',
+      isCalculating: false,
+    },
+    {
+      part_number: 2,
+      file: null,
+      file_name: '',
+      file_size: '',
+      file_size_bytes: 0,
+      checksum_sha256: '',
+      page_start: 23,
+      page_end: 44,
+      page_range: 'Pages 23 à 44',
+      isCalculating: false,
+    },
+  ]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -88,11 +145,31 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       setFileSizeFormatted(existingDocument.file_size || '');
       setFileSizeBytes(existingDocument.file_size_bytes || 0);
       setChecksumSha256(existingDocument.checksum_sha256 || '');
-      setSourceName(existingDocument.source_name || 'DGDDL');
+      setSourceName((existingDocument.source_name as OfficialDocumentSource) || 'DGDDL');
       setSourceUrl(existingDocument.source_url || '');
       setAdoptionDate(existingDocument.adoption_date || '');
       setApprovalDate(existingDocument.approval_date || '');
       setApprovalReference(existingDocument.approval_reference || '');
+      setIsMultipart(Boolean(existingDocument.is_multipart));
+      setIsScannedPdf(Boolean(existingDocument.is_scanned));
+
+      if (existingDocument.is_multipart && existingDocument.document_parts && existingDocument.document_parts.length > 0) {
+        setParts(
+          existingDocument.document_parts.map((p, idx) => ({
+            part_number: p.part_number || idx + 1,
+            file: null,
+            file_name: p.file_name || '',
+            file_size: p.file_size || '',
+            file_size_bytes: p.file_size_bytes || 0,
+            checksum_sha256: p.checksum_sha256 || '',
+            page_start: p.page_start || 1,
+            page_end: p.page_end || 1,
+            page_range: p.page_range || `Pages ${p.page_start || 1} à ${p.page_end || 1}`,
+            storage_path: p.storage_path,
+            isCalculating: false,
+          }))
+        );
+      }
     } else {
       setFiscalYear(selectedYear);
       setSelectedFile(null);
@@ -108,16 +185,72 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       setApprovalReference('');
       setIsAsNewVersion(false);
       setDuplicateWarning(null);
+      setIsMultipart(false);
+      setIsScannedPdf(false);
+      setManifestSha256('');
+      setParts([
+        {
+          part_number: 1,
+          file: null,
+          file_name: '',
+          file_size: '',
+          file_size_bytes: 0,
+          checksum_sha256: '',
+          page_start: 1,
+          page_end: 22,
+          page_range: 'Pages 1 à 22',
+          isCalculating: false,
+        },
+        {
+          part_number: 2,
+          file: null,
+          file_name: '',
+          file_size: '',
+          file_size_bytes: 0,
+          checksum_sha256: '',
+          page_start: 23,
+          page_end: 44,
+          page_range: 'Pages 23 à 44',
+          isCalculating: false,
+        },
+      ]);
     }
   }, [isOpen, targetCollectivite, existingDocument, selectedYear]);
 
-  // Vérifier si un document existe déjà pour cette institution et cette année
+  // Recalcul automatique du SHA-256 du manifeste multi-parties
+  useEffect(() => {
+    if (!isMultipart) {
+      setManifestSha256('');
+      return;
+    }
+    const hashes = parts.map(p => p.checksum_sha256).filter(Boolean);
+    if (hashes.length === parts.length && hashes.length > 0) {
+      void calculateManifestSha256(hashes).then(h => setManifestSha256(h));
+    } else {
+      setManifestSha256('');
+    }
+  }, [isMultipart, parts]);
+
+  // Validation des plages de pages en temps réel
+  const pageRangeValidation = useMemo(() => {
+    if (!isMultipart) return { isValid: true, error: undefined, errors: [] as string[], totalPages: 1 };
+    return validateDocumentPageRanges(
+      parts.map(p => ({
+        part_number: p.part_number,
+        page_start: p.page_start,
+        page_end: p.page_end,
+        page_range: p.page_range,
+      }))
+    );
+  }, [isMultipart, parts]);
+
   const currentInstitution = collectivites.find(c => c.id === institutionId);
   const alreadyExistingDoc = institutionId && fiscalYear 
     ? dataStore.getCAForInstitution(institutionId, fiscalYear) 
     : undefined;
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Gestion du fichier pour le mode document unique
+  const handleSingleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -134,13 +267,11 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
     const formatted = parseFloat(sizeMb) >= 1 ? `${sizeMb} Mo` : `${Math.round(file.size / 1024)} Ko`;
     setFileSizeFormatted(formatted);
 
-    // Calcul SHA-256
     setIsCalculatingHash(true);
     try {
       const hash = await calculateFileSha256(file);
       setChecksumSha256(hash);
 
-      // Vérifier les doublons
       const duplicate = dataStore.findDocumentByChecksum(hash);
       if (duplicate && duplicate.id !== existingDocument?.id) {
         setDuplicateWarning(`Ce fichier a la même empreinte SHA-256 que "${duplicate.title}" (${duplicate.institution_name}).`);
@@ -154,44 +285,218 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
     }
   };
 
+  // Gestion de la sélection de fichier pour un fascicule spécifique
+  const handlePartFileChange = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+      onShowToast(`Le fascicule ${parts[index].part_number} doit être un fichier PDF valide.`, 'error');
+      return;
+    }
+
+    const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+    const formatted = parseFloat(sizeMb) >= 1 ? `${sizeMb} Mo` : `${Math.round(file.size / 1024)} Ko`;
+
+    setParts(prev => prev.map((p, idx) => idx === index ? {
+      ...p,
+      file,
+      file_name: file.name,
+      file_size: formatted,
+      file_size_bytes: file.size,
+      isCalculating: true,
+    } : p));
+
+    try {
+      const hash = await calculateFileSha256(file);
+      setParts(prev => prev.map((p, idx) => idx === index ? {
+        ...p,
+        checksum_sha256: hash,
+        isCalculating: false,
+      } : p));
+    } catch (err) {
+      console.warn(`Calcul SHA-256 impossible pour la partie ${index + 1}`, err);
+      setParts(prev => prev.map((p, idx) => idx === index ? { ...p, isCalculating: false } : p));
+    }
+  };
+
+  // Ajout / Suppression / Réordonnancement de fascicules
+  const handleAddPart = () => {
+    setParts(prev => {
+      const nextNum = prev.length + 1;
+      const lastPart = prev[prev.length - 1];
+      const nextStart = lastPart ? lastPart.page_end + 1 : 1;
+      const nextEnd = nextStart + 21;
+      return [
+        ...prev,
+        {
+          part_number: nextNum,
+          file: null,
+          file_name: '',
+          file_size: '',
+          file_size_bytes: 0,
+          checksum_sha256: '',
+          page_start: nextStart,
+          page_end: nextEnd,
+          page_range: `Pages ${nextStart} à ${nextEnd}`,
+          isCalculating: false,
+        },
+      ];
+    });
+  };
+
+  const handleRemovePart = (index: number) => {
+    if (parts.length <= 2) {
+      onShowToast('Un document multi-parties doit comporter au moins 2 fascicules.', 'error');
+      return;
+    }
+    setParts(prev => {
+      const filtered = prev.filter((_, idx) => idx !== index);
+      return filtered.map((p, idx) => ({ ...p, part_number: idx + 1 }));
+    });
+  };
+
+  const handleMovePart = (index: number, direction: 'UP' | 'DOWN') => {
+    const targetIdx = direction === 'UP' ? index - 1 : index + 1;
+    if (targetIdx < 0 || targetIdx >= parts.length) return;
+    setParts(prev => {
+      const updated = [...prev];
+      const temp = updated[index];
+      updated[index] = updated[targetIdx];
+      updated[targetIdx] = temp;
+      return updated.map((p, idx) => ({ ...p, part_number: idx + 1 }));
+    });
+  };
+
+  const handlePageChange = (index: number, field: 'start' | 'end', value: number) => {
+    setParts(prev => prev.map((p, idx) => {
+      if (idx !== index) return p;
+      const newStart = field === 'start' ? value : p.page_start;
+      const newEnd = field === 'end' ? value : p.page_end;
+      return {
+        ...p,
+        page_start: newStart,
+        page_end: newEnd,
+        page_range: `Pages ${newStart} à ${newEnd}`,
+      };
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
     if (!institutionId) {
       onShowToast('Veuillez sélectionner une collectivité.', 'error');
       return;
     }
 
-    if (!selectedFile && !existingDocument?.storage_path) {
-      onShowToast('Veuillez téléverser un fichier PDF officiel.', 'error');
-      return;
+    if (isMultipart) {
+      if (!pageRangeValidation.isValid) {
+        onShowToast(pageRangeValidation.error || 'Plages de pages invalides.', 'error');
+        return;
+      }
+      for (const p of parts) {
+        if (p.file && p.file.size === 0) {
+          onShowToast(`Le fichier sélectionné pour le volet ${p.part_number} (${p.file_name}) est vide (0 octet).`, 'error');
+          return;
+        }
+        if (!p.file && (!p.storage_path || !p.checksum_sha256)) {
+          onShowToast(`Veuillez sélectionner un fichier PDF pour le volet ${p.part_number}.`, 'error');
+          return;
+        }
+      }
+    } else {
+      if (selectedFile && selectedFile.size === 0) {
+        onShowToast('Le fichier PDF sélectionné est vide (0 octet).', 'error');
+        return;
+      }
+      if (!selectedFile && !existingDocument?.storage_path) {
+        onShowToast('Veuillez téléverser un fichier PDF officiel.', 'error');
+        return;
+      }
     }
 
     setIsSubmitting(true);
+    const newlyUploadedPaths: string[] = [];
 
     try {
       let finalFileUrl = fileUrl;
-      let finalStorageBucket = existingDocument?.storage_bucket;
+      let finalStorageBucket = existingDocument?.storage_bucket || 'public_documents';
       let finalStoragePath = existingDocument?.storage_path;
       let finalSizeStr = fileSizeFormatted;
       let finalSizeBytes = fileSizeBytes;
       let finalSha256 = checksumSha256;
+      let finalParts: DocumentPartInfo[] | undefined = undefined;
+      let finalTotalPages = pageRangeValidation.totalPages || 1;
 
-      // Si un nouveau fichier est sélectionné, téléversement
-      if (selectedFile) {
+      const uploadOptions = {
+        institutionId,
+        institutionType: (currentInstitution?.type === 'REGION' ? 'REGION' : 'MAIRIE') as 'REGION' | 'MAIRIE',
+        fiscalYear,
+        documentType: 'COMPTE_ADMINISTRATIF' as const,
+        version: isAsNewVersion ? ((alreadyExistingDoc?.version || 1) + 1) : (existingDocument?.version || 1),
+      };
+
+      if (isMultipart) {
+        // Mode multi-parties : téléversement réel des nouveaux fascicules
+        const hasNewFiles = parts.some(p => Boolean(p.file));
+        
+        if (hasNewFiles) {
+          const multiRes = await DocumentStorageService.uploadMultiPartDocument(
+            parts.map(p => ({
+              partNumber: p.part_number,
+              file: p.file || undefined,
+              fileName: p.file_name,
+              pageStart: p.page_start,
+              pageEnd: p.page_end,
+              pageRange: p.page_range,
+              checksumSha256: p.checksum_sha256,
+              storagePath: p.storage_path,
+              fileSizeBytes: p.file_size_bytes,
+              fileSizeFormatted: p.file_size,
+              notes: p.notes,
+            })),
+            uploadOptions
+          );
+
+          if (!multiRes.success) {
+            throw new Error(multiRes.error || 'Échec du téléversement multi-parties.');
+          }
+
+          newlyUploadedPaths.push(...multiRes.newlyUploadedPaths);
+          finalStoragePath = multiRes.primaryStoragePath;
+          finalSha256 = multiRes.manifestChecksumSha256;
+          finalSizeStr = multiRes.totalFileSizeFormatted;
+          finalSizeBytes = multiRes.totalFileSizeBytes;
+          finalParts = multiRes.documentParts;
+          finalTotalPages = multiRes.totalPageCount;
+        } else {
+          // Métadonnées sans nouveau fichier (modification sans ré-upload)
+          finalParts = parts.map(p => ({
+            part_number: p.part_number,
+            file_name: p.file_name,
+            page_range: p.page_range,
+            page_start: p.page_start,
+            page_end: p.page_end,
+            checksum_sha256: p.checksum_sha256,
+            file_size: p.file_size,
+            file_size_bytes: p.file_size_bytes,
+            storage_path: p.storage_path,
+            notes: p.notes,
+          }));
+          finalSha256 = manifestSha256 || checksumSha256;
+        }
+      } else if (selectedFile) {
+        // Mode document unique
         const uploadRes = await DocumentStorageService.uploadDocument(
           selectedFile,
           selectedFile.name,
-          {
-            institutionId,
-            institutionType: currentInstitution?.type === 'REGION' ? 'REGION' : 'MAIRIE',
-            fiscalYear,
-            documentType: 'COMPTE_ADMINISTRATIF',
-            version: isAsNewVersion ? ((alreadyExistingDoc?.version || 1) + 1) : (existingDocument?.version || 1),
-          }
+          uploadOptions
         );
 
         if (!uploadRes.success) throw new Error(uploadRes.error || 'Téléversement non confirmé.');
+        newlyUploadedPaths.push(uploadRes.storagePath);
         finalFileUrl = uploadRes.fileUrl;
         finalStorageBucket = uploadRes.storageBucket;
         finalStoragePath = uploadRes.storagePath;
@@ -200,37 +505,62 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
         finalSha256 = uploadRes.checksumSha256;
       }
 
-      const savedDoc = await dataStore.saveCADocument({
-        replacement_reason: replacementReason,
-        id: existingDocument?.id,
-        institution_id: institutionId,
-        institution_name: currentInstitution?.name || 'Collectivité',
-        institution_type: currentInstitution?.type === 'REGION' ? 'REGION' : 'MAIRIE',
-        year: fiscalYear,
-        fiscal_year: fiscalYear,
-        title: `Compte Administratif ${fiscalYear} - ${currentInstitution?.name}`,
-        file_url: finalFileUrl,
-        file_name: fileName || `compte-administratif-${fiscalYear}.pdf`,
-        file_size: finalSizeStr || undefined,
-        file_size_bytes: finalSizeBytes,
-        storage_bucket: finalStorageBucket,
-        storage_path: finalStoragePath,
-        checksum_sha256: finalSha256,
-        source_name: sourceName,
-        source_url: sourceUrl || undefined,
-        adoption_date: adoptionDate || undefined,
-        approval_date: approvalDate || undefined,
-        approval_reference: approvalReference || undefined,
-      }, isAsNewVersion);
+      // Statut OCR rigoureux : pas de fausse extraction automatique annoncée
+      const finalOcrStatus: DocumentOcrStatus = isScannedPdf ? 'MANUAL_TRANSCRIPTION' : 'NOT_APPLICABLE';
 
-      onSuccess(savedDoc);
-      onShowToast(
-        isAsNewVersion 
-          ? `Nouvelle version v${savedDoc.version} enregistrée avec succès.` 
-          : `Compte Administratif ${fiscalYear} enregistré avec succès.`, 
-        'success'
-      );
-      onClose();
+      // Persistance PostgreSQL avec compensation en cas d'échec
+      try {
+        const savedDoc = await dataStore.saveCADocument({
+          replacement_reason: replacementReason,
+          id: existingDocument?.id,
+          institution_id: institutionId,
+          institution_name: currentInstitution?.name || 'Collectivité',
+          institution_type: currentInstitution?.type === 'REGION' ? 'REGION' : 'MAIRIE',
+          year: fiscalYear,
+          fiscal_year: fiscalYear,
+          title: `Compte Administratif ${fiscalYear} - ${currentInstitution?.name}`,
+          file_url: finalFileUrl,
+          file_name: isMultipart ? `compte-administratif-${fiscalYear}-multipart.pdf` : (fileName || `compte-administratif-${fiscalYear}.pdf`),
+          file_size: finalSizeStr || undefined,
+          file_size_bytes: finalSizeBytes,
+          storage_bucket: finalStorageBucket,
+          storage_path: finalStoragePath,
+          checksum_sha256: finalSha256,
+          source_name: sourceName,
+          source_url: sourceUrl || undefined,
+          adoption_date: adoptionDate || undefined,
+          approval_date: approvalDate || undefined,
+          approval_reference: approvalReference || undefined,
+          page_count: finalTotalPages,
+          is_multipart: isMultipart,
+          parts_count: isMultipart ? (finalParts?.length || parts.length) : undefined,
+          document_parts: finalParts,
+          is_scanned: isScannedPdf,
+          has_text_layer: !isScannedPdf,
+          ocr_status: finalOcrStatus,
+        }, isAsNewVersion);
+
+        onSuccess(savedDoc);
+        onShowToast(
+          isAsNewVersion 
+            ? `Nouvelle version v${savedDoc.version} enregistrée avec succès.` 
+            : `Compte Administratif ${fiscalYear} enregistré avec succès (${isMultipart ? `${parts.length} volets` : 'document unique'}).`, 
+          'success'
+        );
+        onClose();
+      } catch (dbErr: any) {
+        // Compensation Storage : nettoyer uniquement les nouveaux fichiers de cette tentative
+        if (newlyUploadedPaths.length > 0) {
+          console.warn('Compensation Storage déclenchée après échec base de données:', dbErr.message);
+          const cleanupResult = await DocumentStorageService.deleteStorageFiles(newlyUploadedPaths);
+          if (cleanupResult.success) {
+            throw new Error(`Échec de l'enregistrement en base (${dbErr.message}). Les fichiers temporaires téléversés ont été automatiquement nettoyés.`);
+          } else {
+            throw new Error(`Échec critique : l'enregistrement en base a échoué (${dbErr.message}) ET le nettoyage des fichiers a échoué (${cleanupResult.error || 'inconnu'}). Fichiers orphelins : ${newlyUploadedPaths.join(', ')}.`);
+          }
+        }
+        throw dbErr;
+      }
     } catch (err: any) {
       console.error("Erreur enregistrement CA:", err);
       onShowToast(`Erreur lors de l'enregistrement : ${err.message || 'Erreur inconnue'}`, 'error');
@@ -255,7 +585,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
                 {existingDocument ? 'Modifier le Compte Administratif' : 'Déposer un Compte Administratif (CA)'}
               </h3>
               <p className="text-xs text-slate-500">
-                Enregistrez le document officiel certifié avec son empreinte numérique et ses références de tutelle.
+                Enregistrez le document officiel certifié avec son empreinte numérique réelle et ses références de tutelle.
               </p>
             </div>
           </div>
@@ -335,60 +665,246 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
             </div>
           )}
 
-          {/* Fichier PDF & Dropzone */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
-              Document PDF Officiel *
-            </label>
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-300 hover:border-brand-blue bg-slate-50/50 hover:bg-blue-50/20 rounded-2xl p-6 text-center transition-all cursor-pointer group"
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,application/pdf"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-              <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-brand-blue transition-colors">
-                <Upload className="w-5 h-5" />
-              </div>
-              {fileName ? (
-                <div>
-                  <div className="text-xs font-bold text-slate-900">{fileName}</div>
-                  <div className="text-[11px] text-slate-500 font-mono mt-0.5">
-                    Taille : {fileSizeFormatted}
-                  </div>
+          {/* Options de Numérisation & Multi-Parties */}
+          <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-3">
+            <h4 className="text-xs font-black uppercase text-slate-800 tracking-wider flex items-center gap-1.5">
+              <Layers className="w-4 h-4 text-brand-blue" />
+              <span>Format & Structure Numérique</span>
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={isScannedPdf}
+                  onChange={e => setIsScannedPdf(e.target.checked)}
+                  className="rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
+                />
+                <span>Document scanné (photocopie sans texte natif)</span>
+              </label>
+
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={isMultipart}
+                  onChange={e => setIsMultipart(e.target.checked)}
+                  className="rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
+                />
+                <span>Document scindé en plusieurs fascicules (multi-PDF)</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Section Téléversement : Simple ou Multi-Parties */}
+          {!isMultipart ? (
+            /* Mode Document Unique */
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Document PDF Officiel Unique *
+              </label>
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-slate-300 hover:border-brand-blue bg-slate-50/50 hover:bg-blue-50/20 rounded-2xl p-6 text-center transition-all cursor-pointer group"
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  className="hidden"
+                  onChange={handleSingleFileChange}
+                />
+                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-brand-blue transition-colors">
+                  <Upload className="w-5 h-5" />
                 </div>
-              ) : (
-                <div>
-                  <div className="text-xs font-bold text-slate-700">Cliquez pour téléverser le PDF officiel</div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">Format PDF uniquement (max 50 Mo)</div>
+                {fileName ? (
+                  <div>
+                    <div className="text-xs font-bold text-slate-900">{fileName}</div>
+                    <div className="text-[11px] text-slate-500 font-mono mt-0.5">
+                      Taille : {fileSizeFormatted}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="text-xs font-bold text-slate-700">Cliquez pour téléverser le PDF officiel</div>
+                    <div className="text-[11px] text-slate-400 mt-0.5">Format PDF uniquement (max 50 Mo)</div>
+                  </div>
+                )}
+              </div>
+
+              {isCalculatingHash && (
+                <div className="text-[11px] text-slate-500 mt-1.5 flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping" />
+                  <span>Calcul cryptographique de l'empreinte SHA-256 en cours...</span>
+                </div>
+              )}
+              {checksumSha256 && !isCalculatingHash && (
+                <div className="text-[11px] text-slate-500 mt-2 p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono flex items-center justify-between">
+                  <span className="truncate max-w-md">SHA-256: {checksumSha256}</span>
+                  <span className="text-[10px] text-emerald-600 font-bold px-1.5 py-0.5 bg-emerald-50 rounded">Vérifié</span>
+                </div>
+              )}
+              {duplicateWarning && (
+                <div className="p-3 mt-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-[11px] font-medium flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                  <span>{duplicateWarning}</span>
                 </div>
               )}
             </div>
+          ) : (
+            /* Mode Multi-Parties / Fascicules */
+            <div className="space-y-3 p-4 rounded-2xl border border-blue-200 bg-blue-50/30">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-black uppercase text-brand-blue tracking-wider">
+                    Fascicules du Document ({parts.length} parties)
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    Sélectionnez chaque fichier PDF dans l'ordre de consultation. Les empreintes et le manifeste sont calculés automatiquement.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddPart}
+                  className="px-3 py-1.5 rounded-xl bg-brand-blue text-white text-xs font-bold hover:bg-blue-700 transition-colors flex items-center gap-1 shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Ajouter une partie</span>
+                </button>
+              </div>
 
-            {/* Checksum SHA-256 Feedback */}
-            {isCalculatingHash && (
-              <div className="text-[11px] text-slate-500 mt-1.5 flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping" />
-                <span>Calcul cryptographique de l'empreinte SHA-256 en cours...</span>
+              {/* Erreur de validation des plages */}
+              {!pageRangeValidation.isValid && (
+                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                  <span>{pageRangeValidation.error}</span>
+                </div>
+              )}
+
+              {/* Liste des parties */}
+              <div className="space-y-3 pt-1">
+                {parts.map((part, index) => (
+                  <div key={index} className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-lg bg-brand-blue text-white text-xs font-black flex items-center justify-center">
+                          {part.part_number}
+                        </span>
+                        <span className="text-xs font-black text-slate-900">
+                          Partie {part.part_number} {part.file_name ? `• ${part.file_name}` : ''}
+                        </span>
+                        {part.file_size && (
+                          <span className="text-[10px] font-mono text-slate-500">({part.file_size})</span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleMovePart(index, 'UP')}
+                          disabled={index === 0}
+                          className="p-1 rounded text-slate-400 hover:text-slate-700 disabled:opacity-30"
+                          title="Déplacer vers le haut"
+                        >
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleMovePart(index, 'DOWN')}
+                          disabled={index === parts.length - 1}
+                          className="p-1 rounded text-slate-400 hover:text-slate-700 disabled:opacity-30"
+                          title="Déplacer vers le bas"
+                        >
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePart(index)}
+                          disabled={parts.length <= 2}
+                          className="p-1 rounded text-rose-500 hover:bg-rose-50 disabled:opacity-30"
+                          title="Supprimer cette partie"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Sélection du fichier de cette partie */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-center">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                          Fichier PDF de la Partie {part.part_number} *
+                        </label>
+                        <input
+                          type="file"
+                          accept=".pdf,application/pdf"
+                          onChange={e => handlePartFileChange(index, e)}
+                          className="text-xs file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-brand-blue hover:file:bg-blue-100"
+                        />
+                      </div>
+
+                      {/* Plages de pages */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                            Page Début
+                          </label>
+                          <input
+                            type="number"
+                            min={1}
+                            value={part.page_start}
+                            onChange={e => handlePageChange(index, 'start', parseInt(e.target.value, 10) || 1)}
+                            className="w-full p-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-center"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                            Page Fin
+                          </label>
+                          <input
+                            type="number"
+                            min={part.page_start}
+                            value={part.page_end}
+                            onChange={e => handlePageChange(index, 'end', parseInt(e.target.value, 10) || part.page_start)}
+                            className="w-full p-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-center"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Hash du fascicule */}
+                    {part.isCalculating && (
+                      <div className="text-[10px] text-amber-600 flex items-center gap-1.5 font-medium">
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                        <span>Calcul de l'empreinte du fichier...</span>
+                      </div>
+                    )}
+                    {part.checksum_sha256 && !part.isCalculating && (
+                      <div className="p-1.5 bg-slate-50 border border-slate-100 rounded-lg text-[10px] font-mono text-slate-500 flex items-center justify-between">
+                        <span className="truncate">SHA-256: {part.checksum_sha256}</span>
+                        <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1 py-0.5 rounded">Calculé</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            )}
-            {checksumSha256 && !isCalculatingHash && (
-              <div className="text-[11px] text-slate-500 mt-2 p-2 bg-slate-50 border border-slate-200 rounded-xl font-mono flex items-center justify-between">
-                <span className="truncate max-w-md">SHA-256: {checksumSha256}</span>
-                <span className="text-[10px] text-emerald-600 font-bold px-1.5 py-0.5 bg-emerald-50 rounded">Vérifié</span>
-              </div>
-            )}
-            {duplicateWarning && (
-              <div className="p-3 mt-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-[11px] font-medium flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0" />
-                <span>{duplicateWarning}</span>
-              </div>
-            )}
-          </div>
+
+              {/* Empreinte du Manifeste Multi-Parties */}
+              {manifestSha256 && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1">
+                  <div className="flex items-center justify-between text-xs font-bold text-emerald-900">
+                    <span className="flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                      <span>Empreinte logique du manifeste ({parts.length} fascicules, {pageRangeValidation.totalPages} pages)</span>
+                    </span>
+                    <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Déterministe</span>
+                  </div>
+                  <div className="font-mono text-[11px] text-emerald-700 break-all">
+                    {manifestSha256}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Source & Approbation de Tutelle */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -422,7 +938,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
 
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Date d'Adoption par le Conseil (Optionnel)
+                Date d'Adoption par le Conseil
               </label>
               <input
                 type="date"
@@ -458,12 +974,21 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
             />
           </div>
 
-          {isAsNewVersion && <label className="block text-sm font-semibold text-slate-700">
-            Motif du remplacement
-            <input required value={replacementReason} onChange={e => setReplacementReason(e.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 p-3 focus-visible:outline-brand-blue" />
-          </label>}
-          <p className="p-4 rounded-2xl bg-amber-50 text-amber-900 text-sm">
-            Le document sera enregistré à vérifier. La vérification et la publication s’effectuent ensuite depuis l’examen du document.
+          {isAsNewVersion && (
+            <label className="block text-sm font-semibold text-slate-700">
+              Motif du remplacement *
+              <input 
+                required 
+                value={replacementReason} 
+                onChange={e => setReplacementReason(e.target.value)} 
+                placeholder="Ex: Remplacement par le scan officiel complet certifié"
+                className="mt-1 w-full rounded-xl border border-slate-300 p-3 text-xs focus-visible:outline-brand-blue" 
+              />
+            </label>
+          )}
+
+          <p className="p-3.5 rounded-2xl bg-amber-50 text-amber-900 text-xs border border-amber-200">
+            Le document sera enregistré avec le statut <strong>« À vérifier »</strong>. La vérification humaine et la publication s’effectuent ensuite depuis l’écran d’examen du document.
           </p>
 
           {/* Footer Submit */}
@@ -477,11 +1002,11 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || isCalculatingHash}
-              className="px-5 py-2.5 min-h-[44px] rounded-xl bg-brand-blue text-white text-xs font-black hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2"
+              disabled={isSubmitting || isCalculatingHash || (isMultipart && !pageRangeValidation.isValid)}
+              className="px-5 py-2.5 min-h-[44px] rounded-xl bg-brand-blue text-white text-xs font-black hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2 cursor-pointer"
             >
               <ShieldCheck className="w-4 h-4" />
-              <span>{isSubmitting ? 'Enregistrement...' : 'Enregistrer le Compte Administratif'}</span>
+              <span>{isSubmitting ? 'Téléversement & Enregistrement...' : 'Enregistrer le Compte Administratif'}</span>
             </button>
           </div>
         </form>

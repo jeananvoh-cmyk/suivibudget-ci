@@ -29,6 +29,7 @@ export interface PasswordStrengthResult {
 }
 
 export interface SessionPayload {
+  userId?: string;
   email: string;
   fullName: string;
   role: 'ADMIN' | 'MODERATOR' | 'DATA_MANAGER';
@@ -189,6 +190,7 @@ export class AuthSecurityService {
     }
 
     inMemorySession = {
+        userId: authUser.id,
         email: authUser.email || '',
         fullName: profile.full_name || authUser.email || 'Utilisateur',
         role: profile.role as 'ADMIN' | 'MODERATOR' | 'DATA_MANAGER',

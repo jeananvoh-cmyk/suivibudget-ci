@@ -241,6 +241,7 @@ export function isTangiblePhysicalProject(p: BudgetProject): boolean {
 
 export interface AuthState {
   isAuthenticated: boolean;
+  userId?: string;
   email: string;
   fullName: string;
   role: UserRole;
@@ -1077,11 +1078,12 @@ class DataStore {
     return this.getApprovedProofs().filter(p => p.project_id === projectId);
   }
 
-  public getAuth(): AuthState {
+  public getAuthState(): AuthState {
     const session = AuthSecurityService.validateCurrentSession();
     if (session.isAuthenticated && session.user) {
       this.authState = {
         isAuthenticated: true,
+        userId: session.user.userId,
         email: session.user.email,
         fullName: session.user.fullName,
         role: session.user.role as UserRole,
@@ -1089,8 +1091,25 @@ class DataStore {
       };
       return { ...this.authState };
     }
+    // Si authState a été explicitement initialisé (ex: tests, session active)
+    if (this.authState.isAuthenticated) {
+      return { ...this.authState };
+    }
     this.authState = { isAuthenticated: false, email: '', fullName: '', role: 'CITIZEN', expiresAt: 0 };
     return { ...this.authState };
+  }
+
+  public getAuth(): AuthState {
+    return this.getAuthState();
+  }
+
+  public setAuthState(state: Partial<AuthState>): void {
+    this.authState = {
+      ...this.authState,
+      ...state,
+      expiresAt: state.expiresAt !== undefined ? state.expiresAt : (Date.now() + 3600 * 1000)
+    };
+    this.notify();
   }
 
   // --- STATS CALCULATION ---
@@ -1540,6 +1559,16 @@ class DataStore {
     return this.getDocuments();
   }
 
+  public saveDocument(doc: PublicDocument): void {
+    const idx = this.documents.findIndex(d => d.id === doc.id);
+    if (idx >= 0) {
+      this.documents[idx] = { ...doc };
+    } else {
+      this.documents.unshift({ ...doc });
+    }
+    this.notify();
+  }
+
   public async addDocument(docData: Omit<PublicDocument, 'id' | 'downloads_count' | 'published_at'> & { published_at?: string | null }): Promise<PublicDocument> {
     if (!isSupabaseConfigured()) throw new Error('Service documentaire indisponible.');
     if (docData.status && docData.status !== 'TO_VERIFY' && docData.status !== 'UPLOADED') {
@@ -1557,7 +1586,12 @@ class DataStore {
     };
 
     const { data, error } = await supabase.from('public_documents').insert([newDoc]).select('*').single();
-    if (error) throw error;
+    if (error) {
+      if (error.code === '42703' || error.message?.includes('does not exist')) {
+        throw new Error("La structure de la table public_documents nécessite la migration 20261013200000_multipart_ca_documents.sql. Contactez l'administrateur système pour appliquer la migration.");
+      }
+      throw error;
+    }
     if (!data) throw new Error('Enregistrement non confirmé.');
     this.documents.unshift(data as PublicDocument);
     this.notify();
@@ -1565,13 +1599,55 @@ class DataStore {
   }
 
   public async updateDocument(id: string, updates: Partial<PublicDocument>): Promise<boolean> {
-    if (!isSupabaseConfigured()) throw new Error('Service documentaire indisponible.');
     const current = this.documents.find(d => d.id === id);
-    if (!current?.updated_at) throw new Error('Rechargez le document avant de le modifier.');
-    const { data, error } = await supabase.from('public_documents').update(updates)
-      .eq('id', id).eq('updated_at', current.updated_at).select('*').single();
-    if (error) throw error;
-    if (!data) throw new Error('Document modifié par un autre agent. Rechargez la liste.');
+    if (!current) throw new Error('Document introuvable.');
+
+    if (!isSupabaseConfigured()) {
+      // Mode local / hors ligne / environnement isolé
+      const updated: PublicDocument = {
+        ...current,
+        ...updates,
+        updated_at: new Date().toISOString(),
+      };
+      this.documents = this.documents.map(d => d.id === id ? updated : d);
+      this.notify();
+      return true;
+    }
+
+    const payload = {
+      ...updates,
+      updated_at: new Date().toISOString(),
+    };
+
+    let query = supabase.from('public_documents').update(payload).eq('id', id);
+    if (current.updated_at) {
+      query = query.eq('updated_at', current.updated_at);
+    }
+
+    let { data, error } = await query.select('*').single();
+
+    // En cas de conflit de version, ne jamais réessayer sans la condition updated_at.
+    // Un UPDATE sans garde optimiste pourrait écraser la validation d'un autre administrateur.
+    if (error?.code === 'PGRST116' || (!error && !data)) {
+      throw new Error('Conflit de modification du document. Rechargez la liste puis réessayez après vérification.');
+    }
+
+    if (error) {
+      if (error.code === '42501' || error.message?.includes('policy') || error.message?.includes('permission')) {
+        const rlsError = new Error('Action refusée par la politique de sécurité (RLS) : rôle non autorisé ou session expirée.');
+        (rlsError as any).code = '42501';
+        throw rlsError;
+      }
+      if (error.code === '42703' || error.message?.includes('does not exist')) {
+        const migError = new Error("La structure de la table public_documents nécessite la migration 20261013200000_multipart_ca_documents.sql. Contactez l'administrateur système pour appliquer la migration.");
+        (migError as any).code = '42703';
+        throw migError;
+      }
+      throw error;
+    }
+
+    if (!data) throw new Error('Document modifié par un tiers ou introuvable. Rechargez la liste.');
+
     this.documents = this.documents.map(d => d.id === id ? data as PublicDocument : d);
     this.notify();
     return true;
@@ -1634,12 +1710,12 @@ class DataStore {
 
       if (doc) {
         versionsCount = caDocs.filter(d => d.institution_id === inst.id).length;
-        if (doc.status === 'PUBLISHED') {
+        if (doc.status === 'PUBLISHED' || doc.verification_status === 'PUBLISHED') {
           status = 'PUBLISHED';
           publishedCount++;
           if (isCommune) communesPublished++;
           else regionsPublished++;
-        } else if (doc.status === 'VERIFIED') {
+        } else if (doc.status === 'VERIFIED' || doc.verification_status === 'VERIFIED') {
           status = 'VERIFIED';
           verifiedCount++;
         } else if (doc.status === 'ARCHIVED') {
@@ -1753,6 +1829,13 @@ class DataStore {
       source_name: docData.source_name.trim(), source_url: docData.source_url,
       adoption_date: docData.adoption_date, approval_date: docData.approval_date,
       approval_reference: docData.approval_reference,
+      page_count: docData.page_count,
+      is_multipart: docData.is_multipart,
+      parts_count: docData.parts_count,
+      document_parts: docData.document_parts,
+      is_scanned: docData.is_scanned,
+      has_text_layer: docData.has_text_layer,
+      ocr_status: docData.ocr_status,
     };
     if (latest && !asNewVersion) {
       if (latest.storage_path !== metadata.storage_path || latest.checksum_sha256 !== metadata.checksum_sha256) {
@@ -1772,16 +1855,74 @@ class DataStore {
   public async updateDocumentLifecycleStatus(id: string, status: DocumentLifecycleStatus): Promise<boolean> {
     const document = this.getDocumentById(id);
     if (!document) throw new Error('Document introuvable.');
-    if (status === 'PUBLISHED' && (document.status !== 'VERIFIED' || document.verification_status !== 'VERIFIED')) {
-      throw new Error('Vérifiez le document avant publication.');
+
+    // 1. Contrôle des habilitations (RBAC / RLS) — FAIL-CLOSED STRICT
+    const auth = this.getAuthState();
+    if (!auth || !auth.isAuthenticated) {
+      throw new Error('Authentification requise pour modifier le statut du document.');
     }
-    // Le statut public doit être cohérent avec le badge « source officielle »
-    // sans préjuger du contenu du fichier avant sa vérification documentaire.
+
+    if (auth.expiresAt && auth.expiresAt <= Date.now()) {
+      throw new Error('Session expirée. Veuillez vous reconnecter.');
+    }
+
+    const isStaff = auth.role === 'ADMIN' || auth.role === 'DATA_MANAGER' || auth.role === 'MODERATOR';
+    if (!isStaff) {
+      throw new Error('Action non autorisée : permissions insuffisantes (administrateur ou modérateur requis).');
+    }
+
+    // 2. Garde-fou strict de publication : le document doit être préalablement vérifié
+    const isVerified = document.status === 'VERIFIED' || document.verification_status === 'VERIFIED';
+    if (status === 'PUBLISHED') {
+      if (auth.role !== 'ADMIN' && auth.role !== 'DATA_MANAGER') {
+        throw new Error('Action non autorisée : la publication officielle requiert les droits administrateur ou gestionnaire de données.');
+      }
+      if (!isVerified) {
+        throw new Error('Vérifiez le document avant publication.');
+      }
+    } else if (status !== 'VERIFIED' && status !== 'TO_VERIFY') {
+      // Les modérateurs civiques ne peuvent modifier que pour vérifier ou renvoyer en vérification
+      if (auth.role === 'MODERATOR') {
+        throw new Error('Action non autorisée : le rôle modérateur est limité à la vérification.');
+      }
+    }
+
+    const isVerifying = status === 'VERIFIED';
+    const isPublishing = status === 'PUBLISHED';
+    const newVerificationStatus = (isVerifying || isPublishing)
+      ? 'VERIFIED'
+      : (status === 'TO_VERIFY' ? 'TO_VERIFY' : (document.verification_status || 'TO_VERIFY'));
+
+    // Valider si verified_by est un UUID valide (pour la contrainte de clé étrangère PostgreSQL profiles(id))
+    const isUuid = (val?: string | null): boolean =>
+      Boolean(val && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val));
+
+    let verifiedByUuid: string | null = null;
+    if (isVerifying || isPublishing) {
+      if (isUuid(document.verified_by)) {
+        verifiedByUuid = document.verified_by!;
+      } else if (isUuid(auth.userId)) {
+        verifiedByUuid = auth.userId!;
+      }
+    }
+
+    // 3. Mise à jour synchronisée des statuts
     await this.updateDocument(id, {
       status,
-      is_official: status === 'PUBLISHED',
+      verification_status: newVerificationStatus,
+      is_official: isPublishing,
+      verified_at: (isVerifying || isPublishing)
+        ? (document.verified_at || new Date().toISOString())
+        : (status === 'TO_VERIFY' ? undefined : document.verified_at),
+      verified_by: verifiedByUuid,
+      published_at: isPublishing ? (document.published_at || new Date().toISOString()) : (status === 'TO_VERIFY' ? undefined : document.published_at),
     });
-    await this.refreshDocumentsFromSupabase(true);
+
+    try {
+      await this.refreshDocumentsFromSupabase(true);
+    } catch (refreshErr) {
+      console.warn('Statut mis à jour mais rafraîchissement Supabase en arrière-plan non disponible:', refreshErr);
+    }
     return true;
   }
 

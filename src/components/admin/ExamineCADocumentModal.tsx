@@ -22,7 +22,7 @@ import {
   Layers,
   Edit
 } from 'lucide-react';
-import { PublicDocument, DocumentLifecycleStatus } from '../../types';
+import { PublicDocument, DocumentLifecycleStatus, DocumentPartInfo } from '../../types';
 import { dataStore } from '../../services/dataStore';
 import { supabase } from '../../services/supabase';
 import { isSafeUrl } from '../../utils/security';
@@ -46,6 +46,12 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
 }) => {
   const [copiedHash, setCopiedHash] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [openingPartIndex, setOpeningPartIndex] = useState<number | null>(null);
+
+  // Authentication & RBAC status
+  const auth = dataStore.getAuthState();
+  const isStaff = auth.role === 'ADMIN' || auth.role === 'DATA_MANAGER' || auth.role === 'MODERATOR';
+  const canPublish = auth.role === 'ADMIN' || auth.role === 'DATA_MANAGER';
 
   // Verification Checklist State
   const [checks, setChecks] = useState({
@@ -80,18 +86,27 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
   const handleUpdateStatus = async (newStatus: DocumentLifecycleStatus) => {
     setIsProcessing(true);
     try {
-      if (newStatus === 'VERIFIED' && !checks.formatValid) throw new Error('Confirmez la vérification du document source.');
+      if (newStatus === 'VERIFIED' && !checks.formatValid) {
+        throw new Error('Confirmez la vérification du document source dans la grille de contrôle.');
+      }
+      if (!isStaff) {
+        throw new Error('Action non autorisée : permissions insuffisantes (administrateur ou modérateur requis).');
+      }
+      if (newStatus === 'PUBLISHED' && !canPublish) {
+        throw new Error('Action non autorisée : la publication officielle requiert les droits administrateur ou gestionnaire de données.');
+      }
+
       const ok = await dataStore.updateDocumentLifecycleStatus(document.id, newStatus);
       if (ok) {
         onStatusChange(document.id, newStatus);
         if (newStatus === 'VERIFIED') {
-          onShowToast('Document validé et marqué "VÉRIFIÉ". Il n\'est pas encore visible publiquement.');
+          onShowToast('Document validé et marqué "VÉRIFIÉ". Prêt pour la publication officielle.', 'success');
         } else if (newStatus === 'PUBLISHED') {
           onShowToast('Document PUBLIÉ avec succès ! Il est maintenant accessible aux citoyens.', 'success');
         } else if (newStatus === 'TO_VERIFY') {
-          onShowToast('Document renvoyé en examen ("À VÉRIFIER").');
+          onShowToast('Document renvoyé en examen ("À VÉRIFIER").', 'info');
         } else if (newStatus === 'ARCHIVED') {
-          onShowToast('Document archivé.');
+          onShowToast('Document archivé.', 'info');
         }
         onClose();
       }
@@ -104,18 +119,43 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
 
   const currentStatus = document.status || 'TO_VERIFY';
   const previousVersions = dataStore.getDocumentVersions(document).filter(d => (d.version || 1) < (document.version || 1));
+
   const openSource = async (source: PublicDocument) => {
     try {
-      let url = source.file_url;
-      if (source.storage_path) {
-        const { data, error } = await supabase.storage.from('public_documents').createSignedUrl(source.storage_path, 300);
-        if (error || !data) throw new Error('Lien temporaire indisponible.');
+      const targetStoragePath = source.storage_path || (source.document_parts && source.document_parts[0]?.storage_path);
+      const targetFileUrl = source.file_url || (source.document_parts && source.document_parts[0]?.file_url);
+      let url = targetFileUrl;
+      if (targetStoragePath) {
+        const { data, error } = await supabase.storage
+          .from(source.storage_bucket || 'public_documents')
+          .createSignedUrl(targetStoragePath, 300);
+        if (error || !data?.signedUrl) throw new Error('Lien temporaire indisponible.');
         url = data.signedUrl;
       }
-      if (!isSafeUrl(url)) throw new Error('Lien documentaire invalide.');
+      if (!url || !isSafeUrl(url)) throw new Error('Lien documentaire invalide.');
       window.open(url, '_blank', 'noopener,noreferrer');
     } catch (error) {
       onShowToast(error instanceof Error ? error.message : 'Document inaccessible.', 'error');
+    }
+  };
+
+  const openPart = async (part: DocumentPartInfo, index: number) => {
+    setOpeningPartIndex(index);
+    try {
+      let url = part.file_url;
+      if (part.storage_path) {
+        const { data, error } = await supabase.storage
+          .from(document.storage_bucket || 'public_documents')
+          .createSignedUrl(part.storage_path, 300);
+        if (error || !data?.signedUrl) throw new Error(`Lien temporaire indisponible pour le volet ${part.part_number}.`);
+        url = data.signedUrl;
+      }
+      if (!url || !isSafeUrl(url)) throw new Error('Lien documentaire invalide.');
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Volet inaccessible.', 'error');
+    } finally {
+      setOpeningPartIndex(null);
     }
   };
 
@@ -199,14 +239,30 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
           <div className="border border-slate-200 rounded-2xl p-4 bg-white space-y-3">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Fichier PDF</div>
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Fichier PDF Principal</div>
                 <div className="font-mono text-sm font-black text-slate-900 mt-0.5 break-all">
                   {document.file_name}
                 </div>
-                <div className="text-xs text-slate-500 mt-1 flex items-center gap-2">
+                <div className="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-2">
                   <span>Taille : <strong>{document.file_size || 'Non renseignée'}</strong></span>
                   <span>•</span>
                   <span>Source : <strong>{document.source_name || 'Non spécifiée'}</strong></span>
+                  {document.page_count && (
+                    <>
+                      <span>•</span>
+                      <span>Pages : <strong>{document.page_count}</strong></span>
+                    </>
+                  )}
+                  {document.is_scanned && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
+                      Scan raster (sans couche texte)
+                    </span>
+                  )}
+                  {document.is_multipart && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-brand-blue">
+                      Document multi-volets ({document.parts_count || document.document_parts?.length || 2} parties)
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -215,14 +271,86 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                 className="px-4 py-2 rounded-xl bg-brand-blue text-white text-xs font-bold hover:bg-blue-700 transition-colors shadow-xs flex items-center gap-1.5 flex-shrink-0"
               >
                 <ExternalLink className="w-4 h-4" />
-                <span>Ouvrir le PDF</span>
+                <span>{document.is_multipart ? 'Ouvrir (Volet 1)' : 'Ouvrir le PDF'}</span>
               </button>
             </div>
+
+            {/* Volets multi-parties si existants */}
+            {document.is_multipart && document.document_parts && document.document_parts.length > 0 && (
+              <div className="pt-3 border-t border-slate-100 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                    <Layers className="w-3.5 h-3.5 text-brand-blue" />
+                    <span>Fascicules & volets du document ({document.document_parts.length}) :</span>
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-medium">
+                    Chaque volet dispose de son empreinte et de son lien vérifiable
+                  </span>
+                </div>
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  {document.document_parts.map((p, idx) => (
+                    <div key={idx} className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs flex flex-col justify-between gap-2">
+                      <div>
+                        <div className="flex items-center justify-between font-bold text-slate-900">
+                          <span className="flex items-center gap-1.5">
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-brand-blue/10 text-brand-blue">
+                              Volet {p.part_number}
+                            </span>
+                            <span className="text-slate-800 font-semibold">{p.page_range}</span>
+                          </span>
+                          {p.file_size_bytes ? (
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              {(p.file_size_bytes / 1024 / 1024).toFixed(2)} Mo
+                            </span>
+                          ) : p.file_size ? (
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              {p.file_size}
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="text-[11px] font-mono text-slate-600 truncate mt-1" title={p.file_name}>
+                          {p.file_name}
+                        </div>
+                        {p.checksum_sha256 && (
+                          <div className="text-[10px] font-mono text-slate-400 truncate mt-1" title={p.checksum_sha256}>
+                            SHA: {p.checksum_sha256.substring(0, 16)}...{p.checksum_sha256.substring(p.checksum_sha256.length - 8)}
+                          </div>
+                        )}
+                        {p.notes && (
+                          <div className="text-[10px] text-slate-500 italic mt-0.5">{p.notes}</div>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => void openPart(p, idx)}
+                        disabled={openingPartIndex === idx}
+                        className="w-full mt-1 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-brand-blue hover:bg-blue-50 text-[11px] font-bold transition-colors flex items-center justify-center gap-1.5 shadow-2xs disabled:opacity-50"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        <span>{openingPartIndex === idx ? 'Chargement...' : `Consulter le PDF (Volet ${p.part_number})`}</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Checksum SHA-256 */}
             <div className="pt-2 border-t border-slate-100">
               <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-                <span className="font-bold">Empreinte numérique (SHA-256) :</span>
+                <span className="font-bold flex items-center gap-1.5">
+                  {document.is_multipart ? (
+                    <>
+                      <span>Empreinte logique d'intégrité (Manifest SHA-256) :</span>
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-blue-100 text-brand-blue">
+                        MULTI-VOLETS
+                      </span>
+                    </>
+                  ) : (
+                    <span>Empreinte numérique (SHA-256) :</span>
+                  )}
+                </span>
                 <button
                   onClick={handleCopyHash}
                   className="text-brand-blue hover:underline flex items-center gap-1 text-[11px] font-semibold"
@@ -234,6 +362,11 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
               <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-700 break-all select-all">
                 {document.checksum_sha256 || 'Aucun checksum calculé (document antérieur)'}
               </div>
+              {document.is_multipart && (
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Empreinte calculée de façon déterministe à partir de la concaténation ordonnée des empreintes de chaque volet ({document.document_parts?.length || 2} volets).
+                </p>
+              )}
             </div>
 
             {/* Canonical Storage Path */}
@@ -366,8 +499,8 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
               <button
                 type="button"
                 onClick={() => handleUpdateStatus('TO_VERIFY')}
-                disabled={isProcessing}
-                className="px-3.5 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-amber-300 text-amber-800 bg-amber-50 text-xs font-bold hover:bg-amber-100 transition-colors"
+                disabled={isProcessing || !canPublish}
+                className="px-3.5 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-amber-300 text-amber-800 bg-amber-50 text-xs font-bold hover:bg-amber-100 transition-colors disabled:opacity-50"
               >
                 Dépublier (Renvoyer en examen)
               </button>
@@ -375,8 +508,8 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
               <button
                 type="button"
                 onClick={() => handleUpdateStatus('ARCHIVED')}
-                disabled={isProcessing}
-                className="px-3.5 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-200 text-xs font-bold transition-colors"
+                disabled={isProcessing || !isStaff}
+                className="px-3.5 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-200 text-xs font-bold transition-colors disabled:opacity-50"
               >
                 Archiver
               </button>
@@ -388,8 +521,8 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
               <button
                 type="button"
                 onClick={() => handleUpdateStatus('VERIFIED')}
-                disabled={isProcessing || !checks.formatValid}
-                title={!checks.formatValid ? 'Confirmez le contrôle du PDF dans la grille de vérification.' : undefined}
+                disabled={isProcessing || !checks.formatValid || !isStaff}
+                title={!checks.formatValid ? 'Confirmez le contrôle du PDF dans la grille de vérification.' : !isStaff ? 'Rôle administrateur requis.' : undefined}
                 className="px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-brand-blue text-brand-blue hover:bg-blue-50 text-xs font-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Valider (Marquer VÉRIFIÉ)
@@ -400,8 +533,9 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
               <button
                 type="button"
                 onClick={() => handleUpdateStatus('PUBLISHED')}
-                disabled={isProcessing}
-                className="px-5 py-2.5 min-h-[44px] rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-black transition-colors shadow-sm flex items-center gap-2"
+                disabled={isProcessing || !canPublish}
+                title={!canPublish ? 'Rôle administrateur requis pour publier.' : undefined}
+                className="px-5 py-2.5 min-h-[44px] rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-black transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Publier sur la plateforme</span>

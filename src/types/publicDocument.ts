@@ -96,6 +96,32 @@ export interface PublicDocument {
   created_at?: string;
   updated_at?: string;
 
+  // Extension multi-parties & numérisation (scans volumineux, fascicules)
+  is_multipart?: boolean;
+  parts_count?: number;
+  document_parts?: DocumentPartInfo[];
+  is_scanned?: boolean;
+  has_text_layer?: boolean;
+  ocr_status?: DocumentOcrStatus;
+}
+
+export type DocumentOcrStatus = 'NOT_APPLICABLE' | 'NOT_IMPLEMENTED' | 'OCR_PENDING' | 'MANUAL_TRANSCRIPTION' | 'PROCESSED' | 'FAILED' | 'NONE';
+
+/**
+ * Informations sur un fascicule / volet d'un document multi-parties
+ */
+export interface DocumentPartInfo {
+  part_number: number;
+  file_name: string;
+  page_range: string;
+  page_start?: number;
+  page_end?: number;
+  checksum_sha256?: string;
+  file_size_bytes?: number;
+  file_size?: string;
+  storage_path?: string;
+  file_url?: string;
+  notes?: string;
 }
 
 /**

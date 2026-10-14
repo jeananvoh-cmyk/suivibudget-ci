@@ -231,11 +231,55 @@ export function buildProposedValuesTemplate(
         {
           id: 'val-ca-investment-realized',
           field: 'investment_realized',
-          label: 'Investissement Réalisé',
+          label: 'Investissement Réalisé (Dépenses)',
           section: 'INVESTISSEMENT',
           nature: 'EXECUTION',
           amount: initialValues.investment_realized ?? null,
           precision: initialValues.investment_realized != null ? 'EXACT' : 'UNKNOWN',
+          confidence: 'MEDIUM',
+          status: 'PENDING'
+        },
+        {
+          id: 'val-ca-total-revenue',
+          field: 'total_revenue_collected',
+          label: 'Total Recettes Recouvrées',
+          section: 'GLOBAL',
+          nature: 'RECOUVREMENT',
+          amount: initialValues.total_revenue_collected ?? null,
+          precision: initialValues.total_revenue_collected != null ? 'EXACT' : 'UNKNOWN',
+          confidence: 'MEDIUM',
+          status: 'PENDING'
+        },
+        {
+          id: 'val-ca-operating-revenue',
+          field: 'operating_revenue_realized',
+          label: 'Recettes Fonctionnement Recouvrées',
+          section: 'FONCTIONNEMENT',
+          nature: 'RECOUVREMENT',
+          amount: initialValues.operating_revenue_realized ?? null,
+          precision: initialValues.operating_revenue_realized != null ? 'EXACT' : 'UNKNOWN',
+          confidence: 'MEDIUM',
+          status: 'PENDING'
+        },
+        {
+          id: 'val-ca-investment-revenue',
+          field: 'investment_revenue_realized',
+          label: 'Recettes Investissement Recouvrées',
+          section: 'INVESTISSEMENT',
+          nature: 'RECOUVREMENT',
+          amount: initialValues.investment_revenue_realized ?? null,
+          precision: initialValues.investment_revenue_realized != null ? 'EXACT' : 'UNKNOWN',
+          confidence: 'MEDIUM',
+          status: 'PENDING'
+        },
+        {
+          id: 'val-ca-surplus',
+          field: 'surplus_or_deficit',
+          label: 'Excédent / Déficit de l\'Exercice',
+          section: 'GLOBAL',
+          nature: 'EXECUTION',
+          amount: initialValues.surplus_or_deficit ?? null,
+          precision: initialValues.surplus_or_deficit != null ? 'EXACT' : 'UNKNOWN',
           confidence: 'MEDIUM',
           status: 'PENDING'
         }
@@ -456,6 +500,62 @@ export function runDocumentDryRun(
     }
   }
 
+  // Vérification arithmétique pour les comptes administratifs
+  if (metadata.document_type === 'COMPTE_ADMINISTRATIF') {
+    const totPlanned = validValues.find(v => v.field === 'total_planned');
+    const opPlanned = validValues.find(v => v.field === 'operating_planned');
+    const invPlanned = validValues.find(v => v.field === 'investment_planned');
+
+    if (totPlanned && opPlanned && invPlanned && 
+        totPlanned.amount !== null && opPlanned.amount !== null && invPlanned.amount !== null &&
+        totPlanned.precision === 'EXACT' && opPlanned.precision === 'EXACT' && invPlanned.precision === 'EXACT') {
+      const sumPlanned = opPlanned.amount + invPlanned.amount;
+      if (sumPlanned !== totPlanned.amount) {
+        arithmeticValid = false;
+        errors.push(`Incompatibilité arithmétique prévisions CA : Fonctionnement prévu (${opPlanned.amount.toLocaleString('fr-FR')}) + Investissement prévu (${invPlanned.amount.toLocaleString('fr-FR')}) = ${sumPlanned.toLocaleString('fr-FR')} FCFA, mais Total prévu = ${totPlanned.amount.toLocaleString('fr-FR')} FCFA (écart de ${Math.abs(sumPlanned - totPlanned.amount).toLocaleString('fr-FR')} FCFA).`);
+      }
+    }
+
+    const totRealized = validValues.find(v => v.field === 'total_realized');
+    const opRealized = validValues.find(v => v.field === 'operating_realized');
+    const invRealized = validValues.find(v => v.field === 'investment_realized');
+
+    if (totRealized && opRealized && invRealized && 
+        totRealized.amount !== null && opRealized.amount !== null && invRealized.amount !== null &&
+        totRealized.precision === 'EXACT' && opRealized.precision === 'EXACT' && invRealized.precision === 'EXACT') {
+      const sumRealized = opRealized.amount + invRealized.amount;
+      if (sumRealized !== totRealized.amount) {
+        arithmeticValid = false;
+        errors.push(`Incompatibilité arithmétique dépenses CA : Fonctionnement ordonnancé (${opRealized.amount.toLocaleString('fr-FR')}) + Investissement ordonnancé (${invRealized.amount.toLocaleString('fr-FR')}) = ${sumRealized.toLocaleString('fr-FR')} FCFA, mais Total ordonnancé = ${totRealized.amount.toLocaleString('fr-FR')} FCFA (écart de ${Math.abs(sumRealized - totRealized.amount).toLocaleString('fr-FR')} FCFA).`);
+      }
+    }
+
+    const totRevenue = validValues.find(v => v.field === 'total_revenue_collected');
+    const opRevenue = validValues.find(v => v.field === 'operating_revenue_realized');
+    const invRevenue = validValues.find(v => v.field === 'investment_revenue_realized');
+
+    if (totRevenue && opRevenue && invRevenue && 
+        totRevenue.amount !== null && opRevenue.amount !== null && invRevenue.amount !== null &&
+        totRevenue.precision === 'EXACT' && opRevenue.precision === 'EXACT' && invRevenue.precision === 'EXACT') {
+      const sumRevenue = opRevenue.amount + invRevenue.amount;
+      if (sumRevenue !== totRevenue.amount) {
+        arithmeticValid = false;
+        errors.push(`Incompatibilité arithmétique recettes CA : Recettes fonctionnement (${opRevenue.amount.toLocaleString('fr-FR')}) + Recettes investissement (${invRevenue.amount.toLocaleString('fr-FR')}) = ${sumRevenue.toLocaleString('fr-FR')} FCFA, mais Total recettes = ${totRevenue.amount.toLocaleString('fr-FR')} FCFA (écart de ${Math.abs(sumRevenue - totRevenue.amount).toLocaleString('fr-FR')} FCFA).`);
+      }
+    }
+
+    const surplusVal = validValues.find(v => v.field === 'surplus_or_deficit');
+    if (totRevenue && totRealized && surplusVal && 
+        totRevenue.amount !== null && totRealized.amount !== null && surplusVal.amount !== null &&
+        totRevenue.precision === 'EXACT' && totRealized.precision === 'EXACT' && surplusVal.precision === 'EXACT') {
+      const calcSurplus = totRevenue.amount - totRealized.amount;
+      if (calcSurplus !== surplusVal.amount) {
+        arithmeticValid = false;
+        errors.push(`Incompatibilité arithmétique résultat CA : Recettes totales (${totRevenue.amount.toLocaleString('fr-FR')}) - Dépenses totales (${totRealized.amount.toLocaleString('fr-FR')}) = ${calcSurplus.toLocaleString('fr-FR')} FCFA, mais Excédent/Déficit déclaré = ${surplusVal.amount.toLocaleString('fr-FR')} FCFA (écart de ${Math.abs(calcSurplus - surplusVal.amount).toLocaleString('fr-FR')} FCFA).`);
+      }
+    }
+  }
+
   // Rejet de montants négatifs invalides pour les budgets primitifs
   if (metadata.document_type === 'BUDGET_PRIMITIF') {
     for (const v of validValues) {
@@ -598,6 +698,10 @@ export function buildStandardImportEnvelope(
   let kind: 'BP' | 'CA' = 'BP';
   if (metadata.document_type === 'COMPTE_ADMINISTRATIF') {
     kind = 'CA';
+    dataObj.verification_status = metadata.evidence_level ?? 'OFFICIAL_DOCUMENT';
+    if (metadata.adoption_date) dataObj.approval_date = metadata.adoption_date;
+    if (metadata.source_date) dataObj.prefecture_visa_date = metadata.source_date;
+    if (metadata.notes) dataObj.notes = metadata.notes;
   } else {
     // PRÉSERVER LE TYPE RÉEL DE L'ACTE (Items 4 & 5)
     let budgetType: string = 'PRIMITIF_ADOPTE';
