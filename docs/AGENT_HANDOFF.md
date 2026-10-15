@@ -1,3 +1,22 @@
+## 15 octobre 2026 — Correction UX/UI & Métier : Synchronisation du Filtre Sectoriel et Fiabilisation des Pourcentages d'Investissement (Antigravity)
+
+- **Branche Git** : `feat/admin-financial-document-ingestion-pilot`
+- **Commit** : `c3125f4`
+- **Périmètre & Diagnostics résolus** :
+  1. **Redirection sectorielle effective** :
+     - Problème : Le clic sur les cartes d'accueil (`HomePage.tsx`) appelait un `setSelectedCategory` local à `HomePage` qui était immédiatement perdu lors de la bascule vers `ProjectsPage`. L'utilisateur arrivait avec tous les secteurs confondus (`selectedCategory = 'ALL'`).
+     - Solution : Ajout de la prop `onNavigateToProjectsWithCategory` transmise par `App.tsx` vers `HomePage`. La catégorie choisie est synchronisée dans l'état global `selectedCategoryFilter`, transmise à `ProjectsPage`, et applique le filtre instantanément avec réinitialisation de pagination à la page 1.
+  2. **Matching catégoriel bidirectionnel & multi-sources** :
+     - Les projets proviennent de deux sources : projets locaux (ex: `Infrastructures & Voirie`, `Eau potable`, `Santé`) et projets nationaux (ex: `INFRASTRUCTURE`, `EAU_POTABLE`, `SANTE`).
+     - Ajout d'une fonction de rapprochement normalisée et résiliente (`matchesSectorCategory`) gérant la troncature, l'accentuation et les racines lexicales communes (ex: `infrastructure` $\leftrightarrow$ `Infrastructures & Voirie`).
+  3. **Honnêteté citoyenne des chiffres et pourcentages (Principe P1, P2)** :
+     - Problème : Le libellé indiquait « *X % du budget* » en forçant arbitrairement tout secteur avec `Math.max(2, ...)` à au moins 2 %, et suggérait qu'il s'agissait du budget général de l'État de Côte d'Ivoire.
+     - Solution : Remplacement du libellé par « *X % des investissements* », calcul exact des pourcentages réels (ex. `0,3 %`, `1,4 %`, `4,0 %`, `31 %`) sans plancher artificiel, et ajout d'un titre explicatif sur le badge.
+- **Validation** :
+  - Nouveau test d'intégration : `src/pages/__tests__/SectorBreakdownAndFiltering.test.tsx` (**2/2 PASS**).
+  - Suite complète : **63 fichiers de tests, 822 tests passés (100% PASS, 0 FAIL)**.
+  - Build Vite & TypeScript : `npm run build` réussi sans erreur (**code 0**).
+
 ## 14 octobre 2026 — Correction de Clôture PR #62 : Sécurité RBAC Fail-Closed, Intégrité Multi-PDF et Validation Finale (Antigravity)
 
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62
