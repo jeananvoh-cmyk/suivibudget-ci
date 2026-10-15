@@ -1,3 +1,22 @@
+## 15 octobre 2026 — Assainissement UX/UI : Masquage Progressif du SHA-256 et Nettoyage des Métadonnées Documentaires (Antigravity)
+
+- **Branche Git** : `feat/admin-financial-document-ingestion-pilot`
+- **Commits** : `7dd766f`
+- **Périmètre & Diagnostics résolus** :
+  1. **Élimination des notes d'ingénierie dans les descriptions publiques** (`officialPublicDocumentsCatalog.ts`) :
+     - Suppression des phrases d'audit interne (« *Extraction détaillée à vérifier* », « *Extraction des montants non vérifiée* ») intégrées à la fin des descriptions de l'Annexe 8, de l'Annexe 6 et du RAP 2022. Remplacement par des descriptions métier concrètes et intelligibles pour le citoyen.
+  2. **Progressive Disclosure du SHA-256 (Niveau 3 - Vérifier)** (`DocumentsPage.tsx`) :
+     - Les blocs imposants `# SHA-256 : ...` affichés en plein milieu de chaque carte sont désormais pliés dans un accordéon interactif discret `<details className="pt-0.5 group/audit">` intitulé `Empreinte cryptographique`.
+     - Les cartes restent épurées et lisibles pour 99% des visiteurs, tout en permettant aux journalistes et auditeurs de déplier et copier le SHA-256 complet en un clic.
+  3. **Adoucissement des libellés de statut et recherche** (`DocumentsPage.tsx`) :
+     - Le statut `HTTP 404` est présenté sous forme d'alerte propre « *Copie locale conservée* » plutôt qu'un texte de log d'erreur brut.
+     - Le placeholder de la barre de recherche est clarifié pour le grand public (« *Rechercher un document officiel (ex: Loi de Finances, DPPD-PAP, Ministère, Commune)...* ») tout en maintenant la recherche technique par hash en tâche de fond.
+  4. **Suppression des messages d'audit de repli dans les fiches collectivités** (`InstitutionDetailModal.tsx`) :
+     - Remplacement du texte technique « *Source de la ligne à vérifier* » par un affichage conditionnel propre évitant les libellés anxiogènes non pertinents pour le citoyen lorsque les sous-catégories ne sont pas renseignées.
+- **Validation** :
+  - Tests unitaires et d'intégration : `DocumentsPage.test.tsx`, `institutionDetailModalFocusTrap.test.ts` et suite globale **100% PASS (822/822 tests)**.
+  - Build de production : `npm run build` réussi sans aucune erreur (**code 0**).
+
 ## 15 octobre 2026 — Correction UX/UI & Métier : Synchronisation du Filtre Sectoriel et Fiabilisation des Pourcentages d'Investissement (Antigravity)
 
 - **Branche Git** : `feat/admin-financial-document-ingestion-pilot`

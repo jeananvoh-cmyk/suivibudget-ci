@@ -1240,7 +1240,9 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                             <tr key={line.id} className="hover:bg-slate-50/80 transition-colors">
                               <td className="p-3 pl-4">
                                 <div className="font-bold text-slate-900 text-xs">{line.libelle}</div>
-                                <div className="text-[10px] text-slate-400">{line.sous_categorie_3 || line.sous_categorie_2 || 'Source de la ligne à vérifier'}</div>
+                                {(line.sous_categorie_3 || line.sous_categorie_2) && (
+                                  <div className="text-[10px] text-slate-400">{line.sous_categorie_3 || line.sous_categorie_2}</div>
+                                )}
                               </td>
                               <td className="p-3 whitespace-nowrap">
                                 <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase whitespace-nowrap inline-flex items-center tracking-wide border ${
