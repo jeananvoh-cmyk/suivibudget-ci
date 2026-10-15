@@ -54,6 +54,7 @@ export function App() {
   const [isPrivateSentinelOpen, setIsPrivateSentinelOpen] = useState(false);
   const [targetShareProject, setTargetShareProject] = useState<BudgetProject | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('ALL');
 
   const institutions = dataStore.getInstitutions();
   const allProjects = dataStore.getProjects();
@@ -176,6 +177,14 @@ export function App() {
 
   const handleNavigateToProjectsWithFilter = (query: string) => {
     setSearchQuery(query);
+    setSelectedCategoryFilter('ALL');
+    navigateTo('projects', 'INDEX');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigateToProjectsWithCategory = (category: string) => {
+    setSelectedCategoryFilter(category);
+    setSearchQuery('');
     navigateTo('projects', 'INDEX');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -261,6 +270,7 @@ export function App() {
                 handleTabChange(tab);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
+              onNavigateToProjectsWithCategory={handleNavigateToProjectsWithCategory}
             />
           )}
 
@@ -281,6 +291,8 @@ export function App() {
               onSelectProject={(p) => handleSelectProject(p)}
               onOpenSendProof={(p) => handleOpenSendProof(p)}
               onOpenShare={(p) => handleOpenShare(p)}
+              selectedCategory={selectedCategoryFilter}
+              onSelectCategory={setSelectedCategoryFilter}
             />
           )}
 

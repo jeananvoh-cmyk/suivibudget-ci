@@ -1,4 +1,4 @@
-import { matchesSmartSearch } from '../utils/searchHelpers';
+import { matchesSmartSearch, normalizeSearchText, extractWords } from '../utils/searchHelpers';
 import React, { useState, useMemo, useEffect } from 'react';
 import { BudgetProject, ImpactStats, NewsArticle } from '../types';
 import { HeroSection } from '../components/HeroSection';
@@ -46,6 +46,23 @@ interface HomePageProps {
   onOpenSendProof: (project?: BudgetProject) => void;
   onOpenShare: (project: BudgetProject) => void;
   onNavigateTab: (tab: 'institutions' | 'projects' | 'observatory') => void;
+  onNavigateToProjectsWithCategory?: (category: string) => void;
+}
+
+function matchesSectorCategory(projectCategory: string, sectorKey: string, categoryId?: string): boolean {
+  const pNorm = normalizeSearchText(projectCategory);
+  const targets = [sectorKey, categoryId].filter(Boolean) as string[];
+  for (const t of targets) {
+    const tNorm = normalizeSearchText(t);
+    if (!tNorm) continue;
+    if (pNorm === tNorm || pNorm.includes(tNorm) || tNorm.includes(pNorm)) return true;
+    const tWords = extractWords(tNorm).filter(w => w.length >= 4);
+    const pWords = extractWords(pNorm).filter(w => w.length >= 4);
+    if (tWords.some(tw => pWords.some(pw => pw.startsWith(tw.slice(0, 5)) || tw.startsWith(pw.slice(0, 5))))) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -56,6 +73,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   onOpenShare,
   onNavigateTab,
   onOpenPrivateSentinel,
+  onNavigateToProjectsWithCategory,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [readingArticle, setReadingArticle] = useState<NewsArticle | null>(null);
@@ -92,6 +110,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     { 
       name: 'Infrastructures & Voirie', 
       key: 'Infrastructure', 
+      categoryId: 'Infrastructures & Voirie',
       countKey: 'Voirie', 
       bgBar: 'bg-blue-600',
       badgeBg: 'bg-blue-50 text-blue-800 border-blue-200',
@@ -100,6 +119,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     { 
       name: 'Éducation & Formation', 
       key: 'Éducation', 
+      categoryId: 'Éducation',
       countKey: 'Education', 
       bgBar: 'bg-emerald-600',
       badgeBg: 'bg-emerald-50 text-emerald-800 border-emerald-200',
@@ -108,6 +128,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     { 
       name: 'Santé & Hygiène', 
       key: 'Santé', 
+      categoryId: 'Santé',
       countKey: 'Sante', 
       bgBar: 'bg-teal-600',
       badgeBg: 'bg-teal-50 text-teal-800 border-teal-200',
@@ -116,6 +137,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     { 
       name: 'Eau Potable & Assainissement', 
       key: 'Eau', 
+      categoryId: 'Eau potable',
       countKey: 'Eau', 
       bgBar: 'bg-sky-600',
       badgeBg: 'bg-sky-50 text-sky-800 border-sky-200',
@@ -124,6 +146,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     { 
       name: 'Commerce & Économie', 
       key: 'Commerce', 
+      categoryId: 'Commerce & Économie',
       countKey: 'Commerce', 
       bgBar: 'bg-amber-600',
       badgeBg: 'bg-amber-50 text-amber-800 border-amber-200',
@@ -132,6 +155,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     { 
       name: 'Logement & Aménagement', 
       key: 'Logement', 
+      categoryId: 'Logement & Urbanisme',
       countKey: 'Logement', 
       bgBar: 'bg-indigo-600',
       badgeBg: 'bg-indigo-50 text-indigo-800 border-indigo-200',
@@ -142,11 +166,15 @@ export const HomePage: React.FC<HomePageProps> = ({
   const totalAllProjectsAmount = allProjects.reduce((acc, p) => acc + p.budget_amount_fcfa, 0) || 1;
 
   const sectorData = sectorConfigs.map(s => {
-    const matching = allProjects.filter(p => p.category.toLowerCase().includes(s.key.toLowerCase()));
+    const matching = allProjects.filter(p => matchesSectorCategory(p.category, s.key, s.categoryId));
     const amount = matching.reduce((acc, p) => acc + p.budget_amount_fcfa, 0);
     const count = matching.length;
-    const pct = Math.max(2, Math.round((amount / totalAllProjectsAmount) * 100));
-    return { ...s, amount, count, pct };
+    const rawPct = (amount / totalAllProjectsAmount) * 100;
+    const pctFormatted = rawPct >= 10
+      ? `${Math.round(rawPct)} %`
+      : `${rawPct.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
+    const barWidthPct = Math.min(100, Math.max(3, Math.round(rawPct)));
+    return { ...s, amount, count, rawPct, pctFormatted, barWidthPct };
   });
 
   // 1. SECTION 1 : Grands Projets Stratégiques de l'État en Milliards FCFA
@@ -378,12 +406,18 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Où vont les investissements publics en 2026 ?
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-                Répartition sectorielle des 7 162 chantiers inscrits au budget d'État et des collectivités locales.
+                Répartition sectorielle des investissements physiques et chantiers programmés (État et collectivités locales).
               </p>
             </div>
             <button
-              onClick={() => onNavigateTab('projects')}
-              className="text-xs font-bold text-brand-blue flex items-center gap-1 hover:underline flex-shrink-0"
+              onClick={() => {
+                if (onNavigateToProjectsWithCategory) {
+                  onNavigateToProjectsWithCategory('ALL');
+                } else {
+                  onNavigateTab('projects');
+                }
+              }}
+              className="text-xs font-bold text-brand-blue flex items-center gap-1 hover:underline flex-shrink-0 cursor-pointer"
             >
               Voir le détail complet <ArrowRight className="w-3.5 h-3.5" />
             </button>
@@ -394,8 +428,11 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div
                 key={sec.name}
                 onClick={() => {
-                  setSelectedCategory(sec.key);
-                  onNavigateTab('projects');
+                  if (onNavigateToProjectsWithCategory) {
+                    onNavigateToProjectsWithCategory(sec.categoryId || sec.key);
+                  } else {
+                    onNavigateTab('projects');
+                  }
                 }}
                 className="p-5 bg-white hover:bg-slate-50/80 rounded-2xl border border-slate-200/90 hover:border-brand-blue/50 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
               >
@@ -410,8 +447,11 @@ export const HomePage: React.FC<HomePageProps> = ({
                         {sec.tagline}
                       </span>
                     </div>
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-black border flex-shrink-0 ${sec.badgeBg}`}>
-                      {sec.pct} % du budget
+                    <span 
+                      className={`px-2.5 py-1 rounded-full text-xs font-black border flex-shrink-0 ${sec.badgeBg}`}
+                      title="Part calculée sur l'ensemble des investissements publics recensés sur la plateforme"
+                    >
+                      {sec.pctFormatted} des investissements
                     </span>
                   </div>
 
@@ -435,7 +475,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                       <div className="w-full bg-slate-200/80 h-2 rounded-full overflow-hidden">
                         <div 
                           className={`${sec.bgBar} h-full rounded-full transition-all duration-500`} 
-                          style={{ width: `${Math.min(100, Math.max(3, sec.pct))}%` }}
+                          style={{ width: `${sec.barWidthPct}%` }}
                         />
                       </div>
                     </div>

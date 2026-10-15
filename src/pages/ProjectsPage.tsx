@@ -1,5 +1,5 @@
-import { matchesSmartSearch, normalizeSearchText } from '../utils/searchHelpers';
-import React, { useState, useRef } from 'react';
+import { matchesSmartSearch, normalizeSearchText, extractWords } from '../utils/searchHelpers';
+import React, { useState, useRef, useEffect } from 'react';
 import { BudgetProject } from '../types';
 import { ProjectCard } from '../components/ProjectCard';
 import { CATEGORIES, getCategoryBadgeClass } from '../data/categories';
@@ -31,6 +31,8 @@ interface ProjectsPageProps {
   onSelectProject: (project: BudgetProject) => void;
   onOpenSendProof: (project: BudgetProject) => void;
   onOpenShare: (project: BudgetProject) => void;
+  selectedCategory?: string;
+  onSelectCategory?: (category: string) => void;
 }
 
 export const ProjectsPage: React.FC<ProjectsPageProps> = ({
@@ -39,10 +41,25 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   onSelectProject,
   onOpenSendProof,
   onOpenShare,
+  selectedCategory: selectedCategoryProp,
+  onSelectCategory: onSelectCategoryProp,
 }) => {
   const allProjects = dataStore.getProjects();
   const [selectedScope, setSelectedScope] = useState<'LOCAL' | 'NATIONAL' | 'ALL'>('ALL');
-  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [internalCategory, setInternalCategory] = useState<string>(selectedCategoryProp || 'ALL');
+  const selectedCategory = selectedCategoryProp !== undefined ? selectedCategoryProp : internalCategory;
+  const setSelectedCategory = (cat: string) => {
+    setInternalCategory(cat);
+    onSelectCategoryProp?.(cat);
+  };
+
+  useEffect(() => {
+    if (selectedCategoryProp !== undefined) {
+      setInternalCategory(selectedCategoryProp);
+      setCurrentPage(1);
+    }
+  }, [selectedCategoryProp]);
+
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [selectedRegion, setSelectedRegion] = useState<string>('ALL');
   const [onlyPhysical, setOnlyPhysical] = useState<boolean>(true); // Youth friendly default: filter out pure salaries/provisions
@@ -130,10 +147,18 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
     );
 
     // Category filter
+    const pCatNorm = normalizeSearchText(p.category);
+    const selCatNorm = normalizeSearchText(selectedCategory);
     const matchesCategory =
       selectedCategory === 'ALL' ||
-      normalizeSearchText(p.category) === normalizeSearchText(selectedCategory) ||
-      normalizeSearchText(p.category).includes(normalizeSearchText(selectedCategory));
+      pCatNorm === selCatNorm ||
+      pCatNorm.includes(selCatNorm) ||
+      selCatNorm.includes(pCatNorm) ||
+      extractWords(selCatNorm).filter(w => w.length >= 4).some(sw =>
+        extractWords(pCatNorm).filter(w => w.length >= 4).some(pw =>
+          pw.startsWith(sw.slice(0, 5)) || sw.startsWith(pw.slice(0, 5))
+        )
+      );
 
     // Status filter
     const matchesStatus =
