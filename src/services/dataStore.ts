@@ -486,8 +486,7 @@ class DataStore {
   private publicProofs: CitizenProof[] = [];
   private proofRefreshGeneration = 0;
   private entityRefreshGeneration = 0;
-  private settingsRevision: number | undefined;
-  private entitySnapshotReady=!isSupabaseConfigured();
+  private entitySnapshotReady = true;
   private mediaRefreshedAt=0;
   private articles: NewsArticle[] = [];
   private documents: PublicDocument[] = [];
@@ -883,7 +882,7 @@ class DataStore {
   }
 
   public async logout() {
-    this.entitySnapshotReady=!isSupabaseConfigured();
+    this.entitySnapshotReady = true;
     const signOut = AuthSecurityService.clearSession();
     this.proofRefreshGeneration++;
     this.proofs = [];
