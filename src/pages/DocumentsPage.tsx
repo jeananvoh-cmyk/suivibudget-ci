@@ -323,7 +323,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               aria-label="Rechercher un document officiel par titre, institution ou empreinte SHA-256"
-              placeholder="Rechercher par titre, institution, empreinte SHA-256 (ex: Loi de Finances, DPPD-PAP, DGBF)..."
+              placeholder="Rechercher un document officiel (ex: Loi de Finances, DPPD-PAP, Ministère, Commune)..."
               className="w-full pl-10 pr-16 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue transition-all"
             />
             {searchQuery && (
@@ -485,19 +485,46 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                         <span title={doc.control_scope || undefined}>Extraction partiellement contrôlée</span>
                       </span>
                     ) : (
-                      <span className="text-xs text-amber-800">Extraction à vérifier</span>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-800 bg-amber-50 border border-amber-200/90 px-2 py-0.5 rounded-md">
+                        <span>Extraction à vérifier</span>
+                      </span>
                     )}
                   </div>
 
-                  <p className="text-xs text-slate-600">
-                    {doc.verification_status === 'VERIFIED' ? 'Original contrôlé' : 'Authenticité à vérifier'}
-                    {' · '}{doc.http_status === 200 ? 'Lien accessible lors du contrôle' : doc.http_status === 404 ? 'Lien indisponible (HTTP 404)' : 'Disponibilité inconnue'}
-                    {doc.accessed_at && ` — ${doc.accessed_at}`}
-                    {doc.availability === 'AVAILABLE_FROM_PRIOR_OFFICIAL_ACQUISITION' && ' · Empreinte de l’acquisition antérieure'}
-                  </p>
+                  <div className="text-xs text-slate-600">
+                    {doc.http_status === 404 ? (
+                      <div className="text-[11px] text-amber-800 bg-amber-50/80 border border-amber-200/70 rounded-lg px-2.5 py-1 flex items-center justify-between gap-1">
+                        <span>{doc.verification_status === 'VERIFIED' ? 'Original contrôlé' : 'Authenticité à vérifier'} · Lien indisponible (HTTP 404)</span>
+                        <span className="text-[10px] font-semibold text-amber-700">Copie locale conservée</span>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block flex-shrink-0"></span>
+                        <span className="truncate">
+                          {doc.verification_status === 'VERIFIED' ? 'Original contrôlé' : 'Authenticité à vérifier'}
+                          {' · '}
+                          {doc.http_status === 200 ? 'Lien accessible lors du contrôle' : 'Disponibilité inconnue'}
+                          {doc.accessed_at && ` (${doc.accessed_at})`}
+                        </span>
+                      </p>
+                    )}
+                    {doc.availability === 'AVAILABLE_FROM_PRIOR_OFFICIAL_ACQUISITION' && doc.http_status !== 404 && (
+                      <p className="text-[10px] text-slate-400 mt-0.5">Empreinte de l’acquisition antérieure</p>
+                    )}
+                  </div>
+
                   {hasSha256 && (
-                    <div className="pt-1">
-                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-2 flex items-center justify-between gap-2">
+                    <details className="pt-0.5 group/audit">
+                      <summary className="text-[11px] font-semibold text-slate-400 hover:text-brand-blue cursor-pointer list-none flex items-center justify-between py-1 transition-colors select-none">
+                        <span className="flex items-center gap-1">
+                          <Hash className="w-3 h-3 text-slate-400 group-hover/audit:text-brand-blue" />
+                          <span>Empreinte cryptographique</span>
+                        </span>
+                        <span className="text-[10px] font-mono text-slate-400 group-open/audit:hidden">
+                          SHA-256 : {doc.checksum_sha256!.slice(0, 10)}...{doc.checksum_sha256!.slice(-8)}
+                        </span>
+                      </summary>
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-2 mt-1 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <Hash className="w-3 h-3 text-slate-400 flex-shrink-0" />
                           <span className="text-[10px] font-mono text-slate-600 truncate" title={doc.checksum_sha256!}>
@@ -523,7 +550,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                           Empreinte copiée dans le presse-papier !
                         </p>
                       )}
-                    </div>
+                    </details>
                   )}
 
                   {/* Tags */}
