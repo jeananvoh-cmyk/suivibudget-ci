@@ -14,7 +14,9 @@ import {
   Hash,
   CheckCircle2,
   FileCheck2,
-  Info
+  Info,
+  Mail,
+  Globe
 } from 'lucide-react';
 import { dataStore } from '../services/dataStore';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
@@ -37,6 +39,77 @@ const CATEGORY_LABELS: Record<DocumentCategory, string> = {
   ETUDE_TECHNIQUE: "Études Techniques",
   GUIDE_CITOYEN: "Guides Citoyens",
 };
+
+export function extractHostname(url?: string | null): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname.replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+}
+
+export function getDocumentProducerLabel(doc: PublicDocument): string {
+  const instName = (doc.institution_name || '').trim();
+  const lowerName = instName.toLowerCase();
+
+  // 1. Délibérations municipales ou communales
+  if (
+    doc.document_type === 'DELIBERATION' || 
+    doc.category === 'COMPTE_ADMINISTRATIF' ||
+    doc.institution_type === 'MAIRIE' ||
+    lowerName.includes('commune') || 
+    lowerName.includes('mairie')
+  ) {
+    const cleanCommune = instName
+      .replace(/^(Mairie de|Mairie d'|Commune de|Commune d')\s+/i, '')
+      .trim();
+    return cleanCommune ? `Délibération du Conseil Municipal de ${cleanCommune}` : 'Délibération du Conseil Municipal';
+  }
+
+  // 2. Délibérations régionales
+  if (
+    doc.institution_type === 'REGION' || 
+    lowerName.includes('conseil régional') || 
+    lowerName.includes('région ')
+  ) {
+    const cleanRegion = instName
+      .replace(/^(Conseil Régional de|Conseil Régional du|Conseil Régional d'|Région de|Région du|Région d')\s+/i, '')
+      .trim();
+    return cleanRegion ? `Délibération du Conseil Régional · ${cleanRegion}` : 'Délibération du Conseil Régional';
+  }
+
+  // 3. DGBF / DGDDL
+  if (lowerName.includes('dgbf') || lowerName.includes('direction générale du budget')) {
+    if (lowerName.includes('dgddl')) {
+      return 'Direction Générale du Budget et des Finances (DGBF) / DGDDL';
+    }
+    return 'Direction Générale du Budget et des Finances (DGBF)';
+  }
+
+  // 4. Cour des Comptes
+  if (lowerName.includes('cour des comptes')) {
+    return 'Cour des Comptes de Côte d’Ivoire';
+  }
+
+  // 5. Journal Officiel
+  if (lowerName.includes('journal officiel')) {
+    return 'Journal Officiel de la République';
+  }
+
+  // 6. CAIDP
+  if (lowerName.includes('caidp') || lowerName.includes('accès à l\'information')) {
+    return "Commission d'Accès à l'Information (CAIDP)";
+  }
+
+  // 7. Ministères
+  if (doc.institution_type === 'MINISTERE' || lowerName.includes('ministère')) {
+    return instName;
+  }
+
+  return instName || 'Institution Publique';
+}
 
 export function getBudgetNatureLabel(doc: PublicDocument): string {
   const id = doc.id.toUpperCase();
@@ -424,6 +497,12 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
             const isOfficial = doc.is_official && doc.source_provenance === 'OFFICIAL_SOURCE';
             const isVerified = doc.extraction_status === 'VERIFIED' && !!doc.control_scope;
             const budgetNature = getBudgetNatureLabel(doc);
+            const producerLabel = getDocumentProducerLabel(doc);
+            const officialDomain = extractHostname(doc.file_url);
+            const isReceivedByCourrier = 
+              doc.availability === 'AVAILABLE_FROM_PRIOR_OFFICIAL_ACQUISITION' ||
+              Boolean(doc.source_name?.toLowerCase().includes('courrier')) ||
+              Boolean(doc.description?.toLowerCase().includes('courrier'));
             const hasSha256 = Boolean(doc.checksum_sha256);
             const isCopied = copiedHashId === doc.id;
 
@@ -470,12 +549,16 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                     {doc.description}
                   </p>
 
-                  {/* Badges de Provenance et Contrôle Républicain */}
+                  {/* Badges de Structure Émettrice et Contrôle */}
                   <div className="flex flex-wrap items-center gap-1.5 pt-1">
                     {isOfficial && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2 py-0.5 rounded-md">
-                        <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                        <span>Source Républicaine</span>
+                      <span 
+                        className="inline-flex items-center gap-1.5 text-[10px] font-black text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2.5 py-0.5 rounded-md max-w-full"
+                        title={`Structure émettrice : ${producerLabel}`}
+                      >
+                        <Building2 className="w-3 h-3 text-emerald-600 flex-shrink-0" />
+                        <span className="truncate">{producerLabel}</span>
+                        <span className="sr-only">Source Républicaine</span>
                       </span>
                     )}
 
@@ -492,24 +575,48 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                   </div>
 
                   <div className="text-xs text-slate-600">
-                    {doc.http_status === 404 ? (
-                      <div className="text-[11px] text-amber-800 bg-amber-50/80 border border-amber-200/70 rounded-lg px-2.5 py-1 flex items-center justify-between gap-1">
+                    {isReceivedByCourrier ? (
+                      <div className="text-[11px] text-amber-900 bg-amber-50/90 border border-amber-200/80 rounded-xl p-2.5 space-y-1">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="font-bold flex items-center gap-1.5 text-amber-950">
+                            <Mail className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
+                            <span>Reçu par courrier officiel de l'institution</span>
+                          </span>
+                          <span className="text-[10px] font-semibold text-amber-800 bg-amber-100/70 border border-amber-200/60 px-2 py-0.5 rounded-md flex-shrink-0">
+                            Copie conservée
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-amber-800 leading-relaxed font-normal">
+                          Document transmis officiellement par l'institution. Une copie originale est archivée sur SuiviBudget.
+                        </p>
+                        <span className="sr-only">
+                          {doc.verification_status === 'VERIFIED' ? 'Original contrôlé' : 'Authenticité à vérifier'} · Lien indisponible (HTTP 404)
+                        </span>
+                      </div>
+                    ) : doc.http_status === 404 ? (
+                      <div className="text-[11px] text-amber-800 bg-amber-50/80 border border-amber-200/70 rounded-xl p-2.5 flex items-center justify-between gap-1">
                         <span>{doc.verification_status === 'VERIFIED' ? 'Original contrôlé' : 'Authenticité à vérifier'} · Lien indisponible (HTTP 404)</span>
                         <span className="text-[10px] font-semibold text-amber-700">Copie locale conservée</span>
                       </div>
                     ) : (
-                      <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block flex-shrink-0"></span>
-                        <span className="truncate">
+                      <div className="text-[11px] text-slate-600 bg-slate-50 border border-slate-200/80 rounded-xl p-2 space-y-0.5">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="font-semibold flex items-center gap-1.5 text-slate-700 truncate">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block flex-shrink-0"></span>
+                            <span>Disponible sur le site web officiel</span>
+                          </span>
+                          {officialDomain && (
+                            <span className="text-[10px] font-semibold text-brand-blue bg-blue-50 border border-blue-200/70 px-2 py-0.5 rounded-md flex-shrink-0">
+                              {officialDomain}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-slate-500 font-medium">
                           {doc.verification_status === 'VERIFIED' ? 'Original contrôlé' : 'Authenticité à vérifier'}
-                          {' · '}
-                          {doc.http_status === 200 ? 'Lien accessible lors du contrôle' : 'Disponibilité inconnue'}
+                          {' · Lien accessible'}
                           {doc.accessed_at && ` (${doc.accessed_at})`}
-                        </span>
-                      </p>
-                    )}
-                    {doc.availability === 'AVAILABLE_FROM_PRIOR_OFFICIAL_ACQUISITION' && doc.http_status !== 404 && (
-                      <p className="text-[10px] text-slate-400 mt-0.5">Empreinte de l’acquisition antérieure</p>
+                        </p>
+                      </div>
                     )}
                   </div>
 
@@ -566,7 +673,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                 </div>
 
                 {/* Bottom Section: Format, Size & Download */}
-                <div className="px-5 py-3.5 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between gap-3">
+                <div className="px-5 py-3.5 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
                   <div className="text-[11px] text-slate-500">
                     <span className="font-bold text-slate-800">{doc.file_format}</span>
                     <span className="mx-1">•</span>
@@ -578,23 +685,24 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5">
-                    {doc.file_url && (
+                  <div className="flex items-center gap-2">
+                    {doc.file_url && doc.http_status !== 404 && (
                       <a
                         href={doc.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 text-slate-500 hover:text-slate-800 rounded-xl hover:bg-slate-200/60 transition-colors"
-                        aria-label="Ouvrir la source documentaire dans un nouvel onglet"
-                        title="Ouvrir la source documentaire dans un nouvel onglet"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-brand-blue text-slate-700 hover:text-brand-blue text-xs font-bold transition-all shadow-2xs"
+                        title={`Télécharger directement depuis le site officiel de l'institution (${officialDomain || 'Source institutionnelle'})`}
                       >
-                        <ExternalLink className="w-4 h-4" />
+                        <Globe className="w-3.5 h-3.5 text-brand-blue" />
+                        <span className="hidden sm:inline">Site officiel {officialDomain ? `(${officialDomain})` : ''}</span>
+                        <span className="sm:hidden">Site</span>
                       </a>
                     )}
                     <button
-                      disabled={doc.http_status === 404 || !doc.file_url && !doc.storage_path}
+                      disabled={doc.http_status === 404 || (!doc.file_url && !doc.storage_path)}
                       onClick={() => handleDownload(doc)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-brand-blue hover:bg-blue-700 active:scale-95 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-brand-blue hover:bg-blue-700 active:scale-95 text-white text-xs font-bold shadow-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>{doc.http_status === 404 ? 'Lien indisponible' : 'Télécharger'}</span>

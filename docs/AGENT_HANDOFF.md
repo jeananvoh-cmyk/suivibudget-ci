@@ -1,7 +1,23 @@
+## 15 octobre 2026 — UX/UI Civique : Remplacement de "Source Républicaine" par les Structures Émettrices & Téléchargement Direct (Antigravity)
+
+- **Branche Git** : `feat/admin-financial-document-ingestion-pilot`
+- **Périmètre & Diagnostics résolus** :
+  1. **Structure émettrice concrète** (`DocumentsPage.tsx`) :
+     - Remplacement du badge abstrait « *Source Républicaine* » par l'identification explicite de l'organisme producteur : *Direction Générale du Budget et des Finances (DGBF)*, *Ministère*, *Journal Officiel*, *Cour des Comptes*, ou *Délibération du Conseil Municipal / Régional*.
+     - Préservation de l'accessibilité (`sr-only`) et de l'intégrité républicaine sans régression.
+  2. **Téléchargement direct depuis le site web de l'institution** (`DocumentsPage.tsx`) :
+     - Ajout d'un bouton d'action directe « *Site officiel (dgbf.ci)* » renvoyant au serveur source institutionnel en un clic lorsque le document est disponible en ligne.
+  3. **Mention de transmission par courrier en français simple** (`DocumentsPage.tsx`) :
+     - Élimination des tournures techniques (*« Empreinte de l'acquisition antérieure »* ou *« HTTP 404 »*).
+     - Remplacement par une formulation claire pour le citoyen : « *Reçu par courrier officiel de l'institution · Copie conservée sur SuiviBudget* ».
+- **Validation** :
+  - Tests unitaires et d'intégration : `DocumentsPage.test.tsx` enrichi, suite globale **100% PASS (63 fichiers, 822/822 tests)**.
+  - Build de production : `npm run build` réussi (**code 0** en 19s).
+
 ## 15 octobre 2026 — Assainissement UX/UI : Masquage Progressif du SHA-256 et Nettoyage des Métadonnées Documentaires (Antigravity)
 
 - **Branche Git** : `feat/admin-financial-document-ingestion-pilot`
-- **Commits** : `7dd766f`
+- **Commits** : `7dd766f`, `db763ab`
 - **Périmètre & Diagnostics résolus** :
   1. **Élimination des notes d'ingénierie dans les descriptions publiques** (`officialPublicDocumentsCatalog.ts`) :
      - Suppression des phrases d'audit interne (« *Extraction détaillée à vérifier* », « *Extraction des montants non vérifiée* ») intégrées à la fin des descriptions de l'Annexe 8, de l'Annexe 6 et du RAP 2022. Remplacement par des descriptions métier concrètes et intelligibles pour le citoyen.

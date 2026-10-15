@@ -218,6 +218,9 @@ describe('BLOC A — Intégration Documentaire & Budgétaire Publique (Lots 6, 7
     it('affiche les badges de source républicaine et les empreintes SHA-256 abrégées', () => {
       const html = renderToStaticMarkup(<DocumentsPage />);
       expect(html).toContain('Source Républicaine');
+      expect(html).toContain('Direction Générale du Budget et des Finances (DGBF)');
+      expect(html).toContain('Reçu par courrier officiel de l&#x27;institution');
+      expect(html).toContain('Site officiel (dgbf.ci)');
       expect(html).toContain('Extraction partiellement contrôlée');
       expect(html).toContain('Extraction à vérifier');
       expect(html).toContain('Authenticité à vérifier');
