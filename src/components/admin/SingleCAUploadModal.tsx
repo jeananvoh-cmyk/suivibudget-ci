@@ -20,7 +20,7 @@ import {
   ArrowDown
 } from 'lucide-react';
 import { Institution, PublicDocument, OfficialDocumentSource, DocumentPartInfo, DocumentOcrStatus } from '../../types';
-import { calculateFileSha256 } from '../../utils/caFileMatcher';
+import { calculateFileSha256, extractPdfPageCount } from '../../utils/caFileMatcher';
 import { 
   DocumentStorageService, 
   calculateManifestSha256, 
@@ -83,6 +83,8 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
   const [fileSizeBytes, setFileSizeBytes] = useState<number>(existingDocument?.file_size_bytes || 0);
   const [checksumSha256, setChecksumSha256] = useState<string>(existingDocument?.checksum_sha256 || '');
   const [isCalculatingHash, setIsCalculatingHash] = useState<boolean>(false);
+  const [pageCount, setPageCount] = useState<number | undefined>(existingDocument?.page_count);
+  const [pageCountSource, setPageCountSource] = useState<'AUTOMATIC' | 'MANUAL'>(existingDocument?.page_count_source || 'AUTOMATIC');
 
   // Métadonnées officielles
   const [sourceName, setSourceName] = useState<OfficialDocumentSource>(
@@ -151,6 +153,8 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       setApprovalReference(existingDocument.approval_reference || '');
       setIsMultipart(Boolean(existingDocument.is_multipart));
       setIsScannedPdf(existingDocument.is_scanned ?? null);
+      setPageCount(existingDocument.page_count);
+      setPageCountSource(existingDocument.page_count_source || 'AUTOMATIC');
 
       if (existingDocument.is_multipart && existingDocument.document_parts && existingDocument.document_parts.length > 0) {
         setParts(
@@ -187,6 +191,8 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       setIsMultipart(false);
       setIsScannedPdf(null);
       setManifestSha256('');
+      setPageCount(undefined);
+      setPageCountSource('AUTOMATIC');
       setParts([
         {
           part_number: 1,
@@ -267,8 +273,15 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
 
     setIsCalculatingHash(true);
     try {
-      const hash = await calculateFileSha256(file);
+      const [hash, pages] = await Promise.all([
+        calculateFileSha256(file),
+        extractPdfPageCount(file),
+      ]);
       setChecksumSha256(hash);
+      if (pages && pages > 0) {
+        setPageCount(pages);
+        setPageCountSource('AUTOMATIC');
+      }
 
       const duplicate = dataStore.findDocumentByChecksum(hash);
       if (duplicate && duplicate.id !== existingDocument?.id) {
@@ -306,12 +319,26 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
     } : p));
 
     try {
-      const hash = await calculateFileSha256(file);
-      setParts(prev => prev.map((p, idx) => idx === index ? {
-        ...p,
-        checksum_sha256: hash,
-        isCalculating: false,
-      } : p));
+      const [hash, pages] = await Promise.all([
+        calculateFileSha256(file),
+        extractPdfPageCount(file),
+      ]);
+      setParts(prev => prev.map((p, idx) => {
+        if (idx !== index) return p;
+        const updated = {
+          ...p,
+          checksum_sha256: hash,
+          isCalculating: false,
+        };
+        if (pages && pages > 0 && (!p.page_end || p.page_end === 0)) {
+          const start = p.page_start || (index === 0 ? 1 : (prev[index - 1]?.page_end ? prev[index - 1].page_end! + 1 : 1));
+          const end = start + pages - 1;
+          updated.page_start = start;
+          updated.page_end = end;
+          updated.page_range = `${start} à ${end}`;
+        }
+        return updated;
+      }));
     } catch (err) {
       console.warn(`Calcul SHA-256 impossible pour la partie ${index + 1}`, err);
       setParts(prev => prev.map((p, idx) => idx === index ? { ...p, isCalculating: false } : p));
@@ -413,7 +440,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       let finalSizeBytes = fileSizeBytes;
       let finalSha256 = checksumSha256;
       let finalParts: DocumentPartInfo[] | undefined = undefined;
-      let finalTotalPages = isMultipart ? pageRangeValidation.totalPages : existingDocument?.page_count;
+      let finalTotalPages = isMultipart ? pageRangeValidation.totalPages : (pageCount ?? existingDocument?.page_count);
 
       const uploadOptions = {
         institutionId,
@@ -498,6 +525,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
         approval_date: approvalDate || undefined,
         approval_reference: approvalReference || undefined,
         page_count: finalTotalPages,
+        page_count_source: isMultipart ? 'AUTOMATIC' : pageCountSource,
         is_multipart: isMultipart,
         parts_count: isMultipart ? finalParts?.length : 1,
         document_parts: finalParts,
@@ -696,6 +724,41 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
                   <span className="text-[10px] text-emerald-600 font-bold px-1.5 py-0.5 bg-emerald-50 rounded">Calculé localement</span>
                 </div>
               )}
+
+              {/* Pagination automatique / manuelle */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-slate-700">
+                      Nombre de pages
+                    </label>
+                    {pageCount ? (
+                      <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${
+                        pageCountSource === 'AUTOMATIC' 
+                          ? 'bg-emerald-100 text-emerald-800' 
+                          : 'bg-amber-100 text-amber-800'
+                      }`}>
+                        {pageCountSource === 'AUTOMATIC' ? 'Détecté automatiquement' : 'Correction manuelle'}
+                      </span>
+                    ) : null}
+                  </div>
+                  <input
+                    type="number"
+                    min={1}
+                    placeholder="Ex: 44"
+                    value={pageCount ?? ''}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      setPageCount(isNaN(val) ? undefined : val);
+                      setPageCountSource('MANUAL');
+                    }}
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-blue/20"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    Calculé automatiquement depuis le PDF ou corrigible manuellement.
+                  </p>
+                </div>
+              </div>
               {duplicateWarning && (
                 <div className="p-3 mt-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-[11px] font-medium flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0" />

@@ -76,6 +76,7 @@ export interface PublicDocument {
   mime_type?: string;
   file_size_bytes?: number;
   page_count?: number;
+  page_count_source?: 'AUTOMATIC' | 'MANUAL';
   source_name?: string | null;
   source_url?: string | null;
   adoption_date?: string;

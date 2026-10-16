@@ -20,7 +20,8 @@ import {
   Building2, 
   Calendar,
   Layers,
-  Edit
+  Edit,
+  FileSpreadsheet
 } from 'lucide-react';
 import { PublicDocument, DocumentLifecycleStatus, DocumentPartInfo } from '../../types';
 import { dataStore } from '../../services/dataStore';
@@ -34,6 +35,7 @@ interface ExamineCADocumentModalProps {
   onOpenEdit: (doc: PublicDocument) => void;
   onStatusChange: (docId: string, newStatus: DocumentLifecycleStatus) => void;
   onShowToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
+  onExploitFinancials?: (doc: PublicDocument) => void;
 }
 
 export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
@@ -43,6 +45,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
   onOpenEdit,
   onStatusChange,
   onShowToast,
+  onExploitFinancials,
 }) => {
   const [copiedHash, setCopiedHash] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -518,14 +521,29 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
+            {onExploitFinancials && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onExploitFinancials(document);
+                }}
+                className="px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-emerald-600 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 text-xs font-black transition-colors gap-2 cursor-pointer shadow-2xs"
+                title="Saisir ou vérifier les montants financiers dans la console d'import"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                <span>Exploiter les données financières</span>
+              </button>
+            )}
+
             {currentStatus === 'TO_VERIFY' && (
               <button
                 type="button"
                 onClick={() => handleUpdateStatus('VERIFIED')}
                 disabled={isProcessing || !checks.formatValid || (document.is_multipart && !checks.pageRanges) || !isStaff}
                 title={!checks.formatValid ? 'Confirmez le contrôle du PDF dans la grille de vérification.' : !isStaff ? 'Rôle administrateur requis.' : undefined}
-                className="px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-brand-blue text-brand-blue hover:bg-blue-50 text-xs font-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl border border-brand-blue text-brand-blue hover:bg-blue-50 text-xs font-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 Valider (Marquer VÉRIFIÉ)
               </button>
@@ -537,7 +555,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                 onClick={() => handleUpdateStatus('PUBLISHED')}
                 disabled={isProcessing || !canPublish}
                 title={!canPublish ? 'Rôle administrateur requis pour publier.' : undefined}
-                className="px-5 py-2.5 min-h-[44px] rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-black transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5 py-2.5 min-h-[44px] rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-black transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Publier sur la plateforme</span>
@@ -548,7 +566,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
+                className="px-4 py-2.5 min-h-[44px] flex items-center justify-center rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 Fermer
               </button>

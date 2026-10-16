@@ -36,7 +36,10 @@ import {
   Calendar, 
   Check, 
   ArrowRight,
-  Scale
+  Scale,
+  Hash,
+  Copy,
+  FileSpreadsheet
 } from 'lucide-react';
 import { CompteAdministratifExplainerModal } from './CompteAdministratifExplainerModal';
 import { fetchAdministrativeAccounts } from '../services/administrativeAccountsService';
@@ -56,7 +59,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
   const [opSearch, setOpSearch] = useState('');
   const [selectedSector, setSelectedSector] = useState('ALL');
   const [selectedMatchLevel, setSelectedMatchLevel] = useState<'ALL' | 'STRONG' | 'PARTIAL' | 'NONE'>('ALL');
-  const [copiedData, setCopiedData] = useState(false);
+  const [copiedSha256, setCopiedSha256] = useState(false);
   const [fieldContributionMsg, setFieldContributionMsg] = useState<string | null>(null);
 
   const formatReadableAmount = (value: number | null | undefined) =>
@@ -181,11 +184,28 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
     downloadAnchor.remove();
   };
 
+  const handleCopyHash = (hash: string) => {
+    navigator.clipboard.writeText(hash);
+    setCopiedSha256(true);
+    setTimeout(() => setCopiedSha256(false), 2000);
+  };
+
+  // Matching document from public library
+  const documents = dataStore.getDocuments();
+  const matchingDoc = currentCA ? documents.find(d => 
+    (currentCA.source_document_sha256 && d.checksum_sha256 === currentCA.source_document_sha256) ||
+    (d.institution_id === institution.id && d.year === currentCA.fiscal_year && d.category === 'COMPTE_ADMINISTRATIF') ||
+    (currentCA.source_document && (d.title.includes(currentCA.source_document) || d.file_name.includes(currentCA.source_document)))
+  ) : undefined;
+
+  const sha256 = currentCA?.source_document_sha256 || matchingDoc?.checksum_sha256 || null;
+  const docUrl = currentCA?.source_url || matchingDoc?.file_url || null;
+
   // If no account exists for this entity
   if (!currentCA) {
     return (
       <div className="space-y-5 animate-in fade-in duration-200">
-        <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200 shadow-2xs space-y-5">
+        <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-2xs space-y-5">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center flex-shrink-0">
               <Scale className="w-6 h-6" />
@@ -208,7 +228,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </div>
           </div>
 
-          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 text-xs">
             <div className="flex items-center gap-2 font-black text-slate-800 uppercase tracking-wider text-[11px]">
               <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
               <span>Engagement Républicain de Vérifiabilité & Open Data</span>
@@ -248,41 +268,48 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
     );
   }
 
+  // Calculate sections shares
+  const totalRealized = currentCA.total_realized || 0;
+  const operatingShare = totalRealized > 0 && currentCA.operating_realized != null
+    ? Math.round((currentCA.operating_realized / totalRealized) * 100)
+    : null;
+  const investmentShare = totalRealized > 0 && currentCA.investment_realized != null
+    ? Math.round((currentCA.investment_realized / totalRealized) * 100)
+    : null;
+
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
+    <div className="space-y-6 animate-in fade-in duration-200">
       
       {/* ========================================================================= */}
-      {/* 1. EN-TÊTE OFFICIEL DE L'EXÉCUTION + SELECTEUR D'EXERCICE + BOUTON GUIDE */}
+      {/* EN-TÊTE DE LA FICHE FINANCIÈRE CITOYENNE                                    */}
       {/* ========================================================================= */}
-      <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-4">
+      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-xs space-y-4">
         
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-          <div className="space-y-1">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1.5 shadow-2xs">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-                Compte Administratif Officiel Vérifié
+                Fiche Financière Citoyenne Contrôlée
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-slate-100 text-slate-800 border border-slate-200">
-                Exercice {currentCA.fiscal_year}
+                Exercice Fiscal {currentCA.fiscal_year}
               </span>
             </div>
 
             <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight pt-1">
-              Exécution Budgétaire Réelle de {institution.name}
+              Compte Administratif de {institution.name}
             </h3>
 
-            {/* Smart fallback note */}
             <p className="text-xs text-brand-blue font-semibold flex items-center gap-1.5">
               <Info className="w-3.5 h-3.5 flex-shrink-0" />
               <span>
-                Compte administratif officiel disponible : <strong>exercice {currentCA.fiscal_year}</strong>. Les données présentées ci-dessous sont issues du document officiel référencé par SuiviBudget.
+                Données arrêtées par la collectivité et contrôlées à partir du document source officiel.
               </span>
             </p>
           </div>
 
           <div className="flex flex-col sm:items-end gap-2 flex-shrink-0">
-            {/* Multi-exercices selector if available */}
             {availableYears.length > 1 && (
               <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
                 <span className="text-[10px] font-bold uppercase text-slate-500 pl-2">Exercice :</span>
@@ -307,20 +334,20 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-brand-blue border border-blue-200 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer self-start sm:self-auto"
             >
               <HelpCircle className="w-3.5 h-3.5 text-brand-blue" />
-              <span>Qu'est-ce qu'un compte administratif ?</span>
+              <span>Comprendre le compte administratif</span>
             </button>
           </div>
         </div>
 
         {/* Métadonnées Délibération & Tutelle */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-slate-50/80 p-3 sm:p-4 rounded-xl border border-slate-200/80">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-slate-50/80 p-3 sm:p-4 rounded-2xl border border-slate-200/80">
           <div>
             <span className="text-[10px] font-bold uppercase text-slate-400 block">Date Délibération Conseil</span>
-            <strong className="text-slate-900 break-words sm:text-right">{currentCA.approval_date || 'Date non renseignée'}</strong>
+            <strong className="text-slate-900 break-words">{currentCA.approval_date || 'Date non renseignée'}</strong>
           </div>
           <div>
             <span className="text-[10px] font-bold uppercase text-slate-400 block">Visa de Tutelle Préfecture</span>
-            <strong className="text-slate-900 break-words sm:text-right">{currentCA.prefecture_visa_date || 'Date non renseignée'}</strong>
+            <strong className="text-slate-900 break-words">{currentCA.prefecture_visa_date || 'Date non renseignée'}</strong>
           </div>
           <div>
             <span className="text-[10px] font-bold uppercase text-slate-400 block">Document Source</span>
@@ -328,13 +355,13 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               <span className="text-slate-900 truncate" title={currentCA.source_document}>
                 {currentCA.source_document}
               </span>
-              {currentCA.source_url && isSafeUrl(currentCA.source_url) && (
+              {docUrl && isSafeUrl(docUrl) && (
                 <a
-                  href={currentCA.source_url}
+                  href={docUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-brand-blue hover:underline inline-flex items-center"
-                  title="Consulter la source"
+                  title="Consulter le document source"
                 >
                   <ExternalLink className="w-3 h-3 flex-shrink-0" />
                 </a>
@@ -342,332 +369,395 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </div>
           </div>
         </div>
-
       </div>
 
       {/* ========================================================================= */}
-      {/* 1.5 TRAÇABILITÉ DU CYCLE BUDGÉTAIRE : BP → MODIFICATIONS → CRÉDITS DÉFINITIFS */}
+      {/* RUBRIQUE 1 : LES MOYENS FINANCIERS                                        */}
       {/* ========================================================================= */}
-      <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-4">
+      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-2xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
-            <Layers className="w-5 h-5 text-brand-blue" />
-            <h4 className="text-sm font-black uppercase tracking-wider text-slate-900">
-              Traçabilité du Cycle Budgétaire — Exercice {selectedYear}
-            </h4>
+            <span className="w-7 h-7 rounded-xl bg-blue-100 text-brand-blue font-black text-xs flex items-center justify-center">1</span>
+            <div>
+              <h4 className="text-base font-black text-slate-900 tracking-tight">
+                Rubrique 1 : Les moyens financiers
+              </h4>
+              <p className="text-xs text-slate-500">
+                Montants prévus par le conseil municipal ou régional et autorisations budgétaires.
+              </p>
+            </div>
           </div>
-          <span className="text-[11px] font-semibold text-slate-500">
-            BP initial → Modifications officielles → Crédits définitifs calculés
+          <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
+            Autorisations Votées
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-          {/* Étape A : Budget Primitif Initial */}
-          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block">
-              A. Budget Primitif Initial
-            </span>
-            <div className="text-base font-black text-slate-900">
-              {cycleConsolidation.initial_budget?.total.amount != null
-                ? formatReadableAmount(cycleConsolidation.initial_budget.total.amount)
-                : formatReadableRecordAmount(currentCA, 'total_planned')}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs">
+          {/* A. Budget Primitif Initial */}
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
+                Budget Primitif (Voté Initial)
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">
+                Initial
+              </span>
             </div>
-            <p className="text-[11px] text-slate-500">
-              {cycleConsolidation.initial_budget?.document?.document_name || 'Crédits votés initiaux extraits de l\'acte budgétaire officiel.'}
+            <div className="text-lg sm:text-xl font-black text-slate-900">
+              {currentCA.initial_budget_total != null
+                ? formatReadableAmount(currentCA.initial_budget_total)
+                : cycleConsolidation.initial_budget?.total.amount != null
+                ? formatReadableAmount(cycleConsolidation.initial_budget.total.amount)
+                : <span className="text-slate-500 text-sm font-semibold italic">Non documenté au CA</span>}
+            </div>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Crédits votés par le Conseil en début d'exercice fiscal.
             </p>
           </div>
 
-          {/* Étape B : Modifications Budgétaires */}
-          <div className="p-3.5 bg-blue-50/50 rounded-xl border border-blue-100 space-y-2">
+          {/* B. Modifications en cours d'année */}
+          <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-200 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-wider text-brand-blue block">
-                B. Modifications Budgétaires
+              <span className="text-[11px] font-black uppercase tracking-wider text-brand-blue">
+                Ajustements en cours d'année
               </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white border border-blue-200 text-brand-blue">
-                {cycleConsolidation.amendments.length} acte(s)
+                {cycleConsolidation.amendments.length > 0 ? `${cycleConsolidation.amendments.length} acte(s)` : 'Modifications'}
               </span>
             </div>
-            <div className="text-base font-black text-brand-blue">
+            <div className="text-lg sm:text-xl font-black text-brand-blue">
               {cycleConsolidation.net_amendments.total !== null
                 ? `${cycleConsolidation.net_amendments.total >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(cycleConsolidation.net_amendments.total))}`
-                : 'Non documenté'}
+                : (currentCA.initial_budget_total != null && currentCA.total_planned != null
+                    ? `${(currentCA.total_planned - currentCA.initial_budget_total) >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(currentCA.total_planned - currentCA.initial_budget_total))}`
+                    : 'Non documenté')}
             </div>
-            <p className="text-[11px] text-slate-600 leading-snug">
-              {cycleConsolidation.amendments_explanation}
+            <p className="text-[11px] text-slate-600 leading-relaxed">
+              Budgets modificatifs et virements de crédits votés par le Conseil.
             </p>
           </div>
 
-          {/* Étape C : Crédits Définitifs (Valeur Dérivée ou Source Confirmée) */}
-          <div className="p-3.5 bg-emerald-50/50 rounded-xl border border-emerald-200 space-y-2">
+          {/* C. Prévisions Définitives */}
+          <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-300 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 block">
-                C. Crédits Définitifs
+              <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800">
+                Prévisions Définitives
               </span>
-              {cycleConsolidation.final_credits_status === 'DERIVED_FROM_DOCUMENTED_AMENDMENTS' && (
-                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-200 text-emerald-900 uppercase">
-                  Calculé (Dérivé)
-                </span>
-              )}
-              {cycleConsolidation.final_credits_status === 'SOURCE_CONFIRMED' && (
-                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-blue-200 text-blue-900 uppercase">
-                  Source Officielle
-                </span>
-              )}
-              {cycleConsolidation.final_credits_status === 'NOT_ESTABLISHED' && (
-                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 uppercase">
-                  Non Établis
-                </span>
-              )}
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                Autorisation Finale
+              </span>
             </div>
-            <div className="text-base font-black text-emerald-950">
-              {cycleConsolidation.final_credits?.total.amount != null ? (
-                formatReadableAmount(cycleConsolidation.final_credits.total.amount)
-              ) : (
-                <span className="text-slate-500 font-bold text-sm">Non établis</span>
-              )}
+            <div className="text-lg sm:text-xl font-black text-emerald-950">
+              {formatReadableRecordAmount(currentCA, 'total_planned')}
             </div>
-            <p className="text-[11px] text-slate-600 leading-snug">
-              {cycleConsolidation.final_credits?.total.formula || cycleConsolidation.final_credits_notice || 'Les crédits définitifs ne peuvent pas être établis avec les documents actuellement disponibles.'}
+            <p className="text-[11px] text-slate-600 leading-relaxed">
+              Plafond légal définitif des dépenses autorisées pour l'exercice clos.
             </p>
-            {cycleConsolidation.documented_adjusted_amount?.total != null && (
-              <div className="text-[10px] text-amber-800 bg-amber-50 rounded p-1 border border-amber-200">
-                Montant ajusté provisoire : <strong>{formatReadableAmount(cycleConsolidation.documented_adjusted_amount.total)}</strong> (chaîne d'actes partielle)
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Détail pédagogique des doubles taux d'exécution si crédits définitifs établis */}
-        {cycleConsolidation.execution_comparison?.vs_final_credits && cycleConsolidation.execution_comparison?.vs_initial_budget ? (
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <span className="text-slate-700">
-              <strong>Double lecture civique :</strong> Taux d'exécution sur crédits définitifs = <strong>{cycleConsolidation.execution_comparison.vs_final_credits.total.formatted}</strong> vs Taux sur budget primitif initial = <strong>{cycleConsolidation.execution_comparison.vs_initial_budget.total.formatted}</strong>.
-            </span>
-            <span className="text-[10px] text-slate-500 italic">
-              Les deux indicateurs mesurent respectivement le respect de l'autorisation finale et l'évolution par rapport aux orientations initiales.
-            </span>
+        {/* Note pédagogique d'évolution des prévisions */}
+        <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-700 leading-relaxed flex items-start gap-2.5">
+          <Info className="w-4 h-4 text-brand-blue flex-shrink-0 mt-0.5" />
+          <div>
+            <strong>Comprendre l'évolution des prévisions :</strong> Le Budget Primitif (BP) est une prévision adoptée avant le début de l'année. En cours d'exercice, des ajustements légaux (budgets modificatifs, décisions modificatives, virements de crédits) peuvent être votés par le Conseil. Les <strong>prévisions définitives</strong> constituent le montant final arrêté au compte administratif.
           </div>
-        ) : (
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <span className="text-slate-700">
-              <strong>Lecture civique :</strong> Taux d'exécution mesuré sur le budget primitif initial ({cycleConsolidation.execution_comparison?.vs_initial_budget?.total.formatted || 'non calculé'}). Crédits définitifs non établis à ce jour.
-            </span>
-            <span className="text-[10px] text-slate-500 italic">
-              Absence de document public ≠ Preuve d'absence d'actes administratifs.
-            </span>
-          </div>
-        )}
+        </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. SYNTHÈSE DES 3 VOLETS FINANCIERS AVEC FORMULE DYNAMIQUE CALCULÉE */}
+      {/* RUBRIQUE 2 : LES RECETTES ET LES DÉPENSES                                 */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
-        
-        {/* Volet 1 : Fonctionnement */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-3 flex flex-col justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200">
-                1. Dépenses de Fonctionnement
-              </span>
-              {operatingRate && (
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${operatingRate.badgeClass}`}>
-                  {operatingRate.formatted}
-                </span>
-              )}
-            </div>
-
-            <div className="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3">
-                <span className="text-[11px] text-slate-500 font-medium">Ce qui était prévu :</span>
-                <strong className="text-slate-900 break-words sm:text-right">{formatReadableRecordAmount(currentCA, 'operating_planned')}</strong>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3">
-                <span className="text-[11px] text-slate-500 font-medium">Ce qui a été réalisé financièrement :</span>
-                <strong className="text-slate-900 text-sm font-black break-words sm:text-right">{formatReadableRecordAmount(currentCA, 'operating_realized')}</strong>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3 pt-1 border-t border-slate-200 text-[11px]">
-                <span className="text-slate-500 font-medium">Écart :</span>
-                <span className={`font-bold ${isExactAmount(currentCA, 'operating_planned') && isExactAmount(currentCA, 'operating_realized') && currentCA.operating_realized! > currentCA.operating_planned! ? 'text-purple-700' : 'text-slate-700'}`}>
-                  {isExactAmount(currentCA, 'operating_planned') && isExactAmount(currentCA, 'operating_realized')
-                    ? `${(currentCA.operating_realized! - currentCA.operating_planned!) >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(currentCA.operating_planned! - currentCA.operating_realized!))}`
-                    : 'Non calculable'}
-                </span>
-              </div>
-              <div className="flex justify-between items-baseline text-[11px]">
-                <span className="text-slate-500 font-medium">Taux d'exécution :</span>
-                <span className="font-black text-brand-blue">{operatingRate?.formatted}</span>
-              </div>
-            </div>
-
-            {/* Jauge */}
-            <div className="space-y-1 pt-1">
-              <div hidden={operatingRate?.rate == null} className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full transition-all duration-500 ${
-                    (operatingRate?.rate || 0) > 100 ? 'bg-purple-600' :
-                    (operatingRate?.rate || 0) >= 90 ? 'bg-emerald-500' :
-                    (operatingRate?.rate || 0) >= 70 ? 'bg-blue-500' : 'bg-amber-500'
-                  }`} 
-                  style={{ width: `${Math.min(100, operatingRate?.rate || 0)}%` }}
-                />
-              </div>
+      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-xl bg-purple-100 text-purple-700 font-black text-xs flex items-center justify-center">2</span>
+            <div>
+              <h4 className="text-base font-black text-slate-900 tracking-tight">
+                Rubrique 2 : Les recettes et les dépenses
+              </h4>
+              <p className="text-xs text-slate-500">
+                Exécution financière attestée de l'exercice : recouvrement, dépenses et résultat de clôture.
+              </p>
             </div>
           </div>
-
-          {currentCA.operating_revenue_realized != null && (
-            <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-600">
-              Recettes de fonctionnement encaissées : <strong className="text-slate-900 break-words sm:text-right">{formatReadableRecordAmount(currentCA, 'operating_revenue_realized')}</strong>
-            </div>
-          )}
+          <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-50 text-purple-800 border border-purple-200">
+            Stade comptable : {currentCA.accounting_stage || 'ORDONNANCE'}
+          </span>
         </div>
 
-        {/* Volet 2 : Investissement */}
-        <div className="bg-white rounded-2xl p-5 border border-emerald-200/90 shadow-2xs space-y-3 flex flex-col justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
-                2. Dépenses d'Investissement
-              </span>
-              {investmentRate && (
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${investmentRate.badgeClass}`}>
-                  {investmentRate.formatted}
-                </span>
-              )}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs">
+          {/* Recettes Recouvrées */}
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
+              Recettes Recouvrées
+            </span>
+            <div className="text-lg sm:text-xl font-black text-emerald-700">
+              {(() => {
+                const totalRev = currentCA.total_revenue_collected ?? 
+                  (currentCA.operating_revenue_realized != null || currentCA.investment_revenue_realized != null
+                    ? (currentCA.operating_revenue_realized || 0) + (currentCA.investment_revenue_realized || 0)
+                    : null);
+                return totalRev != null ? formatReadableAmount(totalRev) : 'Non documenté au CA';
+              })()}
             </div>
-
-            <div className="space-y-1.5 bg-emerald-50/50 p-3 rounded-xl border border-emerald-200 text-xs">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3">
-                <span className="text-[11px] text-slate-500 font-medium">Ce qui était prévu :</span>
-                <strong className="text-slate-900 break-words sm:text-right">{formatReadableRecordAmount(currentCA, 'investment_planned')}</strong>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3">
-                <span className="text-[11px] text-slate-500 font-medium">Ce qui a été réalisé financièrement :</span>
-                <strong className="text-slate-900 text-sm font-black break-words sm:text-right">{formatReadableRecordAmount(currentCA, 'investment_realized')}</strong>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3 pt-1 border-t border-emerald-200 text-[11px]">
-                <span className="text-slate-500 font-medium">Écart :</span>
-                <span className="font-bold text-slate-700">
-                  {isExactAmount(currentCA, 'investment_planned') && isExactAmount(currentCA, 'investment_realized')
-                    ? `${(currentCA.investment_realized! - currentCA.investment_planned!) >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(currentCA.investment_planned! - currentCA.investment_realized!))}`
-                    : 'Non calculable'}
-                </span>
-              </div>
-              <div className="flex justify-between items-baseline text-[11px]">
-                <span className="text-slate-500 font-medium">Taux d'exécution :</span>
-                <span className="font-black text-emerald-700">{investmentRate?.formatted}</span>
-              </div>
-            </div>
-
-            {/* Jauge */}
-            <div className="space-y-1 pt-1">
-              <div hidden={investmentRate?.rate == null} className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full transition-all duration-500 ${
-                    (investmentRate?.rate || 0) >= 80 ? 'bg-emerald-600' :
-                    (investmentRate?.rate || 0) >= 60 ? 'bg-blue-600' : 'bg-amber-500'
-                  }`} 
-                  style={{ width: `${Math.min(100, investmentRate?.rate || 0)}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-[10px] text-slate-500 font-medium">
-                <span>{currentCA.operations.length} opérations identifiées</span>
-              </div>
-            </div>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Fonds effectivement encaissés (fiscalité locale, dotations de l'État, taxes de marché).
+            </p>
           </div>
 
-          {currentCA.investment_revenue_realized != null && (
-            <div className="p-2.5 bg-emerald-50/60 rounded-xl border border-emerald-200 text-[11px] text-emerald-900">
-              Recettes d'investissement recouvrées : <strong className="text-emerald-950">{formatReadableRecordAmount(currentCA, 'investment_revenue_realized')}</strong>
-            </div>
-          )}
-        </div>
-
-        {/* Volet 3 : Total Consolidé & Résultat */}
-        <div className="bg-gradient-to-br from-slate-900 to-brand-blue-dark text-white rounded-2xl p-5 shadow-xs space-y-3 flex flex-col justify-between">
-          <div className="space-y-3">
+          {/* Dépenses Exécutées */}
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-white/10 text-white border border-white/20">
-                3. Total Consolidé
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
+                Dépenses Exécutées
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-brand-blue border border-blue-200">
+                {currentCA.accounting_stage || 'ORDONNANCE'}
+              </span>
+            </div>
+            <div className="text-lg sm:text-xl font-black text-slate-900">
+              {formatReadableRecordAmount(currentCA, 'total_realized')}
+            </div>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Mandats émis et liquidés par l'ordonnateur au titre de l'exercice clos.
+            </p>
+          </div>
+
+          {/* Taux d'Exécution Global */}
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
+                Taux d'Exécution Global
               </span>
               {totalRate && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-slate-950">
+                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${totalRate.badgeClass}`}>
                   {totalRate.formatted}
                 </span>
               )}
             </div>
-
-            <div className="space-y-1.5 bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/15 text-xs">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3">
-                <span className="text-[11px] text-blue-200 font-medium">Ce qui était prévu :</span>
-                <strong className="text-white">{formatReadableRecordAmount(currentCA, 'total_planned')}</strong>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3">
-                <span className="text-[11px] text-blue-200 font-medium">Ce qui a été réalisé financièrement :</span>
-                <strong className="text-amber-300 text-sm font-black">{formatReadableRecordAmount(currentCA, 'total_realized')}</strong>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-0.5 sm:gap-3 pt-1 border-t border-white/15 text-[11px]">
-                <span className="text-blue-200 font-medium">Écart :</span>
-                <span className="font-bold text-amber-200">
-                  {isExactAmount(currentCA, 'total_planned') && isExactAmount(currentCA, 'total_realized')
-                    ? `${(currentCA.total_realized! - currentCA.total_planned!) >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(currentCA.total_planned! - currentCA.total_realized!))}`
-                    : 'Non calculable'}
-                </span>
-              </div>
-              <div className="flex justify-between items-baseline text-[11px]">
-                <span className="text-blue-200 font-medium">Taux d'exécution global :</span>
-                <span className="font-black text-amber-300">{totalRate?.formatted}</span>
-              </div>
+            <div className="text-lg sm:text-xl font-black text-brand-blue">
+              {totalRate?.formatted || 'Non calculable'}
             </div>
-
-            {/* Jauge globale */}
-            <div className="space-y-1 pt-1">
-              <div hidden={totalRate?.rate == null} className="w-full bg-white/20 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="bg-amber-400 h-full transition-all duration-500" 
-                  style={{ width: `${Math.min(100, totalRate?.rate || 0)}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-[10px] text-blue-200 font-medium">
-                <span>{getExecutionStatusLabel(totalRate?.status || 'NORMAL')}</span>
-              </div>
+            <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+              <div 
+                className={`h-full transition-all duration-500 ${
+                  (totalRate?.rate || 0) > 100 ? 'bg-purple-600' :
+                  (totalRate?.rate || 0) >= 90 ? 'bg-emerald-500' :
+                  (totalRate?.rate || 0) >= 70 ? 'bg-blue-500' : 'bg-amber-500'
+                }`} 
+                style={{ width: `${Math.min(100, totalRate?.rate || 0)}%` }}
+              />
             </div>
+            <p className="text-[10px] text-slate-400">
+              Mesuré par rapport aux prévisions définitives.
+            </p>
           </div>
-
-          {currentCA.surplus_or_deficit != null && (
-            <div className="p-2.5 bg-white/10 backdrop-blur-md rounded-xl border border-white/15 text-[11px] text-white">
-              {currentCA.surplus_or_deficit >= 0 ? (
-                <>
-                  Excédent budgétaire de clôture : <strong className="text-emerald-300">{formatReadableRecordAmount(currentCA, 'surplus_or_deficit')}</strong>
-                </>
-              ) : (
-                <>
-                  Déficit d'exercice : <strong className="text-rose-300">{formatReadableRecordAmount(currentCA, 'surplus_or_deficit')}</strong>
-                </>
-              )}
-            </div>
-          )}
         </div>
 
+        {/* Ligne Résultat de Clôture, Reports Antérieurs & Résultat Cumulé */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
+          <div>
+            <span className="text-[10px] font-bold uppercase text-slate-500 block">Résultat de clôture de l'exercice</span>
+            <strong className={`text-sm ${
+              currentCA.surplus_or_deficit == null ? 'text-slate-600' :
+              currentCA.surplus_or_deficit >= 0 ? 'text-emerald-700' : 'text-rose-700'
+            }`}>
+              {currentCA.surplus_or_deficit != null
+                ? `${currentCA.surplus_or_deficit >= 0 ? 'Excédent : +' : 'Déficit : '}${formatReadableRecordAmount(currentCA, 'surplus_or_deficit')}`
+                : 'Non documenté au CA'}
+            </strong>
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase text-slate-500 block">Reports antérieurs (Report à nouveau)</span>
+            <strong className="text-sm text-slate-800">
+              {currentCA.previous_result_reported != null
+                ? `${currentCA.previous_result_reported >= 0 ? '+' : ''}${formatReadableAmount(currentCA.previous_result_reported)}`
+                : 'Non documenté au CA'}
+            </strong>
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase text-slate-500 block">Résultat cumulé final</span>
+            <strong className="text-sm text-slate-900">
+              {currentCA.cumulative_result != null
+                ? `${currentCA.cumulative_result >= 0 ? '+' : ''}${formatReadableAmount(currentCA.cumulative_result)}`
+                : (currentCA.surplus_or_deficit != null && currentCA.previous_result_reported != null
+                    ? `${(currentCA.surplus_or_deficit + currentCA.previous_result_reported) >= 0 ? '+' : ''}${formatReadableAmount(currentCA.surplus_or_deficit + currentCA.previous_result_reported)}`
+                    : 'Non documenté au CA')}
+            </strong>
+          </div>
+        </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. DÉTAIL DES OPÉRATIONS D'INVESTISSEMENT & RAPPROCHEMENT MARCHÉS PUBLICS */}
+      {/* RUBRIQUE 3 : FONCTIONNEMENT ET INVESTISSEMENT                              */}
       {/* ========================================================================= */}
-      <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-2xs space-y-4">
+      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-2xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-800 font-black text-xs flex items-center justify-center">3</span>
+            <div>
+              <h4 className="text-base font-black text-slate-900 tracking-tight">
+                Rubrique 3 : Fonctionnement et investissement
+              </h4>
+              <p className="text-xs text-slate-500">
+                Montants prévus, montants réalisés et part respective de chaque section dans le budget.
+              </p>
+            </div>
+          </div>
+          <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+            2 Sections Budgétaires
+          </span>
+        </div>
+
+        {/* Encart pédagogique de distinction Fonctionnement vs Investissement */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
+          <div className="space-y-1">
+            <span className="font-black text-brand-blue uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-brand-blue inline-block"></span>
+              Fonctionnement
+            </span>
+            <p className="text-slate-600 leading-relaxed">
+              Salaires des agents municipaux, fournitures de bureau, carburant, factures d'eau et d'électricité, entretien courant des locaux, charges quotidiennes nécessaires au service public.
+            </p>
+          </div>
+          <div className="space-y-1">
+            <span className="font-black text-emerald-700 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span>
+              Investissement
+            </span>
+            <p className="text-slate-600 leading-relaxed">
+              Équipements durables, travaux de voirie et de bitumage, construction d'écoles, réhabilitation de centres de santé, ponts, réseaux d'eau et d'assainissement, infrastructures pérennes.
+            </p>
+          </div>
+        </div>
+
+        {/* Les 2 volets financiers détaillés */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+          
+          {/* Volet Fonctionnement */}
+          <div className="bg-slate-50/70 rounded-2xl p-5 border border-slate-200 space-y-3 flex flex-col justify-between">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-blue-100 text-brand-blue border border-blue-200">
+                  Section Fonctionnement
+                </span>
+                {operatingRate && (
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-black ${operatingRate.badgeClass}`}>
+                    Taux : {operatingRate.formatted}
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-2 bg-white p-3.5 rounded-xl border border-slate-200 text-xs">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-slate-500 font-medium">Ce qui était prévu :</span>
+                  <strong className="text-slate-900">{formatReadableRecordAmount(currentCA, 'operating_planned')}</strong>
+                </div>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-slate-500 font-medium">Ce qui a été réalisé :</span>
+                  <strong className="text-slate-900 text-sm font-black">{formatReadableRecordAmount(currentCA, 'operating_realized')}</strong>
+                </div>
+                <div className="flex justify-between items-baseline pt-1 border-t border-slate-100 text-[11px]">
+                  <span className="text-slate-500 font-medium">Part dans le total exécuté :</span>
+                  <strong className="text-brand-blue">{operatingShare != null ? `${operatingShare} %` : 'N/A'}</strong>
+                </div>
+              </div>
+
+              {/* Jauge Fonctionnement */}
+              <div className="space-y-1">
+                <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full transition-all duration-500 ${
+                      (operatingRate?.rate || 0) > 100 ? 'bg-purple-600' :
+                      (operatingRate?.rate || 0) >= 90 ? 'bg-emerald-500' :
+                      (operatingRate?.rate || 0) >= 70 ? 'bg-blue-500' : 'bg-amber-500'
+                    }`} 
+                    style={{ width: `${Math.min(100, operatingRate?.rate || 0)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {currentCA.operating_revenue_realized != null && (
+              <div className="p-2.5 bg-white rounded-xl border border-slate-200 text-[11px] text-slate-600">
+                Recettes de fonctionnement recouvrées : <strong className="text-slate-900">{formatReadableRecordAmount(currentCA, 'operating_revenue_realized')}</strong>
+              </div>
+            )}
+          </div>
+
+          {/* Volet Investissement */}
+          <div className="bg-emerald-50/40 rounded-2xl p-5 border border-emerald-200 space-y-3 flex flex-col justify-between">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  Section Investissement
+                </span>
+                {investmentRate && (
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-black ${investmentRate.badgeClass}`}>
+                    Taux : {investmentRate.formatted}
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-2 bg-white p-3.5 rounded-xl border border-emerald-200 text-xs">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-slate-500 font-medium">Ce qui était prévu :</span>
+                  <strong className="text-slate-900">{formatReadableRecordAmount(currentCA, 'investment_planned')}</strong>
+                </div>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-slate-500 font-medium">Ce qui a été réalisé :</span>
+                  <strong className="text-slate-900 text-sm font-black">{formatReadableRecordAmount(currentCA, 'investment_realized')}</strong>
+                </div>
+                <div className="flex justify-between items-baseline pt-1 border-t border-slate-100 text-[11px]">
+                  <span className="text-slate-500 font-medium">Part dans le total exécuté :</span>
+                  <strong className="text-emerald-700">{investmentShare != null ? `${investmentShare} %` : 'N/A'}</strong>
+                </div>
+              </div>
+
+              {/* Jauge Investissement */}
+              <div className="space-y-1">
+                <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full transition-all duration-500 ${
+                      (investmentRate?.rate || 0) >= 80 ? 'bg-emerald-600' :
+                      (investmentRate?.rate || 0) >= 60 ? 'bg-blue-600' : 'bg-amber-500'
+                    }`} 
+                    style={{ width: `${Math.min(100, investmentRate?.rate || 0)}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-[10px] text-slate-500 font-medium pt-0.5">
+                  <span>{currentCA.operations.length} chantiers individualisés</span>
+                </div>
+              </div>
+            </div>
+
+            {currentCA.investment_revenue_realized != null && (
+              <div className="p-2.5 bg-white rounded-xl border border-emerald-200 text-[11px] text-emerald-900">
+                Recettes d'investissement recouvrées : <strong className="text-emerald-950">{formatReadableRecordAmount(currentCA, 'investment_revenue_realized')}</strong>
+              </div>
+            )}
+          </div>
+
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* RUBRIQUE 4 : OPÉRATIONS ET INVESTISSEMENTS IDENTIFIÉS                      */}
+      {/* ========================================================================= */}
+      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-2xs space-y-4">
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-brand-blue" />
-              <h4 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
-                Chantiers d'Investissement & Rapprochement Marchés Publics (DGMP)
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-xl bg-amber-100 text-amber-800 font-black text-xs flex items-center justify-center">4</span>
+            <div>
+              <h4 className="text-base font-black text-slate-900 tracking-tight">
+                Rubrique 4 : Opérations et investissements identifiés
               </h4>
+              <p className="text-xs text-slate-500">
+                Chantiers individualisés dans le compte administratif ({currentCA.operations.length} répertoriés).
+              </p>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Traçabilité des {currentCA.operations.length} opérations d'infrastructures financées sur l'exercice {currentCA.fiscal_year}.
-            </p>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
@@ -690,17 +780,6 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
           </div>
         </div>
 
-        {/* Règle Républicaine Non Négociable */}
-        <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-xl text-xs text-amber-950 flex items-start gap-2.5">
-          <Scale className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
-          <div className="space-y-0.5">
-            <span className="font-bold block text-amber-900">Règle républicaine d'imputabilité : Réalisé financier ≠ Réalisation physique</span>
-            <p className="text-[11px] text-amber-800 leading-relaxed">
-              Une dépense ordonnancée ou un marché public attribué documentent un engagement financier et juridique, jamais la livraison physique des travaux sur le terrain. À l'inverse, 0 FCFA ordonnancé au CA sur un exercice ne signifie pas l'abandon d'un projet (report budgétaire).
-            </p>
-          </div>
-        </div>
-
         {/* Filtres Opérations */}
         <div className="flex flex-col lg:flex-row items-center gap-2.5">
           <div className="relative flex-1 w-full">
@@ -710,7 +789,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               placeholder="Rechercher une opération (santé, école, marché, entreprise...)"
               value={opSearch}
               onChange={(e) => setOpSearch(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:bg-white"
+              className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:bg-white"
             />
           </div>
 
@@ -719,7 +798,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               <select
                 value={selectedSector}
                 onChange={(e) => setSelectedSector(e.target.value)}
-                className="min-w-0 max-w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600"
+                className="min-w-0 max-w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-blue"
               >
                 <option value="ALL">Tous les secteurs</option>
                 {uniqueSectors.map(s => <option key={s} value={s}>{s}</option>)}
@@ -729,7 +808,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             <select
               value={selectedMatchLevel}
               onChange={(e) => setSelectedMatchLevel(e.target.value as any)}
-              className="min-w-0 max-w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600"
+              className="min-w-0 max-w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-blue"
             >
               <option value="ALL">Tous les rapprochements DGMP</option>
               <option value="STRONG">Marché Retrouvé (DGMP)</option>
@@ -760,12 +839,14 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-50 text-brand-blue border border-blue-200">
                         {op.sector}
                       </span>
-                      <span className="text-[11px] text-slate-500 font-medium">
-                        📍 {op.location}
-                      </span>
+                      {op.location && (
+                        <span className="text-[11px] text-slate-500 font-medium">
+                          📍 {op.location}
+                        </span>
+                      )}
                       {op.source_page && (
-                        <span className="text-[10px] text-slate-400 font-medium">
-                          (Page {op.source_page} du CA)
+                        <span className="text-[10px] text-brand-blue font-bold bg-blue-50/70 border border-blue-200/60 px-2 py-0.5 rounded-md">
+                          Page {op.source_page} du CA
                         </span>
                       )}
                     </div>
@@ -791,7 +872,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                     <strong className="text-slate-900 block">{formatReadableRecordAmount(op, 'planned_amount')}</strong>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 font-medium block">Ce qui a été réalisé financièrement</span>
+                    <span className="text-[10px] text-slate-500 font-medium block">Ce qui a été réalisé</span>
                     <strong className="text-slate-900 block">{formatReadableRecordAmount(op, 'executed_amount')}</strong>
                   </div>
                   <div>
@@ -808,7 +889,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                   </div>
                 </div>
 
-                {/* Ligne 2 : Bloc Rapprochement Marchés Publics DGMP */}
+                {/* Rapprochement Marchés Publics DGMP */}
                 <div className="p-3 rounded-xl border text-xs space-y-2 bg-slate-50/70 border-slate-200">
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <div className="flex items-center gap-2">
@@ -818,13 +899,13 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                       {match?.match_level === 'STRONG' && (
                         <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3 text-emerald-700" />
-                          Marché DGMP Retrouvé & Validé
+                          Marché DGMP Retrouvé
                         </span>
                       )}
                       {match?.match_level === 'PARTIAL' && (
                         <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1">
                           <AlertCircle className="w-3 h-3 text-amber-700" />
-                          Rapprochement DGMP Partiel
+                          Rapprochement Partiel
                         </span>
                       )}
                       {(!match || match.match_level === 'NONE') && (
@@ -842,98 +923,28 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                     )}
                   </div>
 
-                  {/* Détails du marché si retrouvé */}
                   {match && match.match_level !== 'NONE' && (
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-slate-200/80 text-[11px]">
                       <div>
                         <span className="text-slate-400 block font-medium">Contrat / Titulaire :</span>
-                        <strong className="text-slate-900 break-words sm:text-right">{match.contractor || 'Non spécifié'}</strong>
+                        <strong className="text-slate-900 break-words">{match.contractor || 'Non spécifié'}</strong>
                       </div>
                       <div>
                         <span className="text-slate-400 block font-medium">Montant attribué :</span>
-                        <strong className="text-slate-900 break-words sm:text-right">{formatReadableRecordAmount(match, 'award_amount')}</strong>
+                        <strong className="text-slate-900 break-words">{formatReadableRecordAmount(match, 'award_amount')}</strong>
                       </div>
                       <div>
                         <span className="text-slate-400 block font-medium">Date d'attribution :</span>
-                        <strong className="text-slate-900 break-words sm:text-right">{match.award_date || 'Exercice clos'}</strong>
+                        <strong className="text-slate-900 break-words">{match.award_date || 'Exercice clos'}</strong>
                       </div>
                     </div>
                   )}
 
-                  {/* Clarification citoyenne pour "NON RETROUVÉ" */}
                   {(!match || match.match_level === 'NONE') && (
-                    <div className="p-2.5 bg-white rounded-lg border border-slate-200 text-[11px] text-slate-600 leading-snug space-y-1">
-                      <p>
-                        <strong>Note républicaine d'équité :</strong> « Non retrouvé » ne signifie <strong>pas</strong> que le marché n'existe pas.
-                      </p>
-                      <p className="text-slate-500 italic">
-                        Les prestations exécutées en régie directe municipale, par bons de commande sous les seuils d'appel d'offres obligatoires ou par entente directe ne figurent pas systématiquement sur le portail centralisé de la DGMP.
-                      </p>
-                    </div>
-                  )}
-
-                  {match?.notes && (
-                    <p className="text-[11px] text-slate-500 italic pt-0.5">
-                      Précision : {match.notes}
+                    <p className="text-[11px] text-slate-500 italic">
+                      Les travaux exécutés en régie directe municipale ou les commandes sous les seuils d'appel d'offres obligatoires ne figurent pas systématiquement sur le portail centralisé de la DGMP.
                     </p>
                   )}
-                </div>
-
-                {/* Bloc Pédagogique d'Imputabilité : Ce que les documents prouvent vs ce qu'ils ne permettent pas d'affirmer */}
-                <div className="p-3 rounded-xl border border-slate-200 bg-white text-xs space-y-2">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-black uppercase text-emerald-800 tracking-wider flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      Ce que les documents prouvent
-                    </span>
-                    <p className="text-slate-700 text-[11px] leading-relaxed">
-                      {op.executed_amount === 0 && match ? (
-                        <>Attribution officielle du marché public DGMP (n° <strong>{match.tender_number}</strong>, {formatReadableRecordAmount(match, 'award_amount')}, titulaire <strong>{match.contractor}</strong>), mais <strong>0 FCFA (zéro FCFA) ordonnancé</strong> au Compte Administratif {op.fiscal_year} (opération reportée / non mandatée sur l'exercice clos).</>
-                      ) : match && match.match_level === 'STRONG' ? (
-                        <>Attribution du marché public (Avis <strong>{match.tender_number}</strong>, {formatReadableRecordAmount(match, 'award_amount')}, <strong>{match.contractor}</strong>) et ordonnancement effectif de <strong>{formatReadableRecordAmount(op, 'executed_amount')}</strong> retracé au Compte Administratif{op.source_page ? ` (page ${op.source_page})` : ''}.</>
-                      ) : (
-                        <>Ordonnancement financier de <strong>{formatReadableRecordAmount(op, 'executed_amount')}</strong> consigné dans le Compte Administratif officiel{op.source_page ? ` (page ${op.source_page})` : ''}.</>
-                      )}
-                    </p>
-                  </div>
-
-                  <div className="pt-1.5 border-t border-slate-100 space-y-1">
-                    <span className="text-[10px] font-black uppercase text-amber-800 tracking-wider flex items-center gap-1.5">
-                      <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
-                      Ce qu'ils ne permettent pas encore d'affirmer
-                    </span>
-                    <p className="text-slate-600 text-[11px] leading-relaxed italic">
-                      Un mandat financier ou un marché attribué ne prouvent jamais à eux seuls l'achèvement physique des travaux sur le terrain. De même, 0 FCFA ordonnancé sur un exercice ne signifie pas que le projet est abandonné.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Ligne 3 : Observation Citoyenne & Preuve de Terrain */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
-                      <Camera className="w-3 h-3 text-slate-500" />
-                      <span>{op.citizen_proofs_count || 0} observation(s) citoyenne(s) de terrain</span>
-                    </span>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      op.citizen_status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-800' :
-                      op.citizen_status === 'IN_PROGRESS' ? 'bg-blue-50 text-brand-blue' : 'bg-slate-100 text-slate-600'
-                    }`}>
-                      {op.citizen_status === 'COMPLETED' ? 'Chantier Livré' :
-                       op.citizen_status === 'IN_PROGRESS' ? 'En Cours d\'Exécution' : 'Programmé'}
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      setFieldContributionMsg(`Merci pour votre engagement civique ! L'équipe SuiviBudget CI a bien noté votre volonté de documenter l'opération "${op.title}". Vous pouvez envoyer vos photos géolocalisées ou documents à contact@suivibudget.ci.`);
-                      setTimeout(() => setFieldContributionMsg(null), 6000);
-                    }}
-                    className="inline-flex items-center gap-1.5 text-brand-blue hover:text-brand-blue-dark font-bold text-xs hover:underline cursor-pointer"
-                  >
-                    <Camera className="w-3.5 h-3.5 text-brand-orange" />
-                    <span>Transmettre une observation de terrain →</span>
-                  </button>
                 </div>
               </div>
             );
@@ -949,17 +960,78 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                   setSelectedSector('ALL');
                   setSelectedMatchLevel('ALL');
                 }}
-                className="text-xs text-brand-blue hover:underline font-bold"
+                className="text-xs text-brand-blue hover:underline font-bold cursor-pointer"
               >
                 Réinitialiser les filtres
               </button>
             </div>
           )}
         </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* RUBRIQUE 5 : SUIVI CITOYEN SUR LE TERRAIN                                  */}
+      {/* ========================================================================= */}
+      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-xl bg-orange-100 text-brand-orange font-black text-xs flex items-center justify-center">5</span>
+            <div>
+              <h4 className="text-base font-black text-slate-900 tracking-tight">
+                Rubrique 5 : Suivi citoyen sur le terrain
+              </h4>
+              <p className="text-xs text-slate-500">
+                Constat physique indépendant et participation citoyenne sur les réalisations effectives.
+              </p>
+            </div>
+          </div>
+          <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-orange-50 text-brand-orange border border-orange-200">
+            Preuves de Terrain
+          </span>
+        </div>
+
+        {/* Bannière du Principe Non Négociable : Réalisé financier != Réalisation physique */}
+        <div className="p-4 bg-amber-50/80 border border-amber-300 rounded-2xl text-xs text-amber-950 flex items-start gap-3">
+          <Scale className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <span className="font-black text-amber-900 text-sm block">
+              Principe républicain : Réalisé financier ≠ Réalisation physique
+            </span>
+            <p className="text-amber-800 leading-relaxed text-[11px]">
+              Une dépense ordonnancée ou un marché public attribué documente un engagement financier régulier, <strong>mais ne prouve jamais à elle seule la livraison physique effective des travaux sur le terrain</strong>. De même, 0 FCFA ordonnancé sur un exercice ne signifie pas l'abandon d'un chantier (report budgétaire légal).
+            </p>
+          </div>
+        </div>
+
+        {/* Synthèse des Observations Citoyennes & Bouton d'Action */}
+        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Camera className="w-4 h-4 text-brand-blue" />
+              <strong className="text-slate-900 text-xs">
+                {currentCA.operations.reduce((sum, op) => sum + (op.citizen_proofs_count || 0), 0)} observation(s) citoyenne(s) enregistrée(s)
+              </strong>
+            </div>
+            <p className="text-slate-600 text-[11px]">
+              Contribuez à documenter l'état réel des écoles, voiries, dispensaires et centres de santé de {institution.name}.
+            </p>
+          </div>
+
+          <button
+            onClick={() => {
+              setFieldContributionMsg(`Merci pour votre engagement civique ! Vous pouvez transmettre vos photos géolocalisées, vidéos et observations de terrain à l'équipe SuiviBudget CI via contact@suivibudget.ci.`);
+              setTimeout(() => setFieldContributionMsg(null), 7000);
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-orange hover:bg-orange-600 text-white font-bold text-xs shadow-xs transition-all cursor-pointer flex-shrink-0"
+          >
+            <Camera className="w-4 h-4 text-white" />
+            <span>Transmettre une observation ou une photo</span>
+          </button>
+        </div>
 
         {/* Message éphémère de contribution citoyenne */}
         {fieldContributionMsg && (
-          <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-xl text-xs text-emerald-900 flex items-start gap-2 animate-in fade-in duration-200">
+          <div className="p-3.5 bg-emerald-50 border border-emerald-300 rounded-2xl text-xs text-emerald-900 flex items-start gap-2.5 animate-in fade-in duration-200">
             <Check className="w-4 h-4 text-emerald-700 flex-shrink-0 mt-0.5" />
             <span>{fieldContributionMsg}</span>
           </div>
@@ -967,10 +1039,10 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
       </div>
 
       {/* ========================================================================= */}
-      {/* 4. DROIT DE RÉPONSE ET PRÉCISIONS DE L'INSTITUTION */}
+      {/* DROIT DE RÉPONSE INSTITUTIONNEL (SI PRÉSENT)                               */}
       {/* ========================================================================= */}
       {currentCA.institution_response && (
-        <div className="bg-white rounded-2xl p-5 border-l-4 border-l-brand-blue border-y border-r border-slate-200 shadow-2xs space-y-2.5">
+        <div className="bg-white rounded-3xl p-5 sm:p-7 border-l-4 border-l-brand-blue border-y border-r border-slate-200 shadow-2xs space-y-2.5">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4 text-brand-blue" />
@@ -999,27 +1071,118 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
       )}
 
       {/* ========================================================================= */}
-      {/* 5. TÉLÉCHARGEMENT & DEMANDE DE PIÈCES COMPLÉMENTAIRES (CAIDP) */}
+      {/* RUBRIQUE 6 : SOURCES ET VÉRIFICATION (CAIDP & INTÉGRITÉ)                  */}
       {/* ========================================================================= */}
-      <div className="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-        <div className="space-y-0.5">
-          <span className="font-black text-slate-900 block">
-            Accès aux Documents Budgétaires & Données Ouvertes
+      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-2xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-xl bg-slate-900 text-white font-black text-xs flex items-center justify-center">6</span>
+            <div>
+              <h4 className="text-base font-black text-slate-900 tracking-tight">
+                Rubrique 6 : Sources et vérification
+              </h4>
+              <p className="text-xs text-slate-500">
+                Traçabilité documentaire, intégrité cryptographique et droit d'accès à l'information publique.
+              </p>
+            </div>
+          </div>
+          <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+            Loi CAIDP n° 2013-867
           </span>
-          <p className="text-slate-600">
-            Téléchargez les données structurées ou demandez l'extrait certifié du procès-verbal de séance.
-          </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={() => onOpenDocRequest(`Procès-verbal et compte de gestion du Compte Administratif ${currentCA.fiscal_year} de ${institution.name}`)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
-          >
-            <FileText className="w-3.5 h-3.5 text-amber-300" />
-            <span>Demande de pièces complémentaires (Loi CAIDP)</span>
-          </button>
+        {/* Détails du document et de son contrôle */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <span className="text-[10px] font-bold uppercase text-slate-400 block">Document conservé</span>
+            <strong className="text-slate-900 block text-sm">{currentCA.source_document}</strong>
+            <p className="text-slate-500 text-[11px]">
+              Structure émettrice : {institution.name} ({institution.type === 'MAIRIE' ? 'Commune' : 'Conseil Régional'}).
+            </p>
+            <div className="text-[11px] text-slate-600 pt-1">
+              Statut du contrôle : <strong className="text-emerald-700">Document officiel vérifié</strong>
+            </div>
+          </div>
+
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <span className="text-[10px] font-bold uppercase text-slate-400 block">Pages exploitées du document</span>
+            <strong className="text-slate-900 block text-sm">
+              {currentCA.source_page ? `Page ${currentCA.source_page}` : 'Sections de synthèse et état des investissements'}
+            </strong>
+            <p className="text-slate-500 text-[11px]">
+              Date de délibération : {currentCA.approval_date || 'Non spécifiée'} — Visa préfectoral : {currentCA.prefecture_visa_date || 'Non spécifié'}.
+            </p>
+          </div>
         </div>
+
+        {/* Empreinte SHA-256 */}
+        {sha256 && (
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 min-w-0">
+              <Hash className="w-4 h-4 text-slate-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <span className="text-[10px] text-slate-400 uppercase font-bold block">Empreinte cryptographique du fichier source conservé</span>
+                <span className="font-mono text-slate-700 text-xs truncate block" title={sha256}>
+                  SHA-256 : {sha256.slice(0, 16)}...{sha256.slice(-12)}
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handleCopyHash(sha256)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-colors cursor-pointer self-start sm:self-auto flex-shrink-0"
+              title="Copier l'empreinte SHA-256 complète pour vérification"
+            >
+              {copiedSha256 ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="text-emerald-700 font-bold">Copiée !</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Copier le hash</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Mention légale CAIDP & Actions */}
+        <div className="p-4 bg-slate-900 text-white rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+          <div className="space-y-1 max-w-xl">
+            <span className="text-amber-300 text-[10px] font-black uppercase tracking-wider block">
+              Droit d'accès légal aux documents publics (Loi n° 2013-867)
+            </span>
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              En application de la loi n° 2013-867 du 23 décembre 2013 relative à l'accès à l'information d'intérêt public (CAIDP), tout citoyen peut demander communication des délibérations, budgets primitifs et comptes administratifs certifiés des collectivités ivoiriennes.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
+            {docUrl && isSafeUrl(docUrl) && (
+              <a
+                href={docUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 text-xs font-bold transition-all shadow-xs cursor-pointer"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Consulter le document</span>
+              </a>
+            )}
+
+            <button
+              onClick={() => onOpenDocRequest(`Compte Administratif ${currentCA.fiscal_year} de ${institution.name}`)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-brand-orange hover:bg-orange-600 text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Demande CAIDP</span>
+            </button>
+          </div>
+        </div>
+
       </div>
 
       {/* Modal explicative pédagogique */}

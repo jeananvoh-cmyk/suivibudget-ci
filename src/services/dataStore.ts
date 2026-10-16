@@ -494,6 +494,7 @@ class DataStore {
   private caidpLogs: CaidpRequestEvent[] = [];
   private subscribers: NewsletterSubscriber[] = [];
   private settings: SiteSettings = { ...DEFAULT_SETTINGS };
+  private settingsRevision?: number;
   private authState: AuthState = {
     isAuthenticated: false,
     email: '',

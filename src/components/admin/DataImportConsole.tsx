@@ -7,7 +7,7 @@ import { ADMINISTRATIVE_ACCOUNTS_DATA } from '../../data/administrativeAccountsD
 import { listImports, parseImportInput, reviewImport, runImport, type ImportReport, type ImportRow } from '../../services/dataImportService';
 import { formatQualifiedFCFA, formatFCFA } from '../../utils/formatters';
 import { isSafeUrl } from '../../utils/security';
-import type { Institution } from '../../types';
+import type { Institution, PublicDocument } from '../../types';
 import type {
   DocumentIngestionMetadata,
   ProposedFinancialValue,
@@ -32,7 +32,12 @@ import {
   Edit3
 } from 'lucide-react';
 
-export function DataImportConsole({ role }: { role: string }) {
+export interface DataImportConsoleProps {
+  role: string;
+  initialDocument?: PublicDocument;
+}
+
+export function DataImportConsole({ role, initialDocument }: DataImportConsoleProps) {
   const [sessionEnded, setSessionEnded] = useState(false);
   const allowed = !sessionEnded && (role === 'ADMIN' || role === 'DATA_MANAGER');
 
@@ -67,20 +72,43 @@ export function DataImportConsole({ role }: { role: string }) {
 
   // Guided Assistant state
   const institutions = useMemo(() => dataStore.getInstitutions(true), []);
-  const [selectedInstitutionId, setSelectedInstitutionId] = useState<string>('inst-com-tiassale');
+  const [selectedInstitutionId, setSelectedInstitutionId] = useState<string>(
+    initialDocument?.institution_id || 'inst-com-tiassale'
+  );
   const [institutionFilter, setInstitutionFilter] = useState<string>('');
-  const [fiscalYear, setFiscalYear] = useState<number>(2024);
-  const [documentType, setDocumentType] = useState<BudgetDocumentCategory>('BUDGET_MODIFICATIF');
-  const [sourceName, setSourceName] = useState<string>('');
-  const [sourceReference, setSourceReference] = useState<string>('');
-  const [sourceDate, setSourceDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [adoptionDate, setAdoptionDate] = useState<string>('');
+  const [fiscalYear, setFiscalYear] = useState<number>(
+    initialDocument?.fiscal_year || initialDocument?.year || 2024
+  );
+  const [documentType, setDocumentType] = useState<BudgetDocumentCategory>(
+    (initialDocument?.document_type as BudgetDocumentCategory) || (initialDocument?.category as BudgetDocumentCategory) || 'COMPTE_ADMINISTRATIF'
+  );
+  const [sourceName, setSourceName] = useState<string>(
+    initialDocument?.source_name || (initialDocument?.institution_name ? `Mairie / Conseil de ${initialDocument.institution_name}` : '')
+  );
+  const [sourceReference, setSourceReference] = useState<string>(initialDocument?.approval_reference || '');
+  const [sourceDate, setSourceDate] = useState<string>(
+    initialDocument?.approval_date || initialDocument?.adoption_date || new Date().toISOString().split('T')[0]
+  );
+  const [adoptionDate, setAdoptionDate] = useState<string>(initialDocument?.adoption_date || '');
   const [sourceDateKind, setSourceDateKind] = useState<'PUBLISHED' | 'ACCESSED' | 'RECORDED'>('RECORDED');
-  const [sourceUrl, setSourceUrl] = useState<string>('');
-  const [sourcePage, setSourcePage] = useState<number | undefined>(undefined);
+  const [sourceUrl, setSourceUrl] = useState<string>(initialDocument?.file_url || '');
+  const [sourcePage, setSourcePage] = useState<number | undefined>(initialDocument?.page_count ? 1 : undefined);
   const [evidenceLevel, setEvidenceLevel] = useState<'OFFICIAL_DOCUMENT' | 'OFFICIAL_INSTITUTION' | 'AIP_VERIFIED' | 'SECONDARY_TO_CORROBORATE'>('OFFICIAL_DOCUMENT');
   const [amountSemantics, setAmountSemantics] = useState<'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN'>('DELTA');
   const [notes, setNotes] = useState<string>('');
+
+  useEffect(() => {
+    if (!initialDocument) return;
+    if (initialDocument.institution_id) setSelectedInstitutionId(initialDocument.institution_id);
+    if (initialDocument.fiscal_year || initialDocument.year) setFiscalYear(initialDocument.fiscal_year || initialDocument.year);
+    if (initialDocument.document_type || initialDocument.category) {
+      setDocumentType((initialDocument.document_type as BudgetDocumentCategory) || (initialDocument.category as BudgetDocumentCategory) || 'COMPTE_ADMINISTRATIF');
+    }
+    if (initialDocument.source_name) setSourceName(initialDocument.source_name);
+    if (initialDocument.approval_reference) setSourceReference(initialDocument.approval_reference);
+    if (initialDocument.approval_date || initialDocument.adoption_date) setSourceDate(initialDocument.approval_date || initialDocument.adoption_date || '');
+    if (initialDocument.file_url) setSourceUrl(initialDocument.file_url);
+  }, [initialDocument]);
 
   // Proposed structured values
   const [proposedValues, setProposedValues] = useState<ProposedFinancialValue[]>(() =>

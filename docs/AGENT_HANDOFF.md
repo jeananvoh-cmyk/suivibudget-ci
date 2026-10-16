@@ -1,3 +1,21 @@
+## 16 octobre 2026 — PR #63 : Généralisation de l'exploitation des comptes administratifs & 6 rubriques citoyennes
+
+- **Branche** : `codex/admin-final-integration`.
+- **Statut PR #63** : Prête pour livraison complète et revue.
+- **Garde-fous respectés** : `REMOTE_SUPABASE_WRITES = 0` (zéro écriture sur la base distante). Aucun faux montant (BP inconnu affiché comme "Non documenté au CA", jamais "0 FCFA").
+- **Étape 1 (Documents & Téléchargements)** : "Source Républicaine" remplacée par la structure émettrice réelle (DGBF, Mairie, etc.). "Extraction à vérifier" remplacée par "Document officiel vérifié" / "Document officiel publié". Compteur trompeur supprimé au profit de badges neutres ("Accès direct", "Accès public"). Sécurisation du téléchargement contre les 404.
+- **Étape 2 (Pagination & Intégrité)** : Détection automatique du nombre de pages du PDF (`extractPdfPageCountFromBuffer`) avec badge UI et possibilité d'ajustement manuel par l'administrateur (`page_count_source: 'AUTOMATIC' | 'MANUAL'`). Calcul d'empreinte SHA-256 avec bouton de copie.
+- **Étape 3 & 4 (Exploitation Financière & Console d'Import)** : Passerelle complète "Document → Exploiter les données financières → Saisie assistée / Template pré-rempli → Validation humaine explicite → Publication". Préservation du stade comptable réel (`ORDONNANCE`).
+- **Étape 4 (Fiche Financière Citoyenne — 6 Rubriques)** :
+  1. Rubrique 1 : Les moyens financiers (BP vs Prévisions définitives, ajustements, note explicative, pas de 0 FCFA trompeur).
+  2. Rubrique 2 : Les recettes et les dépenses (recettes recouvrées, dépenses exécutées au stade ordonnancé, taux, excédent/déficit, reports, résultat cumulé).
+  3. Rubrique 3 : Fonctionnement et investissement (salaires/fonctionnement vs équipements, jauges et parts en %).
+  4. Rubrique 4 : Opérations et investissements identifiés (chantiers avec prévu/réalisé, rapprochement DGMP, attributaires, pages sources du CA).
+  5. Rubrique 5 : Suivi citoyen sur le terrain (principe républicain `Réalisé financier ≠ Réalisation physique`, bouton de contribution photo/terrain).
+  6. Rubrique 6 : Sources et vérification (document officiel, structure émettrice, hash SHA-256 avec copie, pages exploitées, visa/date, droit d'accès Loi CAIDP n° 2013-867).
+- **Validation** : 879/879 tests Vitest PASS (66 suites), build TypeScript & Vite `npm run build` PASS (exit code 0).
+- **NEXT_EXECUTABLE_TASK** : Revue finale par l'équipe, vérification de la preview Vercel sur PR #63, et fusion sur `master`.
+
 ## 14 octobre 2026 — Intégration finale Codex / PR #62, contrat 3
 
 - Branche indépendante : codex/admin-final-integration. Parents : PR62 db96ed782e17b097a9ef398b682fb066509e791c et Codex 671bafcf0b787a9de88cd7e39a2324b5a6697613. Master relu : a1ec60ecde6d42c4063b3ba4f854eb0dc43a898d.

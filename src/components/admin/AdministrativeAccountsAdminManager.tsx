@@ -47,6 +47,7 @@ interface AdministrativeAccountsAdminManagerProps {
   onShowToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
   initialYear?: number;
   initialSearch?: string;
+  onExploitFinancials?: (doc: PublicDocument) => void;
 }
 
 const AVAILABLE_YEARS = [2024, 2025, 2026, 2027];
@@ -55,6 +56,7 @@ export const AdministrativeAccountsAdminManager: React.FC<AdministrativeAccounts
   onShowToast,
   initialYear = 2025,
   initialSearch = '',
+  onExploitFinancials,
 }) => {
   const [selectedYear, setSelectedYear] = useState<number>(initialYear);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
@@ -641,17 +643,29 @@ export const AdministrativeAccountsAdminManager: React.FC<AdministrativeAccounts
                             <>
                               <button
                                 onClick={() => handleOpenExamine(doc!)}
-                                className="px-2.5 py-1.5 rounded-lg bg-blue-50 text-brand-blue hover:bg-blue-100 text-xs font-bold transition-colors flex items-center gap-1"
+                                className="px-2.5 py-1.5 rounded-lg bg-blue-50 text-brand-blue hover:bg-blue-100 text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
                                 title="Examiner et valider le document"
                               >
                                 <Eye className="w-3.5 h-3.5" />
                                 <span>Examiner</span>
                               </button>
 
+                              {onExploitFinancials && (
+                                <button
+                                  type="button"
+                                  onClick={() => onExploitFinancials(doc!)}
+                                  className="px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 hover:bg-emerald-100 text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
+                                  title="Exploiter les données financières du document"
+                                >
+                                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span className="hidden xl:inline">Données</span>
+                                </button>
+                              )}
+
                               <button
                                 type="button"
                                 onClick={() => void handleOpenPDF(doc!)}
-                                className="p-1.5 rounded-lg text-slate-500 hover:text-brand-blue hover:bg-slate-100"
+                                className="p-1.5 rounded-lg text-slate-500 hover:text-brand-blue hover:bg-slate-100 cursor-pointer"
                                 title="Ouvrir le PDF"
                                 aria-label={`Ouvrir le PDF du compte administratif de ${row.institution_name}`}
                               >
@@ -758,6 +772,7 @@ export const AdministrativeAccountsAdminManager: React.FC<AdministrativeAccounts
           }
         }}
         onShowToast={onShowToast}
+        onExploitFinancials={onExploitFinancials}
       />
     </div>
   );

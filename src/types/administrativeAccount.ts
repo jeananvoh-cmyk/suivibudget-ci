@@ -111,9 +111,13 @@ export interface AdministrativeAccount {
   investment_expenditure_engaged?: number;
   
   // Totaux consolidés
+  initial_budget_total?: number | null; // Budget primitif initial, uniquement s'il est documenté explicitement
   total_planned: number | null;         // Total prévu (Fonctionnement + Investissement)
   total_realized: number | null;        // Total exécuté
   surplus_or_deficit?: number;   // Uniquement si le document source qualifie explicitement ce montant ainsi
+  previous_result_reported?: number; // Report à nouveau antérieur
+  cumulative_result?: number;    // Résultat cumulé de clôture
+  accounting_stage?: 'ORDONNANCE' | 'PAYE' | 'ENGAGE' | 'LIQUIDE'; // Stade comptable attesté
   total_revenue_collected?: number;
   total_expenditure_engaged?: number;
   arithmetic_difference?: number; // Différence arithmétique, ne jamais présenter automatiquement comme bénéfice/excédent
@@ -122,6 +126,7 @@ export interface AdministrativeAccount {
   // Traçabilité & Sources
   source_document: string;       // Titre du document officiel
   source_document_id?: string;
+  source_document_sha256?: string;
   source_url?: string;           // Lien de consultation ou téléchargement
   source_page?: number;
   approval_date?: string;        // Date de délibération du Conseil

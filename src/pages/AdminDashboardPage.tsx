@@ -2,7 +2,7 @@ import { adminErrorMessage, readStaffOperators, requireAdminPersistence } from '
 import { matchesSmartSearch, normalizeSearchText } from '../utils/searchHelpers';
 import { AuthSecurityService } from '../services/authSecurity';
 import React, { useState, useMemo, useEffect } from 'react';
-import { BudgetProject, ProjectStatus, Institution, NewsArticle, SiteSettings, CitizenProof, PrimitiveBudgetInfo } from '../types';
+import { BudgetProject, ProjectStatus, Institution, NewsArticle, SiteSettings, CitizenProof, PrimitiveBudgetInfo, PublicDocument } from '../types';
 import { dataStore } from '../services/dataStore';
 import { sanitizeCsvCell } from '../utils/security';
 import { formatFCFA, formatDateFR, getStatusConfig, formatAmountInWords, calculateContractualElapsedPercentage } from '../utils/formatters';
@@ -140,6 +140,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [caInitialYear, setCaInitialYear] = useState(2025);
   const [caInitialSearch, setCaInitialSearch] = useState('');
   const [onlyAnomalyProjects, setOnlyAnomalyProjects] = useState(false);
+  const [selectedDocForDataImport, setSelectedDocForDataImport] = useState<PublicDocument | undefined>(undefined);
 
   const handleActionHeaderNavigate = (target: string, filter?: Record<string, string> | string) => {
     if (target === 'moderation') {
@@ -1464,8 +1465,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       {/* ========================================================================= */}
       {/* TAB -1: OPERATIONAL WORK QUEUE */}
       {/* ========================================================================= */}
-      {(auth.role === 'ADMIN' || auth.role === 'DATA_MANAGER') && <button className="my-4 min-h-[44px] rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-blue" onClick={() => setAdminTab('data_import')}>Console données</button>}
-      {adminTab === 'data_import' && (auth.role === 'ADMIN' || auth.role === 'DATA_MANAGER') && <DataImportConsole role={auth.role} />}
+      {(auth.role === 'ADMIN' || auth.role === 'DATA_MANAGER') && <button className="my-4 min-h-[44px] rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-blue cursor-pointer" onClick={() => setAdminTab('data_import')}>Console données</button>}
+      {adminTab === 'data_import' && (auth.role === 'ADMIN' || auth.role === 'DATA_MANAGER') && (
+        <DataImportConsole role={auth.role} initialDocument={selectedDocForDataImport} />
+      )}
       {adminTab === 'work_queue' && (
         <AdminWorkQueue
           currentUserEmail={auth.email}
@@ -1501,7 +1504,15 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       {/* TAB 0.6: COMPTES ADMINISTRATIFS (CA 232) & PILOTAGE */}
       {/* ========================================================================= */}
       {adminTab === 'comptes_administratifs' && (
-        <AdministrativeAccountsAdminManager onShowToast={showToast} initialYear={caInitialYear} initialSearch={caInitialSearch} />
+        <AdministrativeAccountsAdminManager
+          onShowToast={showToast}
+          initialYear={caInitialYear}
+          initialSearch={caInitialSearch}
+          onExploitFinancials={(doc) => {
+            setSelectedDocForDataImport(doc);
+            setAdminTab('data_import');
+          }}
+        />
       )}
 
       {/* ========================================================================= */}

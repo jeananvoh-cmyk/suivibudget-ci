@@ -22,6 +22,58 @@ export async function calculateFileSha256(file: File | Blob | ArrayBuffer): Prom
 }
 
 /**
+ * Extraction automatique du nombre de pages d'un fichier PDF (ArrayBuffer ou Uint8Array)
+ * Analyse les dictionnaires /Pages et objets /Page sans dépendance externe lourde.
+ */
+export function extractPdfPageCountFromBuffer(buffer: ArrayBuffer | Uint8Array): number | null {
+  try {
+    const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+    if (bytes.length < 5) return null;
+    const header = String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3], bytes[4]);
+    if (!header.startsWith('%PDF-')) return null;
+
+    const text = new TextDecoder('latin1').decode(bytes);
+
+    // Méthode 1 : Dictionnaire /Pages avec /Count N
+    const pageMatches = [...text.matchAll(/\/Type\s*\/Pages[\s\S]*?\/Count\s+(\d+)/g)];
+    if (pageMatches.length > 0) {
+      const counts = pageMatches.map(m => parseInt(m[1], 10)).filter(n => !isNaN(n) && n > 0);
+      if (counts.length > 0) {
+        return Math.max(...counts);
+      }
+    }
+
+    // Méthode 1 bis : /Count N avant /Type /Pages
+    const reverseMatches = [...text.matchAll(/\/Count\s+(\d+)[\s\S]*?\/Type\s*\/Pages/g)];
+    if (reverseMatches.length > 0) {
+      const counts = reverseMatches.map(m => parseInt(m[1], 10)).filter(n => !isNaN(n) && n > 0);
+      if (counts.length > 0) {
+        return Math.max(...counts);
+      }
+    }
+
+    // Méthode 2 : Décompte des objets /Type /Page individuels (hors /Pages)
+    const singlePages = text.match(/\/Type\s*\/Page(?!\s*s)\b/g);
+    if (singlePages && singlePages.length > 0) {
+      return singlePages.length;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Calcule le nombre de pages d'un fichier PDF (File, Blob ou ArrayBuffer)
+ */
+export async function extractPdfPageCount(file: File | Blob | ArrayBuffer): Promise<number | null> {
+  const buffer = file instanceof ArrayBuffer ? file : await file.arrayBuffer();
+  return extractPdfPageCountFromBuffer(buffer);
+}
+
+
+/**
  * Normalisation d'une chaîne pour comparaison insensible aux accents et caractères spéciaux
  */
 export function normalizeSearchString(text: string): string {
