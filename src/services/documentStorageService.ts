@@ -541,6 +541,26 @@ export class DocumentStorageService {
 /**
  * Ouvre ou télécharge de manière sécurisée un document public (via URL signée public-document-url ou file_url)
  */
+export async function downloadPublicDocument(doc: PublicDocument, partId?: string): Promise<void> {
+  if (doc.http_status === 404) throw new Error('Document indisponible.');
+  if (!doc.storage_path && !doc.is_multipart) {
+    if (!/^https:\/\//i.test(doc.file_url)) throw new Error('Source documentaire indisponible.');
+    window.open(doc.file_url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  if (!isSupabaseConfigured()) throw new Error('Service documentaire indisponible.');
+  const {data,error}=await supabase.functions.invoke('public-document-url',{
+    body:{document_id:doc.id,action:'download',request_id:crypto.randomUUID(),...(partId ? {part_id:partId} : {})},
+  });
+  if (error || !(data instanceof Blob) || !data.size) throw new Error('Téléchargement indisponible. Veuillez réessayer.');
+  const url=URL.createObjectURL(data);
+  const link=document.createElement('a');
+  link.href=url;
+  link.download=doc.document_parts?.find(part=>part.id===partId)?.file_name || doc.file_name || 'document.pdf';
+  link.click();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+
 export async function openPublicDocument(doc: PublicDocument, partId?: string): Promise<boolean> {
   if (!doc || doc.http_status === 404) return false;
   let targetUrl = doc.file_url;

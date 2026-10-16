@@ -23,6 +23,7 @@ import { matchesSmartSearch } from '../utils/searchHelpers';
 import { publicDocumentMetadata } from '../review/domain/documents';
 import { openDataCsv, openDataJson, auditedObservationsFromCatalog } from '../review/domain/history';
 import { getReviewSourceDocuments } from '../data/officialPublicDocumentsCatalog';
+import { downloadPublicDocument } from '../services/documentStorageService';
 
 interface DocumentsPageProps {
   onNavigateToCaidp?: () => void;
@@ -72,6 +73,9 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedYear, setSelectedYear] = useState<string>('ALL');
   const [copiedHashId, setCopiedHashId] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [counterAvailable, setCounterAvailable] = useState(false);
 
   const [documents, setDocuments] = useState<PublicDocument[]>(() => 
     dataStore.getDocuments().filter(document => document.status === 'PUBLISHED')
@@ -82,6 +86,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
       setDocuments(dataStore.getDocuments().filter(document => document.status === 'PUBLISHED'))
     );
     if (isSupabaseConfigured()) {
+      void supabase.rpc('document_delivery_metric').then(({data,error})=>setCounterAvailable(!error && data==='SERVER_FILE_DELIVERY_V1'));
       void supabase
         .from('public_documents')
         .select('*')
@@ -150,22 +155,16 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
   }, [documents, selectedCategory, selectedYear, searchQuery]);
 
   const handleDownload = async (doc: PublicDocument, partId?: string) => {
-    if (doc.http_status === 404) return;
-    let targetUrl = doc.file_url;
-    if ((doc.storage_path || doc.is_multipart) && isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase.functions.invoke('public-document-url', {
-          body: { document_id: doc.id, ...(partId ? {part_id:partId} : {}) },
-        });
-        if (error || !data?.url) return;
-        targetUrl = data.url;
-      } catch {
-        return;
-      }
+    setDownloadingId(doc.id);
+    setDownloadError(null);
+    try {
+      await downloadPublicDocument(doc,partId);
+      if (doc.storage_path || doc.is_multipart) await dataStore.refreshDocumentDownloads(doc.id);
+    } catch (error) {
+      setDownloadError(error instanceof Error ? error.message : 'Téléchargement indisponible.');
+    } finally {
+      setDownloadingId(null);
     }
-    if (!targetUrl) return;
-    window.open(targetUrl, '_blank', 'noopener,noreferrer');
-    dataStore.incrementDocumentDownloads(doc.id);
   };
 
   const handleCopySha256 = (docId: string, hash: string) => {
@@ -237,6 +236,8 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
+      {downloadError && <p role="alert" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">{downloadError}</p>}
+      <p className="text-xs text-slate-600">Le compteur mesure les fichiers délivrés par notre serveur, sans certifier leur réception complète. Les consultations et liens externes ne sont pas comptés.</p>
       
       {/* ========================================================================= */}
       {/* 1. REPUBLICAN HERO BANNER                                                 */}
@@ -266,11 +267,11 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
               </div>
               <div className="w-px h-8 bg-white/20"></div>
               <div>
-                <span className="text-[10px] text-slate-300 block font-bold uppercase tracking-wider">Téléchargements</span>
+                <span className="text-[10px] text-slate-300 block font-bold uppercase tracking-wider">Fichiers délivrés</span>
                 <span className="text-lg sm:text-2xl font-black text-brand-orange">
-                  {documents.reduce((sum, d) => sum + (d.downloads_count || 0), 0) > 0
-                    ? documents.reduce((sum, d) => sum + (d.downloads_count || 0), 0)
-                    : 'Accès public'}
+                  {counterAvailable && documents.some(d => d.storage_path || d.is_multipart)
+                    ? documents.filter(d => d.storage_path || d.is_multipart).reduce((sum, d) => sum + (d.downloads_count || 0), 0)
+                    : 'Non mesuré'}
                 </span>
               </div>
               <div className="w-px h-8 bg-white/20 hidden sm:block"></div>
@@ -554,11 +555,9 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                     <span className="mx-1">•</span>
                     <span>{doc.file_size || (doc.page_count ? `${doc.page_count} pages` : 'PDF')}</span>
                     <div className="text-[10px] text-slate-400 mt-0.5">
-                      {doc.downloads_count && doc.downloads_count > 1 
-                        ? `${doc.downloads_count} téléchargements` 
-                        : doc.downloads_count === 1
-                        ? '1 téléchargement'
-                        : 'Accès direct'}
+                      {doc.storage_path || doc.is_multipart
+                        ? counterAvailable && Number.isSafeInteger(doc.downloads_count) ? `${doc.downloads_count} fichier(s) délivré(s) par le serveur` : 'Comptage indisponible'
+                        : 'Lien externe · téléchargement non mesuré'}
                     </div>
                   </div>
 
@@ -581,6 +580,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                           <button
                             key={part.id || part.part_number}
                             onClick={() => void handleDownload(doc, part.id)}
+                            disabled={downloadingId===doc.id}
                             className="rounded-xl bg-brand-blue px-3 py-2 text-xs font-bold text-white hover:bg-blue-700 focus-visible:outline-brand-blue cursor-pointer"
                           >
                             Fascicule {part.part_number}
@@ -589,7 +589,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                       </div>
                     ) : (
                       <button
-                        disabled={doc.http_status === 404 || (!doc.file_url && !doc.storage_path)}
+                        disabled={downloadingId===doc.id || doc.http_status === 404 || (!doc.file_url && !doc.storage_path)}
                         onClick={() => handleDownload(doc)}
                         className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition-all ${
                           doc.http_status === 404 || (!doc.file_url && !doc.storage_path)

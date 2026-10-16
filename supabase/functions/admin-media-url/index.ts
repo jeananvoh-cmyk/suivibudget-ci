@@ -31,7 +31,7 @@ Deno.serve(async(req:Request)=>{
       }
       if(!['ADMIN','DATA_MANAGER'].includes(profile.data.role) || typeof id!=='string' || id.length>200 || Object.keys(body).some(key=>!['action','id'].includes(key))) return reply(403,{error:'Contrôle documentaire non autorisé'});
       const {data:document,error}=await client.from('public_documents').select('*').eq('id',id).maybeSingle();
-      if(error || !document || !['UPLOADED','TO_VERIFY'].includes(document.status)) return reply(404,{error:'Document à contrôler non accessible'});
+      if(error || !document || (!['UPLOADED','TO_VERIFY'].includes(document.status) && !(['VERIFIED','PUBLISHED'].includes(document.status) && document.checksum_status==='DECLARED'))) return reply(404,{error:'Document à contrôler non accessible'});
       normalizeOcrStatus(document.ocr_status,document.is_scanned,document.has_text_layer);
       if(document.is_multipart && await calculateManifestSha256(document.document_parts)!==document.manifest_sha256) return reply(409,{error:'Manifeste incohérent'});
       const parts=document.is_multipart ? document.document_parts : [document];

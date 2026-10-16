@@ -626,7 +626,7 @@ class DataStore {
               merged.push({
                 ...localDoc,
                 ...remoteDoc,
-                downloads_count: Math.max(remoteDoc.downloads_count || 0, localDoc.downloads_count || 0),
+                downloads_count: remoteDoc.downloads_count,
               });
               remoteMap.delete(localDoc.id);
             } else {
@@ -1260,10 +1260,10 @@ class DataStore {
     return true;
   }
 
-  public incrementDocumentDownloads(id: string): void {
-    const doc = this.documents.find(d => d.id === id);
-    if (!doc) return;
-    doc.downloads_count = (doc.downloads_count || 0) + 1;
+  public async refreshDocumentDownloads(id: string): Promise<void> {
+    const {data,error}=await supabase.from('public_documents').select('downloads_count').eq('id',id).eq('status','PUBLISHED').maybeSingle();
+    if (error || !data || !Number.isSafeInteger(data.downloads_count)) throw new Error('Fichier reçu ; actualisation du compteur indisponible.');
+    this.documents=this.documents.map(doc=>doc.id===id ? {...doc,downloads_count:data.downloads_count} : doc);
     this.notify();
   }
 

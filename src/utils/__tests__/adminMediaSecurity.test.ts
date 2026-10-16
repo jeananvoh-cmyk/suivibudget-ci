@@ -16,6 +16,7 @@ const request=(body:object,identity?:string)=>new Request('https://isolated.exam
 
 beforeAll(async()=>{
   fixture=await createAdminPersistenceFixture();
+  await fixture.db.exec(readFileSync('supabase/migrations/20261016090000_document_delivery_counter.sql','utf8'));
   api.getUser.mockResolvedValue({data:{user:{id:fixture.admin}},error:null});
   const source=readFileSync('supabase/functions/admin-media-url/index.ts','utf8').replace(/^import .*;\r?\n/gm,'');
   const js=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
@@ -27,6 +28,15 @@ beforeAll(async()=>{
         return {data:data.rows[0] ?? null,error:null};
       }};return builder;
     },storage:{from:(bucket:string)=>({createSignedUrl:signed,download:async(path:string)=>({data:blobs.get(`${bucket}/${path}`) ?? null,error:null})})},rpc:async(_name:string,args:Record<string,unknown>)=>{
+      if(_name==='record_document_delivery') {
+        try {
+          const data=await fixture.db.transaction(async tx=>{
+            await tx.exec('set local role service_role');
+            return (await tx.query<{count:number}>('select public.record_document_delivery($1,$2,$3,$4,$5) count',[args.p_document_id,args.p_request_id,args.p_storage_path,args.p_checksum,args.p_client_hash])).rows[0].count;
+          });
+          return {data,error:null};
+        } catch(error) {return {data:null,error};}
+      }
       try {await fixture.db.query('select public.admin_confirm_document_integrity($1,$2,$3,$4::jsonb)',[args.p_id,args.p_revision,args.p_actor,JSON.stringify(args.p_files)]);return {data:null,error:null};}
       catch(error){return {data:null,error};}
     }};
@@ -229,5 +239,53 @@ describe('Médias administratifs privés, checksum et signatures limitées aux l
     const checked=await fixture.session(fixture.manager,()=>fixture.mutate('public_documents','csv-document',1,{status:'VERIFIED'},undefined,'Contrôle humain du CSV original et de la source'),true);
     expect(checked.checksum_status).toBe('COMPUTED');expect(checked.status).toBe('VERIFIED');
     expect((await fixture.db.query("select total_amount from public.local_budgets where id='isolated-bp'")).rows).toEqual([{total_amount:300}]);
+  });
+
+  it('délivre les octets contrôlés et persiste un compteur atomique sans compter les consultations ni les échecs',async()=>{
+    const row=(await fixture.db.query<{revision:number}>("select revision from public.public_documents where id='csv-document'")).rows[0];
+    await fixture.session(fixture.manager,()=>fixture.mutate('public_documents','csv-document',row.revision,{status:'PUBLISHED'},undefined,'Publication humaine du fichier isolé'),true);
+    const read=async()=> (await fixture.db.query<{downloads_count:number;revision:number}>("select downloads_count,revision from public.public_documents where id='csv-document'")).rows[0];
+    const before=await read();
+    const body={document_id:'csv-document',action:'download',request_id:crypto.randomUUID()};
+    expect((await publicHandler(request({document_id:'csv-document'}))).status).toBe(200);
+    expect(await read()).toEqual(before);
+    const key='public_documents/isolated/data.csv',original=blobs.get(key)!;
+    blobs.delete(key);expect((await publicHandler(request(body))).status).toBe(404);blobs.set(key,new Blob(['altéré']));
+    expect((await publicHandler(request(body))).status).toBe(404);blobs.set(key,original);
+    expect((await publicHandler(request({...body,document_id:'cocody-reference'}))).status).toBe(404);
+    expect((await publicHandler(request({...body,storage_path:'forged.pdf'}))).status).toBe(400);
+    expect(await read()).toEqual(before);
+    const delivered=await publicHandler(request(body));
+    expect(delivered.status).toBe(200);
+    expect(await delivered.text()).toBe(await original.text());
+    expect(Number(delivered.headers.get('X-Document-Delivery-Count'))).toBe(before.downloads_count+1);
+    expect((await publicHandler(request(body))).status).toBe(200);
+    expect((await read()).downloads_count).toBe(before.downloads_count+1);
+    const responses=await Promise.all(Array.from({length:12},()=>publicHandler(request({...body,request_id:crypto.randomUUID()}))));
+    expect(responses.map(r=>r.status)).toEqual(Array(12).fill(200));
+    expect(await read()).toEqual({...before,downloads_count:before.downloads_count+13});
+    const receipts=await fixture.db.query<{count:number}>("select count(*)::int count from private.document_delivery_receipts where document_id='csv-document'");
+    expect(receipts.rows[0].count).toBe(13);
+    for(const identity of [null,fixture.citizen,fixture.moderator,fixture.manager,fixture.admin]) {
+      await expect(fixture.session(identity,()=>fixture.db.exec("update public.public_documents set downloads_count=900 where id='csv-document'"))).rejects.toThrow(/permission/);
+      await expect(fixture.session(identity,()=>fixture.db.query('select public.record_document_delivery($1,$2,$3,$4,$5)',[body.document_id,crypto.randomUUID(),'isolated/data.csv','a'.repeat(64),'b'.repeat(64)]))).rejects.toThrow(/permission/);
+    }
+    for(let i=0;i<7;i++) expect((await publicHandler(request({...body,request_id:crypto.randomUUID()}))).status).toBe(200);
+    expect((await publicHandler(request({...body,request_id:crypto.randomUUID()}))).status).toBe(503);
+    expect((await read()).downloads_count).toBe(before.downloads_count+20);
+  });
+
+  it('ne comptabilise ni les liens externes ni une réponse annulée avant la remise',async()=>{
+    await fixture.session(fixture.manager,()=>fixture.mutate('public_documents','external-delivery',null,{title:'Source externe',category:'ETUDE_TECHNIQUE',institution_name:'Fictive',year:2025,file_url:'https://example.test/source.pdf',file_name:'source.pdf',source_name:'Source isolée'}),true);
+    await fixture.session(fixture.manager,()=>fixture.mutate('public_documents','external-delivery',1,{status:'VERIFIED'},undefined,'Vérification humaine de la source'),true);
+    await fixture.session(fixture.manager,()=>fixture.mutate('public_documents','external-delivery',2,{status:'PUBLISHED'},undefined,'Publication humaine de la source'),true);
+    expect((await publicHandler(request({document_id:'external-delivery',action:'download',request_id:crypto.randomUUID()}))).status).toBe(409);
+    expect((await publicHandler(request({document_id:'external-delivery'}))).status).toBe(200);
+    expect((await fixture.db.query("select downloads_count from public.public_documents where id='external-delivery'")).rows).toEqual([{downloads_count:0}]);
+    const before=(await fixture.db.query("select downloads_count from public.public_documents where id='csv-document'")).rows;
+    const controller=new AbortController();controller.abort();
+    const cancelled=new Request('https://isolated.example/function',{method:'POST',body:JSON.stringify({document_id:'csv-document',action:'download',request_id:crypto.randomUUID()}),signal:controller.signal});
+    expect((await publicHandler(cancelled)).status).toBe(499);
+    expect((await fixture.db.query("select downloads_count from public.public_documents where id='csv-document'")).rows).toEqual(before);
   });
 });

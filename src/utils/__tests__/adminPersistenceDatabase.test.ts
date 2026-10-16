@@ -59,6 +59,71 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
       await actual.exec('rollback');
     } finally {await actual.close();}
   },60000);
+
+  it('converge sans erreur depuis l’état distant cdesuvcozcetdtvibgqs (20261014155231 déjà appliqué + document Cocody publié)',async()=>{
+    const remote=await createProductionSchemaFixture();
+    try {
+      // 1. Reproduce the remote 20261014155231 (PR #62 multipart_ca_documents) migration already applied on cdesuvcozcetdtvibgqs
+      await remote.exec(`
+        alter table public.public_documents
+          add column if not exists is_multipart boolean not null default false,
+          add column if not exists parts_count integer,
+          add column if not exists document_parts jsonb not null default '[]'::jsonb,
+          add column if not exists is_scanned boolean not null default false,
+          add column if not exists has_text_layer boolean not null default true,
+          add column if not exists ocr_status text not null default 'NOT_APPLICABLE';
+        alter table public.public_documents drop constraint if exists chk_pubdocs_ocr_status;
+        alter table public.public_documents add constraint chk_pubdocs_ocr_status check (
+          ocr_status in ('NOT_APPLICABLE','NOT_IMPLEMENTED','OCR_PENDING','PROCESSED','MANUAL_TRANSCRIPTION')
+        );
+      `);
+      // 2. Seed active ADMIN operator and the exact live Cocody CA 2024 published document row + storage object
+      await remote.exec(`
+        insert into auth.users(id) values('${admin}');
+        insert into public.profiles(id,email,full_name,role,is_active) values('${admin}','admin@example.test','Admin','ADMIN',true);
+        insert into public.institutions(id,name,type) values('inst-com-cocody','Commune de Cocody','MAIRIE');
+        insert into storage.buckets(id,name,public) values('public_documents','public_documents',false);
+        insert into storage.objects(bucket_id,name) values('public_documents','ca/2024/inst-com-cocody/1791994418805-COMMUNE_DE_COCODY.pdf');
+        alter table public.public_documents disable trigger user;
+        insert into public.public_documents(
+          id,title,category,institution_name,institution_id,institution_type,year,fiscal_year,document_type,
+          storage_bucket,storage_path,file_url,file_name,original_filename,mime_type,file_size_bytes,page_count,
+          source_name,status,verification_status,is_official,checksum_sha256,version,
+          is_multipart,parts_count,document_parts,is_scanned,has_text_layer,ocr_status
+        ) values(
+          'doc-dff4865a-c6a8-418e-8895-626258e409d0','Compte Administratif 2024 - Commune de Cocody','COMPTE_ADMINISTRATIF',
+          'Commune de Cocody','inst-com-cocody','COMMUNE',2024,2024,'COMPTE_ADMINISTRATIF',
+          'public_documents','ca/2024/inst-com-cocody/1791994418805-COMMUNE_DE_COCODY.pdf','',
+          'COMMUNE DE COCODY.pdf','COMMUNE DE COCODY.pdf','application/pdf',14072943,45,
+          'Mairie de Cocody','PUBLISHED','VERIFIED',true,
+          '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf',1,
+          false,null,'[]'::jsonb,false,true,'NOT_APPLICABLE'
+        );
+        alter table public.public_documents enable trigger user;
+      `);
+      // 3. Run 20261013165625_admin_dashboard_persistence_hardening.sql WITHOUT any JWT claim (as supabase db push / SQL Editor runs)
+      await remote.exec(readFileSync('supabase/migrations/20261013165625_admin_dashboard_persistence_hardening.sql','utf8'));
+      await remote.exec(readFileSync('supabase/migrations/20261013200000_multipart_ca_documents.sql','utf8'));
+
+      const docState=(await remote.query<{status:string;verification_status:string;checksum_status:string;revision:number}>(
+        "select status,verification_status,checksum_status,revision from public.public_documents where id='doc-dff4865a-c6a8-418e-8895-626258e409d0'"
+      )).rows[0];
+      expect(docState).toEqual({status:'PUBLISHED',verification_status:'VERIFIED',checksum_status:'DECLARED',revision:1});
+      expect((await remote.query('select * from private.admin_document_file_checks')).rows).toEqual([]);
+      await remote.query('select public.admin_confirm_document_integrity($1,$2,$3,$4::jsonb)',[
+        'doc-dff4865a-c6a8-418e-8895-626258e409d0',1,admin,JSON.stringify([{storage_path:'ca/2024/inst-com-cocody/1791994418805-COMMUNE_DE_COCODY.pdf',checksum_sha256:'941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf',file_size_bytes:14072943}]),
+      ]);
+
+      // 5. Verify ADMIN can update non-identity fields (e.g. description and parts_count=1 normalization) via admin_mutate without deadlock
+      await remote.exec(`begin;set local role authenticated;select set_config('request.jwt.claim.sub','${admin}',true);`);
+      const updated=await remote.query<{row:{revision:number;description:string;status:string}}>(
+        'select public.admin_mutate($1,$2,$3,$4::jsonb,$5::uuid,$6) row',
+        ['public_documents','doc-dff4865a-c6a8-418e-8895-626258e409d0',1,JSON.stringify({description:'Synthèse p. 40 PDF (41/45 imprimée)',parts_count:1}),crypto.randomUUID(),'Précision de la référence de page de synthèse']
+      );
+      expect(updated.rows[0].row).toMatchObject({revision:2,description:'Synthèse p. 40 PDF (41/45 imprimée)',status:'PUBLISHED'});
+      await remote.exec('rollback');
+    } finally {await remote.close();}
+  },60000);
   it('cloisonne les événements financiers et de modération au niveau RLS',async()=>{
     await session(admin,()=>mutate('institutions','audit-private',null,{name:'Brouillon financier privé',type:'MAIRIE'}),true);
     await session(moderator,()=>db.exec("update public.citizen_proofs set verification_status='REJECTED' where id='pending-proof'"),true);

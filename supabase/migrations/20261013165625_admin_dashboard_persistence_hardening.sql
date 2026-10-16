@@ -109,9 +109,25 @@ language sql immutable set search_path='' as $$
 $$;
 revoke all on function private.admin_normalize_ocr(text,boolean,boolean) from public,anon;
 grant execute on function private.admin_normalize_ocr(text,boolean,boolean) to authenticated;
+alter table public.public_documents alter column is_multipart drop not null;
+alter table public.public_documents alter column is_multipart drop default;
+alter table public.public_documents alter column parts_count drop not null;
+alter table public.public_documents alter column parts_count drop default;
+alter table public.public_documents alter column is_scanned drop not null;
+alter table public.public_documents alter column is_scanned drop default;
+alter table public.public_documents alter column has_text_layer drop not null;
+alter table public.public_documents alter column has_text_layer drop default;
 alter table public.public_documents alter column ocr_status drop not null;
 alter table public.public_documents alter column ocr_status drop default;
+alter table public.public_documents drop constraint if exists chk_pubdocs_ocr_status;
+drop trigger if exists admin_validate on public.public_documents;
+drop trigger if exists admin_audit on public.public_documents;
+drop trigger if exists admin_document_integrity on public.public_documents;
 update public.public_documents set ocr_status=private.admin_normalize_ocr(ocr_status,is_scanned,has_text_layer) where ocr_status in ('NONE','PENDING');
+alter table public.public_documents add constraint chk_pubdocs_ocr_status check (
+  ocr_status in ('NOT_APPLICABLE','NOT_IMPLEMENTED','OCR_PENDING','MANUAL_TRANSCRIPTION','PROCESSED','FAILED')
+  and (ocr_status <> 'NOT_APPLICABLE' or (is_scanned is not true and has_text_layer is not false))
+);
 alter table public.site_settings add column if not exists revision integer not null default 1;
 alter table public.site_settings add column if not exists settings_metadata jsonb not null default '{}';
 
@@ -160,6 +176,15 @@ language sql immutable set search_path = '' as $$
 $$;
 revoke all on function private.admin_redact(jsonb) from public,anon,authenticated;
 
+create or replace function private.admin_is_delivery_update(previous jsonb, updated jsonb) returns boolean
+language sql stable set search_path='' as $$
+  select coalesce(current_setting('role',true)='service_role'
+    and previous-'downloads_count'=updated-'downloads_count'
+    and (updated->>'downloads_count')::bigint=coalesce((previous->>'downloads_count')::bigint,0)+1,false)
+$$;
+revoke all on function private.admin_is_delivery_update(jsonb,jsonb) from public,anon;
+grant execute on function private.admin_is_delivery_update(jsonb,jsonb) to authenticated,service_role;
+
 create or replace function private.admin_record_event() returns trigger
 language plpgsql security definer set search_path = '' as $$
 declare
@@ -167,6 +192,7 @@ declare
   current_data jsonb := case when tg_op = 'DELETE' then null else to_jsonb(new) end;
   staff_role text;
 begin
+  if tg_table_name='public_documents' and tg_op='UPDATE' and private.admin_is_delivery_update(previous,current_data) then return new; end if;
   select role into staff_role from public.profiles where id = auth.uid() and is_active;
   if staff_role is null then raise exception 'Authenticated active operator required'; end if;
   insert into public.admin_audit_events(actor_id,actor_role,action,entity_type,entity_id,before_data,after_data,reason,provenance,operation_id,operation_hash)
@@ -198,6 +224,7 @@ declare
   field text;
   url_value text;
 begin
+  if tg_table_name='public_documents' and tg_op='UPDATE' and private.admin_is_delivery_update(to_jsonb(old),row_data) then return new; end if;
   if tg_op = 'DELETE' then raise exception 'Archive required; deletion is disabled'; end if;
   if tg_op = 'UPDATE' then
     if new.id <> old.id then raise exception 'Immutable identifier'; end if;
@@ -547,7 +574,7 @@ declare document public.public_documents; file jsonb; expected jsonb; total inte
 begin
   if not exists(select 1 from public.profiles where id=p_actor and is_active and role::text in ('ADMIN','DATA_MANAGER')) then raise exception 'Active document operator required'; end if;
   select * into document from public.public_documents where id=p_id for update;
-  if not found or document.revision<>p_revision or document.status not in ('UPLOADED','TO_VERIFY') then raise exception 'Document conflict or immutable verified version'; end if;
+  if not found or document.revision<>p_revision or (document.status not in ('UPLOADED','TO_VERIFY') and not (document.status in ('VERIFIED','PUBLISHED') and document.checksum_status='DECLARED')) then raise exception 'Document conflict or immutable verified version'; end if;
   if jsonb_typeof(p_files)<>'array' then raise exception 'Checked files required'; end if;
   total:=case when document.is_multipart then document.parts_count else 1 end;
   if jsonb_array_length(p_files)<>total then raise exception 'Every original file must be checked'; end if;
@@ -607,11 +634,13 @@ declare part jsonb; normalized jsonb:='[]'; pages text[]; start_page integer; en
   previous_end integer:=0; index integer:=0; known_ranges integer:=0; manifest text:=E'SUIVIBUDGET_PARTS_V1\n';
   computed boolean:=true; identity_before jsonb; identity_after jsonb;
 begin
+  if tg_op='UPDATE' and private.admin_is_delivery_update(to_jsonb(old),to_jsonb(new)) then return new; end if;
   new.ocr_status:=private.admin_normalize_ocr(new.ocr_status,new.is_scanned,new.has_text_layer);
   if new.parts_count<1 or new.parts_count>100 or jsonb_typeof(new.document_parts)<>'array' or
     new.ocr_status not in ('NOT_APPLICABLE','NOT_IMPLEMENTED','OCR_PENDING','PROCESSED','FAILED','MANUAL_TRANSCRIPTION') or (new.ocr_status='NOT_APPLICABLE' and (new.is_scanned is true or new.has_text_layer is false)) or
     (new.page_count is not null and new.page_count<1) then raise exception 'Invalid documentary metadata'; end if;
-  if tg_op='UPDATE' and (new.is_multipart is distinct from old.is_multipart or new.parts_count is distinct from old.parts_count or
+  if tg_op='UPDATE' and (new.is_multipart is distinct from old.is_multipart or
+    (case when new.is_multipart is false then coalesce(new.parts_count,1) else new.parts_count end) is distinct from (case when old.is_multipart is false then coalesce(old.parts_count,1) else old.parts_count end) or
     new.file_size_bytes is distinct from old.file_size_bytes or new.original_filename is distinct from old.original_filename or
     new.checksum_algorithm is distinct from old.checksum_algorithm or new.manifest_sha256 is distinct from old.manifest_sha256) then raise exception 'Create a new version for documentary identity'; end if;
   if tg_op='UPDATE' and (new.page_count is distinct from old.page_count or new.is_scanned is distinct from old.is_scanned or
