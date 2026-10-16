@@ -233,6 +233,7 @@ export function isTangiblePhysicalProject(p: BudgetProject): boolean {
 
 export interface AuthState {
   isAuthenticated: boolean;
+  userId?: string;
   email: string;
   fullName: string;
   role: UserRole;
@@ -816,6 +817,7 @@ class DataStore {
     if (session.isAuthenticated && session.user) {
       this.authState = {
         isAuthenticated: true,
+        userId: session.user.userId,
         email: session.user.email,
         fullName: session.user.fullName,
         role: session.user.role as UserRole,
@@ -824,7 +826,7 @@ class DataStore {
       return { ...this.authState };
     }
     // Si authState a été explicitement initialisé (ex: tests, session active)
-    if (this.authState.isAuthenticated && (!this.authState.expiresAt || this.authState.expiresAt > Date.now())) {
+    if (this.authState.isAuthenticated) {
       return { ...this.authState };
     }
     this.authState = { isAuthenticated: false, email: '', fullName: '', role: 'CITIZEN', expiresAt: 0 };
@@ -839,7 +841,7 @@ class DataStore {
     this.authState = {
       ...this.authState,
       ...state,
-      expiresAt: state.expiresAt || (Date.now() + 3600 * 1000)
+      expiresAt: state.expiresAt !== undefined ? state.expiresAt : (Date.now() + 3600 * 1000)
     };
     this.notify();
   }
@@ -1463,11 +1465,36 @@ class DataStore {
     const document = this.getDocumentById(id);
     if (!document) throw new Error('Document introuvable.');
 
-    // 1. Garde-fou strict de publication : le document doit être préalablement vérifié
-    const isVerified = document.status === 'VERIFIED' || document.verification_status === 'VERIFIED';
-    if (status === 'PUBLISHED' && !isVerified) {
-      throw new Error('Vérifiez le document avant publication.');
+    // 1. Contrôle des habilitations (RBAC / RLS) — FAIL-CLOSED STRICT
+    const auth = this.getAuthState();
+    if (!auth || !auth.isAuthenticated) {
+      throw new Error('Authentification requise pour modifier le statut du document.');
     }
+
+    if (auth.expiresAt && auth.expiresAt <= Date.now()) {
+      throw new Error('Session expirée. Veuillez vous reconnecter.');
+    }
+
+    const isStaff = auth.role === 'ADMIN' || auth.role === 'DATA_MANAGER' || auth.role === 'MODERATOR';
+    if (!isStaff) {
+      throw new Error('Action non autorisée : permissions insuffisantes (administrateur ou modérateur requis).');
+    }
+
+    // 2. Garde-fou strict de publication : le document doit être préalablement vérifié
+    const isVerified = document.status === 'VERIFIED' || document.verification_status === 'VERIFIED';
+    if (status === 'PUBLISHED') {
+      if (auth.role !== 'ADMIN' && auth.role !== 'DATA_MANAGER') {
+        throw new Error('Action non autorisée : la publication officielle requiert les droits administrateur ou gestionnaire de données.');
+      }
+      if (!isVerified) {
+        throw new Error('Vérifiez le document avant publication.');
+      }
+    } else if (status !== 'VERIFIED' && status !== 'TO_VERIFY') {
+      if (auth.role === 'MODERATOR') {
+        throw new Error('Action non autorisée : le rôle modérateur est limité à la vérification.');
+      }
+    }
+
     if(status==='VERIFIED' && (document.storage_path || document.is_multipart)) {
       const {data,error}=await supabase.functions.invoke('admin-media-url',{body:{action:'attest-document',id}});
       if(error || data?.document_id!==id || data?.revision!==document.revision || data?.checksum_status!=='COMPUTED') throw new Error('Contrôle des octets Storage non confirmé ; document conservé à vérifier.');

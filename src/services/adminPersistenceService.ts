@@ -131,7 +131,13 @@ export async function mutateAdminEntity(input: AdminMutation): Promise<Persisted
       p_table: input.table, p_id: input.id, p_expected_revision: input.revision,
       p_patch: input.patch, p_operation_id: operationId, p_reason: input.reason,
     });
-    if (error) throw new Error(adminErrorMessage(error));
+    if (error) {
+      const wrapped = new Error(adminErrorMessage(error));
+      if (typeof (error as { code?: unknown })?.code === 'string') {
+        (wrapped as Error & { code?: string }).code = (error as { code: string }).code;
+      }
+      throw wrapped;
+    }
     if(committed?._operation?.changed) throw new Error('Conflit : cette opération a été confirmée, puis la ressource a changé. Votre formulaire est conservé ; rechargez avant toute nouvelle écriture.');
     if(committed?._operation?.original?.revision!==committed?.revision || committed?._operation?.id!==operationId) throw new Error('Confirmation serveur invalide. Rechargez avant de réessayer.');
     if (committed?.id !== input.id || !Number.isInteger(committed.revision)) throw new Error('Confirmation serveur invalide. Rechargez avant de réessayer.');

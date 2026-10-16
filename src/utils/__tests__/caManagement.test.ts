@@ -198,6 +198,7 @@ describe('Comptes administratifs — persistance et publication', () => {
   });
 
   it('sépare vérification et publication', async () => {
+    dataStore.setAuthState({ isAuthenticated: true, role: 'ADMIN', email: 'admin@suivibudget.ci', fullName: 'Super Admin' });
     storageMock.query.mockResolvedValueOnce({ data: [row], error: null });
     await dataStore.refreshDocumentsFromSupabase(true);
     await expect(dataStore.updateDocumentLifecycleStatus(row.id, 'PUBLISHED')).rejects.toThrow('Vérifiez');

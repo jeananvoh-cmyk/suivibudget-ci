@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { 
   Institution, 
   AdministrativeAccount, 
-  CAInvestmentOperation 
+  CAInvestmentOperation,
+  PublicDocument
 } from '../types';
 import { 
   getAdministrativeAccountsForInstitution, 
@@ -14,9 +15,10 @@ import {
   getExecutionStatusLabel 
 } from '../utils/budgetCalculations';
 import { 
-  formatFCFA, formatFCFAWithWords, formatRecordAmount, amountPrecision, isExactAmount, formatAmountInWords
+  formatFCFA, formatFCFAWithWords, formatQualifiedFCFA, formatRecordAmount, amountPrecision, isExactAmount, formatAmountInWords
 } from '../utils/formatters';
 import { isSafeUrl } from '../utils/security';
+import { openPublicDocument } from '../services/documentStorageService';
 import { 
   ShieldCheck, 
   CheckCircle2, 
@@ -51,6 +53,22 @@ interface AdministrativeAccountViewProps {
   onOpenDocRequest: (documentTitle?: string) => void;
 }
 
+const normalizeInstitutionLabel = (s: string) =>
+  (s || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/^(mairie|commune|conseil\s+regional|region|district(\s+autonome)?)\s+(de\s+|du\s+|des\s+|d'|de\s+la\s+)?/i, '')
+    .trim();
+
+export const getOperationPhysicalStatusLabel = (status: CAInvestmentOperation['citizen_status'] | string | null | undefined): string => {
+  if (!status) return 'Réalisation physique non documentée';
+  if (status === 'COMPLETED') return 'Terminé / Livré';
+  if (status === 'IN_PROGRESS') return 'En cours';
+  if (status === 'NOT_STARTED') return 'Voté au Budget';
+  return status;
+};
+
 export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps> = ({
   institution,
   onOpenDocRequest,
@@ -61,6 +79,11 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
   const [selectedMatchLevel, setSelectedMatchLevel] = useState<'ALL' | 'STRONG' | 'PARTIAL' | 'NONE'>('ALL');
   const [copiedSha256, setCopiedSha256] = useState(false);
   const [fieldContributionMsg, setFieldContributionMsg] = useState<string | null>(null);
+  const [, setStoreTick] = useState(0);
+
+  useEffect(() => {
+    return dataStore.subscribe(() => setStoreTick(t => t + 1));
+  }, []);
 
   const formatReadableAmount = (value: number | null | undefined) =>
     value == null || !Number.isFinite(value) ? 'Montant à confirmer' : formatFCFAWithWords(value);
@@ -171,7 +194,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
         `"${rate.formatted}"`,
         `"${op.procurement_match?.contract_number || op.procurement_match?.verification_status || 'Non répertorié'}"`,
         `"${op.procurement_match?.contractor || 'Régie/Gré à gré'}"`,
-        `"${op.citizen_status}"`
+        `"${getOperationPhysicalStatusLabel(op.citizen_status)}"`
       ].join(';');
     });
 
@@ -190,19 +213,183 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
     setTimeout(() => setCopiedSha256(false), 2000);
   };
 
-  // Matching document from public library
+  // Matching document from public library (even when structured CA row is not yet published)
   const documents = dataStore.getDocuments();
-  const matchingDoc = currentCA ? documents.find(d => 
-    (currentCA.source_document_sha256 && d.checksum_sha256 === currentCA.source_document_sha256) ||
-    (d.institution_id === institution.id && d.year === currentCA.fiscal_year && d.category === 'COMPTE_ADMINISTRATIF') ||
-    (currentCA.source_document && (d.title.includes(currentCA.source_document) || d.file_name.includes(currentCA.source_document)))
-  ) : undefined;
+  const cleanInstName = normalizeInstitutionLabel(institution.name);
+  const isInstitutionCADoc = (d: PublicDocument) => {
+    const isCADoc = d.category === 'COMPTE_ADMINISTRATIF' || d.document_type === 'COMPTE_ADMINISTRATIF';
+    if (!isCADoc) return false;
+    if (d.institution_id && d.institution_id === institution.id) return true;
+    const docInst = normalizeInstitutionLabel(d.institution_name);
+    return Boolean(cleanInstName && docInst && (docInst === cleanInstName || docInst.includes(cleanInstName) || cleanInstName.includes(docInst)));
+  };
+
+  const matchingDoc = currentCA
+    ? documents.find(d => 
+        (currentCA.source_document_sha256 && d.checksum_sha256 === currentCA.source_document_sha256) ||
+        (isInstitutionCADoc(d) && d.year === currentCA.fiscal_year) ||
+        (currentCA.source_document && (d.title.includes(currentCA.source_document) || d.file_name.includes(currentCA.source_document)))
+      )
+    : [...documents]
+        .filter(isInstitutionCADoc)
+        .sort((a, b) => (b.year || 0) - (a.year || 0))[0];
 
   const sha256 = currentCA?.source_document_sha256 || matchingDoc?.checksum_sha256 || null;
   const docUrl = currentCA?.source_url || matchingDoc?.file_url || null;
+  const canOpenMatchingDoc = Boolean(
+    matchingDoc && (matchingDoc.status === 'PUBLISHED' || matchingDoc.storage_path || (matchingDoc.file_url && isSafeUrl(matchingDoc.file_url)))
+  );
 
-  // If no account exists for this entity
+  // If no structured administrative_accounts row is published for this entity
   if (!currentCA) {
+    const docYear = matchingDoc?.year || 2024;
+    const isDocPublishedOrVerified = Boolean(
+      matchingDoc && (matchingDoc.status === 'PUBLISHED' || matchingDoc.verification_status === 'VERIFIED')
+    );
+    const isDocRecordedPendingVerification = Boolean(
+      matchingDoc && !isDocPublishedOrVerified && (matchingDoc.status === 'TO_VERIFY' || matchingDoc.verification_status === 'TO_VERIFY')
+    );
+
+    if (matchingDoc && (isDocPublishedOrVerified || isDocRecordedPendingVerification)) {
+      return (
+        <div className="space-y-5 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-2xs space-y-5">
+            <div className="flex items-start gap-4">
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${
+                isDocPublishedOrVerified ? 'bg-blue-100 text-brand-blue' : 'bg-amber-100 text-amber-900'
+              }`}>
+                <FileText className="w-6 h-6" />
+              </div>
+              <div className="space-y-1.5 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                    isDocPublishedOrVerified
+                      ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                      : 'bg-amber-100 text-amber-900 border-amber-300'
+                  }`}>
+                    {matchingDoc.status === 'PUBLISHED'
+                      ? 'Document officiel publié — Exploitation financière en cours'
+                      : isDocPublishedOrVerified
+                      ? 'Document officiel vérifié — Validation financière en cours'
+                      : 'Document enregistré — Vérification en cours'}
+                  </span>
+                  <span className="text-xs font-bold text-slate-500">
+                    Exercice {docYear}
+                  </span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-black text-slate-900">
+                  {isDocPublishedOrVerified
+                    ? `Compte administratif ${docYear} disponible à la consultation. Données financières en cours d'exploitation et de validation.`
+                    : `Compte administratif ${docYear} enregistré — vérification documentaire et financière en cours avant publication.`}
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
+                  {isDocPublishedOrVerified ? (
+                    <>
+                      Le document officiel du Compte Administratif {docYear} de <strong>{institution.name}</strong> est archivé et disponible pour consultation directe. Conformément à notre protocole d'intégrité des finances publiques, <strong>les montants chiffrés structurés (6 rubriques citoyennes) ne sont affichés qu'après contrôle arithmétique complet et validation humaine explicite</strong>.
+                    </>
+                  ) : (
+                    <>
+                      Le fichier du Compte Administratif {docYear} de <strong>{institution.name}</strong> a été déposé dans l'espace d'administration et fait l'objet d'une vérification documentaire avant sa mise en ligne publique.
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-slate-50 p-4 rounded-2xl border border-slate-200">
+              <div>
+                <span className="text-[10px] font-bold uppercase text-slate-400 block">Document conservé</span>
+                <strong className="text-slate-900 break-words">{matchingDoc.title || matchingDoc.file_name}</strong>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase text-slate-400 block">Statut du document PDF</span>
+                <strong className="text-emerald-700 break-words">
+                  {matchingDoc.status === 'PUBLISHED'
+                    ? 'Document publié et consultable'
+                    : matchingDoc.verification_status === 'VERIFIED'
+                    ? 'Document vérifié'
+                    : 'Document enregistré (à vérifier)'}
+                </strong>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase text-slate-400 block">Synthèse chiffrée (6 rubriques)</span>
+                <strong className="text-amber-800 break-words">
+                  Données financières en cours d'exploitation et de validation
+                </strong>
+              </div>
+            </div>
+
+            {sha256 && (
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Hash className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Empreinte cryptographique du fichier source conservé</span>
+                    <span className="font-mono text-slate-700 text-xs truncate block" title={sha256}>
+                      SHA-256 : {sha256.slice(0, 16)}...{sha256.slice(-12)}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopyHash(sha256)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-colors cursor-pointer self-start sm:self-auto flex-shrink-0"
+                >
+                  {copiedSha256 ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-700 font-bold">Copiée !</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Copier le hash</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              {isDocPublishedOrVerified && (
+                <button
+                  type="button"
+                  onClick={() => void openPublicDocument(matchingDoc)}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-blue hover:bg-blue-800 text-white rounded-xl text-xs font-black shadow-xs transition-all cursor-pointer"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Consulter le document</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setIsExplainerOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                <HelpCircle className="w-3.5 h-3.5 text-brand-blue" />
+                <span>Qu'est-ce qu'un compte administratif ?</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onOpenDocRequest(`Compte Administratif ${docYear} de ${institution.name}`)}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black shadow-xs transition-all cursor-pointer"
+              >
+                <FileText className="w-3.5 h-3.5 text-amber-300" />
+                <span>Demande CAIDP</span>
+              </button>
+            </div>
+          </div>
+
+          <CompteAdministratifExplainerModal 
+            isOpen={isExplainerOpen}
+            onClose={() => setIsExplainerOpen(false)}
+          />
+        </div>
+      );
+    }
+
     return (
       <div className="space-y-5 animate-in fade-in duration-200">
         <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-2xs space-y-5">
@@ -276,6 +463,50 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
   const investmentShare = totalRealized > 0 && currentCA.investment_realized != null
     ? Math.round((currentCA.investment_realized / totalRealized) * 100)
     : null;
+
+  // Priority 5.1: Accounting stage resolution (never default to ORDONNANCE when ENGAGE or unknown)
+  const resolvedAccountingStage = currentCA.accounting_stage
+    ? currentCA.accounting_stage
+    : currentCA.total_expenditure_engaged != null && currentCA.total_expenditure_ordered == null && currentCA.total_expenditure_paid == null
+    ? 'ENGAGE'
+    : null;
+
+  const accountingStageHeaderLabel =
+    resolvedAccountingStage === 'ORDONNANCE'
+      ? 'ORDONNANCE'
+      : resolvedAccountingStage === 'ENGAGE'
+      ? 'Dépenses engagées'
+      : resolvedAccountingStage === 'PAYE'
+      ? 'PAYE'
+      : resolvedAccountingStage === 'LIQUIDE'
+      ? 'LIQUIDE'
+      : 'Stade comptable à confirmer sur pièce';
+
+  const accountingStageDescription =
+    resolvedAccountingStage === 'ORDONNANCE'
+      ? "Mandats émis et liquidés par l'ordonnateur au titre de l'exercice clos."
+      : resolvedAccountingStage === 'ENGAGE'
+      ? "Dépenses engagées au titre de l'exercice clos (stade d'ordonnancement à confirmer sur pièce)."
+      : "Dépenses exécutées au titre de l'exercice clos (stade comptable précis à confirmer sur pièce).";
+
+  // Priority 5.3: Closing result and arithmetic difference resolution
+  const totalRevenueResolved =
+    currentCA.total_revenue_collected ??
+    (currentCA.operating_revenue_realized != null || currentCA.investment_revenue_realized != null
+      ? (currentCA.operating_revenue_realized || 0) + (currentCA.investment_revenue_realized || 0)
+      : null);
+
+  const arithmeticDiffResolved =
+    currentCA.arithmetic_difference ??
+    (totalRevenueResolved != null && currentCA.total_realized != null
+      ? totalRevenueResolved - currentCA.total_realized
+      : null);
+
+  const isClosingResultUnconfirmed =
+    currentCA.surplus_or_deficit == null ||
+    currentCA.reconciliation_status === 'SOURCE_ANOMALY' ||
+    amountPrecision(currentCA, 'surplus_or_deficit') === 'UNKNOWN' ||
+    (currentCA.surplus_or_deficit === 0 && arithmeticDiffResolved != null && arithmeticDiffResolved !== 0);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -355,7 +586,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               <span className="text-slate-900 truncate" title={currentCA.source_document}>
                 {currentCA.source_document}
               </span>
-              {docUrl && isSafeUrl(docUrl) && (
+              {docUrl && isSafeUrl(docUrl) ? (
                 <a
                   href={docUrl}
                   target="_blank"
@@ -365,7 +596,16 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                 >
                   <ExternalLink className="w-3 h-3 flex-shrink-0" />
                 </a>
-              )}
+              ) : canOpenMatchingDoc && matchingDoc ? (
+                <button
+                  type="button"
+                  onClick={() => void openPublicDocument(matchingDoc)}
+                  className="text-brand-blue hover:underline inline-flex items-center cursor-pointer"
+                  title="Consulter le document source"
+                >
+                  <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                </button>
+              ) : null}
             </div>
           </div>
         </div>
@@ -407,11 +647,18 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               {currentCA.initial_budget_total != null
                 ? formatReadableAmount(currentCA.initial_budget_total)
                 : cycleConsolidation.initial_budget?.total.amount != null
-                ? formatReadableAmount(cycleConsolidation.initial_budget.total.amount)
+                ? (cycleConsolidation.initial_budget.total.precision === 'EXACT'
+                    ? formatReadableAmount(cycleConsolidation.initial_budget.total.amount)
+                    : formatQualifiedFCFA(
+                        cycleConsolidation.initial_budget.total.amount,
+                        cycleConsolidation.initial_budget.total.precision
+                      ))
                 : <span className="text-slate-500 text-sm font-semibold italic">Non documenté au CA</span>}
             </div>
             <p className="text-[11px] text-slate-500 leading-relaxed">
-              Crédits votés par le Conseil en début d'exercice fiscal.
+              {cycleConsolidation.initial_budget && cycleConsolidation.initial_budget.total.precision !== 'EXACT'
+                ? `Estimation issue d'une source secondaire (${cycleConsolidation.initial_budget.document?.primary_source_label || cycleConsolidation.initial_budget.total.sources?.[0]?.document_name || 'presse institutionnelle'}) — document BP original à confirmer.`
+                : "Crédits votés par le Conseil en début d'exercice fiscal."}
             </p>
           </div>
 
@@ -482,7 +729,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </div>
           </div>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-50 text-purple-800 border border-purple-200">
-            Stade comptable : {currentCA.accounting_stage || 'ORDONNANCE'}
+            Stade comptable : {accountingStageHeaderLabel}
           </span>
         </div>
 
@@ -493,13 +740,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               Recettes Recouvrées
             </span>
             <div className="text-lg sm:text-xl font-black text-emerald-700">
-              {(() => {
-                const totalRev = currentCA.total_revenue_collected ?? 
-                  (currentCA.operating_revenue_realized != null || currentCA.investment_revenue_realized != null
-                    ? (currentCA.operating_revenue_realized || 0) + (currentCA.investment_revenue_realized || 0)
-                    : null);
-                return totalRev != null ? formatReadableAmount(totalRev) : 'Non documenté au CA';
-              })()}
+              {totalRevenueResolved != null ? formatReadableAmount(totalRevenueResolved) : 'Non documenté au CA'}
             </div>
             <p className="text-[11px] text-slate-500 leading-relaxed">
               Fonds effectivement encaissés (fiscalité locale, dotations de l'État, taxes de marché).
@@ -513,14 +754,14 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                 Dépenses Exécutées
               </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-brand-blue border border-blue-200">
-                {currentCA.accounting_stage || 'ORDONNANCE'}
+                {accountingStageHeaderLabel}
               </span>
             </div>
             <div className="text-lg sm:text-xl font-black text-slate-900">
               {formatReadableRecordAmount(currentCA, 'total_realized')}
             </div>
             <p className="text-[11px] text-slate-500 leading-relaxed">
-              Mandats émis et liquidés par l'ordonnateur au titre de l'exercice clos.
+              {accountingStageDescription}
             </p>
           </div>
 
@@ -555,38 +796,62 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
           </div>
         </div>
 
-        {/* Ligne Résultat de Clôture, Reports Antérieurs & Résultat Cumulé */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
+        {/* Ligne Différence Arithmétique, Résultat de Clôture, Reports Antérieurs & Résultat Cumulé */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
           <div>
-            <span className="text-[10px] font-bold uppercase text-slate-500 block">Résultat de clôture de l'exercice</span>
+            <span className="text-[10px] font-bold uppercase text-slate-500 block">Différence arithmétique (Recettes − Dépenses)</span>
+            <strong className="text-sm text-slate-800">
+              {arithmeticDiffResolved != null
+                ? `${arithmeticDiffResolved >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(arithmeticDiffResolved))}`
+                : 'Non calculable'}
+            </strong>
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase text-slate-500 block">Résultat de l'exercice (clôture)</span>
             <strong className={`text-sm ${
-              currentCA.surplus_or_deficit == null ? 'text-slate-600' :
-              currentCA.surplus_or_deficit >= 0 ? 'text-emerald-700' : 'text-rose-700'
+              isClosingResultUnconfirmed ? 'text-amber-800' :
+              (currentCA.surplus_or_deficit ?? 0) >= 0 ? 'text-emerald-700' : 'text-rose-700'
             }`}>
-              {currentCA.surplus_or_deficit != null
-                ? `${currentCA.surplus_or_deficit >= 0 ? 'Excédent : +' : 'Déficit : '}${formatReadableRecordAmount(currentCA, 'surplus_or_deficit')}`
-                : 'Non documenté au CA'}
+              {isClosingResultUnconfirmed
+                ? 'Résultat de clôture à confirmer'
+                : `${(currentCA.surplus_or_deficit ?? 0) >= 0 ? 'Excédent : +' : 'Déficit : -'}${formatReadableAmount(Math.abs(currentCA.surplus_or_deficit ?? 0))}`}
             </strong>
           </div>
           <div>
             <span className="text-[10px] font-bold uppercase text-slate-500 block">Reports antérieurs (Report à nouveau)</span>
             <strong className="text-sm text-slate-800">
               {currentCA.previous_result_reported != null
-                ? `${currentCA.previous_result_reported >= 0 ? '+' : ''}${formatReadableAmount(currentCA.previous_result_reported)}`
+                ? `${currentCA.previous_result_reported >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(currentCA.previous_result_reported))}`
                 : 'Non documenté au CA'}
             </strong>
           </div>
           <div>
             <span className="text-[10px] font-bold uppercase text-slate-500 block">Résultat cumulé final</span>
             <strong className="text-sm text-slate-900">
-              {currentCA.cumulative_result != null
-                ? `${currentCA.cumulative_result >= 0 ? '+' : ''}${formatReadableAmount(currentCA.cumulative_result)}`
-                : (currentCA.surplus_or_deficit != null && currentCA.previous_result_reported != null
-                    ? `${(currentCA.surplus_or_deficit + currentCA.previous_result_reported) >= 0 ? '+' : ''}${formatReadableAmount(currentCA.surplus_or_deficit + currentCA.previous_result_reported)}`
+              {currentCA.reconciliation_status === 'SOURCE_ANOMALY'
+                ? 'Résultat de clôture à confirmer'
+                : currentCA.cumulative_result != null
+                ? `${currentCA.cumulative_result >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(currentCA.cumulative_result))}`
+                : (!isClosingResultUnconfirmed && currentCA.surplus_or_deficit != null && currentCA.previous_result_reported != null
+                    ? `${(currentCA.surplus_or_deficit + currentCA.previous_result_reported) >= 0 ? '+' : '-'}${formatReadableAmount(Math.abs(currentCA.surplus_or_deficit + currentCA.previous_result_reported))}`
                     : 'Non documenté au CA')}
             </strong>
           </div>
         </div>
+
+        {(currentCA.reconciliation_status === 'SOURCE_ANOMALY' || currentCA.reconciliation_notes) && (
+          <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-2xl text-xs text-amber-950 flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <strong className="font-black text-amber-900 block">
+                Observation documentaire et arithmétique sur la pièce source
+              </strong>
+              <p className="text-amber-800 text-[11px] leading-relaxed">
+                {currentCA.reconciliation_notes || "Le document source présente un écart arithmétique entre la différence Recettes − Dépenses et le solde de clôture déclaré. Aucun excédent ou déficit nul n'est présenté comme confirmé sans pièce rectificative."}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ========================================================================= */}
@@ -839,6 +1104,15 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-50 text-brand-blue border border-blue-200">
                         {op.sector}
                       </span>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                        op.citizen_status === 'COMPLETED' || (op.citizen_status as string) === 'Réalisé'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                          : op.citizen_status
+                          ? 'bg-amber-50 text-amber-800 border-amber-200'
+                          : 'bg-slate-100 text-slate-600 border-slate-200'
+                      }`}>
+                        {getOperationPhysicalStatusLabel(op.citizen_status)}
+                      </span>
                       {op.location && (
                         <span className="text-[11px] text-slate-500 font-medium">
                           📍 {op.location}
@@ -936,6 +1210,17 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                       <div>
                         <span className="text-slate-400 block font-medium">Date d'attribution :</span>
                         <strong className="text-slate-900 break-words">{match.award_date || 'Exercice clos'}</strong>
+                        {match.source_url && isSafeUrl(match.source_url) && (
+                          <a
+                            href={match.source_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-brand-blue hover:underline inline-flex items-center gap-1 mt-0.5 block font-bold"
+                          >
+                            <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                            <span>Source marché public (DGMP)</span>
+                          </a>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1100,14 +1385,19 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               Structure émettrice : {institution.name} ({institution.type === 'MAIRIE' ? 'Commune' : 'Conseil Régional'}).
             </p>
             <div className="text-[11px] text-slate-600 pt-1">
-              Statut du contrôle : <strong className="text-emerald-700">Document officiel vérifié</strong>
+              Statut du contrôle :{' '}
+              <strong className={currentCA.reconciliation_status === 'SOURCE_ANOMALY' ? 'text-amber-800' : 'text-emerald-700'}>
+                {currentCA.reconciliation_status === 'SOURCE_ANOMALY'
+                  ? 'Document officiel avec réserve documentaire (écart arithmétique source signalé)'
+                  : 'Données transcrites et contrôlées à partir du document source'}
+              </strong>
             </div>
           </div>
 
           <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
             <span className="text-[10px] font-bold uppercase text-slate-400 block">Pages exploitées du document</span>
             <strong className="text-slate-900 block text-sm">
-              {currentCA.source_page ? `Page ${currentCA.source_page}` : 'Sections de synthèse et état des investissements'}
+              {currentCA.source_page ? `Page ${currentCA.source_page}` : 'Pagination non renseignée'}
             </strong>
             <p className="text-slate-500 text-[11px]">
               Date de délibération : {currentCA.approval_date || 'Non spécifiée'} — Visa préfectoral : {currentCA.prefecture_visa_date || 'Non spécifié'}.
@@ -1161,7 +1451,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
-            {docUrl && isSafeUrl(docUrl) && (
+            {docUrl && isSafeUrl(docUrl) ? (
               <a
                 href={docUrl}
                 target="_blank"
@@ -1171,7 +1461,16 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                 <ExternalLink className="w-3.5 h-3.5" />
                 <span>Consulter le document</span>
               </a>
-            )}
+            ) : canOpenMatchingDoc && matchingDoc ? (
+              <button
+                type="button"
+                onClick={() => void openPublicDocument(matchingDoc)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 text-xs font-bold transition-all shadow-xs cursor-pointer"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Consulter le document</span>
+              </button>
+            ) : null}
 
             <button
               onClick={() => onOpenDocRequest(`Compte Administratif ${currentCA.fiscal_year} de ${institution.name}`)}

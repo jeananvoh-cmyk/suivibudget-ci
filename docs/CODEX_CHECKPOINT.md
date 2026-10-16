@@ -1,3 +1,16 @@
+## 16 octobre 2026 — Corrections finales, réconciliation documentaire Cocody 2024 et reciblage de la PR #63 vers `master` (Antigravity)
+
+- **Branche** : `codex/admin-final-integration` (fusionnée proprement avec `origin/master` `f9ebadb1d1df14217d478bf2ab29f8bd29aa07d6`, base GitHub de la PR #63 reciblée sur `master`).
+- **Revue traitée** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/63#issuecomment-6205027483
+- **Garde-fous respectés** : `REMOTE_SUPABASE_WRITES = 0`, `PRODUCTION_DEPLOYMENTS = 0`, aucune fusion automatique.
+- **Priorités 1 à 6 résolues** :
+  1. **Priorité 1 (Cocody 2024)** : Rapprochement sur pièce PDF primaire (page PDF 40 / imprimée `41/45`, délibération du `08/07/2025`, visa `002/PA/D.CAB` du `22/07/2025` ; détail des projets pages PDF 41–43). Série officielle confirmée : Prévisions investissement `3 900 630 000 FCFA`, Dépenses investissement `1 366 100 690 FCFA`, Recettes totales `19 012 357 233 FCFA`, Prévisions totales `22 341 865 000 FCFA`, Dépenses totales `16 775 223 443 FCFA`, Excédent de l'exercice `+2 237 133 790 FCFA`, Report antérieur `+944 FCFA`, Résultat cumulé `+2 237 134 734 FCFA`.
+  2. **Priorité 2 (Branche & Base PR #63)** : Résolution intégrale des conflits avec `master`, préservation du contrat 3 PostgreSQL/RLS et des sécurités RBAC/Storage de la PR #62, reciblage de la PR #63 vers `master`.
+  3. **Priorité 3 (Compteur de pages PDF)** : Analyse structurelle de l'arbre `/Catalog -> /Pages -> /Count` et des révisions incrémentales dans `extractPdfPageCountFromBuffer`, retour `null` sur `/ObjStm` compressé ou `/Encrypt`, validation sur les 2 fascicules réels de Cocody (`22 + 22 = 44 pages`).
+  4. **Priorité 4 (États documentaires et financiers de Cocody)** : Affichage explicite *« Compte administratif 2024 disponible à la consultation. Données financières en cours d'exploitation et de validation. »* avec bouton de consultation PDF et SHA-256 lorsque seul le document est publié, et affichage complet des 6 rubriques dès publication de la ligne `administrative_accounts`.
+  5. **Priorité 5 (Libellés comptables et citoyens)** : Aucun défaut `ORDONNANCE` sur dépenses `ENGAGE` ou stade inconnu ; `Réalisation physique non documentée` lorsque `citizen_status` est `null` ; `Résultat de clôture à confirmer` et distinction des 4 soldes ; préservation de `Environ 820 150 000 FCFA` (`APPROXIMATE`) et des 3 marchés DGMP sur Tiassalé 2024.
+  6. **Priorité 6 (Tests E2E)** : Recette complète validée sur Cocody 2024, Tiassalé 2024, une commune isolée et un conseil régional isolé.
+
 ## 14 octobre 2026 — Intégration finale Codex / PR #62, contrat 3
 
 - Branche indépendante : codex/admin-final-integration. Parents : PR62 db96ed782e17b097a9ef398b682fb066509e791c et Codex 671bafcf0b787a9de88cd7e39a2324b5a6697613. Master relu : a1ec60ecde6d42c4063b3ba4f854eb0dc43a898d.
@@ -50,6 +63,21 @@
 - Livraison GitHub bloquée par la consigne humaine : attendre la fusion ou fermeture de #62, encore ouverte au dernier contrôle, HEAD `7af1c5b89f75ae32fb7de8b63ccb2d035d38a61d`.
 - Migrations production = 0 ; écritures production = 0 ; fusion = non ; déploiement = non.
 - NEXT_EXECUTABLE_TASK : terminer la validation locale, puis attendre #62 avant d’intégrer le nouveau master et de proposer une PR unique. Ne pas publier un frontend sans son contrat approuvé.
+
+## 14 octobre 2026 — Correction de Clôture PR #62 : Sécurité RBAC Fail-Closed, Intégrité Multi-PDF et Validation Finale (Antigravity)
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62
+- **Branche Git** : `feat/admin-financial-document-ingestion-pilot`
+- **Revue traitée** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62#issuecomment-6157235505
+- **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0` (100% simulations et tests sous PGlite WASM / Vitest, zéro écriture sur Supabase production).
+- **Corrections appliquées** :
+  1. RBAC Fail-Closed strict dans `updateDocumentLifecycleStatus` (rejet sans session valide, session expirée, citoyen bloqué, modérateur limité à la vérification, publication réservée aux administrateurs/gestionnaires de données).
+  2. Élimination totale des Blobs vides (`new Blob([], ...)`), validation préalable de non-vacuité et politique de remplacement partiel avec préservation des métadonnées existantes.
+  3. Compensation automatique Storage en cas d'échec d'enregistrement PostgreSQL via `deleteStorageFiles` sur `newlyUploadedPaths` uniquement.
+  4. Résolution de l'incompatibilité de type UUID dans `verified_by` sous PostgreSQL.
+  5. Validation PGlite de la migration `20261013200000_multipart_ca_documents.sql`.
+- **Statut de validation** : 820/820 tests passés (62 suites), `npm run build` réussi sans erreur (code 0).
+- **Prochaine étape** : Revue et fusion de la PR #62 sur `master`.
 
 ## 13 octobre 2026 — Correction Finale PR #62 : Ingestion Multi-PDF Réelle et Validation Administrateur (Antigravity)
 

@@ -118,10 +118,13 @@ export interface AdministrativeAccount {
   previous_result_reported?: number; // Report à nouveau antérieur
   cumulative_result?: number;    // Résultat cumulé de clôture
   accounting_stage?: 'ORDONNANCE' | 'PAYE' | 'ENGAGE' | 'LIQUIDE'; // Stade comptable attesté
-  total_revenue_collected?: number;
-  total_expenditure_engaged?: number;
-  arithmetic_difference?: number; // Différence arithmétique, ne jamais présenter automatiquement comme bénéfice/excédent
+  total_revenue_collected?: number | null;
+  total_expenditure_engaged?: number | null;
+  total_expenditure_ordered?: number | null;
+  total_expenditure_paid?: number | null;
+  arithmetic_difference?: number | null; // Différence arithmétique, ne jamais présenter automatiquement comme bénéfice/excédent
   reconciliation_status?: 'TO_VERIFY' | 'RECONCILED' | 'SOURCE_ANOMALY' | 'INCOMPLETE_SOURCE';
+  reconciliation_notes?: string;
   
   // Traçabilité & Sources
   source_document: string;       // Titre du document officiel

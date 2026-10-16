@@ -3,10 +3,11 @@
 // SuiviBudget Côte d'Ivoire - Architecture Multi-Exercices & Matrice 232
 // =========================================================================
 
-import type { DocumentOcrStatus } from '../../supabase/functions/_shared/documentIntegrity';
-export type { DocumentOcrStatus } from '../../supabase/functions/_shared/documentIntegrity';
+import type { DocumentOcrStatus as SharedDocumentOcrStatus } from '../../supabase/functions/_shared/documentIntegrity';
 
 import type { DocumentAvailability, DocumentProvenance, ExtractionVerificationStatus } from '../review/domain/documents';
+
+export type DocumentOcrStatus = SharedDocumentOcrStatus | 'NONE';
 
 export type DocumentCategory =
   | 'RAPPORT_AUDIT'
@@ -109,9 +110,11 @@ export interface PublicDocument {
   checksum_status?: 'DECLARED' | 'COMPUTED';
   checksum_algorithm?: 'SHA256_FILE_V1' | 'SHA256_PARTS_MANIFEST_V1';
   manifest_sha256?: string | null;
-
 }
 
+/**
+ * Informations sur un fascicule / volet d'un document multi-parties
+ */
 export interface DocumentPartInfo {
   id?: string;
   part_number: number;

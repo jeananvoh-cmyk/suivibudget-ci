@@ -1,5 +1,14 @@
 begin;
 alter table public.public_documents
+  add column if not exists checksum_sha256 text,
+  add column if not exists is_multipart boolean,
+  add column if not exists parts_count integer,
+  add column if not exists document_parts jsonb default '[]'::jsonb,
+  add column if not exists is_scanned boolean,
+  add column if not exists has_text_layer boolean,
+  add column if not exists ocr_status text,
+  add column if not exists manifest_sha256 text;
+alter table public.public_documents
   alter column is_multipart drop not null,
   alter column is_multipart drop default,
   alter column parts_count drop not null,

@@ -1,20 +1,31 @@
-## 16 octobre 2026 — PR #63 : Généralisation de l'exploitation des comptes administratifs & 6 rubriques citoyennes
+## 16 octobre 2026 — PR #63 : Réconciliation finale avec `master`, rapprochement documentaire Cocody 2024 et recette de bout en bout (Priorités 1 à 6)
 
-- **Branche** : `codex/admin-final-integration`.
-- **Statut PR #63** : Prête pour livraison complète et revue.
-- **Garde-fous respectés** : `REMOTE_SUPABASE_WRITES = 0` (zéro écriture sur la base distante). Aucun faux montant (BP inconnu affiché comme "Non documenté au CA", jamais "0 FCFA").
-- **Étape 1 (Documents & Téléchargements)** : "Source Républicaine" remplacée par la structure émettrice réelle (DGBF, Mairie, etc.). "Extraction à vérifier" remplacée par "Document officiel vérifié" / "Document officiel publié". Compteur trompeur supprimé au profit de badges neutres ("Accès direct", "Accès public"). Sécurisation du téléchargement contre les 404.
-- **Étape 2 (Pagination & Intégrité)** : Détection automatique du nombre de pages du PDF (`extractPdfPageCountFromBuffer`) avec badge UI et possibilité d'ajustement manuel par l'administrateur (`page_count_source: 'AUTOMATIC' | 'MANUAL'`). Calcul d'empreinte SHA-256 avec bouton de copie.
-- **Étape 3 & 4 (Exploitation Financière & Console d'Import)** : Passerelle complète "Document → Exploiter les données financières → Saisie assistée / Template pré-rempli → Validation humaine explicite → Publication". Préservation du stade comptable réel (`ORDONNANCE`).
-- **Étape 4 (Fiche Financière Citoyenne — 6 Rubriques)** :
-  1. Rubrique 1 : Les moyens financiers (BP vs Prévisions définitives, ajustements, note explicative, pas de 0 FCFA trompeur).
-  2. Rubrique 2 : Les recettes et les dépenses (recettes recouvrées, dépenses exécutées au stade ordonnancé, taux, excédent/déficit, reports, résultat cumulé).
-  3. Rubrique 3 : Fonctionnement et investissement (salaires/fonctionnement vs équipements, jauges et parts en %).
-  4. Rubrique 4 : Opérations et investissements identifiés (chantiers avec prévu/réalisé, rapprochement DGMP, attributaires, pages sources du CA).
-  5. Rubrique 5 : Suivi citoyen sur le terrain (principe républicain `Réalisé financier ≠ Réalisation physique`, bouton de contribution photo/terrain).
-  6. Rubrique 6 : Sources et vérification (document officiel, structure émettrice, hash SHA-256 avec copie, pages exploitées, visa/date, droit d'accès Loi CAIDP n° 2013-867).
-- **Validation** : 879/879 tests Vitest PASS (66 suites), build TypeScript & Vite `npm run build` PASS (exit code 0).
-- **NEXT_EXECUTABLE_TASK** : Revue finale par l'équipe, vérification de la preview Vercel sur PR #63, et fusion sur `master`.
+- **Branche** : `codex/admin-final-integration` (réconciliée avec `origin/master` `f9ebadb1d1df14217d478bf2ab29f8bd29aa07d6`, base de la PR #63 reciblée vers `master`).
+- **Revue traitée** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/63#issuecomment-6205027483
+- **Garde-fous respectés** : `REMOTE_SUPABASE_WRITES = 0` (zéro écriture ni migration sur la base Supabase de production), `PRODUCTION_DEPLOYMENTS = 0`, aucune fusion automatique, aucun remplacement d'une donnée inconnue par zéro.
+- **Priorité 1 (Réconciliation documentaire Cocody 2024 — Page PDF 40 / imprimée 41/45)** :
+  - Vérification physique des 2 fascicules PDF originaux (`Cocody_CA_2024_pages_01-22.pdf`, SHA-256 `580b42cde2c164c8f7a4af23419b3dd93de541b583f5986d71bbf35b3e9c4ca4`, 22 pages ; `Cocody_CA_2024_pages_23-44.pdf`, SHA-256 `796921a9522c0fbf2a48b4bbf16f97ea8a525f57fb74b438c11bc64de5dc7ec9`, 22 pages) et du PDF combiné en base (`COMMUNE DE COCODY.pdf`, SHA-256 `941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf`, 44 pages).
+  - La série officielle exacte du `TABLEAU DES RESULTATS DU COMPTE ADMINISTRATIF` (page PDF 40 / imprimée `Page 41 / 45`, arrêté le `08/07/2025`, approuvé le `22/07/2025` sous le `n° 002/PA/D.CAB`) et de la `SITUATION D'EXECUTION DU TITRE II PAR CODE PROJET` (pages PDF 41–43 / imprimées `42/45` à `44/45`) est :
+    - Fonctionnement prévu : `18 441 235 000 FCFA` | Recettes fonctionnement : `17 646 256 543 FCFA` | Dépenses fonctionnement : `15 409 122 753 FCFA`
+    - Investissement prévu : `3 900 630 000 FCFA` | Recettes investissement : `1 366 100 690 FCFA` | Dépenses investissement : `1 366 100 690 FCFA`
+    - Total prévisions définitives : `22 341 865 000 FCFA` | Total recettes recouvrées : `19 012 357 233 FCFA` | Total dépenses ordonnancées : `16 775 223 443 FCFA`
+    - Résultat de l'exercice (excédent) : `+2 237 133 790 FCFA` | Report de l'exercice précédent : `+944 FCFA` | Résultat cumulé : `+2 237 134 734 FCFA`
+  - Alignement intégral des fixtures de test (`caGeneralizationAndRubrics.test.tsx`) sur la pièce primaire vérifiée.
+- **Priorité 2 (Réconciliation de branche & Reciblage PR #63)** :
+  - Fusion propre de `origin/master` (`f9ebadb`) dans `codex/admin-final-integration` en conservant l'intégralité des durcissements de sécurité de la PR #62 (RBAC fail-closed, zéro blob vide, compensation Storage, contrat 3 SQL/RLS, journal d'audit expurgé) et les fonctionnalités de la PR #63.
+- **Priorité 3 (Compteur de pages PDF fiable — `src/utils/caFileMatcher.ts`)** :
+  - Remplacement de la regex naïve par une analyse structurelle des objets indirects PDF (`/Type /Catalog` -> `/Pages` -> `/Count`, gestion des mises à jour incrémentales, exclusion des `/Outlines /Count`, retour explicite `null` en présence de flux d'objets compressés `/ObjStm` ou de chiffrement `/Encrypt`).
+- **Priorité 4 (Trois états de la fiche financière — `src/components/AdministrativeAccountView.tsx`)** :
+  - Distinction stricte entre : (1) Document enregistré (`TO_VERIFY`), (2) Document publié/vérifié avec données financières en cours de validation (*« Compte administratif 2024 disponible à la consultation. Données financières en cours d'exploitation et de validation. »* + bouton `Consulter le document` + SHA-256), et (3) Fiche complète à 6 rubriques citoyennes lorsque la ligne `administrative_accounts` est publiée.
+- **Priorité 5 (Libellés comptables et citoyens — `src/components/AdministrativeAccountView.tsx`)** :
+  - Stade comptable : aucun repli abusif sur `ORDONNANCE` lorsque le stade est `ENGAGE` (Bingerville) ou inconnu (`Dépenses engagées` / `Stade comptable à confirmer sur pièce`).
+  - Statut physique : `citizen_status = null` affiche `Réalisation physique non documentée` (jamais `Programmé`).
+  - Résultat de clôture : séparation explicite entre `Différence arithmétique (Recettes − Dépenses)`, `Résultat de l'exercice (clôture)`, `Reports antérieurs`, et `Résultat cumulé final` ; affichage de `Résultat de clôture à confirmer` en cas de `SOURCE_ANOMALY` ou de solde non confirmé (Tiassalé).
+  - Sources & précision : respect du qualificatif `Environ 820 150 000 FCFA` (`APPROXIMATE`, dépêche AIP) sur le BP de Tiassalé, liens DGMP distincts du CA, et pagination affichée uniquement lorsqu'elle est renseignée.
+- **Priorité 6 (Recette de bout en bout)** :
+  - Chaîne complète (`Dépôt PDF → Métadonnées → Extraction assistée → Contrôle → Validation humaine → Import contrôlé → Publication simulée → 6 Rubriques citoyennes`) testée et validée sur Cocody 2024, Tiassalé 2024 (non-régression), une commune isolée (Dabou) et un conseil régional isolé (San-Pedro).
+- **NEXT_EXECUTABLE_TASK** : Revue finale et décision de fusion de la PR #63 sur `master`.
+
 
 ## 14 octobre 2026 — Intégration finale Codex / PR #62, contrat 3
 
@@ -69,6 +80,42 @@
 - Livraison GitHub bloquée par la consigne humaine : attendre la fusion ou fermeture de #62, encore ouverte au dernier contrôle, HEAD `7af1c5b89f75ae32fb7de8b63ccb2d035d38a61d`.
 - Migrations production = 0 ; écritures production = 0 ; fusion = non ; déploiement = non.
 - NEXT_EXECUTABLE_TASK : terminer la validation locale, puis attendre #62 avant d’intégrer le nouveau master et de proposer une PR unique. Ne pas publier un frontend sans son contrat approuvé.
+
+## 14 octobre 2026 — Correction de Clôture PR #62 : Sécurité RBAC Fail-Closed, Intégrité Multi-PDF et Validation Finale (Antigravity)
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62
+- **Branche Git** : `feat/admin-financial-document-ingestion-pilot`
+- **Revue traitée** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62#issuecomment-6157235505
+- **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0` (100% simulations et tests sous PGlite WASM / Vitest, zéro écriture sur Supabase production).
+- **Problèmes résolus et durcissements appliqués** :
+  1. **Contrôle d'accès RBAC Fail-Closed** (`dataStore.ts`) :
+     - Rejet immédiat de toute tentative non authentifiée ou avec session expirée (`expiresAt <= Date.now()`).
+     - Rôle `CITIZEN` formellement bloqué.
+     - Rôle `MODERATOR` strictement limité à la vérification (`VERIFIED`), interdiction de publication ou d'archivage.
+     - Rôles `ADMIN` et `DATA_MANAGER` seuls habilités à publier, avec vérification préalable obligatoire (`isVerified`).
+  2. **Intégrité des fichiers & Élimination définitive des Blobs vides** (`SingleCAUploadModal.tsx`, `documentStorageService.ts`) :
+     - Suppression de tout dummy Blob (`new Blob([], ...)`).
+     - Validation préalable rejetant les fichiers de taille 0 octet.
+     - Remplacement partiel sécurisé : les volets inchangés conservent fidèlement leur `storage_path` et `checksum_sha256` existants sans re-téléversement inutile.
+     - Recalcul déterministe du SHA-256 du manifeste combinant volets mis à jour et préservés.
+  3. **Compensation transactionnelle Storage / PostgreSQL** (`SingleCAUploadModal.tsx`, `documentStorageService.ts`) :
+     - Suivi précis des fichiers créés lors de la session (`newlyUploadedPaths`).
+     - Si la persistance PostgreSQL échoue, appel automatique de `deleteStorageFiles` sur les seuls fichiers orphelins nouvellement téléversés, sans jamais affecter les fichiers historiques.
+     - Reporting d'anomalie critique pour l'administrateur si le nettoyage Storage échoue.
+     - Protection anti-double soumission `if (isSubmitting) return;`.
+  4. **Résolution de l'erreur de validation initiale du CA Cocody 2024** (`dataStore.ts`) :
+     - Diagnostic : la colonne `verified_by` est de type `UUID references profiles(id)` sous PostgreSQL. L'envoi d'une chaîne textuelle telle que `'Administrateur'` provoquait `invalid input syntax for type uuid: "Administrateur"`.
+     - Correction : validation regex du format UUID (`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`). Seul un UUID valide (`userId`) est transmis, sinon `null`/`undefined` est passé pour laisser le trigger PostgreSQL assigner `auth.uid()`.
+  5. **Schéma & Migration SQL Locale (PGlite)** :
+     - Validation sous PGlite (WASM) de la migration `supabase/migrations/20261013200000_multipart_ca_documents.sql`.
+     - Vérification de la rétrocompatibilité (défauts `is_multipart = false`, `parts_count = null`, `ocr_status = 'NOT_APPLICABLE'`).
+     - Vérification de la contrainte `chk_pubdocs_ocr_status`.
+- **Validation Globale** :
+  - `src/utils/__tests__/caMultipartAndValidation.test.ts` : **27/27 tests passés**.
+  - `src/utils/__tests__/caManagement.test.ts` : **26/26 tests passés**.
+  - Couverture totale : **62 fichiers de tests, 820 tests exécutés, 820 tests réussis (100% PASS, 0 FAIL)**.
+  - Compilation TypeScript & Build Vite : `npm run build` réussi sans erreur (**code 0**).
+- **NEXT_EXECUTABLE_TASK** : Revue finale et approbation de la PR #62 par ChatGPT pour fusion sur `master`.
 
 ## 13 octobre 2026 — Correction Finale PR #62 : Ingestion Multi-PDF Réelle et Validation Administrateur (Antigravity)
 

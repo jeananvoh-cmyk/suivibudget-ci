@@ -60,6 +60,7 @@ interface PartItemState {
   page_range: string;
   storage_path?: string;
   isCalculating: boolean;
+  notes?: string;
 }
 
 export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
@@ -406,6 +407,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
     if (!institutionId) {
       onShowToast('Veuillez sélectionner une collectivité.', 'error');
@@ -417,13 +419,25 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
         onShowToast(pageRangeValidation.error || 'Plages de pages invalides.', 'error');
         return;
       }
-      if(existingDocument && !isAsNewVersion && parts.some(p=>p.file)) {onShowToast('Créez une nouvelle version pour remplacer les originaux.','error');return;}
-      const missingFiles = parts.some(p => (isAsNewVersion ? !p.file : !p.file && !p.storage_path));
-      if (missingFiles) {
-        onShowToast('Veuillez sélectionner un fichier PDF pour chaque volet.', 'error');
+      if (existingDocument && !isAsNewVersion && parts.some(p => p.file)) {
+        onShowToast('Créez une nouvelle version pour remplacer les originaux.', 'error');
         return;
       }
+      for (const p of parts) {
+        if (p.file && p.file.size === 0) {
+          onShowToast(`Le fichier sélectionné pour le volet ${p.part_number} (${p.file_name}) est vide (0 octet).`, 'error');
+          return;
+        }
+        if (isAsNewVersion ? !p.file && (!p.storage_path || !p.checksum_sha256) : !p.file && (!p.storage_path || !p.checksum_sha256)) {
+          onShowToast(`Veuillez sélectionner un fichier PDF pour le volet ${p.part_number}.`, 'error');
+          return;
+        }
+      }
     } else {
+      if (selectedFile && selectedFile.size === 0) {
+        onShowToast('Le fichier PDF sélectionné est vide (0 octet).', 'error');
+        return;
+      }
       if (!selectedFile && !existingDocument?.storage_path) {
         onShowToast('Veuillez téléverser un fichier PDF officiel.', 'error');
         return;
@@ -431,6 +445,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
     }
 
     setIsSubmitting(true);
+    const newlyUploadedPaths: string[] = [];
 
     try {
       let finalFileUrl = fileUrl;
@@ -451,18 +466,23 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       };
 
       if (isMultipart) {
-        // Mode multi-parties : téléversement réel de chaque fascicule
-        const filesToUpload = parts.filter(p => Boolean(p.file));
+        // Mode multi-parties : téléversement réel des nouveaux fascicules
+        const hasNewFiles = parts.some(p => Boolean(p.file));
         
-        if (filesToUpload.length > 0) {
+        if (hasNewFiles) {
           const multiRes = await DocumentStorageService.uploadMultiPartDocument(
             parts.map(p => ({
               partNumber: p.part_number,
-              file: p.file || new Blob([], { type: 'application/pdf' }), // ou existant
+              file: p.file || undefined,
               fileName: p.file_name,
               pageStart: p.page_start,
               pageEnd: p.page_end,
               pageRange: p.page_range,
+              checksumSha256: p.checksum_sha256,
+              storagePath: p.storage_path,
+              fileSizeBytes: p.file_size_bytes,
+              fileSizeFormatted: p.file_size,
+              notes: p.notes,
             })),
             uploadOptions
           );
@@ -471,6 +491,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
             throw new Error(multiRes.error || 'Échec du téléversement multi-parties.');
           }
 
+          newlyUploadedPaths.push(...multiRes.newlyUploadedPaths);
           finalStoragePath = multiRes.primaryStoragePath;
           finalSha256 = multiRes.manifestChecksumSha256;
           finalSizeStr = multiRes.totalFileSizeFormatted;
@@ -480,7 +501,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
         } else {
           // Métadonnées sans nouveau fichier (modification)
           finalParts = existingDocument?.document_parts;
-          finalSha256 = existingDocument?.manifest_sha256 || checksumSha256;
+          finalSha256 = existingDocument?.manifest_sha256 || manifestSha256 || checksumSha256;
         }
       } else if (selectedFile) {
         // Mode document unique
@@ -491,6 +512,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
         );
 
         if (!uploadRes.success) throw new Error(uploadRes.error || 'Téléversement non confirmé.');
+        newlyUploadedPaths.push(uploadRes.storagePath);
         finalFileUrl = uploadRes.fileUrl;
         finalStorageBucket = uploadRes.storageBucket;
         finalStoragePath = uploadRes.storagePath;
@@ -500,48 +522,62 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       }
 
       // Statut OCR rigoureux : pas de fausse extraction automatique annoncée
-      const finalOcrStatus: DocumentOcrStatus | null = existingDocument?.ocr_status ?? (isScannedPdf===true ? 'NOT_IMPLEMENTED' : null);
+      const finalOcrStatus: DocumentOcrStatus | null = existingDocument?.ocr_status ?? (isScannedPdf === true ? 'NOT_IMPLEMENTED' : null);
 
-      const savedDoc = await dataStore.saveCADocument({
-        replacement_reason: replacementReason,
-        id: existingDocument?.id,
-        institution_id: institutionId,
-        institution_name: currentInstitution?.name || 'Collectivité',
-        institution_type: currentInstitution?.type === 'REGION' ? 'REGION' : 'MAIRIE',
-        year: fiscalYear,
-        fiscal_year: fiscalYear,
-        title: `Compte Administratif ${fiscalYear} - ${currentInstitution?.name}`,
-        file_url: finalFileUrl,
-        file_name: isMultipart ? `compte-administratif-${fiscalYear}-multipart.pdf` : (fileName || `compte-administratif-${fiscalYear}.pdf`),
-        file_size: finalSizeStr || undefined,
-        file_size_bytes: finalSizeBytes,
-        storage_bucket: finalStorageBucket,
-        storage_path: isMultipart ? null : finalStoragePath,
-        checksum_sha256: isMultipart ? null : finalSha256,
-        manifest_sha256: isMultipart ? finalSha256 : null,
-        source_name: sourceName,
-        source_url: sourceUrl || undefined,
-        adoption_date: adoptionDate || undefined,
-        approval_date: approvalDate || undefined,
-        approval_reference: approvalReference || undefined,
-        page_count: finalTotalPages,
-        page_count_source: isMultipart ? 'AUTOMATIC' : pageCountSource,
-        is_multipart: isMultipart,
-        parts_count: isMultipart ? finalParts?.length : 1,
-        document_parts: finalParts,
-        is_scanned: isScannedPdf,
-        has_text_layer: existingDocument?.has_text_layer ?? null,
-        ocr_status: finalOcrStatus,
-      }, isAsNewVersion);
+      // Persistance PostgreSQL avec compensation en cas d'échec
+      try {
+        const savedDoc = await dataStore.saveCADocument({
+          replacement_reason: replacementReason,
+          id: existingDocument?.id,
+          institution_id: institutionId,
+          institution_name: currentInstitution?.name || 'Collectivité',
+          institution_type: currentInstitution?.type === 'REGION' ? 'REGION' : 'MAIRIE',
+          year: fiscalYear,
+          fiscal_year: fiscalYear,
+          title: `Compte Administratif ${fiscalYear} - ${currentInstitution?.name}`,
+          file_url: finalFileUrl,
+          file_name: isMultipart ? `compte-administratif-${fiscalYear}-multipart.pdf` : (fileName || `compte-administratif-${fiscalYear}.pdf`),
+          file_size: finalSizeStr || undefined,
+          file_size_bytes: finalSizeBytes,
+          storage_bucket: finalStorageBucket,
+          storage_path: isMultipart ? null : finalStoragePath,
+          checksum_sha256: isMultipart ? null : finalSha256,
+          manifest_sha256: isMultipart ? finalSha256 : null,
+          source_name: sourceName,
+          source_url: sourceUrl || undefined,
+          adoption_date: adoptionDate || undefined,
+          approval_date: approvalDate || undefined,
+          approval_reference: approvalReference || undefined,
+          page_count: finalTotalPages,
+          page_count_source: isMultipart ? 'AUTOMATIC' : pageCountSource,
+          is_multipart: isMultipart,
+          parts_count: isMultipart ? finalParts?.length : 1,
+          document_parts: finalParts,
+          is_scanned: isScannedPdf,
+          has_text_layer: existingDocument?.has_text_layer ?? null,
+          ocr_status: finalOcrStatus,
+        }, isAsNewVersion);
 
-      onSuccess(savedDoc);
-      onShowToast(
-        isAsNewVersion 
-          ? `Nouvelle version v${savedDoc.version} enregistrée avec succès.` 
-          : `Compte Administratif ${fiscalYear} enregistré avec succès (${isMultipart ? `${parts.length} volets` : 'document unique'}).`, 
-        'success'
-      );
-      onClose();
+        onSuccess(savedDoc);
+        onShowToast(
+          isAsNewVersion 
+            ? `Nouvelle version v${savedDoc.version} enregistrée avec succès.` 
+            : `Compte Administratif ${fiscalYear} enregistré avec succès (${isMultipart ? `${parts.length} volets` : 'document unique'}).`, 
+          'success'
+        );
+        onClose();
+      } catch (dbErr: any) {
+        if (newlyUploadedPaths.length > 0) {
+          console.warn('Compensation Storage déclenchée après échec base de données:', dbErr.message);
+          const cleanupResult = await DocumentStorageService.deleteStorageFiles(newlyUploadedPaths);
+          if (cleanupResult.success) {
+            throw new Error(`Échec de l'enregistrement en base (${dbErr.message}). Les fichiers temporaires téléversés ont été automatiquement nettoyés.`);
+          } else {
+            throw new Error(`Échec critique : l'enregistrement en base a échoué (${dbErr.message}) ET le nettoyage des fichiers a échoué (${cleanupResult.error || 'inconnu'}). Fichiers orphelins : ${newlyUploadedPaths.join(', ')}.`);
+          }
+        }
+        throw dbErr;
+      }
     } catch (err: any) {
       console.error("Erreur enregistrement CA:", err);
       onShowToast(`Erreur lors de l'enregistrement : ${err.message || 'Erreur inconnue'}`, 'error');

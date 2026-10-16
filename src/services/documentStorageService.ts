@@ -6,7 +6,7 @@
 
 import { supabase, isSupabaseConfigured } from './supabase';
 import { calculateFileSha256 } from '../utils/caFileMatcher';
-import { OfficialDocumentType, DocumentPartInfo } from '../types';
+import { OfficialDocumentType, DocumentPartInfo, PublicDocument } from '../types';
 import { calculateManifestSha256 } from '../../supabase/functions/_shared/documentIntegrity';
 export { calculateManifestSha256 } from '../../supabase/functions/_shared/documentIntegrity';
 import { requireAdminPersistence } from './adminPersistenceService';
@@ -36,7 +36,7 @@ export interface DocumentUploadResult {
 export interface MultiPartInputItem {
   partNumber?: number;
   part_number?: number;
-  file: File | Blob;
+  file?: File | Blob | null;
   fileName?: string;
   file_name?: string;
   pageStart?: number;
@@ -45,6 +45,14 @@ export interface MultiPartInputItem {
   page_end?: number;
   pageRange?: string;
   page_range?: string;
+  checksumSha256?: string;
+  checksum_sha256?: string;
+  fileSizeFormatted?: string;
+  file_size?: string;
+  fileSizeBytes?: number;
+  file_size_bytes?: number;
+  storagePath?: string;
+  storage_path?: string;
   notes?: string;
 }
 
@@ -57,6 +65,7 @@ export interface MultiPartUploadResult {
   primaryStoragePath: string;
   totalPageCount: number;
   uploadedPaths: string[];
+  newlyUploadedPaths: string[];
   error?: string;
 }
 
@@ -317,6 +326,11 @@ export class DocumentStorageService {
       const pageStart = p.pageStart ?? p.page_start;
       const pageEnd = p.pageEnd ?? p.page_end;
       const pageRange = p.pageRange ?? p.page_range ?? (pageStart && pageEnd ? `${pageStart}-${pageEnd}` : `Pages ${pageStart || 1}`);
+      const checksumSha256 = p.checksumSha256 ?? p.checksum_sha256;
+      const storagePath = p.storagePath ?? p.storage_path;
+      const fileSizeBytes = p.fileSizeBytes ?? p.file_size_bytes;
+      const fileSizeFormatted = p.fileSizeFormatted ?? p.file_size;
+
       return {
         partNumber,
         fileName,
@@ -324,6 +338,10 @@ export class DocumentStorageService {
         pageStart,
         pageEnd,
         pageRange,
+        checksumSha256,
+        storagePath,
+        fileSizeBytes,
+        fileSizeFormatted,
         notes: p.notes,
       };
     });
@@ -338,7 +356,7 @@ export class DocumentStorageService {
       }))
     );
 
-    if (!pageCheck.isValid || normalizedParts.length<2 || normalizedParts.length>100) {
+    if (!pageCheck.isValid) {
       return {
         success: false,
         documentParts: [],
@@ -348,43 +366,94 @@ export class DocumentStorageService {
         primaryStoragePath: '',
         totalPageCount: 0,
         uploadedPaths: [],
+        newlyUploadedPaths: [],
         error: pageCheck.error || 'Plages de pages invalides.',
       };
     }
 
     // 2. Traitement séquentiel de chaque partie
     try {
-      const hashes=new Set<string>();
-      for(const item of normalizedParts) {
-        if(item.file.size<1 || item.file.size>50*1024*1024 || item.file.type!=='application/pdf' || new TextDecoder().decode(await item.file.slice(0,5).arrayBuffer())!=='%PDF-') throw new Error('PDF réel requis pour chaque fascicule.');
-        const hash=await calculateFileSha256(item.file);if(hashes.has(hash)) throw new Error('Un original est présent deux fois.');hashes.add(hash);
-      }
+      const hashes = new Set<string>();
       for (const item of normalizedParts) {
-        const uploadRes = await this.uploadDocument(item.file, item.fileName, {
-          ...options,
-          partNumber: item.partNumber,
-        });
-
-        if (!uploadRes.success) {
-          throw new Error(`Échec du téléversement du volet ${item.partNumber} (${item.fileName}) : ${uploadRes.error}`);
+        if (item.file) {
+          if (item.file.size === 0) {
+            throw new Error(`Le fichier pour le volet ${item.partNumber} (${item.fileName}) est vide (0 octet).`);
+          }
+          if (
+            item.file.size < 1 ||
+            item.file.size > 50 * 1024 * 1024 ||
+            item.file.type !== 'application/pdf' ||
+            new TextDecoder().decode(await item.file.slice(0, 5).arrayBuffer()) !== '%PDF-'
+          ) {
+            throw new Error('PDF réel requis pour chaque fascicule.');
+          }
+          const hash = await calculateFileSha256(item.file);
+          if (hashes.has(hash)) throw new Error('Un original est présent deux fois.');
+          hashes.add(hash);
+        } else {
+          if (!item.storagePath || !item.checksumSha256 || !/^[a-f0-9]{64}$/i.test(item.checksumSha256)) {
+            throw new Error(`Le volet ${item.partNumber} (${item.fileName}) ne dispose ni d'un nouveau fichier PDF ni d'un chemin de stockage existant certifié.`);
+          }
+          if (hashes.has(item.checksumSha256)) throw new Error('Un original est présent deux fois.');
+          hashes.add(item.checksumSha256);
         }
+      }
 
-        uploadedPaths.push(uploadRes.storagePath);
-        totalBytes += uploadRes.fileSizeBytes;
+      if (normalizedParts.length < 2 || normalizedParts.length > 100) {
+        throw new Error('Deux à cent fascicules requis.');
+      }
 
-        documentParts.push({
-          id:`part-${item.partNumber}-${uploadRes.checksumSha256}`,original_filename:item.fileName,status:'TO_VERIFY',checksum_status:'DECLARED',
-          part_number: item.partNumber,
-          file_name: item.fileName,
-          page_range: item.pageRange,
-          page_start: item.pageStart,
-          page_end: item.pageEnd,
-          checksum_sha256: uploadRes.checksumSha256,
-          file_size: uploadRes.fileSizeFormatted,
-          file_size_bytes: uploadRes.fileSizeBytes,
-          storage_path: uploadRes.storagePath,
-          notes: item.notes,
-        });
+      for (const item of normalizedParts) {
+        if (item.file) {
+          const uploadRes = await this.uploadDocument(item.file, item.fileName, {
+            ...options,
+            partNumber: item.partNumber,
+          });
+
+          if (!uploadRes.success) {
+            throw new Error(`Échec du téléversement du volet ${item.partNumber} (${item.fileName}) : ${uploadRes.error}`);
+          }
+
+          uploadedPaths.push(uploadRes.storagePath);
+          totalBytes += uploadRes.fileSizeBytes;
+
+          documentParts.push({
+            id: `part-${item.partNumber}-${uploadRes.checksumSha256}`,
+            original_filename: item.fileName,
+            status: 'TO_VERIFY',
+            checksum_status: 'DECLARED',
+            part_number: item.partNumber,
+            file_name: item.fileName,
+            page_range: item.pageRange,
+            page_start: item.pageStart,
+            page_end: item.pageEnd,
+            checksum_sha256: uploadRes.checksumSha256,
+            file_size: uploadRes.fileSizeFormatted,
+            file_size_bytes: uploadRes.fileSizeBytes,
+            storage_path: uploadRes.storagePath,
+            notes: item.notes,
+          });
+        } else {
+          const bytes = item.fileSizeBytes || 0;
+          totalBytes += bytes;
+
+          documentParts.push({
+            id: `part-${item.partNumber}-${item.checksumSha256}`,
+            original_filename: item.fileName,
+            status: 'TO_VERIFY',
+            checksum_status: 'DECLARED',
+            part_number: item.partNumber,
+            file_name: item.fileName,
+            page_range: item.pageRange,
+            page_start: item.pageStart,
+            page_end: item.pageEnd,
+            checksum_sha256: item.checksumSha256,
+            file_size: item.fileSizeFormatted || (bytes > 0 ? `${(bytes / (1024 * 1024)).toFixed(1)} Mo` : 'Existant'),
+            file_size_bytes: bytes,
+            storage_path: item.storagePath,
+            notes: item.notes,
+          });
+        }
       }
 
       // 3. Calcul déterministe de l'empreinte logique du manifeste
@@ -402,12 +471,16 @@ export class DocumentStorageService {
         primaryStoragePath: '',
         totalPageCount: pageCheck.totalPages || 0,
         uploadedPaths,
+        newlyUploadedPaths: uploadedPaths,
       };
     } catch (uploadError: any) {
       // 4. Compensation / Rollback en cas d'échec partiel
       console.warn('Rollback déclenché pour upload multi-parties:', uploadError.message);
       if (uploadedPaths.length > 0) {
-        await this.deleteStorageFiles(uploadedPaths);
+        const cleanupRes = await this.deleteStorageFiles(uploadedPaths);
+        if (!cleanupRes.success) {
+          console.error('Échec critique du rollback Storage des fichiers:', uploadedPaths, cleanupRes.error);
+        }
       }
 
       return {
@@ -419,6 +492,7 @@ export class DocumentStorageService {
         primaryStoragePath: '',
         totalPageCount: 0,
         uploadedPaths: [],
+        newlyUploadedPaths: [],
         error: uploadError.message || 'Échec lors du téléversement multi-parties.',
       };
     }
@@ -445,14 +519,46 @@ export class DocumentStorageService {
   /**
    * Supprime des fichiers du stockage privé Supabase (utilisé pour compensation/rollback)
    */
-  public static async deleteStorageFiles(storagePaths: string[]): Promise<void> {
-    if (!storagePaths || storagePaths.length === 0) return;
-    if (!isSupabaseConfigured()) return;
+  public static async deleteStorageFiles(storagePaths: string[]): Promise<{ success: boolean; error?: string; deletedCount: number }> {
+    if (!storagePaths || storagePaths.length === 0) return { success: true, deletedCount: 0 };
+    if (!isSupabaseConfigured()) return { success: true, deletedCount: storagePaths.length };
 
     try {
-      await supabase.storage.from(this.BUCKET_NAME).remove(storagePaths);
-    } catch (removeError) {
-      console.warn('Erreur lors de la suppression de compensation dans le bucket:', removeError);
+      const { data, error } = await supabase.storage.from(this.BUCKET_NAME).remove(storagePaths);
+      if (error) {
+        console.warn('Erreur lors de la suppression de compensation dans le bucket:', error);
+        return { success: false, error: error.message, deletedCount: 0 };
+      }
+      return { success: true, deletedCount: data?.length ?? storagePaths.length };
+    } catch (removeError: any) {
+      const msg = removeError instanceof Error ? removeError.message : 'Erreur inconnue';
+      console.warn('Erreur inattendue suppression bucket:', msg);
+      return { success: false, error: msg, deletedCount: 0 };
     }
   }
 }
+
+/**
+ * Ouvre ou télécharge de manière sécurisée un document public (via URL signée public-document-url ou file_url)
+ */
+export async function openPublicDocument(doc: PublicDocument, partId?: string): Promise<boolean> {
+  if (!doc || doc.http_status === 404) return false;
+  let targetUrl = doc.file_url;
+  if ((doc.storage_path || doc.is_multipart) && isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase.functions.invoke('public-document-url', {
+        body: { document_id: doc.id, ...(partId ? { part_id: partId } : {}) },
+      });
+      if (error || !data?.url) return false;
+      targetUrl = data.url;
+    } catch {
+      return false;
+    }
+  }
+  if (!targetUrl) return false;
+  if (typeof window !== 'undefined' && typeof window.open === 'function') {
+    window.open(targetUrl, '_blank', 'noopener,noreferrer');
+  }
+  return true;
+}
+
