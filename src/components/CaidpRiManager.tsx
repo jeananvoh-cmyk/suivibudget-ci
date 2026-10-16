@@ -1,3 +1,5 @@
+import { sanitizeCsvCell } from '../utils/security';
+import { adminErrorMessage, readStaffOperators } from '../services/adminPersistenceService';
 import React, { useState, useMemo, useEffect } from 'react';
 import { CaidpEntity, EntityPublicCategory, CaidpEntityHistoryItem } from '../data/caidpRiData';
 import { dataStore } from '../services/dataStore';
@@ -52,12 +54,12 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
   const auth = dataStore.getAuth();
 
   // Directory state from dataStore
-  const [directory, setDirectory] = useState<CaidpEntity[]>(() => dataStore.getCaidpDirectory());
+  const [directory, setDirectory] = useState<CaidpEntity[]>(() => dataStore.getCaidpDirectory(true));
 
   // Subscribe to dataStore changes
   useEffect(() => {
     return dataStore.subscribe(() => {
-      setDirectory(dataStore.getCaidpDirectory());
+      setDirectory(dataStore.getCaidpDirectory(true));
     });
   }, []);
 
@@ -254,7 +256,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
       source: item.source || "Mis à jour par l'Admin",
       source_url: item.source_url || '',
       verification_status: item.verification_status || 'TO_VERIFY',
-      verified_by: item.verified_by || auth.fullName || 'Admin',
+      verified_by: item.verified_by || '',
       assigned_to: item.assigned_to || '',
       notes: item.notes || '',
     });
@@ -272,10 +274,10 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
       ri_function: "Service d'Accès aux Documents Publics (Loi n°2013-867)",
       email: "Pas d'email",
       phone: "Pas de numéro",
-      source: "Créé par l'Admin",
+      source: '',
       source_url: '',
       verification_status: 'TO_VERIFY',
-      verified_by: auth.fullName || 'Admin',
+      verified_by: '',
       assigned_to: '',
       notes: '',
     });
@@ -283,89 +285,40 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
   };
 
   // Save current entity logic
-  const saveCurrentEntity = (form: Omit<CaidpEntity, 'id'>, itemToSave: CaidpEntity | null): boolean => {
-    if (!form.company_name.trim()) {
-      onShowToast("Veuillez saisir le nom de l'organisme public.", 'error');
-      return false;
-    }
-
-    const now = new Date().toISOString();
-    const author = auth.fullName || 'Admin';
-
-    if (itemToSave) {
-      const historyItem: CaidpEntityHistoryItem = {
-        id: 'hist-' + Date.now(),
-        action: 'UPDATE_COORDINATES',
-        author,
-        date: now,
-        details: `Mise à jour: Email "${form.email}", Tél "${form.phone}", RI "${form.ri_name}"`,
-      };
-
-      const existingHistory = itemToSave.history || [];
-      const updatedHistory = [historyItem, ...existingHistory].slice(0, 10);
-
-      dataStore.updateCaidpEntity(itemToSave.id, {
-        ...form,
-        verification_date: now,
-        history: updatedHistory,
-      });
-
-      adminTaskService.logActivity({
-        action_type: 'ENTITY_COMPLETED',
-        description: `Coordonnées RI mises à jour : ${form.company_name}`,
-        author,
-        author_role: auth.role,
-        target_id: itemToSave.id,
-        target_type: 'CAIDP_ENTITY',
-        metadata: { email: form.email, phone: form.phone, ri_name: form.ri_name }
-      });
-
-      onShowToast(`"${form.company_name}" enregistré avec succès !`, 'success');
-      return true;
-    } else {
-      const newEntity: CaidpEntity = {
-        id: 'caidp-entity-' + Date.now(),
-        ...form,
-        verification_date: now,
-        history: [{
-          id: 'hist-' + Date.now(),
-          action: 'CREATE',
-          author,
-          date: now,
-          details: `Création de l'organisme dans le répertoire CAIDP`,
-        }],
-      };
-
-      dataStore.addCaidpEntity(newEntity);
-
-      adminTaskService.logActivity({
-        action_type: 'ENTITY_COMPLETED',
-        description: `Nouvel organisme CAIDP ajouté : ${form.company_name}`,
-        author,
-        author_role: auth.role,
-        target_id: newEntity.id,
-        target_type: 'CAIDP_ENTITY',
-      });
-
-      onShowToast(`Nouvel organisme "${form.company_name}" ajouté avec succès !`, 'success');
-      return true;
-    }
+  const saving=React.useRef(false);
+  const [adminSaving,setSaving]=useState(false);
+  const [operators,setOperators]=useState<{id:string;full_name:string;role:string}[]>([]);
+  useEffect(()=>{void readStaffOperators().then(setOperators).catch(error=>onShowToast(adminErrorMessage(error),'error'));},[]);
+  const saveCurrentEntity = async (form: Omit<CaidpEntity,'id'>, item: CaidpEntity | null): Promise<boolean> => {
+    if(!form.company_name.trim()) {onShowToast('Nom de l’organisme requis.','error');return false;}
+    if(item) await dataStore.updateCaidpEntity(item.id,{...form,revision:item.revision,verification_status:form.verification_status==='VERIFIED' && item.verification_status!=='VERIFIED' ? 'TO_VERIFY' : form.verification_status});
+    else await dataStore.addCaidpEntity({...form,verification_status:'TO_VERIFY'});
+    onShowToast('Organisme sauvegardé et relu sur le serveur. Toute certification exige une revue distincte.','success');
+    return true;
   };
 
-  const handleSaveOnly = (e: React.FormEvent) => {
+  const handleSaveOnly = async (e: React.FormEvent) => {
+    e.preventDefault(); if (saving.current) return; saving.current=true; setSaving(true);
+    try {
+
     e.preventDefault();
-    const success = saveCurrentEntity(drawerForm, editingItem);
+    const success = await saveCurrentEntity(drawerForm, editingItem);
     if (success) {
       setIsDrawerOpen(false);
       setEditingItem(null);
     }
+
+    } catch (error) { onShowToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
 
   // "Enregistrer et suivant" : Save and immediately switch to next incomplete entity!
-  const handleSaveAndNext = (e: React.FormEvent) => {
+  const handleSaveAndNext = async (e: React.FormEvent) => {
+    e.preventDefault(); if (saving.current) return; saving.current=true; setSaving(true);
+    try {
+
     e.preventDefault();
     const currentId = editingItem?.id;
-    const success = saveCurrentEntity(drawerForm, editingItem);
+    const success = await saveCurrentEntity(drawerForm, editingItem);
     if (!success) return;
 
     // Search for next incomplete entity in the filtered list
@@ -389,71 +342,45 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
       setEditingItem(null);
       onShowToast('Félicitations ! Tous les organismes de cette sélection sont complets.', 'success');
     }
+
+    } catch (error) { onShowToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
 
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (id: string, name: string) => {
+    if (saving.current) return; saving.current=true; setSaving(true);
+    try {
+
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer "${name}" du répertoire CAIDP ?`)) {
-      dataStore.deleteCaidpEntity(id);
-      adminTaskService.logActivity({
-        action_type: 'TASK_RESOLVED',
-        description: `Suppression de l'organisme CAIDP : ${name}`,
-        author: auth.fullName || 'Admin',
-        author_role: auth.role,
-        target_id: id,
-        target_type: 'CAIDP_ENTITY',
-      });
-      onShowToast(`"${name}" a été supprimé du répertoire.`, 'info');
+      await dataStore.deleteCaidpEntity(id);
+
+      onShowToast(`"${name}" a été archivé sur le serveur.`, 'info');
     }
+
+    } catch (error) { onShowToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
 
   // Bulk Operations
-  const handleBulkMarkVerified = () => {
-    if (selectedIds.size === 0) return;
-    const now = new Date().toISOString();
-    const author = auth.fullName || 'Admin';
+  const handleBulkMarkVerified = async () => {
+    if (saving.current) return; saving.current=true; setSaving(true);
+    try {
 
-    selectedIds.forEach(id => {
-      dataStore.updateCaidpEntity(id, {
-        verification_status: 'VERIFIED',
-        verification_date: now,
-        verified_by: author,
-      });
-    });
+    if(selectedIds.size===0) return;
+    const reason=window.prompt('Motif du contrôle humain des sources de chaque contact (10 caractères minimum)');
+    if(!reason || reason.trim().length<10) return;
+    await dataStore.verifyCaidpEntities([...selectedIds],reason);
+    onShowToast('Contrôles humains sauvegardés et relus sur le serveur.','success');setSelectedIds(new Set());
 
-    adminTaskService.logActivity({
-      action_type: 'BULK_ACTION',
-      description: `${selectedIds.size} organismes marqués comme vérifiés`,
-      author,
-      author_role: auth.role,
-      metadata: { count: selectedIds.size, ids: Array.from(selectedIds) }
-    });
-
-    onShowToast(`${selectedIds.size} organismes marqués comme vérifiés avec succès !`, 'success');
-    setSelectedIds(new Set());
+    } catch (error) { onShowToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
+  const handleBulkAssign = async () => {
+    if (saving.current) return; saving.current=true; setSaving(true);
+    try {
 
-  const handleBulkAssign = () => {
-    if (selectedIds.size === 0 || !bulkAssignee.trim()) return;
-    const author = auth.fullName || 'Admin';
+    if(!selectedIds.size || !bulkAssignee.trim()) return;
+    await adminTaskService.bulkAssignTasks([...selectedIds].map(id=>'task-caidp-'+id),bulkAssignee.trim());
+    onShowToast('Assignations sauvegardées sur le serveur.','success');setIsBulkAssignModalOpen(false);setSelectedIds(new Set());
 
-    selectedIds.forEach(id => {
-      dataStore.updateCaidpEntity(id, {
-        assigned_to: bulkAssignee.trim(),
-      });
-    });
-
-    adminTaskService.logActivity({
-      action_type: 'BULK_ACTION',
-      description: `${selectedIds.size} organismes assignés à ${bulkAssignee.trim()}`,
-      author,
-      author_role: auth.role,
-      metadata: { count: selectedIds.size, assignee: bulkAssignee.trim() }
-    });
-
-    onShowToast(`${selectedIds.size} organismes assignés à "${bulkAssignee.trim()}" !`, 'success');
-    setIsBulkAssignModalOpen(false);
-    setBulkAssignee('');
-    setSelectedIds(new Set());
+    } catch (error) { onShowToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
 
   const handleExportSelectedCSV = () => {
@@ -461,21 +388,8 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
       ? directory.filter(e => selectedIds.has(e.id))
       : filteredDirectory;
 
-    const headers = ['ID', 'Organisme', 'Categorie', 'Region', 'Commune', 'Nom_RI', 'Fonction_RI', 'Email_RI', 'Telephone_RI', 'Statut_Verification', 'Assigné_A', 'Source'];
-    const rows = listToExport.map(e => [
-      `"${e.id}"`,
-      `"${(e.company_name || '').replace(/"/g, '""')}"`,
-      `"${e.category}"`,
-      `"${e.region || ''}"`,
-      `"${e.commune || ''}"`,
-      `"${(e.ri_name || '').replace(/"/g, '""')}"`,
-      `"${(e.ri_function || '').replace(/"/g, '""')}"`,
-      `"${e.email || ''}"`,
-      `"${e.phone || ''}"`,
-      `"${e.verification_status || 'TO_VERIFY'}"`,
-      `"${e.assigned_to || ''}"`,
-      `"${(e.source || '').replace(/"/g, '""')}"`,
-    ]);
+    const headers=["id","revision","company_name","category","region","commune","ri_name","ri_function","email","phone","source","source_url"];
+    const rows=listToExport.map(row=>headers.map(key=>sanitizeCsvCell((row as unknown as Record<string,unknown>)[key] ?? '')));
 
     const csvContent = [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -502,22 +416,21 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
     onShowToast('Exportation du répertoire complet réussie !', 'success');
   };
 
-  const handleImportCSV = () => {
+  const handleImportCSV = async () => {
+    if (saving.current) return; saving.current=true; setSaving(true);
+    try {
+
     if (!importCsvText.trim()) {
       onShowToast('Veuillez coller le contenu CSV à importer.', 'error');
       return;
     }
-    const result = dataStore.importCaidpDirectoryFromCSV(importCsvText);
-    adminTaskService.logActivity({
-      action_type: 'BULK_ACTION',
-      description: `Import CSV CAIDP : ${result.successCount} organismes mis à jour`,
-      author: auth.fullName || 'Admin',
-      author_role: auth.role,
-      metadata: { count: result.successCount }
-    });
+    const result = await dataStore.importCaidpDirectoryFromCSV(importCsvText);
+
     onShowToast(`Importation terminée : ${result.successCount} organismes mis à jour ou ajoutés !`, 'success');
     setIsImportModalOpen(false);
     setImportCsvText('');
+
+    } catch (error) { onShowToast(adminErrorMessage(error),'error'); } finally {saving.current=false;setSaving(false);}
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -552,6 +465,9 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
   };
 
   return (
+    <fieldset disabled={adminSaving} aria-busy={adminSaving} className="min-w-0">
+      <legend className="sr-only">Répertoire CAIDP</legend>
+      {adminSaving && <p role="status">Sauvegarde serveur en cours…</p>}
     <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6 relative">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5">
@@ -578,7 +494,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
           <button
             onClick={handleExportAllCSV}
             className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-200 cursor-pointer"
-            title="Exporter l'annuaire au format CSV"
+            title="Exporter l'annuaire au format CSV" aria-label="Exporter l'annuaire au format CSV"
           >
             <Download className="w-3.5 h-3.5 text-slate-600" />
             <span>Exporter CSV</span>
@@ -587,7 +503,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
           <button
             onClick={() => setIsImportModalOpen(true)}
             className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-200 cursor-pointer"
-            title="Importer des contacts en masse depuis un CSV"
+            title="Importer des contacts en masse depuis un CSV" aria-label="Importer des contacts en masse depuis un CSV"
           >
             <Upload className="w-3.5 h-3.5 text-slate-600" />
             <span>Importer Contacts</span>
@@ -633,12 +549,12 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
               <button
                 onClick={() => { setCompletionFilter('WITH_EMAIL'); setCurrentPage(1); }}
                 className="font-black text-slate-900 hover:text-emerald-700 hover:underline cursor-pointer"
-                title="Cliquer pour afficher les 29 organismes disposant d'un email"
+                title="Cliquer pour afficher les 29 organismes disposant d'un email" aria-label="Cliquer pour afficher les 29 organismes disposant d'un email"
               >
                 {stats.withEmail} / {stats.total} ({stats.emailCoveragePercent}%)
               </button>
             </div>
-            <div 
+            <div
               className="w-full bg-slate-100 rounded-full h-2 overflow-hidden cursor-pointer"
               onClick={() => { setCompletionFilter('WITH_EMAIL'); setCurrentPage(1); }}
               title="Cliquer pour afficher les 29 organismes disposant d'un email"
@@ -655,7 +571,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                 <button
                   onClick={() => { setCompletionFilter('ONLY_EMAIL'); setCurrentPage(1); }}
                   className="text-indigo-600 font-bold hover:underline cursor-pointer"
-                  title="Afficher les 11 organismes avec email mais sans numéro de téléphone"
+                  title="Afficher les 11 organismes avec email mais sans numéro de téléphone" aria-label="Afficher les 11 organismes avec email mais sans numéro de téléphone"
                 >
                   {stats.onlyEmail} email seul
                 </button>
@@ -679,12 +595,12 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
               <button
                 onClick={() => { setCompletionFilter('WITH_PHONE'); setCurrentPage(1); }}
                 className="font-black text-slate-900 hover:text-brand-blue hover:underline cursor-pointer"
-                title="Cliquer pour afficher les 20 organismes disposant d'un numéro de téléphone"
+                title="Cliquer pour afficher les 20 organismes disposant d'un numéro de téléphone" aria-label="Cliquer pour afficher les 20 organismes disposant d'un numéro de téléphone"
               >
                 {stats.withPhone} / {stats.total} ({stats.phoneCoveragePercent}%)
               </button>
             </div>
-            <div 
+            <div
               className="w-full bg-slate-100 rounded-full h-2 overflow-hidden cursor-pointer"
               onClick={() => { setCompletionFilter('WITH_PHONE'); setCurrentPage(1); }}
               title="Cliquer pour afficher les 20 organismes disposant d'un numéro de téléphone"
@@ -749,7 +665,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
               className="w-full pl-10 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue"
             />
             {searchQuery && (
-              <button
+              <button aria-label="Fermer"
                 onClick={() => { setSearchQuery(''); setCurrentPage(1); }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
@@ -788,7 +704,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200'
               }`}
-              title="Afficher tous les organismes avec un email officiel opérationnel"
+              title="Afficher tous les organismes avec un email officiel opérationnel" aria-label="Afficher tous les organismes avec un email officiel opérationnel"
             >
               <Mail className="w-3.5 h-3.5" />
               <span>Avec email ({stats.withEmail})</span>
@@ -800,7 +716,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                   ? 'bg-indigo-600 text-white shadow-xs'
                   : 'bg-indigo-50 text-indigo-800 hover:bg-indigo-100 border border-indigo-200'
               }`}
-              title="Afficher les organismes disposant uniquement d'un email (sans téléphone direct)"
+              title="Afficher les organismes disposant uniquement d'un email (sans téléphone direct)" aria-label="Afficher les organismes disposant uniquement d'un email (sans téléphone direct)"
             >
               <Mail className="w-3.5 h-3.5" />
               <span>Uniquement email ({stats.onlyEmail})</span>
@@ -915,7 +831,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                 <button
                   onClick={handleToggleSelectAllPage}
                   className="text-slate-500 hover:text-slate-900 cursor-pointer"
-                  title={isAllPageSelected ? 'Désélectionner la page' : 'Sélectionner la page'}
+                  title={isAllPageSelected ? 'Désélectionner la page' : 'Sélectionner la page'} aria-label={isAllPageSelected ? 'Désélectionner la page' : 'Sélectionner la page'}
                 >
                   {isAllPageSelected ? <CheckSquare className="w-4 h-4 text-brand-blue" /> : <Square className="w-4 h-4" />}
                 </button>
@@ -997,7 +913,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                         <button
                           onClick={() => handleOpenEdit(item)}
                           className="text-amber-700 hover:text-brand-blue hover:underline text-[11px] font-semibold inline-flex items-center gap-1 cursor-pointer"
-                          title="Cliquez pour désigner le RI"
+                          title="Cliquez pour désigner le RI" aria-label="Cliquez pour désigner le RI"
                         >
                           <span className="text-amber-500">•</span>
                           <span>À désigner</span>
@@ -1031,7 +947,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                         <button
                           onClick={() => handleOpenEdit(item)}
                           className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded-lg border border-amber-200 transition-colors cursor-pointer"
-                          title="Cliquer pour renseigner l'email officiel"
+                          title="Cliquer pour renseigner l'email officiel" aria-label="Cliquer pour renseigner l'email officiel"
                         >
                           <Plus className="w-3 h-3 text-amber-600" />
                           <span>Ajouter email</span>
@@ -1050,7 +966,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                         <button
                           onClick={() => handleOpenEdit(item)}
                           className="text-slate-400 hover:text-slate-700 text-[10px] font-semibold hover:underline cursor-pointer"
-                          title="Ajouter un numéro"
+                          title="Ajouter un numéro" aria-label="Ajouter un numéro"
                         >
                           + Ajouter tél
                         </button>
@@ -1078,7 +994,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                         <button
                           onClick={() => handleOpenEdit(item)}
                           className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-brand-blue hover:text-white text-slate-700 font-bold text-xs transition-colors flex items-center gap-1 cursor-pointer"
-                          title="Ouvrir le panneau d'édition rapide"
+                          title="Ouvrir le panneau d'édition rapide" aria-label="Ouvrir le panneau d'édition rapide"
                         >
                           <Edit className="w-3.5 h-3.5" />
                           <span>Éditer</span>
@@ -1086,7 +1002,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                         <button
                           onClick={() => handleDelete(item.id, item.company_name)}
                           className="p-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
-                          title="Supprimer cette entrée"
+                          title="Supprimer cette entrée" aria-label="Supprimer cette entrée"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -1184,7 +1100,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
           <button
             onClick={handleClearSelection}
             className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer ml-1"
-            title="Désélectionner tout"
+            title="Désélectionner tout" aria-label="Désélectionner tout"
           >
             <X className="w-4 h-4" />
           </button>
@@ -1210,7 +1126,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                   </p>
                 </div>
               </div>
-              <button
+              <button aria-label="Fermer"
                 onClick={() => { setIsDrawerOpen(false); setEditingItem(null); }}
                 className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
               >
@@ -1346,6 +1262,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                 </div>
               </div>
 
+              <label className="block font-bold">Diffusion du contact<select aria-label="Diffusion du contact" disabled={!editingItem?.revision || editingItem.verification_status!=='VERIFIED'} value={drawerForm.publication_status || editingItem?.publication_status || 'DRAFT'} onChange={e=>setDrawerForm({...drawerForm,publication_status:e.target.value as 'DRAFT'|'PUBLISHED'})} className="w-full p-2 border rounded-xl"><option value="DRAFT">Brouillon privé</option><option value="PUBLISHED">Publication explicite après revue</option></select></label><p className="text-xs text-slate-600">Enregistrez les coordonnées, puis sélectionnez la fiche dans la liste et lancez le contrôle humain. Une modification révoque sa vérification.</p>
               <div className="pt-2 border-t border-slate-100">
                 <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
                   Gouvernance & Traçabilité
@@ -1360,7 +1277,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                     onChange={(e) => setDrawerForm({ ...drawerForm, verification_status: e.target.value as any })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium"
                   >
-                    <option value="VERIFIED">Vérifié (Conforme)</option>
+                    <option value="VERIFIED" disabled>Vérifié (Conforme)</option>
                     <option value="TO_VERIFY">À vérifier</option>
                     <option value="OUTDATED">Obsolète</option>
                     <option value="UNKNOWN">Incertain</option>
@@ -1457,7 +1374,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                   type="button"
                   onClick={handleSaveAndNext}
                   className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
-                  title="Enregistre cet organisme et ouvre immédiatement le prochain organisme incomplet"
+                  title="Enregistre cet organisme et ouvre immédiatement le prochain organisme incomplet" aria-label="Enregistre cet organisme et ouvre immédiatement le prochain organisme incomplet"
                 >
                   <span>Enregistrer et suivant</span>
                   <ArrowRight className="w-4 h-4" />
@@ -1476,7 +1393,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
               <h4 className="font-extrabold text-slate-900 text-sm">
                 Assigner {selectedIds.size} organismes
               </h4>
-              <button
+              <button aria-label="Fermer"
                 onClick={() => setIsBulkAssignModalOpen(false)}
                 className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
               >
@@ -1484,14 +1401,8 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
               </button>
             </div>
             <div className="space-y-3 text-xs">
-              <label className="block font-bold text-slate-700">Nom du modérateur responsable</label>
-              <input
-                type="text"
-                value={bulkAssignee}
-                onChange={(e) => setBulkAssignee(e.target.value)}
-                placeholder="ex: Sarah Koffi, Modérateur 1..."
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
-              />
+              <label className="block font-bold text-slate-700">Compte responsable de la tâche</label>
+              <select aria-label="Opérateur CAIDP responsable" value={bulkAssignee} onChange={e=>setBulkAssignee(e.target.value)} className="w-full px-3 py-2 border rounded-xl"><option value="">Sélectionnez un compte actif</option>{operators.filter(operator=>operator.role!=='MODERATOR').map(operator=><option key={operator.id} value={operator.id}>{operator.full_name} ({operator.role})</option>)}</select>
             </div>
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
               <button
@@ -1529,7 +1440,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                   </p>
                 </div>
               </div>
-              <button
+              <button aria-label="Fermer"
                 onClick={() => setIsImportModalOpen(false)}
                 className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
               >
@@ -1558,7 +1469,7 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
                   rows={6}
                   value={importCsvText}
                   onChange={(e) => setImportCsvText(e.target.value)}
-                  placeholder="Organisme;Categorie;Region;Commune;Nom_RI;Fonction_RI;Email_RI;Telephone_RI&#10;Mairie de Korhogo;MAIRIE;Poro;Korhogo;M. Soro Amadou;Secrétaire Général;soro@mairie-korhogo.ci;+225 27 36 86 00 00"
+                  placeholder="company_name;category;region;commune;ri_name;ri_function;email;phone;source;source_url"
                   className="w-full p-3 font-mono text-[11px] bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue"
                 />
               </div>
@@ -1591,5 +1502,6 @@ export const CaidpRiManager: React.FC<CaidpRiManagerProps> = ({ onShowToast, ini
         </div>
       )}
     </div>
+    </fieldset>
   );
 };

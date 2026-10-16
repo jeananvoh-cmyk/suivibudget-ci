@@ -123,111 +123,17 @@ describe('Financial Integrity & Data Sanitation (LOT 1)', () => {
     });
   });
 
-  describe('Admin Dashboard Roundtrip & Three-state Budget Invariants', () => {
-    it('preserves null budgets when an institution with unknown amounts is opened, edited, and saved', () => {
-      const testInst: Institution = {
-        id: 'inst-test-null-preservation',
-        name: 'Mairie Test Sans Budget Documenté',
-        type: 'MAIRIE',
-        region: 'Lagunes',
-        district: "Autonome d'Abidjan",
-        total_budget_fcfa: null,
-        budget_functioning_fcfa: null,
-        budget_investment_fcfa: null,
-      };
-
-      dataStore.addInstitution(testInst);
-
-      // 1. Simuler l'ouverture du formulaire (handleEditInstitution)
-      const formState = {
-        budget_functioning_fcfa: testInst.budget_functioning_fcfa ?? null,
-        budget_investment_fcfa: testInst.budget_investment_fcfa ?? null,
-        total_budget_fcfa: testInst.total_budget_fcfa ?? null,
-      };
-
-      expect(formState.budget_functioning_fcfa).toBeNull();
-      expect(formState.budget_investment_fcfa).toBeNull();
-      expect(formState.total_budget_fcfa).toBeNull();
-
-      // 2. Simuler la sauvegarde (handleSaveInstitution) sans forcer null -> 0
-      const hasBothBreakdowns = formState.budget_functioning_fcfa != null && formState.budget_investment_fcfa != null;
-      const computedTotal = hasBothBreakdowns
-        ? (formState.budget_functioning_fcfa! + formState.budget_investment_fcfa!)
-        : null;
-      const resolvedTotal = computedTotal != null
-        ? computedTotal
-        : (formState.total_budget_fcfa ?? testInst.total_budget_fcfa ?? null);
-
-      expect(resolvedTotal).toBeNull();
-
-      const savedInst: Institution = {
-        ...testInst,
-        total_budget_fcfa: resolvedTotal,
-        budget_functioning_fcfa: formState.budget_functioning_fcfa,
-        budget_investment_fcfa: formState.budget_investment_fcfa,
-      };
-
-      dataStore.updateInstitution(savedInst);
-
-      // 3. Contrôle après sauvegarde dans le store
-      const reloaded = dataStore.getInstitutions().find(i => i.id === testInst.id);
-      expect(reloaded).toBeDefined();
-      expect(reloaded!.total_budget_fcfa).toBeNull();
-      expect(reloaded!.budget_functioning_fcfa).toBeNull();
-      expect(reloaded!.budget_investment_fcfa).toBeNull();
+  describe('Admin Dashboard — refus des sauvegardes locales et protection des budgets',()=>{
+    it('ne conserve aucun faux enregistrement en l’absence de confirmation serveur',async()=>{
+      const testInst: Institution={id:'isolated-offline',name:'Institution isolée',type:'MAIRIE',region:'Test',district:'Test',total_budget_fcfa:null,budget_functioning_fcfa:null,budget_investment_fcfa:null};
+      await expect(dataStore.addInstitution(testInst)).rejects.toThrow(/Supabase|Authentication/);
+      expect(dataStore.getInstitutions().some(row=>row.id===testInst.id)).toBe(false);
     });
-
-    it('preserves genuine documented zero across open, edit, and save flows', () => {
-      const testZeroInst: Institution = {
-        id: 'inst-test-zero-preservation',
-        name: 'Mairie Test Budget Zéro Documenté',
-        type: 'MAIRIE',
-        region: 'Lagunes',
-        district: "Autonome d'Abidjan",
-        total_budget_fcfa: 0,
-        budget_functioning_fcfa: 0,
-        budget_investment_fcfa: 0,
-      };
-
-      dataStore.addInstitution(testZeroInst);
-
-      // 1. Formulaire
-      const formState = {
-        budget_functioning_fcfa: testZeroInst.budget_functioning_fcfa ?? null,
-        budget_investment_fcfa: testZeroInst.budget_investment_fcfa ?? null,
-        total_budget_fcfa: testZeroInst.total_budget_fcfa ?? null,
-      };
-
-      expect(formState.budget_functioning_fcfa).toBe(0);
-      expect(formState.budget_investment_fcfa).toBe(0);
-      expect(formState.total_budget_fcfa).toBe(0);
-
-      // 2. Sauvegarde
-      const hasBothBreakdowns = formState.budget_functioning_fcfa != null && formState.budget_investment_fcfa != null;
-      const computedTotal = hasBothBreakdowns
-        ? (formState.budget_functioning_fcfa! + formState.budget_investment_fcfa!)
-        : null;
-      const resolvedTotal = computedTotal != null
-        ? computedTotal
-        : (formState.total_budget_fcfa ?? testZeroInst.total_budget_fcfa ?? null);
-
-      expect(resolvedTotal).toBe(0);
-
-      const savedInst: Institution = {
-        ...testZeroInst,
-        total_budget_fcfa: resolvedTotal,
-        budget_functioning_fcfa: formState.budget_functioning_fcfa,
-        budget_investment_fcfa: formState.budget_investment_fcfa,
-      };
-
-      dataStore.updateInstitution(savedInst);
-
-      // 3. Contrôle dans le store
-      const reloaded = dataStore.getInstitutions().find(i => i.id === testZeroInst.id);
-      expect(reloaded).toBeDefined();
-      expect(reloaded!.total_budget_fcfa).toBe(0);
-      expect(reloaded!.budget_functioning_fcfa).toBe(0);
-      expect(reloaded!.budget_investment_fcfa).toBe(0);
+    it('préserve les montants historiques et refuse de convertir un montant inconnu en zéro',async()=>{
+      const current=dataStore.getInstitutions().find(row=>row.total_budget_fcfa===null)!;
+      const before={...current};
+      await expect(dataStore.updateInstitution({...current,total_budget_fcfa:0})).rejects.toThrow(/budgétaire|historique|financi/);
+      expect(dataStore.getInstitutions().find(row=>row.id===current.id)).toEqual(before);
     });
   });
 

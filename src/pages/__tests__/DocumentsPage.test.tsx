@@ -215,12 +215,12 @@ describe('BLOC A — Intégration Documentaire & Budgétaire Publique (Lots 6, 7
       expect(html).toContain('Sources (JSON)');
     });
 
-    it('affiche les badges de source républicaine et les empreintes SHA-256 abrégées', () => {
+    it('affiche les badges de structure source officielle, le statut de contrôle et les empreintes SHA-256 abrégées', () => {
       const html = renderToStaticMarkup(<DocumentsPage />);
-      expect(html).toContain('Source Républicaine');
-      expect(html).toContain('Extraction partiellement contrôlée');
-      expect(html).toContain('Extraction à vérifier');
-      expect(html).toContain('Authenticité à vérifier');
+      expect(html).toContain('Source :');
+      expect(html).toContain('Document officiel vérifié');
+      expect(html).toContain('Document officiel publié');
+      expect(html).toContain('Document enregistré');
       expect(html).toContain('Lien indisponible (HTTP 404)');
       expect(html).toContain('SHA-256 : f06035b6af...3a507d76');
       expect(html).toContain('SHA-256 : 0f8c7a91b5...ed0ffe10');

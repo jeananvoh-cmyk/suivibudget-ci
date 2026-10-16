@@ -5,12 +5,12 @@ import { ProjectCard } from '../components/ProjectCard';
 import { CATEGORIES, getCategoryBadgeClass } from '../data/categories';
 import { dataStore } from '../services/dataStore';
 import { formatCompactFCFA, formatFCFA, formatAmountInWords, getProjectEntityInfo } from '../utils/formatters';
-import { 
+import {
   Camera,
-  Search, 
-  Filter, 
-  ArrowUpDown, 
-  MapPin, 
+  Search,
+  Filter,
+  ArrowUpDown,
+  MapPin,
   Building2,
   TrendingUp,
   LayoutGrid,
@@ -50,15 +50,15 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   const [viewMode, setViewMode] = useState<'GRID' | 'TABLE'>('GRID');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const activeFiltersCount = (selectedCategory !== 'ALL' ? 1 : 0) + 
-    (selectedRegion !== 'ALL' ? 1 : 0) + 
+  const activeFiltersCount = (selectedCategory !== 'ALL' ? 1 : 0) +
+    (selectedRegion !== 'ALL' ? 1 : 0) +
     (sortBy !== 'amount-desc' ? 1 : 0);
 
   // Helper for physical infrastructure filter (youth filter)
   const isAbstractProject = (p: BudgetProject) => {
     const titleLow = p.title.toLowerCase();
-    return titleLow.startsWith('assurer le traitement salarial') || 
-           titleLow.startsWith('traitement salarial') || 
+    return titleLow.startsWith('assurer le traitement salarial') ||
+           titleLow.startsWith('traitement salarial') ||
            titleLow.startsWith('indemnité') ||
            titleLow.startsWith('provision pour investissement');
   };
@@ -67,7 +67,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   const activePool = onlyPhysical ? allProjects.filter(p => !isAbstractProject(p)) : allProjects;
   const localProjectsTotal = activePool.filter(p => p.scope_level !== 'NATIONAL');
   const nationalProjectsTotal = activePool.filter(p => p.scope_level === 'NATIONAL');
-  
+
   // Pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(20);
@@ -148,13 +148,13 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   });
 
   const sortedProjects = [...filteredProjects].sort((a, b) => {
-    if (sortBy === 'amount-desc') return b.budget_amount_fcfa - a.budget_amount_fcfa;
-    if (sortBy === 'amount-asc') return a.budget_amount_fcfa - b.budget_amount_fcfa;
+    if (sortBy === 'amount-desc') return (b.budget_amount_fcfa ?? -Infinity) - (a.budget_amount_fcfa ?? -Infinity);
+    if (sortBy === 'amount-asc') return (a.budget_amount_fcfa ?? -Infinity) - (b.budget_amount_fcfa ?? -Infinity);
     return a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' });
   });
 
   // Calculate stats
-  const totalBudgetFiltered = filteredProjects.reduce((acc, curr) => acc + curr.budget_amount_fcfa, 0);
+  const totalBudgetFiltered = filteredProjects.reduce((acc, curr) => acc + (curr.budget_amount_fcfa ?? 0), 0);
 
   // Pagination bounds
   const totalPages = Math.ceil(sortedProjects.length / PAGE_SIZE) || 1;
@@ -191,7 +191,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-6 sm:py-8">
-      
+
       {/* ========================================================================= */}
       {/* 1. YOUTH CITIZEN ENGAGEMENT BANNER                                        */}
       {/* ========================================================================= */}
@@ -229,10 +229,10 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
       {/* 2. OPTIMIZED SEARCH & SMART FILTER BAR (CLEAN & MODERN)                   */}
       {/* ========================================================================= */}
       <div className="bg-white rounded-3xl p-3.5 sm:p-6 border border-slate-200 shadow-sm mb-6 space-y-4">
-        
+
         {/* TOP LEVEL: Primary Scope Switcher + Real Projects + View Modes + Export */}
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-          
+
           {/* Scope Segmented Control: 3 equal tabs, 100% visible on mobile, zero truncation */}
           <div className="grid grid-cols-3 p-1 sm:p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/70 gap-1 w-full lg:flex-1">
             {/* 1. TOUS */}
@@ -568,8 +568,8 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                   const hasOfficialResponse = !!(p as any).official_response || !!(p as any).official_report_url;
 
                   return (
-                    <tr 
-                      key={p.id} 
+                    <tr
+                      key={p.id}
                       className="hover:bg-blue-50/40 transition-colors group"
                     >
                       {/* Col 1: Intitulé du Chantier */}
@@ -691,7 +691,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
 
         return (
           <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4 mt-8">
-            
+
             {/* 1. Direct Page Numbers Guide */}
             <div className="flex flex-wrap items-center justify-center gap-1.5">
               {/* First Page */}
@@ -779,7 +779,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
 
             {/* 2. Direct Jump Form & Page Size Selector */}
             <div className="flex flex-wrap items-center justify-center gap-3 text-xs">
-              
+
               {/* Quick Jump Input */}
               <form onSubmit={handleJumpSubmit} className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-200">
                 <span className="text-slate-500 font-bold px-2">Aller à la page :</span>

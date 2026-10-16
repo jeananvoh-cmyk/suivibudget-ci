@@ -109,20 +109,20 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
 
     const matchesGender = selectedGender === 'ALL' || getInstitutionLeaderGender(i) === selectedGender;
 
-    const matchesSearch = !searchQuery.trim() || 
+    const matchesSearch = !searchQuery.trim() ||
       normalize(i.name).includes(normalize(searchQuery)) ||
       normalize(i.region).includes(normalize(searchQuery)) ||
       (i.district && normalize(i.district).includes(normalize(searchQuery))) ||
       (i.departement && normalize(i.departement).includes(normalize(searchQuery))) ||
       (i.info_officer_name && normalize(i.info_officer_name).includes(normalize(searchQuery)));
 
-    const matchesDistrict = selectedDistrictFilter === 'ALL' || 
+    const matchesDistrict = selectedDistrictFilter === 'ALL' ||
       normalize(i.district) === normalize(selectedDistrictFilter);
 
-    const matchesReg = selectedRegionFilter === 'ALL' || 
+    const matchesReg = selectedRegionFilter === 'ALL' ||
       normalize(i.region) === normalize(selectedRegionFilter);
 
-    const matchesLetter = selectedLetterFilter === 'ALL' || 
+    const matchesLetter = selectedLetterFilter === 'ALL' ||
       firstLetter === selectedLetterFilter;
 
     return matchesSearch && matchesDistrict && matchesReg && matchesLetter && matchesGender;
@@ -453,7 +453,7 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
               <div>
                 <div className="flex items-start gap-4 mb-3">
                   <LeaderPortrait
-                    photoUrl={inst.leader_photo_url}
+                    photoUrl={inst.leader_photo_display_url || inst.leader_photo_url}
                     name={inst.leader_name || inst.name}
                     title={inst.leader_title || 'Maire'}
                     sizeClass="w-20 h-20 sm:w-24 sm:h-24 min-w-[5rem] max-w-[5rem] sm:min-w-[6rem] sm:max-w-[6rem]"

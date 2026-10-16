@@ -1,38 +1,30 @@
--- =========================================================================
--- SUIVIBUDGET CI — MIGRATION : SUPPORT MULTI-FASCICULES & SCAN COMPTES ADMINISTRATIFS
--- Extension additive et rétrocompatible de public.public_documents
--- =========================================================================
-
-ALTER TABLE public.public_documents
-    ADD COLUMN IF NOT EXISTS is_multipart BOOLEAN NOT NULL DEFAULT false,
-    ADD COLUMN IF NOT EXISTS parts_count INTEGER,
-    ADD COLUMN IF NOT EXISTS document_parts JSONB DEFAULT '[]'::jsonb,
-    ADD COLUMN IF NOT EXISTS is_scanned BOOLEAN NOT NULL DEFAULT false,
-    ADD COLUMN IF NOT EXISTS has_text_layer BOOLEAN NOT NULL DEFAULT true,
-    ADD COLUMN IF NOT EXISTS ocr_status TEXT NOT NULL DEFAULT 'NOT_APPLICABLE';
-
--- Contrainte de validation sur ocr_status
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint WHERE conname = 'chk_pubdocs_ocr_status'
-    ) THEN
-        ALTER TABLE public.public_documents
-            ADD CONSTRAINT chk_pubdocs_ocr_status CHECK (
-                ocr_status IN (
-                    'NOT_APPLICABLE',
-                    'NOT_IMPLEMENTED',
-                    'OCR_PENDING',
-                    'MANUAL_TRANSCRIPTION',
-                    'PROCESSED'
-                )
-            );
-    END IF;
-END $$;
-
-COMMENT ON COLUMN public.public_documents.is_multipart IS 'Indique si le document officiel est composé de plusieurs fascicules ou tomes physiques.';
-COMMENT ON COLUMN public.public_documents.parts_count IS 'Nombre total de fascicules ou parties composant le document logique.';
-COMMENT ON COLUMN public.public_documents.document_parts IS 'Tableau JSONB détaillant chaque partie (part_number, file_name, page_range, page_start, page_end, file_size, checksum_sha256, storage_path).';
-COMMENT ON COLUMN public.public_documents.is_scanned IS 'Indique si le document provient d''un scan papier/photocopie sans texte natif.';
-COMMENT ON COLUMN public.public_documents.has_text_layer IS 'Indique si le PDF dispose d''une couche de texte sélectionnable/indexable.';
-COMMENT ON COLUMN public.public_documents.ocr_status IS 'Statut du traitement OCR (NOT_APPLICABLE, NOT_IMPLEMENTED, OCR_PENDING, MANUAL_TRANSCRIPTION, PROCESSED).';
+begin;
+alter table public.public_documents
+  add column if not exists checksum_sha256 text,
+  add column if not exists is_multipart boolean,
+  add column if not exists parts_count integer,
+  add column if not exists document_parts jsonb default '[]'::jsonb,
+  add column if not exists is_scanned boolean,
+  add column if not exists has_text_layer boolean,
+  add column if not exists ocr_status text,
+  add column if not exists manifest_sha256 text;
+alter table public.public_documents
+  alter column is_multipart drop not null,
+  alter column is_multipart drop default,
+  alter column parts_count drop not null,
+  alter column parts_count drop default,
+  alter column is_scanned drop not null,
+  alter column is_scanned drop default,
+  alter column has_text_layer drop not null,
+  alter column has_text_layer drop default,
+  alter column ocr_status drop not null,
+  alter column ocr_status drop default;
+alter table public.public_documents drop constraint if exists chk_pubdocs_ocr_status;
+alter table public.public_documents add constraint chk_pubdocs_ocr_status check (
+  ocr_status in ('NOT_APPLICABLE','NOT_IMPLEMENTED','OCR_PENDING','MANUAL_TRANSCRIPTION','PROCESSED','FAILED')
+  and (ocr_status <> 'NOT_APPLICABLE' or (is_scanned is not true and has_text_layer is not false))
+);
+comment on column public.public_documents.checksum_sha256 is 'SHA-256 historique du fichier physique. Aucune empreinte historique n’est réinterprétée en manifeste.';
+comment on column public.public_documents.manifest_sha256 is 'SHA256_PARTS_MANIFEST_V1 : UTF-8, séparateurs | et LF, ordre strict des originaux, identité, chemin, taille, SHA-256 et pages.';
+comment on column public.public_documents.ocr_status is 'NULL = inconnu. Absence OCR et transcription manuelle ne prouvent pas une extraction validée.';
+commit;

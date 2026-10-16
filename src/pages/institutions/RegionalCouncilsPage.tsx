@@ -205,8 +205,8 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
             type="button"
             onClick={() => setRevealAllParties(!revealAllParties)}
             className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl border text-xs font-bold transition-all shadow-xs ${
-              revealAllParties 
-                ? 'bg-slate-900 border-slate-900 text-white' 
+              revealAllParties
+                ? 'bg-slate-900 border-slate-900 text-white'
                 : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
             }`}
             title="Afficher ou masquer tous les partis politiques"
@@ -229,7 +229,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
               <div>
                 <div className="flex items-start gap-4 mb-3">
                   <LeaderPortrait
-                    photoUrl={inst.leader_photo_url}
+                    photoUrl={inst.leader_photo_display_url || inst.leader_photo_url}
                     name={inst.leader_name || inst.name}
                     title={inst.leader_title || 'Président'}
                     sizeClass="w-20 h-20 sm:w-24 sm:h-24 min-w-[5rem] max-w-[5rem] sm:min-w-[6rem] sm:max-w-[6rem]"

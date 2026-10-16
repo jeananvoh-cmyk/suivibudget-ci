@@ -1,36 +1,43 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { adminCreationId, adminErrorMessage, budgetLineFields, importAdminCsv, mutateAdminEntity, pickAdminFields, readAdminRows, type PersistedRow } from '../../services/adminPersistenceService';
+import { sanitizeCsvCell } from '../../utils/security';
 import { supabase } from '../../services/supabase';
 import { dataStore } from '../../services/dataStore';
 import { ADMINISTRATIVE_ACCOUNTS_DATA } from '../../data/administrativeAccountsData';
 import { listImports, parseImportInput, reviewImport, runImport, type ImportReport, type ImportRow } from '../../services/dataImportService';
 import { formatQualifiedFCFA, formatFCFA } from '../../utils/formatters';
 import { isSafeUrl } from '../../utils/security';
-import type { Institution } from '../../types';
-import type { 
-  DocumentIngestionMetadata, 
-  ProposedFinancialValue, 
-  BudgetDocumentCategory, 
-  DocumentDryRunResult 
+import type { Institution, PublicDocument } from '../../types';
+import type {
+  DocumentIngestionMetadata,
+  ProposedFinancialValue,
+  BudgetDocumentCategory,
+  DocumentDryRunResult
 } from '../../types/budgetCycle';
-import { 
-  buildProposedValuesTemplate, 
-  runDocumentDryRun, 
-  buildStandardImportEnvelope 
+import {
+  buildProposedValuesTemplate,
+  runDocumentDryRun,
+  buildStandardImportEnvelope
 } from '../../utils/budgetDocumentDryRun';
-import { 
-  FileText, 
-  CheckCircle2, 
-  AlertTriangle, 
-  HelpCircle, 
-  XCircle, 
-  ShieldCheck, 
-  ArrowRight, 
-  Layers, 
-  Upload, 
+import {
+  FileText,
+  CheckCircle2,
+  AlertTriangle,
+  HelpCircle,
+  XCircle,
+  ShieldCheck,
+  ArrowRight,
+  Layers,
+  Upload,
   Edit3
 } from 'lucide-react';
 
-export function DataImportConsole({ role }: { role: string }) {
+export interface DataImportConsoleProps {
+  role: string;
+  initialDocument?: PublicDocument;
+}
+
+export function DataImportConsole({ role, initialDocument }: DataImportConsoleProps) {
   const [sessionEnded, setSessionEnded] = useState(false);
   const allowed = !sessionEnded && (role === 'ADMIN' || role === 'DATA_MANAGER');
 
@@ -52,26 +59,59 @@ export function DataImportConsole({ role }: { role: string }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [revision, setRevision] = useState(0);
+  const inFlight = useRef(false);
+  const [budgetLines, setBudgetLines] = useState<PersistedRow[]>([]);
+  const [lineDraft, setLineDraft] = useState<Record<string,string>>({budget_id:'',line_label:'',amount:'',source_page:'',source_document_id:''});
+  const [editingLine, setEditingLine] = useState<PersistedRow | null>(null);
+  const [lineBudgets, setLineBudgets] = useState<{id:string;institution_name:string;fiscal_year:number}[]>([]);
+  const [lineDocuments, setLineDocuments] = useState<PersistedRow[]>([]);
+  const [lineReason, setLineReason] = useState('');
+  const [lineConfirmed, setLineConfirmed] = useState(false);
+  const [lineCsv, setLineCsv] = useState('');
+  const [lineSearch, setLineSearch] = useState('');
 
   // Guided Assistant state
-  const institutions = useMemo(() => dataStore.getInstitutions(), []);
-  const [selectedInstitutionId, setSelectedInstitutionId] = useState<string>('inst-com-tiassale');
+  const institutions = useMemo(() => dataStore.getInstitutions(true), []);
+  const [selectedInstitutionId, setSelectedInstitutionId] = useState<string>(
+    initialDocument?.institution_id || 'inst-com-tiassale'
+  );
   const [institutionFilter, setInstitutionFilter] = useState<string>('');
-  const [fiscalYear, setFiscalYear] = useState<number>(2024);
-  const [documentType, setDocumentType] = useState<BudgetDocumentCategory>('BUDGET_MODIFICATIF');
-  const [sourceName, setSourceName] = useState<string>('');
-  const [sourceReference, setSourceReference] = useState<string>('');
-  const [sourceDate, setSourceDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [adoptionDate, setAdoptionDate] = useState<string>('');
+  const [fiscalYear, setFiscalYear] = useState<number>(
+    initialDocument?.fiscal_year || initialDocument?.year || 2024
+  );
+  const [documentType, setDocumentType] = useState<BudgetDocumentCategory>(
+    (initialDocument?.document_type as BudgetDocumentCategory) || (initialDocument?.category as BudgetDocumentCategory) || 'COMPTE_ADMINISTRATIF'
+  );
+  const [sourceName, setSourceName] = useState<string>(
+    initialDocument?.source_name || (initialDocument?.institution_name ? `Mairie / Conseil de ${initialDocument.institution_name}` : '')
+  );
+  const [sourceReference, setSourceReference] = useState<string>(initialDocument?.approval_reference || '');
+  const [sourceDate, setSourceDate] = useState<string>(
+    initialDocument?.approval_date || initialDocument?.adoption_date || new Date().toISOString().split('T')[0]
+  );
+  const [adoptionDate, setAdoptionDate] = useState<string>(initialDocument?.adoption_date || '');
   const [sourceDateKind, setSourceDateKind] = useState<'PUBLISHED' | 'ACCESSED' | 'RECORDED'>('RECORDED');
-  const [sourceUrl, setSourceUrl] = useState<string>('');
-  const [sourcePage, setSourcePage] = useState<number | undefined>(undefined);
+  const [sourceUrl, setSourceUrl] = useState<string>(initialDocument?.file_url || '');
+  const [sourcePage, setSourcePage] = useState<number | undefined>(initialDocument?.page_count ? 1 : undefined);
   const [evidenceLevel, setEvidenceLevel] = useState<'OFFICIAL_DOCUMENT' | 'OFFICIAL_INSTITUTION' | 'AIP_VERIFIED' | 'SECONDARY_TO_CORROBORATE'>('OFFICIAL_DOCUMENT');
   const [amountSemantics, setAmountSemantics] = useState<'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN'>('DELTA');
   const [notes, setNotes] = useState<string>('');
 
+  useEffect(() => {
+    if (!initialDocument) return;
+    if (initialDocument.institution_id) setSelectedInstitutionId(initialDocument.institution_id);
+    if (initialDocument.fiscal_year || initialDocument.year) setFiscalYear(initialDocument.fiscal_year || initialDocument.year);
+    if (initialDocument.document_type || initialDocument.category) {
+      setDocumentType((initialDocument.document_type as BudgetDocumentCategory) || (initialDocument.category as BudgetDocumentCategory) || 'COMPTE_ADMINISTRATIF');
+    }
+    if (initialDocument.source_name) setSourceName(initialDocument.source_name);
+    if (initialDocument.approval_reference) setSourceReference(initialDocument.approval_reference);
+    if (initialDocument.approval_date || initialDocument.adoption_date) setSourceDate(initialDocument.approval_date || initialDocument.adoption_date || '');
+    if (initialDocument.file_url) setSourceUrl(initialDocument.file_url);
+  }, [initialDocument]);
+
   // Proposed structured values
-  const [proposedValues, setProposedValues] = useState<ProposedFinancialValue[]>(() => 
+  const [proposedValues, setProposedValues] = useState<ProposedFinancialValue[]>(() =>
     buildProposedValuesTemplate('BUDGET_MODIFICATIF')
   );
 
@@ -86,6 +126,16 @@ export function DataImportConsole({ role }: { role: string }) {
 
   const button = 'min-h-[44px] rounded-lg border border-slate-300 px-4 py-2 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-blue disabled:opacity-50 cursor-pointer';
   const input = 'w-full min-h-[44px] rounded-lg border border-slate-300 bg-white p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-blue';
+
+  useEffect(()=>{
+    let active=true;
+    if(allowed) Promise.all([readAdminRows('budget_lines'),readAdminRows('public_documents'),
+      supabase.from('local_budgets').select('id,institution_name,fiscal_year').eq('status','PUBLISHED')]).then(([lines,documents,budgets])=>{
+      if(budgets.error) throw budgets.error;
+      if(active) {setBudgetLines(lines);setLineDocuments(documents);setLineBudgets(budgets.data || []);}
+    }).catch(error=>{if(active) setMessage(adminErrorMessage(error));});
+    return ()=>{active=false;};
+  },[allowed,revision]);
 
   useEffect(() => {
     let active = true;
@@ -111,9 +161,43 @@ export function DataImportConsole({ role }: { role: string }) {
   }, [allowed, selected]);
 
   const execute = async (run: () => Promise<void>) => {
+    if(inFlight.current) return;
+    inFlight.current=true;
     setBusy(true); setMessage('');
     try { await run(); } catch (error) { setMessage(error instanceof Error ? error.message : (error as { message?: string }).message || 'Action non confirmée.'); }
-    finally { setBusy(false); }
+    finally { setBusy(false); inFlight.current=false; }
+  };
+
+  const saveLine = (event: React.FormEvent) => {
+    event.preventDefault();
+    void execute(async()=>{
+      const patch=pickAdminFields(lineDraft,budgetLineFields);
+      patch.amount=lineDraft.amount==='' ? null : Number(lineDraft.amount);
+      patch.source_page=lineDraft.source_page==='' ? null : Number(lineDraft.source_page);
+      for(const field of budgetLineFields) if(patch[field]==='') patch[field]=null;
+      if(patch.amount!==null && (!Number.isSafeInteger(patch.amount) || Number(patch.amount)<0)) throw new Error('Montant entier positif requis, ou vide si inconnu.');
+      if(!lineDraft.budget_id || !lineDraft.line_label?.trim()) throw new Error('Budget et libellé requis.');
+      if(!lineDraft.source_document_id) patch.source_document_id=null;
+      await mutateAdminEntity({table:'budget_lines',id:editingLine?.id || await adminCreationId('budget_lines',patch),
+        revision:editingLine?.revision ?? null,patch,reason:'Préparation de la ligne budgétaire, sans modification de l’enveloppe'});
+      setEditingLine(null);setLineDraft({budget_id:'',line_label:'',amount:'',source_page:'',source_document_id:''});
+      setRevision(value=>value+1);setMessage('Ligne relue sur le serveur. Aucun budget global modifié.');
+    });
+  };
+
+  const changeLine = (row: PersistedRow, action: 'VERIFY'|'REVIEW'|'PUBLISH'|'ARCHIVE') => void execute(async()=>{
+    if(action==='VERIFY' && (!lineConfirmed || lineReason.trim().length<10)) throw new Error('Contrôle humain et motif détaillé requis.');
+    await mutateAdminEntity({table:'budget_lines',id:row.id,revision:row.revision,
+      patch:action==='VERIFY' ? {verification_status:'VERIFIED'} : action==='REVIEW' ? {publication_status:'IN_REVIEW'} : action==='PUBLISH' ? {publication_status:'PUBLISHED'} : {publication_status:'ARCHIVED',archived_at:new Date().toISOString()},
+      reason:action==='VERIFY' ? lineReason.trim() : action==='PUBLISH' ? 'Publication explicite de la ligne contrôlée' : 'Archivage sans suppression de la ligne'});
+    setRevision(value=>value+1);setLineConfirmed(false);setMessage('État confirmé et relu sur le serveur.');
+  });
+
+  const exportLines = () => {
+    const fields=['id','revision',...budgetLineFields];
+    const csv=[fields.join(';'),...budgetLines.filter(row=>!row.archived_at).map(row=>fields.map(field=>sanitizeCsvCell(row[field]==null ? '' : String(row[field]))).join(';'))].join('\n');
+    const url=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+    const anchor=document.createElement('a');anchor.href=url;anchor.download='lignes-budgetaires-serveur.csv';anchor.click();URL.revokeObjectURL(url);
   };
 
   const selectedInstitution = useMemo(
@@ -142,12 +226,12 @@ export function DataImportConsole({ role }: { role: string }) {
   const handleUpdateValueAmount = (id: string, newAmount: number | null, precision: ProposedFinancialValue['precision'] = 'EXACT') => {
     setProposedValues(prev => prev.map(v => {
       if (v.id !== id) return v;
-      return { 
-        ...v, 
-        amount: newAmount, 
+      return {
+        ...v,
+        amount: newAmount,
         precision: newAmount === null ? 'UNKNOWN' : precision,
         status: 'CORRECTED',
-        original_amount: v.original_amount ?? v.amount 
+        original_amount: v.original_amount ?? v.amount
       };
     }));
     setDryRunResult(null);
@@ -254,6 +338,43 @@ export function DataImportConsole({ role }: { role: string }) {
       <p role="status" aria-live="polite" className="break-words font-medium text-brand-blue">
         {busy ? 'Traitement en cours…' : message}
       </p>
+
+      <details className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+        <summary className="min-h-[44px] cursor-pointer text-lg font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-blue">Lignes budgétaires détaillées — source serveur</summary>
+        <fieldset disabled={busy} className="mt-4 space-y-4 disabled:opacity-60">
+          <p className="text-slate-600">Prévision BP distincte de l’exécution CA. Le montant inconnu reste vide. Une ligne n’altère jamais l’enveloppe votée.</p>
+          <form onSubmit={saveLine} className="grid gap-3 sm:grid-cols-2">
+            <label>Budget publié<select aria-label="Budget de la ligne" required disabled={!!editingLine} className={input} value={lineDraft.budget_id} onChange={e=>setLineDraft({...lineDraft,budget_id:e.target.value})}><option value="">Choisir le budget et l’exercice</option>{lineBudgets.map(row=><option key={row.id} value={row.id}>{row.institution_name} — {row.fiscal_year}</option>)}</select></label>
+            <label>Libellé exact<input aria-label="Libellé de la ligne" required className={input} value={lineDraft.line_label || ''} onChange={e=>setLineDraft({...lineDraft,line_label:e.target.value})}/></label>
+            <label>Montant prévu FCFA<input aria-label="Montant de la ligne" type="number" min="0" step="1" placeholder="Inconnu" className={input} value={lineDraft.amount || ''} onChange={e=>setLineDraft({...lineDraft,amount:e.target.value})}/></label>
+            <label>Nature<select aria-label="Nature de la ligne" className={input} value={lineDraft.category || ''} onChange={e=>setLineDraft({...lineDraft,category:e.target.value})}><option value="">Non précisée</option><option value="FONCTIONNEMENT">Fonctionnement</option><option value="INVESTISSEMENT">Investissement</option></select></label>
+            <label>Document BP / modificatif<select aria-label="Document de la ligne" className={input} value={lineDraft.source_document_id || ''} onChange={e=>setLineDraft({...lineDraft,source_document_id:e.target.value})}><option value="">Source à relier</option>{lineDocuments.filter(row=>row.status==='PUBLISHED' && row.verification_status==='VERIFIED' && ['BUDGET_PRIMITIF','BUDGET_MODIFICATIF'].includes(String(row.document_type))).map(row=><option key={row.id} value={row.id}>{String(row.title)}</option>)}</select></label>
+            <label>Page source<input aria-label="Page de la ligne" type="number" min="1" step="1" className={input} value={lineDraft.source_page || ''} onChange={e=>setLineDraft({...lineDraft,source_page:e.target.value})}/></label>
+            <label>Programme<input aria-label="Programme de la ligne" className={input} value={lineDraft.program_name || ''} onChange={e=>setLineDraft({...lineDraft,program_name:e.target.value})}/></label>
+            <label>Référence source<input aria-label="Référence de la ligne" className={input} value={lineDraft.source_reference || ''} onChange={e=>setLineDraft({...lineDraft,source_reference:e.target.value})}/></label>
+            <button type="submit" className={button}>{editingLine ? 'Enregistrer la ligne' : 'Créer un brouillon de ligne'}</button>
+            <button type="button" className={button} onClick={()=>{setEditingLine(null);setLineDraft({budget_id:'',line_label:'',amount:'',source_page:'',source_document_id:''});}}>Annuler la saisie</button>
+          </form>
+          <label className="block">Motif du contrôle humain<input aria-label="Motif du contrôle de ligne" className={input} value={lineReason} onChange={e=>setLineReason(e.target.value)}/></label>
+          <label className="flex items-start gap-2"><input type="checkbox" checked={lineConfirmed} onChange={e=>setLineConfirmed(e.target.checked)}/>J’ai comparé le libellé, le montant et la page avec le budget de cette institution et de cet exercice.</label>
+          <input aria-label="Rechercher les lignes serveur" className={input} placeholder="Rechercher libellé, programme ou statut" value={lineSearch} onChange={e=>setLineSearch(e.target.value)}/>
+          <div className="space-y-3">{budgetLines.filter(row=>!row.archived_at && `${row.line_label} ${row.program_name || ''} ${row.publication_status}`.toLowerCase().includes(lineSearch.toLowerCase())).map(row=><article key={row.id} className="rounded-xl border border-slate-200 p-3 space-y-2">
+            <p className="break-words font-bold">{String(row.line_label)} — {row.amount==null ? 'Montant à confirmer' : formatFCFA(Number(row.amount))}</p>
+            <p>{String(row.verification_status)} · {String(row.publication_status)} · version {row.revision}</p>
+            <div className="flex flex-wrap gap-2">
+              <button className={button} onClick={()=>{setEditingLine(row);setLineDraft(Object.fromEntries(budgetLineFields.map(key=>[key,row[key]==null ? '' : String(row[key])])));}}>Modifier la ligne</button>
+              <button className={button} disabled={row.verification_status==='VERIFIED'} onClick={()=>changeLine(row,'VERIFY')}>Vérifier la ligne</button>
+              <button className={button} onClick={()=>changeLine(row,'REVIEW')}>Soumettre en revue</button>
+              <button className={button} disabled={row.publication_status!=='IN_REVIEW' || row.verification_status!=='VERIFIED'} onClick={()=>changeLine(row,'PUBLISH')}>Publier la ligne</button>
+              <button className={button} onClick={()=>changeLine(row,'ARCHIVE')}>Archiver la ligne</button>
+            </div>
+          </article>)}</div>
+          <button className={button} onClick={exportLines}>Exporter les lignes serveur CSV</button>
+          <button className={button} onClick={()=>setRevision(value=>value+1)}>Recharger les lignes serveur</button>
+          <label className="block">Import CSV additif, 100 lignes maximum<textarea aria-label="CSV des lignes serveur" className={input} rows={4} placeholder="budget_id;line_label;amount;source_document_id;source_page" value={lineCsv} onChange={e=>setLineCsv(e.target.value)}/></label>
+          <button className={button} onClick={()=>void execute(async()=>{const count=await importAdminCsv('budget_lines',lineCsv);setRevision(value=>value+1);setMessage(`${count} lignes confirmées et relues, sans remplacement d’exercice.`);})}>Importer les lignes en brouillon</button>
+        </fieldset>
+      </details>
 
       {/* SÉLECTEUR DE MODE D'INGESTION */}
       <div className="flex border-b border-slate-200 gap-2">

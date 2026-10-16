@@ -22,6 +22,142 @@ export async function calculateFileSha256(file: File | Blob | ArrayBuffer): Prom
 }
 
 /**
+ * Extraction automatique du nombre de pages d'un fichier PDF (ArrayBuffer ou Uint8Array)
+ * Analyse les dictionnaires /Pages et objets /Page sans dépendance externe lourde.
+ */
+export function extractPdfPageCountFromBuffer(buffer: ArrayBuffer | Uint8Array): number | null {
+  try {
+    const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+    if (bytes.length < 8) return null;
+
+    const headSlice = new TextDecoder('latin1').decode(bytes.subarray(0, Math.min(bytes.length, 1024)));
+    if (!headSlice.includes('%PDF-')) return null;
+
+    const text = new TextDecoder('latin1').decode(bytes);
+
+    // Map each indirect object number to its latest non-stream dictionary content (respecting PDF incremental updates)
+    const objectMap = new Map<number, string>();
+    let hasCompressedObjStm = false;
+    let hasEncryption = false;
+
+    const objRegex = /(?:^|[\r\n\s])(\d+)\s+(\d+)\s+obj\b([\s\S]*?)endobj/g;
+    let match: RegExpExecArray | null;
+    while ((match = objRegex.exec(text)) !== null) {
+      const objNum = parseInt(match[1], 10);
+      if (isNaN(objNum) || objNum <= 0) continue;
+      const rawBody = match[3];
+      const streamIdx = rawBody.search(/stream[\r\n]/);
+      const dictPart = streamIdx >= 0 ? rawBody.slice(0, streamIdx) : rawBody;
+      objectMap.set(objNum, dictPart);
+
+      if (/\/Type\s*\/ObjStm\b/.test(dictPart)) {
+        hasCompressedObjStm = true;
+      }
+      if (/\/Encrypt\b/.test(dictPart)) {
+        hasEncryption = true;
+      }
+    }
+
+    if (/\/Encrypt\s+\d+\s+\d+\s+R/.test(text)) {
+      hasEncryption = true;
+    }
+
+    const extractCountFromPagesDict = (dict: string): number | null => {
+      if (!/\/Type\s*\/Pages\b/.test(dict)) return null;
+      const countMatch = dict.match(/\/Count\s+(\d+)\b/);
+      if (!countMatch) return null;
+      const count = parseInt(countMatch[1], 10);
+      return !isNaN(count) && count > 0 ? count : null;
+    };
+
+    // 1. Follow /Type /Catalog -> /Pages N G R -> root /Type /Pages /Count
+    let catalogPagesObjNum: number | null = null;
+    for (const [, dict] of objectMap.entries()) {
+      if (/\/Type\s*\/Catalog\b/.test(dict)) {
+        const pagesRef = dict.match(/\/Pages\s+(\d+)\s+\d+\s+R\b/);
+        if (pagesRef) {
+          catalogPagesObjNum = parseInt(pagesRef[1], 10);
+        }
+      }
+    }
+
+    // Also check trailer /Root if needed
+    if (catalogPagesObjNum === null) {
+      const rootMatches = [...text.matchAll(/\/Root\s+(\d+)\s+\d+\s+R\b/g)];
+      if (rootMatches.length > 0) {
+        const rootObjNum = parseInt(rootMatches[rootMatches.length - 1][1], 10);
+        const rootDict = objectMap.get(rootObjNum);
+        if (rootDict) {
+          const pagesRef = rootDict.match(/\/Pages\s+(\d+)\s+\d+\s+R\b/);
+          if (pagesRef) {
+            catalogPagesObjNum = parseInt(pagesRef[1], 10);
+          }
+        }
+      }
+    }
+
+    if (catalogPagesObjNum !== null) {
+      const rootPagesDict = objectMap.get(catalogPagesObjNum);
+      if (rootPagesDict) {
+        const rootCount = extractCountFromPagesDict(rootPagesDict);
+        if (rootCount !== null) {
+          return rootCount;
+        }
+      }
+    }
+
+    // 2. Look for root /Type /Pages dictionary (without /Parent) in indirect objects
+    const rootPagesCounts: number[] = [];
+    const allPagesCounts: number[] = [];
+    for (const [, dict] of objectMap.entries()) {
+      const c = extractCountFromPagesDict(dict);
+      if (c !== null) {
+        allPagesCounts.push(c);
+        if (!/\/Parent\s+\d+\s+\d+\s+R\b/.test(dict)) {
+          rootPagesCounts.push(c);
+        }
+      }
+    }
+
+    if (rootPagesCounts.length > 0) {
+      return rootPagesCounts[rootPagesCounts.length - 1];
+    }
+
+    if (!hasCompressedObjStm && !hasEncryption && allPagesCounts.length > 0) {
+      return Math.max(...allPagesCounts);
+    }
+
+    // 3. Fallback: count unique indirect /Type /Page objects (only if PDF is not using compressed object streams or encryption)
+    if (hasCompressedObjStm || hasEncryption) {
+      return null;
+    }
+
+    let leafPageCount = 0;
+    for (const [, dict] of objectMap.entries()) {
+      if (/\/Type\s*\/Page(?!\s*s)\b/.test(dict)) {
+        leafPageCount++;
+      }
+    }
+    if (leafPageCount > 0) {
+      return leafPageCount;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Calcule le nombre de pages d'un fichier PDF (File, Blob ou ArrayBuffer)
+ */
+export async function extractPdfPageCount(file: File | Blob | ArrayBuffer): Promise<number | null> {
+  const buffer = file instanceof ArrayBuffer ? file : await file.arrayBuffer();
+  return extractPdfPageCountFromBuffer(buffer);
+}
+
+
+/**
  * Normalisation d'une chaîne pour comparaison insensible aux accents et caractères spéciaux
  */
 export function normalizeSearchString(text: string): string {

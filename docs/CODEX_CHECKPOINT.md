@@ -1,3 +1,78 @@
+## 16 octobre 2026 — Reprise Codex PR #63 : délivrance documentaire comptée côté serveur
+
+- Base relue : `aa874ef864142ab86313ff6f8ac4fd112d3850f0`, PR ouverte vers master, 9 commits devant / 0 derrière. Changements locaux préexistants repris sans écrasement.
+- Compteur : RPC `record_document_delivery`, service_role uniquement, mise à jour atomique de `downloads_count`, reçus privés/idempotence 24 h et limite 20/minute par empreinte d'adresse relayée. L'Edge vérifie les octets SHA-256 avant de rendre le fichier. La mesure porte sur la réponse fichier délivrée, pas sur sa réception complète. Consultations, liens externes, refus et erreurs exclus ; aucun incrément navigateur. Le frontend relit la base et préserve le catalogue national.
+- Migration `20261016090000_document_delivery_counter.sql` PREPARED, non appliquée. Convergence du schéma admin conservée ; backfill non committé de fausses attestations supprimé et test corrigé. Relecture réelle des octets requise pour les documents historiques DECLARED. Aucun statut de publication ni montant de production modifié.
+- Validation : 904/904 tests, 66 suites ; 50 tests ciblés SQL/RLS/Edge et TypeScript PASS. Build production PASS (1766 modules ; avertissement de taille des données préexistant). PostgreSQL PGlite réel ; Auth/Storage/transport simulés. Les requêtes parallèles passent sur une instance PGlite ; ce n'est pas une recette de plusieurs sessions Supabase distantes.
+- UX/UI Documents : contrôle navigateur NOT_STARTED pour ce bloc. Recette Supabase complète BLOCKED : Docker absent, aucun environnement distant de test autorisé. Production : écritures 0, migrations 0, déploiements 0, fusion 0.
+- NEXT_EXECUTABLE_TASK : pousser ce bloc après build, remplacer le comptage PDF par un analyseur réel et vérifier les deux fascicules Cocody présents localement. Ne pas réimporter Bingerville.
+
+## 16 octobre 2026 — Corrections finales, réconciliation documentaire Cocody 2024 et reciblage de la PR #63 vers `master` (Antigravity)
+
+- **Branche** : `codex/admin-final-integration` (fusionnée proprement avec `origin/master` `f9ebadb1d1df14217d478bf2ab29f8bd29aa07d6`, base GitHub de la PR #63 reciblée sur `master`).
+- **Revue traitée** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/63#issuecomment-6205027483
+- **Garde-fous respectés** : `REMOTE_SUPABASE_WRITES = 0`, `PRODUCTION_DEPLOYMENTS = 0`, aucune fusion automatique.
+- **Priorités 1 à 6 résolues** :
+  1. **Priorité 1 (Cocody 2024)** : Rapprochement sur pièce PDF primaire (page PDF 40 / imprimée `41/45`, délibération du `08/07/2025`, visa `002/PA/D.CAB` du `22/07/2025` ; détail des projets pages PDF 41–43). Série officielle confirmée : Prévisions investissement `3 900 630 000 FCFA`, Dépenses investissement `1 366 100 690 FCFA`, Recettes totales `19 012 357 233 FCFA`, Prévisions totales `22 341 865 000 FCFA`, Dépenses totales `16 775 223 443 FCFA`, Excédent de l'exercice `+2 237 133 790 FCFA`, Report antérieur `+944 FCFA`, Résultat cumulé `+2 237 134 734 FCFA`.
+  2. **Priorité 2 (Branche & Base PR #63)** : Résolution intégrale des conflits avec `master`, préservation du contrat 3 PostgreSQL/RLS et des sécurités RBAC/Storage de la PR #62, reciblage de la PR #63 vers `master`.
+  3. **Priorité 3 (Compteur de pages PDF)** : Analyse structurelle de l'arbre `/Catalog -> /Pages -> /Count` et des révisions incrémentales dans `extractPdfPageCountFromBuffer`, retour `null` sur `/ObjStm` compressé ou `/Encrypt`, validation sur les 2 fascicules réels de Cocody (`22 + 22 = 44 pages`).
+  4. **Priorité 4 (États documentaires et financiers de Cocody)** : Affichage explicite *« Compte administratif 2024 disponible à la consultation. Données financières en cours d'exploitation et de validation. »* avec bouton de consultation PDF et SHA-256 lorsque seul le document est publié, et affichage complet des 6 rubriques dès publication de la ligne `administrative_accounts`.
+  5. **Priorité 5 (Libellés comptables et citoyens)** : Aucun défaut `ORDONNANCE` sur dépenses `ENGAGE` ou stade inconnu ; `Réalisation physique non documentée` lorsque `citizen_status` est `null` ; `Résultat de clôture à confirmer` et distinction des 4 soldes ; préservation de `Environ 820 150 000 FCFA` (`APPROXIMATE`) et des 3 marchés DGMP sur Tiassalé 2024.
+  6. **Priorité 6 (Tests E2E)** : Recette complète validée sur Cocody 2024, Tiassalé 2024, une commune isolée et un conseil régional isolé.
+
+## 14 octobre 2026 — Intégration finale Codex / PR #62, contrat 3
+
+- Branche indépendante : codex/admin-final-integration. Parents : PR62 db96ed782e17b097a9ef398b682fb066509e791c et Codex 671bafcf0b787a9de88cd7e39a2324b5a6697613. Master relu : a1ec60ecde6d42c4063b3ba4f854eb0dc43a898d.
+- OCR canonique nullable, conversion NONE conditionnelle et PENDING explicite ; métadonnées historiques inconnues préservées ; manifeste SHA256_PARTS_MANIFEST_V1 distinct du checksum physique et partagé client/Edge, comparé à SQL.
+- Séquence des deux migrations non déployées vérifiée deux fois sur le schéma réel exporté sans données. Revue IN_REVIEW obligatoire pour institutions, projets, lignes et publications ; exception CAIDP soumise à vérification humaine. CSV : montants inconnus, zéro, invalides, somme partielle et total complet distingués.
+- Validation locale : 868/868 tests (34 PostgreSQL/RLS, 13 médias/Edge, 13 services), TypeScript et builds public/review PASS ; navigateur 16/16, transport Auth/REST/Storage simulé et SQL/RLS réels. Dashboard 360/640/768/1024/1440 px sans débordement ; contrôle visuel mobile effectué. Pages publiques : tests automatisés et accueil navigateur, audit visuel exhaustif non réalisé.
+- Supabase réel : BLOCKED (supabase start tenté, moteur Docker absent). Aucun test d’écriture distant. Données financières, Cocody et Bingerville inchangés ; aucune migration, fusion ou action de déploiement distante.
+- L’autorisation courante permet une PR empilée sur #62 ouverte : elle remplace l’ancienne consigne d’attente ci-dessous. La branche Antigravity n’a pas été modifiée.
+- PR #63 publiée, code ec134cf4951095d8b60f58274020f0f066517b59, arbre 5390eb7e4b104db72f3f6882d692f61f725a452e. CI Quality 38589329556 PASS ; rapport unique ADMIN_DASHBOARD_FINAL_INTEGRATION.md. NEXT_EXECUTABLE_TASK : revue indépendante et recette Supabase complète autorisée, puis validation ordonnée du backend, Edge et frontend. Fusion et production restent interdites avant validation, rebasage/cible finale et recette réelle du backend.
+
+## 13 octobre 2026 — Audit de sécurité admin : validation du contrat 2
+
+- HEAD initial `396ff29ed6cde2ecd4549e1049d6a3a3ec1bbf29` ; correctifs P0-01/P0-02/P1-01/P1-02/P1-03 locaux, aucune modification d'un worktree Antigravity.
+- Deux régressions du journal reproduites sur le contrat initial (2 tests FAIL), puis corrigées (3 tests ciblés PASS). Suite finale 832/832 ; SQL/RLS 24, service 12, médias 13 ; TypeScript et builds public/review PASS ; E2E 16/16, Auth et REST simulés, SQL/RLS réels.
+- Six métadonnées PR62 conservées ; checksums déclarés distincts du contrôle des octets, fascicules immuables, pages à contrôler humainement, publication distincte. Reçus d'opération durables, exactitude des révisions, lots atomiques ; domaine métier appliqué au journal et aux médias.
+- #62 OPEN au contrôle final, HEAD `7af1c5b89f75ae32fb7de8b63ccb2d035d38a61d`. Intégration complète et Auth/Storage réels BLOCKED. Contrat local version 2 non déployé.
+- Écritures et migrations production 0 ; Cocody inchangé ; CI distante non exécutée, push/PR/fusion/déploiement NON.
+- HEAD technique `4c4a962f07e0d469e0fc9787ec371954eda1e9ab` ; rapport `ADMIN_DASHBOARD_SECURITY_REMEDIATION.md` et patch cumulatif livrés avec manifeste d'intégrité. Prêt pour revue indépendante OUI, prêt pour fusion NON.
+- NEXT_EXECUTABLE_TASK : attendre la stabilisation de #62 pour réconcilier sur master et recetter avant PR.
+
+## 13 octobre 2026 — Dashboard admin, lot F : rapport et livraison retenue
+
+- HEAD technique validé : `66f1f0accee9fcbc5d237413980d4d939d74a5fc` ; contrat serveur : `57575c1e4f9f9beec1546da0fd736922194f26fb`.
+- Rapport : `docs/audits/admin/ADMIN_DASHBOARD_PERSISTENCE_REMEDIATION.md` ; runbook DB/Storage et rollback documentés. 811/811 tests, 13/13 E2E, TypeScript et deux builds PASS.
+- PR #62 toujours ouverte au dernier contrôle ; aucune PR concurrente ni push. CI distante non exécutée, preview non créée. Rapport et correctif conservés localement.
+- Statut réel : prêt pour fusion NON ; prêt pour production NON ; écritures/migrations production 0.
+- NEXT_EXECUTABLE_TASK : attendre la résolution de #62, intégrer et recetter le nouveau master, puis créer la PR corrective. Toute migration, signature réelle de Cocody, fusion ou production reste soumise à validation.
+
+## 13 octobre 2026 — Dashboard admin, lots C–E : services et parcours validés localement
+
+- Contrat serveur : commit `57575c1e4f9f9beec1546da0fd736922194f26fb` ; branche `codex/admin-dashboard-persistence-hardening`.
+- Institutions, projets déclarés, lignes budgétaires distinctes, publications, annuaire, documents, paramètres et file reliés au serveur. Révisions des formulaires, reprises après réponse perdue, sauvegardes attendues et relectures ; aucune sauvegarde locale présentée comme persistante.
+- Publication distincte du contrôle humain ; UNKNOWN ≠ 0 ; budget prévu ≠ exécuté ; contribution approuvée ≠ réalisation physique certifiée. Montants officiels et données du catalogue conservés.
+- Médias privés, SHA calculé à l’envoi, signatures rattachées à l’objet accessible ; absence de fichier Storage bloque sa vérification. Identité citoyenne privée conservée ; audit expurgé et projection publique pseudonymisée.
+- Validation : **811/811 tests, 63 suites** ; contrats SQL/RLS 16, service 8, médias 4. TypeScript, build public et build review PASS. Sauvegarde/restauration PGlite isolée PASS.
+- Playwright : **13/13 parcours**, 2 sessions, conflit, réseau, relecture, contrôle/publication documentaire, archivage et responsive 360/640/768/1024/1440 ; zéro erreur inattendue et zéro egress transféré. Auth/transport simulés, RLS/RPC réels ; pas de recette GoTrue/Edge déployée ni de blob de production restauré.
+- Réinitialisation globale et restauration JSON indisponibles ; export identifié comme copie locale. Newsletter et télémétrie CAIDP restent auxiliaires, sans journal administratif certifié.
+- **Livraison non publiée** : #62 ouverte, attente de fusion/fermeture imposée par l’utilisateur. CI distante = non exécutée ; preview Vercel = non créée.
+- Migrations production = 0 ; écritures Supabase production = 0 ; Cocody 2024 TO_VERIFY inchangé ; fusion/déploiement = non.
+- NEXT_EXECUTABLE_TASK : attendre #62, intégrer le master réel après résolution, relire compatibilité de l’ingestion documentaire, refaire tests/builds/recette puis ouvrir une PR unique. Migration et Edge séparément soumises à validation avant toute production.
+
+## 13 octobre 2026 — Dashboard admin, lots A–B : contrat serveur préparé, non déployé
+
+- Base réelle de master : `a1ec60ecde6d42c4063b3ba4f854eb0dc43a898d`. Branche : `codex/admin-dashboard-persistence-hardening`.
+- Inventaire distant en lecture seule ; aucune modification Supabase distante. Cocody 2024 reste TO_VERIFY, version 1, empreinte inchangée.
+- Migration locale additive et idempotente : révisions, RPC atomiques et reprise, rôles protégés, brouillons/publication, tâches persistantes, audit serveur privé, médias privés, contrôles documentaires et financiers distincts.
+- Retrait d’une source : réouverture des tâches concernées et retrait des publications dépendantes ; historique conservé. Modération citoyenne avec acteur/date serveur, sans certification physique. Suppression client de preuves retirée.
+- Fixture PostgreSQL réelle : migration appliquée deux fois, RLS et triggers exercés, restauration sur une seconde instance PGlite. Pas de restauration de production ni de blobs Storage dans cette fixture.
+- Les lots C–F (services, UI, recette et rapport) se poursuivent dans le même worktree. Chaque résultat final est consigné dans le rapport admin.
+- Livraison GitHub bloquée par la consigne humaine : attendre la fusion ou fermeture de #62, encore ouverte au dernier contrôle, HEAD `7af1c5b89f75ae32fb7de8b63ccb2d035d38a61d`.
+- Migrations production = 0 ; écritures production = 0 ; fusion = non ; déploiement = non.
+- NEXT_EXECUTABLE_TASK : terminer la validation locale, puis attendre #62 avant d’intégrer le nouveau master et de proposer une PR unique. Ne pas publier un frontend sans son contrat approuvé.
+
 ## 14 octobre 2026 — Correction de Clôture PR #62 : Sécurité RBAC Fail-Closed, Intégrité Multi-PDF et Validation Finale (Antigravity)
 
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/62
