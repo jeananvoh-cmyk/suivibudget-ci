@@ -27,7 +27,7 @@ const RegulatorLeaderAvatar: React.FC<{
 
   if (!photoUrl || hasError) {
     return (
-      <div 
+      <div
         className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-2xs bg-slate-100 flex flex-col items-center justify-center flex-shrink-0"
         title={name}
       >
@@ -80,16 +80,13 @@ export const RegulatoryAuthoritiesPage: React.FC<RegulatoryAuthoritiesPageProps>
   const baseAuthorities = useMemo(() => {
     const list = (institutions && institutions.length > 0) ? institutions : dataStore.getInstitutions();
     const storeMap = new Map(list.map(i => [i.id, i]));
-    return REGULATORY_AUTHORITIES_DATA.map(item => {
+    return REGULATORY_AUTHORITIES_DATA.filter(item=>storeMap.has(item.id)).map(item => {
       const fromStore = storeMap.get(item.id);
       if (!fromStore) return item;
 
-      // Conserver une photo uploadée en studio base64 dans le store si présente, sinon privilégier l'image locale fiable
-      const leader_photo_url = (fromStore.leader_photo_url && fromStore.leader_photo_url.startsWith('data:image/'))
-        ? fromStore.leader_photo_url
-        : (item.leader_photo_url || fromStore.leader_photo_url);
+      const leader_photo_url = fromStore.leader_photo_url || item.leader_photo_url;
 
-      return { 
+      return {
         ...item,
         ...fromStore,
         // Les anciennes valeurs du store ne constituent pas une preuve documentaire.
@@ -205,7 +202,7 @@ export const RegulatoryAuthoritiesPage: React.FC<RegulatoryAuthoritiesPageProps>
 
                 {/* Official Leader Portrait */}
                 <RegulatorLeaderAvatar
-                  photoUrl={item.leader_photo_url}
+                  photoUrl={item.leader_photo_display_url || item.leader_photo_url}
                   name={item.leader_name}
                 />
               </div>

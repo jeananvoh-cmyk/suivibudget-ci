@@ -217,16 +217,28 @@ export interface ProposedFinancialValue {
   id: string;
   field: string;
   label: string;
+  original_label?: string;
+  unit?: string; // 'FCFA'
   section: FinancialSection;
   nature: FinancialNature;
+  accounting_stage?: 'ORDONNANCE' | 'PAYE' | 'ENGAGE' | 'LIQUIDE' | 'RECOUVRE';
   amount: number | null; // NULL != 0
   precision: AmountPrecision;
   source_page?: number;
+  source_document_id?: string;
   confidence: 'HIGH' | 'MEDIUM' | 'LOW';
   notes?: string;
   status: 'PENDING' | 'VALIDATED' | 'CORRECTED' | 'MARKED_UNKNOWN' | 'REJECTED';
   original_amount?: number | null;
   correction_reason?: string;
+  validated_by?: string;
+  validated_at?: string;
+  correction_history?: Array<{
+    amount: number | null;
+    corrected_at: string;
+    corrected_by: string;
+    reason: string;
+  }>;
 }
 
 /**

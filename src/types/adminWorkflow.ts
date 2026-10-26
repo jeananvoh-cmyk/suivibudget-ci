@@ -4,17 +4,18 @@
 
 export type TaskPriority = 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW';
 
-export type TaskType = 
-  | 'PROOF_MODERATION' 
-  | 'DOCUMENT_VERIFICATION' 
-  | 'CAIDP_CONTACT_COMPLETION' 
-  | 'CAIDP_REQUEST_FOLLOWUP' 
-  | 'WEB_AUDIT' 
+export type TaskType =
+  | 'PROOF_MODERATION'
+  | 'DOCUMENT_VERIFICATION'
+  | 'CAIDP_CONTACT_COMPLETION'
+  | 'CAIDP_REQUEST_FOLLOWUP'
+  | 'WEB_AUDIT'
   | 'BUDGET_ANOMALY';
 
 export type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD';
 
 export interface AdminWorkTask {
+  revision?: number;
   id: string;
   type: TaskType;
   priority: TaskPriority;
@@ -24,7 +25,7 @@ export interface AdminWorkTask {
   description: string;
   status: TaskStatus;
   assigned_to?: string; // Nom ou email du modérateur
-  assigned_to_role?: 'ADMIN' | 'MODERATOR';
+  assigned_to_role?: 'ADMIN' | 'MODERATOR' | 'DATA_MANAGER';
   created_at: string;
   due_date?: string;
   completed_at?: string;
@@ -41,7 +42,7 @@ export interface AdminActivityLog {
   actor_name: string;
   actor_email: string;
   actor_role: string;
-  action_type: 
+  action_type:
     | 'UPDATE_RI_CONTACT'
     | 'BULK_UPDATE_RI'
     | 'MODERATE_PROOF'
@@ -60,7 +61,7 @@ export interface AdminActivityLog {
   details?: string;
 }
 
-export type AdminModuleCategory = 
+export type AdminModuleCategory =
   | 'WORK_QUEUE'
   | 'PUBLIC_DATA'
   | 'CITIZEN_PARTICIPATION'

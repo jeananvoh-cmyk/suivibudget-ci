@@ -77,14 +77,14 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
   const baseOfficials = React.useMemo(() => {
     const list = (institutions && institutions.length > 0) ? institutions : dataStore.getInstitutions();
     const storeMap = new Map(list.map(i => [i.id, i]));
-    return GOVERNMENT_OFFICIALS.map((official: OfficialLeader) => {
+    return GOVERNMENT_OFFICIALS.filter(official=>storeMap.has(official.id)).map((official: OfficialLeader) => {
       const fromStore = storeMap.get(official.id);
       if (!fromStore) return official;
       return {
         ...official,
         name: fromStore.leader_name || official.name,
         role_title: fromStore.leader_title || official.role_title,
-        photo_url: fromStore.leader_photo_url || official.photo_url,
+        photo_url: fromStore.leader_photo_display_url || fromStore.leader_photo_url || official.photo_url,
         website_url: fromStore.website || official.website_url,
         facebook_url: fromStore.facebook_url || official.facebook_url,
         // A present store row is authoritative for display, including an explicit
@@ -236,9 +236,9 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
       {/* Header Banner */}
       <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm flex flex-col md:flex-row items-center gap-6">
         <div className="w-full md:w-5/12 h-44 sm:h-48 rounded-2xl overflow-hidden border border-slate-200 shadow-2xs flex-shrink-0">
-          <img 
-            src="/images/conseil_des_ministres.png" 
-            alt="Conseil des Ministres de Côte d'Ivoire" 
+          <img
+            src="/images/conseil_des_ministres.png"
+            alt="Conseil des Ministres de Côte d'Ivoire"
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
           />
         </div>
@@ -325,14 +325,14 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {premierMinistre && (
-            <div 
+            <div
               onClick={() => openOfficialDetail(premierMinistre)}
               className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-brand-blue/40 transition-all cursor-pointer flex flex-col justify-between group"
             >
               <div>
                 <div className="flex gap-4 items-start">
-                  <LeaderAvatar 
-                    photoUrl={premierMinistre.photo_url} 
+                  <LeaderAvatar
+                    photoUrl={premierMinistre.photo_url}
                     name={premierMinistre.name}
                     className="w-24 h-24 sm:w-28 sm:h-28"
                   />
@@ -354,14 +354,14 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
           )}
 
           {vicePremierMinistre && (
-            <div 
+            <div
               onClick={() => openOfficialDetail(vicePremierMinistre)}
               className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-brand-blue/40 transition-all cursor-pointer flex flex-col justify-between group"
             >
               <div>
                 <div className="flex gap-4 items-start">
-                  <LeaderAvatar 
-                    photoUrl={vicePremierMinistre.photo_url} 
+                  <LeaderAvatar
+                    photoUrl={vicePremierMinistre.photo_url}
                     name={vicePremierMinistre.name}
                     className="w-24 h-24 sm:w-28 sm:h-28"
                   />
@@ -396,15 +396,15 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {ministresEtat.map((official: OfficialLeader) => (
-              <div 
+              <div
                 key={official.id}
                 onClick={() => openOfficialDetail(official)}
                 className="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm hover:shadow-md hover:border-brand-blue/40 transition-all cursor-pointer flex flex-col justify-between group"
               >
                 <div>
                   <div className="flex gap-3.5 sm:gap-4 items-start">
-                    <LeaderAvatar 
-                      photoUrl={official.photo_url} 
+                    <LeaderAvatar
+                      photoUrl={official.photo_url}
                       name={official.name}
                       className="w-20 h-20 sm:w-24 sm:h-24"
                     />
@@ -439,15 +439,15 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {ministres.map((official: OfficialLeader) => (
-            <div 
+            <div
               key={official.id}
               onClick={() => openOfficialDetail(official)}
               className="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm hover:shadow-md hover:border-brand-blue/40 transition-all cursor-pointer flex flex-col justify-between group"
             >
               <div>
                 <div className="flex gap-3.5 sm:gap-4 items-start">
-                  <LeaderAvatar 
-                    photoUrl={official.photo_url} 
+                  <LeaderAvatar
+                    photoUrl={official.photo_url}
                     name={official.name}
                     className="w-20 h-20 sm:w-24 sm:h-24"
                   />

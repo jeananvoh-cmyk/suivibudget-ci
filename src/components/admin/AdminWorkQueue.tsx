@@ -1,32 +1,34 @@
+import { adminErrorMessage, readStaffOperators } from '../../services/adminPersistenceService';
 // =========================================================================
 // SUIVIBUDGET CÔTE D'IVOIRE — COMPOSANT FILE DE TRAVAIL UNIFIÉE (WORK QUEUE)
 // Agrémente et priorise l'ensemble des tâches opérationnelles de l'équipe
 // =========================================================================
 
 import React, { useState, useMemo } from 'react';
-import { 
-  AdminWorkTask, 
-  TaskPriority, 
-  TaskStatus, 
-  TaskType 
+import {
+  AdminWorkTask,
+  TaskPriority,
+  TaskStatus,
+  TaskType
 } from '../../types/adminWorkflow';
 import { adminTaskService } from '../../services/adminTaskService';
-import { AuthSecurityService, ModeratorUser } from '../../services/authSecurity';
-import { 
-  CheckCircle2, 
-  Clock, 
-  AlertTriangle, 
-  Flame, 
-  Camera, 
-  FileText, 
-  Building2, 
-  Mail, 
-  UserCheck, 
-  UserPlus, 
-  Filter, 
-  Search, 
-  Check, 
-  X, 
+import { supabase } from '../../services/supabase';
+import { dataStore } from '../../services/dataStore';
+import {
+  CheckCircle2,
+  Clock,
+  AlertTriangle,
+  Flame,
+  Camera,
+  FileText,
+  Building2,
+  Mail,
+  UserCheck,
+  UserPlus,
+  Filter,
+  Search,
+  Check,
+  X,
   ArrowRight,
   ExternalLink,
   ChevronRight,
@@ -58,23 +60,28 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('ALL');
 
+  const saving=React.useRef(false);
+  const [adminSaving,setSaving]=useState(false);
+  const [currentUserId,setCurrentUserId]=useState('');
+  React.useEffect(()=>{void supabase.auth.getUser().then(({data})=>setCurrentUserId(data.user?.id || ''));},[]);
   // Multi-selection state for bulk actions
   const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
 
   // Assign modal / popover state
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedAssignee, setSelectedAssignee] = useState<string>('');
-  const [moderatorsList, setModeratorsList] = useState<ModeratorUser[]>([]);
+  const [moderatorsList, setModeratorsList] = useState<{id:string;full_name:string;role:string}[]>([]);
 
   // Refresh tasks on service update
   React.useEffect(() => {
-    return adminTaskService.subscribe(() => {
-      setTasks(adminTaskService.getWorkQueueTasks());
-    });
+    void adminTaskService.refresh().catch(error=>onShowToast(adminErrorMessage(error),'error'));
+    const update=()=>setTasks(adminTaskService.getWorkQueueTasks());
+    const queue=adminTaskService.subscribe(update);const source=dataStore.subscribe(update);
+    return ()=>{queue();source();};
   }, []);
 
   React.useEffect(() => {
-    setModeratorsList(AuthSecurityService.getModerators());
+    void readStaffOperators().then(setModeratorsList).catch(error=>onShowToast(adminErrorMessage(error),'error'));
   }, []);
 
   // Filtered tasks
@@ -82,7 +89,7 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
     return tasks.filter(task => {
       // Status filter
       if (activeFilter === 'MY_TASKS') {
-        const isAssignedToMe = task.assigned_to === currentUserEmail || task.assigned_to === currentUserName;
+        const isAssignedToMe = task.assigned_to === currentUserId;
         if (!isAssignedToMe) return false;
       } else if (activeFilter === 'UNASSIGNED') {
         if (task.assigned_to && task.assigned_to.trim().length > 0) return false;
@@ -112,7 +119,7 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
 
       return true;
     });
-  }, [tasks, activeFilter, typeFilter, searchQuery, currentUserEmail, currentUserName]);
+  }, [tasks, activeFilter, typeFilter, searchQuery, currentUserEmail, currentUserName, currentUserId]);
 
   // Priority badge config
   const getPriorityBadge = (priority: TaskPriority) => {
@@ -182,67 +189,57 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
   };
 
   // Actions
-  const handleAssignToMe = (taskId: string) => {
-    adminTaskService.assignTask(taskId, currentUserName, currentUserRole === 'ADMIN' ? 'ADMIN' : 'MODERATOR');
-    adminTaskService.logActivity(
-      currentUserName,
-      currentUserEmail,
-      currentUserRole,
-      'ASSIGN_TASK',
-      'TÂCHE',
-      taskId,
-      `Tâche prise en charge par ${currentUserName}.`
-    );
-    onShowToast(`Tâche prise en charge par ${currentUserName}.`, 'success');
-  };
+  const handleAssignToMe = async (taskId: string) => {
+ if(saving.current)return;saving.current=true;setSaving(true);try{
 
-  const handleMarkCompleted = (taskId: string) => {
-    adminTaskService.updateTask(taskId, {
+    await adminTaskService.assignTask(taskId, currentUserEmail);
+
+    onShowToast(`Tâche prise en charge par ${currentUserName}.`, 'success');
+
+ }catch(error){onShowToast(adminErrorMessage(error),'error');}finally{saving.current=false;setSaving(false);}
+};
+
+  const handleMarkCompleted = async (taskId: string) => {
+ if(saving.current)return;saving.current=true;setSaving(true);try{
+
+    await adminTaskService.updateTask(taskId, {
       status: 'COMPLETED',
       completed_at: new Date().toISOString(),
       completed_by: currentUserName
     });
-    adminTaskService.logActivity(
-      currentUserName,
-      currentUserEmail,
-      currentUserRole,
-      'COMPLETE_TASK',
-      'TÂCHE',
-      taskId,
-      `Tâche marquée comme terminée par ${currentUserName}.`
-    );
-    onShowToast('Tâche marquée comme terminée.', 'success');
-  };
 
-  const handleBulkComplete = () => {
-    adminTaskService.bulkUpdateStatus(selectedTaskIds, 'COMPLETED');
-    adminTaskService.logActivity(
-      currentUserName,
-      currentUserEmail,
-      currentUserRole,
-      'COMPLETE_TASK',
-      'TÂCHES',
-      `${selectedTaskIds.length} éléments`,
-      `${selectedTaskIds.length} tâches marquées comme terminées en lot.`
-    );
+    onShowToast('Tâche marquée comme terminée.', 'success');
+
+ }catch(error){onShowToast(adminErrorMessage(error),'error');}finally{saving.current=false;setSaving(false);}
+};
+
+  const handleBulkComplete = async () => {
+ if(saving.current)return;saving.current=true;setSaving(true);try{
+
+    await adminTaskService.bulkUpdateStatus(selectedTaskIds, 'COMPLETED');
+
     onShowToast(`${selectedTaskIds.length} tâches terminées avec succès.`, 'success');
     setSelectedTaskIds([]);
-  };
 
-  const handleBulkAssign = (assignee: string) => {
-    adminTaskService.bulkAssignTasks(selectedTaskIds, assignee);
-    adminTaskService.logActivity(
-      currentUserName,
-      currentUserEmail,
-      currentUserRole,
-      'ASSIGN_TASK',
-      'TÂCHES',
-      `${selectedTaskIds.length} éléments`,
-      `Assignation groupée à ${assignee}.`
-    );
+ }catch(error){onShowToast(adminErrorMessage(error),'error');}finally{saving.current=false;setSaving(false);}
+};
+
+  const handleBulkAssign = async (assignee: string) => {
+ if(saving.current)return;saving.current=true;setSaving(true);try{
+
+    await adminTaskService.bulkAssignTasks(selectedTaskIds, assignee);
+
     onShowToast(`${selectedTaskIds.length} tâches assignées à ${assignee}.`, 'success');
     setSelectedTaskIds([]);
     setIsAssignModalOpen(false);
+
+ }catch(error){onShowToast(adminErrorMessage(error),'error');}finally{saving.current=false;setSaving(false);}
+};
+
+  const handleTaskChange = async (id: string, updates: {status?:TaskStatus;priority?:TaskPriority}) => {
+    if(saving.current)return;saving.current=true;setSaving(true);
+    try{await adminTaskService.updateTask(id,updates);onShowToast('Décision sauvegardée et relue sur le serveur.','success');}
+    catch(error){onShowToast(adminErrorMessage(error),'error');}finally{saving.current=false;setSaving(false);}
   };
 
   const handleExecuteTask = (task: AdminWorkTask) => {
@@ -250,24 +247,28 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
   };
 
   // Toggle select all
-  const isAllSelected = filteredTasks.length > 0 && selectedTaskIds.length === filteredTasks.length;
+  const assignableTasks=filteredTasks.filter(task=>['DOCUMENT_VERIFICATION','PROOF_MODERATION','CAIDP_CONTACT_COMPLETION'].includes(task.type));
+  const isAllSelected = assignableTasks.length > 0 && selectedTaskIds.length === assignableTasks.length;
   const toggleSelectAll = () => {
     if (isAllSelected) {
       setSelectedTaskIds([]);
     } else {
-      setSelectedTaskIds(filteredTasks.map(t => t.id));
+      setSelectedTaskIds(assignableTasks.map(t => t.id));
     }
   };
 
   const toggleSelectTask = (id: string) => {
-    setSelectedTaskIds(prev => 
+    setSelectedTaskIds(prev =>
       prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );
   };
 
   return (
+    <fieldset disabled={adminSaving} aria-busy={adminSaving} className="min-w-0">
+      <legend className="sr-only">File de travail</legend>
+      {adminSaving && <p role="status">Décision serveur en cours…</p>}
     <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-5 sm:p-6 space-y-5">
-      
+
       {/* 1. Header with View Title & Stats */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <div>
@@ -361,7 +362,7 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
             className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-brand-blue"
           />
           {searchQuery && (
-            <button
+            <button aria-label="Fermer"
               onClick={() => setSearchQuery('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
             >
@@ -433,7 +434,7 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
             Aucune tâche en attente dans cette vue
           </h4>
           <p className="text-xs text-slate-500 max-w-sm mx-auto">
-            {activeFilter === 'MY_TASKS' 
+            {activeFilter === 'MY_TASKS'
               ? "Vous n'avez aucune tâche assignée en cours. Vous pouvez prendre en charge des tâches non assignées."
               : "Toutes les opérations de cette file ont été traitées ou aucun résultat ne correspond aux filtres."}
           </p>
@@ -475,18 +476,20 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
                 {filteredTasks.map(task => {
+                  const persistent=['DOCUMENT_VERIFICATION','PROOF_MODERATION','CAIDP_CONTACT_COMPLETION'].includes(task.type);
                   const typeInfo = getTypeBadge(task.type);
                   const isSelected = selectedTaskIds.includes(task.id);
-                  const isAssignedToMe = task.assigned_to === currentUserEmail || task.assigned_to === currentUserName;
+                  const isAssignedToMe = task.assigned_to === currentUserId;
 
                   return (
-                    <tr 
+                    <tr
                       key={task.id}
                       className={`hover:bg-slate-50/80 transition-colors ${isSelected ? 'bg-blue-50/50' : ''} ${task.status === 'COMPLETED' ? 'opacity-60 bg-slate-50/40' : ''}`}
                     >
                       <td className="py-3 px-3">
                         <input
                           type="checkbox"
+                          disabled={!persistent}
                           checked={isSelected}
                           onChange={() => toggleSelectTask(task.id)}
                           className="rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
@@ -495,7 +498,7 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
 
                       {/* Priorité */}
                       <td className="py-3 px-3 whitespace-nowrap">
-                        {getPriorityBadge(task.priority)}
+                        {getPriorityBadge(task.priority)}<select disabled={!persistent} aria-label={`Priorité : ${task.title}`} value={task.priority} onChange={e=>handleTaskChange(task.id,{priority:e.target.value as TaskPriority})} className="mt-1 block rounded border p-1 text-xs"><option value="URGENT">Urgente</option><option value="HIGH">Haute</option><option value="NORMAL">Normale</option><option value="LOW">Basse</option></select>
                       </td>
 
                       {/* Type */}
@@ -514,6 +517,7 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
                         <div className="text-[11px] text-slate-500 line-clamp-1" title={task.description}>
                           {task.description}
                         </div>
+                        {!persistent && <p className="text-[11px] text-slate-500">Signal indicatif : traitement dans le module source, sans clôture certifiée dans cette file.</p>}
                       </td>
 
                       {/* Organisme / Commune */}
@@ -528,13 +532,14 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
                             isAssignedToMe ? 'bg-amber-100 text-amber-900 border border-amber-200 font-black' : 'bg-slate-100 text-slate-700'
                           }`}>
                             <UserCheck className="w-3 h-3 text-slate-500" />
-                            <span>{isAssignedToMe ? 'Moi' : task.assigned_to}</span>
+                            <span>{isAssignedToMe ? 'Moi' : (moderatorsList.find(operator=>operator.id===task.assigned_to)?.full_name || task.assigned_to)}</span>
                           </span>
                         ) : (
                           <button
+                            disabled={!persistent}
                             onClick={() => handleAssignToMe(task.id)}
                             className="text-[10px] font-bold text-brand-blue hover:underline cursor-pointer flex items-center gap-1"
-                            title="Prendre en charge cette tâche"
+                            title="Prendre en charge cette tâche" aria-label="Prendre en charge cette tâche"
                           >
                             <UserPlus className="w-3 h-3" />
                             <span>Prendre</span>
@@ -544,6 +549,7 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
 
                       {/* Statut */}
                       <td className="py-3 px-3 whitespace-nowrap">
+                        <select disabled={!persistent} aria-label={`État : ${task.title}`} value={task.status} onChange={e=>handleTaskChange(task.id,{status:e.target.value as TaskStatus})} className="mb-1 rounded border p-1 text-xs"><option value="PENDING">À traiter</option><option value="IN_PROGRESS">En cours</option><option value="ON_HOLD">En attente</option><option value="COMPLETED" disabled>Clôture par contrôle de l’objet</option></select>
                         {task.status === 'COMPLETED' ? (
                           <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
                             <Check className="w-3 h-3" /> Terminé
@@ -562,11 +568,11 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
                       {/* Actions */}
                       <td className="py-3 px-3 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">
-                          {task.status !== 'COMPLETED' && (
+                          {persistent && task.status !== 'COMPLETED' && (
                             <button
                               onClick={() => handleMarkCompleted(task.id)}
                               className="p-1 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
-                              title="Marquer comme terminée"
+                              title="Marquer comme terminée" aria-label="Marquer comme terminée"
                             >
                               <CheckCircle2 className="w-4 h-4" />
                             </button>
@@ -575,7 +581,7 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
                           <button
                             onClick={() => handleExecuteTask(task)}
                             className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-900 hover:bg-brand-blue text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer group"
-                            title="Ouvrir le module et traiter l'élément"
+                            title="Ouvrir le module et traiter l'élément" aria-label="Ouvrir le module et traiter l'élément"
                           >
                             <span>Traiter</span>
                             <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -599,43 +605,43 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
               <h4 className="text-base font-black text-slate-900">
                 Assigner {selectedTaskIds.length} tâches
               </h4>
-              <button onClick={() => setIsAssignModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+              <button aria-label="Fermer" onClick={() => setIsAssignModalOpen(false)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-3">
               <label className="block text-xs font-bold text-slate-700">
-                Sélectionner le modérateur responsable :
+                Sélectionner le responsable autorisé :
               </label>
-              
+
               <div className="space-y-1.5 max-h-48 overflow-y-auto">
                 <button
-                  onClick={() => setSelectedAssignee(currentUserName)}
+                  onClick={() => setSelectedAssignee(currentUserId)}
                   className={`w-full text-left p-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-between ${
-                    selectedAssignee === currentUserName ? 'bg-blue-50 border-brand-blue text-brand-blue' : 'hover:bg-slate-50 border-slate-200'
+                    selectedAssignee === currentUserId ? 'bg-blue-50 border-brand-blue text-brand-blue' : 'hover:bg-slate-50 border-slate-200'
                   }`}
                 >
                   <div className="flex items-center gap-2">
                     <User className="w-4 h-4 text-slate-400" />
                     <span>M'assigner ces tâches ({currentUserName})</span>
                   </div>
-                  {selectedAssignee === currentUserName && <Check className="w-4 h-4 text-brand-blue" />}
+                  {selectedAssignee === currentUserId && <Check className="w-4 h-4 text-brand-blue" />}
                 </button>
 
                 {moderatorsList.map(mod => (
                   <button
                     key={mod.id}
-                    onClick={() => setSelectedAssignee(mod.full_name)}
+                    onClick={() => setSelectedAssignee(mod.id)}
                     className={`w-full text-left p-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-between ${
-                      selectedAssignee === mod.full_name ? 'bg-blue-50 border-brand-blue text-brand-blue' : 'hover:bg-slate-50 border-slate-200'
+                      selectedAssignee === mod.id ? 'bg-blue-50 border-brand-blue text-brand-blue' : 'hover:bg-slate-50 border-slate-200'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4 text-slate-400" />
                       <span>{mod.full_name} ({mod.role})</span>
                     </div>
-                    {selectedAssignee === mod.full_name && <Check className="w-4 h-4 text-brand-blue" />}
+                    {selectedAssignee === mod.id && <Check className="w-4 h-4 text-brand-blue" />}
                   </button>
                 ))}
               </div>
@@ -661,5 +667,6 @@ export const AdminWorkQueue: React.FC<AdminWorkQueueProps> = ({
       )}
 
     </div>
+    </fieldset>
   );
 };

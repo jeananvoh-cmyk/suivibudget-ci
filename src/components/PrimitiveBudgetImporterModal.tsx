@@ -3,14 +3,14 @@ import { Institution, PrimitiveBudgetInfo } from '../types';
 import { dataStore } from '../services/dataStore';
 import { formatFCFA } from '../utils/formatters';
 import { normalizeKey } from '../data/officialWebDirectory';
-import { 
-  Upload, 
-  FileSpreadsheet, 
-  Download, 
-  CheckCircle2, 
-  AlertTriangle, 
-  X, 
-  ExternalLink, 
+import {
+  Upload,
+  FileSpreadsheet,
+  Download,
+  CheckCircle2,
+  AlertTriangle,
+  X,
+  ExternalLink,
   Sparkles,
   Search,
   Check,
@@ -75,7 +75,7 @@ export const PrimitiveBudgetImporterModal: React.FC<PrimitiveBudgetImporterModal
   const findInstitution = (query: string): Institution | null => {
     if (!query) return null;
     const clean = query.trim().toLowerCase();
-    
+
     // Direct ID match
     if (institutionLookup.has(clean)) {
       return institutionLookup.get(clean)!;
@@ -118,7 +118,7 @@ export const PrimitiveBudgetImporterModal: React.FC<PrimitiveBudgetImporterModal
       const line = lines[i];
       // Detect separator: ';' or ',' or '\t'
       const separator = line.includes(';') ? ';' : line.includes('\t') ? '\t' : ',';
-      
+
       // Simple CSV split handling quotes
       const regex = new RegExp(`(?:^|${separator})(?:"([^"]*(?:""[^"]*)*)"|([^"${separator}]*))`, 'g');
       const tokens: string[] = [];
@@ -232,35 +232,7 @@ export const PrimitiveBudgetImporterModal: React.FC<PrimitiveBudgetImporterModal
 
   // Apply Bulk Import
   const handleApplyImport = () => {
-    const validRows = parsedRows.filter(r => r.matchedInstitution && !r.error);
-    if (validRows.length === 0) return;
-
-    setIsProcessing(true);
-
-    const updatedInstitutions: Institution[] = [];
-
-    for (const row of validRows) {
-      const inst = row.matchedInstitution!;
-      const primitive: PrimitiveBudgetInfo = {
-        total_voted_fcfa: row.totalVoted,
-        investment_voted_fcfa: row.investmentVoted,
-        functioning_voted_fcfa: row.functioningVoted,
-        voted_date: row.votedDate,
-        source: row.source,
-        source_url: row.sourceUrl || undefined,
-        session_notes: row.notes || undefined,
-      };
-
-      updatedInstitutions.push({
-        ...inst,
-        primitive_budget: primitive,
-      });
-    }
-
-    dataStore.updateMultipleInstitutions(updatedInstitutions);
-    setIsProcessing(false);
-    onImportSuccess(updatedInstitutions.length);
-    onClose();
+    window.alert('Import budgétaire local désactivé. Utilisez la console d’import qualifié : source, exercice, contrôle humain puis publication explicite.');
   };
 
   if (!isOpen) return null;
@@ -268,7 +240,7 @@ export const PrimitiveBudgetImporterModal: React.FC<PrimitiveBudgetImporterModal
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
       <div className="bg-white rounded-3xl w-full max-w-4xl shadow-2xl border border-slate-200 overflow-hidden my-6 flex flex-col max-h-[92vh]">
-        
+
         {/* Header */}
         <div className="px-6 py-5 bg-linear-to-r from-navy-900 to-navy-800 text-white flex items-center justify-between border-b border-navy-700/60">
           <div className="flex items-center gap-3">
@@ -287,7 +259,7 @@ export const PrimitiveBudgetImporterModal: React.FC<PrimitiveBudgetImporterModal
               </p>
             </div>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
@@ -320,7 +292,7 @@ export const PrimitiveBudgetImporterModal: React.FC<PrimitiveBudgetImporterModal
 
           {/* File Picker or Paste Area */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            
+
             {/* Direct File Selector */}
             <div className="border-2 border-dashed border-slate-200 hover:border-brand-blue rounded-2xl p-4 bg-slate-50/50 text-center flex flex-col justify-center transition-colors">
               <input
@@ -330,7 +302,7 @@ export const PrimitiveBudgetImporterModal: React.FC<PrimitiveBudgetImporterModal
                 onChange={handleFileChange}
                 className="hidden"
               />
-              <label 
+              <label
                 htmlFor="primitive-csv-file"
                 className="cursor-pointer flex flex-col items-center justify-center gap-2"
               >
@@ -377,7 +349,7 @@ export const PrimitiveBudgetImporterModal: React.FC<PrimitiveBudgetImporterModal
           {/* Parsing Results & Live Preview */}
           {parsedRows.length > 0 && (
             <div className="space-y-3 pt-2">
-              
+
               {/* Summary Badges */}
               <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-200">
                 <div className="flex items-center gap-3 text-xs">

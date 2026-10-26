@@ -6,11 +6,11 @@ import { StatImpactBanner } from '../components/StatImpactBanner';
 import { ProjectCard } from '../components/ProjectCard';
 import { dataStore, isTangiblePhysicalProject } from '../services/dataStore';
 import { formatFCFA, formatAmountInWords } from '../utils/formatters';
-import { 
-  ArrowRight, 
-  Camera, 
-  ShieldCheck, 
-  Eye, 
+import {
+  ArrowRight,
+  Camera,
+  ShieldCheck,
+  Eye,
   MapPin,
   Building2,
   Calendar,
@@ -73,14 +73,14 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   // Filter projects for the search / category
   const filteredProjects = allProjects.filter((p) => {
-    const matchesSearch = 
+    const matchesSearch =
       !searchQuery ||
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.commune_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.region_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.category.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesCategory = 
+    const matchesCategory =
       selectedCategory === 'ALL' ||
       p.category.toLowerCase().includes(selectedCategory.toLowerCase());
 
@@ -89,61 +89,61 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   // Calculate sector breakdowns from allProjects
   const sectorConfigs = [
-    { 
-      name: 'Infrastructures & Voirie', 
-      key: 'Infrastructure', 
-      countKey: 'Voirie', 
+    {
+      name: 'Infrastructures & Voirie',
+      key: 'Infrastructure',
+      countKey: 'Voirie',
       bgBar: 'bg-blue-600',
       badgeBg: 'bg-blue-50 text-blue-800 border-blue-200',
-      tagline: 'Routes, ponts & échangeurs' 
+      tagline: 'Routes, ponts & échangeurs'
     },
-    { 
-      name: 'Éducation & Formation', 
-      key: 'Éducation', 
-      countKey: 'Education', 
+    {
+      name: 'Éducation & Formation',
+      key: 'Éducation',
+      countKey: 'Education',
       bgBar: 'bg-emerald-600',
       badgeBg: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-      tagline: 'Écoles, collèges & universités' 
+      tagline: 'Écoles, collèges & universités'
     },
-    { 
-      name: 'Santé & Hygiène', 
-      key: 'Santé', 
-      countKey: 'Sante', 
+    {
+      name: 'Santé & Hygiène',
+      key: 'Santé',
+      countKey: 'Sante',
       bgBar: 'bg-teal-600',
       badgeBg: 'bg-teal-50 text-teal-800 border-teal-200',
-      tagline: 'Hôpitaux, CHU & maternités' 
+      tagline: 'Hôpitaux, CHU & maternités'
     },
-    { 
-      name: 'Eau Potable & Assainissement', 
-      key: 'Eau', 
-      countKey: 'Eau', 
+    {
+      name: 'Eau Potable & Assainissement',
+      key: 'Eau',
+      countKey: 'Eau',
       bgBar: 'bg-sky-600',
       badgeBg: 'bg-sky-50 text-sky-800 border-sky-200',
-      tagline: "Châteaux d'eau, forages & réseaux" 
+      tagline: "Châteaux d'eau, forages & réseaux"
     },
-    { 
-      name: 'Commerce & Économie', 
-      key: 'Commerce', 
-      countKey: 'Commerce', 
+    {
+      name: 'Commerce & Économie',
+      key: 'Commerce',
+      countKey: 'Commerce',
       bgBar: 'bg-amber-600',
       badgeBg: 'bg-amber-50 text-amber-800 border-amber-200',
-      tagline: 'Marchés couverts & zones d\'activités' 
+      tagline: 'Marchés couverts & zones d\'activités'
     },
-    { 
-      name: 'Logement & Aménagement', 
-      key: 'Logement', 
-      countKey: 'Logement', 
+    {
+      name: 'Logement & Aménagement',
+      key: 'Logement',
+      countKey: 'Logement',
       bgBar: 'bg-indigo-600',
       badgeBg: 'bg-indigo-50 text-indigo-800 border-indigo-200',
-      tagline: 'Logements sociaux & cadre de vie' 
+      tagline: 'Logements sociaux & cadre de vie'
     },
   ];
 
-  const totalAllProjectsAmount = allProjects.reduce((acc, p) => acc + p.budget_amount_fcfa, 0) || 1;
+  const totalAllProjectsAmount = allProjects.reduce((acc, p) => acc + (p.budget_amount_fcfa ?? 0), 0) || 1;
 
   const sectorData = sectorConfigs.map(s => {
     const matching = allProjects.filter(p => p.category.toLowerCase().includes(s.key.toLowerCase()));
-    const amount = matching.reduce((acc, p) => acc + p.budget_amount_fcfa, 0);
+    const amount = matching.reduce((acc, p) => acc + (p.budget_amount_fcfa ?? 0), 0);
     const count = matching.length;
     const pct = Math.max(2, Math.round((amount / totalAllProjectsAmount) * 100));
     return { ...s, amount, count, pct };
@@ -153,8 +153,8 @@ export const HomePage: React.FC<HomePageProps> = ({
   const { heroFeatured, sideArticles } = useMemo(() => {
     // Select tangible State investments with top budgets in Billions / hundreds of Millions FCFA
     const stateProjects = allProjects
-      .filter(p => isTangiblePhysicalProject(p) && (p.scope_level === 'NATIONAL' || p.budget_amount_fcfa >= 1_000_000_000))
-      .sort((a, b) => b.budget_amount_fcfa - a.budget_amount_fcfa);
+      .filter(p => isTangiblePhysicalProject(p) && (p.scope_level === 'NATIONAL' || (p.budget_amount_fcfa != null && p.budget_amount_fcfa >= 1_000_000_000)))
+      .sort((a, b) => (b.budget_amount_fcfa ?? -Infinity) - (a.budget_amount_fcfa ?? -Infinity));
 
     const pool = stateProjects.length > 0 ? stateProjects : allProjects.filter(isTangiblePhysicalProject);
 
@@ -200,8 +200,8 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   // 2. SECTION 2 : Chantiers Communaux & Régionaux de Proximité
   const localCommunalProjects = useMemo(() => {
-    return allProjects.filter(p => 
-      isTangiblePhysicalProject(p) && 
+    return allProjects.filter(p =>
+      isTangiblePhysicalProject(p) &&
       (p.scope_level === 'LOCAL' || (p.commune_name && p.commune_name !== 'National / Multi-Régions' && !p.commune_name.includes('Assemblée') && !p.commune_name.includes('Présidence')))
     );
   }, [allProjects]);
@@ -221,7 +221,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
     for (const c of distinctCommunes) {
       const commProjects = projectsByCommune.get(c) || [];
-      const proj = commProjects.find(p => p.budget_amount_fcfa >= 10_000_000) || commProjects[0];
+      const proj = commProjects.find(p => (p.budget_amount_fcfa != null && p.budget_amount_fcfa >= 10_000_000)) || commProjects[0];
       if (proj && !usedCommunes.has(c)) {
         remaining.push(proj);
         usedCommunes.add(c);
@@ -240,7 +240,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     }
 
     const query = selectedProximityCity.trim().toLowerCase();
-    return localCommunalProjects.filter(p => 
+    return localCommunalProjects.filter(p =>
       (p.commune_name && p.commune_name.toLowerCase().includes(query)) ||
       (p.region_name && p.region_name.toLowerCase().includes(query)) ||
       (p.title && p.title.toLowerCase().includes(query)) ||
@@ -250,7 +250,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <div className="space-y-14 pb-24 bg-slate-50">
-      
+
       {/* 1. HERO SECTION */}
       <HeroSection
         searchQuery={searchQuery}
@@ -277,9 +277,9 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          
+
           {/* Pillar 1: Tracka-CI */}
-          <div 
+          <div
             onClick={() => onOpenSendProof()}
             className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-brand-blue/40 transition-all cursor-pointer flex flex-col justify-between group"
           >
@@ -301,7 +301,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Pillar 2: Budget Ouvert */}
-          <div 
+          <div
             onClick={() => onNavigateTab('projects')}
             className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-brand-blue/40 transition-all cursor-pointer flex flex-col justify-between group"
           >
@@ -323,7 +323,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Pillar 3: Portail CAIDP */}
-          <div 
+          <div
             onClick={() => onNavigateTab('institutions')}
             className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-brand-blue/40 transition-all cursor-pointer flex flex-col justify-between group"
           >
@@ -345,7 +345,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Pillar 4: Observatoire */}
-          <div 
+          <div
             onClick={() => onNavigateTab('observatory')}
             className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-brand-blue/40 transition-all cursor-pointer flex flex-col justify-between group"
           >
@@ -425,7 +425,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                         {formatFCFA(sec.amount)}
                       </span>
                     </div>
-                    
+
                     <div className="text-xl font-black text-slate-900 tracking-tight">
                       {formatAmountInWords(sec.amount)} FCFA
                     </div>
@@ -433,8 +433,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                     {/* Jauge explicite */}
                     <div className="space-y-1 pt-1">
                       <div className="w-full bg-slate-200/80 h-2 rounded-full overflow-hidden">
-                        <div 
-                          className={`${sec.bgBar} h-full rounded-full transition-all duration-500`} 
+                        <div
+                          className={`${sec.bgBar} h-full rounded-full transition-all duration-500`}
                           style={{ width: `${Math.min(100, Math.max(3, sec.pct))}%` }}
                         />
                       </div>
@@ -462,7 +462,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       {/* 4. SECTION 1 : GRANDS PROJETS STRATÉGIQUES DE L'ÉTAT (EN MILLIARDS FCFA) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Header with Title and Dynamic Refresh */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8 border-b border-slate-200/80 pb-4">
           <div>
@@ -486,10 +486,10 @@ export const HomePage: React.FC<HomePageProps> = ({
 
         {/* Editorial 2-Column Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* LEFT: HERO FEATURED STORY (STATE MEGA PROJECT) */}
           {heroFeatured && (
-            <div 
+            <div
               onClick={() => onSelectProject(heroFeatured)}
               role="button"
               tabIndex={0}
@@ -604,7 +604,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       {/* 5. SECTION 2 : CHANTIERS COMMUNAUX & RÉGIONAUX DE PROXIMITÉ */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 border-b border-slate-200 pb-5">
           <div className="max-w-3xl">
@@ -627,7 +627,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
         {/* Proximity Local Selector (Option 1: Clean, no duplicate search bar) */}
         <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-2xs mb-8 space-y-3">
-          
+
           {/* Header with label & quick reset */}
           <div className="flex items-center justify-between gap-3 text-xs">
             <span className="font-bold text-slate-700 flex items-center gap-1.5">
@@ -742,8 +742,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </span>
                 <span className="text-xs text-slate-400">{readingArticle.published_at}</span>
               </div>
-              <button 
-                onClick={() => setReadingArticle(null)} 
+              <button
+                onClick={() => setReadingArticle(null)}
                 className="p-1.5 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
@@ -752,7 +752,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
             {readingArticle.cover_image_url && (
               <div className="h-56 w-full rounded-2xl overflow-hidden shadow-xs">
-                <img src={readingArticle.cover_image_url} alt={readingArticle.title} className="w-full h-full object-cover" />
+                <img src={readingArticle.cover_image_display_url || readingArticle.cover_image_url} alt={readingArticle.title} className="w-full h-full object-cover" />
               </div>
             )}
 
@@ -760,7 +760,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <h3 className="text-xl sm:text-2xl font-black text-slate-900 leading-snug">
                 {readingArticle.title}
               </h3>
-              
+
               <div className="p-4 bg-slate-50 rounded-2xl border-l-4 border-purple-600 text-xs sm:text-sm font-medium text-slate-700 italic leading-relaxed">
                 {readingArticle.summary}
               </div>
@@ -778,9 +778,9 @@ export const HomePage: React.FC<HomePageProps> = ({
                       <span className="text-[10px] text-purple-700">Document officiel téléchargeable</span>
                     </div>
                   </div>
-                  {readingArticle.document_url ? (
+                  {readingArticle.document_display_url || (readingArticle.document_url && !readingArticle.document_url.startsWith('storage://')) ? (
                     <a
-                      href={readingArticle.document_url}
+                      href={readingArticle.document_display_url || readingArticle.document_url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="px-3.5 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs"

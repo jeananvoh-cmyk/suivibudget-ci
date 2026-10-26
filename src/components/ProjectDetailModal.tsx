@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { BudgetProject, CitizenProof } from '../types';
 import { formatFCFA, formatAmountInWords, formatDateFR, getStatusConfig, getProjectEntityInfo, getProjectTypeActionInfo, getProjectTier, getProjectTierBadge } from '../utils/formatters';
-import { 
-  X, 
-  MapPin, 
-  Building, 
-  Calendar, 
-  Briefcase, 
-  Camera, 
-  Video, 
-  Share2, 
-  Clock, 
-  ShieldCheck, 
+import {
+  X,
+  MapPin,
+  Building,
+  Calendar,
+  Briefcase,
+  Camera,
+  Video,
+  Share2,
+  Clock,
+  ShieldCheck,
   AlertCircle,
   FileText,
   Printer,
@@ -67,11 +67,11 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   const actionInfo = getProjectTypeActionInfo(project.title, project.category, project.scope_level);
   const tier = getProjectTier(project);
   const tierBadge = getProjectTierBadge(tier);
-  
-  const hasSpecificNeighborhood = !!project.locality_village_neighborhood && 
+
+  const hasSpecificNeighborhood = !!project.locality_village_neighborhood &&
     !project.title.toLowerCase().includes(project.locality_village_neighborhood.toLowerCase());
-  
-  const isDetailsRedundant = !project.details || 
+
+  const isDetailsRedundant = !project.details ||
     project.details.trim().toLowerCase() === project.title.trim().toLowerCase() ||
     project.details.trim().length < 5;
 
@@ -83,7 +83,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
     const text = encodeURIComponent(
       ` *SUIVI CITOYEN - ${actionInfo.shareCategoryLabel}*\n\n` +
       ` *Intitulé :* ${project.title}\n` +
-      ` *Budget Alloué :* ${formatFCFA(project.budget_amount_fcfa)} (${formatAmountInWords(project.budget_amount_fcfa)} FCFA)\n` +
+      ` *${project.data_provenance==='DECLARED_ADMIN' ? 'Budget prévu déclaré' : 'Budget public prévu'} :* ${formatFCFA(project.budget_amount_fcfa)} (${formatAmountInWords(project.budget_amount_fcfa)} FCFA)\n` +
       `*Autorité Responsable :* ${entityInfo.entityName}\n` +
       `*Localisation :* ${project.region_name || project.commune_name}\n\n` +
       `Citoyens et riverains, suivez la réalisation effective sur la plateforme citoyenne : ${window.location.origin}/projets?project=${encodeURIComponent(project.id)}`
@@ -92,20 +92,20 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 md:p-6 animate-in fade-in duration-200 cursor-pointer"
       onClick={onClose}
     >
-      
+
       {/* Modal Container */}
-      <div 
+      <div
         role="dialog"
         aria-modal="true"
         aria-label={`Détails du projet : ${project.title}`}
         className="bg-white rounded-3xl w-full max-w-3xl shadow-2xl border border-slate-200 overflow-hidden my-auto max-h-[92vh] flex flex-col print:max-h-none print:shadow-none print:border-none cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
-        
+
         {/* Modal Header */}
         <div className="p-6 bg-white border-b border-slate-200 flex items-start justify-between gap-4 print:border-b-2 print:border-slate-900">
           <div>
@@ -158,10 +158,10 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
         {/* Project Hero Visual Cover */}
         {project.image_url && (
           <div className="relative aspect-video sm:aspect-21/9 w-full overflow-hidden bg-slate-950 flex-shrink-0">
-            <img 
-              src={project.image_url} 
-              alt={project.title} 
-              className="w-full h-full object-cover" 
+            <img
+              src={project.image_url}
+              alt={project.title}
+              className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-black/30" />
             <div className="absolute bottom-3 inset-x-4 flex items-center justify-between gap-2 text-white">
@@ -183,7 +183,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
         {/* 3-TAB SWITCHER: DONNÉES & BUDGET vs PASSEPORT vs CONSTATS & VIDÉOS        */}
         {/* ========================================================================= */}
         <div className="px-4 sm:px-6 pt-3 bg-slate-50 border-b border-slate-200 flex items-center gap-1 sm:gap-2 overflow-x-auto print:hidden">
-          
+
           <button
             onClick={() => setActiveTab('budget')}
             className={`pb-3 px-3 sm:px-4 font-bold text-xs sm:text-sm border-b-2 transition-all flex items-center gap-1.5 sm:gap-2 shrink-0 ${
@@ -236,21 +236,21 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 
         {/* Modal Body - Scrollable */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1">
-          
+
           {/* ===================================================================== */}
           {/* ONGLET 1 : FICHE & BUDGET OFFICIEL                                     */}
           {/* ===================================================================== */}
           {activeTab === 'budget' && (
             <div className="space-y-6 animate-in fade-in duration-150">
-              
+
               {/* BUDGET & STATUS HIGHLIGHT BOX */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
+
                 {/* Box 1: Budget Voté */}
                 <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl flex flex-col justify-between">
                   <div>
                     <span className="text-xs font-black tracking-wider text-slate-500 uppercase">
-                      Budget Public Alloué
+                      {project.data_provenance==='DECLARED_ADMIN' ? 'Budget prévu déclaré' : 'Budget public prévu'}
                     </span>
                     <div className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
                       {formatFCFA(project.budget_amount_fcfa)}
@@ -272,13 +272,13 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                       <span className="text-xs font-black tracking-wider text-slate-500 uppercase">
                         Statut du Projet
                       </span>
-                      
+
                       <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">
                         <span className="w-2 h-2 rounded-full bg-slate-400"></span>
                         <span>Réalisation physique non certifiée</span>
                       </span>
                     </div>
-                    
+
                     <div className="mt-3">
                       <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1.5">
                         <span>Constat citoyen terrain</span>
@@ -293,9 +293,9 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                           <span className="text-slate-400">En attente de photo/vidéo</span>
                         )}
                       </div>
-                      
+
                       {proofs.length > 0 ? (
-                        <div 
+                        <div
                           onClick={() => setActiveTab('proofs')}
                           className="p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-slate-300 hover:bg-slate-50/70 transition-colors flex items-center justify-between"
                         >
@@ -344,9 +344,9 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   </div>
 
                   <div className="w-full bg-emerald-200 h-2.5 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-emerald-600 rounded-full transition-all duration-500" 
-                      style={{ width: `${Math.min(100, project.progress_percentage)}%` }} 
+                    <div
+                      className="h-full bg-emerald-600 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(100, project.progress_percentage)}%` }}
                     />
                   </div>
                 </div>
@@ -457,7 +457,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                  
+
                   {/* Action 1: Photo / Vidéo */}
                   <button
                     onClick={() => onOpenSendProof(project)}
@@ -498,7 +498,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
           {/* ===================================================================== */}
           {activeTab === 'passport' && (
             <div className="animate-in fade-in duration-150">
-              <ProjectAccountabilityPassport 
+              <ProjectAccountabilityPassport
                 project={project}
                 proofs={proofs}
                 onOpenSendProof={onOpenSendProof}
@@ -512,7 +512,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
           {/* ===================================================================== */}
           {activeTab === 'proofs' && (
             <div className="space-y-6 animate-in fade-in duration-150">
-              
+
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                 <div>
                   <h4 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
@@ -564,7 +564,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                     return (
                       <div key={proof.id} className="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden shadow-2xs flex flex-col justify-between">
                         <div>
-                          
+
                           {/* Media Header (Video player or Photo) */}
                           <div className="h-48 bg-slate-900 relative overflow-hidden flex items-center justify-center">
                             {isVideo && proof.video_url ? (
@@ -616,7 +616,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                                 </span>
                               )}
                             </div>
-                            
+
                             <p className="text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200 italic leading-relaxed">
                               "{proof.comment}"
                             </p>

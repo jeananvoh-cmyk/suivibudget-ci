@@ -5,15 +5,25 @@ import { CA_PILOT_FIXTURES } from './caPilotFixtures';
 beforeEach(() => {
   ADMINISTRATIVE_ACCOUNTS_DATA.splice(0, Infinity, ...structuredClone(CA_PILOT_FIXTURES));
 });
-import { 
-  generateProjectPassport, 
-  findMatchingCaOperation, 
-  findMatchingCaOperationResult 
+import {
+  generateProjectPassport,
+  findMatchingCaOperation,
+  findMatchingCaOperationResult
 } from '../projectPassport';
 import { BudgetProject, CitizenProof } from '../../types';
 import type { AdministrativeAccount, CAInvestmentOperation } from '../../types/administrativeAccount';
 
 describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
+  it('ne certifie ni les montants ni la réalisation d’une déclaration administrateur', () => {
+    const passport=generateProjectPassport({...mockTiassaleProject2024,id:'declaration-isolée',institution_id:'isolated',commune_name:'Test',data_provenance:'DECLARED_ADMIN',budget_amount_fcfa:null,progress_percentage:100,official_progress_source:'Texte saisi par un administrateur'},[],[]);
+    expect(passport.facts.budget_amount.availability).toBe('UNKNOWN');
+    expect(passport.facts.budget_amount.provenance).toBe('UNVERIFIED_INPUT');
+    expect(passport.facts.source_reference.provenance).toBe('UNVERIFIED_INPUT');
+    expect(passport.facts.physical_status.provenance).toBe('UNVERIFIED_INPUT');
+    const physical=passport.stages.find(stage=>stage.id==='PHYSICAL_REALIZATION')!;
+    expect(physical.status).toBe('PENDING_DOCUMENTATION');
+    expect(physical.dataPoints[0].provenance).toBe('UNVERIFIED_INPUT');
+  });
   it('ne déduit ni zéro ni réalisation à partir des montants CA/DGMP qualifiés', () => {
     const accounts=structuredClone(CA_PILOT_FIXTURES);
     const op=accounts.find(ca=>ca.id==='ca-tiassale-2024')!.operations[2];
@@ -286,7 +296,7 @@ describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
   it('Section 10.E : une preuve citoyenne approuvée est strictement CITIZEN_OBSERVATION (jamais OFFICIAL_SOURCE)', () => {
     const passport = generateProjectPassport(mockTiassaleProject2024, [mockApprovedProof]);
     const physicalStage = passport.stages.find(s => s.id === 'PHYSICAL_REALIZATION');
-    
+
     expect(physicalStage?.status).toBe('CITIZEN_DOCUMENTED');
     const citizenProofDp = physicalStage?.dataPoints.find(dp => dp.label === 'Contributions citoyennes publiées');
     expect(citizenProofDp?.provenance).toBe('CITIZEN_OBSERVATION');
@@ -376,7 +386,7 @@ describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
 
   it('Phase 2B : un montant proche ne compense jamais un objet et une localisation incompatibles', () => {
     const incompatible = makeOperation('op-near-amount', 'Réhabilitation du centre de santé de Niamoué', {
-      planned_amount: mockTiassaleProject2024.budget_amount_fcfa - 1000,
+      planned_amount: mockTiassaleProject2024.budget_amount_fcfa! - 1000,
       location: 'Niamoué',
       sector: 'Santé',
     });

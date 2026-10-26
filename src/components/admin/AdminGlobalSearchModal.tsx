@@ -4,14 +4,14 @@
 // =========================================================================
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { 
-  Search, 
-  X, 
-  Building2, 
-  Landmark, 
-  FileText, 
-  Camera, 
-  FileSpreadsheet, 
+import {
+  Search,
+  X,
+  Building2,
+  Landmark,
+  FileText,
+  Camera,
+  FileSpreadsheet,
   ArrowRight,
   User,
   ExternalLink,
@@ -64,7 +64,7 @@ export const AdminGlobalSearchModal: React.FC<AdminGlobalSearchModalProps> = ({
     const results: AdminGlobalSearchResult[] = [];
 
     // 1. Organismes CAIDP & Mairies
-    const caidpEntities = dataStore.getCaidpDirectory();
+    const caidpEntities = dataStore.getCaidpDirectory(true);
     caidpEntities.forEach(ent => {
       const matchName = normalizeSearchText(ent.company_name).includes(q);
       const matchRi = normalizeSearchText(ent.ri_name).includes(q);
@@ -84,7 +84,7 @@ export const AdminGlobalSearchModal: React.FC<AdminGlobalSearchModalProps> = ({
     });
 
     // 2. Institutions & Élus
-    const institutions = dataStore.getInstitutions();
+    const institutions = dataStore.getInstitutions(true);
     institutions.forEach(inst => {
       const matchInst = normalizeSearchText(inst.name).includes(q);
       const matchLeader = inst.leader_name && normalizeSearchText(inst.leader_name).includes(q);
@@ -125,7 +125,7 @@ export const AdminGlobalSearchModal: React.FC<AdminGlobalSearchModalProps> = ({
     });
 
     // 4. Projets & Lignes Budgétaires
-    const projects = dataStore.getProjects();
+    const projects = dataStore.getProjects(true);
     projects.forEach(proj => {
       const matchTitle = normalizeSearchText(proj.title).includes(q);
       const matchCommune = normalizeSearchText(proj.commune_name).includes(q);
@@ -189,11 +189,11 @@ export const AdminGlobalSearchModal: React.FC<AdminGlobalSearchModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-start justify-center pt-16 sm:pt-24 p-4 animate-in fade-in duration-150"
       onClick={onClose}
     >
-      <div 
+      <div
         className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
@@ -213,7 +213,7 @@ export const AdminGlobalSearchModal: React.FC<AdminGlobalSearchModalProps> = ({
             className="flex-1 bg-transparent border-none outline-none text-sm sm:text-base font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
           />
           {query ? (
-            <button 
+            <button
               onClick={() => setQuery('')}
               className="text-slate-400 hover:text-slate-600 p-1"
             >

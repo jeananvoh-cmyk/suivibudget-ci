@@ -1,16 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { dataStore } from '../services/dataStore';
 import { formatFCFA, formatAmountInWords, formatDateFR } from '../utils/formatters';
-import { 
-  FileText, 
-  Printer, 
-  TrendingUp, 
-  Building, 
-  ShieldCheck, 
-  CheckCircle2, 
-  PieChart, 
-  Layers, 
-  MapPin, 
+import {
+  FileText,
+  Printer,
+  TrendingUp,
+  Building,
+  ShieldCheck,
+  CheckCircle2,
+  PieChart,
+  Layers,
+  MapPin,
   AlertCircle,
   BarChart3,
   Calendar,
@@ -39,18 +39,18 @@ export const BudgetReportsView: React.FC = () => {
       filteredProjects = allProjects.filter(p => p.scope_level === 'LOCAL');
     }
 
-    const totalAmount = filteredProjects.reduce((sum, p) => sum + p.budget_amount_fcfa, 0);
+    const totalAmount = filteredProjects.reduce((sum, p) => sum + (p.budget_amount_fcfa ?? 0), 0);
     const nationalCount = filteredProjects.filter(p => p.scope_level === 'NATIONAL').length;
     const localCount = filteredProjects.filter(p => p.scope_level === 'LOCAL').length;
-    const nationalAmount = filteredProjects.filter(p => p.scope_level === 'NATIONAL').reduce((sum, p) => sum + p.budget_amount_fcfa, 0);
-    const localAmount = filteredProjects.filter(p => p.scope_level === 'LOCAL').reduce((sum, p) => sum + p.budget_amount_fcfa, 0);
+    const nationalAmount = filteredProjects.filter(p => p.scope_level === 'NATIONAL').reduce((sum, p) => sum + (p.budget_amount_fcfa ?? 0), 0);
+    const localAmount = filteredProjects.filter(p => p.scope_level === 'LOCAL').reduce((sum, p) => sum + (p.budget_amount_fcfa ?? 0), 0);
 
     // Top entities in this report
     const entityMap = new Map<string, { name: string; amount: number; count: number }>();
     filteredProjects.forEach(p => {
       const name = p.ministry_name || p.institution_name || p.commune_name || p.region_name || 'Collectivité';
       const existing = entityMap.get(name) || { name, amount: 0, count: 0 };
-      existing.amount += p.budget_amount_fcfa;
+      if(p.budget_amount_fcfa != null) existing.amount += p.budget_amount_fcfa;
       existing.count += 1;
       entityMap.set(name, existing);
     });
@@ -63,7 +63,7 @@ export const BudgetReportsView: React.FC = () => {
     const catMap = new Map<string, number>();
     filteredProjects.forEach(p => {
       const cat = p.category || 'Autres';
-      catMap.set(cat, (catMap.get(cat) || 0) + p.budget_amount_fcfa);
+      catMap.set(cat, (catMap.get(cat) || 0) + (p.budget_amount_fcfa ?? 0));
     });
 
     const categoryBreakdown = Array.from(catMap.entries())
@@ -104,7 +104,7 @@ export const BudgetReportsView: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      
+
       {/* Header & Controls (Hidden in Print Mode) */}
       <div className="print:hidden bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-6">
@@ -166,7 +166,7 @@ export const BudgetReportsView: React.FC = () => {
       {/* OFFICIAL REPORT DOCUMENT (PRINTABLE A4 FRIENDLY) */}
       {/* ========================================================================= */}
       <div className="bg-white rounded-3xl p-6 sm:p-12 border border-slate-200 shadow-lg space-y-10 print:border-none print:shadow-none print:p-0">
-        
+
         {/* Document Header */}
         <div className="border-b-2 border-slate-900 pb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="space-y-1">

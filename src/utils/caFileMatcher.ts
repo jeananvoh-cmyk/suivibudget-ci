@@ -21,6 +21,30 @@ export async function calculateFileSha256(file: File | Blob | ArrayBuffer): Prom
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+export async function extractPdfPageCountFromBuffer(buffer: ArrayBuffer | Uint8Array): Promise<number | null> {
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  if (bytes.byteLength < 8 || bytes.byteLength > 50 * 1024 * 1024) return null;
+  const { PDFParse } = await import('pdf-parse');
+  if (typeof window !== 'undefined') {
+    const { default: workerUrl } = await import('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url');
+    PDFParse.setWorker(workerUrl);
+  }
+  const parser = new PDFParse({ data: bytes.slice(), isEvalSupported: false });
+  try {
+    const info = await parser.getInfo();
+    return info.permission === null && Number.isSafeInteger(info.total) && info.total > 0 ? info.total : null;
+  } catch {
+    return null;
+  } finally {
+    await parser.destroy();
+  }
+}
+
+export async function extractPdfPageCount(file: File | Blob | ArrayBuffer): Promise<number | null> {
+  const buffer = file instanceof ArrayBuffer ? file : await file.arrayBuffer();
+  return extractPdfPageCountFromBuffer(buffer);
+}
+
 /**
  * Normalisation d'une chaîne pour comparaison insensible aux accents et caractères spéciaux
  */
