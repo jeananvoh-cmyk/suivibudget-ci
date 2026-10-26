@@ -265,6 +265,8 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
     }
 
     setSelectedFile(file);
+    setPageCount(undefined);
+    setPageCountSource('AUTOMATIC');
     setFileName(file.name);
     setFileSizeBytes(file.size);
 
@@ -316,6 +318,9 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       file_name: file.name,
       file_size: formatted,
       file_size_bytes: file.size,
+      checksum_sha256: '',
+      page_end: undefined,
+      page_range: '',
       isCalculating: true,
     } : p));
 
@@ -455,7 +460,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
       let finalSizeBytes = fileSizeBytes;
       let finalSha256 = checksumSha256;
       let finalParts: DocumentPartInfo[] | undefined = undefined;
-      let finalTotalPages = isMultipart ? pageRangeValidation.totalPages : (pageCount ?? existingDocument?.page_count);
+      let finalTotalPages = isMultipart ? pageRangeValidation.totalPages : pageCount;
 
       const uploadOptions = {
         institutionId,

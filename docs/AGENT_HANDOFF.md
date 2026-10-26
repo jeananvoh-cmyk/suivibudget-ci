@@ -1,3 +1,11 @@
+## 26 octobre 2026 — Clôture B : PDF éprouvés et bibliothèque
+
+Remplacement du compteur regex par PDF.js 5.4.296 via pdf-parse 2.4.5, versions exactes. Worker servi localement et chargé à la demande ; aucun CDN. Copie des octets avant analyse pour préserver SHA-256. Taille limitée à 50 MiB ; fichiers illisibles/chiffrés => null, correction manuelle conservée. Remplacement de fichier : compteur/plage antérieurs invalidés, sans reprendre silencieusement les pages historiques. Le test de vrais fichiers est explicitement SKIPPED si absent, jamais PASS sans assertion.
+
+Deux originaux locaux contrôlés : Cocody_CA_2024_pages_01-22.pdf (7277392 octets, 22 pages, SHA 580b42cde2c164c8f7a4af23419b3dd93de541b583f5986d71bbf35b3e9c4ca4), Cocody_CA_2024_pages_23-44.pdf (6844140 octets, 22 pages, SHA 796921a9522c0fbf2a48b4bbf16f97ea8a525f57fb74b438c11bc64de5dc7ec9). Ces SHA physiques ne sont pas le manifeste multipart ni le SHA 941c399b… du document de production. Aucune équivalence de fichiers présumée.
+
+PDF générés valides avec table xref (1/22/44/58 pages), PDF compressé et PDF chiffré pypdf testés. 50 tests ciblés pagination/multipart PASS ; 16/16 parcours Chromium/Edge PASS dont upload multipart, attestation des octets, contrôle humain, publication et écrans 360/640/768/1024/1440. RLS/RPC PostgreSQL PGlite réels ; Auth/REST/Storage simulés. TypeScript, builds production et review PASS. Suite complète finale en cours au prochain checkpoint. Prochaine action : clôture documentaire Cocody/Tiassalé/État et plan de bascule contrôlée ; aucune production modifiée.
+
 ## 26 octobre 2026 — Clôture A : délivrance documentaire
 
 Reprise de #63 au HEAD e336b1e, master f9ebadb (0 commit master manquant). Worktree initial propre, travaux Antigravity préservés. CI GitHub Quality 38891432495 verte. Vérification production en lecture seule : admin_persistence_version et record_document_delivery absentes ; multipart déjà appliquée sous 20261014155231. Aucune écriture distante.

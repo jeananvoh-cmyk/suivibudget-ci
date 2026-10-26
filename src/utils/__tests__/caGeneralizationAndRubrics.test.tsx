@@ -18,6 +18,18 @@ import { dataStore } from '../../services/dataStore';
 import type { Institution, AdministrativeAccount, PublicDocument } from '../../types';
 import type { LocalBudget } from '../../types/localBudget';
 
+function pdfFixture(pages: number): ArrayBuffer {
+  const objects = ['<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [' + Array.from({length:pages},(_,i)=>(i+3)+' 0 R').join(' ') + '] /Count '+pages+' >>',
+    ...Array.from({length:pages},()=> '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 200] >>')];
+  let pdf='%PDF-1.4\n';const offsets=[0];
+  objects.forEach((object,i)=>{offsets.push(pdf.length);pdf+=(i+1)+' 0 obj\n'+object+'\nendobj\n';});
+  const xref=pdf.length;
+  pdf+='xref\n0 '+(objects.length+1)+'\n0000000000 65535 f \n'+offsets.slice(1).map(n=>String(n).padStart(10,'0')+' 00000 n \n').join('');
+  pdf+='trailer\n<< /Size '+(objects.length+1)+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF\n';
+  return new TextEncoder().encode(pdf).buffer;
+}
+
 describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoyennes', () => {
   beforeEach(() => {
     ADMINISTRATIVE_ACCOUNTS_DATA.splice(0, ADMINISTRATIVE_ACCOUNTS_DATA.length);
@@ -27,65 +39,28 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
   // PRIORITÉ 3 : Compteur de pages PDF fiable, Empreinte SHA-256 et Métadonnées
   // =========================================================================
   describe('1. Compteur de pages PDF fiable et Intégrité documentaire (Priorité 3)', () => {
-    it('détecte le nombre de pages à partir de la racine /Catalog -> /Pages /Count', () => {
-      const fakePdfContent = `%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 58 >>\nendobj\n%%EOF`;
-      const buffer = new TextEncoder().encode(fakePdfContent).buffer;
-      const count = extractPdfPageCountFromBuffer(buffer);
-      expect(count).toBe(58);
+    it.each([1,22,44,58])('compte un vrai PDF de %i pages sans détacher les octets originaux', async count => {
+      const buffer=pdfFixture(count);
+      const hash=await calculateFileSha256(buffer);
+      expect(await extractPdfPageCountFromBuffer(buffer)).toBe(count);
+      expect(await calculateFileSha256(buffer)).toBe(hash);
     });
 
-    it('ignore les compteurs non liés aux pages (/Outlines /Count) et suit l’arbre /Pages', () => {
-      const pdfWithOutlines = [
-        '%PDF-1.4',
-        '1 0 obj << /Type /Catalog /Pages 2 0 R /Outlines 3 0 R >> endobj',
-        '2 0 obj << /Type /Pages /Kids [4 0 R 5 0 R] /Count 22 >> endobj',
-        '3 0 obj << /Type /Outlines /Count 999 >> endobj',
-        '4 0 obj << /Type /Page /Parent 2 0 R >> endobj',
-        '5 0 obj << /Type /Page /Parent 2 0 R >> endobj',
-        'trailer << /Root 1 0 R >>',
-        '%%EOF'
-      ].join('\n');
-      const buffer = new TextEncoder().encode(pdfWithOutlines).buffer;
-      expect(extractPdfPageCountFromBuffer(buffer)).toBe(22);
+    it.each(['Ceci est un fichier texte', '%PDF-1.5\n1 0 obj << /Type /ObjStm /Length 9 >> stream\ncorrompu\nendstream endobj\n%%EOF', '%PDF-1.5\n1 0 obj << /Filter /Standard >> endobj\ntrailer << /Encrypt 1 0 R >>\n%%EOF'])('laisse les fichiers illisibles ou chiffrés indéterminés', async content => {
+      expect(await extractPdfPageCountFromBuffer(new TextEncoder().encode(content))).toBeNull();
     });
 
-    it('prend en compte les mises à jour incrémentales PDF (dernière révision de l’objet /Pages)', () => {
-      const incrementalPdf = [
-        '%PDF-1.4',
-        '1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj',
-        '2 0 obj << /Type /Pages /Kids [3 0 R] /Count 10 >> endobj',
-        '%%EOF',
-        '2 0 obj << /Type /Pages /Kids [3 0 R 4 0 R] /Count 44 >> endobj',
-        'trailer << /Root 1 0 R >>',
-        '%%EOF'
-      ].join('\n');
-      const buffer = new TextEncoder().encode(incrementalPdf).buffer;
-      expect(extractPdfPageCountFromBuffer(buffer)).toBe(44);
+    it('analyse un PDF encrypted généré par pypdf', async () => {
+      const bytes=Uint8Array.from(atob('JVBERi0xLjMKJeLjz9MKMSAwIG9iago8PAovUHJvZHVjZXIgPGUwNWYwY2RiN2Y+Cj4+CmVuZG9iagoyIDAgb2JqCjw8Ci9UeXBlIC9QYWdlcwovQ291bnQgMQovS2lkcyBbIDQgMCBSIF0KPj4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL0NhdGFsb2cKL1BhZ2VzIDIgMCBSCj4+CmVuZG9iago0IDAgb2JqCjw8Ci9UeXBlIC9QYWdlCi9SZXNvdXJjZXMgPDwKPj4KL01lZGlhQm94IFsgMC4wIDAuMCAzMDAgMjAwIF0KL1BhcmVudCAyIDAgUgo+PgplbmRvYmoKNSAwIG9iago8PAovViAyCi9SIDMKL0xlbmd0aCAxMjgKL1AgNDI5NDk2NzI5MgovRmlsdGVyIC9TdGFuZGFyZAovTyA8YTgxN2MwMzIxY2ViOTJjMDQ3MDkyMDc2MTA0NjJkZjViZWIwMzJjYzBhYTQ4YTY3MGY5YWVmNTM3NTk2MzdkNj4KL1UgPDdjMTYwZjkwOWE2NDA0YTU0MzlkYTY5YmVjMzIxN2ZiMjhiZjRlNWU0ZTc1OGE0MTY0MDA0ZTU2ZmZmYTAxMDg+Cj4+CmVuZG9iagp4cmVmCjAgNgowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMTUgMDAwMDAgbiAKMDAwMDAwMDA1OSAwMDAwMCBuIAowMDAwMDAwMTE4IDAwMDAwIG4gCjAwMDAwMDAxNjcgMDAwMDAgbiAKMDAwMDAwMDI2MSAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDYKL1Jvb3QgMyAwIFIKL0luZm8gMSAwIFIKL0lEIFsgPDMzMzYzMDY0MzAzNzM0NjUzMjM3MzYzMDMzMzEzMTM2MzA2MzYzMzU2MTYxMzAzNzY0NjUzNzM0Mzc2MjYzNjU+IDwzMzM2MzA2NDMwMzczNDY1MzIzNzM2MzAzMzMxMzEzNjMwNjM2MzM1NjE2MTMwMzc2NDY1MzczNDM3NjI2MzY1PiBdCi9FbmNyeXB0IDUgMCBSCj4+CnN0YXJ0eHJlZgo0NzYKJSVFT0YK'), c=>c.charCodeAt(0));
+      expect(await extractPdfPageCountFromBuffer(bytes)).toBeNull();
     });
 
-    it('détecte le nombre de pages en comptant les objets /Type /Page individuels hors flux binaires', () => {
-      const fakePdfContent = `%PDF-1.4\n1 0 obj << /Type /Page >> endobj\n2 0 obj << /Type /Page >> endobj\n3 0 obj << /Type /Page >> endobj\n%%EOF`;
-      const buffer = new TextEncoder().encode(fakePdfContent).buffer;
-      const count = extractPdfPageCountFromBuffer(buffer);
-      expect(count).toBe(3);
+    it('analyse un PDF compressed généré par pypdf', async () => {
+      const bytes=Uint8Array.from(atob('JVBERi0xLjMKJeLjz9MKMSAwIG9iago8PAovUHJvZHVjZXIgKHB5cGRmKQo+PgplbmRvYmoKMiAwIG9iago8PAovVHlwZSAvUGFnZXMKL0NvdW50IDEKL0tpZHMgWyA0IDAgUiBdCj4+CmVuZG9iagozIDAgb2JqCjw8Ci9UeXBlIC9DYXRhbG9nCi9QYWdlcyAyIDAgUgo+PgplbmRvYmoKNCAwIG9iago8PAovVHlwZSAvUGFnZQovUmVzb3VyY2VzIDw8Cj4+Ci9NZWRpYUJveCBbIDAuMCAwLjAgMzAwIDIwMCBdCi9QYXJlbnQgMiAwIFIKL0NvbnRlbnRzIDUgMCBSCj4+CmVuZG9iago1IDAgb2JqCjw8Ci9GaWx0ZXIgL0ZsYXRlRGVjb2RlCi9MZW5ndGggMTMKPj4Kc3RyZWFtCniccwpRcA0BAAPdAVAKZW5kc3RyZWFtCmVuZG9iagp4cmVmCjAgNgowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMTUgMDAwMDAgbiAKMDAwMDAwMDA1NCAwMDAwMCBuIAowMDAwMDAwMTEzIDAwMDAwIG4gCjAwMDAwMDAxNjIgMDAwMDAgbiAKMDAwMDAwMDI3MiAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDYKL1Jvb3QgMyAwIFIKL0luZm8gMSAwIFIKPj4Kc3RhcnR4cmVmCjM1NgolJUVPRgo='), c=>c.charCodeAt(0));
+      expect(await extractPdfPageCountFromBuffer(bytes)).toBe(1);
     });
 
-    it('retourne null (sans inventer de nombre) lorsque les objets sont compressés dans un /ObjStm ou chiffrés', () => {
-      const compressedObjStmPdf = `%PDF-1.5\n1 0 obj << /Type /ObjStm /N 15 /First 100 /Length 50 >>\nstream\ncompressed_binary_data\nendstream\nendobj\n%%EOF`;
-      const buffer = new TextEncoder().encode(compressedObjStmPdf).buffer;
-      expect(extractPdfPageCountFromBuffer(buffer)).toBeNull();
-
-      const encryptedPdf = `%PDF-1.5\n1 0 obj << /Filter /Standard >> endobj\ntrailer << /Encrypt 1 0 R >>\n%%EOF`;
-      const encBuffer = new TextEncoder().encode(encryptedPdf).buffer;
-      expect(extractPdfPageCountFromBuffer(encBuffer)).toBeNull();
-    });
-
-    it('renvoie null pour un fichier qui n’est pas un PDF valide', () => {
-      const fakeBuffer = new TextEncoder().encode('Ceci est un fichier texte ordinaire').buffer;
-      expect(extractPdfPageCountFromBuffer(fakeBuffer)).toBeNull();
-    });
-
-    it('vérifie les 2 fascicules PDF réels du CA 2024 de Cocody (22 + 22 = 44 pages) et leurs empreintes SHA-256', async () => {
+    it('vérifie les 2 fascicules PDF réels du CA 2024 de Cocody (22 + 22 = 44 pages) et leurs empreintes SHA-256', async (context) => {
       const candidateDirs = [
         'C:/Users/Couple ANVOH/Downloads',
         'C:/Users/Couple ANVOH/.gemini/antigravity/brain/de35e4de-3e97-4c4c-91f5-35aea9916df1/.user_uploaded'
@@ -102,14 +77,15 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
       const part1Path = part1Candidates.find(p => existsSync(p));
       const part2Path = part2Candidates.find(p => existsSync(p));
 
-      if (part1Path && part2Path) {
+      if (!part1Path || !part2Path) { context.skip(); return; }
+      {
         const buf1 = readFileSync(part1Path);
         const buf2 = readFileSync(part2Path);
         const ab1 = buf1.buffer.slice(buf1.byteOffset, buf1.byteOffset + buf1.byteLength);
         const ab2 = buf2.buffer.slice(buf2.byteOffset, buf2.byteOffset + buf2.byteLength);
 
-        const pages1 = extractPdfPageCountFromBuffer(ab1);
-        const pages2 = extractPdfPageCountFromBuffer(ab2);
+        const pages1 = await extractPdfPageCountFromBuffer(ab1);
+        const pages2 = await extractPdfPageCountFromBuffer(ab2);
         expect(pages1).toBe(22);
         expect(pages2).toBe(22);
         expect((pages1 || 0) + (pages2 || 0)).toBe(44);
@@ -750,10 +726,8 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
       }
     ])('exécute toute la chaîne (Dépôt PDF → Métadonnées → Extraction assistée → Contrôle → Validation → Import → Publication → 6 Rubriques) pour $label', async ({ institution, amounts, expectedFormattedPlanned, expectedFormattedRealized }) => {
       // 1. Dépôt du fichier PDF & calcul SHA-256 + pages
-      const pdfBytes = new TextEncoder().encode(
-        `%PDF-1.4\n1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n2 0 obj << /Type /Pages /Kids [3 0 R] /Count 18 >> endobj\n3 0 obj << /Type /Page /Parent 2 0 R >> endobj\ntrailer << /Root 1 0 R >>\n%%EOF`
-      ).buffer;
-      const pageCount = extractPdfPageCountFromBuffer(pdfBytes);
+      const pdfBytes = pdfFixture(18);
+      const pageCount = await extractPdfPageCountFromBuffer(pdfBytes);
       const sha256 = await calculateFileSha256(pdfBytes);
       expect(pageCount).toBe(18);
       expect(sha256).toMatch(/^[a-f0-9]{64}$/);
