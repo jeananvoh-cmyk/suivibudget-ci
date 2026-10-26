@@ -18,11 +18,13 @@ Deno.serve(async(req:Request)=>{
   if(original.storage_path){
    if(doc.verification_status!=='VERIFIED' || (doc.is_multipart && (original.status!=='VERIFIED' || original.checksum_status!=='COMPUTED' || !original.page_range_verified))) return new Response(JSON.stringify({error:'Original non contrôlé'}),{status:404,headers:{...cors,'Content-Type':'application/json','Cache-Control':'no-store'}});
    const bytes=await admin.storage.from('public_documents').download(original.storage_path);
+   if(bytes.error || !bytes.data || bytes.data.size===0 || bytes.data.size>50*1024*1024 || (original.file_size_bytes!=null && bytes.data.size!==Number(original.file_size_bytes))) return new Response(JSON.stringify({error:'Original absent ou altéré'}),{status:404,headers:{...cors,'Content-Type':'application/json','Cache-Control':'no-store'}});
    const hash=bytes.data ? Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await bytes.data.arrayBuffer())),byte=>byte.toString(16).padStart(2,'0')).join('') : null;
    if(bytes.error || !bytes.data || bytes.data.size===0 || bytes.data.size>50*1024*1024 || hash!==original.checksum_sha256 || (original.file_size_bytes!=null && bytes.data.size!==Number(original.file_size_bytes))) return new Response(JSON.stringify({error:'Original absent ou altéré'}),{status:404,headers:{...cors,'Content-Type':'application/json','Cache-Control':'no-store'}});
    if(action==='download') {
     if(req.signal.aborted) return new Response(null,{status:499,headers:cors});
-    const peer=req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown';
+    // The gateway must append the peer address; client-supplied prefixes cannot select a rate-limit bucket.
+    const peer=req.headers.get('x-forwarded-for')?.split(',').at(-1)?.trim().toLowerCase() || 'unknown';
     const clientHash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')+'|'+peer))),byte=>byte.toString(16).padStart(2,'0')).join('');
     const counted=await admin.rpc('record_document_delivery',{p_document_id:doc.id,p_request_id:request_id,p_storage_path:original.storage_path,p_checksum:hash,p_client_hash:clientHash});
     if(counted.error) return new Response(JSON.stringify({error:'Délivrance temporairement indisponible. Réessayez dans une minute.'}),{status:503,headers:{...cors,'Content-Type':'application/json','Cache-Control':'no-store'}});

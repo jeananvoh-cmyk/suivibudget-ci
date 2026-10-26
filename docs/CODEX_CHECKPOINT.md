@@ -1,3 +1,10 @@
+## 26 octobre 2026 — Clôture A : délivrance documentaire
+
+Reprise de #63 au HEAD e336b1e, master f9ebadb (0 commit master manquant). Worktree initial propre, travaux Antigravity préservés. CI GitHub Quality 38891432495 verte. Vérification production en lecture seule : admin_persistence_version et record_document_delivery absentes ; multipart déjà appliquée sous 20261014155231. Aucune écriture distante.
+
+Correction ciblée public-document-url : taille contrôlée avant matérialisation ArrayBuffer/SHA ; identité de limitation fondée sur la dernière adresse relayée, empêchant un préfixe client de choisir son compartiment. Hypothèse à valider sur la passerelle avant production : dernière adresse ajoutée par un proxy de confiance. Sans en-tête, compartiment unknown partagé et limité. 20 délivrances/minute, déduplication UUID 24 h, compteur atomique serveur existant conservé. La métrique décrit une remise binaire côté serveur, pas la réception complète.
+
+Validation : 50 tests SQL/RLS/Edge avant modification ; test supplémentaire de préfixe relayé falsifié intégré au scénario existant ; suite complète 905/905 (66 fichiers), TypeScript et build production PASS. PostgreSQL PGlite exécuté, transports Auth/Storage/Edge simulés ; pas de concurrence multisession PostgreSQL ni de backend Supabase complet (Docker Desktop absent). Les corrections PDF déjà validées dans cette suite seront livrées dans le checkpoint B suivant. Prochaine action : pagination éprouvée et contrôle documentaire Cocody.
 ## 16 octobre 2026 — Reprise Codex PR #63 : délivrance documentaire comptée côté serveur
 
 - Base relue : `aa874ef864142ab86313ff6f8ac4fd112d3850f0`, PR ouverte vers master, 9 commits devant / 0 derrière. Changements locaux préexistants repris sans écrasement.

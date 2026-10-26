@@ -273,6 +273,9 @@ describe('Médias administratifs privés, checksum et signatures limitées aux l
     for(let i=0;i<7;i++) expect((await publicHandler(request({...body,request_id:crypto.randomUUID()}))).status).toBe(200);
     expect((await publicHandler(request({...body,request_id:crypto.randomUUID()}))).status).toBe(503);
     expect((await read()).downloads_count).toBe(before.downloads_count+20);
+    const forwarded=new Request('https://isolated.example/function',{method:'POST',headers:{'x-forwarded-for':'forged-client, unknown'},body:JSON.stringify({...body,request_id:crypto.randomUUID()})});
+    expect((await publicHandler(forwarded)).status).toBe(503);
+    expect((await read()).downloads_count).toBe(before.downloads_count+20);
   });
 
   it('ne comptabilise ni les liens externes ni une réponse annulée avant la remise',async()=>{
