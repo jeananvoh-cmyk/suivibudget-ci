@@ -1,3 +1,20 @@
+# État de clôture opérationnelle — 26 octobre 2026
+
+La PR #63 cible maintenant master f9ebadbe et inclut les six rubriques existantes. Checkpoints A 7203647 et B d46918c : compteur durci, PDF.js avec worker local, vrais fascicules Cocody 22+22 pages et SHA contrôlés, pagination manuelle/inconnue conservée. CI du checkpoint B : [Quality 40377524106](https://github.com/jeananvoh-cmyk/suivibudget-ci/actions/runs/40377524106).
+
+907/907 tests (66 fichiers), 16/16 parcours navigateur, TypeScript et deux builds PASS. PostgreSQL/RLS PGlite réels, Auth/REST/Storage simulés. Six rubriques et généralisation commune/conseil régional couvertes par intégration ; ces résultats ne certifient pas une recette backend complète. Pas de production modifiée. Prêt pour fusion NON ; prêt pour production NON : GoTrue/PostgREST/Storage/Edge ensemble, concurrence multisession, restauration réelle et garantie de l'adresse relayée restent à recetter. Docker Desktop absent ; aucun autre projet Supabase autorisé.
+
+Cocody : montants rapprochés visuellement de la page PDF 40 et patrimoine 41–43 ; aucune ligne CA 2024 en production. Document publié distinct, page_count NULL ; fichier distant de SHA 941c399b… distinct des deux fascicules locaux. Aucune substitution ni certification implicite. Tiassalé : CA publié, trois opérations et trois rapprochements confirmés en lecture seule. Aucune ingestion générale ni réimport Bingerville ; données financières nationales inchangées.
+
+Le [runbook actualisé](../PR63_BACKEND_MIGRATIONS_SECURITY_AUDIT.md) remplace la séquence historique ci-dessous : admin/convergence multipart déjà déployée sous 20261014155231, multipart locale, compteur 20261016090000 ; Edge puis frontend après sauvegarde/restauration et recette. L'historique suivant reste daté et ne décrit pas le HEAD courant.
+
+## Reproduction locale
+
+- npm ci ; npx tsc --noEmit ; npm test -- --maxWorkers 2 ; npm run build ; npm run build:review.
+- Sous Windows si esbuild ne peut parcourir les ACL parentes : node --import 'data:text/javascript,globalThis.__dirname=process.cwd()' node_modules/vitest/vitest.mjs run --configLoader native --maxWorkers 2 ; même préchargement avec node_modules/vite/bin/vite.js build --configLoader native. Aucun contournement des permissions métier.
+- Pour le navigateur isolé : construire avec VITE_SUPABASE_URL=https://isolated-admin.supabase.co et VITE_SUPABASE_ANON_KEY=isolated-public dans un répertoire séparé ; définir ADMIN_BROWSER_BUILD vers ce build, ADMIN_BROWSER_OUTPUT vers les traces, PLAYWRIGHT_MODULE_PATH/PLAYWRIGHT_EXECUTABLE_PATH si nécessaires ; node scripts/verify-admin-persistence-browser.cjs. Le script bloque les sorties réseau externes et emploie une base PGlite isolée.
+- Les deux PDF Cocody sont des sources locales facultatives pour la CI : le test est SKIPPED si elles manquent, mais elles étaient présentes et contrôlées lors de cette reprise. Les vrais PDF générés compressé/chiffré et les tables xref restent testés partout. Hashs exacts, pages et montants dans les checkpoints et le runbook.
+
 # Intégration finale du dashboard administrateur — 14 octobre 2026
 
 Le contrat serveur 3 réconcilie la persistance sécurisée de Codex et l’ingestion documentaire de la PR #62. La PR corrective est [#63](https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/63), sur `codex/admin-final-integration`, ciblant `feat/admin-financial-document-ingestion-pilot`. Elle ne doit pas être fusionnée ou déployée automatiquement.

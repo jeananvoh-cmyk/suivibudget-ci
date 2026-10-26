@@ -1,4 +1,35 @@
-# Audit Contrats Backend, Migrations et Sécurité — PR #63 (`CHECKPOINT_01`)
+# Audit Contrats Backend, Migrations et Sécurité — PR #63
+
+## Contrôle du 26 octobre 2026 — état actuel et conditions de bascule
+
+Ce contrôle remplace les observations datées ci-dessous lorsqu'elles diffèrent. #63 cible déjà master f9ebadbe, zéro commit de retard. RPC admin_persistence_version et record_document_delivery absentes, migration multipart présente sous 20261014155231. Aucune migration appliquée pendant cette reprise.
+
+### Préconditions bloquantes
+
+- Recette Auth/GoTrue + PostgREST + Storage + Edge réels : NON RÉALISÉE. Docker Desktop et moteur Docker absents ; PGlite et transports simulés ne remplacent pas ce contrôle. Ne pas fusionner tant que ce parcours isolé n'est pas validé.
+- Avant toute production autorisée, sauvegarder schémas, données, rôles/grants/policies, historique des migrations et objets Storage (inventaire nom/taille/SHA). Sauvegarder séparément les versions exactes et configurations Edge/frontend ; conserver les secrets dans le coffre habituel, pas dans Git ou les logs. Restaurer la sauvegarde dans une recette autorisée, vérifier comptes de lignes, SHA des originaux, relations, rôles et permissions. La sauvegarde/restauration PGlite couverte par les tests ne prouve pas une récupération de production ni des blobs Storage.
+- Vérifier que la passerelle ajoute une dernière adresse x-forwarded-for de confiance. Les préfixes sont ignorés, absence d'en-tête => compartiment unknown partagé. Si cette garantie n'est pas établie, garder la délivrance fermée à la mise en production et adapter la source d'identité ; ne pas affirmer une limitation par utilisateur unique. Tester via la vraie passerelle, pas par un appel direct au handler.
+
+### Ordre contrôlé
+
+Comparer le schéma et le contenu des migrations déjà appliquées, pas leurs seuls timestamps. Ne pas lancer un db push global avec inclusion des migrations historiques. Sous autorisation explicite : admin 20261013165625 (convergence du multipart distant ancien), multipart local 20261013200000, compteur 20261016090000 ; ensuite Edge admin-media-url puis public-document-url et leurs modules partagés ; ensuite frontend du même commit après recette. Les trois SQL sont transactionnels ; l'ensemble DB/Storage/Edge/frontend ne l'est pas.
+
+Après SQL : admin_persistence_version() = 3, document_delivery_metric() = SERVER_FILE_DELIVERY_V1, compteur non modifiable par anon/authenticated, RPC de délivrance réservée service_role. Les anciens SHA restent DECLARED jusqu'à relecture effective des octets, sans acteur humain inventé. Vérifier admin_media privé, limites et policies des buckets, verify_jwt, variables SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY uniquement côté Edge ; jamais de service_role dans le bundle.
+
+Recette avant bascule : matrices ADMIN/DATA_MANAGER/MODERATOR/CITIZEN/anon, mono/multipart, panne Storage et compensation sans suppression historique, valeurs inconnues, contrôle puis publication, SHA altéré, fichier absent, plafond 50 MiB, consultation sans incrément, refus sans incrément, lien externe sans incrément, rejeu UUID et conflit, vingt délivrances/minute, concurrence multisession PostgreSQL et retrait de publication. Test navigateur sur 360/640/768/1024/1440 et accès public au même original. Conserver les traces et les SHAs sans exposer de secret. La métrique décrit une délivrance côté serveur, sans certification de réception complète.
+
+Après autorisation distincte de fusion/déploiement : recontrôler le HEAD et la CI ; recette finale production avec objets explicitement autorisés, puis lectures publiques. Aucun import Cocody/Tiassalé/Bingerville implicite. Pour l'état actuel, ne pas prétendre que Cocody CA 2024 est publié : document publié distinct de ligne financière absente.
+
+En cas d'échec : suspendre les écritures concernées, garder les originaux et journaux, revenir aux artefacts Edge/frontend réellement sauvegardés et compatibles. Conserver les contrôles SQL ; aucune suppression de triggers ni rétrogradation de permissions pour débloquer une interface. Restaurer seulement avec sauvegarde validée, accord et procédure vérifiée. Les privilèges par colonne du compteur exigent une recette des anciens clients ; ne pas supposer un rollback transparent.
+
+### Preuves et écarts documentaires
+
+907/907 Vitest, 66 fichiers ; 16/16 navigateur Chromium/Edge ; TypeScript, build production et review PASS. RLS/RPC PostgreSQL PGlite réellement exécutés ; Auth/REST/Storage/transport Edge simulés. Pas de recette Supabase hébergée ni de sessions PostgreSQL séparées. Tests nationaux de référentiels et intégrité inclus ; fichiers de données financières inchangés depuis master (seules 3 propriétés de type dans caidpRiData.ts préexistaient à cette reprise).
+
+Production lue seulement : Tiassalé 2024 PUBLISHED, trois opérations op-tias-2024-06/14/15 et trois rapprochements. Cocody : document doc-dff4865a-c6a8-418e-8895-626258e409d0 publié, page_count NULL, SHA 941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf ; aucune ligne administrative_accounts Cocody. is_scanned=false et has_text_layer=true sont des métadonnées historiques non revalidées ; les deux fascicules locaux contrôlés sont scannés et ont d'autres empreintes. Ne pas les substituer au fichier distant.
+
+Source Cocody rendue et contrôlée visuellement : PDF global 40 = fascicule 2 p18, imprimée 41/45 ; PDF 41–43 = fascicule 2 p19–21, imprimées 42–44/45. Synthèse : prévisions fonctionnement 18 441 235 000 et investissement 3 900 630 000 ; recettes 17 646 256 543 et 1 366 100 690 ; dépenses ordonnancées 15 409 122 753 et 1 366 100 690. Totaux 22 341 865 000 / 19 012 357 233 / 16 775 223 443. Excédent exercice 2 237 133 790, antérieur 944, cumulé 2 237 134 734. Patrimoine p43 : 810 959 095 + 20 000 000 + 535 141 595 = 1 366 100 690. Aucun paiement ni avancement physique déduit de ces montants. Aucun montant publié par cette reprise.
+
 
 ## Reprise Codex du 16 octobre — état de validation
 
@@ -60,7 +91,7 @@ Pour éviter tout blocage lors de l'application future de `20261013165625_admin_
 | `public.admin_tasks` | **ABSENTE (en attente de `20261013165625`)** | Sera créée par `20261013165625_admin_dashboard_persistence_hardening.sql`. |
 | `public.admin_audit_events` | **ABSENTE (en attente de `20261013165625`)** | Sera créée par `20261013165625_admin_dashboard_persistence_hardening.sql`. |
 | `public.admin_operation_receipts` | **ABSENTE (en attente de `20261013165625`)** | Sera créée par `20261013165625_admin_dashboard_persistence_hardening.sql`. |
-| `private.admin_document_file_checks` | **ABSENTE (en attente de `20261013165625`)** | Sera créée et pré-remplie par `20261013165625_admin_dashboard_persistence_hardening.sql`. |
+| `private.admin_document_file_checks` | **ABSENTE (en attente de `20261013165625`)** | Sera créée, sans attestation historique automatique, par `20261013165625_admin_dashboard_persistence_hardening.sql`. |
 
 ### 2.2 RPC PostgreSQL
 
@@ -117,7 +148,8 @@ Aucun rôle ne dépend de `user_metadata` ni d'un paramètre client : toutes les
 2. **Étape 2 — Migrations SQL Supabase (`cdesuvcozcetdtvibgqs`)** :
    - Appliquer dans l'ordre :
      1. `supabase/migrations/20261013165625_admin_dashboard_persistence_hardening.sql`
-     2. `supabase/migrations/20261013200000_multipart_ca_documents.sql`
+     2. `supabase/migrations/20261013200000_multipart_ca_documents.sql` (convergence de la version distante `20261014155231`, pas réimport des documents).
+     3. `supabase/migrations/20261016090000_document_delivery_counter.sql` (après les deux précédentes).
    - Vérifier immédiatement en SQL :
      - `SELECT public.admin_persistence_version();` → doit retourner `3`.
      - Contrôler les statuts existants et `revision` sans assimiler `PUBLISHED` à une empreinte calculée : `checksum_status` reste `DECLARED` sans attestation des octets.
@@ -139,7 +171,7 @@ Aucun rôle ne dépend de `user_metadata` ni d'un paramètre client : toutes les
 - **Rollback Frontend (immédiat, sans perte de données)** :
   - Redéployer le build Vercel précédent ou annuler le commit de merge sur `master`. Les tables `public_documents` et `administrative_accounts` conservent toutes leurs colonnes historiques intactes.
 - **Rollback Edge Functions** :
-  - Redéployer la révision précédente de `public-document-url` depuis `master~1`. La fonction `admin-media-url` est isolée et n'impacte aucune route publique si le frontend est revenu à la version précédente.
+  - Redéployer la révision précédente de `public-document-url` depuis la sauvegarde exacte du code et de la configuration déployés capturée avant la bascule (ne pas déduire une révision de `master~1`). La fonction `admin-media-url` est isolée et n'impacte aucune route publique si le frontend est revenu à la version précédente.
 - **Rollback Base de données (si nécessaire)** :
   - Les nouvelles tables (`admin_tasks`, `admin_audit_events`, `admin_operation_receipts`, `private.admin_document_file_checks`) et colonnes (`revision`, `checksum_status`, `checksum_algorithm`, `manifest_sha256`, `archived_at`, `publication_status`) sont purement additives et ne suppriment ni ne modifient aucun montant ou document existant.
   - Ne pas supprimer les triggers de sécurité pour contourner un incident. Suspendre les mutations concernées, préserver les originaux et reçus, puis appliquer un correctif revu ou restaurer la sauvegarde dans un environnement isolé. Le retour arrière de l'Edge retire l'accès au nouveau compteur ; les permissions et contrôles SQL restent actifs.
