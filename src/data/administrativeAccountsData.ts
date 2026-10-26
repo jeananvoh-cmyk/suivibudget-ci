@@ -1,5 +1,6 @@
 import type { AdministrativeAccount, ProcurementMatch } from '../types/administrativeAccount';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
+import { hydrateAdministrativeAccountFromRow } from '../utils/budgetDocumentDryRun';
 
 export const ADMINISTRATIVE_ACCOUNTS_DATA: AdministrativeAccount[] = [];
 
@@ -10,11 +11,13 @@ export async function refreshPublishedAdministrativeAccounts(): Promise<void> {
     .select('*, operations:ca_investment_operations(*, matches:ca_procurement_matches(*))')
     .eq('status', 'PUBLISHED');
   if (error) throw error;
-  const accounts: AdministrativeAccount[] = (data || []).map(row => ({
+  const accounts: AdministrativeAccount[] = (data || []).map(row => hydrateAdministrativeAccountFromRow({
     ...row,
-    operations: row.operations.map((operation: AdministrativeAccount['operations'][number] & { matches: ProcurementMatch[] }) => ({
+    operations: (row.operations || []).map((operation: AdministrativeAccount['operations'][number] & { matches: ProcurementMatch[] }) => ({
       ...operation,
-      procurement_match: operation.matches.length === 1 ? operation.matches[0] : undefined,
+      planned_amount: operation.planned_amount != null ? Number(operation.planned_amount) : null,
+      executed_amount: operation.executed_amount != null ? Number(operation.executed_amount) : null,
+      procurement_match: operation.matches?.length === 1 ? operation.matches[0] : undefined,
     })),
   }));
   ADMINISTRATIVE_ACCOUNTS_DATA.push(...accounts);

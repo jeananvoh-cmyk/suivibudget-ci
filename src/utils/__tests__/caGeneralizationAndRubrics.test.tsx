@@ -850,6 +850,7 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
       );
 
       expect(html).toContain('Non documenté au CA');
+      expect(html).toContain('rattachées à cette synthèse');
       expect(html).not.toContain('>0 FCFA<');
       expect(html).not.toContain('>0&nbsp;FCFA<');
     });

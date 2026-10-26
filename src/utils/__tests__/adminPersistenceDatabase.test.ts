@@ -46,7 +46,7 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
       await actual.exec(`insert into auth.users(id) values('${admin}'); insert into public.profiles(id,email,full_name,role,is_active) values('${admin}','isolated@example.test','Fictif','ADMIN',true);select set_config('request.jwt.claim.sub','${admin}',false);`);
       await actual.exec(`insert into public.institutions(id,name,type,total_budget_fcfa) values('isolated-historical','Historique fictif','MAIRIE',123);
         insert into public.public_documents(id,title,category,institution_name,year,file_url,file_name,status,verification_status,checksum_sha256) values('isolated-historical-doc','Historique fictif','ETUDE_TECHNIQUE','Fictive',2024,'https://example.test/old.pdf','old.pdf','TO_VERIFY','TO_VERIFY',repeat('a',64));`);
-      for(let run=0;run<2;run++) for(const path of ['20261013165625_admin_dashboard_persistence_hardening.sql','20261013200000_multipart_ca_documents.sql']) await actual.exec(readFileSync(`supabase/migrations/${path}`,'utf8'));
+      for(let run=0;run<2;run++) for(const path of ['20261013165625_admin_dashboard_persistence_hardening.sql','20261013200000_multipart_ca_documents.sql','20261026213000_security_definer_hardening.sql']) await actual.exec(readFileSync(`supabase/migrations/${path}`,'utf8'));
       expect((await actual.query('select is_multipart,parts_count,is_scanned,has_text_layer,ocr_status,manifest_sha256,checksum_sha256 from public.public_documents')).rows).toEqual([{is_multipart:null,parts_count:null,is_scanned:null,has_text_layer:null,ocr_status:null,manifest_sha256:null,checksum_sha256:'a'.repeat(64)}]);
       expect((await actual.query('select total_budget_fcfa from public.institutions')).rows).toEqual([{total_budget_fcfa:'123.00'}]);
       expect((await actual.query('select public.admin_persistence_version() version')).rows).toEqual([{version:3}]);
@@ -414,4 +414,20 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
       expect((await restored.query("select id from public.budget_projects where id='review-project'")).rows).toEqual([]);
     }finally {await restored.close();}
   },60000);
+  it('verrouille les fonctions SECURITY DEFINER contre le sondage anonyme et les appels hors rôle (Chantier A4)',async()=>{
+    // 1. admin_staff_directory refuse CITIZEN et anon avec 42501, mais autorise les rôles staff
+    await expect(session(null,()=>db.query('select * from public.admin_staff_directory()'))).rejects.toThrow(/permission/);
+    await expect(session(citizen,()=>db.query('select * from public.admin_staff_directory()'))).rejects.toThrow(/Staff authorization required/);
+    expect((await session(admin,()=>db.query('select * from public.admin_staff_directory()'))).rows.length).toBeGreaterThanOrEqual(3);
+    // 2. admin_baseline_visibility rejette les paramètres NULL et ne divulgue jamais les brouillons dynamiques admin-*
+    await expect(session(null,()=>db.query('select public.admin_baseline_visibility(null, array[]::text[])'))).rejects.toThrow(/Invalid baseline request/);
+    await expect(session(null,()=>db.query("select public.admin_baseline_visibility('institutions', null)"))).rejects.toThrow(/Invalid baseline request/);
+    await session(admin,()=>mutate('institutions','admin-secret-draft',null,{name:'Brouillon secret admin',type:'MAIRIE'}),true);
+    const probed = (await session(null,()=>db.query<{v:string[]}>("select public.admin_baseline_visibility('institutions', array['admin-secret-draft','reload-test']) v"))).rows[0].v;
+    expect(probed).toContain('reload-test');
+    expect(probed).not.toContain('admin-secret-draft');
+    // 3. private.admin_file_checked et private.admin_media_link_allowed refusent CITIZEN avec 42501
+    await expect(session(citizen,()=>db.query("select private.admin_file_checked('x','public_documents','x',repeat('a',64),10)"))).rejects.toThrow(/Staff authorization required/);
+    await expect(session(citizen,()=>db.query("select private.admin_media_link_allowed('storage://admin_media/x','institutions','x')"))).rejects.toThrow(/Staff authorization required/);
+  });
 });

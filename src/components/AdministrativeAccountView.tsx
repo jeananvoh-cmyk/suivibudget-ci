@@ -467,7 +467,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
   // Priority 5.1: Accounting stage resolution (never default to ORDONNANCE when ENGAGE or unknown)
   const resolvedAccountingStage = currentCA.accounting_stage
     ? currentCA.accounting_stage
-    : currentCA.total_expenditure_engaged != null && currentCA.total_expenditure_ordered == null && currentCA.total_expenditure_paid == null
+    : currentCA.reconciliation_status !== 'SOURCE_ANOMALY' && currentCA.total_expenditure_engaged != null && currentCA.total_expenditure_ordered == null && currentCA.total_expenditure_paid == null
     ? 'ENGAGE'
     : null;
 
@@ -1235,21 +1235,31 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             );
           })}
 
-          {filteredOperations.length === 0 && (
-            <div className="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          {currentCA.operations.length === 0 ? (
+            <div className="text-center py-8 px-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
               <Info className="w-6 h-6 text-slate-400 mx-auto" />
-              <p className="text-xs text-slate-600 font-bold">Aucune opération ne correspond à vos filtres.</p>
-              <button
-                onClick={() => {
-                  setOpSearch('');
-                  setSelectedSector('ALL');
-                  setSelectedMatchLevel('ALL');
-                }}
-                className="text-xs text-brand-blue hover:underline font-bold cursor-pointer"
-              >
-                Réinitialiser les filtres
-              </button>
+              <p className="text-xs text-slate-800 font-black uppercase tracking-wider">Non documenté</p>
+              <p className="text-xs text-slate-600 max-w-xl mx-auto leading-relaxed">
+                Les opérations d'investissement détaillées ne sont pas encore rattachées à cette synthèse ou ne sont pas individualisées à ce stade. Seuls les totaux d'investissement contrôlés sur le document officiel (Rubrique 3) sont publiés.
+              </p>
             </div>
+          ) : (
+            filteredOperations.length === 0 && (
+              <div className="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                <Info className="w-6 h-6 text-slate-400 mx-auto" />
+                <p className="text-xs text-slate-600 font-bold">Aucune opération ne correspond à vos filtres.</p>
+                <button
+                  onClick={() => {
+                    setOpSearch('');
+                    setSelectedSector('ALL');
+                    setSelectedMatchLevel('ALL');
+                  }}
+                  className="text-xs text-brand-blue hover:underline font-bold cursor-pointer"
+                >
+                  Réinitialiser les filtres
+                </button>
+              </div>
+            )
           )}
         </div>
       </div>

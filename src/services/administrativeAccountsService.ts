@@ -2,6 +2,7 @@ import { supabase, isSupabaseConfigured } from './supabase';
 import { AdministrativeAccount, CAInvestmentOperation, ProcurementMatch } from '../types';
 import type { LocalBudget } from '../types/localBudget';
 import { amountPrecision } from '../utils/formatters';
+import { hydrateAdministrativeAccountFromRow } from '../utils/budgetDocumentDryRun';
 
 export async function fetchPublishedLocalBudgets(): Promise<LocalBudget[]> {
   if (!isSupabaseConfigured()) return [];
@@ -63,6 +64,8 @@ export async function fetchAdministrativeAccounts(institutionId: string): Promis
   for (const op of operations || []) {
     const mapped: CAInvestmentOperation = {
       ...op,
+      planned_amount: op.planned_amount != null ? Number(op.planned_amount) : null,
+      executed_amount: op.executed_amount != null ? Number(op.executed_amount) : null,
       procurement_match: matchByOperation.get(op.id),
     } as CAInvestmentOperation;
     const list = operationsByCA.get(op.ca_id) || [];
@@ -70,7 +73,7 @@ export async function fetchAdministrativeAccounts(institutionId: string): Promis
     operationsByCA.set(op.ca_id, list);
   }
 
-  return accounts.map(account => ({
+  return accounts.map(account => hydrateAdministrativeAccountFromRow({
     ...account,
     operations: operationsByCA.get(account.id) || [],
   })) as AdministrativeAccount[];
