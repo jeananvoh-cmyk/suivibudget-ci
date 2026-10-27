@@ -17,7 +17,8 @@ import type {
 import {
   buildProposedValuesTemplate,
   runDocumentDryRun,
-  buildStandardImportEnvelope
+  buildStandardImportEnvelope,
+  toPipelineImportRow
 } from '../../utils/budgetDocumentDryRun';
 import {
   FileText,
@@ -303,7 +304,7 @@ export function DataImportConsole({ role, initialDocument }: DataImportConsolePr
       return;
     }
 
-    const envelope = buildStandardImportEnvelope(meta, proposedValues, selectedInstitution);
+    const envelope = toPipelineImportRow(buildStandardImportEnvelope(meta, proposedValues, selectedInstitution));
     const jsonString = JSON.stringify([envelope], null, 2);
 
     setText(jsonString);

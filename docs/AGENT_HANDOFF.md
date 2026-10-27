@@ -1,3 +1,31 @@
+## 27 octobre 2026 — Clôture PR #65 + Auto-audit contradictoire et durcissement des 6 points d'insuffisance (Antigravity)
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/65 (`codex/p0-production-cocody-2024` ciblant `master` `901a203`).
+- **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0` (aucune écriture ni réexécution de migration sur `cdesuvcozcetdtvibgqs`).
+- **Chantier A (Recette & Stabilisation de production)** :
+  - Vérification en lecture seule de la production déployée : Vercel `HTTP 200`, `public.admin_persistence_version() = 3`, `public.document_delivery_metric() = 'SERVER_FILE_DELIVERY_V1'`, Edge Functions `public-document-url` et `admin-media-url` actives.
+  - Durcissement des fonctions `SECURITY DEFINER` (`supabase/migrations/20261026213000_security_definer_hardening.sql`) :
+    - `public.admin_baseline_visibility(text, text[])` : garde `NULL` explicite et exclusion des brouillons dynamiques (`id not like 'admin-%'`).
+    - `public.admin_staff_directory()` : rejet explicite `42501` (`Staff authorization required`) pour les comptes `CITIZEN`.
+    - `public.admin_confirm_document_integrity(...)` : garde interne `service_role` / `postgres` / `supabase_admin` en complément du `REVOKE EXECUTE`.
+    - `private.admin_file_checked` et `private.admin_media_link_allowed` : rejet explicite `42501` hors domaine staff authentifié, tout en préservant l'exécution par les triggers serveur/superuser (`auth.uid() is null` sous `postgres`/`supabase_admin`/`service_role`).
+    - Révocation `EXECUTE` sur les fonctions triggers `SECURITY DEFINER`.
+- **Chantier B (Finalisation du CA 2024 de Cocody & Auto-audit contradictoire)** :
+  - Contrôle de l'original de production `doc-dff4865a-c6a8-418e-8895-626258e409d0` (`14 072 943` octets, SHA-256 `941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf`, `44` pages PDF) et rapprochement des 12 indicateurs financiers officiels sur la page PDF `40` (page imprimée `41 / 45`, arrêté en Conseil Municipal le `08/07/2025`, approuvé le `22/07/2025` sous le `n° 002/PA/D.CAB`).
+  - Auto-audit contradictoire et correction de 6 insuffisances :
+    1. **Lot JSON conforme à la liste blanche SQL** : alignement strict du lot JSON de `docs/audits/P0_PRODUCTION_STABILIZATION_AND_COCODY_CA_2024_REPORT.md` sur `private.validate_import_row` (aucun champ hors liste blanche SQL).
+    2. **Contrôle arithmétique du 5e équilibre comptable** : ajout dans `runDocumentDryRun` (`src/utils/budgetDocumentDryRun.ts`) de la vérification `surplus_or_deficit + previous_result_reported === cumulative_result` lorsque les 3 montants sont `EXACT`.
+    3. **Garantie des 6 champs requis par `review_data_import('PUBLISH')` et propagation des précisions** : garantie dans `toPipelineImportRow` de la présence des 6 champs monétaires obligatoires `CA` (`null`/`UNKNOWN` si absents), encodage/décodage des qualificatifs `APPROXIMATE`/`LOWER_BOUND` dans `notes`, et calcul prudent de `total_revenue_collected` dans `hydrateAdministrativeAccountFromRow` avec normalisation numérique des `operations`, `procurement_match.award_amount` et `local_budgets`.
+    4. **Compatibilité triggers serveur/migrations sur `private.admin_file_checked` & `private.admin_media_link_allowed`** : autorisation du contexte serveur/superuser (`auth.uid() is null`) sans affaiblir le blocage `42501` des rôles non-staff.
+    5. **Séparation stricte `VERIFIED !== PUBLISHED` dans `AdministrativeAccountView.tsx`** : seuls les documents `status === 'PUBLISHED'` exposent l'État 2 et le bouton public `Consulter le document` ; un document `VERIFIED` non publié reste en État 1 pré-publication.
+    6. **Élimination des collisions homonymes Commune / Conseil Régional** : suppression des `.includes()` dans `AdministrativeAccountView.tsx` et `src/data/administrativeAccountsData.ts` au profit d'une vérification stricte d'`institution_id`, de type institutionnel (`MAIRIE`/`COMMUNE` vs `REGION`/`REGIONAL_COUNCIL`) et d'égalité exacte normalisée.
+- **Validation & Recette** :
+  - `npx tsc --noEmit` et `npm run build` : **PASS** (`code 0`).
+  - `npx vitest run` : **PASS** (`66/66` fichiers, `911/911` tests).
+  - Recette navigateur `scripts/verify-admin-persistence-browser.cjs` : **PASS** (`16/16` scénarios Chromium E2E, viewports `360/640/768/1024/1440 px`, `0` erreur console/API, `0` fuite externe).
+  - Rapport complet et lot JSON certifié prêt pour import : `docs/audits/P0_PRODUCTION_STABILIZATION_AND_COCODY_CA_2024_REPORT.md`.
+- **NEXT_EXECUTABLE_TASK** : Approbation et fusion de la PR #65 par le propriétaire, application de `20261026213000_security_definer_hardening.sql` puis import/publication contrôlée du lot certifié du CA 2024 de Cocody via `import_data_batch` -> `review_data_import`.
+
 ## 26 octobre 2026 — Clôture C/D/E/F et limites explicites
 
 Cocody : pages PDF 40–43 (fascicule 2 p18–21, imprimées 41–44/45) contrôlées visuellement. Les huit valeurs demandées et la réconciliation patrimoniale concordent avec les fixtures déjà corrigées ; aucune nouvelle donnée financière publiée. Production : document publié distinct de l'absence de CA 2024 structuré. Son SHA 941c399b… ne désigne pas les deux fascicules locaux ; page_count NULL et indicateurs scan/texte historiques à contrôler sur cet original avant qualification. La fiche existante distingue document accessible et exploitation financière en cours. Les tests génériques couvrent les six rubriques, valeurs inconnues et un conseil régional sans branche spécifique.

@@ -336,6 +336,66 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
         );
         expect(html).toContain('Compte administratif 2024 enregistré — vérification documentaire et financière en cours avant publication.');
         expect(html).toContain('941c399bf290cee4');
+        expect(html).not.toContain('Consulter le document');
+      } finally {
+        dataStore.getDocuments = originalGetDocs;
+      }
+    });
+
+    it('Distinction VERIFIED !== PUBLISHED et anti-collision homonyme : un document VERIFIED non publié n’expose pas le bouton de téléchargement public et un Conseil Régional homonyme ne pollue jamais une Commune', () => {
+      const originalGetDocs = dataStore.getDocuments.bind(dataStore);
+      const verifiedUnpublishedDoc: PublicDocument = {
+        id: 'doc-cocody-verified-not-published',
+        title: 'Compte Administratif 2024 — Commune de Cocody',
+        category: 'COMPTE_ADMINISTRATIF',
+        institution_id: 'commune-cocody',
+        institution_name: 'Commune de Cocody',
+        year: 2024,
+        description: '',
+        file_url: '',
+        storage_path: 'ca/2024/commune-de-cocody/COMMUNE_DE_COCODY.pdf',
+        file_name: 'COMMUNE DE COCODY.pdf',
+        file_size: '13.4 MB',
+        file_format: 'PDF',
+        published_at: null,
+        downloads_count: 0,
+        is_official: true,
+        created_at: '2026-04-12',
+        status: 'VERIFIED',
+        verification_status: 'VERIFIED',
+        checksum_sha256: '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf'
+      };
+      const regionalHomonymDoc: PublicDocument = {
+        ...verifiedUnpublishedDoc,
+        id: 'doc-region-san-pedro',
+        institution_id: undefined,
+        institution_name: 'Conseil Régional de San-Pedro',
+        status: 'PUBLISHED'
+      };
+      dataStore.getDocuments = () => [verifiedUnpublishedDoc, regionalHomonymDoc];
+
+      try {
+        const htmlVerified = renderToStaticMarkup(
+          <AdministrativeAccountView institution={cocodyInstitution} onOpenDocRequest={() => {}} />
+        );
+        expect(htmlVerified).toContain('Document officiel vérifié — En attente de publication');
+        expect(htmlVerified).not.toContain('Consulter le document');
+
+        const mairieSanPedro: Institution = {
+          id: 'commune-san-pedro',
+          name: 'Commune de San-Pedro',
+          type: 'MAIRIE',
+          region: 'San-Pedro',
+          district: 'Bas-Sassandra',
+          budget_functioning_fcfa: null,
+          budget_investment_fcfa: null,
+          total_budget_fcfa: null
+        };
+        const htmlHomonym = renderToStaticMarkup(
+          <AdministrativeAccountView institution={mairieSanPedro} onOpenDocRequest={() => {}} />
+        );
+        expect(htmlHomonym).toContain('Compte Administratif non disponible dans le référentiel public');
+        expect(htmlHomonym).not.toContain('Consulter le document');
       } finally {
         dataStore.getDocuments = originalGetDocs;
       }
@@ -850,6 +910,7 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
       );
 
       expect(html).toContain('Non documenté au CA');
+      expect(html).toContain('rattachées à cette synthèse');
       expect(html).not.toContain('>0 FCFA<');
       expect(html).not.toContain('>0&nbsp;FCFA<');
     });

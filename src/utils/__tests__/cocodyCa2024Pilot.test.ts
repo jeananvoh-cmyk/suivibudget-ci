@@ -10,7 +10,9 @@ import { parseImportInput } from '../../services/dataImportService';
 import { 
   runDocumentDryRun, 
   buildProposedValuesTemplate, 
-  buildStandardImportEnvelope 
+  buildStandardImportEnvelope,
+  toPipelineImportRow,
+  hydrateAdministrativeAccountFromRow
 } from '../budgetDocumentDryRun';
 import type { Institution, PublicDocument } from '../../types';
 import type { DocumentIngestionMetadata, ProposedFinancialValue } from '../../types/budgetCycle';
@@ -453,4 +455,129 @@ describe('Pilote Réel d\'Ingestion Documentaire et Financière : Cocody 2024', 
     expect(combinedDoc.document_parts?.[1].checksum_sha256).toBe('796921a9522c0fbf2a48b4bbf16f97ea8a525f57fb74b438c11bc64de5dc7ec9');
   });
 
+  it('K. Chaîne complète Assistant Guidé → toPipelineImportRow → SQL import_data_batch → review_data_import → hydratation 12 indicateurs Cocody 2024', () => isolated(async () => {
+    const meta: DocumentIngestionMetadata = {
+      institution_id: 'inst-com-cocody',
+      institution_name: 'Mairie de Cocody',
+      fiscal_year: 2024,
+      document_type: 'COMPTE_ADMINISTRATIF',
+      source_name: "Mairie de la Commune de Cocody - Compte Administratif de l'Exercice 2024",
+      source_reference: 'CA-2024-COCODY / Approbation Préfectorale n° 002/PA/D.CAB du 22/07/2025',
+      source_date: '2025-07-22',
+      source_date_kind: 'PUBLISHED',
+      source_page: 40,
+      adoption_date: '2025-07-08',
+      evidence_level: 'OFFICIAL_DOCUMENT',
+      notes: 'Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45).'
+    };
+    const proposed = buildProposedValuesTemplate('COMPTE_ADMINISTRATIF', {
+      operating_planned: 18_441_235_000,
+      operating_revenue_realized: 17_646_256_543,
+      operating_realized: 15_409_122_753,
+      investment_planned: 3_900_630_000,
+      investment_revenue_realized: 1_366_100_690,
+      investment_realized: 1_366_100_690,
+      total_planned: 22_341_865_000,
+      total_revenue_collected: 19_012_357_233,
+      total_realized: 16_775_223_443,
+      surplus_or_deficit: 2_237_133_790,
+      previous_result_reported: 944,
+      cumulative_result: 2_237_134_734
+    }).map(v => ({ ...v, status: 'VALIDATED' as const }));
+
+    const envelope = buildStandardImportEnvelope(meta, proposed, COCODY_INSTITUTION);
+    const pipelineRow = toPipelineImportRow(envelope);
+
+    const stageResult = await stage([pipelineRow]);
+    expect(stageResult.counts.imported).toBe(1);
+    const importId = stageResult.rows[0].id;
+
+    await review([importId], 'VERIFY');
+    const pubResult = await review([importId], 'PUBLISH', true);
+    expect(pubResult.rows[0].status).toBe('PUBLISHED');
+
+    await db.exec('reset role');
+    const rawDbRow = (await db.query<any>(
+      'select * from public.administrative_accounts where institution_id=$1 and fiscal_year=2024',
+      ['inst-com-cocody']
+    )).rows[0];
+    const hydrated = hydrateAdministrativeAccountFromRow({ ...rawDbRow, operations: [] });
+    expect(hydrated.accounting_stage).toBe('ORDONNANCE');
+    expect(hydrated.previous_result_reported).toBe(944);
+    expect(hydrated.cumulative_result).toBe(2_237_134_734);
+    expect(hydrated.total_planned).toBe(22_341_865_000);
+    expect(hydrated.total_revenue_collected).toBe(19_012_357_233);
+    expect(hydrated.total_realized).toBe(16_775_223_443);
+    expect(hydrated.surplus_or_deficit).toBe(2_237_133_790);
+  }));
+
+  it('L. Contrôle arithmétique du résultat cumulé (Excédent + Report antérieur = Résultat cumulé) et préservation des précisions APPROXIMATE/UNKNOWN', () => {
+    const meta: DocumentIngestionMetadata = {
+      institution_id: 'inst-com-cocody',
+      institution_name: 'Mairie de Cocody',
+      fiscal_year: 2024,
+      document_type: 'COMPTE_ADMINISTRATIF',
+      source_name: 'Source Test Cumul',
+      source_reference: 'REF-CUMUL',
+      source_date: '2025-07-22',
+      source_date_kind: 'PUBLISHED'
+    };
+
+    const mismatchCumulValues = buildProposedValuesTemplate('COMPTE_ADMINISTRATIF', {
+      operating_planned: 18_441_235_000,
+      operating_revenue_realized: 17_646_256_543,
+      operating_realized: 15_409_122_753,
+      investment_planned: 3_900_630_000,
+      investment_revenue_realized: 1_366_100_690,
+      investment_realized: 1_366_100_690,
+      total_planned: 22_341_865_000,
+      total_revenue_collected: 19_012_357_233,
+      total_realized: 16_775_223_443,
+      surplus_or_deficit: 2_237_133_790,
+      previous_result_reported: 944,
+      cumulative_result: 2_237_133_000 // Écart volontaire de 1 734 FCFA
+    }).map(v => ({ ...v, status: 'VALIDATED' as const }));
+
+    const dryRunRes = runDocumentDryRun(meta, mismatchCumulValues, {
+      knownInstitutions: [COCODY_INSTITUTION],
+      existingBudgets: [],
+      existingAccounts: []
+    });
+    expect(dryRunRes.is_valid).toBe(false);
+    expect(dryRunRes.checks.arithmetic_valid).toBe(false);
+    expect(dryRunRes.errors.some(e => e.includes('Incompatibilité arithmétique résultat cumulé CA'))).toBe(true);
+
+    // Vérification de la préservation des 6 champs requis CA même si rejetés, et de la précision APPROXIMATE dans notes
+    const partialValues: ProposedFinancialValue[] = [
+      { id: '1', field: 'total_planned', label: 'Total Prévu', section: 'GLOBAL', nature: 'PREVISION', amount: 22_341_865_000, precision: 'EXACT', confidence: 'HIGH', status: 'VALIDATED' },
+      { id: '2', field: 'previous_result_reported', label: 'Report antérieur', section: 'GLOBAL', nature: 'EXECUTION', amount: 944, precision: 'APPROXIMATE', confidence: 'MEDIUM', status: 'VALIDATED' },
+      { id: '3', field: 'cumulative_result', label: 'Résultat cumulé', section: 'GLOBAL', nature: 'EXECUTION', amount: 2_237_134_734, precision: 'LOWER_BOUND', confidence: 'MEDIUM', status: 'VALIDATED' }
+    ];
+    const partialEnvelope = buildStandardImportEnvelope(meta, partialValues, COCODY_INSTITUTION);
+    const partialPipelineRow = toPipelineImportRow(partialEnvelope);
+    expect(partialPipelineRow.data.operating_planned).toBeNull();
+    expect(partialPipelineRow.precision.operating_planned).toBe('UNKNOWN');
+    expect(partialPipelineRow.data.investment_realized).toBeNull();
+    expect(partialPipelineRow.precision.investment_realized).toBe('UNKNOWN');
+
+    const hydratedPartial = hydrateAdministrativeAccountFromRow({
+      ...partialPipelineRow.data,
+      operating_revenue_realized: 1000,
+      investment_revenue_realized: 500,
+      import_provenance: {
+        source: partialPipelineRow.source,
+        precision: {
+          ...partialPipelineRow.precision,
+          operating_revenue_realized: 'APPROXIMATE',
+          investment_revenue_realized: 'EXACT'
+        } as Record<string, string>
+      }
+    });
+    expect(hydratedPartial.previous_result_reported).toBe(944);
+    expect(hydratedPartial.import_provenance.precision.previous_result_reported).toBe('APPROXIMATE');
+    expect(hydratedPartial.cumulative_result).toBe(2_237_134_734);
+    expect(hydratedPartial.import_provenance.precision.cumulative_result).toBe('LOWER_BOUND');
+    expect(hydratedPartial.total_revenue_collected).toBe(1500);
+    expect(hydratedPartial.import_provenance.precision.total_revenue_collected).toBe('APPROXIMATE');
+  });
 });
