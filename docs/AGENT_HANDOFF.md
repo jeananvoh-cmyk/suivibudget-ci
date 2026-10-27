@@ -1,3 +1,26 @@
+## 27 octobre 2026 — Clôture PR #65 : Stabilisation de production, durcissement SECURITY DEFINER et pipeline CA 2024 Cocody (Antigravity)
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/65 (`codex/p0-production-cocody-2024` ciblant `master` `901a203`).
+- **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0` (aucune écriture ni réexécution de migration sur `cdesuvcozcetdtvibgqs`).
+- **Chantier A (Recette & Stabilisation de production)** :
+  - Vérification en lecture seule de la production déployée : Vercel `HTTP 200`, `public.admin_persistence_version() = 3`, `public.document_delivery_metric() = 'SERVER_FILE_DELIVERY_V1'`, Edge Functions `public-document-url` et `admin-media-url` actives.
+  - Durcissement des fonctions `SECURITY DEFINER` (`supabase/migrations/20261026213000_security_definer_hardening.sql`) :
+    - `public.admin_baseline_visibility(text, text[])` : garde `NULL` explicite et exclusion des brouillons dynamiques (`id not like 'admin-%'`).
+    - `public.admin_staff_directory()` : rejet explicite `42501` (`Staff authorization required`) pour les comptes `CITIZEN`.
+    - `public.admin_confirm_document_integrity(...)` : garde interne `service_role` / superuser en complément du `REVOKE EXECUTE`.
+    - `private.admin_file_checked` et `private.admin_media_link_allowed` : rejet explicite `42501` hors domaine staff.
+    - Révocation `EXECUTE` sur les fonctions triggers `SECURITY DEFINER`.
+- **Chantier B (Finalisation du CA 2024 de Cocody)** :
+  - Contrôle de l'original de production `doc-dff4865a-c6a8-418e-8895-626258e409d0` (`14 072 943` octets, SHA-256 `941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf`, `44` pages PDF) et rapprochement des 12 indicateurs financiers officiels sur la page PDF `40` (page imprimée `41 / 45`, arrêté en Conseil Municipal le `08/07/2025`, approuvé le `22/07/2025` sous le `n° 002/PA/D.CAB`).
+  - Alignement de `toPipelineImportRow` et `hydrateAdministrativeAccountFromRow` (`src/utils/budgetDocumentDryRun.ts`, `src/components/admin/DataImportConsole.tsx`, `src/services/administrativeAccountsService.ts`, `src/data/administrativeAccountsData.ts`) avec le contrat SQL `import_data_batch` / `review_data_import`.
+  - Affichage explicite du badge **« Non documenté »** dans la Rubrique 4 de `AdministrativeAccountView.tsx` lorsque `operations.length === 0`, et préservation de `Stade comptable à confirmer sur pièce` pour les enregistrements `SOURCE_ANOMALY` (Tiassalé 2024).
+- **Validation & Recette** :
+  - `npx tsc --noEmit` et `npm run build` : **PASS** (`code 0`).
+  - `npx vitest run` : **PASS** (`66/66` fichiers, `911/911` tests).
+  - Recette navigateur `scripts/verify-admin-persistence-browser.cjs` : **PASS** (`16/16` scénarios Chromium E2E, viewports `360/640/768/1024/1440 px`, `0` erreur console/API, `0` fuite externe).
+  - Rapport complet et lot JSON certifié prêt pour import : `docs/audits/P0_PRODUCTION_STABILIZATION_AND_COCODY_CA_2024_REPORT.md`.
+- **NEXT_EXECUTABLE_TASK** : Approbation et fusion de la PR #65 par le propriétaire, application de `20261026213000_security_definer_hardening.sql` puis import/publication contrôlée du lot certifié du CA 2024 de Cocody via `import_data_batch` -> `review_data_import`.
+
 ## 26 octobre 2026 — Clôture C/D/E/F et limites explicites
 
 Cocody : pages PDF 40–43 (fascicule 2 p18–21, imprimées 41–44/45) contrôlées visuellement. Les huit valeurs demandées et la réconciliation patrimoniale concordent avec les fixtures déjà corrigées ; aucune nouvelle donnée financière publiée. Production : document publié distinct de l'absence de CA 2024 structuré. Son SHA 941c399b… ne désigne pas les deux fascicules locaux ; page_count NULL et indicateurs scan/texte historiques à contrôler sur cet original avant qualification. La fiche existante distingue document accessible et exploitation financière en cours. Les tests génériques couvrent les six rubriques, valeurs inconnues et un conseil régional sans branche spécifique.

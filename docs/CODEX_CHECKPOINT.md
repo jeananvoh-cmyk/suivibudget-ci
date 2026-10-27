@@ -1,3 +1,13 @@
+## 27 octobre 2026 — Clôture PR #65 : Stabilisation de production, durcissement SECURITY DEFINER et pipeline CA 2024 Cocody (Antigravity)
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/65 (`codex/p0-production-cocody-2024` ciblant `master` `901a203`).
+- **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0`.
+- **Livrables vérifiés** :
+  - `supabase/migrations/20261026213000_security_definer_hardening.sql` : durcissement de `admin_baseline_visibility`, `admin_staff_directory`, `admin_confirm_document_integrity`, `admin_file_checked`, `admin_media_link_allowed` et révocation `EXECUTE` sur les fonctions triggers `SECURITY DEFINER`.
+  - `src/utils/budgetDocumentDryRun.ts`, `src/components/admin/DataImportConsole.tsx`, `src/services/administrativeAccountsService.ts`, `src/data/administrativeAccountsData.ts`, `src/components/AdministrativeAccountView.tsx` : alignement de bout en bout de l'Assistant Documentaire Guidé (`toPipelineImportRow`) et de l'hydratation (`hydrateAdministrativeAccountFromRow`) sur les 12 indicateurs officiels du CA 2024 de Cocody, et état explicite `Non documenté` en Rubrique 4 lorsque `operations.length === 0`.
+  - `docs/audits/P0_PRODUCTION_STABILIZATION_AND_COCODY_CA_2024_REPORT.md` : rapport de clôture complet incluant le lot JSON exact prêt pour import/publication sur approbation propriétaire.
+- **Résultats de validation** : `tsc` PASS, `npm run build` PASS, Vitest `66/66` suites (`911/911` tests) PASS, Chromium E2E `16/16` PASS (`360/640/768/1024/1440 px`, `0` erreur).
+
 ## 26 octobre 2026 — Clôture C/D/E/F et limites explicites
 
 Cocody : pages PDF 40–43 (fascicule 2 p18–21, imprimées 41–44/45) contrôlées visuellement. Les huit valeurs demandées et la réconciliation patrimoniale concordent avec les fixtures déjà corrigées ; aucune nouvelle donnée financière publiée. Production : document publié distinct de l'absence de CA 2024 structuré. Son SHA 941c399b… ne désigne pas les deux fascicules locaux ; page_count NULL et indicateurs scan/texte historiques à contrôler sur cet original avant qualification. La fiche existante distingue document accessible et exploitation financière en cours. Les tests génériques couvrent les six rubriques, valeurs inconnues et un conseil régional sans branche spécifique.
