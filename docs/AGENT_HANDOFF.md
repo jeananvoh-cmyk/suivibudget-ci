@@ -1,4 +1,4 @@
-## 27 octobre 2026 — Clôture PR #65 : Stabilisation de production, durcissement SECURITY DEFINER et pipeline CA 2024 Cocody (Antigravity)
+## 27 octobre 2026 — Clôture PR #65 + Auto-audit contradictoire et durcissement des 6 points d'insuffisance (Antigravity)
 
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/65 (`codex/p0-production-cocody-2024` ciblant `master` `901a203`).
 - **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0` (aucune écriture ni réexécution de migration sur `cdesuvcozcetdtvibgqs`).
@@ -7,13 +7,18 @@
   - Durcissement des fonctions `SECURITY DEFINER` (`supabase/migrations/20261026213000_security_definer_hardening.sql`) :
     - `public.admin_baseline_visibility(text, text[])` : garde `NULL` explicite et exclusion des brouillons dynamiques (`id not like 'admin-%'`).
     - `public.admin_staff_directory()` : rejet explicite `42501` (`Staff authorization required`) pour les comptes `CITIZEN`.
-    - `public.admin_confirm_document_integrity(...)` : garde interne `service_role` / superuser en complément du `REVOKE EXECUTE`.
-    - `private.admin_file_checked` et `private.admin_media_link_allowed` : rejet explicite `42501` hors domaine staff.
+    - `public.admin_confirm_document_integrity(...)` : garde interne `service_role` / `postgres` / `supabase_admin` en complément du `REVOKE EXECUTE`.
+    - `private.admin_file_checked` et `private.admin_media_link_allowed` : rejet explicite `42501` hors domaine staff authentifié, tout en préservant l'exécution par les triggers serveur/superuser (`auth.uid() is null` sous `postgres`/`supabase_admin`/`service_role`).
     - Révocation `EXECUTE` sur les fonctions triggers `SECURITY DEFINER`.
-- **Chantier B (Finalisation du CA 2024 de Cocody)** :
+- **Chantier B (Finalisation du CA 2024 de Cocody & Auto-audit contradictoire)** :
   - Contrôle de l'original de production `doc-dff4865a-c6a8-418e-8895-626258e409d0` (`14 072 943` octets, SHA-256 `941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf`, `44` pages PDF) et rapprochement des 12 indicateurs financiers officiels sur la page PDF `40` (page imprimée `41 / 45`, arrêté en Conseil Municipal le `08/07/2025`, approuvé le `22/07/2025` sous le `n° 002/PA/D.CAB`).
-  - Alignement de `toPipelineImportRow` et `hydrateAdministrativeAccountFromRow` (`src/utils/budgetDocumentDryRun.ts`, `src/components/admin/DataImportConsole.tsx`, `src/services/administrativeAccountsService.ts`, `src/data/administrativeAccountsData.ts`) avec le contrat SQL `import_data_batch` / `review_data_import`.
-  - Affichage explicite du badge **« Non documenté »** dans la Rubrique 4 de `AdministrativeAccountView.tsx` lorsque `operations.length === 0`, et préservation de `Stade comptable à confirmer sur pièce` pour les enregistrements `SOURCE_ANOMALY` (Tiassalé 2024).
+  - Auto-audit contradictoire et correction de 6 insuffisances :
+    1. **Lot JSON conforme à la liste blanche SQL** : alignement strict du lot JSON de `docs/audits/P0_PRODUCTION_STABILIZATION_AND_COCODY_CA_2024_REPORT.md` sur `private.validate_import_row` (aucun champ hors liste blanche SQL).
+    2. **Contrôle arithmétique du 5e équilibre comptable** : ajout dans `runDocumentDryRun` (`src/utils/budgetDocumentDryRun.ts`) de la vérification `surplus_or_deficit + previous_result_reported === cumulative_result` lorsque les 3 montants sont `EXACT`.
+    3. **Garantie des 6 champs requis par `review_data_import('PUBLISH')` et propagation des précisions** : garantie dans `toPipelineImportRow` de la présence des 6 champs monétaires obligatoires `CA` (`null`/`UNKNOWN` si absents), encodage/décodage des qualificatifs `APPROXIMATE`/`LOWER_BOUND` dans `notes`, et calcul prudent de `total_revenue_collected` dans `hydrateAdministrativeAccountFromRow` avec normalisation numérique des `operations`, `procurement_match.award_amount` et `local_budgets`.
+    4. **Compatibilité triggers serveur/migrations sur `private.admin_file_checked` & `private.admin_media_link_allowed`** : autorisation du contexte serveur/superuser (`auth.uid() is null`) sans affaiblir le blocage `42501` des rôles non-staff.
+    5. **Séparation stricte `VERIFIED !== PUBLISHED` dans `AdministrativeAccountView.tsx`** : seuls les documents `status === 'PUBLISHED'` exposent l'État 2 et le bouton public `Consulter le document` ; un document `VERIFIED` non publié reste en État 1 pré-publication.
+    6. **Élimination des collisions homonymes Commune / Conseil Régional** : suppression des `.includes()` dans `AdministrativeAccountView.tsx` et `src/data/administrativeAccountsData.ts` au profit d'une vérification stricte d'`institution_id`, de type institutionnel (`MAIRIE`/`COMMUNE` vs `REGION`/`REGIONAL_COUNCIL`) et d'égalité exacte normalisée.
 - **Validation & Recette** :
   - `npx tsc --noEmit` et `npm run build` : **PASS** (`code 0`).
   - `npx vitest run` : **PASS** (`66/66` fichiers, `911/911` tests).

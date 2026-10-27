@@ -42,7 +42,7 @@ create or replace function public.admin_confirm_document_integrity(p_id text,p_r
 language plpgsql security definer set search_path='' as $$
 declare document public.public_documents; file jsonb; expected jsonb; total integer;
 begin
-  if coalesce(current_setting('role',true),'none') not in ('service_role','none','postgres') then
+  if coalesce(current_setting('role',true),'none') not in ('service_role','none','postgres','supabase_admin') then
     raise exception 'Server attestation only' using errcode='42501';
   end if;
   if not exists(select 1 from public.profiles where id=p_actor and is_active and role::text in ('ADMIN','DATA_MANAGER')) then raise exception 'Active document operator required'; end if;
@@ -73,11 +73,14 @@ revoke all on function public.admin_confirm_document_integrity(text,integer,uuid
 grant execute on function public.admin_confirm_document_integrity(text,integer,uuid,jsonb) to service_role;
 
 -- 4. Harden private.admin_file_checked and private.admin_media_link_allowed:
---    - Raise explicit 42501 if invoked outside authorized staff domain
+--    - Raise explicit 42501 if invoked outside authorized staff domain or server/migration context
 create or replace function private.admin_file_checked(document_id text,bucket text,path text,checksum text,size bigint) returns boolean
 language plpgsql stable security definer set search_path='' as $$
 begin
-  if not coalesce(private.has_staff_role(array['ADMIN','DATA_MANAGER']),false) then
+  if not (
+    coalesce(private.has_staff_role(array['ADMIN','DATA_MANAGER']),false)
+    or (auth.uid() is null and coalesce(current_setting('role',true),'none') in ('none','postgres','supabase_admin','service_role'))
+  ) then
     raise exception 'Staff authorization required' using errcode='42501';
   end if;
   return exists(
@@ -91,10 +94,13 @@ grant execute on function private.admin_file_checked(text,text,text,text,bigint)
 create or replace function private.admin_media_link_allowed(reference text,entity text,entity_id text) returns boolean
 language plpgsql stable security definer set search_path='' as $$
 begin
-  if not coalesce(private.admin_domain_allowed($2,'{}'::jsonb),false) then
+  if not (
+    coalesce(private.admin_domain_allowed($2,'{}'::jsonb),false)
+    or (auth.uid() is null and coalesce(current_setting('role',true),'none') in ('none','postgres','supabase_admin','service_role'))
+  ) then
     raise exception 'Staff authorization required' using errcode='42501';
   end if;
-  return split_part($1,'/',4)=auth.uid()::text and
+  return (split_part($1,'/',4)=auth.uid()::text or auth.uid() is null) and
     exists(select 1 from storage.objects where bucket_id='admin_media' and name=replace($1,'storage://admin_media/','')) and
     not exists(select 1 from public.institutions where leader_photo_url=$1 and (entity<>'institutions' or id<>entity_id)) and
     not exists(select 1 from public.news_articles where (cover_image_url=$1 or article_metadata->>'document_url'=$1) and (entity<>'news_articles' or id<>entity_id));

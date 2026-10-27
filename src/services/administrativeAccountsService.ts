@@ -11,14 +11,36 @@ export async function fetchPublishedLocalBudgets(): Promise<LocalBudget[]> {
     console.warn("Could not fetch published local budgets:", error.message);
     return [];
   }
-  return (data || []).map(row => ({
-    ...row,
-    operating_percentage: row.total_amount > 0 && row.operating_amount != null && amountPrecision(row,'total_amount') === 'EXACT' && amountPrecision(row,'operating_amount') === 'EXACT' ? row.operating_amount / row.total_amount * 100 : null,
-    investment_percentage: row.total_amount > 0 && row.investment_amount != null && amountPrecision(row,'total_amount') === 'EXACT' && amountPrecision(row,'investment_amount') === 'EXACT' ? row.investment_amount / row.total_amount * 100 : null,
-    sources: [],
-    primary_source_label: row.import_provenance?.source?.name || row.document_name,
-    primary_source_url: row.import_provenance?.source?.url || row.document_url,
-  })) as LocalBudget[];
+  return (data || []).map(row => {
+    const totalAmount = row.total_amount != null ? Number(row.total_amount) : null;
+    const operatingAmount = row.operating_amount != null ? Number(row.operating_amount) : null;
+    const investmentAmount = row.investment_amount != null ? Number(row.investment_amount) : null;
+    return {
+      ...row,
+      total_amount: totalAmount,
+      operating_amount: operatingAmount,
+      investment_amount: investmentAmount,
+      operating_percentage:
+        totalAmount != null &&
+        totalAmount > 0 &&
+        operatingAmount != null &&
+        amountPrecision(row, 'total_amount') === 'EXACT' &&
+        amountPrecision(row, 'operating_amount') === 'EXACT'
+          ? (operatingAmount / totalAmount) * 100
+          : null,
+      investment_percentage:
+        totalAmount != null &&
+        totalAmount > 0 &&
+        investmentAmount != null &&
+        amountPrecision(row, 'total_amount') === 'EXACT' &&
+        amountPrecision(row, 'investment_amount') === 'EXACT'
+          ? (investmentAmount / totalAmount) * 100
+          : null,
+      sources: [],
+      primary_source_label: row.import_provenance?.source?.name || row.document_name,
+      primary_source_url: row.import_provenance?.source?.url || row.document_url,
+    };
+  }) as LocalBudget[];
 }
 
 export async function fetchAdministrativeAccounts(institutionId: string): Promise<AdministrativeAccount[]> {

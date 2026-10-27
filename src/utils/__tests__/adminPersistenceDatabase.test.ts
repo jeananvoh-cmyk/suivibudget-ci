@@ -426,8 +426,10 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
     const probed = (await session(null,()=>db.query<{v:string[]}>("select public.admin_baseline_visibility('institutions', array['admin-secret-draft','reload-test']) v"))).rows[0].v;
     expect(probed).toContain('reload-test');
     expect(probed).not.toContain('admin-secret-draft');
-    // 3. private.admin_file_checked et private.admin_media_link_allowed refusent CITIZEN avec 42501
+    // 3. private.admin_file_checked et private.admin_media_link_allowed refusent CITIZEN avec 42501 mais autorisent le contexte serveur/superuser (migrations/maintenance)
     await expect(session(citizen,()=>db.query("select private.admin_file_checked('x','public_documents','x',repeat('a',64),10)"))).rejects.toThrow(/Staff authorization required/);
     await expect(session(citizen,()=>db.query("select private.admin_media_link_allowed('storage://admin_media/x','institutions','x')"))).rejects.toThrow(/Staff authorization required/);
+    expect((await db.query<{ok:boolean}>("select private.admin_file_checked('x','public_documents','x',repeat('a',64),10) ok")).rows[0].ok).toBe(false);
+    expect((await db.query<{ok:boolean}>("select private.admin_media_link_allowed('storage://admin_media/x','institutions','x') ok")).rows[0].ok).toBe(false);
   });
 });

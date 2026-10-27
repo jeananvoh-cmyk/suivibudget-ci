@@ -1,11 +1,11 @@
-## 27 octobre 2026 — Clôture PR #65 : Stabilisation de production, durcissement SECURITY DEFINER et pipeline CA 2024 Cocody (Antigravity)
+## 27 octobre 2026 — Clôture PR #65 + Auto-audit contradictoire et durcissement des 6 points d'insuffisance (Antigravity)
 
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/65 (`codex/p0-production-cocody-2024` ciblant `master` `901a203`).
 - **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0`.
-- **Livrables vérifiés** :
-  - `supabase/migrations/20261026213000_security_definer_hardening.sql` : durcissement de `admin_baseline_visibility`, `admin_staff_directory`, `admin_confirm_document_integrity`, `admin_file_checked`, `admin_media_link_allowed` et révocation `EXECUTE` sur les fonctions triggers `SECURITY DEFINER`.
-  - `src/utils/budgetDocumentDryRun.ts`, `src/components/admin/DataImportConsole.tsx`, `src/services/administrativeAccountsService.ts`, `src/data/administrativeAccountsData.ts`, `src/components/AdministrativeAccountView.tsx` : alignement de bout en bout de l'Assistant Documentaire Guidé (`toPipelineImportRow`) et de l'hydratation (`hydrateAdministrativeAccountFromRow`) sur les 12 indicateurs officiels du CA 2024 de Cocody, et état explicite `Non documenté` en Rubrique 4 lorsque `operations.length === 0`.
-  - `docs/audits/P0_PRODUCTION_STABILIZATION_AND_COCODY_CA_2024_REPORT.md` : rapport de clôture complet incluant le lot JSON exact prêt pour import/publication sur approbation propriétaire.
+- **Livrables vérifiés et durcis** :
+  - `supabase/migrations/20261026213000_security_definer_hardening.sql` : durcissement de `admin_baseline_visibility`, `admin_staff_directory`, `admin_confirm_document_integrity`, `admin_file_checked`, `admin_media_link_allowed` (avec compatibilité triggers serveur/superuser `auth.uid() is null`) et révocation `EXECUTE` sur les fonctions triggers `SECURITY DEFINER`.
+  - `src/utils/budgetDocumentDryRun.ts`, `src/components/admin/DataImportConsole.tsx`, `src/services/administrativeAccountsService.ts`, `src/data/administrativeAccountsData.ts`, `src/components/AdministrativeAccountView.tsx` : contrôle arithmétique du résultat cumulé (`surplus_or_deficit + previous_result_reported === cumulative_result`), garantie des 6 champs monétaires requis par `review_data_import('PUBLISH')`, propagation des précisions (`EXACT`/`APPROXIMATE`/`LOWER_BOUND`), normalisation des `bigint` PostgreSQL, séparation stricte `VERIFIED !== PUBLISHED` sur l'exposition publique du PDF, et anti-collision homonyme Commune / Conseil Régional.
+  - `docs/audits/P0_PRODUCTION_STABILIZATION_AND_COCODY_CA_2024_REPORT.md` : rapport de clôture complet incluant le lot JSON strictement conforme à `private.validate_import_row`.
 - **Résultats de validation** : `tsc` PASS, `npm run build` PASS, Vitest `66/66` suites (`911/911` tests) PASS, Chromium E2E `16/16` PASS (`360/640/768/1024/1440 px`, `0` erreur).
 
 ## 26 octobre 2026 — Clôture C/D/E/F et limites explicites

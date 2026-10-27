@@ -25,16 +25,27 @@ export async function refreshPublishedAdministrativeAccounts(): Promise<void> {
 
 const clean = (s: string) => s.toLowerCase()
   .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-  .replace(/^(mairie|conseil\s+regional|district)\s+(de\s+|du\s+|des\s+|d'|de\s+la\s+)?/i, '')
+  .replace(/^(mairie|commune|conseil\s+regional|region|district(\s+autonome)?)\s+(de\s+|du\s+|des\s+|d'|de\s+la\s+)?/i, '')
+  .replace(/[-_'’]/g, ' ')
+  .replace(/\s+/g, ' ')
   .trim();
+
+const detectQueryInstitutionType = (s: string): 'COMMUNE' | 'REGIONAL_COUNCIL' | null => {
+  const l = (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (/\b(conseil\s+regional|region)\b/.test(l)) return 'REGIONAL_COUNCIL';
+  if (/\b(mairie|commune|municipal)\b/.test(l)) return 'COMMUNE';
+  return null;
+};
 
 export function getAdministrativeAccountsForInstitution(institutionIdOrName: string): AdministrativeAccount[] {
   if (!institutionIdOrName) return [];
   const target = clean(institutionIdOrName);
+  const targetType = detectQueryInstitutionType(institutionIdOrName);
   return ADMINISTRATIVE_ACCOUNTS_DATA.filter(ca => {
     if (ca.institution_id === institutionIdOrName) return true;
+    if (targetType && ca.institution_type && ca.institution_type !== targetType) return false;
     const caName = clean(ca.institution_name);
-    return caName === target || caName.includes(target) || (target.length >= 4 && target.includes(caName));
+    return Boolean(target && caName && caName === target);
   }).sort((a,b) => b.fiscal_year-a.fiscal_year);
 }
 

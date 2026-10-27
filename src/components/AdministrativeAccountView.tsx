@@ -59,7 +59,16 @@ const normalizeInstitutionLabel = (s: string) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/^(mairie|commune|conseil\s+regional|region|district(\s+autonome)?)\s+(de\s+|du\s+|des\s+|d'|de\s+la\s+)?/i, '')
+    .replace(/[-_'’]/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
+
+const detectInstitutionKind = (label: string): 'MAIRIE' | 'REGION' | null => {
+  const l = (label || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (/\b(conseil\s+regional|region)\b/.test(l)) return 'REGION';
+  if (/\b(mairie|commune|municipal)\b/.test(l)) return 'MAIRIE';
+  return null;
+};
 
 export const getOperationPhysicalStatusLabel = (status: CAInvestmentOperation['citizen_status'] | string | null | undefined): string => {
   if (!status) return 'Réalisation physique non documentée';
@@ -219,58 +228,69 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
   const isInstitutionCADoc = (d: PublicDocument) => {
     const isCADoc = d.category === 'COMPTE_ADMINISTRATIF' || d.document_type === 'COMPTE_ADMINISTRATIF';
     if (!isCADoc) return false;
-    if (d.institution_id && d.institution_id === institution.id) return true;
+    if (d.institution_id) {
+      return d.institution_id === institution.id;
+    }
+    const docKind = detectInstitutionKind(d.institution_name);
+    if (docKind && (institution.type === 'MAIRIE' || institution.type === 'REGION') && docKind !== institution.type) {
+      return false;
+    }
     const docInst = normalizeInstitutionLabel(d.institution_name);
-    return Boolean(cleanInstName && docInst && (docInst === cleanInstName || docInst.includes(cleanInstName) || cleanInstName.includes(docInst)));
+    return Boolean(cleanInstName && docInst && docInst === cleanInstName);
   };
 
   const matchingDoc = currentCA
     ? documents.find(d => 
         (currentCA.source_document_sha256 && d.checksum_sha256 === currentCA.source_document_sha256) ||
         (isInstitutionCADoc(d) && d.year === currentCA.fiscal_year) ||
-        (currentCA.source_document && (d.title.includes(currentCA.source_document) || d.file_name.includes(currentCA.source_document)))
+        (currentCA.source_document && isInstitutionCADoc(d) && (d.title.includes(currentCA.source_document) || d.file_name.includes(currentCA.source_document)))
       )
     : [...documents]
         .filter(isInstitutionCADoc)
         .sort((a, b) => (b.year || 0) - (a.year || 0))[0];
 
   const sha256 = currentCA?.source_document_sha256 || matchingDoc?.checksum_sha256 || null;
-  const docUrl = currentCA?.source_url || matchingDoc?.file_url || null;
+  const docUrl = currentCA?.source_url || (matchingDoc?.status === 'PUBLISHED' ? matchingDoc.file_url : null) || null;
   const canOpenMatchingDoc = Boolean(
-    matchingDoc && (matchingDoc.status === 'PUBLISHED' || matchingDoc.storage_path || (matchingDoc.file_url && isSafeUrl(matchingDoc.file_url)))
+    matchingDoc && matchingDoc.status === 'PUBLISHED'
   );
 
   // If no structured administrative_accounts row is published for this entity
   if (!currentCA) {
     const docYear = matchingDoc?.year || 2024;
-    const isDocPublishedOrVerified = Boolean(
-      matchingDoc && (matchingDoc.status === 'PUBLISHED' || matchingDoc.verification_status === 'VERIFIED')
+    const isDocPublished = Boolean(
+      matchingDoc && matchingDoc.status === 'PUBLISHED'
     );
-    const isDocRecordedPendingVerification = Boolean(
-      matchingDoc && !isDocPublishedOrVerified && (matchingDoc.status === 'TO_VERIFY' || matchingDoc.verification_status === 'TO_VERIFY')
+    const isDocRecordedPendingPublication = Boolean(
+      matchingDoc &&
+        !isDocPublished &&
+        (matchingDoc.status === 'VERIFIED' ||
+          matchingDoc.status === 'TO_VERIFY' ||
+          matchingDoc.verification_status === 'VERIFIED' ||
+          matchingDoc.verification_status === 'TO_VERIFY')
     );
 
-    if (matchingDoc && (isDocPublishedOrVerified || isDocRecordedPendingVerification)) {
+    if (matchingDoc && (isDocPublished || isDocRecordedPendingPublication)) {
       return (
         <div className="space-y-5 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-2xs space-y-5">
             <div className="flex items-start gap-4">
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${
-                isDocPublishedOrVerified ? 'bg-blue-100 text-brand-blue' : 'bg-amber-100 text-amber-900'
+                isDocPublished ? 'bg-blue-100 text-brand-blue' : 'bg-amber-100 text-amber-900'
               }`}>
                 <FileText className="w-6 h-6" />
               </div>
               <div className="space-y-1.5 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
-                    isDocPublishedOrVerified
+                    isDocPublished
                       ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
                       : 'bg-amber-100 text-amber-900 border-amber-300'
                   }`}>
-                    {matchingDoc.status === 'PUBLISHED'
+                    {isDocPublished
                       ? 'Document officiel publié — Exploitation financière en cours'
-                      : isDocPublishedOrVerified
-                      ? 'Document officiel vérifié — Validation financière en cours'
+                      : matchingDoc.status === 'VERIFIED' || matchingDoc.verification_status === 'VERIFIED'
+                      ? 'Document officiel vérifié — En attente de publication'
                       : 'Document enregistré — Vérification en cours'}
                   </span>
                   <span className="text-xs font-bold text-slate-500">
@@ -278,12 +298,12 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                   </span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-black text-slate-900">
-                  {isDocPublishedOrVerified
+                  {isDocPublished
                     ? `Compte administratif ${docYear} disponible à la consultation. Données financières en cours d'exploitation et de validation.`
                     : `Compte administratif ${docYear} enregistré — vérification documentaire et financière en cours avant publication.`}
                 </h3>
                 <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
-                  {isDocPublishedOrVerified ? (
+                  {isDocPublished ? (
                     <>
                       Le document officiel du Compte Administratif {docYear} de <strong>{institution.name}</strong> est archivé et disponible pour consultation directe. Conformément à notre protocole d'intégrité des finances publiques, <strong>les montants chiffrés structurés (6 rubriques citoyennes) ne sont affichés qu'après contrôle arithmétique complet et validation humaine explicite</strong>.
                     </>
@@ -304,10 +324,10 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               <div>
                 <span className="text-[10px] font-bold uppercase text-slate-400 block">Statut du document PDF</span>
                 <strong className="text-emerald-700 break-words">
-                  {matchingDoc.status === 'PUBLISHED'
+                  {isDocPublished
                     ? 'Document publié et consultable'
-                    : matchingDoc.verification_status === 'VERIFIED'
-                    ? 'Document vérifié'
+                    : matchingDoc.status === 'VERIFIED' || matchingDoc.verification_status === 'VERIFIED'
+                    ? 'Document vérifié (en attente de publication)'
                     : 'Document enregistré (à vérifier)'}
                 </strong>
               </div>
@@ -351,7 +371,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             )}
 
             <div className="flex flex-wrap items-center gap-3 pt-1">
-              {isDocPublishedOrVerified && (
+              {isDocPublished && (
                 <button
                   type="button"
                   onClick={() => void openPublicDocument(matchingDoc)}

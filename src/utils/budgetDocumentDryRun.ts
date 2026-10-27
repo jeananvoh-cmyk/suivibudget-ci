@@ -606,6 +606,18 @@ export function runDocumentDryRun(
         errors.push(`Incompatibilité arithmétique résultat CA : Recettes totales (${totRevenue.amount.toLocaleString('fr-FR')}) - Dépenses totales (${totRealized.amount.toLocaleString('fr-FR')}) = ${calcSurplus.toLocaleString('fr-FR')} FCFA, mais Excédent/Déficit déclaré = ${surplusVal.amount.toLocaleString('fr-FR')} FCFA (écart de ${Math.abs(calcSurplus - surplusVal.amount).toLocaleString('fr-FR')} FCFA).`);
       }
     }
+
+    const prevReportedVal = validValues.find(v => v.field === 'previous_result_reported');
+    const cumResultVal = validValues.find(v => v.field === 'cumulative_result');
+    if (surplusVal && prevReportedVal && cumResultVal &&
+        surplusVal.amount !== null && prevReportedVal.amount !== null && cumResultVal.amount !== null &&
+        surplusVal.precision === 'EXACT' && prevReportedVal.precision === 'EXACT' && cumResultVal.precision === 'EXACT') {
+      const calcCumResult = surplusVal.amount + prevReportedVal.amount;
+      if (calcCumResult !== cumResultVal.amount) {
+        arithmeticValid = false;
+        errors.push(`Incompatibilité arithmétique résultat cumulé CA : Résultat de l'exercice (${surplusVal.amount.toLocaleString('fr-FR')}) + Report antérieur (${prevReportedVal.amount.toLocaleString('fr-FR')}) = ${calcCumResult.toLocaleString('fr-FR')} FCFA, mais Résultat cumulé déclaré = ${cumResultVal.amount.toLocaleString('fr-FR')} FCFA (écart de ${Math.abs(calcCumResult - cumResultVal.amount).toLocaleString('fr-FR')} FCFA).`);
+      }
+    }
   }
 
   // Rejet de montants négatifs invalides pour les budgets primitifs
@@ -805,6 +817,15 @@ export function buildStandardImportEnvelope(
 }
 
 
+const CA_REQUIRED_PIPELINE_MONEY_FIELDS = [
+  'operating_planned',
+  'operating_realized',
+  'investment_planned',
+  'investment_realized',
+  'total_planned',
+  'total_realized'
+] as const;
+
 const CA_PIPELINE_MONEY_FIELDS = [
   'operating_planned',
   'operating_realized',
@@ -900,14 +921,18 @@ export function toPipelineImportRow(
       Number.isFinite(rawData.previous_result_reported) &&
       !noteParts.some(p => /Report (?:à nouveau )?antérieur\s*:/i.test(p))
     ) {
-      noteParts.push(`Report antérieur : ${Math.trunc(rawData.previous_result_reported)} FCFA.`);
+      const prevPrec = rawPrecision.previous_result_reported;
+      const prevQual = prevPrec && prevPrec !== 'EXACT' ? ` (${prevPrec})` : '';
+      noteParts.push(`Report antérieur : ${Math.trunc(rawData.previous_result_reported)} FCFA${prevQual}.`);
     }
     if (
       typeof rawData.cumulative_result === 'number' &&
       Number.isFinite(rawData.cumulative_result) &&
       !noteParts.some(p => /Résultat cumulé\s*:/i.test(p))
     ) {
-      noteParts.push(`Résultat cumulé : ${Math.trunc(rawData.cumulative_result)} FCFA.`);
+      const cumPrec = rawPrecision.cumulative_result;
+      const cumQual = cumPrec && cumPrec !== 'EXACT' ? ` (${cumPrec})` : '';
+      noteParts.push(`Résultat cumulé : ${Math.trunc(rawData.cumulative_result)} FCFA${cumQual}.`);
     }
     if (noteParts.length > 0) {
       rawData.notes = noteParts.join(' ');
@@ -921,6 +946,11 @@ export function toPipelineImportRow(
     for (const [k, v] of Object.entries(rawData)) {
       if (v === undefined || !allowedSet.has(k)) continue;
       cleanData[k] = v;
+    }
+    for (const k of CA_REQUIRED_PIPELINE_MONEY_FIELDS) {
+      if (!(k in cleanData)) {
+        cleanData[k] = null;
+      }
     }
     for (const k of CA_PIPELINE_MONEY_FIELDS) {
       if (k in cleanData && moneySet.has(k)) {
@@ -1031,13 +1061,20 @@ const CA_NUMERIC_FIELDS = [
   'source_page'
 ] as const;
 
-function parseAttestedFcfaFromNotes(notes: string, pattern: RegExp): number | null {
+function parseAttestedFcfaFromNotes(
+  notes: string,
+  pattern: RegExp
+): { amount: number; precision: 'EXACT' | 'APPROXIMATE' | 'LOWER_BOUND' } | null {
   const match = notes.match(pattern);
   if (!match || !match[1]) return null;
   const cleaned = match[1].replace(/[\s\u00a0\u202f]/g, '');
   if (!/^[+-]?\d+$/.test(cleaned)) return null;
   const parsed = Number(cleaned);
-  return Number.isSafeInteger(parsed) ? parsed : null;
+  if (!Number.isSafeInteger(parsed)) return null;
+  const rawPrecision = match[2]?.toUpperCase();
+  const precision: 'EXACT' | 'APPROXIMATE' | 'LOWER_BOUND' =
+    rawPrecision === 'APPROXIMATE' || rawPrecision === 'LOWER_BOUND' ? rawPrecision : 'EXACT';
+  return { amount: parsed, precision };
 }
 
 /**
@@ -1045,7 +1082,19 @@ function parseAttestedFcfaFromNotes(notes: string, pattern: RegExp): number | nu
  * en normalisant les colonnes numériques `bigint` et les métadonnées comptables
  * explicitement attestées dans `notes` (`accounting_stage`, `previous_result_reported`, `cumulative_result`).
  */
-export function hydrateAdministrativeAccountFromRow<T extends Record<string, any>>(row: T): T {
+export function hydrateAdministrativeAccountFromRow<T extends Record<string, any>>(
+  row: T
+): T & {
+  accounting_stage?: string;
+  previous_result_reported?: number | null;
+  cumulative_result?: number | null;
+  total_revenue_collected?: number | null;
+  import_provenance?: {
+    source?: Record<string, any>;
+    precision?: Record<string, string>;
+    [key: string]: any;
+  };
+} {
   const hydrated: Record<string, any> = { ...row };
 
   for (const field of CA_NUMERIC_FIELDS) {
@@ -1057,12 +1106,59 @@ export function hydrateAdministrativeAccountFromRow<T extends Record<string, any
     }
   }
 
+  if (Array.isArray(hydrated.operations)) {
+    hydrated.operations = hydrated.operations.map((op: Record<string, any>) => {
+      const normalizedOp: Record<string, any> = {
+        ...op,
+        planned_amount: op.planned_amount != null ? Number(op.planned_amount) : null,
+        executed_amount: op.executed_amount != null ? Number(op.executed_amount) : null
+      };
+      if (normalizedOp.procurement_match && typeof normalizedOp.procurement_match === 'object') {
+        normalizedOp.procurement_match = {
+          ...normalizedOp.procurement_match,
+          award_amount:
+            normalizedOp.procurement_match.award_amount != null
+              ? Number(normalizedOp.procurement_match.award_amount)
+              : normalizedOp.procurement_match.award_amount
+        };
+      }
+      return normalizedOp;
+    });
+  }
+
+  const provenancePrecision: Record<string, string> =
+    hydrated.import_provenance &&
+    typeof hydrated.import_provenance === 'object' &&
+    hydrated.import_provenance.precision &&
+    typeof hydrated.import_provenance.precision === 'object'
+      ? { ...hydrated.import_provenance.precision }
+      : {};
+
   if (
     hydrated.total_revenue_collected == null &&
     typeof hydrated.operating_revenue_realized === 'number' &&
-    typeof hydrated.investment_revenue_realized === 'number'
+    Number.isFinite(hydrated.operating_revenue_realized) &&
+    typeof hydrated.investment_revenue_realized === 'number' &&
+    Number.isFinite(hydrated.investment_revenue_realized) &&
+    provenancePrecision.operating_revenue_realized !== 'UNKNOWN' &&
+    provenancePrecision.investment_revenue_realized !== 'UNKNOWN'
   ) {
     hydrated.total_revenue_collected = hydrated.operating_revenue_realized + hydrated.investment_revenue_realized;
+    const opRevPrec = provenancePrecision.operating_revenue_realized || 'EXACT';
+    const invRevPrec = provenancePrecision.investment_revenue_realized || 'EXACT';
+    const combinedRevPrec =
+      opRevPrec === 'APPROXIMATE' || invRevPrec === 'APPROXIMATE'
+        ? 'APPROXIMATE'
+        : opRevPrec === 'LOWER_BOUND' || invRevPrec === 'LOWER_BOUND'
+        ? 'LOWER_BOUND'
+        : 'EXACT';
+    if (hydrated.import_provenance && typeof hydrated.import_provenance === 'object') {
+      provenancePrecision.total_revenue_collected = combinedRevPrec;
+      hydrated.import_provenance = {
+        ...hydrated.import_provenance,
+        precision: { ...provenancePrecision }
+      };
+    }
   }
 
   const notes = typeof hydrated.notes === 'string' ? hydrated.notes : '';
@@ -1076,34 +1172,36 @@ export function hydrateAdministrativeAccountFromRow<T extends Record<string, any
 
     const prevReported =
       hydrated.previous_result_reported == null
-        ? parseAttestedFcfaFromNotes(notes, /Report (?:à nouveau )?antérieur\s*:\s*([+-]?\d[\d\s\u00a0\u202f]*)\s*FCFA/i)
+        ? parseAttestedFcfaFromNotes(
+            notes,
+            /Report (?:à nouveau )?antérieur\s*:\s*([+-]?\d[\d\s\u00a0\u202f]*)\s*FCFA(?:\s*\((EXACT|APPROXIMATE|LOWER_BOUND)\))?/i
+          )
         : null;
     if (prevReported !== null) {
-      hydrated.previous_result_reported = prevReported;
+      hydrated.previous_result_reported = prevReported.amount;
       if (hydrated.import_provenance && typeof hydrated.import_provenance === 'object') {
+        provenancePrecision.previous_result_reported = prevReported.precision;
         hydrated.import_provenance = {
           ...hydrated.import_provenance,
-          precision: {
-            ...(hydrated.import_provenance.precision || {}),
-            previous_result_reported: 'EXACT'
-          }
+          precision: { ...provenancePrecision }
         };
       }
     }
 
     const cumResult =
       hydrated.cumulative_result == null
-        ? parseAttestedFcfaFromNotes(notes, /Résultat cumulé\s*:\s*([+-]?\d[\d\s\u00a0\u202f]*)\s*FCFA/i)
+        ? parseAttestedFcfaFromNotes(
+            notes,
+            /Résultat cumulé\s*:\s*([+-]?\d[\d\s\u00a0\u202f]*)\s*FCFA(?:\s*\((EXACT|APPROXIMATE|LOWER_BOUND)\))?/i
+          )
         : null;
     if (cumResult !== null) {
-      hydrated.cumulative_result = cumResult;
+      hydrated.cumulative_result = cumResult.amount;
       if (hydrated.import_provenance && typeof hydrated.import_provenance === 'object') {
+        provenancePrecision.cumulative_result = cumResult.precision;
         hydrated.import_provenance = {
           ...hydrated.import_provenance,
-          precision: {
-            ...(hydrated.import_provenance.precision || {}),
-            cumulative_result: 'EXACT'
-          }
+          precision: { ...provenancePrecision }
         };
       }
     }

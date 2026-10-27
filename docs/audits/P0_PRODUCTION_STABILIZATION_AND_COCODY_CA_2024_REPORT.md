@@ -78,16 +78,17 @@ Source primaire : **`TABLEAU DES RESULTATS DU COMPTE ADMINISTRATIF`** — **Page
 ### 2.3 Alignement de bout en bout du Pipeline d'Import et d'Hydratation
 
 1. **`toPipelineImportRow(envelope)` (`src/utils/budgetDocumentDryRun.ts` & `src/components/admin/DataImportConsole.tsx`)** :
-   - Convertit l'enveloppe issue de l'Assistant Documentaire Guidé (`StandardImportEnvelope`) au format exact exigé par `private.validate_import_row` / `public.import_data_batch` (`source.reference`, `source.date`, `source.date_kind`, `source.evidence_level`, `data`, `precision`), tout en préservant dans `source.extra_metadata` les métadonnées riches (`source_document_id`, `accounting_stage: 'ORDONNANCE'`, `previous_result_reported: 944`, `cumulative_result: 2237134734`, `adoption_date: '2025-07-08'`, `approval_date: '2025-07-22'`, `approval_reference: '002/PA/D.CAB'`).
+   - Convertit l'enveloppe issue de l'Assistant Documentaire Guidé (`StandardImportEnvelope`) au contrat SQL strict de `private.validate_import_row` / `public.import_data_batch` (`source` restreint à `name`, `reference`, `date`, `date_kind`, et `url` HTTP(S) optionnelle ; `data` restreint à la liste blanche des colonnes financières `CA`/`BP` + `source_page`, `approval_date`, `prefecture_visa_date`, `notes`, `verification_status`), tout en consignant de manière structurée et sans perte dans `data.notes` les métadonnées comptables attestées (`Stade comptable : ORDONNANCE.`, `Report antérieur : 944 FCFA.`, `Résultat cumulé : 2237134734 FCFA.`) ainsi que les 6 champs monétaires obligatoires exigés par `public.review_data_import('PUBLISH')`.
 2. **`hydrateAdministrativeAccountFromRow(row)` (`src/utils/budgetDocumentDryRun.ts`, `src/services/administrativeAccountsService.ts`, `src/data/administrativeAccountsData.ts`)** :
-   - Réhydrate fidèlement depuis `import_provenance.source.extra_metadata` les champs `previous_result_reported`, `cumulative_result`, `accounting_stage`, `source_document_id`, `adoption_date`, `approval_date`, `approval_reference` et `notes`.
-   - Préserve `accounting_stage = undefined` lorsqu'un enregistrement porte `verification_status = 'SOURCE_ANOMALY'` sans stade explicite dans `extra_metadata`, maintenant l'affichage *« Stade comptable à confirmer sur pièce »* pour Tiassalé 2024.
-3. **Rubrique 4 de `AdministrativeAccountView.tsx`** :
+   - Normalise les montants `bigint` PostgreSQL (y compris dans `operations` et `procurement_match.award_amount`), recalcule `total_revenue_collected` uniquement lorsque les deux composantes sont numériques et non `UNKNOWN` en propageant leur précision combinée, et réhydrate fidèlement depuis `notes` les champs `accounting_stage`, `previous_result_reported` et `cumulative_result` avec leur qualification de précision dans `import_provenance.precision`.
+   - Préserve `accounting_stage = undefined` lorsqu'un enregistrement porte `verification_status = 'SOURCE_ANOMALY'` sans stade explicite attesté, maintenant l'affichage *« Stade comptable à confirmer sur pièce »* pour Tiassalé 2024.
+3. **Rubrique 4 & États pré-publication de `AdministrativeAccountView.tsx`** :
    - Lorsque le Compte Administratif global est publié mais que les opérations détaillées d'investissement ne sont pas encore rattachées (`operations.length === 0`), la Rubrique 4 affiche un badge explicite **`Non documenté`** et indique que la ventilation par opération/projet d'investissement n'est pas encore rattachée, sans jamais afficher un tableau vide trompeur ni confondre absence de détail et absence d'investissement.
+   - Rapprochement documentaire strict par `institution_id` (ou égalité exacte normalisée et type institutionnel compatible sans `.includes()`), et distinction stricte `VERIFIED !== PUBLISHED` (seuls les documents `status === 'PUBLISHED'` exposent le bouton public de consultation PDF).
 
 ### 2.4 Lot JSON exact du CA 2024 de Cocody prêt pour import et publication (soumis à approbation propriétaire)
 
-Conformément aux règles non négociables (`REMOTE_SUPABASE_WRITES = 0`), **aucune écriture n'a été exécutée sur `cdesuvcozcetdtvibgqs`**. Le lot ci-dessous est validé à 100 % sous PGlite (`import_data_batch` -> `review_data_import('VERIFY')` -> `review_data_import('PUBLISH', true)`) et prêt à être importé depuis la console d'administration dès autorisation du propriétaire :
+Conformément aux règles non négociables (`REMOTE_SUPABASE_WRITES = 0`), **aucune écriture n'a été exécutée sur `cdesuvcozcetdtvibgqs`**. Le lot ci-dessous respecte strictement la liste blanche SQL de `private.validate_import_row` et est validé à 100 % sous PGlite (`import_data_batch` -> `review_data_import('VERIFY')` -> `review_data_import('PUBLISH', true)`) :
 
 ```json
 [
@@ -99,55 +100,37 @@ Conformément aux règles non négociables (`REMOTE_SUPABASE_WRITES = 0`), **auc
     "source": {
       "name": "Mairie de la Commune de Cocody - Compte Administratif de l'Exercice 2024",
       "reference": "CA-2024-COCODY / Approbation Préfectorale n° 002/PA/D.CAB du 22/07/2025",
-      "url": null,
       "date": "2025-07-22",
-      "date_kind": "PUBLISHED",
-      "page": 40,
-      "evidence_level": "OFFICIAL_DOCUMENT",
-      "note": "Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45). Arrêté en séance du Conseil Municipal le 08/07/2025, approuvé le 22/07/2025 sous le n° 002/PA/D.CAB.",
-      "extra_metadata": {
-        "source_document_id": "doc-dff4865a-c6a8-418e-8895-626258e409d0",
-        "accounting_stage": "ORDONNANCE",
-        "previous_result_reported": 944,
-        "cumulative_result": 2237134734,
-        "adoption_date": "2025-07-08",
-        "approval_date": "2025-07-22",
-        "approval_reference": "002/PA/D.CAB"
-      }
+      "date_kind": "PUBLISHED"
     },
     "data": {
-      "total_planned": 22341865000,
-      "total_realized": 16775223443,
       "operating_planned": 18441235000,
+      "operating_revenue_realized": 17646256543,
       "operating_realized": 15409122753,
       "investment_planned": 3900630000,
-      "investment_realized": 1366100690,
-      "total_revenue_collected": 19012357233,
-      "operating_revenue_realized": 17646256543,
       "investment_revenue_realized": 1366100690,
+      "investment_realized": 1366100690,
+      "total_planned": 22341865000,
+      "total_revenue_collected": 19012357233,
+      "total_realized": 16775223443,
       "surplus_or_deficit": 2237133790,
-      "previous_result_reported": 944,
-      "cumulative_result": 2237134734,
-      "accounting_stage": "ORDONNANCE",
-      "source_document_id": "doc-dff4865a-c6a8-418e-8895-626258e409d0",
-      "adoption_date": "2025-07-08",
-      "approval_date": "2025-07-22",
-      "approval_reference": "002/PA/D.CAB",
-      "verification_status": "OFFICIAL_DOCUMENT"
+      "source_page": 40,
+      "approval_date": "2025-07-08",
+      "prefecture_visa_date": "2025-07-22",
+      "verification_status": "OFFICIAL_DOCUMENT",
+      "notes": "Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45). Stade comptable : ORDONNANCE. Report antérieur : 944 FCFA. Résultat cumulé : 2237134734 FCFA."
     },
     "precision": {
-      "total_planned": "EXACT",
-      "total_realized": "EXACT",
       "operating_planned": "EXACT",
       "operating_realized": "EXACT",
+      "operating_revenue_realized": "EXACT",
       "investment_planned": "EXACT",
       "investment_realized": "EXACT",
-      "total_revenue_collected": "EXACT",
-      "operating_revenue_realized": "EXACT",
       "investment_revenue_realized": "EXACT",
-      "surplus_or_deficit": "EXACT",
-      "previous_result_reported": "EXACT",
-      "cumulative_result": "EXACT"
+      "total_planned": "EXACT",
+      "total_realized": "EXACT",
+      "total_revenue_collected": "EXACT",
+      "surplus_or_deficit": "EXACT"
     }
   }
 ]
