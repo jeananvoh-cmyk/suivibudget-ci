@@ -53,7 +53,7 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
       expect((await actual.query(`select has_function_privilege('anon','public.admin_baseline_visibility(text,text[])','EXECUTE') as anon_exec`)).rows).toEqual([{anon_exec:false}]);
       await actual.exec(`update public.institutions set publication_status='DRAFT' where id='isolated-historical';`);
       await actual.exec(`begin;set local role authenticated;select set_config('request.jwt.claim.sub','${admin}',true);`);
-      expect((await actual.query(`select public.admin_baseline_visibility('institutions',array['isolated-historical']) value`)).rows[0].value).toEqual(['isolated-historical']);
+      expect((await actual.query<{value:string[]}>(`select public.admin_baseline_visibility('institutions',array['isolated-historical']) value`)).rows[0].value).toEqual(['isolated-historical']);
       await actual.exec('rollback');
       await actual.exec(`begin;set local role authenticated;select set_config('request.jwt.claim.sub','${admin}',true);`);
       const saved=await actual.query<{row:{revision:number}}>('select public.admin_mutate($1,$2,null,$3::jsonb,$4::uuid,$5) row',['institutions','isolated-new',JSON.stringify({name:'Fictive',type:'MAIRIE'}),crypto.randomUUID(),'Recette isolée du schéma réel']);
