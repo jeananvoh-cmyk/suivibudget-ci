@@ -50,6 +50,13 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
       expect((await actual.query('select is_multipart,parts_count,is_scanned,has_text_layer,ocr_status,manifest_sha256,checksum_sha256 from public.public_documents')).rows).toEqual([{is_multipart:null,parts_count:null,is_scanned:null,has_text_layer:null,ocr_status:null,manifest_sha256:null,checksum_sha256:'a'.repeat(64)}]);
       expect((await actual.query('select total_budget_fcfa from public.institutions')).rows).toEqual([{total_budget_fcfa:'123.00'}]);
       expect((await actual.query('select public.admin_persistence_version() version')).rows).toEqual([{version:3}]);
+      expect((await actual.query(`select has_function_privilege('anon','public.admin_baseline_visibility(text,text[])','EXECUTE') as anon_exec`)).rows).toEqual([{anon_exec:false}]);
+      await actual.exec(`begin;set local role authenticated;select set_config('request.jwt.claim.sub','${citizen}',true);`);
+      await expect(actual.query(`select public.admin_baseline_visibility('institutions',array['isolated-historical'])`)).rejects.toThrow(/Staff authorization required/);
+      await actual.exec('rollback');
+      await actual.exec(`begin;set local role authenticated;select set_config('request.jwt.claim.sub','${manager}',true);`);
+      expect((await actual.query(`select public.admin_baseline_visibility('institutions',array['isolated-historical']) value`)).rows[0].value).toEqual(['isolated-historical']);
+      await actual.exec('rollback');
       await actual.exec(`begin;set local role authenticated;select set_config('request.jwt.claim.sub','${admin}',true);`);
       const saved=await actual.query<{row:{revision:number}}>('select public.admin_mutate($1,$2,null,$3::jsonb,$4::uuid,$5) row',['institutions','isolated-new',JSON.stringify({name:'Fictive',type:'MAIRIE'}),crypto.randomUUID(),'Recette isolée du schéma réel']);
       expect(saved.rows[0].row.revision).toBe(1);
