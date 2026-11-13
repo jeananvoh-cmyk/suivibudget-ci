@@ -3,8 +3,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Institution, BudgetProject, BudgetLineItem } from '../types';
 import { formatFCFA, formatAmountInWords, getProjectTier, getProjectTierBadge } from '../utils/formatters';
 import { getProjectsForInstitution } from '../utils/institutionProjects';
-import { X, Globe, ExternalLink, MapPin, Phone, Mail, Building2, FileText, ArrowRight, ShieldCheck, User, CheckCircle2, Share2, Layers, Search, Filter, GraduationCap, Briefcase, FolderOpen, History } from 'lucide-react';
+import { X, Globe, ExternalLink, MapPin, Phone, Mail, Building2, FileText, ArrowRight, ShieldCheck, User, CheckCircle2, Share2, Layers, Search, Filter, GraduationCap, Briefcase, FolderOpen, History, Printer } from 'lucide-react';
 import { OfficialDocRequestModal } from './OfficialDocRequestModal';
+import { CitizenOnePageSummary } from './CitizenOnePageSummary';
 import { findCaidpRI } from '../data/caidpRiData';
 import { dataStore } from '../services/dataStore';
 import { isSafeUrl } from '../utils/security';
@@ -292,6 +293,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   const [apecYear,setApecYear] = useState(String(new Date().getFullYear()));
   const [financeSubTab, setFinanceSubTab] = useState<'BUDGET_2026' | 'EXECUTION' | 'HISTORY'>(initialFinanceSubTab || 'BUDGET_2026');
   const [docModalOpen, setDocModalOpen] = useState(false);
+  const [onePageOpen, setOnePageOpen] = useState(false);
   const [selectedProjectForDoc, setSelectedProjectForDoc] = useState<BudgetProject | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const docTriggerRef = useRef<HTMLElement | null>(null);
@@ -325,13 +327,13 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
 
   // Keyboard navigation: Escape to close and Tab / Shift+Tab focus trap (suspended while child modal is open)
   useEffect(() => {
-    if (!isModalVisible || docModalOpen) return;
+    if (!isModalVisible || docModalOpen || onePageOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      handleModalKeyDown(event, dialogRef.current, docModalOpen, onClose);
+      handleModalKeyDown(event, dialogRef.current, docModalOpen || onePageOpen, onClose);
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isModalVisible, docModalOpen, onClose]);
+  }, [isModalVisible, docModalOpen, onePageOpen, onClose]);
 
   // Sync tab states when opening or props change
   useEffect(() => {
@@ -526,7 +528,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   };
 
   return (
-    <div onClick={docModalOpen ? undefined : onClose} className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 md:p-6 animate-in fade-in duration-200">
+    <div onClick={(docModalOpen || onePageOpen) ? undefined : onClose} className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 md:p-6 animate-in fade-in duration-200">
       <div
         ref={dialogRef}
         role="dialog"
@@ -1538,17 +1540,30 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
         {/* 4. PIED DE PAGE AVEC ACTIONS CITOYENNES */}
         {/* ========================================================= */}
         <div className="p-3.5 sm:px-6 bg-white border-t border-slate-200 flex flex-wrap items-center justify-between gap-2.5 flex-shrink-0">
-          <button
-            onClick={() => openDocModal(null)}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-bold transition-all flex items-center gap-2 shadow-2xs cursor-pointer"
-          >
-            <FileText className="w-3.5 h-3.5 text-brand-orange" />
-            <span>Demande de Documents Publics (Loi CAIDP)</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => openDocModal(null)}
+              className="min-h-[44px] px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-bold transition-all flex items-center gap-2 shadow-2xs cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5 text-brand-orange" />
+              <span>Demande de Documents Publics (Loi CAIDP)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setOnePageOpen(true)}
+              className="min-h-[44px] px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 rounded-full text-xs font-bold transition-all flex items-center gap-2 shadow-2xs cursor-pointer"
+            >
+              <Printer className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Fiche Citoyenne 1 Page (A4)</span>
+            </button>
+          </div>
 
           <button
+            type="button"
             onClick={onClose}
-            className="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-full text-xs font-bold transition-colors cursor-pointer"
+            className="min-h-[44px] px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-full text-xs font-bold transition-colors cursor-pointer"
           >
             Fermer la fiche
           </button>
@@ -1563,6 +1578,23 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
         institution={institution}
         project={selectedProjectForDoc}
       />
+
+      {/* APERÇU IMPRESSION A4 : BUDGET CITOYEN 1 PAGE */}
+      {onePageOpen && (
+        <CitizenOnePageSummary
+          institution={institution}
+          relatedProjects={relatedProjects}
+          latestCA={getLatestAvailableCA(institution.id) || getLatestAvailableCA(institution.name)}
+          documents={dataStore.getDocuments()}
+          riInfo={{
+            name: riName,
+            functionTitle: riFunction,
+            email: riEmail,
+            phone: riPhone,
+          }}
+          onClose={() => setOnePageOpen(false)}
+        />
+      )}
     </div>
   );
 };
