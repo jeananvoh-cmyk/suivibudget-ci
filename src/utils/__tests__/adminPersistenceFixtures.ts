@@ -147,8 +147,11 @@ async function initialize() {
   await db.exec(auditFunction);
   await db.exec('create trigger enforce_document_publication_audit_trigger before insert or update on public.public_documents for each row execute function public.enforce_document_publication_audit()');
   await db.exec(readFileSync(resolve('supabase/migrations/20260930030840_public_proof_projection_boundary.sql'),'utf8'));
+  const hardening = readFileSync(resolve('supabase/migrations/20261026213000_security_definer_hardening.sql'),'utf8');
   await db.exec(migration);
   await db.exec(migration);
+  await db.exec(hardening);
+  await db.exec(hardening);
 }
 await initialize();
 return {db,session,mutate,admin,manager,moderator,citizen};

@@ -606,6 +606,18 @@ export function runDocumentDryRun(
         errors.push(`Incompatibilité arithmétique résultat CA : Recettes totales (${totRevenue.amount.toLocaleString('fr-FR')}) - Dépenses totales (${totRealized.amount.toLocaleString('fr-FR')}) = ${calcSurplus.toLocaleString('fr-FR')} FCFA, mais Excédent/Déficit déclaré = ${surplusVal.amount.toLocaleString('fr-FR')} FCFA (écart de ${Math.abs(calcSurplus - surplusVal.amount).toLocaleString('fr-FR')} FCFA).`);
       }
     }
+
+    const prevReportedVal = validValues.find(v => v.field === 'previous_result_reported');
+    const cumResultVal = validValues.find(v => v.field === 'cumulative_result');
+    if (surplusVal && prevReportedVal && cumResultVal &&
+        surplusVal.amount !== null && prevReportedVal.amount !== null && cumResultVal.amount !== null &&
+        surplusVal.precision === 'EXACT' && prevReportedVal.precision === 'EXACT' && cumResultVal.precision === 'EXACT') {
+      const calcCumResult = surplusVal.amount + prevReportedVal.amount;
+      if (calcCumResult !== cumResultVal.amount) {
+        arithmeticValid = false;
+        errors.push(`Incompatibilité arithmétique résultat cumulé CA : Résultat de l'exercice (${surplusVal.amount.toLocaleString('fr-FR')}) + Report antérieur (${prevReportedVal.amount.toLocaleString('fr-FR')}) = ${calcCumResult.toLocaleString('fr-FR')} FCFA, mais Résultat cumulé déclaré = ${cumResultVal.amount.toLocaleString('fr-FR')} FCFA (écart de ${Math.abs(calcCumResult - cumResultVal.amount).toLocaleString('fr-FR')} FCFA).`);
+      }
+    }
   }
 
   // Rejet de montants négatifs invalides pour les budgets primitifs
@@ -802,4 +814,398 @@ export function buildStandardImportEnvelope(
     data: dataObj,
     precision: precisionObj
   };
+}
+
+
+const CA_REQUIRED_PIPELINE_MONEY_FIELDS = [
+  'operating_planned',
+  'operating_realized',
+  'investment_planned',
+  'investment_realized',
+  'total_planned',
+  'total_realized'
+] as const;
+
+const CA_PIPELINE_MONEY_FIELDS = [
+  'operating_planned',
+  'operating_realized',
+  'operating_revenue_realized',
+  'investment_planned',
+  'investment_realized',
+  'investment_revenue_realized',
+  'total_planned',
+  'total_realized',
+  'surplus_or_deficit',
+  'operating_revenue_planned',
+  'operating_revenue_emitted',
+  'operating_revenue_collected',
+  'operating_expenditure_planned',
+  'operating_expenditure_engaged',
+  'investment_revenue_planned',
+  'investment_revenue_emitted',
+  'investment_revenue_collected',
+  'investment_expenditure_planned',
+  'investment_expenditure_engaged',
+  'total_revenue_collected',
+  'total_expenditure_engaged',
+  'arithmetic_difference'
+] as const;
+
+const CA_PIPELINE_ALLOWED_FIELDS = [
+  ...CA_PIPELINE_MONEY_FIELDS,
+  'source_page',
+  'approval_date',
+  'prefecture_visa_date',
+  'notes',
+  'verification_status'
+] as const;
+
+const BP_PIPELINE_MONEY_FIELDS = [
+  'total_amount',
+  'operating_amount',
+  'investment_amount'
+] as const;
+
+const BP_PIPELINE_ALLOWED_FIELDS = [
+  ...BP_PIPELINE_MONEY_FIELDS,
+  'budget_type',
+  'version_number',
+  'adoption_date',
+  'tutelle_approval_date',
+  'notes',
+  'verification_status',
+  'confidence_level'
+] as const;
+
+const BP_PIPELINE_BUDGET_TYPES = new Set([
+  'PRIMITIF_ADOPTE',
+  'PRIMITIF_APRES_TUTELLE',
+  'AUTORISATION_EXECUTION',
+  'MODIFICATIF_1',
+  'MODIFICATIF_2',
+  'AUTRE_MODIFICATIF'
+]);
+
+/**
+ * Normalise une enveloppe issue de `buildStandardImportEnvelope` vers le contrat SQL strict
+ * de `private.validate_import_row` / `public.import_data_batch`, sans perte des métadonnées
+ * comptables attestées (stade comptable, report antérieur, résultat cumulé).
+ */
+export function toPipelineImportRow(
+  envelope: ReturnType<typeof buildStandardImportEnvelope>
+): ReturnType<typeof buildStandardImportEnvelope> {
+  const cleanSource: ReturnType<typeof buildStandardImportEnvelope>['source'] = {
+    name: envelope.source.name,
+    reference: envelope.source.reference,
+    date: envelope.source.date,
+    date_kind: envelope.source.date_kind
+  };
+  if (envelope.source.url && /^https?:\/\/\S+$/.test(envelope.source.url.trim())) {
+    cleanSource.url = envelope.source.url.trim();
+  }
+
+  const rawData = { ...envelope.data };
+  const rawPrecision = { ...envelope.precision };
+  const noteParts: string[] = [];
+  if (typeof rawData.notes === 'string' && rawData.notes.trim().length > 0) {
+    noteParts.push(rawData.notes.trim());
+  }
+
+  if (envelope.kind === 'CA') {
+    const stage = typeof rawData.accounting_stage === 'string' ? rawData.accounting_stage.trim() : '';
+    if (stage && !noteParts.some(p => /Stade comptable\s*:/i.test(p))) {
+      noteParts.push(`Stade comptable : ${stage}.`);
+    }
+    if (
+      typeof rawData.previous_result_reported === 'number' &&
+      Number.isFinite(rawData.previous_result_reported) &&
+      !noteParts.some(p => /Report (?:à nouveau )?antérieur\s*:/i.test(p))
+    ) {
+      const prevPrec = rawPrecision.previous_result_reported;
+      const prevQual = prevPrec && prevPrec !== 'EXACT' ? ` (${prevPrec})` : '';
+      noteParts.push(`Report antérieur : ${Math.trunc(rawData.previous_result_reported)} FCFA${prevQual}.`);
+    }
+    if (
+      typeof rawData.cumulative_result === 'number' &&
+      Number.isFinite(rawData.cumulative_result) &&
+      !noteParts.some(p => /Résultat cumulé\s*:/i.test(p))
+    ) {
+      const cumPrec = rawPrecision.cumulative_result;
+      const cumQual = cumPrec && cumPrec !== 'EXACT' ? ` (${cumPrec})` : '';
+      noteParts.push(`Résultat cumulé : ${Math.trunc(rawData.cumulative_result)} FCFA${cumQual}.`);
+    }
+    if (noteParts.length > 0) {
+      rawData.notes = noteParts.join(' ');
+    }
+
+    const cleanData: Record<string, unknown> = {};
+    const cleanPrecision: Record<string, string> = {};
+    const allowedSet = new Set<string>(CA_PIPELINE_ALLOWED_FIELDS);
+    const moneySet = new Set<string>(CA_PIPELINE_MONEY_FIELDS);
+
+    for (const [k, v] of Object.entries(rawData)) {
+      if (v === undefined || !allowedSet.has(k)) continue;
+      cleanData[k] = v;
+    }
+    for (const k of CA_REQUIRED_PIPELINE_MONEY_FIELDS) {
+      if (!(k in cleanData)) {
+        cleanData[k] = null;
+      }
+    }
+    for (const k of CA_PIPELINE_MONEY_FIELDS) {
+      if (k in cleanData && moneySet.has(k)) {
+        cleanPrecision[k] = rawPrecision[k] || (cleanData[k] === null ? 'UNKNOWN' : 'EXACT');
+      }
+    }
+
+    return {
+      kind: 'CA',
+      institution_id: envelope.institution_id,
+      institution_type: envelope.institution_type,
+      fiscal_year: envelope.fiscal_year,
+      source: cleanSource,
+      data: cleanData,
+      precision: cleanPrecision
+    };
+  }
+
+  // kind === 'BP'
+  const rawBudgetType = typeof rawData.budget_type === 'string' ? rawData.budget_type : 'PRIMITIF_ADOPTE';
+  if (!BP_PIPELINE_BUDGET_TYPES.has(rawBudgetType)) {
+    if (!noteParts.some(p => /Type d'acte\s*:/i.test(p))) {
+      noteParts.push(`Type d'acte : ${rawBudgetType}.`);
+    }
+    rawData.budget_type = 'AUTRE_MODIFICATIF';
+  }
+  if (typeof rawData.version_number !== 'number' || !Number.isInteger(rawData.version_number) || rawData.version_number < 1) {
+    rawData.version_number = 1;
+  }
+  if (typeof rawData.source_page === 'number' && !noteParts.some(p => /Page source\s*:/i.test(p))) {
+    noteParts.push(`Page source : ${rawData.source_page}.`);
+  }
+  if (typeof rawData.amount_semantics === 'string' && !noteParts.some(p => /Sémantique montant\s*:/i.test(p))) {
+    noteParts.push(`Sémantique montant : ${rawData.amount_semantics}.`);
+  }
+  if (noteParts.length > 0) {
+    rawData.notes = noteParts.join(' ');
+  }
+
+  const cleanData: Record<string, unknown> = {};
+  const cleanPrecision: Record<string, string> = {};
+  const allowedBpSet = new Set<string>(BP_PIPELINE_ALLOWED_FIELDS);
+
+  for (const [k, v] of Object.entries(rawData)) {
+    if (v === undefined || !allowedBpSet.has(k)) continue;
+    cleanData[k] = v;
+  }
+  for (const k of BP_PIPELINE_MONEY_FIELDS) {
+    if (!(k in cleanData)) {
+      cleanData[k] = null;
+    }
+    cleanPrecision[k] = rawPrecision[k] || (cleanData[k] === null ? 'UNKNOWN' : 'EXACT');
+  }
+
+  return {
+    kind: 'BP',
+    institution_id: envelope.institution_id,
+    institution_type: envelope.institution_type,
+    fiscal_year: envelope.fiscal_year,
+    source: cleanSource,
+    data: cleanData,
+    precision: cleanPrecision
+  };
+}
+
+const CA_NUMERIC_FIELDS = [
+  'operating_planned',
+  'operating_realized',
+  'operating_revenue_realized',
+  'investment_planned',
+  'investment_realized',
+  'investment_revenue_realized',
+  'total_planned',
+  'total_realized',
+  'surplus_or_deficit',
+  'previous_result_reported',
+  'cumulative_result',
+  'arithmetic_difference',
+  'operating_revenue_planned',
+  'operating_revenue_emitted',
+  'operating_revenue_collected',
+  'operating_expenditure_planned',
+  'operating_expenditure_engaged',
+  'operating_expenditure_ordered',
+  'operating_expenditure_paid',
+  'investment_revenue_planned',
+  'investment_revenue_emitted',
+  'investment_revenue_collected',
+  'investment_expenditure_planned',
+  'investment_expenditure_engaged',
+  'investment_expenditure_ordered',
+  'investment_expenditure_paid',
+  'total_revenue_planned',
+  'total_revenue_emitted',
+  'total_revenue_collected',
+  'total_expenditure_planned',
+  'total_expenditure_engaged',
+  'total_expenditure_ordered',
+  'total_expenditure_paid',
+  'patrimony_immobilier_planned',
+  'patrimony_immobilier_realized',
+  'patrimony_incorporel_planned',
+  'patrimony_incorporel_realized',
+  'patrimony_mobilier_planned',
+  'patrimony_mobilier_realized',
+  'patrimony_total_planned',
+  'patrimony_total_realized',
+  'source_page'
+] as const;
+
+function parseAttestedFcfaFromNotes(
+  notes: string,
+  pattern: RegExp
+): { amount: number; precision: 'EXACT' | 'APPROXIMATE' | 'LOWER_BOUND' } | null {
+  const match = notes.match(pattern);
+  if (!match || !match[1]) return null;
+  const cleaned = match[1].replace(/[\s\u00a0\u202f]/g, '');
+  if (!/^[+-]?\d+$/.test(cleaned)) return null;
+  const parsed = Number(cleaned);
+  if (!Number.isSafeInteger(parsed)) return null;
+  const rawPrecision = match[2]?.toUpperCase();
+  const precision: 'EXACT' | 'APPROXIMATE' | 'LOWER_BOUND' =
+    rawPrecision === 'APPROXIMATE' || rawPrecision === 'LOWER_BOUND' ? rawPrecision : 'EXACT';
+  return { amount: parsed, precision };
+}
+
+/**
+ * Hydrate un enregistrement `administrative_accounts` issu de Supabase/PostgreSQL
+ * en normalisant les colonnes numériques `bigint` et les métadonnées comptables
+ * explicitement attestées dans `notes` (`accounting_stage`, `previous_result_reported`, `cumulative_result`).
+ */
+export function hydrateAdministrativeAccountFromRow<T extends Record<string, any>>(
+  row: T
+): T & {
+  accounting_stage?: string;
+  previous_result_reported?: number | null;
+  cumulative_result?: number | null;
+  total_revenue_collected?: number | null;
+  import_provenance?: {
+    source?: Record<string, any>;
+    precision?: Record<string, string>;
+    [key: string]: any;
+  };
+} {
+  const hydrated: Record<string, any> = { ...row };
+
+  for (const field of CA_NUMERIC_FIELDS) {
+    const val = hydrated[field];
+    if (typeof val === 'bigint') {
+      hydrated[field] = Number(val);
+    } else if (typeof val === 'string' && val.trim() !== '' && /^-?\d+(\.\d+)?$/.test(val.trim())) {
+      hydrated[field] = Number(val.trim());
+    }
+  }
+
+  if (Array.isArray(hydrated.operations)) {
+    hydrated.operations = hydrated.operations.map((op: Record<string, any>) => {
+      const normalizedOp: Record<string, any> = {
+        ...op,
+        planned_amount: op.planned_amount != null ? Number(op.planned_amount) : null,
+        executed_amount: op.executed_amount != null ? Number(op.executed_amount) : null
+      };
+      if (normalizedOp.procurement_match && typeof normalizedOp.procurement_match === 'object') {
+        normalizedOp.procurement_match = {
+          ...normalizedOp.procurement_match,
+          award_amount:
+            normalizedOp.procurement_match.award_amount != null
+              ? Number(normalizedOp.procurement_match.award_amount)
+              : normalizedOp.procurement_match.award_amount
+        };
+      }
+      return normalizedOp;
+    });
+  }
+
+  const provenancePrecision: Record<string, string> =
+    hydrated.import_provenance &&
+    typeof hydrated.import_provenance === 'object' &&
+    hydrated.import_provenance.precision &&
+    typeof hydrated.import_provenance.precision === 'object'
+      ? { ...hydrated.import_provenance.precision }
+      : {};
+
+  if (
+    hydrated.total_revenue_collected == null &&
+    typeof hydrated.operating_revenue_realized === 'number' &&
+    Number.isFinite(hydrated.operating_revenue_realized) &&
+    typeof hydrated.investment_revenue_realized === 'number' &&
+    Number.isFinite(hydrated.investment_revenue_realized) &&
+    provenancePrecision.operating_revenue_realized !== 'UNKNOWN' &&
+    provenancePrecision.investment_revenue_realized !== 'UNKNOWN'
+  ) {
+    hydrated.total_revenue_collected = hydrated.operating_revenue_realized + hydrated.investment_revenue_realized;
+    const opRevPrec = provenancePrecision.operating_revenue_realized || 'EXACT';
+    const invRevPrec = provenancePrecision.investment_revenue_realized || 'EXACT';
+    const combinedRevPrec =
+      opRevPrec === 'APPROXIMATE' || invRevPrec === 'APPROXIMATE'
+        ? 'APPROXIMATE'
+        : opRevPrec === 'LOWER_BOUND' || invRevPrec === 'LOWER_BOUND'
+        ? 'LOWER_BOUND'
+        : 'EXACT';
+    if (hydrated.import_provenance && typeof hydrated.import_provenance === 'object') {
+      provenancePrecision.total_revenue_collected = combinedRevPrec;
+      hydrated.import_provenance = {
+        ...hydrated.import_provenance,
+        precision: { ...provenancePrecision }
+      };
+    }
+  }
+
+  const notes = typeof hydrated.notes === 'string' ? hydrated.notes : '';
+  if (notes) {
+    if (!hydrated.accounting_stage) {
+      const stageMatch = notes.match(/Stade comptable\s*:\s*(ORDONNANCE|ENGAGE|PAYE|LIQUIDE)\b/i);
+      if (stageMatch && stageMatch[1]) {
+        hydrated.accounting_stage = stageMatch[1].toUpperCase();
+      }
+    }
+
+    const prevReported =
+      hydrated.previous_result_reported == null
+        ? parseAttestedFcfaFromNotes(
+            notes,
+            /Report (?:à nouveau )?antérieur\s*:\s*([+-]?\d[\d\s\u00a0\u202f]*)\s*FCFA(?:\s*\((EXACT|APPROXIMATE|LOWER_BOUND)\))?/i
+          )
+        : null;
+    if (prevReported !== null) {
+      hydrated.previous_result_reported = prevReported.amount;
+      if (hydrated.import_provenance && typeof hydrated.import_provenance === 'object') {
+        provenancePrecision.previous_result_reported = prevReported.precision;
+        hydrated.import_provenance = {
+          ...hydrated.import_provenance,
+          precision: { ...provenancePrecision }
+        };
+      }
+    }
+
+    const cumResult =
+      hydrated.cumulative_result == null
+        ? parseAttestedFcfaFromNotes(
+            notes,
+            /Résultat cumulé\s*:\s*([+-]?\d[\d\s\u00a0\u202f]*)\s*FCFA(?:\s*\((EXACT|APPROXIMATE|LOWER_BOUND)\))?/i
+          )
+        : null;
+    if (cumResult !== null) {
+      hydrated.cumulative_result = cumResult.amount;
+      if (hydrated.import_provenance && typeof hydrated.import_provenance === 'object') {
+        provenancePrecision.cumulative_result = cumResult.precision;
+        hydrated.import_provenance = {
+          ...hydrated.import_provenance,
+          precision: { ...provenancePrecision }
+        };
+      }
+    }
+  }
+
+  return hydrated as T;
 }
