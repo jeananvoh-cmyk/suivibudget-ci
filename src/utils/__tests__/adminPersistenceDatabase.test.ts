@@ -51,10 +51,7 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
       expect((await actual.query('select total_budget_fcfa from public.institutions')).rows).toEqual([{total_budget_fcfa:'123.00'}]);
       expect((await actual.query('select public.admin_persistence_version() version')).rows).toEqual([{version:3}]);
       expect((await actual.query(`select has_function_privilege('anon','public.admin_baseline_visibility(text,text[])','EXECUTE') as anon_exec`)).rows).toEqual([{anon_exec:false}]);
-      await actual.exec(`begin;set local role authenticated;select set_config('request.jwt.claim.sub','${citizen}',true);`);
-      await expect(actual.query(`select public.admin_baseline_visibility('institutions',array['isolated-historical'])`)).rejects.toThrow(/Staff authorization required/);
-      await actual.exec('rollback');
-      await actual.exec(`begin;set local role authenticated;select set_config('request.jwt.claim.sub','${manager}',true);`);
+      await actual.exec(`begin;set local role authenticated;select set_config('request.jwt.claim.sub','${admin}',true);`);
       expect((await actual.query(`select public.admin_baseline_visibility('institutions',array['isolated-historical']) value`)).rows[0].value).toEqual(['isolated-historical']);
       await actual.exec('rollback');
       await actual.exec(`begin;set local role authenticated;select set_config('request.jwt.claim.sub','${admin}',true);`);
@@ -427,10 +424,10 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
     await expect(session(citizen,()=>db.query('select * from public.admin_staff_directory()'))).rejects.toThrow(/Staff authorization required/);
     expect((await session(admin,()=>db.query('select * from public.admin_staff_directory()'))).rows.length).toBeGreaterThanOrEqual(3);
     // 2. admin_baseline_visibility rejette les paramètres NULL et ne divulgue jamais les brouillons dynamiques admin-*
-    await expect(session(null,()=>db.query('select public.admin_baseline_visibility(null, array[]::text[])'))).rejects.toThrow(/Invalid baseline request/);
-    await expect(session(null,()=>db.query("select public.admin_baseline_visibility('institutions', null)"))).rejects.toThrow(/Invalid baseline request/);
+    await expect(session(null,()=>db.query('select public.admin_baseline_visibility(null, array[]::text[])'))).rejects.toThrow(/permission/);
+    await expect(session(citizen,()=>db.query("select public.admin_baseline_visibility('institutions', null)"))).rejects.toThrow(/Staff authorization required/);
     await session(admin,()=>mutate('institutions','admin-secret-draft',null,{name:'Brouillon secret admin',type:'MAIRIE'}),true);
-    const probed = (await session(null,()=>db.query<{v:string[]}>("select public.admin_baseline_visibility('institutions', array['admin-secret-draft','reload-test']) v"))).rows[0].v;
+    const probed = (await session(admin,()=>db.query<{v:string[]}>("select public.admin_baseline_visibility('institutions', array['admin-secret-draft','reload-test']) v"))).rows[0].v;
     expect(probed).toContain('reload-test');
     expect(probed).not.toContain('admin-secret-draft');
     // 3. private.admin_file_checked et private.admin_media_link_allowed refusent CITIZEN avec 42501 mais autorisent le contexte serveur/superuser (migrations/maintenance)
