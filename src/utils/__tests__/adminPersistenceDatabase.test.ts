@@ -51,6 +51,7 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
       expect((await actual.query('select total_budget_fcfa from public.institutions')).rows).toEqual([{total_budget_fcfa:'123.00'}]);
       expect((await actual.query('select public.admin_persistence_version() version')).rows).toEqual([{version:3}]);
       expect((await actual.query(`select has_function_privilege('anon','public.admin_baseline_visibility(text,text[])','EXECUTE') as anon_exec`)).rows).toEqual([{anon_exec:false}]);
+      await actual.exec(`update public.institutions set publication_status='DRAFT' where id='isolated-historical';`);
       await actual.exec(`begin;set local role authenticated;select set_config('request.jwt.claim.sub','${admin}',true);`);
       expect((await actual.query(`select public.admin_baseline_visibility('institutions',array['isolated-historical']) value`)).rows[0].value).toEqual(['isolated-historical']);
       await actual.exec('rollback');
