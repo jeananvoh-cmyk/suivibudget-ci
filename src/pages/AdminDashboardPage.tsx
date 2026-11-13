@@ -19,6 +19,7 @@ import { DataImportConsole } from '../components/admin/DataImportConsole';
 import { AdminWorkQueue } from '../components/admin/AdminWorkQueue';
 import { AdminGlobalSearchModal } from '../components/admin/AdminGlobalSearchModal';
 import { AdministrativeAccountsAdminManager } from '../components/admin/AdministrativeAccountsAdminManager';
+import { InstitutionResponseManager } from '../components/admin/InstitutionResponseManager';
 import { adminTaskService } from '../services/adminTaskService';
 import {
   ShieldCheck,
@@ -2656,6 +2657,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               </div>
             )}
           </div>
+
+          <InstitutionResponseManager
+            staffRole={auth.role || ''}
+            onShowToast={showToast}
+          />
         </div>
       )}
 

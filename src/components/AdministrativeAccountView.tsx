@@ -18,6 +18,7 @@ import {
   formatFCFA, formatFCFAWithWords, formatQualifiedFCFA, formatRecordAmount, amountPrecision, isExactAmount, formatAmountInWords
 } from '../utils/formatters';
 import { isSafeUrl } from '../utils/security';
+import { buildInstitutionalResponseBadge } from '../review/domain/responses';
 import { openPublicDocument } from '../services/documentStorageService';
 import { 
   ShieldCheck, 
@@ -1405,36 +1406,69 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
       </div>
 
       {/* ========================================================================= */}
-      {/* DROIT DE RÉPONSE INSTITUTIONNEL (SI PRÉSENT)                               */}
+      {/* DROIT DE RÉPONSE INSTITUTIONNEL (SI PUBLIÉ — PRINCIPE 8)                  */}
       {/* ========================================================================= */}
-      {currentCA.institution_response && (
-        <div className="bg-white rounded-3xl p-5 sm:p-7 border-l-4 border-l-brand-blue border-y border-r border-slate-200 shadow-2xs space-y-2.5">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-brand-blue" />
-              <h5 className="text-xs font-black uppercase tracking-wider text-slate-900">
-                Droit de Réponse & Précisions Officielles de l'Institution
-              </h5>
-            </div>
-            <span className="text-[11px] text-slate-500 font-medium">
-              Transmis le {currentCA.institution_response.response_date}
-            </span>
-          </div>
+      {(() => {
+        const rawList = currentCA.institution_responses?.length
+          ? currentCA.institution_responses
+          : currentCA.institution_response
+            ? [currentCA.institution_response]
+            : [];
+        const publishedResponses = rawList.filter((r) => r.response_status === 'PUBLISHED');
+        if (publishedResponses.length === 0) return null;
+        const badge = buildInstitutionalResponseBadge('INSTITUTION_RESPONSE');
+        return (
+          <div className="space-y-3">
+            {publishedResponses.map((resp) => (
+              <div
+                key={resp.id}
+                className="bg-white rounded-3xl p-5 sm:p-7 border-l-4 border-l-brand-blue border-y border-r border-slate-200 shadow-2xs space-y-2.5"
+              >
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-brand-blue" />
+                    <h5 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                      Droit de Réponse &amp; Précisions Officielles de l'Institution
+                    </h5>
+                  </div>
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    Transmis le {resp.response_date}
+                  </span>
+                </div>
 
-          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 italic">
-            « {currentCA.institution_response.response_text} »
-          </p>
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 italic">
+                  « {resp.response_text} »
+                </p>
 
-          <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-            <span>
-              Auteur : <strong>{currentCA.institution_response.author_name}</strong> ({currentCA.institution_response.author_title})
-            </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
-              Vérifié Officiel
-            </span>
+                <div className="flex items-center justify-between flex-wrap gap-2 text-[11px] text-slate-500 pt-1">
+                  <span>
+                    Auteur : <strong>{resp.author_name}</strong> ({resp.author_title})
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-900 border border-purple-200">
+                    {badge.label}
+                  </span>
+                </div>
+
+                {resp.supporting_document_url && isSafeUrl(resp.supporting_document_url) && (
+                  <a
+                    href={resp.supporting_document_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:underline"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>{resp.supporting_document_name || 'Consulter la pièce justificative'}</span>
+                  </a>
+                )}
+
+                <p className="text-[10.5px] text-slate-500 pt-1 border-t border-slate-100">
+                  {badge.disclaimer}
+                </p>
+              </div>
+            ))}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ========================================================================= */}
       {/* RUBRIQUE 6 : SOURCES ET VÉRIFICATION (CAIDP & INTÉGRITÉ)                  */}
