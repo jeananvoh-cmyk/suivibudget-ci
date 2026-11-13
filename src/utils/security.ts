@@ -85,48 +85,87 @@ export async function validateVideoBinary(file: File): Promise<{ isValid: boolea
 }
 
 /**
- * Compress and sanitize an image via HTML5 Canvas (strips embedded malicious payload & metadata)
+ * Default maximum target payload (~300 KB) so field proofs remain usable on 2G/3G networks.
  */
-export async function compressAndSanitizeImage(file: File, maxDimension = 1280, quality = 0.85): Promise<string> {
+export const DEFAULT_PROOF_IMAGE_MAX_BYTES = 300 * 1024;
+
+/**
+ * Estimates decoded byte length of a base64 Data URL or string payload.
+ */
+export function estimateDataUrlBytes(dataUrl: string): number {
+  if (!dataUrl || typeof dataUrl !== 'string') return 0;
+  const commaIdx = dataUrl.indexOf(',');
+  const base64 = commaIdx >= 0 ? dataUrl.slice(commaIdx + 1) : dataUrl;
+  const padding = base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0;
+  return Math.max(0, Math.floor((base64.length * 3) / 4) - padding);
+}
+
+function encodeCanvasUnderBudget(
+  img: HTMLImageElement,
+  startMaxDimension: number,
+  startQuality: number,
+  maxBytes: number
+): string {
+  const dimensionSteps = [startMaxDimension, Math.min(startMaxDimension, 960), Math.min(startMaxDimension, 768)];
+  const qualitySteps = [startQuality, 0.72, 0.58, 0.45, 0.35];
+
+  let bestUrl = '';
+  for (const dim of dimensionSteps) {
+    let width = img.width;
+    let height = img.height;
+    if (width > dim || height > dim) {
+      if (width > height) {
+        height = Math.max(1, Math.round((height * dim) / width));
+        width = dim;
+      } else {
+        width = Math.max(1, Math.round((width * dim) / height));
+        height = dim;
+      }
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return bestUrl;
+    ctx.drawImage(img, 0, 0, width, height);
+
+    for (const q of qualitySteps) {
+      let candidate: string;
+      try {
+        candidate = canvas.toDataURL('image/webp', q);
+        if (!candidate.startsWith('data:image/webp')) {
+          candidate = canvas.toDataURL('image/jpeg', q);
+        }
+      } catch {
+        candidate = canvas.toDataURL('image/jpeg', q);
+      }
+      bestUrl = candidate;
+      if (estimateDataUrlBytes(candidate) <= maxBytes) {
+        return candidate;
+      }
+    }
+  }
+  return bestUrl;
+}
+
+/**
+ * Compress and sanitize an image via HTML5 Canvas (strips embedded malicious payload & metadata)
+ * and enforces an adaptive target payload budget for low-bandwidth 2G/3G field connections.
+ */
+export async function compressAndSanitizeImage(
+  file: File,
+  maxDimension = 1280,
+  quality = 0.85,
+  maxBytes = DEFAULT_PROOF_IMAGE_MAX_BYTES
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        let width = img.width;
-        let height = img.height;
-
-        if (width > maxDimension || height > maxDimension) {
-          if (width > height) {
-            height = Math.round((height * maxDimension) / width);
-            width = maxDimension;
-          } else {
-            width = Math.round((width * maxDimension) / height);
-            height = maxDimension;
-          }
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          resolve(e.target?.result as string);
-          return;
-        }
-
-        ctx.drawImage(img, 0, 0, width, height);
-        let dataUrl: string;
-        try {
-          dataUrl = canvas.toDataURL('image/webp', quality);
-          if (!dataUrl.startsWith('data:image/webp')) {
-            dataUrl = canvas.toDataURL('image/jpeg', quality);
-          }
-        } catch {
-          dataUrl = canvas.toDataURL('image/jpeg', quality);
-        }
-        resolve(dataUrl);
+        const encoded = encodeCanvasUnderBudget(img, maxDimension, quality, maxBytes);
+        resolve(encoded || (e.target?.result as string));
       };
       img.onerror = () => reject(new Error("Impossible de décoder l'image fournie."));
       img.src = e.target?.result as string;
