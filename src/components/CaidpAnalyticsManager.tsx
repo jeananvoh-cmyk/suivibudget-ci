@@ -20,10 +20,12 @@ import {
   Award, 
   AlertCircle,
   Briefcase,
-  Layers
+  Layers,
+  Clock
 } from 'lucide-react';
 import { dataStore, CaidpRequestEvent, CaidpRequestStats } from '../services/dataStore';
 import { sanitizeCsvCell } from '../utils/security';
+import { evaluateCaidpRequestDeadline } from '../utils/caidpDeadlines';
 
 interface CaidpAnalyticsManagerProps {
   onShowToast: (message: string, type?: 'success' | 'error' | 'info') => void;
@@ -134,6 +136,12 @@ export const CaidpAnalyticsManager: React.FC<CaidpAnalyticsManagerProps> = ({ on
   const riCoveragePercent = stats.totalRequests > 0 
     ? Math.round((stats.withRiCount / stats.totalRequests) * 100) 
     : 0;
+
+  const overdueRequestsCount = useMemo(() => {
+    return stats.recentEvents.filter(
+      (evt) => evaluateCaidpRequestDeadline(evt).state === 'LEGAL_DELAY_EXPIRED'
+    ).length;
+  }, [stats.recentEvents]);
 
   return (
     <div className="space-y-6">
@@ -251,6 +259,9 @@ export const CaidpAnalyticsManager: React.FC<CaidpAnalyticsManagerProps> = ({ on
           </p>
           <span className="text-[10px] text-slate-500 font-semibold block">
             {stats.withRiCount} avec RI • {stats.withoutRiCount} sans RI
+            {overdueRequestsCount > 0 && (
+              <span className="text-rose-600 font-black"> • {overdueRequestsCount} délai &gt; 30j</span>
+            )}
           </span>
         </div>
 
@@ -414,6 +425,7 @@ export const CaidpAnalyticsManager: React.FC<CaidpAnalyticsManagerProps> = ({ on
                 <th className="px-4 py-3">Date & Heure</th>
                 <th className="px-4 py-3">Organisme Public</th>
                 <th className="px-4 py-3">Statut RI</th>
+                <th className="px-4 py-3">Délai Légal (30j)</th>
                 <th className="px-4 py-3">Action</th>
                 <th className="px-4 py-3">Documents Demandés</th>
                 <th className="px-4 py-3">Demandeur</th>
@@ -422,7 +434,7 @@ export const CaidpAnalyticsManager: React.FC<CaidpAnalyticsManagerProps> = ({ on
             <tbody className="divide-y divide-slate-100 font-sans">
               {filteredEvents.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-slate-400 italic">
+                  <td colSpan={7} className="px-4 py-8 text-center text-slate-400 italic">
                     Aucune démarche enregistrée correspondant aux critères.
                   </td>
                 </tr>
@@ -434,6 +446,8 @@ export const CaidpAnalyticsManager: React.FC<CaidpAnalyticsManagerProps> = ({ on
                     color: 'text-slate-700',
                     bg: 'bg-slate-50 border-slate-200',
                   };
+
+                  const deadline = evaluateCaidpRequestDeadline(evt);
 
                   return (
                     <tr key={evt.id} className="hover:bg-slate-50/80 transition-colors">
@@ -473,6 +487,23 @@ export const CaidpAnalyticsManager: React.FC<CaidpAnalyticsManagerProps> = ({ on
                             <span>Sans RI (Art. 10)</span>
                           </span>
                         )}
+                      </td>
+
+                      {/* Délai Légal 30 jours CAIDP */}
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                            deadline.state === 'LEGAL_DELAY_EXPIRED'
+                              ? 'bg-rose-50 text-rose-800 border-rose-200'
+                              : deadline.state === 'DUE_TODAY'
+                                ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                : 'bg-sky-50 text-sky-800 border-sky-200'
+                          }`}
+                          title={deadline.citizenGuidance}
+                        >
+                          <Clock className="w-3 h-3" />
+                          <span>{deadline.badgeLabel}</span>
+                        </span>
                       </td>
 
                       {/* Type d'Action */}
