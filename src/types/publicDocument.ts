@@ -78,6 +78,10 @@ export interface PublicDocument {
   file_size_bytes?: number;
   page_count?: number;
   page_count_source?: 'AUTOMATIC' | 'MANUAL';
+  physical_page_count?: number | null;
+  printed_page_count?: number | null;
+  missing_printed_pages?: string[] | null;
+  pagination_note?: string | null;
   source_name?: string | null;
   source_url?: string | null;
   adoption_date?: string;

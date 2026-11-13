@@ -435,6 +435,8 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
         );
         expect(html).toContain('Consulter le document');
         expect(html).toContain('941c399bf290cee4');
+        expect(html).toContain('44 pages physiques PDF');
+        expect(html).toContain('20/45 absente du scan');
         expect(html).not.toContain('Compte Administratif non disponible dans le référentiel public');
       } finally {
         dataStore.getDocuments = originalGetDocs;
@@ -487,6 +489,9 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
       expect(html).toContain('Rubrique 6 : Sources et vérification');
       expect(html).toContain('COMMUNE DE COCODY.pdf');
       expect(html).toContain('Page 40');
+      expect(html).toContain('imprimée 41/45');
+      expect(html).toContain('44 pages physiques PDF');
+      expect(html).toContain('20/45 absente du scan');
       expect(html).toContain('941c399bf290cee4');
     });
   });

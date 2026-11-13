@@ -505,6 +505,11 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                     {doc.accessed_at && ` — ${doc.accessed_at}`}
                     {doc.availability === 'AVAILABLE_FROM_PRIOR_OFFICIAL_ACQUISITION' && ' · Archive officielle acquise'}
                   </p>
+                  {doc.pagination_note && (
+                    <div className="bg-amber-50/80 border border-amber-200/80 rounded-xl p-2 text-[11px] text-amber-900 leading-snug">
+                      <span className="font-bold">Pagination contrôlée :</span> {doc.pagination_note}
+                    </div>
+                  )}
                   {hasSha256 && (
                     <div className="pt-1">
                       <div className="bg-slate-50 border border-slate-200 rounded-xl p-2 flex items-center justify-between gap-2">
@@ -553,7 +558,11 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                   <div className="text-[11px] text-slate-500">
                     <span className="font-bold text-slate-800">{doc.file_format}</span>
                     <span className="mx-1">•</span>
-                    <span>{doc.file_size || (doc.page_count ? `${doc.page_count} pages` : 'PDF')}</span>
+                    <span>
+                      {doc.physical_page_count && doc.printed_page_count
+                        ? `${doc.file_size ? `${doc.file_size} · ` : ''}${doc.physical_page_count} pages physiques PDF (imprimées jusqu'à 44/${doc.printed_page_count})`
+                        : (doc.file_size || (doc.page_count ? `${doc.page_count} pages` : 'PDF'))}
+                    </span>
                     <div className="text-[10px] text-slate-400 mt-0.5">
                       {doc.storage_path || doc.is_multipart
                         ? counterAvailable && Number.isSafeInteger(doc.downloads_count) ? `${doc.downloads_count} fichier(s) délivré(s) par le serveur` : 'Comptage indisponible'

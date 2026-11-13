@@ -55,11 +55,11 @@
 
 | Champ Métier Cible (`data`) | Type | Source Documentaire | Valeur Retenue |
 |---|---|---|---|
-| `source_page` | `integer` | Page récapitulative du tableau d'arbitrage | `40` |
+| `source_page` | `integer` | Page récapitulative du tableau d'arbitrage (PDF 40 / imprimée 41/45) | `40` |
 | `verification_status` | `string` | Nature de la source physique | `"OFFICIAL_DOCUMENT"` |
-| `approval_date` | `string` | Date du visa préfectoral | `"2025-07-22"` |
-| `prefecture_visa_date` | `string` | Date du visa préfectoral | `"2025-07-22"` |
-| `notes` | `string` | Observations méthodologiques | `"Compte administratif 2024 approuvé par arrêté préfectoral n° 002/PA/D.CAB du 22/07/2025. Excédent exercice 2 237 133 790 FCFA. Report à nouveau antérieur 944 FCFA. Résultat cumulé 2 237 134 734 FCFA. Tableau patrimonial page 43: Immobilier 810 959 095, Incorporel 20 000 000, Mobilier 535 141 595."` |
+| `approval_date` | `string` | Date de la délibération municipale en séance | `"2025-07-08"` |
+| `prefecture_visa_date` | `string` | Date du visa préfectoral (`n° 002/PA/D.CAB`) | `"2025-07-22"` |
+| `notes` | `string` | Observations méthodologiques | `"Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45 ; 44 pages physiques PDF, numérotation imprimée jusqu'à 44/45 sur 45 annoncées, page imprimée 20/45 absente du scan d'origine). Délibération municipale du 08/07/2025 ; approbation préfectorale n° 002/PA/D.CAB du 22/07/2025. Stade comptable : ORDONNANCE. Report antérieur : 944 FCFA. Résultat cumulé : 2237134734 FCFA. Tableau patrimonial page PDF 43 (imprimée 44/45) : Immobilier 810959095, Incorporel 20000000, Mobilier 535141595 (Total 1366100690 FCFA)."` |
 
 ---
 
@@ -92,10 +92,10 @@ Ce payload JSON constitue l'enveloppe officielle certifiée à coller ou charger
       "total_revenue_collected": 19012357233,
       "surplus_or_deficit": 2237133790,
       "source_page": 40,
-      "approval_date": "2025-07-22",
+      "approval_date": "2025-07-08",
       "prefecture_visa_date": "2025-07-22",
       "verification_status": "OFFICIAL_DOCUMENT",
-      "notes": "Compte administratif 2024 approuvé par arrêté préfectoral n° 002/PA/D.CAB le 22/07/2025. Excédent de fonctionnement 2 237 133 790 FCFA. Report à nouveau antérieur 944 FCFA. Résultat cumulé 2 237 134 734 FCFA. Tableau patrimonial page 43: Immobilier 810 959 095, Incorporel 20 000 000, Mobilier 535 141 595."
+      "notes": "Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45 ; 44 pages physiques PDF, numérotation imprimée jusqu'à 44/45 sur 45 annoncées, page imprimée 20/45 absente du scan d'origine). Délibération municipale du 08/07/2025 ; approbation préfectorale n° 002/PA/D.CAB du 22/07/2025. Stade comptable : ORDONNANCE. Report antérieur : 944 FCFA. Résultat cumulé : 2237134734 FCFA. Tableau patrimonial page PDF 43 (imprimée 44/45) : Immobilier 810959095, Incorporel 20000000, Mobilier 535141595 (Total 1366100690 FCFA)."
     },
     "precision": {
       "operating_planned": "EXACT",

@@ -1,12 +1,12 @@
-## 27 octobre 2026 — Clôture PR #65 + Auto-audit contradictoire et durcissement des 6 points d'insuffisance (Antigravity)
+## 27 octobre 2026 — Corrections Post-Audit P0 : Sécurité Supabase (`private` RLS & 21 `SECURITY DEFINER`), Pagination Contrôlée Cocody CA 2024 et Stabilisation PR #65 (Antigravity)
 
-- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/65 (`codex/p0-production-cocody-2024` ciblant `master` `901a203`).
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/65 (`codex/p0-production-cocody-2024` ciblant `master` `901a2033084c5aa1ca76bc4ce4625e1884d48ab9`).
 - **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0`.
 - **Livrables vérifiés et durcis** :
-  - `supabase/migrations/20261026213000_security_definer_hardening.sql` : durcissement de `admin_baseline_visibility`, `admin_staff_directory`, `admin_confirm_document_integrity`, `admin_file_checked`, `admin_media_link_allowed` (avec compatibilité triggers serveur/superuser `auth.uid() is null`) et révocation `EXECUTE` sur les fonctions triggers `SECURITY DEFINER`.
-  - `src/utils/budgetDocumentDryRun.ts`, `src/components/admin/DataImportConsole.tsx`, `src/services/administrativeAccountsService.ts`, `src/data/administrativeAccountsData.ts`, `src/components/AdministrativeAccountView.tsx` : contrôle arithmétique du résultat cumulé (`surplus_or_deficit + previous_result_reported === cumulative_result`), garantie des 6 champs monétaires requis par `review_data_import('PUBLISH')`, propagation des précisions (`EXACT`/`APPROXIMATE`/`LOWER_BOUND`), normalisation des `bigint` PostgreSQL, séparation stricte `VERIFIED !== PUBLISHED` sur l'exposition publique du PDF, et anti-collision homonyme Commune / Conseil Régional.
-  - `docs/audits/P0_PRODUCTION_STABILIZATION_AND_COCODY_CA_2024_REPORT.md` : rapport de clôture complet incluant le lot JSON strictement conforme à `private.validate_import_row`.
-- **Résultats de validation** : `tsc` PASS, `npm run build` PASS, Vitest `66/66` suites (`911/911` tests) PASS, Chromium E2E `16/16` PASS (`360/640/768/1024/1440 px`, `0` erreur).
+  - `supabase/migrations/20261026213000_security_definer_hardening.sql` : activation de RLS (`ENABLE ROW LEVEL SECURITY`, 0 politique permissive) et `REVOKE ALL` sur `private.admin_document_file_checks` et `private.document_delivery_receipts` ; durcissement de `admin_baseline_visibility` (`id not like 'admin-%'`, `csv-%`, `import-%`), `admin_staff_directory`, `admin_confirm_document_integrity`, `admin_file_checked`, `admin_media_link_allowed`, et révocation des privilèges `EXECUTE` superflus sur les helpers `private.*` et les 7 fonctions triggers `SECURITY DEFINER`.
+  - `src/types/publicDocument.ts`, `src/data/officialPublicDocumentsCatalog.ts`, `src/services/dataStore.ts`, `src/pages/DocumentsPage.tsx`, `src/components/AdministrativeAccountView.tsx`, `src/components/admin/ExamineCADocumentModal.tsx` : contrôle déterministe de pagination pour le CA 2024 de Cocody (`44` pages physiques PDF vs numérotation imprimée jusqu'à `44/45` sur `45` annoncées, page imprimée `20/45` absente du scan d'origine signalée sans inventer son contenu).
+  - `docs/audits/P0_PRODUCTION_STABILIZATION_AND_COCODY_CA_2024_REPORT.md` : rapport complet post-audit P0 (tables `private`, 21 fonctions `SECURITY DEFINER`, `auth_leaked_password_protection`, lot JSON certifié Cocody 2024).
+- **Résultats de validation** : `tsc` PASS, `npm run build` PASS, Vitest `66/66` suites (`912/912` tests) PASS, Chromium E2E `16/16` PASS (`360/640/768/1024/1440 px`, `0` erreur).
 
 ## 26 octobre 2026 — Clôture C/D/E/F et limites explicites
 

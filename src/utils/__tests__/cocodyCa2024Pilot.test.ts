@@ -16,6 +16,7 @@ import {
 } from '../budgetDocumentDryRun';
 import type { Institution, PublicDocument } from '../../types';
 import type { DocumentIngestionMetadata, ProposedFinancialValue } from '../../types/budgetCycle';
+import { applyVerifiedDocumentPagination } from '../../data/officialPublicDocumentsCatalog';
 
 let db: PGlite;
 const adminUid = '00000000-0000-0000-0000-000000000001';
@@ -55,10 +56,10 @@ const COCODY_CA_2024_ROW = {
     total_revenue_collected: 19_012_357_233,
     surplus_or_deficit: 2_237_133_790,
     source_page: 40,
-    approval_date: '2025-07-22',
+    approval_date: '2025-07-08',
     prefecture_visa_date: '2025-07-22',
     verification_status: 'OFFICIAL_DOCUMENT',
-    notes: 'Compte administratif 2024 approuvé par arrêté préfectoral n° 002/PA/D.CAB le 22/07/2025. Excédent de fonctionnement 2 237 133 790 FCFA. Report à nouveau antérieur 944 FCFA. Résultat cumulé 2 237 134 734 FCFA. Tableau patrimonial page 43: Immobilier 810 959 095, Incorporel 20 000 000, Mobilier 535 141 595.'
+    notes: "Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45 ; 44 pages physiques PDF, numérotation imprimée jusqu'à 44/45 avec page imprimée 20/45 absente du scan d'origine). Arrêté en Conseil Municipal le 08/07/2025 et approuvé par arrêté préfectoral n° 002/PA/D.CAB le 22/07/2025. Stade comptable : ORDONNANCE. Report antérieur : 944 FCFA. Résultat cumulé : 2237134734 FCFA. Tableau patrimonial page PDF 43 / imprimée 44/45 : Immobilier 810 959 095, Incorporel 20 000 000, Mobilier 535 141 595."
   },
   precision: {
     operating_planned: 'EXACT',
@@ -468,7 +469,7 @@ describe('Pilote Réel d\'Ingestion Documentaire et Financière : Cocody 2024', 
       source_page: 40,
       adoption_date: '2025-07-08',
       evidence_level: 'OFFICIAL_DOCUMENT',
-      notes: 'Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45).'
+      notes: "Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45 ; 44 pages physiques PDF, numérotation imprimée jusqu'à 44/45 avec page imprimée 20/45 absente du scan d'origine)."
     };
     const proposed = buildProposedValuesTemplate('COMPTE_ADMINISTRATIF', {
       operating_planned: 18_441_235_000,
@@ -579,5 +580,47 @@ describe('Pilote Réel d\'Ingestion Documentaire et Financière : Cocody 2024', 
     expect(hydratedPartial.import_provenance.precision.cumulative_result).toBe('LOWER_BOUND');
     expect(hydratedPartial.total_revenue_collected).toBe(1500);
     expect(hydratedPartial.import_provenance.precision.total_revenue_collected).toBe('APPROXIMATE');
+  });
+
+  it('M. Contrôle documentaire Cocody CA 2024 : distinction explicite 44 pages physiques PDF vs 45 imprimées, signalement page 20/45 absente et rapprochement patrimonial', () => {
+    const rawDocWithPrinted45: PublicDocument = {
+      id: 'doc-dff4865a-c6a8-418e-8895-626258e409d0',
+      title: 'Compte Administratif 2024 - Mairie de Cocody',
+      category: 'COMPTE_ADMINISTRATIF',
+      institution_name: 'Mairie de Cocody',
+      institution_id: 'inst-com-cocody',
+      institution_type: 'MAIRIE',
+      year: 2024,
+      fiscal_year: 2024,
+      description: "Compte administratif officiel de l'exercice 2024 pour Mairie de Cocody.",
+      file_url: '',
+      file_name: 'COMMUNE DE COCODY.pdf',
+      file_size: '13.4 Mo',
+      file_size_bytes: 14_072_943,
+      file_format: 'PDF',
+      page_count: 45,
+      published_at: '2026-10-13T14:13:55.000Z',
+      downloads_count: 0,
+      is_official: true,
+      checksum_sha256: '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf',
+      status: 'PUBLISHED',
+      verification_status: 'VERIFIED',
+    };
+
+    const normalized = applyVerifiedDocumentPagination(rawDocWithPrinted45);
+    expect(normalized.page_count).toBe(44);
+    expect(normalized.physical_page_count).toBe(44);
+    expect(normalized.printed_page_count).toBe(45);
+    expect(normalized.missing_printed_pages).toEqual(['20/45']);
+    expect(normalized.pagination_note).toContain('44 pages physiques PDF');
+    expect(normalized.pagination_note).toContain('44/45');
+    expect(normalized.pagination_note).toContain('20/45 absente du scan');
+    expect(normalized.pagination_note).toContain('contenu non restitué');
+
+    // Rapprochement indépendant du tableau patrimonial (page PDF 43 / imprimée 44/45) avec l'investissement (page PDF 40 / imprimée 41/45)
+    const patPlanned = { immobilier: 3_231_678_000, incorporel: 20_000_000, mobilier: 648_952_000 };
+    const patRealized = { immobilier: 810_959_095, incorporel: 20_000_000, mobilier: 535_141_595 };
+    expect(patPlanned.immobilier + patPlanned.incorporel + patPlanned.mobilier).toBe(COCODY_CA_2024_ROW.data.investment_planned);
+    expect(patRealized.immobilier + patRealized.incorporel + patRealized.mobilier).toBe(COCODY_CA_2024_ROW.data.investment_realized);
   });
 });
