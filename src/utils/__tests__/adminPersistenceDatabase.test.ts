@@ -1,6 +1,7 @@
 import { beforeAll, afterAll, describe, it, expect } from 'vitest';
 import { createAdminPersistenceFixture, createProductionSchemaFixture } from './adminPersistenceFixtures';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { calculateManifestSha256, normalizeOcrStatus, OCR_STATUSES } from '../../../supabase/functions/_shared/documentIntegrity';
 import { PGlite } from '@electric-sql/pglite';
 
@@ -46,7 +47,12 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
       await actual.exec(`insert into auth.users(id) values('${admin}'); insert into public.profiles(id,email,full_name,role,is_active) values('${admin}','isolated@example.test','Fictif','ADMIN',true);select set_config('request.jwt.claim.sub','${admin}',false);`);
       await actual.exec(`insert into public.institutions(id,name,type,total_budget_fcfa) values('isolated-historical','Historique fictif','MAIRIE',123);
         insert into public.public_documents(id,title,category,institution_name,year,file_url,file_name,status,verification_status,checksum_sha256) values('isolated-historical-doc','Historique fictif','ETUDE_TECHNIQUE','Fictive',2024,'https://example.test/old.pdf','old.pdf','TO_VERIFY','TO_VERIFY',repeat('a',64));`);
-      for(let run=0;run<2;run++) for(const path of ['20261013165625_admin_dashboard_persistence_hardening.sql','20261013200000_multipart_ca_documents.sql','20261026213000_security_definer_hardening.sql']) await actual.exec(readFileSync(`supabase/migrations/${path}`,'utf8'));
+      const hardeningMigration = [
+        '20261026213727_security_definer_hardening_20261026213000.sql',
+        '20261113011327_security_definer_hardening_20261026213000.sql',
+        '20261026213000_security_definer_hardening.sql'
+      ].find(name => existsSync(resolve(`supabase/migrations/${name}`))) || '20261113011327_security_definer_hardening_20261026213000.sql';
+      for(let run=0;run<2;run++) for(const path of ['20261013165625_admin_dashboard_persistence_hardening.sql','20261013200000_multipart_ca_documents.sql',hardeningMigration]) await actual.exec(readFileSync(resolve(`supabase/migrations/${path}`),'utf8'));
       expect((await actual.query('select is_multipart,parts_count,is_scanned,has_text_layer,ocr_status,manifest_sha256,checksum_sha256 from public.public_documents')).rows).toEqual([{is_multipart:null,parts_count:null,is_scanned:null,has_text_layer:null,ocr_status:null,manifest_sha256:null,checksum_sha256:'a'.repeat(64)}]);
       expect((await actual.query('select total_budget_fcfa from public.institutions')).rows).toEqual([{total_budget_fcfa:'123.00'}]);
       expect((await actual.query('select public.admin_persistence_version() version')).rows).toEqual([{version:3}]);

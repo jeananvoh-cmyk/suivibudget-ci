@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { PGlite } from '@electric-sql/pglite';
 const productionSchema=JSON.parse(readFileSync(resolve('src/utils/__tests__/fixtures/adminProductionSchema.json'),'utf8')) as typeof import('./fixtures/adminProductionSchema.json');
@@ -147,7 +147,12 @@ async function initialize() {
   await db.exec(auditFunction);
   await db.exec('create trigger enforce_document_publication_audit_trigger before insert or update on public.public_documents for each row execute function public.enforce_document_publication_audit()');
   await db.exec(readFileSync(resolve('supabase/migrations/20260930030840_public_proof_projection_boundary.sql'),'utf8'));
-  const hardening = readFileSync(resolve('supabase/migrations/20261026213000_security_definer_hardening.sql'),'utf8');
+  const hardeningMigration = [
+    '20261026213727_security_definer_hardening_20261026213000.sql',
+    '20261113011327_security_definer_hardening_20261026213000.sql',
+    '20261026213000_security_definer_hardening.sql'
+  ].find(name => existsSync(resolve(`supabase/migrations/${name}`))) || '20261026213727_security_definer_hardening_20261026213000.sql';
+  const hardening = readFileSync(resolve(`supabase/migrations/${hardeningMigration}`),'utf8');
   await db.exec(migration);
   await db.exec(migration);
   await db.exec(hardening);
