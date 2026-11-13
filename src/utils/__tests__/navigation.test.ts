@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getCleanPath, parseRoute } from '../navigation';
+import { getCleanPath, parseRoute, parseProjectViewTab, getProjectPassportPath } from '../navigation';
 
 describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
   describe('getCleanPath', () => {
@@ -123,6 +123,19 @@ describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
 
       expect(parseRoute('/observatory', '').tab).toBe('observatory');
       expect(parseRoute('/observatory', '').needsCanonicalRedirect).toBe(true);
+    });
+  });
+
+  describe('parseProjectViewTab & getProjectPassportPath', () => {
+    it('extracts modal sub-tab safely with budget fallback', () => {
+      expect(parseProjectViewTab('')).toBe('budget');
+      expect(parseProjectViewTab('?project=p1&view=passport')).toBe('passport');
+      expect(parseProjectViewTab('?project=p1&view=proofs')).toBe('proofs');
+      expect(parseProjectViewTab('?project=p1&view=invalid')).toBe('budget');
+    });
+
+    it('builds canonical passport permalink', () => {
+      expect(getProjectPassportPath('proj-123')).toBe('/projets?project=proj-123&view=passport');
     });
   });
 });

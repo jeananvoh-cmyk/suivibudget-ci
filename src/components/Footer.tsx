@@ -9,6 +9,7 @@ import { dataStore } from '../services/dataStore';
 import { ActiveTab } from '../types';
 import { AnnuaireSection } from '../utils/navigation';
 import { sanitizeCsvCell } from '../utils/security';
+import { createFilteredOcdsReleasePackage } from '../utils/ocdsMapper';
 
 interface FooterProps {
   activeTab: ActiveTab;
@@ -132,6 +133,25 @@ export const Footer: React.FC<FooterProps> = ({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleExportOcds = () => {
+    const projects = dataStore.getProjects();
+    const proofs = dataStore.getAllProofs();
+    const pkg = createFilteredOcdsReleasePackage(projects, proofs);
+    const json = JSON.stringify(pkg, null, 2);
+    const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute(
+      'download',
+      `SuiviBudget_CI_OCDS_v1.1_${projects.length}_Projets_${new Date().getFullYear()}.ocds.json`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   return (
@@ -302,7 +322,7 @@ export const Footer: React.FC<FooterProps> = ({
         {/* Column 2 : Open Data & Datasets */}
         <div className="space-y-2">
           <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-            Open Data (CSV)
+            Open Data (CSV &amp; OCDS)
           </h4>
           <ul className="space-y-2 text-[11px]">
             <li>
@@ -312,6 +332,15 @@ export const Footer: React.FC<FooterProps> = ({
                 title="Télécharger l'intégralité des 4 701 chantiers publics d'investissement LFI 2026 en CSV"
               >
                 4 701 Chantiers Publics (LFI)
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={handleExportOcds}
+                className="hover:text-slate-900 transition-colors text-left text-emerald-700 font-semibold cursor-pointer"
+                title="Télécharger l'ensemble des projets structurés au standard international Open Contracting (OCDS v1.1 JSON)"
+              >
+                Paquet Global OCDS v1.1 (.ocds.json)
               </button>
             </li>
             <li>

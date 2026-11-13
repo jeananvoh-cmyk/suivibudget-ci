@@ -244,6 +244,9 @@ export interface BudgetProject {
   master_builder?: string;
   project_tier?: 'MUNICIPAL' | 'REGIONAL' | 'STATE';
   official_progress_source?: string;
+  ocid?: string;
+  bomp_reference?: string;
+  procurement_method?: string;
 }
 
 export interface CitizenProof {

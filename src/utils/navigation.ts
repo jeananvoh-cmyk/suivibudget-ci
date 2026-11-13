@@ -134,3 +134,22 @@ export function parseRoute(pathname: string, search: string): RouteState {
 
   return { tab, section, projectId, needsCanonicalRedirect };
 }
+
+export type ProjectDetailTab = 'budget' | 'passport' | 'proofs';
+
+/**
+ * Extracts requested modal sub-tab (?view=passport | ?view=proofs | ?view=budget) for a project permalink.
+ */
+export function parseProjectViewTab(search: string): ProjectDetailTab {
+  const view = new URLSearchParams(search).get('view')?.toLowerCase();
+  if (view === 'passport') return 'passport';
+  if (view === 'proofs') return 'proofs';
+  return 'budget';
+}
+
+/**
+ * Builds canonical permalink pointing directly to a project's Accountability Passport.
+ */
+export function getProjectPassportPath(projectId: string): string {
+  return `/projets?project=${encodeURIComponent(projectId)}&view=passport`;
+}
