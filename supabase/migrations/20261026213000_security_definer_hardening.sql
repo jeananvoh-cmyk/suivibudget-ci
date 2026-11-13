@@ -4,7 +4,7 @@ begin;
 -- The only application caller is dataStore.refreshAdminEntities(), an admin-console path.
 -- Anonymous and citizen sessions must not be able to probe archived/unpublished baseline IDs.
 create or replace function public.admin_baseline_visibility(p_table text,p_ids text[]) returns jsonb
-language plpgsql stable security definer set search_path='' as $
+language plpgsql stable security definer set search_path='' as $baseline$
 declare result jsonb;
 begin
   if not coalesce(private.has_staff_role(array['ADMIN','DATA_MANAGER','MODERATOR']),false) then
@@ -19,7 +19,7 @@ begin
     case when p_table='news_articles' then 'workflow_status' else 'publication_status' end
   ) into result using p_ids;
   return result;
-end $;
+end $baseline$;
 revoke all on function public.admin_baseline_visibility(text,text[]) from public,anon;
 grant execute on function public.admin_baseline_visibility(text,text[]) to authenticated;
 
