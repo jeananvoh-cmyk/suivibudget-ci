@@ -1,12 +1,15 @@
 begin;
 
--- 1. Harden public.admin_baseline_visibility:
---    - Explicit NULL guards on p_table and p_ids
---    - Exclude dynamic admin draft IDs (id not like 'admin-%') so anon/citizen callers cannot probe draft IDs
+-- 1. Restrict baseline visibility reconciliation to authenticated staff.
+-- The only application caller is dataStore.refreshAdminEntities(), an admin-console path.
+-- Anonymous and citizen sessions must not be able to probe archived/unpublished baseline IDs.
 create or replace function public.admin_baseline_visibility(p_table text,p_ids text[]) returns jsonb
-language plpgsql stable security definer set search_path='' as $$
+language plpgsql stable security definer set search_path='' as $
 declare result jsonb;
 begin
+  if not coalesce(private.has_staff_role(array['ADMIN','DATA_MANAGER','MODERATOR']),false) then
+    raise exception 'Staff authorization required' using errcode='42501';
+  end if;
   if p_table is null or p_ids is null or p_table not in ('institutions','budget_projects','news_articles','caidp_directory') or cardinality(p_ids)>30000 then
     raise exception 'Invalid baseline request';
   end if;
@@ -16,9 +19,9 @@ begin
     case when p_table='news_articles' then 'workflow_status' else 'publication_status' end
   ) into result using p_ids;
   return result;
-end $$;
-revoke all on function public.admin_baseline_visibility(text,text[]) from public;
-grant execute on function public.admin_baseline_visibility(text,text[]) to anon,authenticated;
+end $;
+revoke all on function public.admin_baseline_visibility(text,text[]) from public,anon;
+grant execute on function public.admin_baseline_visibility(text,text[]) to authenticated;
 
 -- 2. Harden public.admin_staff_directory:
 --    - Raise explicit 42501 insufficient_privilege when called by a non-staff authenticated user (e.g. CITIZEN)
