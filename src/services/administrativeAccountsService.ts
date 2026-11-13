@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from './supabase';
-import { AdministrativeAccount, CAInvestmentOperation, ProcurementMatch } from '../types';
+import { AdministrativeAccount, CAInvestmentOperation, InstitutionResponse, ProcurementMatch } from '../types';
 import type { LocalBudget } from '../types/localBudget';
 import { amountPrecision } from '../utils/formatters';
 import { hydrateAdministrativeAccountFromRow } from '../utils/budgetDocumentDryRun';
@@ -95,8 +95,37 @@ export async function fetchAdministrativeAccounts(institutionId: string): Promis
     operationsByCA.set(op.ca_id, list);
   }
 
-  return accounts.map(account => hydrateAdministrativeAccountFromRow({
-    ...account,
-    operations: operationsByCA.get(account.id) || [],
-  })) as AdministrativeAccount[];
+  let publishedResponses: InstitutionResponse[] = [];
+  try {
+    const { data: respData, error: respError } = await supabase
+      .from('ca_institution_responses')
+      .select('*')
+      .in('ca_id', caIds)
+      .eq('response_status', 'PUBLISHED')
+      .order('response_date', { ascending: false });
+    if (!respError && Array.isArray(respData)) {
+      publishedResponses = respData as InstitutionResponse[];
+    }
+  } catch {
+    publishedResponses = [];
+  }
+
+  const responsesByCA = new Map<string, InstitutionResponse[]>();
+  for (const resp of publishedResponses) {
+    if (!resp.ca_id) continue;
+    const list = responsesByCA.get(resp.ca_id) || [];
+    list.push(resp);
+    responsesByCA.set(resp.ca_id, list);
+  }
+
+  return accounts.map(account => {
+    const caResponses = responsesByCA.get(account.id) || [];
+    const primaryResponse = caResponses.find(r => !r.operation_id) || caResponses[0];
+    return hydrateAdministrativeAccountFromRow({
+      ...account,
+      institution_response: primaryResponse,
+      institution_responses: caResponses.length > 0 ? caResponses : undefined,
+      operations: operationsByCA.get(account.id) || [],
+    });
+  }) as AdministrativeAccount[];
 }
