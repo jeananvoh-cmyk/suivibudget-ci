@@ -12,11 +12,17 @@ import {
   runDocumentDryRun, 
   buildStandardImportEnvelope 
 } from '../budgetDocumentDryRun';
-import { AdministrativeAccountView, getOperationPhysicalStatusLabel } from '../../components/AdministrativeAccountView';
+import { 
+  AdministrativeAccountView, 
+  getOperationPhysicalStatusLabel,
+  filterCaOperations,
+  matchesProcurementMatchLevel
+} from '../../components/AdministrativeAccountView';
 import { ADMINISTRATIVE_ACCOUNTS_DATA } from '../../data/administrativeAccountsData';
 import { dataStore } from '../../services/dataStore';
 import type { Institution, AdministrativeAccount, PublicDocument } from '../../types';
 import type { LocalBudget } from '../../types/localBudget';
+import type { CAInvestmentOperation } from '../../types/administrativeAccount';
 
 function pdfFixture(pages: number): ArrayBuffer {
   const objects = ['<< /Type /Catalog /Pages 2 0 R >>',
@@ -939,6 +945,166 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
       expect(html).toContain('Compte Administratif non disponible');
       expect(html).toContain('Faire une demande de Compte Administratif (Loi CAIDP)');
       expect(html).toContain('Qu&#x27;est-ce qu&#x27;un compte administratif ?');
+    });
+  });
+
+  // =========================================================================
+  // PRIORITÉ 7 : Filtrage des opérations et rapprochement DGMP (selectedMatchLevel)
+  // =========================================================================
+  describe('6. Rapprochement DGMP et filtrage robuste des opérations d’investissement (selectedMatchLevel)', () => {
+    const mockOps: CAInvestmentOperation[] = [
+      {
+        id: 'op-no-match-1',
+        ca_id: 'ca-test-2024',
+        institution_id: 'inst-test',
+        fiscal_year: 2024,
+        operation_reference: 'OP-01',
+        title: 'Travaux de réhabilitation sans marché DGMP retrouvé',
+        sector: 'Voirie',
+        location: 'Centre-ville',
+        planned_amount: 100_000_000,
+        executed_amount: 50_000_000,
+        procurement_match: undefined
+      },
+      {
+        id: 'op-strong-match',
+        ca_id: 'ca-test-2024',
+        institution_id: 'inst-test',
+        fiscal_year: 2024,
+        operation_reference: 'OP-02',
+        title: 'Construction école primaire avec marché vérifié',
+        sector: 'Éducation',
+        location: 'Quartier Nord',
+        planned_amount: 80_000_000,
+        executed_amount: 80_000_000,
+        procurement_match: {
+          id: 'dgmp-strong-1',
+          tender_number: 'T 101/2024',
+          contractor: 'BTP CI SARL',
+          award_amount: 79_500_000,
+          match_level: 'STRONG',
+          source: 'Portail DGMP',
+          verification_status: 'VERIFIED',
+          procurement_object: 'Construction groupe scolaire'
+        }
+      },
+      {
+        id: 'op-partial-match',
+        ca_id: 'ca-test-2024',
+        institution_id: 'inst-test',
+        fiscal_year: 2024,
+        operation_reference: 'OP-03',
+        title: 'Acquisition ambulance avec rapprochement partiel',
+        sector: 'Santé',
+        location: 'Hôpital général',
+        planned_amount: 45_000_000,
+        executed_amount: 45_000_000,
+        procurement_match: {
+          id: 'dgmp-partial-1',
+          tender_number: 'F 55/2024',
+          contractor: 'AUTO CI',
+          award_amount: 44_000_000,
+          match_level: 'PARTIAL',
+          source: 'BOMP DGMP',
+          verification_status: 'VERIFIED',
+          procurement_object: 'Véhicules sanitaires'
+        }
+      },
+      {
+        id: 'op-explicit-none',
+        ca_id: 'ca-test-2024',
+        institution_id: 'inst-test',
+        fiscal_year: 2024,
+        operation_reference: 'OP-04',
+        title: 'Aménagement espace vert avec statut explicite NONE',
+        sector: 'Cadre de vie',
+        location: 'Zone Sud',
+        planned_amount: 15_000_000,
+        executed_amount: 10_000_000,
+        procurement_match: {
+          id: 'dgmp-none-1',
+          tender_number: undefined,
+          contractor: 'Non retrouvé',
+          award_amount: null,
+          match_level: 'NONE',
+          source: 'Recherche DGMP infructueuse',
+          verification_status: 'VERIFIED',
+          procurement_object: 'Aucun avis d’attribution'
+        }
+      }
+    ];
+
+    it('matchesProcurementMatchLevel retourne true pour NONE sur les opérations sans match ou avec match_level NONE', () => {
+      expect(matchesProcurementMatchLevel('NONE', undefined)).toBe(true);
+      expect(matchesProcurementMatchLevel('NONE', null)).toBe(true);
+      expect(matchesProcurementMatchLevel('NONE', { match_level: 'NONE' } as any)).toBe(true);
+      expect(matchesProcurementMatchLevel('NONE', { match_level: 'STRONG' } as any)).toBe(false);
+      expect(matchesProcurementMatchLevel('NONE', { match_level: 'PARTIAL' } as any)).toBe(false);
+    });
+
+    it('filterCaOperations filtre correctement selon selectedMatchLevel === "NONE" en retournant toutes les opérations non rapprochées', () => {
+      const noneOps = filterCaOperations(mockOps, '', 'ALL', 'NONE');
+      expect(noneOps).toHaveLength(2);
+      expect(noneOps.map(o => o.id)).toEqual(['op-no-match-1', 'op-explicit-none']);
+      expect(noneOps.some(o => o.id === 'op-strong-match')).toBe(false);
+      expect(noneOps.some(o => o.id === 'op-partial-match')).toBe(false);
+
+      const strongOps = filterCaOperations(mockOps, '', 'ALL', 'STRONG');
+      expect(strongOps).toHaveLength(1);
+      expect(strongOps[0].id).toBe('op-strong-match');
+
+      const partialOps = filterCaOperations(mockOps, '', 'ALL', 'PARTIAL');
+      expect(partialOps).toHaveLength(1);
+      expect(partialOps[0].id).toBe('op-partial-match');
+
+      const allOps = filterCaOperations(mockOps, '', 'ALL', 'ALL');
+      expect(allOps).toHaveLength(4);
+    });
+
+    it('AdministrativeAccountView avec initialMatchLevel="NONE" affiche bien les opérations sans marché DGMP et filtre les opérations rapprochées', () => {
+      const testInst: Institution = {
+        id: 'inst-com-match-test',
+        name: 'Commune Test Rapprochement',
+        type: 'MAIRIE',
+        region: 'Lagunes',
+        district: 'Abidjan',
+        budget_functioning_fcfa: null,
+        budget_investment_fcfa: null,
+        total_budget_fcfa: null
+      };
+
+      const testCA: AdministrativeAccount = {
+        id: 'ca-match-test-2024',
+        institution_id: 'inst-com-match-test',
+        institution_name: 'Commune Test Rapprochement',
+        institution_type: 'COMMUNE',
+        fiscal_year: 2024,
+        status: 'PUBLISHED',
+        total_planned: 240_000_000,
+        total_realized: 185_000_000,
+        operating_planned: 100_000_000,
+        operating_realized: 80_000_000,
+        investment_planned: 140_000_000,
+        investment_realized: 105_000_000,
+        source_document: 'CA_TEST_2024.pdf',
+        verification_status: 'OFFICIAL_DOCUMENT',
+        operations: mockOps,
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01'
+      };
+
+      ADMINISTRATIVE_ACCOUNTS_DATA.splice(0, ADMINISTRATIVE_ACCOUNTS_DATA.length, testCA);
+
+      const html = renderToStaticMarkup(
+        <AdministrativeAccountView institution={testInst} onOpenDocRequest={() => {}} initialMatchLevel="NONE" />
+      );
+
+      // Opération sans match DGMP présente
+      expect(html).toContain('Travaux de réhabilitation sans marché DGMP retrouvé');
+      expect(html).toContain('Aménagement espace vert avec statut explicite NONE');
+      // Opérations avec marché DGMP STRONG ou PARTIAL exclues
+      expect(html).not.toContain('Construction école primaire avec marché vérifié');
+      expect(html).not.toContain('Acquisition ambulance avec rapprochement partiel');
     });
   });
 });
