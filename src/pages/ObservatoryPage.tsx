@@ -168,7 +168,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
               Observatoire Citoyen des Chantiers Publics
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
-              Suivi photographique de terrain, veille contractuelle et observations citoyennes indépendantes sur <strong>{publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets physiques 2026</strong> ({formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa)} côté État et {formatCompactFCFA(publicIndicators.investments.localPhysical2026AmountFcfa)} côté collectivités locales, hors {publicIndicators.investments.multiYearPre2026Count} projet pluriannuel 2021 de {formatCompactFCFA(publicIndicators.investments.multiYearPre2026AmountFcfa)}).
+              Suivi photographique de terrain, veille contractuelle et observations citoyennes indépendantes sur <strong>{publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée</strong> ({formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa)} côté État extrait et {formatCompactFCFA(publicIndicators.investments.localCsvPhysical2026AmountFcfa)} côté collectivités LFI, hors {publicIndicators.investments.localPortalBouakePhysical2026Count} projets portail Bouaké de {formatCompactFCFA(publicIndicators.investments.localPortalBouakePhysical2026AmountFcfa)} et {publicIndicators.investments.multiYearPre2026Count} marché pluriannuel 2021 de {formatCompactFCFA(publicIndicators.investments.multiYearPre2026AmountFcfa)}).
             </p>
           </div>
 

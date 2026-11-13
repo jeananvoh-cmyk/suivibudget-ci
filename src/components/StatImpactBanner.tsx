@@ -1,6 +1,7 @@
 import React from 'react';
 import { ImpactStats } from '../types';
 import { formatCompactFCFA } from '../utils/formatters';
+import { LFI_2026_OFFICIAL_MACRO } from '../utils/publicIndicators';
 
 interface StatImpactBannerProps {
   stats: ImpactStats;
@@ -16,12 +17,13 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
 
   const physicalAllCount = detailed?.investments.physicalAllCount ?? stats.totalBudgetLines;
   const state2026Count = detailed?.investments.statePhysical2026Count;
-  const local2026Count = detailed?.investments.localPhysical2026Count;
+  const localCsv2026Count = detailed?.investments.localCsvPhysical2026Count;
+  const bouakeCount = detailed?.investments.localPortalBouakePhysical2026Count ?? 0;
   const multiYearCount = detailed?.investments.multiYearPre2026Count ?? 0;
 
-  const physical2026Amount = detailed?.investments.physical2026AmountFcfa ?? stats.totalInvestmentsFcfa;
   const state2026Amount = detailed?.investments.statePhysical2026AmountFcfa;
-  const local2026Amount = detailed?.investments.localPhysical2026AmountFcfa;
+  const localCsv2026Amount = detailed?.investments.localCsvPhysical2026AmountFcfa;
+  const bouakeAmount = detailed?.investments.localPortalBouakePhysical2026AmountFcfa;
   const multiYearAmount = detailed?.investments.multiYearPre2026AmountFcfa;
 
   const proofTarget2026 = detailed?.citizenProofs.target2026 ?? 1000;
@@ -51,40 +53,43 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
           </div>
         </div>
 
-        {/* Card 2: Projets Physiques Répertoriés (Distincts des lignes brutes) */}
+        {/* Card 2: Projets Physiques Répertoriés (Classification automatisée non certifiée) */}
         <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between">
           <div className="mb-4">
-            <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Projets Physiques Suivis</span>
+            <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Projets Physiques (Auto.)</span>
           </div>
           <div>
             <div className="text-3xl font-black text-slate-900 tracking-tight">
               {physicalAllCount.toLocaleString('fr-FR')}
             </div>
             <p className="text-xs text-slate-600 font-semibold mt-1.5 leading-snug">
-              {state2026Count !== undefined && local2026Count !== undefined
-                ? `${state2026Count.toLocaleString('fr-FR')} État (2026) + ${local2026Count.toLocaleString('fr-FR')} locaux (2026)${multiYearCount > 0 ? ` + ${multiYearCount} ex. 2021` : ''}`
-                : 'Chantiers et équipements répertoriés'}
+              Projets et opérations physiques répertoriés selon une classification automatisée
             </p>
+            {state2026Count !== undefined && localCsv2026Count !== undefined && (
+              <p className="text-[11px] text-slate-500 mt-1 leading-snug">
+                {state2026Count.toLocaleString('fr-FR')} État LFI • {localCsv2026Count.toLocaleString('fr-FR')} local LFI{bouakeCount > 0 ? ` • ${bouakeCount} Bouaké` : ''}{multiYearCount > 0 ? ` • ${multiYearCount} ex. 2021` : ''}
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Card 3: Investissements Physiques 2026 (Périmètre strict par exercice et niveau) */}
+        {/* Card 3: Investissements LFI 2026 & Périmètre Extrait */}
         <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between">
           <div className="mb-4">
-            <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Investissements Physiques 2026</span>
+            <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Investissements LFI 2026</span>
           </div>
           <div>
             <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              {physical2026Amount > 0 ? formatCompactFCFA(physical2026Amount) : 'Montant à confirmer'}
+              {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel}
             </div>
             <p className="text-xs text-slate-600 font-semibold mt-1.5 leading-snug">
-              {state2026Amount !== undefined && local2026Amount !== undefined
-                ? `État : ${formatCompactFCFA(state2026Amount)} • Local : ${formatCompactFCFA(local2026Amount)}`
-                : 'Périmètre des projets physiques 2026'}
+              Dépenses en capital État (Loi n° 2025-987)
             </p>
-            {multiYearCount > 0 && multiYearAmount != null && multiYearAmount > 0 && (
+            {state2026Amount !== undefined && localCsv2026Amount !== undefined && (
               <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                Hors {multiYearCount} projet pluriannuel 2021 ({formatCompactFCFA(multiYearAmount)})
+                Extrait classifié : {formatCompactFCFA(state2026Amount)} État • {formatCompactFCFA(localCsv2026Amount)} local LFI
+                {bouakeCount > 0 && bouakeAmount != null && ` (hors ${formatCompactFCFA(bouakeAmount)} portail Bouaké)`}
+                {multiYearCount > 0 && multiYearAmount != null && multiYearAmount > 0 && ` • hors 2021 : ${formatCompactFCFA(multiYearAmount)}`}
               </p>
             )}
           </div>

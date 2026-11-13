@@ -309,9 +309,9 @@ export const Footer: React.FC<FooterProps> = ({
               <button
                 onClick={() => handleExportCsv('PROJECTS')}
                 className="hover:text-slate-900 transition-colors text-left text-slate-600 cursor-pointer"
-                title={`Télécharger les ${dataStore.getPublicIndicators().investments.physicalAllCount.toLocaleString('fr-FR')} projets physiques répertoriés (État et collectivités) en CSV`}
+                title={`Télécharger les ${dataStore.getPublicIndicators().investments.physicalAllCount.toLocaleString('fr-FR')} projets et opérations physiques répertoriés selon une classification automatisée en CSV`}
               >
-                {dataStore.getPublicIndicators().investments.physicalAllCount.toLocaleString('fr-FR')} Projets Physiques (CSV)
+                {dataStore.getPublicIndicators().investments.physicalAllCount.toLocaleString('fr-FR')} Projets Physiques (Auto. CSV)
               </button>
             </li>
             <li>

@@ -5,6 +5,7 @@ import { HeroSection } from '../components/HeroSection';
 import { StatImpactBanner } from '../components/StatImpactBanner';
 import { ProjectCard } from '../components/ProjectCard';
 import { dataStore, isTangiblePhysicalProject } from '../services/dataStore';
+import { LFI_2026_OFFICIAL_MACRO } from '../utils/publicIndicators';
 import { formatFCFA, formatCompactFCFA, formatAmountInWords } from '../utils/formatters';
 import { computeSectorBreakdown } from '../utils/publicIndicators';
 import {
@@ -260,7 +261,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Budget Ouvert 2026
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Explorez {publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets physiques 2026 ({formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa)} État et {formatCompactFCFA(publicIndicators.investments.localPhysical2026AmountFcfa)} collectivités).
+                Explorez {publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée ({formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa)} État extrait LFI et {formatCompactFCFA(publicIndicators.investments.localCsvPhysical2026AmountFcfa)} local extrait LFI{publicIndicators.investments.localPortalBouakePhysical2026Count > 0 ? `, hors ${publicIndicators.investments.localPortalBouakePhysical2026Count} projets portail Bouaké` : ''}).
               </p>
             </div>
             <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-brand-blue">
@@ -325,7 +326,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Où vont les investissements publics en 2026 ?
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-                Répartition en FCFA des {sectorBreakdown2026.totalProjects.toLocaleString('fr-FR')} projets physiques 2026 ({formatCompactFCFA(sectorBreakdown2026.totalAmountFcfa)} — État & collectivités{sectorBreakdown2026.excludedOtherYearsCount > 0 ? `, hors ${sectorBreakdown2026.excludedOtherYearsCount} projet pluriannuel 2021 de ${formatCompactFCFA(sectorBreakdown2026.excludedOtherYearsAmountFcfa)}` : ''}). Source : LFI 2026 & budgets locaux.
+                Répartition en FCFA des {sectorBreakdown2026.totalProjects.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée ({formatCompactFCFA(sectorBreakdown2026.totalAmountFcfa)} — sous-ensemble extrait sur {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel} votés en LFI 2026{sectorBreakdown2026.excludedOtherYearsCount > 0 ? `, hors ${sectorBreakdown2026.excludedOtherYearsCount} marché pluriannuel 2021 de ${formatCompactFCFA(sectorBreakdown2026.excludedOtherYearsAmountFcfa)}` : ''}). {sectorBreakdown2026.methodologyNotice}
               </p>
             </div>
             <button

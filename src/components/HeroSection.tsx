@@ -1,6 +1,7 @@
 import React from 'react';
 import { dataStore } from '../services/dataStore';
 import { formatCompactFCFA } from '../utils/formatters';
+import { LFI_2026_OFFICIAL_MACRO } from '../utils/publicIndicators';
 import { Search, Camera, ArrowRight } from 'lucide-react';
 
 interface HeroSectionProps {
@@ -40,7 +41,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* Editorial Summary */}
         <p className="mt-5 text-base sm:text-lg md:text-xl text-slate-600 max-w-4xl mx-auto font-normal leading-relaxed">
-          Explorez en toute transparence les <strong>{investments.physicalAllCount.toLocaleString('fr-FR')} chantiers et projets d'équipement physiques répertoriés</strong> (écoles, santé, eau potable, voirie) : <strong>{formatCompactFCFA(investments.statePhysical2026AmountFcfa)}</strong> côté État ({investments.statePhysical2026Count.toLocaleString('fr-FR')} projets 2026) et <strong>{formatCompactFCFA(investments.localPhysical2026AmountFcfa)}</strong> côté collectivités ({investments.localPhysical2026Count.toLocaleString('fr-FR')} projets 2026){investments.multiYearPre2026Count > 0 ? `, plus ${investments.multiYearPre2026Count} grand projet pluriannuel 2021 (${formatCompactFCFA(investments.multiYearPre2026AmountFcfa)})` : ''}. Participez au contrôle citoyen avec vos constats de terrain.
+          Explorez en toute transparence les <strong>{investments.physicalAllCount.toLocaleString('fr-FR')} projets et opérations physiques répertoriés selon une classification automatisée</strong> (écoles, santé, eau potable, voirie) : <strong>{formatCompactFCFA(investments.statePhysical2026AmountFcfa)}</strong> côté État ({investments.statePhysical2026Count.toLocaleString('fr-FR')} opérations 2026 extraites sur {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel} d'investissements LFI) et <strong>{formatCompactFCFA(investments.localCsvPhysical2026AmountFcfa)}</strong> côté collectivités LFI ({investments.localCsvPhysical2026Count.toLocaleString('fr-FR')} opérations 2026){investments.localPortalBouakePhysical2026Count > 0 ? `, hors ${investments.localPortalBouakePhysical2026Count} projets portail Bouaké (${formatCompactFCFA(investments.localPortalBouakePhysical2026AmountFcfa)})` : ''}{investments.multiYearPre2026Count > 0 ? ` et ${investments.multiYearPre2026Count} marché pluriannuel 2021 (${formatCompactFCFA(investments.multiYearPre2026AmountFcfa)})` : ''}. Participez au contrôle citoyen avec vos constats de terrain.
         </p>
 
         {/* Dual Audience Quick Action Links */}

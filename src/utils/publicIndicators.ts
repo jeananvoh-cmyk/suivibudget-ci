@@ -2,6 +2,11 @@ import type { BudgetProject, CitizenProof, Institution, ImpactStats } from '../t
 import type { AdministrativeAccount } from '../types/administrativeAccount';
 import type { LocalBudget } from '../types/localBudget';
 import { OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
+import {
+  classifyAndDeduplicateCatalog,
+  reconcileBudgetCatalog,
+  type CatalogReconciliationSummary,
+} from './budgetCatalogClassification';
 
 export type PublicSectorId =
   | 'INFRASTRUCTURE'
@@ -22,6 +27,9 @@ export interface PublicSectorDefinition {
   tagline: string;
 }
 
+/**
+ * Secteurs budgétaires explicites (aucune catégorie fourre-tout « Autres » destinée à masquer des lacunes).
+ */
 export const PUBLIC_SECTOR_DEFINITIONS: readonly PublicSectorDefinition[] = [
   {
     id: 'INFRASTRUCTURE',
@@ -81,11 +89,11 @@ export const PUBLIC_SECTOR_DEFINITIONS: readonly PublicSectorDefinition[] = [
   },
   {
     id: 'OTHER',
-    name: 'Autres Secteurs (Culture, Sécurité, Énergie, Env.)',
+    name: 'Énergie, Sécurité, Culture & Environnement',
     filterKey: 'Jeunesse',
     bgBar: 'bg-violet-600',
     badgeBg: 'bg-violet-50 text-violet-800 border-violet-200',
-    tagline: 'Jeunesse, sport, sécurité, énergie & environnement',
+    tagline: 'Énergie, sécurité, jeunesse, sport & environnement',
   },
 ] as const;
 
@@ -103,11 +111,18 @@ export interface PublicSectorSummary extends PublicSectorDefinition {
 
 export interface SectorBreakdownResult {
   fiscalYearFilter: number | 'ALL';
+  scopeKind: 'PHYSICAL_CLASSIFIED' | 'RAW_BUDGET_LINES';
+  denominatorAmountFcfa: number;
   totalProjects: number;
   totalAmountFcfa: number;
   unknownAmountProjectsCount: number;
+  unmappedCategoryProjectsCount: number;
+  unmappedCategoryAmountFcfa: number;
   excludedOtherYearsCount: number;
   excludedOtherYearsAmountFcfa: number;
+  excludedOverlapOrDupesCount: number;
+  isExhaustiveCoverage: boolean;
+  methodologyNotice: string;
   sectors: PublicSectorSummary[];
 }
 
@@ -121,6 +136,7 @@ export interface CollectivityCoverageSummary {
   regionsWithPrimitiveBudget2026: number;
   collectivitesWithCatalogProjects2026: number;
   collectivitesWithPublishedCA: number;
+  collectivitiesOwnTotalInvestment2026Fcfa: null;
 }
 
 export interface CitizenProofSummary {
@@ -133,6 +149,27 @@ export interface CitizenProofSummary {
   strategicShowcasesCount: number;
 }
 
+export type IndicatorVerificationStatus =
+  | 'VERIFIED'
+  | 'UNVERIFIED'
+  | 'AUTOMATED_CLASSIFICATION'
+  | 'NOT_CONSOLIDATED';
+
+export interface StructuredPublicIndicator {
+  id: string;
+  label: string;
+  value: number | null;
+  unit: 'FCFA' | 'PROJECTS' | 'COLLECTIVITIES' | 'PROOFS';
+  fiscalYear: number | 'MULTI_YEAR';
+  scope: string;
+  category: 'MACRO_BUDGET' | 'CATALOG_EXTRACTION' | 'TERRITORIAL_COVERAGE' | 'CITIZEN_PROOF';
+  sourceDocument: string;
+  sourceUrl: string;
+  sourcePage: string;
+  verificationStatus: IndicatorVerificationStatus;
+  calculationMethod: string;
+}
+
 export interface PublicInvestmentScopeSummary {
   physicalAllCount: number;
   physicalAllAmountFcfa: number;
@@ -142,6 +179,10 @@ export interface PublicInvestmentScopeSummary {
   statePhysical2026AmountFcfa: number;
   localPhysical2026Count: number;
   localPhysical2026AmountFcfa: number;
+  localCsvPhysical2026Count: number;
+  localCsvPhysical2026AmountFcfa: number;
+  localPortalBouakePhysical2026Count: number;
+  localPortalBouakePhysical2026AmountFcfa: number;
   localMunicipalPhysical2026Count: number;
   localMunicipalPhysical2026AmountFcfa: number;
   localRegionalPhysical2026Count: number;
@@ -154,6 +195,12 @@ export interface PublicInvestmentScopeSummary {
   stateRawCatalog2026AmountFcfa: number;
   localRawCatalog2026Count: number;
   localRawCatalog2026AmountFcfa: number;
+  lfi2026OfficialInvestmentsTotalFcfa: number;
+  lfi2026OfficialStateBudgetTotalFcfa: number;
+  lfi2026OfficialLocalTransfersTotalFcfa: number;
+  physicalClassificationLabel: string;
+  isPhysicalClassificationCertified: false;
+  catalogReconciliation: CatalogReconciliationSummary;
 }
 
 export interface PublicIndicatorsSnapshot {
@@ -161,13 +208,34 @@ export interface PublicIndicatorsSnapshot {
   collectivities: CollectivityCoverageSummary;
   citizenProofs: CitizenProofSummary;
   sectorBreakdown2026: SectorBreakdownResult;
+  indicators: Record<string, StructuredPublicIndicator>;
 }
 
 export const CITIZEN_PROOF_TARGET_2026 = 1000;
 
+export const LFI_2026_OFFICIAL_DOC_URL =
+  'https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf';
+
+export const LFI_2026_OFFICIAL_SHA256 =
+  'f06035b6af6f15f1777b3e843198df2763f72fe9b15a04de1a16c4553a507d76';
+
 export const LFI_2026_OFFICIAL_MACRO = {
-  legalTextTitle: "Loi de finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
+  legalTextTitle:
+    "Loi de finances n° 2025-987 du 19 décembre 2025 portant budget de l'État pour l'année 2026",
+  officialPdfUrl: LFI_2026_OFFICIAL_DOC_URL,
+  officialPdfSha256: LFI_2026_OFFICIAL_SHA256,
+  stateBudgetGlobal2026Fcfa: 17_350_151_982_383,
+  stateBudgetGeneralOps2026Fcfa: 10_893_770_624_368,
+  stateBudgetTreasury2026Fcfa: 4_916_189_128_757,
+  stateBudgetSpecialAccounts2026Fcfa: 1_540_192_229_258,
+  lfiInvestmentsTotal2026Fcfa: 4_195_734_580_603,
+  lfiInvestmentsTreasury2026Fcfa: 2_642_107_662_084,
+  lfiInvestmentsExternal2026Fcfa: 1_553_626_918_519,
+  lfiLocalTransfersTotal2026Fcfa: 224_690_561_296,
+  lfiLocalTransfersInvestment2026Fcfa: 172_400_000_000,
+  lfiLocalTransfersOperating2026Fcfa: 52_290_561_296,
   totalBudgetMilliardsLabel: '17 350,2 Mds FCFA',
+  investmentsMilliardsLabel: '4 195,7 Mds FCFA',
   budgetRecettesMilliardsLabel: '8 728,5 Mds FCFA',
   tresorerieMilliardsLabel: '7 081,5 Mds FCFA',
   comptesSpeciauxMilliardsLabel: '1 540,2 Mds FCFA',
@@ -183,9 +251,9 @@ function normalizeCategoryToken(rawCategory?: string): string {
     .toLowerCase();
 }
 
-export function normalizeSectorCategory(rawCategory?: string): PublicSectorId {
+export function normalizeSectorCategory(rawCategory?: string): PublicSectorId | null {
   const token = normalizeCategoryToken(rawCategory);
-  if (!token) return 'OTHER';
+  if (!token) return null;
 
   if (
     token === 'infrastructure' ||
@@ -195,25 +263,43 @@ export function normalizeSectorCategory(rawCategory?: string): PublicSectorId {
   ) {
     return 'INFRASTRUCTURE';
   }
-  if (token.includes('eau')) {
+  if (token.includes('eau') || token.includes('hydraulique')) {
     return 'WATER';
   }
   if (token.includes('administration')) {
     return 'ADMINISTRATION';
   }
-  if (token.includes('education')) {
+  if (token.includes('education') || token.includes('formation')) {
     return 'EDUCATION';
   }
   if (token.includes('logement') || token.includes('urbanisme')) {
     return 'HOUSING';
   }
-  if (token.includes('commerce') || token.includes('agriculture')) {
+  if (
+    token.includes('commerce') ||
+    token.includes('agriculture') ||
+    token.includes('economie') ||
+    token.includes('marche')
+  ) {
     return 'ECONOMY_AGRI';
   }
   if (token.includes('sante')) {
     return 'HEALTH';
   }
-  return 'OTHER';
+  if (
+    token.includes('energie') ||
+    token.includes('eclairage') ||
+    token.includes('securite') ||
+    token.includes('jeunesse') ||
+    token.includes('culture') ||
+    token.includes('sport') ||
+    token.includes('salubrite') ||
+    token.includes('environnement') ||
+    token.includes('developpement local')
+  ) {
+    return 'OTHER';
+  }
+  return null;
 }
 
 function getConfirmedAmount(amount: number | null | undefined): number | null {
@@ -226,17 +312,46 @@ function isStateProject(p: BudgetProject): boolean {
 
 export function computeSectorBreakdown(
   projects: readonly BudgetProject[],
-  options: { fiscalYear?: number | 'ALL' } = {}
+  options: {
+    fiscalYear?: number | 'ALL';
+    scopeKind?: 'PHYSICAL_CLASSIFIED' | 'RAW_BUDGET_LINES';
+    excludeLfi2204040Overlap?: boolean;
+  } = {}
 ): SectorBreakdownResult {
   const fiscalYearFilter = options.fiscalYear ?? 2026;
-  const scopedProjects =
-    fiscalYearFilter === 'ALL'
-      ? projects
-      : projects.filter((p) => p.fiscal_year === fiscalYearFilter);
-  const excludedOtherYears =
-    fiscalYearFilter === 'ALL'
-      ? []
-      : projects.filter((p) => p.fiscal_year !== fiscalYearFilter);
+  const scopeKind = options.scopeKind ?? 'PHYSICAL_CLASSIFIED';
+  const excludeOverlap = options.excludeLfi2204040Overlap ?? true;
+
+  const classified = classifyAndDeduplicateCatalog(projects);
+
+  let excludedOverlapOrDupesCount = 0;
+  let excludedOtherYearsCount = 0;
+  let excludedOtherYearsAmountFcfa = 0;
+
+  const scopedItems: Array<{ project: BudgetProject; sectorId: PublicSectorId | null }> = [];
+
+  for (const { project, classification } of classified) {
+    if (classification.isExactDuplicate) {
+      excludedOverlapOrDupesCount += 1;
+      continue;
+    }
+    if (excludeOverlap && classification.isCrossCatalogOverlap) {
+      excludedOverlapOrDupesCount += 1;
+      continue;
+    }
+
+    const confirmed = getConfirmedAmount(project.budget_amount_fcfa);
+    if (fiscalYearFilter !== 'ALL' && project.fiscal_year !== fiscalYearFilter) {
+      excludedOtherYearsCount += 1;
+      excludedOtherYearsAmountFcfa += confirmed ?? 0;
+      continue;
+    }
+
+    scopedItems.push({
+      project,
+      sectorId: normalizeSectorCategory(project.category),
+    });
+  }
 
   const buckets = new Map<
     PublicSectorId,
@@ -265,13 +380,25 @@ export function computeSectorBreakdown(
 
   let totalAmountFcfa = 0;
   let unknownAmountProjectsCount = 0;
+  let unmappedCategoryProjectsCount = 0;
+  let unmappedCategoryAmountFcfa = 0;
 
-  for (const p of scopedProjects) {
-    const sectorId = normalizeSectorCategory(p.category);
+  for (const { project, sectorId } of scopedItems) {
+    const confirmed = getConfirmedAmount(project.budget_amount_fcfa);
+    const isState = isStateProject(project);
+
+    if (sectorId === null) {
+      unmappedCategoryProjectsCount += 1;
+      if (confirmed === null) {
+        unknownAmountProjectsCount += 1;
+      } else {
+        unmappedCategoryAmountFcfa += confirmed;
+        totalAmountFcfa += confirmed;
+      }
+      continue;
+    }
+
     const bucket = buckets.get(sectorId)!;
-    const confirmed = getConfirmedAmount(p.budget_amount_fcfa);
-    const isState = isStateProject(p);
-
     bucket.count += 1;
     if (confirmed === null) {
       bucket.unknownAmountCount += 1;
@@ -293,11 +420,6 @@ export function computeSectorBreakdown(
     }
   }
 
-  const excludedOtherYearsAmountFcfa = excludedOtherYears.reduce((sum, p) => {
-    const c = getConfirmedAmount(p.budget_amount_fcfa);
-    return sum + (c ?? 0);
-  }, 0);
-
   const sectors: PublicSectorSummary[] = PUBLIC_SECTOR_DEFINITIONS.map((def) => {
     const b = buckets.get(def.id)!;
     const exactPct = totalAmountFcfa > 0 ? (b.amountFcfa / totalAmountFcfa) * 100 : 0;
@@ -316,13 +438,27 @@ export function computeSectorBreakdown(
     };
   });
 
+  const isExhaustiveCoverage =
+    unmappedCategoryProjectsCount === 0 && unknownAmountProjectsCount === 0 && totalAmountFcfa > 0;
+
+  const methodologyNotice = isExhaustiveCoverage
+    ? "Répartition exhaustive sur le périmètre classifié présenté (total ≈ 100 % à l'arrondi près)."
+    : 'Principaux secteurs recensés — pourcentage calculé sur le périmètre présenté';
+
   return {
     fiscalYearFilter,
-    totalProjects: scopedProjects.length,
+    scopeKind,
+    denominatorAmountFcfa: totalAmountFcfa,
+    totalProjects: scopedItems.length,
     totalAmountFcfa,
     unknownAmountProjectsCount,
-    excludedOtherYearsCount: excludedOtherYears.length,
+    unmappedCategoryProjectsCount,
+    unmappedCategoryAmountFcfa,
+    excludedOtherYearsCount,
     excludedOtherYearsAmountFcfa,
+    excludedOverlapOrDupesCount,
+    isExhaustiveCoverage,
+    methodologyNotice,
     sectors,
   };
 }
@@ -356,6 +492,12 @@ export function computePublicIndicators(params: {
     strategicShowcasesCount = 1,
   } = params;
 
+  const catalogReconciliation = reconcileBudgetCatalog(rawProjects);
+  const classifiedProjects = classifyAndDeduplicateCatalog(projects).filter(
+    ({ classification }) =>
+      !classification.isCrossCatalogOverlap && !classification.isExactDuplicate
+  );
+
   let physicalAllAmountFcfa = 0;
   let physical2026Count = 0;
   let physical2026AmountFcfa = 0;
@@ -363,6 +505,10 @@ export function computePublicIndicators(params: {
   let statePhysical2026AmountFcfa = 0;
   let localPhysical2026Count = 0;
   let localPhysical2026AmountFcfa = 0;
+  let localCsvPhysical2026Count = 0;
+  let localCsvPhysical2026AmountFcfa = 0;
+  let localPortalBouakePhysical2026Count = 0;
+  let localPortalBouakePhysical2026AmountFcfa = 0;
   let localMunicipalPhysical2026Count = 0;
   let localMunicipalPhysical2026AmountFcfa = 0;
   let localRegionalPhysical2026Count = 0;
@@ -371,7 +517,7 @@ export function computePublicIndicators(params: {
   let multiYearPre2026AmountFcfa = 0;
   let unknownAmountProjectsCount = 0;
 
-  for (const p of projects) {
+  for (const { project: p, classification } of classifiedProjects) {
     const confirmed = getConfirmedAmount(p.budget_amount_fcfa);
     if (confirmed === null) {
       unknownAmountProjectsCount += 1;
@@ -389,6 +535,13 @@ export function computePublicIndicators(params: {
       } else {
         localPhysical2026Count += 1;
         localPhysical2026AmountFcfa += amt;
+        if (classification.provenancePool === 'LOCAL_PORTAL_BOUAKE_2026') {
+          localPortalBouakePhysical2026Count += 1;
+          localPortalBouakePhysical2026AmountFcfa += amt;
+        } else {
+          localCsvPhysical2026Count += 1;
+          localCsvPhysical2026AmountFcfa += amt;
+        }
         if (p.project_tier === 'REGIONAL') {
           localRegionalPhysical2026Count += 1;
           localRegionalPhysical2026AmountFcfa += amt;
@@ -408,7 +561,9 @@ export function computePublicIndicators(params: {
   let localRawCatalog2026Count = 0;
   let localRawCatalog2026AmountFcfa = 0;
 
-  for (const p of rawProjects) {
+  const classifiedRaw = classifyAndDeduplicateCatalog(rawProjects);
+  for (const { project: p, classification } of classifiedRaw) {
+    if (classification.isExactDuplicate || classification.isCrossCatalogOverlap) continue;
     if (p.fiscal_year !== 2026) continue;
     const amt = getConfirmedAmount(p.budget_amount_fcfa) ?? 0;
     if (isStateProject(p)) {
@@ -447,7 +602,8 @@ export function computePublicIndicators(params: {
     communesWithPrimitiveBudget2026 + regionsWithPrimitiveBudget2026;
 
   const catalogCollectivityKeys = new Set<string>();
-  for (const p of rawProjects) {
+  for (const { project: p, classification } of classifiedRaw) {
+    if (classification.isExactDuplicate || classification.isCrossCatalogOverlap) continue;
     if (p.fiscal_year === 2026 && !isStateProject(p)) {
       const k = normalizeCollectivityKey(p.institution_name || p.commune_name);
       if (k) catalogCollectivityKeys.add(k);
@@ -467,9 +623,163 @@ export function computePublicIndicators(params: {
   const verificationRatePct =
     totalSubmittedCount > 0 ? Math.round((approvedCount / totalSubmittedCount) * 100) : null;
 
+  const dedupedPhysicalCount = classifiedProjects.length;
+  const physicalClassificationLabel =
+    'Projets et opérations physiques répertoriés selon une classification automatisée';
+
+  const indicators: Record<string, StructuredPublicIndicator> = {
+    stateBudgetTotal2026: {
+      id: 'stateBudgetTotal2026',
+      label: "Budget global de l'État (LFI 2026)",
+      value: LFI_2026_OFFICIAL_MACRO.stateBudgetGlobal2026Fcfa,
+      unit: 'FCFA',
+      fiscalYear: 2026,
+      scope: 'ÉTAT CENTRAL — BUDGET GÉNÉRAL, TRÉSORERIE & CST',
+      category: 'MACRO_BUDGET',
+      sourceDocument: LFI_2026_OFFICIAL_MACRO.legalTextTitle,
+      sourceUrl: LFI_2026_OFFICIAL_DOC_URL,
+      sourcePage: 'Articles 1, 7 et 13 (pp. 7–11 et 41)',
+      verificationStatus: 'VERIFIED',
+      calculationMethod:
+        'Somme officielle votée en ressources/charges : 10 893,77 Mds (opérations budgétaires) + 4 916,19 Mds (trésorerie) + 1 540,19 Mds (CST).',
+    },
+    lfiInvestmentsTotal2026: {
+      id: 'lfiInvestmentsTotal2026',
+      label: 'Investissements publics votés en LFI 2026 (Dépenses en capital)',
+      value: LFI_2026_OFFICIAL_MACRO.lfiInvestmentsTotal2026Fcfa,
+      unit: 'FCFA',
+      fiscalYear: 2026,
+      scope: 'ÉTAT CENTRAL — DÉPENSES EN CAPITAL (TRÉSOR + EXTÉRIEUR)',
+      category: 'MACRO_BUDGET',
+      sourceDocument: LFI_2026_OFFICIAL_MACRO.legalTextTitle,
+      sourceUrl: LFI_2026_OFFICIAL_DOC_URL,
+      sourcePage: 'Articles 6, 8, 13 et 16 (pp. 8–9, 11, 21–25 et 41)',
+      verificationStatus: 'VERIFIED',
+      calculationMethod:
+        'Montant officiel LFI : 2 642 107 662 084 FCFA (Trésor) + 1 553 626 918 519 FCFA (financements extérieurs : dons et emprunts-projets).',
+    },
+    localLfiTransfers2026: {
+      id: 'localLfiTransfers2026',
+      label: 'Transferts de l’État aux collectivités territoriales et districts (LFI 2026)',
+      value: LFI_2026_OFFICIAL_MACRO.lfiLocalTransfersTotal2026Fcfa,
+      unit: 'FCFA',
+      fiscalYear: 2026,
+      scope: 'DOTATIONS & TRANSFERTS LFI 2026 AUX COLLECTIVITÉS ET DISTRICTS',
+      category: 'MACRO_BUDGET',
+      sourceDocument: LFI_2026_OFFICIAL_MACRO.legalTextTitle,
+      sourceUrl: LFI_2026_OFFICIAL_DOC_URL,
+      sourcePage: 'Article 21 (p. 29)',
+      verificationStatus: 'VERIFIED',
+      calculationMethod:
+        'Dotation officielle Article 21 : 52 290 561 296 FCFA (fonctionnement) + 172 400 000 000 FCFA (investissement).',
+    },
+    stateCatalogPhysical2026: {
+      id: 'stateCatalogPhysical2026',
+      label: `${physicalClassificationLabel} — État (2026, sous-ensemble extrait)`,
+      value: statePhysical2026AmountFcfa,
+      unit: 'FCFA',
+      fiscalYear: 2026,
+      scope: 'EXTRACTION CATALOGUE ÉTAT 2026 HORS PROGRAMME 2204040 (NON EXHAUSTIF VS 4 195,7 MDS LFI)',
+      category: 'CATALOG_EXTRACTION',
+      sourceDocument: 'Catalogue extrait LFI 2026 (officialNationalProjects2026.json)',
+      sourceUrl: LFI_2026_OFFICIAL_DOC_URL,
+      sourcePage: 'Non consolidé page par page (classification automatisée)',
+      verificationStatus: 'AUTOMATED_CLASSIFICATION',
+      calculationMethod:
+        'Somme des lignes nationales 2026 classifiées PROJECT_PHYSICAL après exclusion des 2 024 lignes du Programme 2204040 et des dépenses non physiques.',
+    },
+    localCsvPhysical2026: {
+      id: 'localCsvPhysical2026',
+      label: `${physicalClassificationLabel} — Collectivités (extraction LFI 2026)`,
+      value: localCsvPhysical2026AmountFcfa,
+      unit: 'FCFA',
+      fiscalYear: 2026,
+      scope: 'EXTRACTION CSV COLLECTIVITÉS LFI 2026 (DÉDUPLIQUÉE, HORS SALAIRES)',
+      category: 'CATALOG_EXTRACTION',
+      sourceDocument: 'Extraction locale LFI 2026 (officialProjectsFromCsv.json)',
+      sourceUrl: LFI_2026_OFFICIAL_DOC_URL,
+      sourcePage: 'Programme 2204040 décomposé (non certifié individuellement)',
+      verificationStatus: 'AUTOMATED_CLASSIFICATION',
+      calculationMethod:
+        'Somme des opérations communales/régionales 2026 classifiées PROJECT_PHYSICAL, après retrait des 32 lignes salariales et doublons exacts.',
+    },
+    bouakePortalPhysical2026: {
+      id: 'bouakePortalPhysical2026',
+      label: 'Projets municipaux Bouaké sourcés sur portail communal (hors LFI 2026)',
+      value: localPortalBouakePhysical2026AmountFcfa,
+      unit: 'FCFA',
+      fiscalYear: 2026,
+      scope: 'PORTAIL EXTERNE MAIRIEDEBOUAKE.CI (C2D / AFD / PPP, HORS DOTATION LFI)',
+      category: 'CATALOG_EXTRACTION',
+      sourceDocument: 'Portail officiel de la Mairie de Bouaké (mairiedebouake.ci/projets)',
+      sourceUrl: 'https://mairiedebouake.ci/projets',
+      sourcePage: 'Portail projets (vérification documentaire en cours)',
+      verificationStatus: 'UNVERIFIED',
+      calculationMethod:
+        'Agrégat isolé des projets physiques issus du portail communal Bouaké (excluant la digitalisation des taxes). Ne pas additionner au total LFI.',
+    },
+    multiYearStateCatalogPre2026: {
+      id: 'multiYearStateCatalogPre2026',
+      label: 'Grand marché pluriannuel de l’État engagé en 2021 (hors exercice 2026)',
+      value: multiYearPre2026AmountFcfa,
+      unit: 'FCFA',
+      fiscalYear: 'MULTI_YEAR',
+      scope: 'EXERCICE 2021 — AXE SÉGUÉLA-SIFIÉ-TOUBA (HORS LFI 2026)',
+      category: 'CATALOG_EXTRACTION',
+      sourceDocument: "Marché de l'État engagé en 2021 (MEER / AGEROUTE / Trésor Public)",
+      sourceUrl: '',
+      sourcePage: 'Référence contractuelle non rattachée à une page PDF LFI 2026',
+      verificationStatus: 'UNVERIFIED',
+      calculationMethod: 'Montant isolé sur exercice 2021, jamais cumulé avec les crédits 2026.',
+    },
+    collectivitiesTotalInvestments2026: {
+      id: 'collectivitiesTotalInvestments2026',
+      label: 'Total consolidé des investissements votés des 232 collectivités (2026)',
+      value: null,
+      unit: 'FCFA',
+      fiscalYear: 2026,
+      scope: '201 COMMUNES + 31 RÉGIONS — BUDGETS PRIMITIFS PROPRES COMPLETS',
+      category: 'MACRO_BUDGET',
+      sourceDocument: 'Consolidation nationale des budgets primitifs 2026 en cours',
+      sourceUrl: '',
+      sourcePage: 'Non disponible pour les 232 entités',
+      verificationStatus: 'UNVERIFIED',
+      calculationMethod:
+        'Donnée non consolidée (null) : seuls les transferts LFI (224,69 Mds) et les BP 2026 partiellement publiés sont documentés.',
+    },
+    collectivitiesReferenced: {
+      id: 'collectivitiesReferenced',
+      label: 'Collectivités territoriales référencées dans l’annuaire',
+      value: totalCollectivitesReferenced,
+      unit: 'COLLECTIVITIES',
+      fiscalYear: 2026,
+      scope: '201 COMMUNES + 31 RÉGIONS (2 DISTRICTS AUTONOMES SUIVIS SÉPARÉMENT)',
+      category: 'TERRITORIAL_COVERAGE',
+      sourceDocument: 'Loi n° 2012-1128 portant organisation des collectivités territoriales',
+      sourceUrl: '',
+      sourcePage: 'Référentiel territorial SuiviBudget CI',
+      verificationStatus: 'VERIFIED',
+      calculationMethod: 'Comptage exact des entités MAIRIE (201) + REGION (31).',
+    },
+    citizenProofsVerified: {
+      id: 'citizenProofsVerified',
+      label: 'Constats citoyens de terrain approuvés et publiés',
+      value: approvedCount,
+      unit: 'PROOFS',
+      fiscalYear: 2026,
+      scope: 'PREUVES TERRAIN CITOYENNES MODÉRÉES (STATUT APPROVED)',
+      category: 'CITIZEN_PROOF',
+      sourceDocument: 'Base citoyenne SuiviBudget CI (table citizen_proofs, modération STAFF)',
+      sourceUrl: 'https://suivibudget.vercel.app/observatoire',
+      sourcePage: 'Observatoire citoyen',
+      verificationStatus: 'VERIFIED',
+      calculationMethod: 'Comptage dynamique des preuves citoyennes publiées (APPROVED), objectif 2026 : 1 000.',
+    },
+  };
+
   return {
     investments: {
-      physicalAllCount: projects.length,
+      physicalAllCount: dedupedPhysicalCount,
       physicalAllAmountFcfa,
       physical2026Count,
       physical2026AmountFcfa,
@@ -477,6 +787,10 @@ export function computePublicIndicators(params: {
       statePhysical2026AmountFcfa,
       localPhysical2026Count,
       localPhysical2026AmountFcfa,
+      localCsvPhysical2026Count,
+      localCsvPhysical2026AmountFcfa,
+      localPortalBouakePhysical2026Count,
+      localPortalBouakePhysical2026AmountFcfa,
       localMunicipalPhysical2026Count,
       localMunicipalPhysical2026AmountFcfa,
       localRegionalPhysical2026Count,
@@ -489,6 +803,12 @@ export function computePublicIndicators(params: {
       stateRawCatalog2026AmountFcfa,
       localRawCatalog2026Count,
       localRawCatalog2026AmountFcfa,
+      lfi2026OfficialInvestmentsTotalFcfa: LFI_2026_OFFICIAL_MACRO.lfiInvestmentsTotal2026Fcfa,
+      lfi2026OfficialStateBudgetTotalFcfa: LFI_2026_OFFICIAL_MACRO.stateBudgetGlobal2026Fcfa,
+      lfi2026OfficialLocalTransfersTotalFcfa: LFI_2026_OFFICIAL_MACRO.lfiLocalTransfersTotal2026Fcfa,
+      physicalClassificationLabel,
+      isPhysicalClassificationCertified: false,
+      catalogReconciliation,
     },
     collectivities: {
       communesReferenced,
@@ -500,6 +820,7 @@ export function computePublicIndicators(params: {
       regionsWithPrimitiveBudget2026,
       collectivitesWithCatalogProjects2026: catalogCollectivityKeys.size,
       collectivitesWithPublishedCA: publishedCaIds.size,
+      collectivitiesOwnTotalInvestment2026Fcfa: null,
     },
     citizenProofs: {
       approvedCount,
@@ -510,7 +831,15 @@ export function computePublicIndicators(params: {
       target2026: CITIZEN_PROOF_TARGET_2026,
       strategicShowcasesCount,
     },
-    sectorBreakdown2026: computeSectorBreakdown(projects, { fiscalYear: 2026 }),
+    sectorBreakdown2026: computeSectorBreakdown(
+      classifiedProjects.map(({ project }) => project),
+      {
+        fiscalYear: 2026,
+        scopeKind: 'PHYSICAL_CLASSIFIED',
+        excludeLfi2204040Overlap: true,
+      }
+    ),
+    indicators,
   };
 }
 

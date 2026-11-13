@@ -25,6 +25,7 @@ import { publicCitizenProof } from '../review/domain/citizen';
 import { refreshPublishedAdministrativeAccounts, ADMINISTRATIVE_ACCOUNTS_DATA } from '../data/administrativeAccountsData';
 import { STRATEGIC_PROJECTS_LIST } from '../data/strategicProjectsData';
 import { computePublicIndicators, type PublicIndicatorsSnapshot } from '../utils/publicIndicators';
+import { classifyAndDeduplicateCatalog, classifyBudgetCatalogLine } from '../utils/budgetCatalogClassification';
 import { fetchPublishedLocalBudgets } from './administrativeAccountsService';
 import { enrichWithPrimitiveBudgets, OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
 import {
@@ -94,143 +95,19 @@ export interface NewsletterSubscriber {
 
 export function isTangiblePhysicalProject(p: BudgetProject): boolean {
   if (!p) return false;
-  if (p.id?.startsWith('proj-bouake-') || p.id?.startsWith('proj-infra-')) return true;
-  const text = `${p.title || ''} ${p.details || ''} ${p.sub_nature_expense || ''} ${p.category || ''}`.toLowerCase();
+  const classification = classifyBudgetCatalogLine(p);
+  return classification.isPhysicalProject && !classification.isCrossCatalogOverlap;
+}
 
-  // 1. Exclude ALL Salaries, Bonuses, Missions, Travel, Administration, IT master plans & Operating overhead
-  const excludedKeywords = [
-    'salaire',
-    'salarial',
-    'traitement salarial',
-    'indemnité',
-    'indemnites',
-    'prime',
-    'émolument',
-    'emolument',
-    'gratification',
-    'vacation',
-    'rémunération',
-    'remuneration',
-    'personnel du conseil',
-    'personnel de la mairie',
-    'frais de personnel',
-    'charges de personnel',
-    'charges sociales',
-    'frais de mission',
-    'mission à l',
-    'missions à l',
-    'voyage',
-    'billet d\'avion',
-    'billets d\'avion',
-    'frais de séjour',
-    'hébergement',
-    'carburant et lubrifiant',
-    'frais de carburant',
-    'consommable',
-    'fourniture de bureau',
-    'fournitures de bureau',
-    'schéma directeur',
-    'schema directeur',
-    'système d\'information',
-    'systeme d\'information',
-    'audit organisationnel',
-    'étude institutionnelle',
-    'frais financiers',
-    'remboursement de dette',
-    'intérêts de la dette',
-    'contentieux judiciaire',
-    'assurance du personnel',
-    'cotisation sociale',
-    'dotation globale de fonctionnement',
-    'fonctionnement des services',
-    'charges administratives',
-    'assurer le fonctionnement',
-    'assurer la gestion',
-  ];
-
-  for (const kw of excludedKeywords) {
-    if (text.includes(kw)) {
-      return false;
-    }
-  }
-
-  // 2. Must be a tangible investment / equipment / construction / rehabilitation / community facility
-  const tangibleKeywords = [
-    'construction',
-    'réhabilitation',
-    'rehabilitation',
-    'reprofilage',
-    'bitumage',
-    'voirie',
-    'route',
-    'piste',
-    'pont',
-    'caniveau',
-    'assainissement',
-    'forage',
-    'château d\'eau',
-    'chateau d\'eau',
-    'hydraulique',
-    'adduction',
-    'eau potable',
-    'électrification',
-    'electrification',
-    'éclairage public',
-    'eclairage public',
-    'panneau solaire',
-    'panneaux solaires',
-    'école',
-    'ecole',
-    'collège',
-    'college',
-    'lycée',
-    'lycee',
-    'classe',
-    'bâtiment scolaire',
-    'batiment scolaire',
-    'cantine',
-    'table-banc',
-    'tables-bancs',
-    'maternité',
-    'maternite',
-    'dispensaire',
-    'centre de santé',
-    'centre de sante',
-    'hôpital',
-    'hopital',
-    'chr',
-    'chu',
-    'ambulance',
-    'médical',
-    'medical',
-    'médicament',
-    'chambre froide',
-    'marché',
-    'marche',
-    'hangar',
-    'abattoir',
-    'logement',
-    'foyer',
-    'stade',
-    'terrain de sport',
-    'complexe sportif',
-    'retenue d\'eau',
-    'agricole',
-    'irrigation',
-    'magasin de stockage',
-    'bâtiment',
-    'batiment',
-    'travaux',
-    'aménagement',
-    'amenagement',
-    'équipement',
-    'equipement',
-    'acquisition de matériel',
-    'acquisition de materiel',
-    'acquisition d\'équipements',
-  ];
-
-  return tangibleKeywords.some(kw => text.includes(kw));
+function getClassifiedPhysicalProjects(rawProjects: readonly BudgetProject[]): BudgetProject[] {
+  return classifyAndDeduplicateCatalog(rawProjects)
+    .filter(
+      ({ classification }) =>
+        classification.isPhysicalProject &&
+        !classification.isCrossCatalogOverlap &&
+        !classification.isExactDuplicate
+    )
+    .map(({ project }) => project);
 }
 
 export interface AuthState {
@@ -277,16 +154,16 @@ export const INITIAL_PUBLIC_DOCUMENTS: PublicDocument[] = [
   },
   {
     id: 'doc-lfi-2026-officiel-dgbf',
-    title: "Loi n° 2025-998 du 24 décembre 2025 portant Budget de l'État pour l'année 2026 (LFI 2026)",
+    title: "Loi n° 2025-987 du 19 décembre 2025 portant Budget de l'État pour l'année 2026 (LFI 2026)",
     category: 'BUDGET_OFFICIEL',
     institution_name: "Ministère des Finances et du Budget & Assemblée Nationale",
     year: 2026,
     description: "Texte officiel et intégral de la Loi de Finances Initiale 2026 (17 350,2 milliards FCFA) fixant l'ensemble des recettes, dotations, charges budgétaires et programmes de l'État ivoirien, votée par le Parlement et promulguée au Journal Officiel de la République de Côte d'Ivoire.",
-    file_url: "https://budget.gouv.ci/fileadmin/budget/fichiers/LFI_2026.pdf",
+    file_url: "https://www.dgbf.ci/wp-content/uploads/2025/12/Loi-de-Finances-2026.pdf",
     file_name: "Loi_de_Finances_2026_Cote_d_Ivoire_Officiel_DGBF.pdf",
-    file_size: "18.5 Mo",
+    file_size: "13.1 Mo",
     file_format: "PDF",
-    published_at: "2025-12-24",
+    published_at: "2025-12-19",
     downloads_count: 0,
     is_official: true,
     tags: ["Loi de Finances 2026", "LFI", "Budget de l'État", "DGBF", "Journal Officiel", "Parlement"]
@@ -527,8 +404,8 @@ class DataStore {
   }
 
   private init() {
-    // 1. Projects - Retain only tangible, physically verifiable investments
-    this.projects = [...RAW_BUDGET_PROJECTS].filter(isTangiblePhysicalProject);
+    // 1. Projects - Retain classified, deduplicated physical investments without cross-catalog overlap
+    this.projects = getClassifiedPhysicalProjects(RAW_BUDGET_PROJECTS);
     this.institutions = enrichWithPrimitiveBudgets([...INSTITUTIONS_DATA]);
 
     // 2.b Local Budgets Referential (Multi-exercices, multi-versions)
@@ -904,7 +781,7 @@ class DataStore {
     this.proofs = [];
     this.publicProofs = [];
     this.documents = getOfficialPublicDocuments();
-    this.projects = [...RAW_BUDGET_PROJECTS].filter(isTangiblePhysicalProject);
+    this.projects = getClassifiedPhysicalProjects(RAW_BUDGET_PROJECTS);
     this.institutions = enrichWithPrimitiveBudgets([...INSTITUTIONS_DATA]);
     this.articles = [...INITIAL_ARTICLES];
     this.caidpDirectory = [...CAIDP_MASTER_DIRECTORY];
@@ -1110,7 +987,7 @@ class DataStore {
         budget_investment_fcfa: baseline.budget_investment_fcfa, total_budget_fcfa: baseline.total_budget_fcfa } : row;
     }));
     this.enrichInstitutionsWithBudgets();
-    this.projects = merge(RAW_BUDGET_PROJECTS.filter(row=>!hidden[1].has(row.id)).filter(isTangiblePhysicalProject), rows[1].map(row => ({...row, ...((row.project_metadata || {}) as object)}) as unknown as BudgetProject));
+    this.projects = merge(getClassifiedPhysicalProjects(RAW_BUDGET_PROJECTS.filter(row=>!hidden[1].has(row.id))), rows[1].map(row => ({...row, ...((row.project_metadata || {}) as object)}) as unknown as BudgetProject));
     this.articles = merge(INITIAL_ARTICLES.filter(row=>!hidden[2].has(row.id)), rows[2].map(row => ({ ...row,
       ...((row.article_metadata || {}) as object), author_name: row.author } as unknown as NewsArticle)));
     this.caidpDirectory = merge(CAIDP_MASTER_DIRECTORY.filter(row=>!hidden[3].has(row.id)), rows[3] as unknown as CaidpEntity[]);
