@@ -202,17 +202,28 @@ export const STRATEGIC_INFRASTRUCTURE_PROJECTS: BudgetProject[] = [
     image_url: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80',
     locality_village_neighborhood: 'Grands axes de desserte inter-quartiers de Bouaké',
     created_at: '2025-01-20',
-    source: 'Portail officiel des projets de la Mairie de Bouaké (mairiedebouake.ci/projets)',
+    source: 'Portail officiel des projets de la Mairie de Bouaké (mairiedebouake.ci/projets) — source secondaire municipale à rapprocher',
+    source_url: 'https://mairiedebouake.ci/projets',
+    financial_verification_status: 'TO_VERIFY',
     scope_level: 'LOCAL',
     project_tier: 'MUNICIPAL',
   },
 ];
+
+const LFI_2026_ANNEX_DOCUMENT_URL =
+  'https://www.finances.gouv.ci/images/Documents/LOI_DE_FINANCES_POUR_LA_GESTION_2026_ANNEXE_PROJETS.pdf';
 
 export const NATIONAL_BUDGET_PROJECTS: BudgetProject[] = (officialNationalProjects2026 as unknown as BudgetProject[]).map(p => ({
   ...p,
   scope_level: 'NATIONAL' as const,
   project_tier: 'STATE' as const,
   master_builder: p.ministry_name || 'État Central (Ministère Sectoriel)',
+  source: p.source && p.source.trim().length > 0 && p.source !== 'Loi de Finances 2026 (DGBF)'
+    ? p.source
+    : 'Annexe Projets / Loi de Finances 2026 (DGBF) — page et ligne PDF individuelles non indexées',
+  source_url: p.source_url || LFI_2026_ANNEX_DOCUMENT_URL,
+  source_document_id: p.source_document_id || 'doc-lfi-2026-officiel-dgbf',
+  financial_verification_status: p.financial_verification_status || 'TO_VERIFY',
 }));
 
 export const LOCAL_BUDGET_PROJECTS: BudgetProject[] = OFFICIAL_CSV_PROJECTS.map(p => {
@@ -222,6 +233,12 @@ export const LOCAL_BUDGET_PROJECTS: BudgetProject[] = OFFICIAL_CSV_PROJECTS.map(
     scope_level: 'LOCAL' as const,
     project_tier: isRegional ? ('REGIONAL' as const) : ('MUNICIPAL' as const),
     master_builder: isRegional ? `Conseil Régional ${p.region_name || ''}`.trim() : (p.commune_name ? `Mairie de ${p.commune_name}` : 'Mairie'),
+    source: p.source && p.source.trim().length > 0 && p.source !== "Loi de Finances - Budget de l'État de Côte d'Ivoire"
+      ? p.source
+      : 'Loi de Finances 2026 — extrait catalogue budgétaire DGBF (page/ligne individuelle non indexée)',
+    source_url: p.source_url || LFI_2026_ANNEX_DOCUMENT_URL,
+    source_document_id: p.source_document_id || 'doc-lfi-2026-officiel-dgbf',
+    financial_verification_status: p.financial_verification_status || 'TO_VERIFY',
   };
 });
 

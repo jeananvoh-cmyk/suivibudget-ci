@@ -32,6 +32,10 @@ export interface CatalogLineClassification {
   category: BudgetCatalogCategory;
   reason: string;
   provenancePool: CatalogProvenancePool;
+  classificationMethod: 'AUTOMATED_KEYWORD_AND_SCOPE_RULES';
+  verificationStatus: 'AUTOMATED_CLASSIFICATION';
+  confidence: 'LOW' | 'MEDIUM' | 'HIGH';
+  provenanceLabel: string;
   isPhysicalProject: boolean;
   isNonPhysicalExpense: boolean;
   isCrossCatalogOverlap: boolean;
@@ -142,7 +146,12 @@ const NON_PHYSICAL_CATEGORIES: ReadonlySet<BudgetCatalogCategory> = new Set([
  * (`proj-bouake-`, `proj-infra-`) et sans assimiler un mot-clé isolé (« travaux », « équipement »)
  * à un chantier physique certifié.
  */
-export function classifyBudgetCatalogLine(project: BudgetProject): CatalogLineClassification {
+function classifyBudgetCatalogLineCore(
+  project: BudgetProject
+): Omit<
+  CatalogLineClassification,
+  'classificationMethod' | 'verificationStatus' | 'confidence' | 'provenanceLabel'
+> {
   const title = normalizeForClassification(project.title);
   const provenancePool = resolveProvenancePool(project);
 
@@ -366,6 +375,25 @@ export function classifyBudgetCatalogLine(project: BudgetProject): CatalogLineCl
     isCrossCatalogOverlap: false,
     isExactDuplicate: false,
     duplicateOfId: null,
+  };
+}
+
+export function classifyBudgetCatalogLine(project: BudgetProject): CatalogLineClassification {
+  const base = classifyBudgetCatalogLineCore(project);
+  const confidence: CatalogLineClassification['confidence'] =
+    base.category === 'UNDETERMINED'
+      ? 'LOW'
+      : base.isCrossCatalogOverlap ||
+          base.category === 'PERSONNEL' ||
+          base.category === 'TRANSFER_SUBSIDY'
+        ? 'HIGH'
+        : 'MEDIUM';
+  return {
+    ...base,
+    classificationMethod: 'AUTOMATED_KEYWORD_AND_SCOPE_RULES',
+    verificationStatus: 'AUTOMATED_CLASSIFICATION',
+    confidence,
+    provenanceLabel: POOL_LABELS[base.provenancePool],
   };
 }
 

@@ -28,7 +28,12 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { dataStore, INITIAL_PUBLIC_DOCUMENTS } from '../../services/dataStore';
 import { RAW_BUDGET_PROJECTS } from '../../data/budgetData';
+import { OFFICIAL_PRIMITIVE_BUDGETS, getPrimitiveBudgetCatalogStats } from '../../data/officialPrimitiveBudgets';
+import { LOCAL_BUDGETS_REFERENTIAL } from '../../data/localBudgetsReferential';
 import { ADMINISTRATIVE_ACCOUNTS_DATA, hasCA } from '../../data/administrativeAccountsData';
+import { formatQualifiedFCFA } from '../formatters';
+import { generateProjectPassport } from '../projectPassport';
+import { classifyBudgetCatalogLine } from '../budgetCatalogClassification';
 import {
   CITIZEN_PROOF_TARGET_2026,
   LFI_2026_OFFICIAL_MACRO,
@@ -111,11 +116,13 @@ describe('Public Indicators Reconciliation & Traceability', () => {
     expect(stateCatalogPhysical2026.verificationStatus).toBe('AUTOMATED_CLASSIFICATION');
     expect(stateCatalogPhysical2026.value).not.toBe(lfiInvestmentsTotal2026.value);
     expect(localCsvPhysical2026.verificationStatus).toBe('AUTOMATED_CLASSIFICATION');
-    expect(bouakePortalPhysical2026.verificationStatus).toBe('UNVERIFIED');
+    expect(bouakePortalPhysical2026.verificationStatus).toBe('SECONDARY_SOURCE');
 
-    // National sum of collectivities' own voted investments must stay null/UNVERIFIED
+    // National sum of collectivities' own voted investments must stay null / NOT_CONSOLIDATED
     expect(collectivitiesTotalInvestments2026.value).toBeNull();
-    expect(collectivitiesTotalInvestments2026.verificationStatus).toBe('UNVERIFIED');
+    expect(collectivitiesTotalInvestments2026.verificationStatus).toBe('NOT_CONSOLIDATED');
+    expect(snapshot.indicators.collectivitiesReferenced.verificationStatus).toBe('REPORTED');
+    expect(snapshot.indicators.citizenProofsVerified.verificationStatus).toBe('REPORTED');
   });
 
   it('prevents reappearance of erroneous legal reference Loi n° 2025-998 and enforces Loi n° 2025-987', () => {
@@ -483,5 +490,90 @@ describe('Public Indicators Reconciliation & Traceability', () => {
     expect(llmsTxt).toContain('1 062,7 Milliards FCFA');
     expect(llmsTxt).toContain('122,5 Milliards FCFA');
     expect(llmsTxt).toContain('classification automatisée');
+  });
+
+  it('Section 9 closure gate: keeps OFFICIAL_PRIMITIVE_BUDGETS (46) + LOCAL_BUDGETS_REFERENTIAL 2026 (47, +Tiassalé) reconciled, free of 60/40 splits, and strictly honest on verification status', () => {
+    const stats = getPrimitiveBudgetCatalogStats();
+    expect(stats.totalEntries).toBe(46);
+    expect(stats.communesCount).toBe(30);
+    expect(stats.regionsCount).toBe(16);
+    expect(stats.districtsCount).toBe(0);
+    expect(stats.otherEntitiesCount).toBe(0);
+    expect(stats.duplicateSourceUrlsCount).toBe(0);
+    expect(stats.bySourceType.SECONDARY_MEDIA).toBe(46);
+    expect(stats.byVerificationStatus.REPORTED).toBe(35);
+    expect(stats.byVerificationStatus.APPROXIMATE).toBe(8);
+    expect(stats.byVerificationStatus.LOWER_BOUND).toBe(3);
+
+    // 1:1 parity across the 46 OFFICIAL_PRIMITIVE_BUDGETS entries + explicit Tiassalé 2026 APPROXIMATE entry (= 47 in LOCAL_BUDGETS_REFERENTIAL)
+    const ref2026Current = LOCAL_BUDGETS_REFERENTIAL.filter(
+      (b) => b.fiscal_year === 2026 && b.is_current_version
+    );
+    expect(ref2026Current).toHaveLength(47);
+    for (const ref of ref2026Current) {
+      if (ref.institution_id === 'inst-com-tiassale') {
+        expect(ref.total_amount).toBe(1_760_000_000);
+        expect(ref.amount_precision).toBe('APPROXIMATE');
+        expect(ref.operating_amount).toBeNull();
+        expect(ref.investment_amount).toBeNull();
+        continue;
+      }
+      const canonical = OFFICIAL_PRIMITIVE_BUDGETS[ref.institution_id];
+      expect(canonical, ref.institution_id).toBeDefined();
+      expect(ref.total_amount, ref.institution_id).toBe(canonical.total_voted_fcfa);
+      expect(ref.investment_amount, ref.institution_id).toBe(canonical.investment_voted_fcfa);
+      expect(ref.operating_amount, ref.institution_id).toBe(canonical.functioning_voted_fcfa);
+    }
+
+    // Never invent splits or functioning/investment subtraction on reported secondary articles
+    for (const id of [
+      'inst-com-agboville',
+      'inst-com-bettie',
+      'inst-com-boundiali',
+      'inst-com-tanda',
+      'inst-com-toumodi',
+      'inst-com-yopougon',
+      'inst-com-cocody',
+    ]) {
+      expect(OFFICIAL_PRIMITIVE_BUDGETS[id].investment_voted_fcfa, id).toBeNull();
+      expect(OFFICIAL_PRIMITIVE_BUDGETS[id].functioning_voted_fcfa, id).toBeNull();
+    }
+
+    // Formatters must never present LOWER_BOUND / APPROXIMATE figures as exact amounts
+    expect(formatQualifiedFCFA(17_000_000_000, 'LOWER_BOUND')).toMatch(/^Plus de /);
+    expect(formatQualifiedFCFA(1_586_000_000, 'APPROXIMATE')).toMatch(/^Environ /);
+
+    // Catalog lines preserve DGBF PDF traceability without pretending verified per-page or physical certification
+    const sampleState = RAW_BUDGET_PROJECTS.find((p) => p.scope_level === 'NATIONAL' && p.id !== 'proj-infra-seguela-touba-104mrd')!;
+    expect(sampleState.source_url).toContain('LOI_DE_FINANCES');
+    expect(sampleState.source_document_id).toBe('doc-lfi-2026-officiel-dgbf');
+    expect(sampleState.financial_verification_status).toBe('TO_VERIFY');
+    const classification = classifyBudgetCatalogLine(sampleState);
+    expect(classification.classificationMethod).toBe('AUTOMATED_KEYWORD_AND_SCOPE_RULES');
+    expect(classification.verificationStatus).toBe('AUTOMATED_CLASSIFICATION');
+
+    const catalogPassport = generateProjectPassport(sampleState);
+    const budgetStage = catalogPassport.stages.find((s) => s.id === 'BUDGET_VOTED')!;
+    expect(budgetStage.status).toBe('PENDING_DOCUMENTATION');
+    expect(budgetStage.status).not.toBe('VERIFIED_OFFICIAL');
+
+    // Never elevate DECLARED_ADMIN to OFFICIAL_SOURCE or VERIFIED_OFFICIAL
+    const declaredPassport = generateProjectPassport({
+      ...sampleState,
+      id: 'proj-declared-test',
+      data_provenance: 'DECLARED_ADMIN',
+      source_page: undefined,
+      financial_verification_status: undefined,
+    });
+    expect(declaredPassport.facts.budget_amount.provenance).toBe('UNVERIFIED_INPUT');
+    expect(declaredPassport.stages.find((s) => s.id === 'BUDGET_VOTED')!.status).toBe('PENDING_DOCUMENTATION');
+
+    // Separate Bouake portal and 2021 multi-year outside LFI 2026 totals
+    const snapshot = dataStore.getPublicIndicators();
+    expect(snapshot.indicators.bouakePortalPhysical2026.verificationStatus).toBe('SECONDARY_SOURCE');
+    expect(snapshot.indicators.multiYearStateCatalogPre2026.fiscalYear).toBe('MULTI_YEAR');
+    expect(snapshot.investments.statePhysical2026AmountFcfa).not.toBe(
+      LFI_2026_OFFICIAL_MACRO.lfiInvestmentsTotal2026Fcfa
+    );
   });
 });

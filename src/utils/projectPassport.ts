@@ -393,13 +393,19 @@ export function generateProjectPassport(
   const citizenNeedOrigin = project.citizen_need_origin?.trim() || project.initiative_source?.trim();
   const citizenNeedRecorded = Boolean(citizenNeedOrigin);
 
+  const hasVerifiedBudgetEvidence = Boolean(
+    account ||
+    (project.data_provenance !== 'DECLARED_ADMIN' &&
+      (project.financial_verification_status === 'VERIFIED' || Boolean(project.source_page)))
+  );
+
   stages.push({
     id: 'NEED_PROGRAMMING',
     stepNumber: 1,
     label: 'Besoin & Programmation',
     shortDescription: 'Traçabilité du besoin citoyen d\'origine et inscription au programme d\'investissement',
-    status: hasProgram ? (projectProvenance==='OFFICIAL_SOURCE' ? 'VERIFIED_OFFICIAL' : 'PENDING_DOCUMENTATION') : 'NOT_FOUND_PUBLICLY',
-    statusLabel: hasProgram ? (projectProvenance==='OFFICIAL_SOURCE' ? 'Programmation Budgétaire Officielle' : 'Programmation déclarée') : 'Donnée non retrouvée publiquement',
+    status: hasProgram ? (hasVerifiedBudgetEvidence ? 'VERIFIED_OFFICIAL' : 'PENDING_DOCUMENTATION') : 'NOT_FOUND_PUBLICLY',
+    statusLabel: hasProgram ? (hasVerifiedBudgetEvidence ? 'Programmation Budgétaire Officielle' : 'Programmation cataloguée (source à relier)') : 'Donnée non retrouvée publiquement',
     dataPoints: [
       {
         label: 'Programmation budgétaire',
@@ -434,13 +440,20 @@ export function generateProjectPassport(
   // -------------------------------------------------------------------------
   // ÉTAPE 2 : BUDGET VOTÉ
   // -------------------------------------------------------------------------
+  const hasVotedAmount = project.publication_status !== 'DRAFT' && project.budget_amount_fcfa != null && project.budget_amount_fcfa > 0;
   stages.push({
     id: 'BUDGET_VOTED',
     stepNumber: 2,
     label: 'Budget Voté (BP)',
     shortDescription: 'Crédits votés par l\'autorité délibérante (Loi de Finances ou Conseil Municipal)',
-    status: (project.data_provenance !== 'DECLARED_ADMIN' && project.publication_status !== 'DRAFT' && project.budget_amount_fcfa != null && project.budget_amount_fcfa > 0) ? 'VERIFIED_OFFICIAL' : 'PENDING_DOCUMENTATION',
-    statusLabel: project.data_provenance === 'DECLARED_ADMIN' ? 'Montant déclaré, vérification distincte requise' : (project.publication_status !== 'DRAFT' && project.budget_amount_fcfa != null && project.budget_amount_fcfa > 0) ? 'Voté au Budget' : 'Montant non renseigné',
+    status: (project.data_provenance !== 'DECLARED_ADMIN' && hasVerifiedBudgetEvidence && hasVotedAmount) ? 'VERIFIED_OFFICIAL' : 'PENDING_DOCUMENTATION',
+    statusLabel: project.data_provenance === 'DECLARED_ADMIN'
+      ? 'Montant déclaré, vérification distincte requise'
+      : !hasVotedAmount
+        ? 'Montant non renseigné'
+        : hasVerifiedBudgetEvidence
+          ? 'Voté au Budget (source vérifiée)'
+          : 'Ligne cataloguée — page/pièce officielle à vérifier',
     dataPoints: [
       {
         label: 'Exercice fiscal',

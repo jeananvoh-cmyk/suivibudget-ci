@@ -5,7 +5,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { BudgetProject, ProjectStatus, Institution, NewsArticle, SiteSettings, CitizenProof, PrimitiveBudgetInfo, PublicDocument } from '../types';
 import { dataStore } from '../services/dataStore';
 import { sanitizeCsvCell } from '../utils/security';
-import { formatFCFA, formatDateFR, getStatusConfig, formatAmountInWords, calculateContractualElapsedPercentage } from '../utils/formatters';
+import { formatFCFA, formatQualifiedFCFA, formatDateFR, getStatusConfig, formatAmountInWords, calculateContractualElapsedPercentage } from '../utils/formatters';
 import { DocumentStorageService } from '../services/documentStorageService';
 import { processLeaderPhotoFile } from '../utils/imageHelpers';
 import { SocialPostGenerator } from '../components/SocialPostGenerator';
@@ -1852,7 +1852,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                           {inst.primitive_budget?.total_voted_fcfa ? (
                             <div>
                               <span className="font-black text-emerald-800 text-xs sm:text-sm block">
-                                {formatFCFA(inst.primitive_budget.total_voted_fcfa)}
+                                {formatQualifiedFCFA(inst.primitive_budget.total_voted_fcfa, inst.primitive_budget.precision)}
                               </span>
                               <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-slate-500 pt-0.5">
                                 <span>Voté le {inst.primitive_budget.voted_date || '2024'}</span>
@@ -1927,7 +1927,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                           ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
                           : 'bg-amber-50/40 text-amber-700 border-dashed border-amber-300 hover:bg-amber-100'
                       }`}
-                      title={inst.primitive_budget?.total_voted_fcfa ? `Modifier le budget primitif voté (${formatFCFA(inst.primitive_budget.total_voted_fcfa)})` : 'Ajouter le budget primitif voté et le lien de preuve'} aria-label={inst.primitive_budget?.total_voted_fcfa ? `Modifier le budget primitif voté (${formatFCFA(inst.primitive_budget.total_voted_fcfa)})` : 'Ajouter le budget primitif voté et le lien de preuve'}
+                      title={inst.primitive_budget?.total_voted_fcfa ? `Modifier le budget primitif voté (${formatQualifiedFCFA(inst.primitive_budget.total_voted_fcfa, inst.primitive_budget.precision)})` : 'Ajouter le budget primitif voté et le lien de preuve'} aria-label={inst.primitive_budget?.total_voted_fcfa ? `Modifier le budget primitif voté (${formatQualifiedFCFA(inst.primitive_budget.total_voted_fcfa, inst.primitive_budget.precision)})` : 'Ajouter le budget primitif voté et le lien de preuve'}
                     >
                       <Receipt className="w-3 h-3 shrink-0 text-amber-600" />
                       <span className="truncate">{inst.primitive_budget?.total_voted_fcfa ? 'Budget' : '+ Budget'}</span>

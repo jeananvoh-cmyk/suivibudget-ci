@@ -1,7 +1,7 @@
 import type { BudgetProject, CitizenProof, Institution, ImpactStats } from '../types';
 import type { AdministrativeAccount } from '../types/administrativeAccount';
 import type { LocalBudget } from '../types/localBudget';
-import { OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
+import { OFFICIAL_PRIMITIVE_BUDGETS, getPrimitiveBudgetCatalogStats, PrimitiveBudgetCatalogStats } from '../data/officialPrimitiveBudgets';
 import {
   classifyAndDeduplicateCatalog,
   reconcileBudgetCatalog,
@@ -137,6 +137,7 @@ export interface CollectivityCoverageSummary {
   collectivitesWithCatalogProjects2026: number;
   collectivitesWithPublishedCA: number;
   collectivitiesOwnTotalInvestment2026Fcfa: null;
+  primitiveBudgetsCatalog: PrimitiveBudgetCatalogStats;
 }
 
 export interface CitizenProofSummary {
@@ -151,8 +152,12 @@ export interface CitizenProofSummary {
 
 export type IndicatorVerificationStatus =
   | 'VERIFIED'
-  | 'UNVERIFIED'
+  | 'REPORTED'
+  | 'SECONDARY_SOURCE'
+  | 'APPROXIMATE'
+  | 'LOWER_BOUND'
   | 'AUTOMATED_CLASSIFICATION'
+  | 'UNVERIFIED'
   | 'NOT_CONSOLIDATED';
 
 export interface StructuredPublicIndicator {
@@ -714,7 +719,7 @@ export function computePublicIndicators(params: {
       sourceDocument: 'Portail officiel de la Mairie de Bouaké (mairiedebouake.ci/projets)',
       sourceUrl: 'https://mairiedebouake.ci/projets',
       sourcePage: 'Portail projets (vérification documentaire en cours)',
-      verificationStatus: 'UNVERIFIED',
+      verificationStatus: 'SECONDARY_SOURCE',
       calculationMethod:
         'Agrégat isolé des projets physiques issus du portail communal Bouaké (excluant la digitalisation des taxes). Ne pas additionner au total LFI.',
     },
@@ -743,9 +748,9 @@ export function computePublicIndicators(params: {
       sourceDocument: 'Consolidation nationale des budgets primitifs 2026 en cours',
       sourceUrl: '',
       sourcePage: 'Non disponible pour les 232 entités',
-      verificationStatus: 'UNVERIFIED',
+      verificationStatus: 'NOT_CONSOLIDATED',
       calculationMethod:
-        'Donnée non consolidée (null) : seuls les transferts LFI (224,69 Mds) et les BP 2026 partiellement publiés sont documentés.',
+        'Donnée non consolidée (null) : seuls les transferts LFI (224,69 Mds) et les BP 2026 partiellement publiés sur presse secondaire sont documentés.',
     },
     collectivitiesReferenced: {
       id: 'collectivitiesReferenced',
@@ -755,11 +760,11 @@ export function computePublicIndicators(params: {
       fiscalYear: 2026,
       scope: '201 COMMUNES + 31 RÉGIONS (2 DISTRICTS AUTONOMES SUIVIS SÉPARÉMENT)',
       category: 'TERRITORIAL_COVERAGE',
-      sourceDocument: 'Loi n° 2012-1128 portant organisation des collectivités territoriales',
+      sourceDocument: 'Loi n° 2012-1128 portant organisation des collectivités territoriales (référentiel DGDDL)',
       sourceUrl: '',
-      sourcePage: 'Référentiel territorial SuiviBudget CI',
-      verificationStatus: 'VERIFIED',
-      calculationMethod: 'Comptage exact des entités MAIRIE (201) + REGION (31).',
+      sourcePage: 'Référentiel territorial SuiviBudget CI (PDF JO non annexé)',
+      verificationStatus: 'REPORTED',
+      calculationMethod: 'Comptage exact des entités MAIRIE (201) + REGION (31) dans le référentiel annuaire.',
     },
     citizenProofsVerified: {
       id: 'citizenProofsVerified',
@@ -772,8 +777,8 @@ export function computePublicIndicators(params: {
       sourceDocument: 'Base citoyenne SuiviBudget CI (table citizen_proofs, modération STAFF)',
       sourceUrl: 'https://suivibudget.vercel.app/observatoire',
       sourcePage: 'Observatoire citoyen',
-      verificationStatus: 'VERIFIED',
-      calculationMethod: 'Comptage dynamique des preuves citoyennes publiées (APPROVED), objectif 2026 : 1 000.',
+      verificationStatus: 'REPORTED',
+      calculationMethod: 'Comptage dynamique des preuves citoyennes publiées (APPROVED), objectif 2026 : 1 000 (constat citoyen distinct d\'une certification comptable officielle).',
     },
   };
 
@@ -821,6 +826,7 @@ export function computePublicIndicators(params: {
       collectivitesWithCatalogProjects2026: catalogCollectivityKeys.size,
       collectivitesWithPublishedCA: publishedCaIds.size,
       collectivitiesOwnTotalInvestment2026Fcfa: null,
+      primitiveBudgetsCatalog: getPrimitiveBudgetCatalogStats(),
     },
     citizenProofs: {
       approvedCount,

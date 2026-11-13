@@ -203,17 +203,17 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
               <span>Investissements Publics 2026</span>
             </div>
             <h1 className="text-xl sm:text-3xl font-black tracking-tight text-white">
-              Observatoire des Projets Locaux & Grands Chantiers en Côte d'Ivoire
+              Observatoire des Lignes Budgétaires & Opérations d'Investissement en Côte d'Ivoire
             </h1>
             <p className="text-xs sm:text-sm text-slate-200 mt-1.5 max-w-2xl leading-relaxed">
-              Explorez les <strong>{localProjectsTotal.length.toLocaleString('fr-FR')} projets communaux, régionaux</strong> et <strong>{nationalProjectsTotal.length.toLocaleString('fr-FR')} chantiers d'État prévus</strong>, et contribuez avec vos constats sur le terrain.
+              Explorez les <strong>{localProjectsTotal.length.toLocaleString('fr-FR')} opérations locales recensées</strong> et <strong>{nationalProjectsTotal.length.toLocaleString('fr-FR')} opérations d'État (classification automatisée — à vérifier sur pièce)</strong>, et contribuez avec vos constats sur le terrain.
             </p>
           </div>
 
           {/* Quick Metrics */}
           <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl border border-white/20 flex-shrink-0 w-full sm:w-auto justify-around sm:justify-start">
             <div>
-              <span className="text-[10px] text-slate-300 block font-bold uppercase tracking-wider">Chantiers Actifs</span>
+              <span className="text-[10px] text-slate-300 block font-bold uppercase tracking-wider">Opérations recensées</span>
               <span className="text-lg sm:text-2xl font-black text-white">{filteredProjects.length.toLocaleString('fr-FR')}</span>
             </div>
             <div className="w-px h-8 bg-white/20 mx-1"></div>
@@ -310,9 +310,9 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                     ? 'bg-slate-900 text-white shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
-                title="Afficher uniquement les chantiers physiques et équipements concrets"
+                title="Afficher uniquement les opérations physiques identifiées par classification automatisée (non certifiées physiquement)"
               >
-                Chantiers Réels
+                Opérations Physiques
               </button>
               <button
                 onClick={() => {

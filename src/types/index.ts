@@ -97,6 +97,17 @@ export interface StateGrantDocumentaryEvidence {
   };
 }
 
+export type PrimitiveBudgetSourceType = 'OFFICIAL_PRIMARY' | 'SECONDARY_MEDIA' | 'OTHER';
+
+export type PrimitiveBudgetVerificationStatus =
+  | 'OFFICIAL_DOCUMENT'
+  | 'SECONDARY_SOURCE'
+  | 'VERIFIED'
+  | 'REPORTED'
+  | 'APPROXIMATE'
+  | 'LOWER_BOUND'
+  | 'UNVERIFIED';
+
 export interface PrimitiveBudgetInfo {
   audit_id?: string;
   fiscal_year?: number;
@@ -107,11 +118,15 @@ export interface PrimitiveBudgetInfo {
   voted_date: string;
   source: string;
   source_url?: string;
+  source_type?: PrimitiveBudgetSourceType;
+  source_title?: string;
+  publication_date?: string;
   projects_count?: number;
   session_notes?: string;
+  verification_note?: string;
   precision?: 'EXACT' | 'APPROXIMATE' | 'LOWER_BOUND' | 'UPPER_BOUND' | 'UNKNOWN';
   editor_source?: string;
-  verification_status?: 'OFFICIAL_DOCUMENT' | 'SECONDARY_SOURCE';
+  verification_status?: PrimitiveBudgetVerificationStatus;
   pdf_page?: number;
   sha256?: string;
   document_reference?: string;
