@@ -52,6 +52,7 @@ import { VERIFIED_DOCUMENT_PAGINATION_CONTROLS } from '../data/officialPublicDoc
 interface AdministrativeAccountViewProps {
   institution: Institution;
   onOpenDocRequest: (documentTitle?: string) => void;
+  initialMatchLevel?: 'ALL' | 'STRONG' | 'PARTIAL' | 'NONE';
 }
 
 const normalizeInstitutionLabel = (s: string) =>
@@ -79,14 +80,46 @@ export const getOperationPhysicalStatusLabel = (status: CAInvestmentOperation['c
   return status;
 };
 
+export const matchesProcurementMatchLevel = (
+  selectedMatchLevel: 'ALL' | 'STRONG' | 'PARTIAL' | 'NONE',
+  procurement_match?: CAInvestmentOperation['procurement_match'] | null
+): boolean => {
+  return selectedMatchLevel === 'ALL' || (
+    selectedMatchLevel === 'NONE'
+      ? (!procurement_match || procurement_match.match_level === 'NONE')
+      : procurement_match?.match_level === selectedMatchLevel
+  );
+};
+
+export const filterCaOperations = (
+  operations: CAInvestmentOperation[],
+  search: string,
+  selectedSector: string,
+  selectedMatchLevel: 'ALL' | 'STRONG' | 'PARTIAL' | 'NONE'
+): CAInvestmentOperation[] => {
+  return (operations || []).filter(op => {
+    const matchesSearch = !search.trim() ||
+      op.title.toLowerCase().includes(search.toLowerCase().trim()) ||
+      (op.location && op.location.toLowerCase().includes(search.toLowerCase().trim())) ||
+      (op.operation_reference && op.operation_reference.toLowerCase().includes(search.toLowerCase().trim())) ||
+      (op.procurement_match?.contractor && op.procurement_match.contractor.toLowerCase().includes(search.toLowerCase().trim()));
+
+    const matchesSector = selectedSector === 'ALL' || op.sector === selectedSector;
+    const matchesMatch = matchesProcurementMatchLevel(selectedMatchLevel, op.procurement_match);
+
+    return matchesSearch && matchesSector && matchesMatch;
+  });
+};
+
 export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps> = ({
   institution,
   onOpenDocRequest,
+  initialMatchLevel = 'ALL',
 }) => {
   const [isExplainerOpen, setIsExplainerOpen] = useState(false);
   const [opSearch, setOpSearch] = useState('');
   const [selectedSector, setSelectedSector] = useState('ALL');
-  const [selectedMatchLevel, setSelectedMatchLevel] = useState<'ALL' | 'STRONG' | 'PARTIAL' | 'NONE'>('ALL');
+  const [selectedMatchLevel, setSelectedMatchLevel] = useState<'ALL' | 'STRONG' | 'PARTIAL' | 'NONE'>(initialMatchLevel);
   const [copiedSha256, setCopiedSha256] = useState(false);
   const [fieldContributionMsg, setFieldContributionMsg] = useState<string | null>(null);
   const [, setStoreTick] = useState(0);
@@ -168,7 +201,11 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
       (op.procurement_match?.contractor && op.procurement_match.contractor.toLowerCase().includes(opSearch.toLowerCase().trim()));
 
     const matchesSector = selectedSector === 'ALL' || op.sector === selectedSector;
-    const matchesMatch = selectedMatchLevel === 'ALL' || (op.procurement_match && op.procurement_match.match_level === selectedMatchLevel);
+    const matchesMatch = selectedMatchLevel === 'ALL' || (
+      selectedMatchLevel === 'NONE'
+        ? (!op.procurement_match || op.procurement_match.match_level === 'NONE')
+        : op.procurement_match?.match_level === selectedMatchLevel
+    );
 
     return matchesSearch && matchesSector && matchesMatch;
   });
