@@ -29,11 +29,11 @@ Le pilote a été couronné d'un succès technique complet :
 
 ### 2.1. Nature et Empreinte du Document
 - **Document source :** Scan officiel de la délibération du Conseil Municipal de la Commune de Cocody relative au Compte Administratif de l'exercice 2024.
-- **Pagination :** 44 pages PDF (pages imprimées 1/45 à 45/45, la page 42 physique étant absente ou sautée lors de la numérisation).
+- **Pagination :** `44` pages physiques PDF (numérotation imprimée allant jusqu'à `44/45` sur `45` pages annoncées ; la page imprimée `20/45` est absente du scan d'origine et son contenu n'est pas restitué).
 - **Fascicules :** 2 tomes (`Cocody_CA_2024_pages_01-22.pdf` et `Cocody_CA_2024_pages_23-44.pdf`).
 - **Empreinte cryptographique globale :**  
-  `SHA-256 : 941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf`
-- **Visas officiels :** Cachet et visa de la tutelle préfectorale (date lisible : 28 mars 2025) et signature du Maire / Rapporteur municipal (page PDF 40 / imprimée 41/45).
+  `SHA-256 : 941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf` (`14 072 943` octets)
+- **Visas officiels :** Délibération municipale en séance du **8 juillet 2025** (`2025-07-08`) et approbation de la tutelle préfectorale (Préfet d'Abidjan) du **22 juillet 2025** (`2025-07-22`, sous le **`n° 002/PA/D.CAB`**, page PDF 40 / imprimée 41/45).
 
 ### 2.2. Chiffres Clés Certifiés et Équilibres
 

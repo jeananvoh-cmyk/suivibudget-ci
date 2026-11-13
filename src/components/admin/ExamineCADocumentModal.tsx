@@ -254,7 +254,13 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                   {document.page_count && (
                     <>
                       <span>•</span>
-                      <span>Pages : <strong>{document.page_count}</strong></span>
+                      <span>
+                        Pages : <strong>
+                          {document.physical_page_count && document.printed_page_count
+                            ? `${document.physical_page_count} pages physiques PDF (imprimées jusqu'à 44/${document.printed_page_count})`
+                            : document.page_count}
+                        </strong>
+                      </span>
                     </>
                   )}
                   {document.is_scanned && (
@@ -278,6 +284,12 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                 <span>{document.is_multipart ? 'Ouvrir (Volet 1)' : 'Ouvrir le PDF'}</span>
               </button>
             </div>
+
+            {document.pagination_note && (
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-950">
+                <strong className="font-bold">Pagination contrôlée :</strong> {document.pagination_note}
+              </div>
+            )}
 
             {/* Volets multi-parties si existants */}
             {document.is_multipart && document.document_parts && document.document_parts.length > 0 && (

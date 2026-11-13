@@ -285,3 +285,40 @@ export function findOfficialDocumentByChecksum(sha256: string, documents: readon
   const source = getReviewSourceDocuments(documents).find(doc => doc.id === matches[0].id)!;
   return source.sha256 ? { ...matches[0], tags: matches[0].tags ? [...matches[0].tags] : undefined } : undefined;
 }
+
+export interface VerifiedDocumentPaginationControl {
+  readonly sha256: string;
+  readonly fileSizeBytes: number;
+  readonly physicalPageCount: number;
+  readonly printedPageCount: number;
+  readonly missingPrintedPages: readonly string[];
+  readonly paginationNote: string;
+}
+
+export const VERIFIED_DOCUMENT_PAGINATION_CONTROLS: Readonly<Record<string, VerifiedDocumentPaginationControl>> = Object.freeze({
+  '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf': {
+    sha256: '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf',
+    fileSizeBytes: 14072943,
+    physicalPageCount: 44,
+    printedPageCount: 45,
+    missingPrintedPages: ['20/45'],
+    paginationNote: "44 pages physiques PDF (numérotation imprimée jusqu'à 44/45 sur 45 annoncées ; page imprimée 20/45 absente du scan d'origine, contenu non restitué).",
+  },
+});
+
+export function applyVerifiedDocumentPagination(doc: PublicDocument): PublicDocument {
+  const sha = doc.checksum_sha256?.toLowerCase().trim();
+  const control = sha ? VERIFIED_DOCUMENT_PAGINATION_CONTROLS[sha] : undefined;
+  if (!control) return doc;
+  const correctedPageCount = doc.page_count == null || doc.page_count === control.printedPageCount
+    ? control.physicalPageCount
+    : doc.page_count;
+  return {
+    ...doc,
+    page_count: correctedPageCount,
+    physical_page_count: doc.physical_page_count ?? control.physicalPageCount,
+    printed_page_count: doc.printed_page_count ?? control.printedPageCount,
+    missing_printed_pages: doc.missing_printed_pages ?? [...control.missingPrintedPages],
+    pagination_note: doc.pagination_note ?? control.paginationNote,
+  };
+}

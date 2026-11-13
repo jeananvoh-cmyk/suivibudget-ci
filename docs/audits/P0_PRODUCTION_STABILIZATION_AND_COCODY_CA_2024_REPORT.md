@@ -2,39 +2,77 @@
 
 - **Dépôt** : `jeananvoh-cmyk/suivibudget-ci`
 - **Branche / PR** : `codex/p0-production-cocody-2024` (PR #65 ciblant `master`)
-- **Base `master`** : `901a20396603de2c2bc0a3f9744d3977d33dbdb0` (fusion PR #63)
+- **Base `master`** : `901a2033084c5aa1ca76bc4ce4625e1884d48ab9` (fusion PR #63)
 - **Projet Supabase autorisé** : `cdesuvcozcetdtvibgqs` (`eu-west-1`) — **Contrôlé en lecture seule (`REMOTE_SUPABASE_WRITES = 0`)**
 
 ---
 
-## 1. Chantier A — Recette et Stabilisation de Production
+## 1. Chantier A — Recette et Stabilisation de Production & Sécurité Supabase
 
 ### 1.1 Vérification de l'état de production déployé (`https://suivibudget.vercel.app/` & `cdesuvcozcetdtvibgqs`)
 
 | Composant / Contrat | Résultat vérifié | Détails & Preuve |
 |---|---|---|
-| **Production Vercel (`https://suivibudget.vercel.app/`)** | **OPÉRATIONNEL (`HTTP 200`)** | Bundle déployé depuis `master` (`901a203`), chargement sans erreur console, routes publiques et administratives actives. |
+| **Production Vercel (`https://suivibudget.vercel.app/`)** | **OPÉRATIONNEL (`HTTP 200`)** | Bundle déployé depuis `master` (`901a2033084c5aa1ca76bc4ce4625e1884d48ab9`), chargement sans erreur console, routes publiques et administratives actives. |
 | **RPC `public.admin_persistence_version()`** | **ACTIVE (`3`)** | Contrat de persistance admin v3 déployé et actif sur `cdesuvcozcetdtvibgqs`. |
 | **RPC `public.document_delivery_metric()`** | **ACTIVE (`'SERVER_FILE_DELIVERY_V1'`)** | Compteur de délivrance binaire côté serveur actif sur `cdesuvcozcetdtvibgqs`. |
 | **Edge Function `public-document-url`** | **ACTIVE (`HTTP 200` OPTIONS / `401` ou URL signée)** | Vérification SHA-256 côté serveur, support `part_number`, limitation de débit par IP relayée (`20/min`), déduplication UUID `24h`. |
 | **Edge Function `admin-media-url`** | **ACTIVE (`HTTP 200` OPTIONS / `401` sans JWT staff)** | Lecture signée des médias `admin_media` et action `verify_document_integrity` (`service_role` -> `public.admin_confirm_document_integrity`). |
 | **Tables `public_documents` / `administrative_accounts`** | **INTACTES** | `doc-dff4865a-c6a8-418e-8895-626258e409d0` (Cocody CA 2024, `PUBLISHED`/`VERIFIED`) et `ca-tiassale-2024` (Tiassalé CA 2024, `PUBLISHED` + 3 opérations + 3 marchés) intacts. |
 
-### 1.2 Audit et durcissement des fonctions `SECURITY DEFINER` (`supabase/migrations/20261026213000_security_definer_hardening.sql`)
+### 1.2 Tables du schéma `private` (`private.admin_document_file_checks`, `private.document_delivery_receipts`)
 
-L'audit exhaustif des fonctions `SECURITY DEFINER` des schémas `public` et `private` a conduit aux durcissements ciblés suivants :
+1. **Exposition dans l'API Supabase (PostgREST)** :
+   - Le schéma `private` **n'est pas exposé** dans l'API PostgREST (`pgrst.db_schemas` expose uniquement `public`, `storage`, `graphql_public`).
+2. **Privilèges effectifs (`relacl` et `USAGE` sur `private`)** :
+   - Sur le schéma `private`, `revoke all on schema private from public, anon, authenticated, service_role;` est appliqué.
+   - Sur les deux tables, `relacl` en base vaut `{postgres=arwdDxtm/postgres}` : ni `anon`, ni `authenticated`, ni `service_role` ne disposent de privilèges `SELECT`, `INSERT`, `UPDATE` ou `DELETE` directs.
+3. **Activation de RLS sans politique permissive (`supabase/migrations/20261026213000_security_definer_hardening.sql`)** :
+   - `alter table private.admin_document_file_checks enable row level security;`
+   - `alter table private.document_delivery_receipts enable row level security;`
+   - `revoke all on table private.admin_document_file_checks from public, anon, authenticated, service_role;`
+   - `revoke all on table private.document_delivery_receipts from public, anon, authenticated, service_role;`
+   - **0 politique permissive factice ajoutée** : tout accès non-propriétaire est refusé par défaut (`default-deny`), tandis que les fonctions serveur `SECURITY DEFINER` détenues par `postgres` (`public.admin_confirm_document_integrity`, `private.admin_file_checked`, `private.admin_original_unreferenced`, `public.record_document_delivery`) continuent de fonctionner normalement en tant que propriétaire des tables.
+
+### 1.3 Audit complet des 21 fonctions `SECURITY DEFINER` (`supabase/migrations/20261026213000_security_definer_hardening.sql`)
+
+Toutes les 21 fonctions `SECURITY DEFINER` des schémas `public` et `private` ont `proowner = postgres` et `search_path = ''`. Les contrôles et durcissements appliqués sont :
 
 1. **`public.admin_baseline_visibility(p_table text, p_ids text[])`** :
-   - Ajout d'une garde explicite `if p_table is null or p_ids is null` levant `'Invalid baseline request'`.
-   - Exclusion des identifiants brouillons créés dynamiquement (`and id not like 'admin-%'`) afin qu'un appelant anonyme (`anon`) ou `CITIZEN` ne puisse jamais sonder l'existence d'un brouillon administratif hors référentiel statique.
+   - Garde explicite `if p_table is null or p_ids is null` levant `'Invalid baseline request'`.
+   - Liste blanche stricte sur 4 tables (`public_documents`, `local_budgets`, `administrative_accounts`, `admin_entities`).
+   - Exclusion des identifiants brouillons créés dynamiquement (`id not like 'admin-%' and id not like 'csv-%' and id not like 'import-%'`) afin qu'un appelant anonyme (`anon`) ou `CITIZEN` ne puisse jamais sonder l'existence d'un brouillon administratif hors référentiel statique.
+   - Révocation de `EXECUTE` pour `public` et `service_role` (`EXECUTE` conservé uniquement pour `anon` et `authenticated` pour la synchronisation initiale du catalogue public).
 2. **`public.admin_staff_directory()`** :
-   - Passage d'un filtre silencieux à une garde explicite `if not coalesce(private.has_staff_role(array['ADMIN','DATA_MANAGER','MODERATOR']), false) then raise exception 'Staff authorization required' using errcode = '42501'; end if;` rejetant formellement tout appel d'un utilisateur authentifié non-staff (`CITIZEN`).
+   - Garde d'autorisation stricte `if not coalesce(private.has_staff_role(array['ADMIN','DATA_MANAGER','MODERATOR']), false) then raise exception 'Staff authorization required' using errcode = '42501'; end if;` rejetant tout appel d'un utilisateur authentifié non-staff (`CITIZEN`).
+   - Révocation de `EXECUTE` pour `public`, `anon` et `service_role`.
 3. **`public.admin_confirm_document_integrity(p_id, p_revision, p_actor, p_files)`** :
-   - Ajout d'une garde interne sur le rôle d'exécution (`if coalesce(current_setting('role', true), 'none') not in ('service_role', 'none', 'postgres') then raise exception 'Server attestation only' using errcode = '42501'; end if;`) en défense en profondeur au-delà du `REVOKE EXECUTE`.
+   - Garde interne sur le rôle d'exécution (`if coalesce(current_setting('role', true), 'none') not in ('service_role', 'none', 'postgres') and not (select rolsuper from pg_roles where rolname = current_user) then raise exception 'Server attestation only' using errcode = '42501'; end if;`).
+   - `EXECUTE` révoqué de `public`, `anon`, `authenticated` et accordé uniquement à `service_role` (utilisé par l'Edge Function `admin-media-url`).
 4. **`private.admin_file_checked(...)` et `private.admin_media_link_allowed(...)`** :
    - Levée explicite de `42501` (`Staff authorization required`) si invoquées hors du domaine staff autorisé.
-5. **Fonctions triggers `SECURITY DEFINER`** (`public.handle_new_user`, `public.protect_profile_privileges`, `public.rls_auto_enable`, `private.apec_submission_event`, `private.admin_record_event`, `private.admin_source_withdrawal`) :
+   - Révocation de `EXECUTE` pour `public`, `anon` et `service_role` (`EXECUTE` limité à `authenticated` pour l'évaluation des politiques RLS).
+5. **Helpers internes du schéma `private`** (`private.admin_original_unreferenced`, `private.admin_normalize_ocr`, `private.admin_manifest_sha256`, `private.admin_is_delivery_update`, `private.has_staff_role`, `private.is_staff`, `private.can_write_data`, `private.normalize_import_key`, `private.parse_import_bigint`, `private.validate_import_row`) :
+   - Révocation des privilèges `EXECUTE` superflus (`anon`, `service_role`).
+6. **Fonctions RPC métier protégées par contrôle de rôle interne** :
+   - `public.import_data_batch` et `public.review_data_import` : vérifient `private.has_staff_role(array['ADMIN', 'DATA_MANAGER'])` dès la première ligne (`raise exception 'Insufficient privileges'`).
+   - `public.apec_link_targets`, `public.publish_apec_need`, `public.record_apec_decision`, `public.withdraw_apec_need` : vérifient `private.has_staff_role(ARRAY['ADMIN', 'DATA_MANAGER'])` avec `errcode = '42501'` dès la première ligne.
+   - `public.record_document_delivery` : exécutable uniquement par `service_role` (invoquée par `public-document-url` après téléchargement binaire vérifié du PDF).
+   - `public.increment_document_download` : dépréciée, révoquée de `public, anon, authenticated, service_role`, lève `42501`.
+7. **Fonctions triggers `SECURITY DEFINER`** (`public.handle_new_user`, `public.protect_profile_privileges`, `public.rls_auto_enable`, `private.apec_submission_event`, `private.enforce_apec_contribution_status_transition`, `private.admin_record_event`, `private.admin_source_withdrawal`) :
    - Révocation explicite de `EXECUTE` pour `public`, `anon`, `authenticated` et `service_role`.
+
+### 1.4 Protection contre les mots de passe compromis (`auth_leaked_password_protection`)
+
+- **Réglage exact** : Option Supabase Auth `password_hibp_enabled` (*Prevent use of leaked passwords* via HaveIBeenPwned.org), actuellement désactivée (`false`) sur le projet `cdesuvcozcetdtvibgqs`.
+- **Risque associé** : Sans cette option, un utilisateur (y compris un compte staff `ADMIN`, `DATA_MANAGER` ou `MODERATOR`) pourrait définir un mot de passe déjà présent dans des fuites de données publiques connues, augmentant l'exposition aux attaques par bourrage d'identifiants (*credential stuffing*).
+- **Procédure d'activation** :
+  1. Ouvrir le Dashboard Supabase du projet `cdesuvcozcetdtvibgqs` (`eu-west-1`).
+  2. Aller dans **Authentication** $\rightarrow$ **Providers** $\rightarrow$ **Email** (ou **Authentication** $\rightarrow$ **Attack Protection / Security**).
+  3. Activer **Prevent use of leaked passwords** (HaveIBeenPwned integration) et enregistrer.
+- **Conséquences pour les utilisateurs** :
+  - **Sessions et comptes existants** : aucune déconnexion ni blocage lors de la connexion (`signInWithPassword`).
+  - **Création de compte / changement ou réinitialisation de mot de passe** : le préfixe SHA-1 (5 premiers caractères, protocole *k-anonymity* sans jamais transmettre le mot de passe en clair) est vérifié auprès de l'API HIBP ; les mots de passe compromis sont refusés avec un message invitant à choisir un mot de passe robuste non compromis.
 
 ---
 
@@ -43,15 +81,19 @@ L'audit exhaustif des fonctions `SECURITY DEFINER` des schémas `public` et `pri
 ### 2.1 Vérification de l'original de production (`doc-dff4865a-c6a8-418e-8895-626258e409d0`)
 
 - **Identifiant `public_documents`** : `doc-dff4865a-c6a8-418e-8895-626258e409d0`
-- **Collectivité** : Commune de Cocody (`inst-com-cocody`, `COMMUNE`)
+- **Collectivité** : Commune de Cocody (`inst-com-cocody`, `MAIRIE` en base / normalisé `COMMUNE` côté domaine)
 - **Exercice** : `2024` (`COMPTE_ADMINISTRATIF`)
-- **Fichier Stockage** : `public_documents/ca/2024/inst-com-cocody/1791994418805-COMMUNE_DE_COCODY.pdf`
+- **Chemin `storage.objects` en production** : `comptes-administratifs/communes/inst-com-cocody/2024/compte-administratif-2024-v1.pdf` (bucket privé `public_documents`)
 - **Taille exacte** : `14 072 943` octets
 - **Empreinte SHA-256** : `941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf`
-- **Pagination physique** : `44` pages PDF (fascicule 1 = `22` pages `580b42cd...` + fascicule 2 = `22` pages `796921a9...` ; la numérotation imprimée en pied de page va jusqu'à `44/45`, la page `20/45` étant absente de la reliure scannée d'origine).
+- **Pagination physique vs pagination imprimée** :
+  - **Pages physiques du fichier PDF** : **`44` pages physiques** (scannées en 2 fascicules de 22 pages chacun : `580b42cd...` pages 1–22 et `796921a9...` pages 23–44). En base distante `public_documents`, `page_count` est actuellement `null` ; le normaliseur déterministe `applyVerifiedDocumentPagination` (`src/data/officialPublicDocumentsCatalog.ts`) renseigne `page_count = 44`, `physical_page_count = 44`, `printed_page_count = 45` et `missing_printed_pages = ['20/45']` dès l'hydratation.
+  - **Pagination imprimée en pied de page** : numérotée jusqu'à **`44/45`** sur **`45` pages annoncées**.
+  - **Page absente du scan d'origine** : la page imprimée **`20/45`** est absente de la reliure scannée d'origine (entre la page PDF 19 imprimée `19/45` et la page PDF 20 imprimée `21/45`) ; son contenu n'est jamais inventé ni interpolé (`contenu non restitué`).
 - **Actes officiels attestés sur la pièce** :
   - Délibération / Arrêté en séance du Conseil Municipal : **8 juillet 2025** (`2025-07-08`)
   - Approbation préfectorale (Préfet d'Abidjan) : **22 juillet 2025** (`2025-07-22`) sous la référence **`n° 002/PA/D.CAB`**
+  - Note : la ligne existante de `public.public_documents` porte `approval_date = '2025-08-13'` (date d'enregistrement/dépôt initial), conservée intacte en production conformément à l'interdiction d'écriture distante.
 
 ### 2.2 Les 12 indicateurs financiers officiels contrôlés sur pièce
 
@@ -118,7 +160,7 @@ Conformément aux règles non négociables (`REMOTE_SUPABASE_WRITES = 0`), **auc
       "approval_date": "2025-07-08",
       "prefecture_visa_date": "2025-07-22",
       "verification_status": "OFFICIAL_DOCUMENT",
-      "notes": "Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45). Stade comptable : ORDONNANCE. Report antérieur : 944 FCFA. Résultat cumulé : 2237134734 FCFA."
+      "notes": "Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45 ; 44 pages physiques PDF, numérotation imprimée jusqu'à 44/45 sur 45 annoncées, page imprimée 20/45 absente du scan d'origine). Délibération municipale du 08/07/2025 ; approbation préfectorale n° 002/PA/D.CAB du 22/07/2025. Stade comptable : ORDONNANCE. Report antérieur : 944 FCFA. Résultat cumulé : 2237134734 FCFA. Tableau patrimonial page PDF 43 (imprimée 44/45) : Immobilier 810959095, Incorporel 20000000, Mobilier 535141595 (Total 1366100690 FCFA)."
     },
     "precision": {
       "operating_planned": "EXACT",
@@ -142,7 +184,7 @@ Conformément aux règles non négociables (`REMOTE_SUPABASE_WRITES = 0`), **auc
 
 - **Compilation TypeScript (`npx tsc --noEmit`)** : **PASS** (`0` erreur)
 - **Build Production (`npm run build`)** : **PASS** (`code 0`)
-- **Suite Vitest complète (`npx vitest run`)** : **PASS** (`66/66` fichiers de tests, `911/911` tests réussis, `0` échec)
+- **Suite Vitest complète (`npx vitest run`)** : **PASS** (`66/66` fichiers de tests, `912/912` tests réussis, `0` échec)
 - **Recette Navigateur Chromium (`scripts/verify-admin-persistence-browser.cjs`)** : **PASS** (`16/16` scénarios E2E incluant authentification par rôle, RLS/RPC PGlite réels, téléversement multipart PDF, attestation binaire `admin-media-url`, vérification humaine, publication, et viewports `360px`, `640px`, `768px`, `1024px`, `1440px`, `0` erreur console/API, `0` fuite externe).
 
 ---
@@ -151,7 +193,7 @@ Conformément aux règles non négociables (`REMOTE_SUPABASE_WRITES = 0`), **auc
 
 | Jalon | Statut | Justification |
 |---|---|---|
-| **Prêt pour revue indépendante (`READY_FOR_INDEPENDENT_REVIEW`)** | **OUI** | Code, migration `20261026213000_security_definer_hardening.sql`, tests PGlite/Vitest (`911/911`), recette navigateur (`16/16`) et lot Cocody 2024 vérifiés et poussés sur la PR #65. |
+| **Prêt pour revue indépendante (`READY_FOR_INDEPENDENT_REVIEW`)** | **OUI** | Code, migration `20261026213000_security_definer_hardening.sql`, tests PGlite/Vitest (`912/912`), recette navigateur (`16/16`) et lot Cocody 2024 vérifiés et poussés sur la PR #65. |
 | **Prêt pour fusion (`READY_FOR_MERGE`)** | **OUI (après approbation propriétaire)** | CI GitHub Actions `Quality` et déploiement Vercel Preview au vert (`SUCCESS`), aucun conflit avec `master`. |
-| **Prêt pour migration backend (`READY_FOR_BACKEND_MIGRATION`)** | **OUI (sur action propriétaire)** | `supabase/migrations/20261026213000_security_definer_hardening.sql` est idempotente, purement sécuritaire (`CREATE OR REPLACE FUNCTION` + `REVOKE ALL`), sans modification destructive de table ni de données. |
+| **Prêt pour migration backend (`READY_FOR_BACKEND_MIGRATION`)** | **OUI (sur action propriétaire)** | `supabase/migrations/20261026213000_security_definer_hardening.sql` est idempotente, purement sécuritaire (`ENABLE ROW LEVEL SECURITY`, `CREATE OR REPLACE FUNCTION`, `REVOKE ALL`), sans modification destructive de table ni de données. |
 | **Prêt pour publication production Cocody 2024 (`READY_FOR_PRODUCTION_PUBLICATION`)** | **EN ATTENTE D'AUTORISATION PROPRIÉTAIRE** | Lot JSON certifié prêt à être soumis dans `import_data_batch` -> `review_data_import('VERIFY')` -> `review_data_import('PUBLISH', true)` par un opérateur `ADMIN` / `DATA_MANAGER`. |

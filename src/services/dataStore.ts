@@ -38,7 +38,7 @@ import {
   exportLocalBudgetsToJson
 } from '../data/localBudgetsReferential';
 import { validateAllLocalBudgets } from '../utils/budgetValidation';
-import { getOfficialPublicDocuments } from '../data/officialPublicDocumentsCatalog';
+import { getOfficialPublicDocuments, applyVerifiedDocumentPagination } from '../data/officialPublicDocumentsCatalog';
 
 const STORAGE_KEYS = {
   PROOFS: 'civicdata_proofs_v12',
@@ -623,18 +623,18 @@ class DataStore {
           for (const localDoc of this.documents) {
             const remoteDoc = remoteMap.get(localDoc.id);
             if (remoteDoc) {
-              merged.push({
+              merged.push(applyVerifiedDocumentPagination({
                 ...localDoc,
                 ...remoteDoc,
                 downloads_count: remoteDoc.downloads_count,
-              });
+              }));
               remoteMap.delete(localDoc.id);
             } else {
-              merged.push(localDoc);
+              merged.push(applyVerifiedDocumentPagination(localDoc));
             }
           }
           for (const newDoc of remoteMap.values()) {
-            merged.push(newDoc as PublicDocument);
+            merged.push(applyVerifiedDocumentPagination(newDoc as PublicDocument));
           }
           this.documents = merged;
           this.notify();
@@ -1200,11 +1200,12 @@ class DataStore {
 
   // --- PUBLIC DOCUMENTS MANAGEMENT ---
   public getDocuments(): PublicDocument[] {
-    return [...this.documents];
+    return this.documents.map(applyVerifiedDocumentPagination);
   }
 
   public getDocumentById(id: string): PublicDocument | undefined {
-    return this.documents.find(d => d.id === id);
+    const found = this.documents.find(d => d.id === id);
+    return found ? applyVerifiedDocumentPagination(found) : undefined;
   }
 
   public async refreshDocumentsFromSupabase(includeUnpublished = false): Promise<PublicDocument[]> {
@@ -1213,17 +1214,18 @@ class DataStore {
     if (!includeUnpublished) query = query.eq('status', 'PUBLISHED');
     const { data, error } = await query;
     if (error) throw error;
-    this.documents = (data || []).map((row:PublicDocument)=>({...row,ocr_status:normalizeOcrStatus(row.ocr_status,row.is_scanned,row.has_text_layer)}));
+    this.documents = (data || []).map((row:PublicDocument)=>applyVerifiedDocumentPagination({...row,ocr_status:normalizeOcrStatus(row.ocr_status,row.is_scanned,row.has_text_layer)}));
     this.notify();
     return this.getDocuments();
   }
 
   public saveDocument(doc: PublicDocument): void {
-    const idx = this.documents.findIndex(d => d.id === doc.id);
+    const normalized = applyVerifiedDocumentPagination(doc);
+    const idx = this.documents.findIndex(d => d.id === normalized.id);
     if (idx >= 0) {
-      this.documents[idx] = { ...doc };
+      this.documents[idx] = { ...normalized };
     } else {
-      this.documents.unshift({ ...doc });
+      this.documents.unshift({ ...normalized });
     }
     this.notify();
   }

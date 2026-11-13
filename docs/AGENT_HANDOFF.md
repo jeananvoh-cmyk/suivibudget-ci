@@ -1,30 +1,30 @@
-## 27 octobre 2026 — Clôture PR #65 + Auto-audit contradictoire et durcissement des 6 points d'insuffisance (Antigravity)
+## 27 octobre 2026 — Corrections Post-Audit P0 : Sécurité Supabase (`private` RLS & 21 `SECURITY DEFINER`), Pagination Contrôlée Cocody CA 2024 et Stabilisation PR #65 (Antigravity)
 
-- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/65 (`codex/p0-production-cocody-2024` ciblant `master` `901a203`).
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/65 (`codex/p0-production-cocody-2024` ciblant `master` `901a2033084c5aa1ca76bc4ce4625e1884d48ab9`).
 - **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0` (aucune écriture ni réexécution de migration sur `cdesuvcozcetdtvibgqs`).
-- **Chantier A (Recette & Stabilisation de production)** :
-  - Vérification en lecture seule de la production déployée : Vercel `HTTP 200`, `public.admin_persistence_version() = 3`, `public.document_delivery_metric() = 'SERVER_FILE_DELIVERY_V1'`, Edge Functions `public-document-url` et `admin-media-url` actives.
-  - Durcissement des fonctions `SECURITY DEFINER` (`supabase/migrations/20261026213000_security_definer_hardening.sql`) :
-    - `public.admin_baseline_visibility(text, text[])` : garde `NULL` explicite et exclusion des brouillons dynamiques (`id not like 'admin-%'`).
-    - `public.admin_staff_directory()` : rejet explicite `42501` (`Staff authorization required`) pour les comptes `CITIZEN`.
-    - `public.admin_confirm_document_integrity(...)` : garde interne `service_role` / `postgres` / `supabase_admin` en complément du `REVOKE EXECUTE`.
-    - `private.admin_file_checked` et `private.admin_media_link_allowed` : rejet explicite `42501` hors domaine staff authentifié, tout en préservant l'exécution par les triggers serveur/superuser (`auth.uid() is null` sous `postgres`/`supabase_admin`/`service_role`).
-    - Révocation `EXECUTE` sur les fonctions triggers `SECURITY DEFINER`.
-- **Chantier B (Finalisation du CA 2024 de Cocody & Auto-audit contradictoire)** :
-  - Contrôle de l'original de production `doc-dff4865a-c6a8-418e-8895-626258e409d0` (`14 072 943` octets, SHA-256 `941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf`, `44` pages PDF) et rapprochement des 12 indicateurs financiers officiels sur la page PDF `40` (page imprimée `41 / 45`, arrêté en Conseil Municipal le `08/07/2025`, approuvé le `22/07/2025` sous le `n° 002/PA/D.CAB`).
-  - Auto-audit contradictoire et correction de 6 insuffisances :
-    1. **Lot JSON conforme à la liste blanche SQL** : alignement strict du lot JSON de `docs/audits/P0_PRODUCTION_STABILIZATION_AND_COCODY_CA_2024_REPORT.md` sur `private.validate_import_row` (aucun champ hors liste blanche SQL).
-    2. **Contrôle arithmétique du 5e équilibre comptable** : ajout dans `runDocumentDryRun` (`src/utils/budgetDocumentDryRun.ts`) de la vérification `surplus_or_deficit + previous_result_reported === cumulative_result` lorsque les 3 montants sont `EXACT`.
-    3. **Garantie des 6 champs requis par `review_data_import('PUBLISH')` et propagation des précisions** : garantie dans `toPipelineImportRow` de la présence des 6 champs monétaires obligatoires `CA` (`null`/`UNKNOWN` si absents), encodage/décodage des qualificatifs `APPROXIMATE`/`LOWER_BOUND` dans `notes`, et calcul prudent de `total_revenue_collected` dans `hydrateAdministrativeAccountFromRow` avec normalisation numérique des `operations`, `procurement_match.award_amount` et `local_budgets`.
-    4. **Compatibilité triggers serveur/migrations sur `private.admin_file_checked` & `private.admin_media_link_allowed`** : autorisation du contexte serveur/superuser (`auth.uid() is null`) sans affaiblir le blocage `42501` des rôles non-staff.
-    5. **Séparation stricte `VERIFIED !== PUBLISHED` dans `AdministrativeAccountView.tsx`** : seuls les documents `status === 'PUBLISHED'` exposent l'État 2 et le bouton public `Consulter le document` ; un document `VERIFIED` non publié reste en État 1 pré-publication.
-    6. **Élimination des collisions homonymes Commune / Conseil Régional** : suppression des `.includes()` dans `AdministrativeAccountView.tsx` et `src/data/administrativeAccountsData.ts` au profit d'une vérification stricte d'`institution_id`, de type institutionnel (`MAIRIE`/`COMMUNE` vs `REGION`/`REGIONAL_COUNCIL`) et d'égalité exacte normalisée.
+- **Chantier P0 — Sécurité Supabase (`supabase/migrations/20261026213000_security_definer_hardening.sql`)** :
+  - **Tables du schéma `private`** (`private.admin_document_file_checks`, `private.document_delivery_receipts`) :
+    - Vérification que le schéma `private` n'est pas exposé dans l'API PostgREST (`public`, `storage`, `graphql_public`) et que `relacl` vaut `{postgres=arwdDxtm/postgres}`.
+    - Activation de RLS (`ENABLE ROW LEVEL SECURITY`) sur les deux tables avec **0 politique permissive** (refus par défaut pour tout rôle non-propriétaire) et `REVOKE ALL ON TABLE ... FROM public, anon, authenticated, service_role`, tout en préservant le fonctionnement des fonctions serveur détenues par `postgres` (`admin_confirm_document_integrity`, `admin_file_checked`, `admin_original_unreferenced`, `record_document_delivery`).
+  - **Audit et durcissement des 21 fonctions `SECURITY DEFINER`** :
+    - `public.admin_baseline_visibility(text, text[])` : garde `NULL` explicite, liste blanche stricte (4 tables), exclusion des brouillons dynamiques (`id not like 'admin-%'`, `id not like 'csv-%'`, `id not like 'import-%'`), et révocation `EXECUTE` pour `public` et `service_role`.
+    - `public.admin_staff_directory()` : rejet explicite `42501` (`Staff authorization required`) pour les comptes `CITIZEN`, et révocation `EXECUTE` pour `public, anon, service_role`.
+    - `public.admin_confirm_document_integrity(...)` : garde interne `service_role` / `postgres` / `rolsuper` en complément du `REVOKE EXECUTE`.
+    - `private.admin_file_checked` et `private.admin_media_link_allowed` : rejet explicite `42501` hors domaine staff authentifié, tout en préservant l'exécution par les triggers serveur/superuser (`auth.uid() is null` sous `postgres`/`service_role`), et révocation `EXECUTE` pour `public, anon, service_role`.
+    - Révocation des privilèges `EXECUTE` superflus sur les helpers internes `private.*` (`admin_original_unreferenced`, `admin_normalize_ocr`, `admin_manifest_sha256`, `admin_is_delivery_update`) et sur les 7 fonctions triggers `SECURITY DEFINER`.
+  - **Protection contre les mots de passe compromis (`auth_leaked_password_protection`)** :
+    - Documentation du réglage `password_hibp_enabled` (HaveIBeenPwned k-anonymity), du risque, de la procédure d'activation dans le Dashboard Supabase et des conséquences utilisateur sans modifier la configuration distante.
+- **Chantier P0 — Intégrité documentaire & Pagination contrôlée Cocody CA 2024** :
+  - Normalisation déterministe (`applyVerifiedDocumentPagination` dans `src/data/officialPublicDocumentsCatalog.ts`, branchée dans `src/services/dataStore.ts`) pour `doc-dff4865a-c6a8-418e-8895-626258e409d0` (`14 072 943` octets, SHA-256 `941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf`, `storage_path` réel `comptes-administratifs/communes/inst-com-cocody/2024/compte-administratif-2024-v1.pdf`) :
+    - `page_count = 44` (jamais `45`), `physical_page_count = 44`, `printed_page_count = 45`, `missing_printed_pages = ['20/45']`.
+    - Mention explicite dans `DocumentsPage.tsx`, `AdministrativeAccountView.tsx` (en mode pré-publication comme en Rubrique 6) et `ExamineCADocumentModal.tsx` : distinction entre **44 pages physiques PDF** et **numérotation imprimée jusqu'à 44/45 sur 45 annoncées**, et signalement de l'**absence de la page imprimée `20/45` du scan d'origine** sans jamais inventer son contenu.
+    - Alignement de `approval_date = '2025-07-08'` (délibération municipale) et `prefecture_visa_date = '2025-07-22'` (`n° 002/PA/D.CAB`) ainsi que de la concordance patrimoniale (`810 959 095 + 20 000 000 + 535 141 595 = 1 366 100 690 FCFA`).
 - **Validation & Recette** :
   - `npx tsc --noEmit` et `npm run build` : **PASS** (`code 0`).
-  - `npx vitest run` : **PASS** (`66/66` fichiers, `911/911` tests).
+  - `npx vitest run` : **PASS** (`66/66` fichiers, `912/912` tests).
   - Recette navigateur `scripts/verify-admin-persistence-browser.cjs` : **PASS** (`16/16` scénarios Chromium E2E, viewports `360/640/768/1024/1440 px`, `0` erreur console/API, `0` fuite externe).
   - Rapport complet et lot JSON certifié prêt pour import : `docs/audits/P0_PRODUCTION_STABILIZATION_AND_COCODY_CA_2024_REPORT.md`.
-- **NEXT_EXECUTABLE_TASK** : Approbation et fusion de la PR #65 par le propriétaire, application de `20261026213000_security_definer_hardening.sql` puis import/publication contrôlée du lot certifié du CA 2024 de Cocody via `import_data_batch` -> `review_data_import`.
+- **NEXT_EXECUTABLE_TASK** : Approbation et fusion de la PR #65 par le propriétaire, application de `20261026213000_security_definer_hardening.sql`, activation de `Prevent use of leaked passwords` dans Supabase Auth, puis import/publication contrôlée du lot certifié du CA 2024 de Cocody via `import_data_batch` -> `review_data_import`.
 
 ## 26 octobre 2026 — Clôture C/D/E/F et limites explicites
 

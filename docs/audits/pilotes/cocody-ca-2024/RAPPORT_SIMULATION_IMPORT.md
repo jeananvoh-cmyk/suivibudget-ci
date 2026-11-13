@@ -76,9 +76,9 @@ L'enveloppe standard d'import générée par `buildStandardImportEnvelope` est e
 ---
 
 ### Étape 4 : Révision Humaine (`VERIFIED`)
-- Le réviseur vérifie les montants sur le PDF (page 40 pour la synthèse, page 43 pour le détail du patrimoine).
+- Le réviseur vérifie les montants sur le PDF (page PDF 40 / imprimée 41/45 pour la synthèse, page PDF 43 / imprimée 44/45 pour le détail du patrimoine).
 - Validation : `verification_status` passe à `'VERIFIED'`.
-- La date de visa préfectoral (`2025-03-28`) et la date d'adoption municipale (`2025-02-28`) sont certifiées.
+- La date de visa préfectoral (`2025-07-22`, `n° 002/PA/D.CAB`) et la date d'adoption municipale (`2025-07-08`) sont certifiées.
 
 ---
 

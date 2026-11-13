@@ -47,6 +47,7 @@ import { CompteAdministratifExplainerModal } from './CompteAdministratifExplaine
 import { fetchAdministrativeAccounts } from '../services/administrativeAccountsService';
 import { consolidateBudgetCycle, formatBudgetTypeLabel } from '../utils/budgetCycleEngine';
 import { dataStore } from '../services/dataStore';
+import { VERIFIED_DOCUMENT_PAGINATION_CONTROLS } from '../data/officialPublicDocumentsCatalog';
 
 interface AdministrativeAccountViewProps {
   institution: Institution;
@@ -250,6 +251,8 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
         .sort((a, b) => (b.year || 0) - (a.year || 0))[0];
 
   const sha256 = currentCA?.source_document_sha256 || matchingDoc?.checksum_sha256 || null;
+  const paginationControl = sha256 ? VERIFIED_DOCUMENT_PAGINATION_CONTROLS[sha256.toLowerCase()] : undefined;
+  const resolvedPaginationNote = matchingDoc?.pagination_note || paginationControl?.paginationNote || null;
   const docUrl = currentCA?.source_url || (matchingDoc?.status === 'PUBLISHED' ? matchingDoc.file_url : null) || null;
   const canOpenMatchingDoc = Boolean(
     matchingDoc && matchingDoc.status === 'PUBLISHED'
@@ -338,6 +341,17 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                 </strong>
               </div>
             </div>
+
+            {resolvedPaginationNote && (
+              <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-3.5 text-xs text-amber-950 space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-900 block">
+                  Contrôle de pagination physique &amp; numérotation imprimée
+                </span>
+                <p className="leading-relaxed font-medium">
+                  {resolvedPaginationNote}
+                </p>
+              </div>
+            )}
 
             {sha256 && (
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
@@ -1427,11 +1441,25 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
           <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
             <span className="text-[10px] font-bold uppercase text-slate-400 block">Pages exploitées du document</span>
             <strong className="text-slate-900 block text-sm">
-              {currentCA.source_page ? `Page ${currentCA.source_page}` : 'Pagination non renseignée'}
+              {currentCA.source_page
+                ? (paginationControl && currentCA.source_page === 40
+                    ? `Page 40 (PDF 40 / imprimée 41/${paginationControl.printedPageCount})`
+                    : `Page ${currentCA.source_page}`)
+                : 'Pagination non renseignée'}
             </strong>
             <p className="text-slate-500 text-[11px]">
               Date de délibération : {currentCA.approval_date || 'Non spécifiée'} — Visa préfectoral : {currentCA.prefecture_visa_date || 'Non spécifié'}.
             </p>
+            {resolvedPaginationNote && (
+              <p className="text-amber-900 bg-amber-50 border border-amber-200/80 rounded-xl p-2 text-[11px] leading-snug">
+                <strong className="font-bold">Pagination du fichier :</strong> {resolvedPaginationNote}
+              </p>
+            )}
+            {currentCA.notes && (
+              <p className="text-slate-600 text-[11px] leading-snug pt-0.5">
+                {currentCA.notes}
+              </p>
+            )}
           </div>
         </div>
 
