@@ -102,6 +102,7 @@ export interface ProjectAccountabilityPassportData {
   hasMatchedCaOperation: boolean;
   hasMatchedDgmpTender: boolean;
   hasCitizenFieldProofs: boolean;
+  approvedProofsCount?: number;
   matchedOperation?: CAInvestmentOperation;
   matchedProcurement?: ProcurementMatch;
   matchResult?: CaOperationMatchResult;
@@ -744,6 +745,7 @@ export function generateProjectPassport(
     hasMatchedCaOperation: Boolean(matchedOp),
     hasMatchedDgmpTender: Boolean(matchedProc),
     hasCitizenFieldProofs: approvedProofs.length > 0,
+    approvedProofsCount: approvedProofs.length,
     matchedOperation: matchedOp,
     matchedProcurement: matchedProc,
     matchResult,

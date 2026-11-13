@@ -24,6 +24,7 @@ import { publicDocumentMetadata } from '../review/domain/documents';
 import { openDataCsv, openDataJson, auditedObservationsFromCatalog } from '../review/domain/history';
 import { getReviewSourceDocuments } from '../data/officialPublicDocumentsCatalog';
 import { downloadPublicDocument } from '../services/documentStorageService';
+import { createFilteredOcdsReleasePackage } from '../utils/ocdsMapper';
 
 interface DocumentsPageProps {
   onNavigateToCaidp?: () => void;
@@ -228,6 +229,22 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
+  const handleExportOpenDataOcds = () => {
+    const fiscalYear = selectedYear !== 'ALL' ? Number(selectedYear) : undefined;
+    const pkg = createFilteredOcdsReleasePackage(
+      dataStore.getProjects(),
+      dataStore.getAllProofs(),
+      { fiscalYear }
+    );
+    const blob = new Blob([JSON.stringify(pkg, null, 2)], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `suivibudget-opendata-${fiscalYear ?? 'tous-exercices'}.ocds.json`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   const handleResetFilters = () => {
     setSearchQuery('');
     setSelectedCategory('ALL');
@@ -302,6 +319,16 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Open Data (JSON)</span>
+              </button>
+
+              <button
+                onClick={handleExportOpenDataOcds}
+                className="min-h-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/25 hover:bg-emerald-500/35 text-emerald-100 font-bold text-xs border border-emerald-400/30 backdrop-blur-md transition-all cursor-pointer shadow-2xs"
+                title="Télécharger les projets et marchés au standard international OCDS v1.1 (.ocds.json)"
+                aria-label="Exporter les données au standard OCDS v1.1 (.ocds.json)"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>OCDS v1.1 (.ocds.json)</span>
               </button>
 
               <button

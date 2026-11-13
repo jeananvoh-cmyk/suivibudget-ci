@@ -29,6 +29,9 @@ export interface ProcurementMatch {
   award_amount: number | null;          // Montant adjugé en FCFA
   award_date?: string;           // Date d'approbation / notification
   lot?: string;                  // Lot éventuel
+  procurement_method?: string;   // Mode de passation (OPEN_TENDER, RESTRICTED, DIRECT, UNKNOWN)
+  bomp_reference?: string;       // Référence au Bulletin Officiel des Marchés Publics (BOMP)
+  ocid?: string;                 // Identifiant standardisé Open Contracting (OCDS v1.1)
   match_level: ProcurementMatchLevel;
   source: string;                // Bulletin Officiel DGMP / Portail Marchés Publics
   source_url?: string;

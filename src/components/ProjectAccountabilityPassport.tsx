@@ -8,6 +8,8 @@ import {
   ProjectAccountabilityPassportData 
 } from '../utils/projectPassport';
 import { formatQualifiedFCFA } from '../utils/formatters';
+import { buildProjectOcid, createOcdsReleasePackage } from '../utils/ocdsMapper';
+import { getProjectPassportPath } from '../utils/navigation';
 import { supabase } from '../services/supabase';
 import { ApecParticipation } from './ApecParticipation';
 import { 
@@ -26,7 +28,10 @@ import {
   Scale, 
   HelpCircle,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Download,
+  Copy,
+  Check
 } from 'lucide-react';
 
 interface ProjectAccountabilityPassportProps {
@@ -44,10 +49,41 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
 }) => {
   const [expandedStageId, setExpandedStageId] = useState<string | null>(null);
   const [sourceMessage, setSourceMessage] = useState('');
+  const [copiedPermalink, setCopiedPermalink] = useState(false);
 
   const passport: ProjectAccountabilityPassportData = React.useMemo(() => {
     return generateProjectPassport(project, proofs);
   }, [project, proofs]);
+
+  const ocid = React.useMemo(() => buildProjectOcid(project), [project]);
+
+  const handleDownloadOcds = () => {
+    const pkg = createOcdsReleasePackage([project], proofs);
+    const json = JSON.stringify(pkg, null, 2);
+    const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${ocid}.ocds.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCopyPermalink = async () => {
+    const path = getProjectPassportPath(project.id);
+    const fullUrl = typeof window !== 'undefined' ? `${window.location.origin}${path}` : path;
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(fullUrl);
+      }
+      setCopiedPermalink(true);
+      setTimeout(() => setCopiedPermalink(false), 2500);
+    } catch {
+      setSourceMessage(`Lien Passeport : ${fullUrl}`);
+    }
+  };
 
   const showFact = (fact: PassportFact) => {
     if (fact.label.includes('FCFA')) return formatQualifiedFCFA(typeof fact.value === 'number' ? fact.value : null, fact.amount_precision);
@@ -204,6 +240,47 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
         <p className="text-xs text-slate-600">Un marché attribué ou une dépense ne prouve pas l’achèvement du chantier. L’absence de donnée ne prouve pas l’absence de réalisation.</p>
         <p className="text-sm"><strong>Preuve terrain :</strong> {showFact(passport.facts.citizen_evidence_status)}</p>
         <p className="text-sm"><strong>Réponse institutionnelle :</strong> {showFact(passport.facts.institution_response_status)}. Elle ne constitue pas une validation indépendante.</p>
+
+        {/* Comparatif Follow The Money (OCDS : Planifié BP -> Adjugé DGMP -> Ordonnancé CA) */}
+        <div className="pt-3 border-t border-slate-100 space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-600">
+              Chaîne financière comparée (OCDS v1.1)
+            </span>
+            <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+              {ocid}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3">
+              <div className="text-[11px] font-bold text-slate-500 uppercase">1. Budget voté (BP)</div>
+              <div className="text-sm font-black text-slate-900 mt-1">
+                {showFact(passport.facts.budget_amount)}
+              </div>
+              <div className="text-[11px] text-slate-500 mt-0.5">
+                Exercice {showFact(passport.facts.fiscal_year)}
+              </div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3">
+              <div className="text-[11px] font-bold text-slate-500 uppercase">2. Marché adjugé (DGMP)</div>
+              <div className="text-sm font-black text-slate-900 mt-1">
+                {passport.hasMatchedDgmpTender ? showFact(passport.facts.procurement_amount) : 'Non retrouvé publiquement'}
+              </div>
+              <div className="text-[11px] text-slate-500 mt-0.5 truncate">
+                {passport.hasMatchedDgmpTender ? showFact(passport.facts.supplier) : 'Avis DGMP à rapprocher'}
+              </div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3">
+              <div className="text-[11px] font-bold text-slate-500 uppercase">3. Mandaté au CA</div>
+              <div className="text-sm font-black text-slate-900 mt-1">
+                {passport.hasMatchedCaOperation ? showFact(passport.facts.executed_amount) : 'Non retrouvé publiquement'}
+              </div>
+              <div className="text-[11px] text-slate-500 mt-0.5 truncate">
+                {passport.hasMatchedCaOperation ? showFact(passport.facts.financial_status) : 'En attente de CA publié'}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <details className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
@@ -298,6 +375,26 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
               {passport.hasCitizenFieldProofs ? 'Documenté' : 'Aucun constat'}
             </span>
           </div>
+        </div>
+
+        {/* Standard Actions: OCDS Export & Canonical Passport Permalink */}
+        <div className="flex flex-wrap items-center gap-2.5 mt-4 pt-3 border-t border-white/10">
+          <button
+            type="button"
+            onClick={handleDownloadOcds}
+            className="min-h-[44px] px-3.5 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 text-xs font-bold inline-flex items-center gap-1.5 transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Exporter OCDS v1.1 (JSON)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleCopyPermalink()}
+            className="min-h-[44px] px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-slate-100 border border-white/15 text-xs font-bold inline-flex items-center gap-1.5 transition-colors"
+          >
+            {copiedPermalink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+            <span>{copiedPermalink ? 'Lien Passeport copié' : 'Copier le lien Passeport'}</span>
+          </button>
         </div>
       </div>
 
