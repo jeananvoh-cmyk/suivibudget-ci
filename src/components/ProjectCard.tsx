@@ -149,22 +149,33 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           </div>
         </div>
 
-        {/* Official Progress Rate (When officially reported) */}
+        {/* Official Progress Rate (When officially reported — distinct from physical verification) */}
         {project.progress_percentage > 0 && (
           <div className="pt-2 border-t border-slate-200/60 space-y-1">
             <div className="flex items-center justify-between text-[11px]">
               <span className="font-bold text-slate-700 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                <span>Taux officiel déclaré</span>
+                <CheckCircle2 className={`w-3 h-3 ${approvedContributionsCount > 0 ? 'text-emerald-600' : 'text-amber-600'}`} />
+                <span>
+                  {approvedContributionsCount > 0
+                    ? 'Taux officiel déclaré'
+                    : 'Avancement déclaré (à vérifier)'}
+                </span>
               </span>
-              <span className="font-black text-emerald-700">{project.progress_percentage}%</span>
+              <span className={`font-black ${approvedContributionsCount > 0 ? 'text-emerald-700' : 'text-amber-700'}`}>
+                {project.progress_percentage}%
+              </span>
             </div>
             <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
               <div
-                className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                className={`h-full rounded-full transition-all duration-500 ${approvedContributionsCount > 0 ? 'bg-emerald-500' : 'bg-amber-500'}`}
                 style={{ width: `${Math.min(100, project.progress_percentage)}%` }}
               />
             </div>
+            {approvedContributionsCount === 0 && (
+              <p className="text-[10px] text-amber-800 font-semibold">
+                Non vérifié sur le terrain — déclaration administrative ≠ réalisation physique (P7)
+              </p>
+            )}
             {project.official_progress_source && (
               <p className="text-[10px] text-slate-400 truncate" title={project.official_progress_source}>
                 Source : {project.official_progress_source}
