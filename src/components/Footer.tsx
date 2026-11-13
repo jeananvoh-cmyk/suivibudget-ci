@@ -60,8 +60,8 @@ export const Footer: React.FC<FooterProps> = ({
     let csvContent = '';
 
     if (type === 'PROJECTS') {
-      filename = `SuiviBudget_CI_4701_Chantiers_LFI_${new Date().getFullYear()}.csv`;
       const projects = dataStore.getProjects();
+      filename = `SuiviBudget_CI_${projects.length}_Projets_Physiques_${new Date().getFullYear()}.csv`;
       csvContent = "ID;Titre;Categorie;Region;Commune;Ministere;Budget_FCFA;Statut;Avancement_Pct;Annee\n" +
         projects.map(p => [
           sanitizeCsvCell(p.id),
@@ -309,9 +309,9 @@ export const Footer: React.FC<FooterProps> = ({
               <button
                 onClick={() => handleExportCsv('PROJECTS')}
                 className="hover:text-slate-900 transition-colors text-left text-slate-600 cursor-pointer"
-                title="Télécharger l'intégralité des 4 701 chantiers publics d'investissement LFI 2026 en CSV"
+                title={`Télécharger les ${dataStore.getPublicIndicators().investments.physicalAllCount.toLocaleString('fr-FR')} projets physiques répertoriés (État et collectivités) en CSV`}
               >
-                4 701 Chantiers Publics (LFI)
+                {dataStore.getPublicIndicators().investments.physicalAllCount.toLocaleString('fr-FR')} Projets Physiques (CSV)
               </button>
             </li>
             <li>
@@ -402,9 +402,9 @@ export const Footer: React.FC<FooterProps> = ({
               <button
                 onClick={() => onNavigateTab('documents')}
                 className="hover:text-slate-900 transition-colors text-left text-slate-600 cursor-pointer"
-                title="Consulter la Loi de Finances 2026 (15 339,2 Milliards FCFA)"
+                title="Consulter la Loi de Finances 2026 (Loi n° 2025-987 — Budget de l'État 17 350,2 Milliards FCFA)"
               >
-                Loi de Finances 2026 (15 339 Mrds)
+                Loi de Finances 2026 (17 350,2 Mrds)
               </button>
             </li>
             <li>

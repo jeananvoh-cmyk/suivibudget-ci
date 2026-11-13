@@ -1,5 +1,6 @@
 import React from 'react';
 import { dataStore } from '../services/dataStore';
+import { formatCompactFCFA } from '../utils/formatters';
 import { Search, Camera, ArrowRight } from 'lucide-react';
 
 interface HeroSectionProps {
@@ -20,7 +21,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onOpenSendProof,
   onNavigateTab,
 }) => {
-  const allProjects = dataStore.getProjects();
+  const indicators = dataStore.getPublicIndicators();
+  const { investments } = indicators;
 
   return (
     <div className="bg-white border-b border-slate-200/80 pt-12 pb-16 px-4 sm:px-6 lg:px-8">
@@ -38,7 +40,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* Editorial Summary */}
         <p className="mt-5 text-base sm:text-lg md:text-xl text-slate-600 max-w-4xl mx-auto font-normal leading-relaxed">
-          Explorez en toute transparence les <strong>{allProjects.length.toLocaleString('fr-FR')} chantiers d'écoles, de santé, d'eau potable et de voirie</strong>. Suivez les <strong>3 461 Mds FCFA</strong> d'investissements publics votés et participez activement au contrôle citoyen avec vos constats de terrain.
+          Explorez en toute transparence les <strong>{investments.physicalAllCount.toLocaleString('fr-FR')} chantiers et projets d'équipement physiques répertoriés</strong> (écoles, santé, eau potable, voirie) : <strong>{formatCompactFCFA(investments.statePhysical2026AmountFcfa)}</strong> côté État ({investments.statePhysical2026Count.toLocaleString('fr-FR')} projets 2026) et <strong>{formatCompactFCFA(investments.localPhysical2026AmountFcfa)}</strong> côté collectivités ({investments.localPhysical2026Count.toLocaleString('fr-FR')} projets 2026){investments.multiYearPre2026Count > 0 ? `, plus ${investments.multiYearPre2026Count} grand projet pluriannuel 2021 (${formatCompactFCFA(investments.multiYearPre2026AmountFcfa)})` : ''}. Participez au contrôle citoyen avec vos constats de terrain.
         </p>
 
         {/* Dual Audience Quick Action Links */}

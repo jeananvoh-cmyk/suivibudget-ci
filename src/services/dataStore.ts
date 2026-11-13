@@ -22,7 +22,9 @@ import { AuthSecurityService } from './authSecurity';
 import { sanitizeCsvCell } from '../utils/security';
 import { supabase, isSupabaseConfigured } from './supabase';
 import { publicCitizenProof } from '../review/domain/citizen';
-import { refreshPublishedAdministrativeAccounts } from '../data/administrativeAccountsData';
+import { refreshPublishedAdministrativeAccounts, ADMINISTRATIVE_ACCOUNTS_DATA } from '../data/administrativeAccountsData';
+import { STRATEGIC_PROJECTS_LIST } from '../data/strategicProjectsData';
+import { computePublicIndicators, type PublicIndicatorsSnapshot } from '../utils/publicIndicators';
 import { fetchPublishedLocalBudgets } from './administrativeAccountsService';
 import { enrichWithPrimitiveBudgets, OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
 import {
@@ -279,7 +281,7 @@ export const INITIAL_PUBLIC_DOCUMENTS: PublicDocument[] = [
     category: 'BUDGET_OFFICIEL',
     institution_name: "Ministère des Finances et du Budget & Assemblée Nationale",
     year: 2026,
-    description: "Texte officiel et intégral de la Loi de Finances Initiale 2026 (15 339,2 milliards FCFA) fixant l'ensemble des recettes, dotations, charges budgétaires et programmes de l'État ivoirien, votée par le Parlement et promulguée au Journal Officiel de la République de Côte d'Ivoire.",
+    description: "Texte officiel et intégral de la Loi de Finances Initiale 2026 (17 350,2 milliards FCFA) fixant l'ensemble des recettes, dotations, charges budgétaires et programmes de l'État ivoirien, votée par le Parlement et promulguée au Journal Officiel de la République de Côte d'Ivoire.",
     file_url: "https://budget.gouv.ci/fileadmin/budget/fichiers/LFI_2026.pdf",
     file_name: "Loi_de_Finances_2026_Cote_d_Ivoire_Officiel_DGBF.pdf",
     file_size: "18.5 Mo",
@@ -311,7 +313,7 @@ export const INITIAL_PUBLIC_DOCUMENTS: PublicDocument[] = [
     category: 'BUDGET_OFFICIEL',
     institution_name: "Ministère des Finances et du Budget",
     year: 2026,
-    description: "Document officiel de vulgarisation budgétaire présentant les 15 339,2 milliards FCFA de dépenses et investissements publics (LFI 2026), ventilés par grandes priorités (Éducation, Santé, Routes, Sécurité).",
+    description: "Document officiel de vulgarisation budgétaire présentant les 17 350,2 milliards FCFA de dépenses et investissements publics (LFI 2026), ventilés par grandes priorités (Éducation, Santé, Routes, Sécurité).",
     file_url: "https://budget.gouv.ci/documents/Synthese_Budget_Citoyen_2026.pdf",
     file_name: "Synthese_Budget_Citoyen_2026_CI.pdf",
     file_size: "4.5 Mo",
@@ -847,15 +849,25 @@ class DataStore {
   }
 
   // --- STATS CALCULATION ---
+  public getPublicIndicators(): PublicIndicatorsSnapshot {
+    return computePublicIndicators({
+      projects: this.projects,
+      rawProjects: RAW_BUDGET_PROJECTS,
+      institutions: this.institutions,
+      proofs: this.proofs,
+      administrativeAccounts: ADMINISTRATIVE_ACCOUNTS_DATA,
+      localBudgets: this.localBudgets,
+      strategicShowcasesCount: STRATEGIC_PROJECTS_LIST.length,
+    });
+  }
+
   public getImpactStats(): ImpactStats {
-    const totalCommunes = 201;
-    const totalRegions = 31;
-    const totalCollectivites = 232;
-    const totalBudgetLines = this.projects.length;
-    const totalInvestmentsFcfa = this.projects.reduce((sum, p) => sum + (p.budget_amount_fcfa ?? 0), 0);
-    const verifiedProofs = this.proofs.filter(p => p.verification_status === 'APPROVED').length;
-    const totalProofs = this.proofs.length;
-    const proofsVerificationRate = totalProofs > 0 ? Math.round((verifiedProofs / totalProofs) * 100) : 100;
+    const snapshot = this.getPublicIndicators();
+    const totalCommunes = snapshot.collectivities.communesReferenced;
+    const totalRegions = snapshot.collectivities.regionsReferenced;
+    const totalCollectivites = snapshot.collectivities.totalCollectivitesReferenced;
+    const totalBudgetLines = snapshot.investments.physicalAllCount;
+    const totalInvestmentsFcfa = snapshot.investments.physicalAllAmountFcfa;
 
     return {
       totalCommunes,
@@ -863,8 +875,9 @@ class DataStore {
       totalCollectivites,
       totalBudgetLines,
       totalInvestmentsFcfa,
-      verifiedProofsCount: verifiedProofs,
-      proofsVerificationRate,
+      verifiedProofsCount: snapshot.citizenProofs.approvedCount,
+      proofsVerificationRate: snapshot.citizenProofs.verificationRatePct,
+      detailed: snapshot,
     };
   }
 

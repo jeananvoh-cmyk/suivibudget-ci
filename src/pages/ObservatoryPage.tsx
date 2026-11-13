@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CitizenProof, ProjectStatus, BudgetProject } from '../types';
 import { dataStore } from '../services/dataStore';
-import { formatFCFA, formatAmountInWords, formatDateFR, getStatusConfig } from '../utils/formatters';
+import { formatFCFA, formatCompactFCFA, formatAmountInWords, formatDateFR, getStatusConfig } from '../utils/formatters';
 import { BudgetReportsView } from '../components/BudgetReportsView';
 import { publicCitizenIdentity, buildCitizenObservationBadge } from '../review/domain/citizen';
 import { buildInstitutionalResponseBadge } from '../review/domain/responses';
@@ -120,8 +120,9 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
     dataStore.confirmProof(proofId);
   };
 
-  // Metrics for Budget Voté vs Avancement Constaté
-  const totalVerifiedProofs = approvedProofs.length + STRATEGIC_PROJECTS_LIST.length;
+  const publicIndicators = dataStore.getPublicIndicators();
+  const approvedProofsCount = approvedProofs.length;
+  const strategicCount = STRATEGIC_PROJECTS_LIST.length;
   const inProgressCount = STRATEGIC_PROJECTS_LIST.filter(p => p.status === 'IN_PROGRESS').length + approvedProofs.filter(p => p.citizen_status_claim === 'IN_PROGRESS').length;
   const completedCount = STRATEGIC_PROJECTS_LIST.filter(p => p.status === 'COMPLETED').length + approvedProofs.filter(p => p.citizen_status_claim === 'COMPLETED').length;
   const notStartedProofs = approvedProofs.filter(p => p.citizen_status_claim === 'NOT_STARTED').length;
@@ -167,7 +168,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
               Observatoire Citoyen des Chantiers Publics
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
-              Suivi photographique de terrain, veille contractuelle et vérification citoyenne indépendante des <strong>3 453,8 Milliards FCFA</strong> d'investissements de l'État et des collectivités locales.
+              Suivi photographique de terrain, veille contractuelle et observations citoyennes indépendantes sur <strong>{publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets physiques 2026</strong> ({formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa)} côté État et {formatCompactFCFA(publicIndicators.investments.localPhysical2026AmountFcfa)} côté collectivités locales, hors {publicIndicators.investments.multiYearPre2026Count} projet pluriannuel 2021 de {formatCompactFCFA(publicIndicators.investments.multiYearPre2026AmountFcfa)}).
             </p>
           </div>
 
@@ -196,7 +197,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
             }`}
           >
             <Camera className="w-4 h-4 text-brand-orange" />
-            <span>Galerie & Chantiers Stratégiques ({STRATEGIC_PROJECTS_LIST.length + approvedProofs.length})</span>
+            <span>Galerie ({strategicCount} dossier stratégique • {approvedProofsCount} constat{approvedProofsCount > 1 ? 's' : ''} citoyen{approvedProofsCount > 1 ? 's' : ''})</span>
           </button>
 
           <button
@@ -232,7 +233,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                 </div>
 
                 <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold self-start sm:self-auto border border-slate-200/70">
-                  {totalVerifiedProofs} chantiers & constats répertoriés
+                  {strategicCount} enquête stratégique • {approvedProofsCount} / {publicIndicators.citizenProofs.target2026.toLocaleString('fr-FR')} constats publiés
                 </span>
               </div>
 

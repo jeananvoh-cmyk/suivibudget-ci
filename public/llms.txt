@@ -9,10 +9,10 @@
 - **Couverture géographique** : République de Côte d'Ivoire (31 régions, 2 districts autonomes d'Abidjan et Yamoussoukro, 201 communes).
 
 ## Chiffres et Données Clés
-- **Volume d'investissements publics suivis** : 3 461 Milliards FCFA votés au titre de la Loi de Finances 2026.
-- **Nombre de chantiers répertoriés** : 4 701 projets d'infrastructures physiques (routes, ponts, écoles, collèges, centres de santé, forages, châteaux d'eau, marchés).
-- **Collectivités territoriales répertoriées** : 201 mairies (avec noms des maires, budgets d'investissement et de fonctionnement, contacts officiels) et 31 conseils régionaux.
-- **Pouvoir exécutif répertorié** : 35 ministères et 13 grandes institutions de la République.
+- **Volume de projets physiques suivis (exercice 2026)** : 1 806,2 Milliards FCFA répartis entre 854 projets de l'État (1 611,1 Milliards FCFA) et 3 853 projets des collectivités territoriales (195,1 Milliards FCFA), plus 1 grand projet pluriannuel engagé en 2021 (104,7 Milliards FCFA) ; ces montants représentent le périmètre des projets physiques extraits, distinct du budget global de l'État (17 350,2 Milliards FCFA selon la Loi de Finances 2026 n° 2025-987).
+- **Nombre de projets physiques répertoriés** : 4 708 projets d'infrastructures et d'équipements physiques (4 707 au titre de 2026 et 1 pluriannuel 2021 : routes, ponts, écoles, collèges, centres de santé, forages, châteaux d'eau, marchés), extraits sur 7 169 lignes d'investissement cataloguées.
+- **Collectivités territoriales référencées** : 201 communes et 31 conseils régionaux (232 collectivités territoriales, plus 2 districts autonomes hors compteur), dont 47 budgets primitifs 2026 cités sur sources documentaires (31 communes et 16 régions) et des comptes administratifs publiés progressivement après vérification.
+- **Pouvoir exécutif et institutions** : 35 portefeuilles ministériels (34 sections LFI), 14 grandes institutions nationales et 7 autorités de régulation.
 - **Répertoire CAIDP** : Coordonnées des Responsables de l'Information (RI) officiellement désignés pour traiter les demandes citoyennes d'accès aux documents publics sous 30 jours (délai légal).
 
 ## Piliers et Fonctionnalités de la Plateforme

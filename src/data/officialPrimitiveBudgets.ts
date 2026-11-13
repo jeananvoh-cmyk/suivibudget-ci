@@ -644,8 +644,17 @@ export function enrichWithPrimitiveBudgets(entities: Institution[]): Institution
         .replace(/^conseilregionaldel/, '');
 
       for (const [key, p] of Object.entries(OFFICIAL_PRIMITIVE_BUDGETS)) {
-        const normKey = normalizeStr(key.replace('inst-com-', '').replace('inst-reg-conseil-regional-', ''));
-        if (normKey === normEntity || normEntity.includes(normKey) || normKey.includes(normEntity)) {
+        const keyIsCom = key.startsWith('inst-com-');
+        const keyIsReg = key.startsWith('inst-reg-');
+        if (entity.type === 'MAIRIE' && !keyIsCom) continue;
+        if (entity.type === 'REGION' && !keyIsReg) continue;
+
+        const normKey = normalizeStr(
+          key
+            .replace(/^inst-com-/, '')
+            .replace(/^inst-reg-conseil-regional-(de-l-|de-la-|du-|des-|de-|d-)?/, '')
+        );
+        if (normKey && normKey === normEntity) {
           primitive = p;
           break;
         }

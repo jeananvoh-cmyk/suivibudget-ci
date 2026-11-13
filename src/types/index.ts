@@ -291,7 +291,8 @@ export interface ImpactStats {
   totalBudgetLines: number;
   totalInvestmentsFcfa: number;
   verifiedProofsCount: number;
-  proofsVerificationRate: number;
+  proofsVerificationRate: number | null;
+  detailed?: import('../utils/publicIndicators').PublicIndicatorsSnapshot;
 }
 
 export interface NewsArticle {

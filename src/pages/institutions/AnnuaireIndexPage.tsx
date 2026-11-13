@@ -1,5 +1,7 @@
 import React from 'react';
 import { ArrowRight, ExternalLink } from 'lucide-react';
+import { dataStore } from '../../services/dataStore';
+import { formatCompactFCFA } from '../../utils/formatters';
 
 interface AnnuaireIndexPageProps {
   onNavigateToSection: (section: 'MINISTRIES' | 'INSTITUTIONS' | 'REGULATORS' | 'MUNICIPAL' | 'REGIONAL') => void;
@@ -116,7 +118,7 @@ export const AnnuaireIndexPage: React.FC<AnnuaireIndexPageProps> = ({
           {/* Citizen Focus Bridge */}
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
             <span className="text-slate-700 font-medium leading-relaxed">
-              Sur ce budget global, <strong>3 461,00 Milliards FCFA</strong> sont alloués aux <strong>Investissements Publics & Chantiers</strong> (7 162 projets suivis par les citoyens sur cette plateforme).
+              Sur le périmètre des <strong>projets et équipements physiques 2026</strong> suivis sur cette plateforme, <strong>{dataStore.getPublicIndicators().investments.statePhysical2026Count.toLocaleString('fr-FR')} chantiers de l'État</strong> ({formatCompactFCFA(dataStore.getPublicIndicators().investments.statePhysical2026AmountFcfa)}) et <strong>{dataStore.getPublicIndicators().investments.localPhysical2026Count.toLocaleString('fr-FR')} projets des collectivités locales</strong> ({formatCompactFCFA(dataStore.getPublicIndicators().investments.localPhysical2026AmountFcfa)}) sont répertoriés séparément, hors {dataStore.getPublicIndicators().investments.multiYearPre2026Count} grand marché pluriannuel 2021 ({formatCompactFCFA(dataStore.getPublicIndicators().investments.multiYearPre2026AmountFcfa)}).
             </span>
           </div>
 
