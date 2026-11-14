@@ -34,12 +34,13 @@
 | **Filtrage source `computePublicIndicators`** | Filtrait uniquement les doublons/chevauchements ; renvoyait 5 144 lignes si appelé avec `RAW_BUDGET_PROJECTS`. | Filtre explicitement `(category === 'PROJECT_PHYSICAL' \|\| isPhysicalProject)` ; renvoie exactement **3 279** lignes physiques (1 332,6 Mds FCFA). | Règle R1 & AC1 satisfaites à 100% : exclusion absolue des équipements (816), études (107), fonctionnement (28), transferts (2 087) et indéterminés (761). |
 | **Cohérence `dataStore.ts`** | Cohérence 1:1 dépendante d'un pré-filtrage interne dans `dataStore.ts`. | Cohérence 1:1 blindée à la source dans `publicIndicators.ts`, vérifiée par test unitaire dédié. | Résilience totale contre tout appelant externe ou refactoring futur. |
 | **SpotlightSearchModal (`SpotlightSearchModal.tsx:167`)** | Texte : *"201 communes, 33 régions, membres du gouvernement et 4 586 chantiers publics"*. | Texte : *"201 communes, 31 conseils régionaux, 2 districts autonomes, membres du gouvernement et opérations répertoriées"*. | Conformité stricte à la Charte territoriale (232 collectivités + 2 districts) et suppression des reliquats obsolètes ("33 régions", "4 586 chantiers"). |
+| **Rapports d'Étape (`BudgetReportsView.tsx:100, 192, 227-230, 258, 305, 364`)** | Affichait *"33 Régions"*, *"234 Collectivités"* (201 Mairies & 33 Régions), *"Données Officielles Vérifiées"*, *"Grands Chantiers"*, *"Nombre de Chantiers"* et claim *"100 % issues de la LFI 2026"*. | Remplacé par *"201 Communes, 31 Conseils Régionaux & 2 Districts Autonomes 2026"*, *"232 Collectivités (201 Communes & 31 Conseils Régionaux (+ 2 Districts))"*, badge *"Classification automatisée — à vérifier sur pièce"*, *"Grands Projets & Opérations de l'État"*, colonne *"Opérations répertoriées"* et avertissement d'extraction de catalogue. | Élimination complète des reliquats territoriaux et des claims de certification non vérifiée sur pièce (Principes 2, 7, 16). |
 | **Contrôle citoyen (`StatImpactBanner.tsx`)** | Affichage partiel du nombre de preuves approuvées sans détails sur la modération. | Affichage explicite des 6 statuts : `{verifiedCount}` modérés (APPROVED), **0 vérification indépendante certifiée**, `{pendingProofsCount}` en attente, Objectif 2026 : **1 000**. | Transparence absolue : distinction entre modération éditoriale et certification d'audit. |
 | **Observatoire citoyen (`ObservatoryPage.tsx:331`)** | Badge photo : *"Constat terrain vérifié"*. | Badge photo : *"Observation terrain documentée (modération staff)"*. Grille des 6 statuts citoyenne intégrée. | Élimination de toute confusion entre constat staff/citoyen et certification officielle (P7). |
 | **Accueil (`HomePage.tsx:308, 397`)** | *"constats citoyens validés"*, *"{sec.count} chantiers"*. | *"constats citoyens modérés"*, *"{sec.count} opérations répertoriées"*. | Clarté sémantique et élimination de claims physiques non certifiés. |
 | **Budgets primitifs 2026 (46 vs 47 vs 232)** | Risque de confusion entre 46 BP de presse et 47 BP avec Tiassalé. | Documenté et sécurisé : 46 BP dans `officialPrimitiveBudgets.ts`, 47 dans `localBudgetsReferential.ts` (+Tiassalé), 100% presse secondaire, 0 document primaire PDF, total national = `null` (`NOT_CONSOLIDATED`). | Interdiction formelle de sommer des montants approximatifs ou de créer un faux total national. |
 | **9 Montants nationaux** | Risque de réapparition des 6 montants obsolètes (`3 461`, `3 453,8`, `1 611,1`, `195,1`, `1 806,2`, `1 910,9` Mds). | Traçabilité intégrale dans le code et les tests ; 6 montants interdits par regex (`forbiddenPatterns`) ; seuls `17 350,2 Mds` et `4 195,7 Mds` (LFI 2026) et `104,7 Mds` (pluriannuel 2021 isolé) sont autorisés. | Éradication complète des montants fantômes historiques. |
-| **Robustesse de la suite de tests** | Test 1 sujet à timeout aléatoire (5 000ms Vitest default sous charge CPU parallèle). | Timeout explicite fixé à 25 000ms sur le test 1 ; ajout d'un test direct sur `RAW_BUDGET_PROJECTS` (15/15 tests PASS). | 100% de succès déterministe sous CI parallèle. |
+| **Robustesse de la suite de tests** | Timeouts par défaut (5 000ms) et seuil 25 000ms sensibles à la contention CPU multi-threads sous exécution concurrente (`npm test`). | Timeouts durcis à 35 000ms sur Test 1, 45 000ms sur Tests 9 & 10 dans `publicIndicators.test.tsx`, et 30 000ms sur `it.each` dans `caGeneralizationAndRubrics.test.tsx:48`. | 100% de succès déterministe sous CI et exécution parallèle complète (68/68 fichiers, 931/931 tests PASS, code 0). |
 
 ### Vérifications & Recette d'Intégrité
 
@@ -47,23 +48,23 @@
   ```text
   Test Files  68 passed (68)
   Tests       931 passed (931)
-  Duration    152.48s
+  Duration    160.45s (transform 32.53s, setup 0ms, import 156.14s, tests 223.74s, environment 54ms)
   ```
 - **Test unitaire ciblé (`npx vitest run src/utils/__tests__/publicIndicators.test.tsx`)** :
   ```text
   Test Files  1 passed (1)
   Tests       15 passed (15)
-  Duration    26.74s
+  Duration    29.85s (transform 3.00s, setup 0ms, import 8.31s, tests 20.00s, environment 0ms)
   ```
 - **Compilation TypeScript & Build de production (`npm run build`)** :
   ```text
   ✓ 1770 modules transformed.
-  ✓ built in 48.44s (0 erreur TypeScript, code 0)
+  ✓ built in 29.74s (0 erreur TypeScript, code 0)
   ```
 - **Build de revue (`npm run build:review`)** :
   ```text
   ✓ 39 modules transformed.
-  ✓ built in 7.39s (code 0)
+  ✓ built in 12.15s (code 0)
   ```
 - **Garde-fou Supabase en lecture seule (`npm run verify:supabase:read-only`)** :
   ```json

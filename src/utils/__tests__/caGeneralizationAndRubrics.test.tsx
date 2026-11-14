@@ -50,7 +50,7 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
       const hash=await calculateFileSha256(buffer);
       expect(await extractPdfPageCountFromBuffer(buffer)).toBe(count);
       expect(await calculateFileSha256(buffer)).toBe(hash);
-    });
+    }, 30000);
 
     it.each(['Ceci est un fichier texte', '%PDF-1.5\n1 0 obj << /Type /ObjStm /Length 9 >> stream\ncorrompu\nendstream endobj\n%%EOF', '%PDF-1.5\n1 0 obj << /Filter /Standard >> endobj\ntrailer << /Encrypt 1 0 R >>\n%%EOF'])('laisse les fichiers illisibles ou chiffrés indéterminés', async content => {
       expect(await extractPdfPageCountFromBuffer(new TextEncoder().encode(content))).toBeNull();

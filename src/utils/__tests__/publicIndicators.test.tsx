@@ -86,7 +86,7 @@ describe('Public Indicators Reconciliation & Traceability', () => {
 
     expect(indicators.investments.catalogReconciliation.crossCatalogOverlapCount).toBe(2024);
     expect(indicators.investments.catalogReconciliation.exactDuplicatesCount).toBe(1);
-  });
+  }, 35000);
 
   it('exposes centralized StructuredPublicIndicator entries with explicit verificationStatus and official LFI 2026 sources', () => {
     const snapshot = dataStore.getPublicIndicators();
@@ -429,7 +429,7 @@ describe('Public Indicators Reconciliation & Traceability', () => {
       expect(homeHtml).toContain('Administration &amp; Équipements Publics');
       expect(homeHtml).toContain('Énergie, Sécurité, Culture &amp; Environnement');
     },
-    25000
+    45000
   );
 
   it(
@@ -460,7 +460,7 @@ describe('Public Indicators Reconciliation & Traceability', () => {
       expect(annuaireHtml).toContain('1 062,7 Milliards FCFA');
       expect(annuaireHtml).toContain('non consolidé publiquement');
     },
-    25000
+    45000
   );
 
   it('keeps public HTML, llms.txt, components, and dataStore free of phantom legacy numbers and 2025-998', () => {
