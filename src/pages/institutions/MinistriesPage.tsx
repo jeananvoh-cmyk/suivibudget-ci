@@ -250,7 +250,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
             Ministères de la République
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
-            Primature, ministères d'État, ministères sectoriels et délégués : portefeuilles officiels, budgets alloués et chantiers publics de l'action gouvernementale.
+            Primature, ministères d'État, ministères sectoriels et délégués : portefeuilles officiels, budgets alloués et opérations d'investissement de l'action gouvernementale.
           </p>
         </div>
       </div>

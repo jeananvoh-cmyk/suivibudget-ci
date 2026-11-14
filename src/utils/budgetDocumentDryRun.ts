@@ -799,7 +799,11 @@ export function buildStandardImportEnvelope(
     }
 
     if (metadata.adoption_date) dataObj.adoption_date = metadata.adoption_date;
-    dataObj.verification_status = metadata.evidence_level ?? 'OFFICIAL_DOCUMENT';
+    // Le schéma PostgreSQL local_budgets en production n'inclut pas encore 'AIP_REPORTED' dans sa contrainte CHECK ;
+    // toute source AIP secondaire rapportée sans délibération primaire est persistée comme 'SECONDARY_TO_CORROBORATE'.
+    const rawEvidence = metadata.evidence_level ?? 'OFFICIAL_DOCUMENT';
+    dataObj.verification_status =
+      rawEvidence === 'AIP_REPORTED' ? 'SECONDARY_TO_CORROBORATE' : rawEvidence;
     // Confiance par défaut qualifiée (Item 10)
     dataObj.confidence_level = metadata.source_date_kind === 'PUBLISHED' ? 'MEDIUM' : 'LOW';
     if (metadata.notes) dataObj.notes = metadata.notes;

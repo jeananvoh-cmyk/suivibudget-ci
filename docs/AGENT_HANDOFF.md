@@ -11,7 +11,7 @@
 ### Rapport d'Intégrité en 16 Points (Charte & Règles AGENTS.md § 3)
 
 1. **Understanding before data dump** : Partition intégrale et documentée des 7 169 lignes brutes du catalogue (`RAW_BUDGET_PROJECTS`, 3 611,6 Mds FCFA bruts). Le moteur `computePublicIndicators` filtre désormais strictement `(classification.category === 'PROJECT_PHYSICAL' || classification.isPhysicalProject)` et élimine les chevauchements et doublons, garantissant 3 279 lignes physiques réconciliées (1 332,6 Mds FCFA) quel que soit le point d'entrée, sans déverser de données brutes ou non vérifiées sur les écrans citoyens.
-2. **Provenance by default** : Chaque indicateur public majeur remonte à sa source légale primaire : Loi de finances n° 2025-987 du 19 décembre 2025 (Articles 1, 6, 7, 8, 13, 16, 21), dépêches secondaires identifiées pour les BP de presse, et observations citoyennes étiquetées `CITIZEN_OBSERVATION` avec statut de modération `APPROVED`. **Harmonisation M2** : Dans `localBudgetsReferential.ts`, 100% des 48 entrées 2026 sont désormais étiquetées `source_role: 'SECONDARY'` et `sources[i].role: 'SECONDARY'` (0 source secondaire en rôle `PRIMARY`), et le statut trompeur `AIP_VERIFIED` a été substitué par le statut explicite `AIP_REPORTED`.
+2. **Provenance by default** : Chaque indicateur public majeur remonte à sa source légale primaire : Loi de finances n° 2025-987 du 19 décembre 2025 (Articles 1, 6, 7, 8, 13, 16, 21), dépêches secondaires identifiées pour les BP de presse, et observations citoyennes étiquetées `CITIZEN_OBSERVATION` avec statut de modération `APPROVED`. **Harmonisation M2** : Dans `localBudgetsReferential.ts`, 100 % des 48 entrées 2026 sont désormais étiquetées `source_role: 'SECONDARY'` et `sources[i].role: 'SECONDARY'` (`0` source secondaire en rôle `PRIMARY`), et le statut trompeur `AIP_VERIFIED` a été remplacé par `AIP_REPORTED` (34 dépêches AIP) et `SECONDARY_TO_CORROBORATE` (14 articles de presse générale : 13 Fraternité Matin / KOACI + Cocody Abidjan.net), avec `0` `OFFICIAL_DOCUMENT` et `0` erreur `ERR_SOURCE_VERIFICATION_MISMATCH`.
 3. **Complete accountability cycle** : Le cycle complet est respecté : prévision LFI 2026 (4 195,7 Mds investissements) → ventilation par pool et secteur → fiches de projets répertoriés → recueil des constats de terrain modérés → reddition des comptes (comptes administratifs publiés).
 4. **No participation black hole** : Chaque observation citoyenne soumise dispose d'un identifiant unique, d'un statut traçable (`PENDING`, `APPROVED`, `REJECTED`), d'un horodatage et d'un affichage observable sur l'Observatoire citoyen.
 5. **Participation is not representativeness** : Les constats citoyens affichés sur l'Observatoire et dans les bannières d'impact sont explicitement qualifiés de contributions territoriales sentinelles qualitatives et ne sont jamais présentés comme un échantillon statistique représentatif.
@@ -33,7 +33,7 @@ Une distinction capitale est désormais documentée et garantie par la suite de 
 - **46 (`OFFICIAL_PRIMITIVE_BUDGETS`)** : Le catalogue officiel canonique (`src/data/officialPrimitiveBudgets.ts`) contient exactement **46 budgets primitifs 2026** (30 communes + 16 conseils régionaux, 0 district). Ces 46 collectivités constituent le socle consolidé officiel.
 - **47 collectivités territoriales distinctes en 2026** : Dans le référentiel étendu (`src/data/localBudgetsReferential.ts`), il existe exactement **47 collectivités territoriales distinctes** pour l'exercice 2026. Ce décompte correspond aux **46 collectivités du socle officiel + la commune de Tiassalé** (`inst-com-tiassale`), dont le budget primitif 2026 est documenté sous statut `APPROXIMATE` (enveloppe globale déclarée dans la presse de 1 760 000 000 FCFA avec ventilation fonctionnement/investissement `null`).
 - **48 enregistrements budgétaires 2026 (`LOCAL_BUDGETS_REFERENTIAL`)** : Le tableau contient au total **48 enregistrements** pour l'exercice 2026. Ce total s'explique par la gestion versionnée de la commune pilote de Bingerville :
-  - `lbud-bingerville-2026-v1` : Version initiale non-courante (`is_current_version: false`), votée par le conseil municipal le 20/11/2025 pour un montant de 4 144 682 000 FCFA (fonctionnement : 1 976 348 000 FCFA, investissement : 2 168 334 000 FCFA). Statut harmonisé en `AIP_REPORTED`, `source_role: 'SECONDARY'`.
+  - `lbud-bingerville-2026-v1` : Version initiale non-courante (`is_current_version: false`), votée par le conseil municipal le 20/11/2025 pour un montant de 4 144 682 000 FCFA (fonctionnement : 1 475 739 000 FCFA, investissement : 2 668 943 000 FCFA). Statut harmonisé en `AIP_REPORTED`, `source_role: 'SECONDARY'`.
   - `lbud-bingerville-2026-v2` : Version approuvée courante (`is_current_version: true`), adoptée pour un montant de 4 046 222 000 FCFA (fonctionnement : 1 877 888 000 FCFA, investissement : 2 168 334 000 FCFA).
   - Les 46 autres collectivités n'ont qu'une seule version 2026 (`is_current_version: true`).
   - Ainsi, les enregistrements avec `is_current_version: true` sont au nombre de **47**, et le total brut d'enregistrements 2026 est de **48**.
@@ -43,11 +43,11 @@ Une distinction capitale est désormais documentée et garantie par la suite de 
 | Indicateur / Composant | Avant Clôture PR #68 | Après Réconciliation & Clôture | Gain Méthodologique & Intégrité |
 | :--- | :--- | :--- | :--- |
 | **Harmonisation des Rôles de Sources (`localBudgetsReferential.ts`)** | Plus de 40 entrées de presse/AIP portaient `source_role: 'PRIMARY'` ou `sources[i].role: 'PRIMARY'`. | **0** entrée de source secondaire ne porte `PRIMARY`. 100% des 48 entrées 2026 ont `source_role: 'SECONDARY'` et `sources[i].role: 'SECONDARY'`. | Respect strict du Principe 2 : une source secondaire (AIP, presse) ne peut jamais être déclarée `PRIMARY`. |
-| **Statut de Vérification des Sources de Presse** | Les dépêches AIP portaient le statut trompeur `AIP_VERIFIED` et Bingerville v1 portait `OFFICIAL_DOCUMENT`. | Remplacé par `AIP_REPORTED` pour les 47 entrées AIP et `SECONDARY_TO_CORROBORATE` pour Cocody. `OFFICIAL_DOCUMENT` est réservé aux arrêtés/délibérations primaires certifiés. | Élimination de toute sur-qualification de fiabilité sans document officiel primaire. |
-| **Double Référentiel Local & Décomposition 46 vs 47 vs 48** | Confusion possible entre le socle officiel de 46 BP et le référentiel local étendu. | Dual-référentiel explicité et couvert par 21 tests unitaires : 46 socle officiel (`officialPrimitiveBudgets.ts`), 47 collectivités distinctes (+ Tiassalé), 48 enregistrements (+ Bingerville v1 archivée). | Clarté mathématique et comptable vérifiable par n'importe quel auditeur. |
+| **Statut de Vérification des Sources de Presse** | Les dépêches AIP portaient le statut trompeur `AIP_VERIFIED` et Bingerville v1 portait `OFFICIAL_DOCUMENT`. | Remplacé par `AIP_REPORTED` pour les **34 dépêches AIP** et `SECONDARY_TO_CORROBORATE` pour les **14 articles de presse générale** (13 Fraternité Matin / KOACI + Cocody Abidjan.net), avec **0** erreur `ERR_SOURCE_VERIFICATION_MISMATCH` (`validateAllLocalBudgets`) et **0** modification de migration Supabase (`supabase/migrations/20260928_local_budgets_referential.sql` identique à `origin/master`, mapping `AIP_REPORTED -> SECONDARY_TO_CORROBORATE` côté persistance `local_budgets`). | Élimination de toute sur-qualification de fiabilité sans document officiel primaire ni dérive de schéma DB. |
+| **Double Référentiel Local & Décomposition 46 vs 47 vs 48** | Confusion possible entre le socle officiel de 46 BP et le référentiel local étendu. | Dual-référentiel explicité et couvert par 22 tests unitaires : 46 socle officiel (`officialPrimitiveBudgets.ts`), 47 collectivités distinctes (+ Tiassalé), 48 enregistrements (+ Bingerville v1 archivée). | Clarté mathématique et comptable vérifiable par n'importe quel auditeur. |
 | **Filtrage source `computePublicIndicators`** | Filtrait uniquement les doublons/chevauchements ; renvoyait 5 144 lignes si appelé avec `RAW_BUDGET_PROJECTS`. | Filtre explicitement `(category === 'PROJECT_PHYSICAL' \|\| isPhysicalProject)` ; renvoie exactement **3 279** lignes physiques (1 332,6 Mds FCFA). | Règle R1 & AC1 satisfaites à 100% : exclusion absolue des équipements (816), études (107), fonctionnement (28), transferts (2 087) et indéterminés (761). |
 | **Cohérence `dataStore.ts`** | Cohérence 1:1 dépendante d'un pré-filtrage interne dans `dataStore.ts`. | Cohérence 1:1 blindée à la source dans `publicIndicators.ts`, vérifiée par test unitaire dédié. | Résilience totale contre tout appelant externe ou refactoring futur. |
-| **Nettoyage sémantique UI ("opérations" vs "chantiers")** | Lignes automatisées assimilées à des "chantiers" dans `ProjectsPage`, `ObservatoryPage`, `HomePage`, `HeroSection`, `Footer`, `InstitutionDetailModal`. | Termes remplacés par "Opérations & Projets", "Opérations répertoriées", "Opérations Communales & Régionales de Proximité", etc. Fallback `dataStore.ts` corrigé en "Source déclarée". | Respect strict du Principe 7 (Financial != Physical) dans tous les parcours utilisateurs. |
+| **Nettoyage sémantique UI ("opérations" vs "chantiers")** | Lignes automatisées assimilées à des "chantiers" dans `ProjectsPage`, `ObservatoryPage`, `HomePage`, `HeroSection`, `Footer`, `InstitutionDetailModal`, `CommuneComparatorModal`, `Header`, `MinistriesPage`, `budgetCatalogClassification`, `index.html`, `manifest.json`, `llms.txt`. | Termes remplacés par "Opérations & Projets", "Opérations répertoriées", "Investissements & Opérations Publics", "observations citoyennes modérées (sans certification d'audit ou d'ingénierie)", etc. Fallback `dataStore.ts` corrigé en "Source déclarée". | Respect strict du Principe 7 (Financial != Physical) dans tous les parcours utilisateurs et métadonnées. |
 | **SpotlightSearchModal (`SpotlightSearchModal.tsx:167`)** | Texte : *"201 communes, 33 régions, membres du gouvernement et 4 586 chantiers publics"*. | Texte : *"201 communes, 31 conseils régionaux, 2 districts autonomes, membres du gouvernement et opérations répertoriées"*. | Conformité stricte à la Charte territoriale (232 collectivités + 2 districts) et suppression des reliquats obsolètes ("33 régions", "4 586 chantiers"). |
 | **Rapports d'Étape (`BudgetReportsView.tsx:100, 192, 227-230, 258, 305, 364`)** | Affichait *"33 Régions"*, *"234 Collectivités"* (201 Mairies & 33 Régions), *"Données Officielles Vérifiées"*, *"Grands Chantiers"*, *"Nombre de Chantiers"* et claim *"100 % issues de la LFI 2026"*. | Remplacé par *"201 Communes, 31 Conseils Régionaux & 2 Districts Autonomes 2026"*, *"232 Collectivités (201 Communes & 31 Conseils Régionaux (+ 2 Districts))"*, badge *"Classification automatisée — à vérifier sur pièce"*, *"Grands Projets & Opérations de l'État"*, colonne *"Opérations répertoriées"* et avertissement d'extraction de catalogue. | Élimination complète des reliquats territoriaux et des claims de certification non vérifiée sur pièce (Principes 2, 7, 16). |
 | **Contrôle citoyen (`StatImpactBanner.tsx`)** | Affichage partiel du nombre de preuves approuvées sans détails sur la modération. | Affichage explicite des 6 statuts : `{verifiedCount}` modérés (APPROVED), **0 vérification indépendante certifiée**, `{pendingProofsCount}` en attente, Objectif 2026 : **1 000**. | Transparence absolue : distinction entre modération éditoriale et certification d'audit. |
@@ -55,37 +55,31 @@ Une distinction capitale est désormais documentée et garantie par la suite de 
 | **Accueil (`HomePage.tsx:308, 397`)** | *"constats citoyens validés"*, *"{sec.count} chantiers"*. | *"constats citoyens modérés"*, *"{sec.count} opérations répertoriées"*. | Clarté sémantique et élimination de claims physiques non certifiés. |
 | **Budgets primitifs 2026 (46 vs 47 vs 232)** | Risque de confusion entre 46 BP de presse et 47 BP avec Tiassalé. | Documenté et sécurisé : 46 BP dans `officialPrimitiveBudgets.ts`, 47 dans `localBudgetsReferential.ts` (+Tiassalé), 100% presse secondaire, 0 document primaire PDF, total national = `null` (`NOT_CONSOLIDATED`). | Interdiction formelle de sommer des montants approximatifs ou de créer un faux total national. |
 | **9 Montants nationaux** | Risque de réapparition des 6 montants obsolètes (`3 461`, `3 453,8`, `1 611,1`, `195,1`, `1 806,2`, `1 910,9` Mds). | Traçabilité intégrale dans le code et les tests ; 6 montants interdits par regex (`forbiddenPatterns`) ; seuls `17 350,2 Mds` et `4 195,7 Mds` (LFI 2026) et `104,7 Mds` (pluriannuel 2021 isolé) sont autorisés. | Éradication complète des montants fantômes historiques. |
-| **Robustesse de la suite de tests** | Timeouts par défaut (5 000ms) et seuil 25 000ms sensibles à la contention CPU multi-threads sous exécution concurrente (`npm test`). | Timeouts durcis à 35 000ms sur Test 1, 45 000ms sur Tests 9 & 10 dans `publicIndicators.test.tsx`, et 30 000ms sur `it.each` dans `caGeneralizationAndRubrics.test.tsx:48`. | 100% de succès déterministe sous CI et exécution parallèle complète (69/69 fichiers, 952/952 tests PASS, code 0). |
+| **Robustesse de la suite de tests** | Timeouts par défaut (5 000ms) et seuil 25 000ms sensibles à la contention CPU multi-threads sous exécution concurrente (`npm test`). | Timeouts durcis à 35 000ms sur Test 1, 45 000ms sur Tests 9 & 10 dans `publicIndicators.test.tsx`, et 30 000ms sur `it.each` dans `caGeneralizationAndRubrics.test.tsx:48`. | 100% de succès déterministe sous CI et exécution parallèle complète (69/69 fichiers, 953/953 tests PASS, code 0). |
 
 ### Vérifications & Recette d'Intégrité
 
 - **Tests unitaires et d'intégration (`npm test`)** :
   ```text
   Test Files  69 passed (69)
-  Tests       952 passed (952)
-  Duration    196.08s (transform 49.42s, setup 0ms, import 228.03s, tests 202.57s, environment 28ms)
+  Tests       953 passed (953)
+  Duration    83.25s (transform 11.77s, setup 0ms, import 74.43s, tests 125.37s, environment 21ms)
   ```
-- **Tests unitaires dual-référentiel (`npx vitest run src/utils/__tests__/dualReferentialVerification.test.ts`)** :
+- **Tests ciblés (`npx vitest run src/utils/__tests__/dualReferentialVerification.test.ts src/utils/__tests__/dataImport.test.ts src/utils/__tests__/publicIndicators.test.tsx`)** :
   ```text
-  Test Files  1 passed (1)
-  Tests       21 passed (21)
-  Duration    1.86s
-  ```
-- **Test unitaire indicateurs publics (`npx vitest run src/utils/__tests__/publicIndicators.test.tsx`)** :
-  ```text
-  Test Files  1 passed (1)
-  Tests       15 passed (15)
-  Duration    29.85s (transform 3.00s, setup 0ms, import 8.31s, tests 20.00s, environment 0ms)
+  Test Files  3 passed (3)
+  Tests       57 passed (57)  [dualReferentialVerification: 22/22, dataImport: 20/20, publicIndicators: 15/15]
+  Duration    19.93s (transform 4.58s, setup 0ms, import 11.23s, tests 18.44s, environment 1ms)
   ```
 - **Compilation TypeScript & Build de production (`npm run build`)** :
   ```text
   ✓ 1770 modules transformed.
-  ✓ built in 50.12s (0 erreur TypeScript, code 0)
+  ✓ built in 23.12s (0 erreur TypeScript, code 0)
   ```
 - **Build de revue (`npm run build:review`)** :
   ```text
   ✓ 39 modules transformed.
-  ✓ built in 6.66s (code 0)
+  ✓ built in 2.78s (code 0)
   ```
 - **Garde-fou Supabase en lecture seule (`npm run verify:supabase:read-only`)** :
   ```json

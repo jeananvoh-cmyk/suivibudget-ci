@@ -572,7 +572,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                       key={p.id}
                       className="hover:bg-blue-50/40 transition-colors group"
                     >
-                      {/* Col 1: Intitulé du Chantier */}
+                      {/* Col 1: Intitulé de l'Opération */}
                       <td className="py-3 px-3 font-bold text-slate-900">
                         <button type="button" onClick={() => onSelectProject(p)} aria-label={`Consulter la fiche du projet : ${p.title}`} className="text-left line-clamp-2 group-hover:text-brand-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue transition-colors text-xs font-black leading-snug">
                           {p.title}
@@ -643,7 +643,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                             onOpenSendProof(p);
                           }}
                           className="px-2.5 py-1 bg-slate-900 hover:bg-brand-blue text-white rounded-lg text-[11px] font-bold transition-all inline-flex items-center gap-1 shadow-2xs active:scale-95"
-                          title="Transmettre une photo preuve pour ce chantier"
+                          title="Transmettre une photo terrain pour cette opération"
                         >
                           <Camera className="w-3 h-3" />
                           <span>Suivi Citoyen</span>

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { OFFICIAL_PRIMITIVE_BUDGETS, getPrimitiveBudgetCatalogStats } from '../../data/officialPrimitiveBudgets';
 import { LOCAL_BUDGETS_REFERENTIAL, LOCAL_BUDGET_SOURCES } from '../../data/localBudgetsReferential';
+import { validateAllLocalBudgets } from '../budgetValidation';
 import { computePublicIndicators } from '../../utils/publicIndicators';
 import { RAW_BUDGET_PROJECTS } from '../../data/budgetData';
 import { INSTITUTIONS_DATA } from '../../data/institutionsData';
@@ -182,7 +183,7 @@ describe('Dual-Referential Verification Suite (M2 Verification Gate)', () => {
   });
 
   describe('4. Statuts de vérification honnêtes — Distinction dépêche vs délibération', () => {
-    it('attribue des statuts secondaires explicites (47 AIP_REPORTED + 1 SECONDARY_TO_CORROBORATE)', () => {
+    it('attribue des statuts secondaires explicites (34 AIP_REPORTED pour dépêches AIP + 14 SECONDARY_TO_CORROBORATE pour presse générale)', () => {
       const records2026 = LOCAL_BUDGETS_REFERENTIAL.filter((b) => b.fiscal_year === 2026);
 
       const statusCounts: Record<string, number> = {};
@@ -190,8 +191,8 @@ describe('Dual-Referential Verification Suite (M2 Verification Gate)', () => {
         statusCounts[b.verification_status] = (statusCounts[b.verification_status] || 0) + 1;
       }
 
-      expect(statusCounts.AIP_REPORTED).toBe(47);
-      expect(statusCounts.SECONDARY_TO_CORROBORATE).toBe(1); // Cocody 2026
+      expect(statusCounts.AIP_REPORTED).toBe(34);
+      expect(statusCounts.SECONDARY_TO_CORROBORATE).toBe(14); // 13 presse générale (FratMat/KOACI) + Cocody 2026
       expect(statusCounts.AIP_VERIFIED).toBeUndefined();
       expect(statusCounts.OFFICIAL_DOCUMENT).toBeUndefined();
     });
@@ -213,6 +214,12 @@ describe('Dual-Referential Verification Suite (M2 Verification Gate)', () => {
         expect(b.verification_status).not.toBe('OFFICIAL_DOCUMENT');
         expect(b.verification_status).not.toBe('AIP_VERIFIED');
       }
+    });
+
+    it('ne présente aucune contradiction ERR_SOURCE_VERIFICATION_MISMATCH sur l\'ensemble de LOCAL_BUDGETS_REFERENTIAL', () => {
+      const issues = validateAllLocalBudgets(LOCAL_BUDGETS_REFERENTIAL);
+      const mismatchIssues = issues.filter((i) => i.code === 'ERR_SOURCE_VERIFICATION_MISMATCH');
+      expect(mismatchIssues).toHaveLength(0);
     });
   });
 
@@ -257,7 +264,7 @@ describe('Dual-Referential Verification Suite (M2 Verification Gate)', () => {
       expect(snapshot.collectivities.collectivitiesOwnTotalInvestment2026Fcfa).toBeNull();
     });
 
-    it('préserve le filtrage 1:1 des opérations physiques (3 279 chantiers physiques sur 7 169 lignes brutes)', () => {
+    it('préserve le filtrage 1:1 des opérations physiques (3 279 opérations physiques sur 7 169 lignes brutes)', () => {
       const snapshot = computePublicIndicators({
         projects: RAW_BUDGET_PROJECTS,
         rawProjects: RAW_BUDGET_PROJECTS,

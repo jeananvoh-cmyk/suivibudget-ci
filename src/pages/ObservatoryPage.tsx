@@ -165,7 +165,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight font-sans">
-              Observatoire Citoyen des Chantiers Publics
+              Observatoire Citoyen des Investissements & Opérations Publics
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
               Suivi photographique de terrain, veille contractuelle et observations citoyennes indépendantes sur <strong>{publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée</strong> ({formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa)} côté État extrait et {formatCompactFCFA(publicIndicators.investments.localCsvPhysical2026AmountFcfa)} côté collectivités LFI, hors {publicIndicators.investments.localPortalBouakePhysical2026Count} projets portail Bouaké de {formatCompactFCFA(publicIndicators.investments.localPortalBouakePhysical2026AmountFcfa)} et {publicIndicators.investments.multiYearPre2026Count} marché pluriannuel 2021 de {formatCompactFCFA(publicIndicators.investments.multiYearPre2026AmountFcfa)}).
@@ -228,7 +228,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                     Budget Voté vs Avancement Constaté sur le Terrain
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Synthèse des observations vérifiées par la communauté citoyenne et les sentinelles régionales
+                    Synthèse des observations citoyennes modérées par la communauté et les sentinelles régionales (sans certification d'audit ou d'ingénierie)
                   </p>
                 </div>
 

@@ -323,7 +323,7 @@ function classifyBudgetCatalogLineCore(
   if (hasConcretePhysicalScope) {
     return {
       category: 'PROJECT_PHYSICAL',
-      reason: 'Chantier ou infrastructure physique identifié par classification automatisée',
+      reason: 'Opération ou infrastructure physique identifiée par classification automatisée',
       provenancePool,
       isPhysicalProject: true,
       isNonPhysicalExpense: false,
