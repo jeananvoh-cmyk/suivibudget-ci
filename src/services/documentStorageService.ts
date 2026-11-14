@@ -63,7 +63,7 @@ export interface MultiPartUploadResult {
   totalFileSizeBytes: number;
   totalFileSizeFormatted: string;
   primaryStoragePath: string;
-  totalPageCount: number;
+  totalPageCount: number | null;
   uploadedPaths: string[];
   newlyUploadedPaths: string[];
   error?: string;
@@ -469,7 +469,7 @@ export class DocumentStorageService {
         totalFileSizeBytes: totalBytes,
         totalFileSizeFormatted: totalSizeFormatted,
         primaryStoragePath: '',
-        totalPageCount: pageCheck.totalPages || 0,
+        totalPageCount: pageCheck.totalPages ?? null,
         uploadedPaths,
         newlyUploadedPaths: uploadedPaths,
       };

@@ -502,7 +502,7 @@ export const SingleCAUploadModal: React.FC<SingleCAUploadModalProps> = ({
           finalSizeStr = multiRes.totalFileSizeFormatted;
           finalSizeBytes = multiRes.totalFileSizeBytes;
           finalParts = multiRes.documentParts;
-          finalTotalPages = multiRes.totalPageCount;
+          finalTotalPages = multiRes.totalPageCount ?? undefined;
         } else {
           // Métadonnées sans nouveau fichier (modification)
           finalParts = existingDocument?.document_parts;

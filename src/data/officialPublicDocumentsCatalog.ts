@@ -195,8 +195,10 @@ const DOCUMENT_REFERENCES: OfficialPublicDocument[] = [
     file_format: 'PDF',
     published_at: null,
     downloads_count: 0,
-    is_official: true,
+    is_official: false,
     status: 'PUBLISHED',
+    http_status: 404,
+    source_provenance: 'SECONDARY_SOURCE',
     budget_nature: 'PERFORMANCE_REPORT',
     source_name: 'Direction Générale du Budget et des Finances',
     source_url: 'https://www.dgbf.ci/wp-content/uploads/2024/04/Rapport-Annuel-de-Performance-2022.pdf',
@@ -215,8 +217,10 @@ const DOCUMENT_REFERENCES: OfficialPublicDocument[] = [
     file_format: 'PDF',
     published_at: '2013-12-23T00:00:00.000Z',
     downloads_count: 0,
-    is_official: true,
+    is_official: false,
     status: 'PUBLISHED',
+    http_status: 404,
+    source_provenance: 'UNVERIFIED',
     budget_nature: 'LEGAL_TEXT',
     source_name: 'CAIDP Côte d’Ivoire',
     source_url: 'https://caidp.ci/uploads/86dc0b7227c41f5053334147b7ec76a6.pdf',
@@ -227,17 +231,22 @@ const DOCUMENT_REFERENCES: OfficialPublicDocument[] = [
 export const OFFICIAL_PUBLIC_DOCUMENTS_REGISTRY: readonly OfficialPublicDocument[] = DOCUMENT_REFERENCES.map(doc => {
   const control = DOCUMENT_CONTROLS.find(c => c.id === doc.id)!;
   const audit = verifyDocumentaryAudit({ id: doc.id, sha256: control.sha256, fiscalYear: doc.year }, OFFICIAL_DOCUMENTARY_AUDITS);
+  const sourceProvenance = doc.source_provenance ?? (
+    control.httpStatus === 404
+      ? (control.availability === 'AVAILABLE_FROM_PRIOR_OFFICIAL_ACQUISITION' ? 'SECONDARY_SOURCE' : 'UNVERIFIED')
+      : 'OFFICIAL_SOURCE'
+  );
   return Object.freeze({
     ...doc,
     checksum_sha256: control.sha256,
     page_count: control.pageCount ?? undefined,
     file_size: control.pageCount ? `${control.pageCount} pages` : undefined,
     verification_status: control.verification,
-    source_provenance: 'OFFICIAL_SOURCE' as const,
+    source_provenance: sourceProvenance,
     extraction_status: audit.verified ? 'VERIFIED' as const : 'TO_VERIFY' as const,
     availability: control.availability,
     accessed_at: control.accessedAt,
-    http_status: control.httpStatus,
+    http_status: control.httpStatus ?? doc.http_status ?? null,
     control_scope: audit.matchingAudit?.controlScope ?? null,
   });
 });
@@ -295,6 +304,8 @@ export interface VerifiedDocumentPaginationControl {
   readonly printedPageCount: number;
   readonly missingPrintedPages: readonly string[];
   readonly paginationNote: string;
+  readonly approvalDate?: string;
+  readonly prefectureVisaDate?: string;
 }
 
 export const VERIFIED_DOCUMENT_PAGINATION_CONTROLS: Readonly<Record<string, VerifiedDocumentPaginationControl>> = Object.freeze({
@@ -307,6 +318,8 @@ export const VERIFIED_DOCUMENT_PAGINATION_CONTROLS: Readonly<Record<string, Veri
     printedPageCount: 45,
     missingPrintedPages: ['20/45'],
     paginationNote: "44 pages physiques PDF (numérotation imprimée jusqu'à 44/45 sur 45 annoncées ; page imprimée 20/45 absente du scan d'origine, contenu non restitué).",
+    approvalDate: '2025-07-08',
+    prefectureVisaDate: '2025-07-22',
   },
 });
 
@@ -348,5 +361,6 @@ export function applyVerifiedDocumentPagination(doc: PublicDocument): PublicDocu
     printed_page_count: control.printedPageCount,
     missing_printed_pages: [...control.missingPrintedPages],
     pagination_note: control.paginationNote,
+    approval_date: control.approvalDate ?? doc.approval_date,
   };
 }

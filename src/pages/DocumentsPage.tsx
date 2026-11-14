@@ -14,7 +14,9 @@ import {
   Hash,
   CheckCircle2,
   FileCheck2,
-  Info
+  Info,
+  AlertTriangle,
+  Archive
 } from 'lucide-react';
 import { dataStore } from '../services/dataStore';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
@@ -429,8 +431,11 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredDocuments.map((doc) => {
-            const isOfficial = doc.is_official && doc.source_provenance === 'OFFICIAL_SOURCE';
-            const isVerified = doc.extraction_status === 'VERIFIED' && !!doc.control_scope;
+            const isOfflineOr404 = doc.http_status === 404 || doc.availability === 'NOT_FOUND_PUBLICLY';
+            const isPriorAcquisition = doc.availability === 'AVAILABLE_FROM_PRIOR_OFFICIAL_ACQUISITION';
+            const isOfficial = !isOfflineOr404 && doc.is_official && doc.source_provenance === 'OFFICIAL_SOURCE';
+            const isVerified = !isOfflineOr404 && doc.extraction_status === 'VERIFIED' && Boolean(doc.control_scope) && Boolean(doc.checksum_sha256);
+            const isRepertorie = !isOfflineOr404 && doc.http_status === 200 && Boolean(doc.checksum_sha256);
             const budgetNature = getBudgetNatureLabel(doc);
             const hasSha256 = Boolean(doc.checksum_sha256);
             const isCopied = copiedHashId === doc.id;
@@ -487,16 +492,34 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                       </span>
                     )}
 
+                    {isOfflineOr404 && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
+                        <AlertTriangle className="w-3 h-3 text-amber-600" />
+                        <span>Lien officiel indisponible (HTTP 404)</span>
+                      </span>
+                    )}
+
+                    {isPriorAcquisition && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
+                        <Archive className="w-3 h-3 text-amber-600" />
+                        <span>Archive officielle acquise (consultation sur demande CAIDP)</span>
+                      </span>
+                    )}
+
                     {isVerified ? (
                       <span className="inline-flex items-center gap-1 text-[10px] font-black text-blue-800 bg-blue-50 border border-blue-200/90 px-2 py-0.5 rounded-md">
                         <CheckCircle2 className="w-3 h-3 text-blue-600" />
                         <span title={doc.control_scope || undefined}>Document officiel vérifié</span>
                       </span>
-                    ) : (
+                    ) : isRepertorie ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-medium text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">
+                        <span>Document officiel répertorié</span>
+                      </span>
+                    ) : !isOfflineOr404 && !isPriorAcquisition ? (
                       <span className="inline-flex items-center gap-1 text-[10px] font-medium text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">
                         <span>Document officiel publié</span>
                       </span>
-                    )}
+                    ) : null}
                   </div>
 
                   <p className="text-xs text-slate-600">

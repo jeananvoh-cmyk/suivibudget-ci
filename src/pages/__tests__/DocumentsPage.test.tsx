@@ -219,9 +219,11 @@ describe('BLOC A — Intégration Documentaire & Budgétaire Publique (Lots 6, 7
       const html = renderToStaticMarkup(<DocumentsPage />);
       expect(html).toContain('Source :');
       expect(html).toContain('Document officiel vérifié');
-      expect(html).toContain('Document officiel publié');
+      expect(html).toContain('Document officiel répertorié');
+      expect(html).not.toContain('Document officiel publié');
       expect(html).toContain('Document enregistré');
-      expect(html).toContain('Lien indisponible (HTTP 404)');
+      expect(html).toContain('Lien officiel indisponible (HTTP 404)');
+      expect(html).toContain('Archive officielle acquise (consultation sur demande CAIDP)');
       expect(html).toContain('SHA-256 : f06035b6af...3a507d76');
       expect(html).toContain('SHA-256 : 0f8c7a91b5...ed0ffe10');
     });
