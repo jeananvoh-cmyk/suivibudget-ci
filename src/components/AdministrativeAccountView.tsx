@@ -593,6 +593,9 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
   const arithmeticDiffResolved =
     calculatedArithmeticDiff ?? currentCA.arithmetic_difference ?? null;
 
+  const anomalyDiff = Math.abs(arithmeticDiffResolved ?? currentCA.arithmetic_difference ?? 0);
+  const formattedAnomalyDiff = anomalyDiff > 0 ? formatFCFA(anomalyDiff) : null;
+
   const isClosingResultUnconfirmed =
     currentCA.surplus_or_deficit == null ||
     currentCA.reconciliation_status === 'SOURCE_ANOMALY' ||
@@ -606,7 +609,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
   );
   const hasSourceAnomaly = currentCA.reconciliation_status === 'SOURCE_ANOMALY';
   const isPrimaryDocumentVerified = Boolean(
-    hasPrimaryDocument && currentCA.source_document_id !== null && !hasSourceAnomaly
+    hasPrimaryDocument && currentCA.source_document_id != null && currentCA.source_document_id.trim() !== '' && !hasSourceAnomaly
   );
 
   return (
@@ -651,7 +654,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               <p className="text-xs text-amber-900 font-semibold flex items-center gap-1.5">
                 <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 text-amber-600" />
                 <span>
-                  Données transcrites en attente de document primaire officiel{hasSourceAnomaly ? ' — Réserve documentaire : anomalie arithmétique source de 157 080 800 FCFA (157M FCFA) signalée' : ''}.
+                  Données transcrites en attente de document primaire officiel{hasSourceAnomaly ? ` — Réserve documentaire : anomalie arithmétique source${formattedAnomalyDiff ? ` de ${formattedAnomalyDiff}` : ''} signalée` : ''}.
                 </span>
               </p>
             )}
@@ -1515,7 +1518,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               Statut du contrôle :{' '}
               <strong className={isPrimaryDocumentVerified ? 'text-emerald-700' : 'text-amber-800'}>
                 {hasSourceAnomaly
-                  ? 'Données transcrites avec réserve documentaire (écart arithmétique source de 157 080 800 FCFA / 157M FCFA signalé, en attente de document primaire)'
+                  ? `Données transcrites avec réserve documentaire (écart arithmétique source${formattedAnomalyDiff ? ` de ${formattedAnomalyDiff}` : ''} signalé, en attente de document primaire)`
                   : !isPrimaryDocumentVerified
                   ? 'Données transcrites — En attente de document primaire officiel'
                   : 'Données transcrites et contrôlées à partir du document source'}
@@ -1525,11 +1528,21 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-[11px] text-amber-900 space-y-1 mt-2">
                 <span className="font-bold flex items-center gap-1 text-amber-800">
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                  Anomalie arithmétique source signalée (157M FCFA)
+                  {formattedAnomalyDiff
+                    ? `Anomalie arithmétique source signalée (${formattedAnomalyDiff})`
+                    : 'Anomalie arithmétique source signalée'}
                 </span>
                 <p className="leading-snug">
-                  Un écart arithmétique de 157 080 800 FCFA (~157M FCFA) existe entre les recettes recouvrées (1 216 336 558 FCFA) et les dépenses ordonnancées (1 059 255 758 FCFA). En l&apos;absence de document primaire complet numérisé rattaché, cette fiche est déclassée en « Données Transcrites — En Attente de Document Primaire ».
+                  {formattedAnomalyDiff
+                    ? `Un écart arithmétique de ${formattedAnomalyDiff} existe entre les recettes recouvrées (${totalRevenueResolved != null ? formatFCFA(totalRevenueResolved) : 'Non renseigné'}) et les dépenses ordonnancées (${currentCA.total_realized != null ? formatFCFA(currentCA.total_realized) : 'Non renseigné'}). `
+                    : 'Une anomalie arithmétique a été détectée sur la pièce source. '}
+                  En l&apos;absence de document primaire complet numérisé rattaché, cette fiche est déclassée en « Données Transcrites — En Attente de Document Primaire ».
                 </p>
+                {currentCA.reconciliation_notes && (
+                  <p className="text-[10px] text-amber-800/90 pt-0.5 italic border-t border-amber-200/60 mt-1">
+                    Note méthodologique : {currentCA.reconciliation_notes}
+                  </p>
+                )}
               </div>
             )}
           </div>

@@ -755,12 +755,72 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
 
         // 5.5 Déclassement honnête Tiassalé : pas de document primaire et anomalie arithmétique source
         expect(html).toContain('Données Transcrites — En Attente de Document Primaire');
-        expect(html).toContain('Anomalie arithmétique source signalée (157M FCFA)');
+        expect(html).toContain('Anomalie arithmétique source signalée (157 080 800 FCFA)');
+        expect(html).toContain('Un écart arithmétique de 157 080 800 FCFA existe entre les recettes recouvrées (748 866 444 FCFA) et les dépenses ordonnancées (591 785 644 FCFA)');
+        expect(html).toContain('Note méthodologique : Observation arithmétique sur la pièce source');
         expect(html).not.toContain('Fiche Financière Citoyenne Contrôlée');
         expect(html).not.toContain('Document officiel vérifié');
       } finally {
         dataStore.getLocalBudgets = originalGetLocalBudgets;
       }
+    });
+
+    it('restitue dynamiquement les montants d’une autre collectivité présentant une anomalie source sans aucune pollution Tiassalé', () => {
+      const otherInst: Institution = {
+        id: 'commune-test-generique',
+        name: 'Mairie de Test Générique',
+        type: 'MAIRIE',
+        region: 'Sud-Comoé',
+        district: 'Comoé',
+        budget_functioning_fcfa: null,
+        budget_investment_fcfa: null,
+        total_budget_fcfa: null
+      };
+
+      const genericAnomalyCA: AdministrativeAccount = {
+        id: 'ca-generic-2024',
+        institution_id: 'commune-test-generique',
+        institution_name: 'Mairie de Test Générique',
+        institution_type: 'COMMUNE',
+        fiscal_year: 2024,
+        status: 'PUBLISHED',
+        total_planned: 300_000_000,
+        total_realized: 210_000_000,
+        total_revenue_collected: 250_000_000,
+        operating_planned: 200_000_000,
+        operating_realized: 150_000_000,
+        operating_revenue_realized: 180_000_000,
+        investment_planned: 100_000_000,
+        investment_realized: 60_000_000,
+        investment_revenue_realized: 70_000_000,
+        surplus_or_deficit: 0,
+        arithmetic_difference: 40_000_000,
+        reconciliation_status: 'SOURCE_ANOMALY',
+        reconciliation_notes: 'Écart constaté sur bordereau récapitulatif générique.',
+        source_document: 'Compte administratif test',
+        verification_status: 'OFFICIAL_DOCUMENT',
+        operations: [],
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01'
+      };
+
+      ADMINISTRATIVE_ACCOUNTS_DATA.splice(0, ADMINISTRATIVE_ACCOUNTS_DATA.length, genericAnomalyCA);
+
+      const html = renderToStaticMarkup(
+        <AdministrativeAccountView institution={otherInst} onOpenDocRequest={() => {}} />
+      );
+
+      // Vérifie la restitution dynamique des montants de la collectivité générique
+      expect(html).toContain('Anomalie arithmétique source signalée (40 000 000 FCFA)');
+      expect(html).toContain('Un écart arithmétique de 40 000 000 FCFA existe entre les recettes recouvrées (250 000 000 FCFA) et les dépenses ordonnancées (210 000 000 FCFA)');
+      expect(html).toContain('Note méthodologique : Écart constaté sur bordereau récapitulatif générique.');
+
+      // Vérifie l'absence absolue de pollution par les chiffres ou libellés de Tiassalé
+      expect(html).not.toContain('157 080 800');
+      expect(html).not.toContain('157M');
+      expect(html).not.toContain('1 216 336 558');
+      expect(html).not.toContain('1 059 255 758');
+      expect(html).not.toContain('Tiassalé');
     });
   });
 
