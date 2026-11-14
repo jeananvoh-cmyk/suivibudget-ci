@@ -15,7 +15,7 @@ import {
   getExecutionStatusLabel 
 } from '../utils/budgetCalculations';
 import { 
-  formatFCFA, formatFCFAWithWords, formatQualifiedFCFA, formatRecordAmount, amountPrecision, isExactAmount, formatAmountInWords
+  formatFCFA, formatFCFAWithWords, formatQualifiedFCFA, formatRecordAmount, formatRecordAmountWithWords, amountPrecision, isExactAmount, formatAmountInWords
 } from '../utils/formatters';
 import { isSafeUrl } from '../utils/security';
 import { openPublicDocument } from '../services/documentStorageService';
@@ -30,6 +30,7 @@ import {
   Search, 
   Filter, 
   AlertCircle, 
+  AlertTriangle,
   Info, 
   Download, 
   MessageSquare, 
@@ -135,10 +136,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
     record: T,
     field: keyof T
   ) => {
-    const value = record[field];
-    return typeof value === 'number' && Number.isFinite(value)
-      ? `${formatRecordAmount(record, field)} (${formatAmountInWords(value)} FCFA)`
-      : formatRecordAmount(record, field);
+    return formatRecordAmountWithWords(record, field);
   };
 
   const staticAccountsById = getAdministrativeAccountsForInstitution(institution.id) || [];
@@ -587,17 +585,29 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
       ? (currentCA.operating_revenue_realized || 0) + (currentCA.investment_revenue_realized || 0)
       : null);
 
-  const arithmeticDiffResolved =
-    currentCA.arithmetic_difference ??
-    (totalRevenueResolved != null && currentCA.total_realized != null
+  const calculatedArithmeticDiff =
+    totalRevenueResolved != null && currentCA.total_realized != null
       ? totalRevenueResolved - currentCA.total_realized
-      : null);
+      : null;
+
+  const arithmeticDiffResolved =
+    calculatedArithmeticDiff ?? currentCA.arithmetic_difference ?? null;
 
   const isClosingResultUnconfirmed =
     currentCA.surplus_or_deficit == null ||
     currentCA.reconciliation_status === 'SOURCE_ANOMALY' ||
     amountPrecision(currentCA, 'surplus_or_deficit') === 'UNKNOWN' ||
     (currentCA.surplus_or_deficit === 0 && arithmeticDiffResolved != null && arithmeticDiffResolved !== 0);
+
+  const hasPrimaryDocument = Boolean(
+    (currentCA.source_document_id && currentCA.source_document_id.trim() !== '') ||
+    (matchingDoc && matchingDoc.status === 'PUBLISHED' && matchingDoc.id) ||
+    (currentCA.source_document_sha256 && currentCA.source_document_sha256.trim() !== '')
+  );
+  const hasSourceAnomaly = currentCA.reconciliation_status === 'SOURCE_ANOMALY';
+  const isPrimaryDocumentVerified = Boolean(
+    hasPrimaryDocument && currentCA.source_document_id !== null && !hasSourceAnomaly
+  );
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -610,10 +620,17 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1.5 shadow-2xs">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-                Fiche Financière Citoyenne Contrôlée
-              </span>
+              {isPrimaryDocumentVerified ? (
+                <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1.5 shadow-2xs">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+                  Fiche Financière Citoyenne Contrôlée
+                </span>
+              ) : (
+                <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1.5 shadow-2xs">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-700" />
+                  Données Transcrites — En Attente de Document Primaire
+                </span>
+              )}
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-slate-100 text-slate-800 border border-slate-200">
                 Exercice Fiscal {currentCA.fiscal_year}
               </span>
@@ -623,12 +640,21 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
               Compte Administratif de {institution.name}
             </h3>
 
-            <p className="text-xs text-brand-blue font-semibold flex items-center gap-1.5">
-              <Info className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>
-                Données arrêtées par la collectivité et contrôlées à partir du document source officiel.
-              </span>
-            </p>
+            {isPrimaryDocumentVerified ? (
+              <p className="text-xs text-brand-blue font-semibold flex items-center gap-1.5">
+                <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>
+                  Données arrêtées par la collectivité et contrôlées à partir du document source officiel.
+                </span>
+              </p>
+            ) : (
+              <p className="text-xs text-amber-900 font-semibold flex items-center gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 text-amber-600" />
+                <span>
+                  Données transcrites en attente de document primaire officiel{hasSourceAnomaly ? ' — Réserve documentaire : anomalie arithmétique source de 157 080 800 FCFA (157M FCFA) signalée' : ''}.
+                </span>
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col sm:items-end gap-2 flex-shrink-0">
@@ -1487,12 +1513,25 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </p>
             <div className="text-[11px] text-slate-600 pt-1">
               Statut du contrôle :{' '}
-              <strong className={currentCA.reconciliation_status === 'SOURCE_ANOMALY' ? 'text-amber-800' : 'text-emerald-700'}>
-                {currentCA.reconciliation_status === 'SOURCE_ANOMALY'
-                  ? 'Document officiel avec réserve documentaire (écart arithmétique source signalé)'
+              <strong className={isPrimaryDocumentVerified ? 'text-emerald-700' : 'text-amber-800'}>
+                {hasSourceAnomaly
+                  ? 'Données transcrites avec réserve documentaire (écart arithmétique source de 157 080 800 FCFA / 157M FCFA signalé, en attente de document primaire)'
+                  : !isPrimaryDocumentVerified
+                  ? 'Données transcrites — En attente de document primaire officiel'
                   : 'Données transcrites et contrôlées à partir du document source'}
               </strong>
             </div>
+            {hasSourceAnomaly && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-[11px] text-amber-900 space-y-1 mt-2">
+                <span className="font-bold flex items-center gap-1 text-amber-800">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                  Anomalie arithmétique source signalée (157M FCFA)
+                </span>
+                <p className="leading-snug">
+                  Un écart arithmétique de 157 080 800 FCFA (~157M FCFA) existe entre les recettes recouvrées (1 216 336 558 FCFA) et les dépenses ordonnancées (1 059 255 758 FCFA). En l&apos;absence de document primaire complet numérisé rattaché, cette fiche est déclassée en « Données Transcrites — En Attente de Document Primaire ».
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">

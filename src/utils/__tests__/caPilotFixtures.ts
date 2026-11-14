@@ -30,7 +30,7 @@ export const CA_PILOT_FIXTURES: AdministrativeAccount[] = [
     reconciliation_status: 'RECONCILED',
     source_document: 'COMMUNE DE ABOBO — Compte administratif 2024',
     source_page: 29,
-    verification_status: 'OFFICIAL_DOCUMENT',
+    verification_status: 'TO_VERIFY',
     notes: 'La différence recettes-dépenses est présentée comme une différence arithmétique. Elle ne doit pas être qualifiée automatiquement de bénéfice ou de détournement.',
     operations: [],
     created_at: '2026-09-29T00:00:00Z',
@@ -64,7 +64,7 @@ export const CA_PILOT_FIXTURES: AdministrativeAccount[] = [
     arithmetic_difference: 511507092,
     reconciliation_status: 'RECONCILED',
     source_document: 'COMMUNE DE BINGERVILLE — Compte administratif 2024',
-    verification_status: 'OFFICIAL_DOCUMENT',
+    verification_status: 'TO_VERIFY',
     notes: 'Les montants de synthèse sont distingués de la vérification physique des investissements.',
     operations: [],
     created_at: '2026-09-29T00:00:00Z',
@@ -98,7 +98,7 @@ export const CA_PILOT_FIXTURES: AdministrativeAccount[] = [
     arithmetic_difference: 157080800,
     reconciliation_status: 'SOURCE_ANOMALY',
     source_document: 'COMMUNE DE TIASSALE — Compte administratif 2024',
-    verification_status: 'OFFICIAL_DOCUMENT',
+    verification_status: 'TO_VERIFY',
     notes: 'La synthèse extraite comporte des taux supérieurs à 100 % en fonctionnement. Ces valeurs sont conservées telles qu’extraites et signalées pour explication/relecture du CA.',
     operations: [
       {

@@ -50,7 +50,8 @@ describe('Réconciliation & Fiabilisation — Tiassalé Compte Administratif 202
       // Traçabilité
       expect(ca!.source_document).toBe('COMMUNE DE TIASSALE — Compte administratif 2024');
       expect(fixtureJson.source.reference).toBe('Compte administratif 2024, page 36');
-      expect(ca!.verification_status).toBe('OFFICIAL_DOCUMENT');
+      expect(ca!.verification_status).toBe('TO_VERIFY');
+      expect(fixtureJson.data.verification_status).toBe('TO_VERIFY');
     });
   });
 

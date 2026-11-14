@@ -17,6 +17,19 @@ export function formatRecordAmount<T extends { import_provenance?: ImportProvena
   return formatQualifiedFCFA(typeof value === 'number' ? value : null, amountPrecision(record, String(field)));
 }
 
+export function formatRecordAmountWithWords<T extends { import_provenance?: ImportProvenance; amount_precision?: AmountPrecision }>(
+  record: T,
+  field: keyof T
+): string {
+  const value = record[field];
+  if (value === 0) {
+    return formatRecordAmount(record, field);
+  }
+  return typeof value === 'number' && Number.isFinite(value)
+    ? `${formatRecordAmount(record, field)} (${formatAmountInWords(value)} FCFA)`
+    : formatRecordAmount(record, field);
+}
+
 export function isExactAmount<T extends { import_provenance?: ImportProvenance; amount_precision?: AmountPrecision }>(record: T, field: keyof T): boolean {
   return typeof record[field] === 'number' && Number.isFinite(record[field]) && amountPrecision(record, String(field)) === 'EXACT';
 }

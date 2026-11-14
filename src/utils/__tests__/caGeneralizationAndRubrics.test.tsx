@@ -502,6 +502,26 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
       expect(html).toContain('20/45 absente du scan');
       expect(html).toContain('941c399bf290cee4');
     });
+
+    it('Résolution arithmétique dynamique Cocody CA 2024 : affiche +2 237 133 790 FCFA même si arithmetic_difference = 0 est injecté en base', () => {
+      // Simule l'anomalie de production P0-PROD-COCODY-ARITH où la colonne arithmetic_difference stocke 0
+      const caWithZeroDiff = {
+        ...reconciledCocodyCA,
+        arithmetic_difference: 0,
+      };
+      ADMINISTRATIVE_ACCOUNTS_DATA.splice(0, ADMINISTRATIVE_ACCOUNTS_DATA.length, caWithZeroDiff);
+
+      const html = renderToStaticMarkup(
+        <AdministrativeAccountView institution={cocodyInstitution} onOpenDocRequest={() => {}} />
+      );
+
+      // Le composant doit recalculer dynamiquement Recettes - Dépenses = +2 237 133 790 FCFA
+      const diffIndex = html.indexOf('Différence arithmétique (Recettes − Dépenses)');
+      expect(diffIndex).toBeGreaterThan(-1);
+      const diffCard = html.slice(diffIndex, diffIndex + 250);
+      expect(diffCard).toContain('+2 237 133 790 FCFA');
+      expect(diffCard).not.toContain('+0 FCFA');
+    });
   });
 
   // =========================================================================
@@ -732,6 +752,12 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
         expect(html).toContain('F 88/2024');
         expect(html).toContain('Source marché public (DGMP)');
         expect(html).toContain('Pagination non renseignée');
+
+        // 5.5 Déclassement honnête Tiassalé : pas de document primaire et anomalie arithmétique source
+        expect(html).toContain('Données Transcrites — En Attente de Document Primaire');
+        expect(html).toContain('Anomalie arithmétique source signalée (157M FCFA)');
+        expect(html).not.toContain('Fiche Financière Citoyenne Contrôlée');
+        expect(html).not.toContain('Document officiel vérifié');
       } finally {
         dataStore.getLocalBudgets = originalGetLocalBudgets;
       }

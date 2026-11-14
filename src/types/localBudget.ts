@@ -65,6 +65,7 @@ export type LocalSourceType =
  * Hiérarchie de confiance et statut de vérification
  */
 export type LocalVerificationStatus = 
+  | 'TO_VERIFY'                 // Données transcrites ou enregistrées en attente de vérification
   | 'OFFICIAL_DOCUMENT'         // ✓ Source officielle (document visé / délibération originale consultée sur pièce)
   | 'OFFICIAL_INSTITUTION'      // ✓ Source institutionnelle vérifiée
   | 'AIP_REPORTED'              // ℹ Dépêche AIP rapportée (source secondaire publique de référence — délibération primaire non consultée)

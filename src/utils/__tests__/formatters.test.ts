@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatQualifiedFCFA, formatRecordAmount, amountPrecision } from '../formatters';
+import { formatQualifiedFCFA, formatRecordAmount, formatRecordAmountWithWords, amountPrecision } from '../formatters';
 import { calculateExecutionRate } from '../budgetCalculations';
 
 describe('Public amount precision', () => {
@@ -34,6 +34,21 @@ describe('Public amount precision', () => {
     expect(formatQualifiedFCFA(partialBudget.total_voted_fcfa, partialBudget.precision)).toMatch(/19[\s\u202f]764[\s\u202f]660[\s\u202f]000 FCFA/);
     expect(formatQualifiedFCFA(partialBudget.functioning_voted_fcfa, 'UNKNOWN')).toBe('Montant à confirmer');
     expect(formatQualifiedFCFA(partialBudget.investment_voted_fcfa, 'UNKNOWN')).toBe('Montant à confirmer');
+  });
+
+  it('formatRecordAmountWithWords évite strictement la coquille de doublon 0 FCFA (0 FCFA FCFA)', () => {
+    const zeroRecord = { executed_amount: 0, amount_precision: 'EXACT' as const };
+    expect(formatRecordAmountWithWords(zeroRecord, 'executed_amount')).toBe('0 FCFA');
+    expect(formatRecordAmountWithWords(zeroRecord, 'executed_amount')).not.toContain('0 FCFA FCFA');
+    expect(formatRecordAmountWithWords(zeroRecord, 'executed_amount')).not.toContain('(0 FCFA FCFA)');
+
+    const positiveRecord = { executed_amount: 27850646, amount_precision: 'EXACT' as const };
+    const formatted = formatRecordAmountWithWords(positiveRecord, 'executed_amount');
+    expect(formatted).toContain('27 850 646 FCFA');
+    expect(formatted).toMatch(/27,85\sMillions FCFA/);
+
+    const nullRecord = { executed_amount: null, amount_precision: 'EXACT' as const };
+    expect(formatRecordAmountWithWords(nullRecord, 'executed_amount')).toBe('Montant à confirmer');
   });
 });
 import { formatFCFA, formatAmountInWords, formatCompactFCFA, getProjectEntityInfo, getStatusConfig, getProjectTier, getProjectTierBadge, getInstitutionLeaderGender } from '../formatters';

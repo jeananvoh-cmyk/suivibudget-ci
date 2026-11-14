@@ -720,4 +720,33 @@ describe('Pilote Réel d\'Ingestion Documentaire et Financière : Cocody 2024', 
     expect(unknownSha.page_count).toBe(22);
     expect(unknownSha.pagination_note).toBeUndefined();
   });
+
+  it('Résolution arithmétique dynamique : recalcule Recettes − Dépenses = +2 237 133 790 FCFA même si arithmetic_difference vaut 0 en base', () => {
+    // Cas de production Cocody 2024 : arithmetic_difference = 0 stocké par erreur en base distante
+    const caProductionLike = {
+      total_revenue_collected: 19_012_357_233,
+      total_realized: 16_775_223_443,
+      arithmetic_difference: 0,
+      operating_revenue_realized: 17_646_256_543,
+      investment_revenue_realized: 1_366_100_690,
+    };
+
+    const totalRevenueResolved =
+      caProductionLike.total_revenue_collected ??
+      (caProductionLike.operating_revenue_realized != null || caProductionLike.investment_revenue_realized != null
+        ? (caProductionLike.operating_revenue_realized || 0) + (caProductionLike.investment_revenue_realized || 0)
+        : null);
+
+    const calculatedArithmeticDiff =
+      totalRevenueResolved != null && caProductionLike.total_realized != null
+        ? totalRevenueResolved - caProductionLike.total_realized
+        : null;
+
+    const arithmeticDiffResolved =
+      calculatedArithmeticDiff ?? caProductionLike.arithmetic_difference ?? null;
+
+    expect(calculatedArithmeticDiff).toBe(2_237_133_790);
+    expect(arithmeticDiffResolved).toBe(2_237_133_790);
+    expect(arithmeticDiffResolved).not.toBe(0);
+  });
 });
