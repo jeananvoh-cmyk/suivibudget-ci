@@ -47,7 +47,7 @@ import { CompteAdministratifExplainerModal } from './CompteAdministratifExplaine
 import { fetchAdministrativeAccounts } from '../services/administrativeAccountsService';
 import { consolidateBudgetCycle, formatBudgetTypeLabel } from '../utils/budgetCycleEngine';
 import { dataStore } from '../services/dataStore';
-import { VERIFIED_DOCUMENT_PAGINATION_CONTROLS } from '../data/officialPublicDocumentsCatalog';
+import { VERIFIED_DOCUMENT_PAGINATION_CONTROLS, applyVerifiedDocumentPagination } from '../data/officialPublicDocumentsCatalog';
 
 interface AdministrativeAccountViewProps {
   institution: Institution;
@@ -287,9 +287,29 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
         .filter(isInstitutionCADoc)
         .sort((a, b) => (b.year || 0) - (a.year || 0))[0];
 
-  const sha256 = currentCA?.source_document_sha256 || matchingDoc?.checksum_sha256 || null;
-  const paginationControl = sha256 ? VERIFIED_DOCUMENT_PAGINATION_CONTROLS[sha256.toLowerCase()] : undefined;
-  const resolvedPaginationNote = matchingDoc?.pagination_note || paginationControl?.paginationNote || null;
+  const normalizedMatchingDoc = matchingDoc ? applyVerifiedDocumentPagination(matchingDoc) : undefined;
+  const sha256 = currentCA?.source_document_sha256 || normalizedMatchingDoc?.checksum_sha256 || null;
+  const candidateControl = sha256 ? VERIFIED_DOCUMENT_PAGINATION_CONTROLS[sha256.trim().toLowerCase()] : undefined;
+  const caControlMatches = Boolean(
+    candidateControl &&
+    currentCA &&
+    !['TO_VERIFY', 'NOT_FOUND', 'SOURCE_CONFLICT', 'CALCULATED_TO_VERIFY', 'SECONDARY_TO_CORROBORATE'].includes(
+      String(currentCA.verification_status ?? '')
+    ) &&
+    currentCA.reconciliation_status !== 'TO_VERIFY' &&
+    currentCA.fiscal_year === candidateControl.fiscalYear &&
+    candidateControl.institutionIds.includes(currentCA.institution_id)
+  );
+  const attestedPaginationControl =
+    normalizedMatchingDoc?.printed_page_count
+      ? candidateControl
+      : !normalizedMatchingDoc && caControlMatches
+        ? candidateControl
+        : undefined;
+  const resolvedPaginationNote =
+    normalizedMatchingDoc?.pagination_note ||
+    attestedPaginationControl?.paginationNote ||
+    null;
   const docUrl = currentCA?.source_url || (matchingDoc?.status === 'PUBLISHED' ? matchingDoc.file_url : null) || null;
   const canOpenMatchingDoc = Boolean(
     matchingDoc && matchingDoc.status === 'PUBLISHED'
@@ -1479,8 +1499,8 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             <span className="text-[10px] font-bold uppercase text-slate-400 block">Pages exploitées du document</span>
             <strong className="text-slate-900 block text-sm">
               {currentCA.source_page
-                ? (paginationControl && currentCA.source_page === 40
-                    ? `Page 40 (PDF 40 / imprimée 41/${paginationControl.printedPageCount})`
+                ? (attestedPaginationControl && currentCA.source_page === 40
+                    ? `Page 40 (PDF 40 / imprimée 41/${attestedPaginationControl.printedPageCount})`
                     : `Page ${currentCA.source_page}`)
                 : 'Pagination non renseignée'}
             </strong>

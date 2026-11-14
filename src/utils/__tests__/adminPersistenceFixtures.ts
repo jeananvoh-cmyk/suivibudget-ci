@@ -153,10 +153,13 @@ async function initialize() {
     '20261026213000_security_definer_hardening.sql'
   ].find(name => existsSync(resolve(`supabase/migrations/${name}`))) || '20261026213727_security_definer_hardening_20261026213000.sql';
   const hardening = readFileSync(resolve(`supabase/migrations/${hardeningMigration}`),'utf8');
+  const reconciliation = readFileSync(resolve('supabase/migrations/20261114183000_reconcile_security_definer_and_private_rls.sql'),'utf8');
   await db.exec(migration);
   await db.exec(migration);
   await db.exec(hardening);
   await db.exec(hardening);
+  await db.exec(reconciliation);
+  await db.exec(reconciliation);
 }
 await initialize();
 return {db,session,mutate,admin,manager,moderator,citizen};

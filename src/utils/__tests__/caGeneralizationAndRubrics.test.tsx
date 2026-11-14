@@ -421,6 +421,7 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
         storage_path: 'ca/2024/commune-de-cocody/1776037272191_COMMUNE_DE_COCODY.pdf',
         file_name: 'COMMUNE DE COCODY.pdf',
         file_size: '13.4 MB',
+        file_size_bytes: 14_072_943,
         file_format: 'PDF',
         published_at: '2026-04-12',
         downloads_count: 0,
@@ -428,6 +429,7 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
         created_at: '2026-04-12',
         status: 'PUBLISHED',
         verification_status: 'VERIFIED',
+        checksum_status: 'COMPUTED',
         checksum_sha256: '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf'
       };
       dataStore.getDocuments = () => [publishedCocodyDoc];

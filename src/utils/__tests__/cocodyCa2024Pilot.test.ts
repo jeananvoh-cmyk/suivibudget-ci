@@ -582,7 +582,7 @@ describe('Pilote Réel d\'Ingestion Documentaire et Financière : Cocody 2024', 
     expect(hydratedPartial.import_provenance.precision.total_revenue_collected).toBe('APPROXIMATE');
   });
 
-  it('M. Contrôle documentaire Cocody CA 2024 : distinction explicite 44 pages physiques PDF vs 45 imprimées, signalement page 20/45 absente et rapprochement patrimonial', () => {
+  it('M. Contrôle documentaire Cocody CA 2024 : attestation réelle de l’empreinte, valeurs déterministes et rapprochement patrimonial', () => {
     const rawDocWithPrinted45: PublicDocument = {
       id: 'doc-dff4865a-c6a8-418e-8895-626258e409d0',
       title: 'Compte Administratif 2024 - Mairie de Cocody',
@@ -602,12 +602,16 @@ describe('Pilote Réel d\'Ingestion Documentaire et Financière : Cocody 2024', 
       published_at: '2026-10-13T14:13:55.000Z',
       downloads_count: 0,
       is_official: true,
-      checksum_sha256: '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf',
+      checksum_sha256: '  941C399BF290CEE446A3C0C5226E0D7B32BB1784834B1D300D1FC6546E9627CF  ',
+      checksum_status: 'COMPUTED',
+      checksum_algorithm: 'SHA256_FILE_V1',
+      is_multipart: false,
       status: 'PUBLISHED',
       verification_status: 'VERIFIED',
     };
 
     const normalized = applyVerifiedDocumentPagination(rawDocWithPrinted45);
+    expect(normalized.checksum_sha256).toBe('941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf');
     expect(normalized.page_count).toBe(44);
     expect(normalized.physical_page_count).toBe(44);
     expect(normalized.printed_page_count).toBe(45);
@@ -617,10 +621,103 @@ describe('Pilote Réel d\'Ingestion Documentaire et Financière : Cocody 2024', 
     expect(normalized.pagination_note).toContain('20/45 absente du scan');
     expect(normalized.pagination_note).toContain('contenu non restitué');
 
+    // Copie défensive : une mutation aval ne corrompt pas le référentiel
+    normalized.missing_printed_pages?.push('99/45');
+    expect(applyVerifiedDocumentPagination(rawDocWithPrinted45).missing_printed_pages).toEqual(['20/45']);
+
     // Rapprochement indépendant du tableau patrimonial (page PDF 43 / imprimée 44/45) avec l'investissement (page PDF 40 / imprimée 41/45)
     const patPlanned = { immobilier: 3_231_678_000, incorporel: 20_000_000, mobilier: 648_952_000 };
     const patRealized = { immobilier: 810_959_095, incorporel: 20_000_000, mobilier: 535_141_595 };
     expect(patPlanned.immobilier + patPlanned.incorporel + patPlanned.mobilier).toBe(COCODY_CA_2024_ROW.data.investment_planned);
     expect(patRealized.immobilier + patRealized.incorporel + patRealized.mobilier).toBe(COCODY_CA_2024_ROW.data.investment_realized);
+  });
+
+  it('N. Tests contradictoires Cocody CA 2024 : rejette toute empreinte non attestée et écrase de manière déterministe les métadonnées divergentes', () => {
+    const attestedBase: PublicDocument = {
+      id: 'doc-dff4865a-c6a8-418e-8895-626258e409d0',
+      title: 'Compte Administratif 2024 - Mairie de Cocody',
+      category: 'COMPTE_ADMINISTRATIF',
+      institution_name: 'Mairie de Cocody',
+      institution_id: 'inst-com-cocody',
+      institution_type: 'MAIRIE',
+      year: 2024,
+      fiscal_year: 2024,
+      description: 'Test contradictoire pagination',
+      file_url: '',
+      file_name: 'COMMUNE DE COCODY.pdf',
+      file_size: '13.4 Mo',
+      file_size_bytes: 14_072_943,
+      file_format: 'PDF',
+      page_count: 45,
+      published_at: '2026-11-13T13:47:29.157086+00:00',
+      downloads_count: 12,
+      is_official: true,
+      checksum_sha256: '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf',
+      checksum_status: 'COMPUTED',
+      checksum_algorithm: 'SHA256_FILE_V1',
+      is_multipart: false,
+      status: 'PUBLISHED',
+      verification_status: 'VERIFIED',
+    };
+
+    // 1. Écrase de manière déterministe toute valeur contradictoire déjà injectée quand l'attestation réelle est valide
+    const tamperedAttested = applyVerifiedDocumentPagination({
+      ...attestedBase,
+      page_count: 43,
+      physical_page_count: 45,
+      printed_page_count: 44,
+      missing_printed_pages: [],
+      pagination_note: 'Document complet 45/45 sans page manquante',
+    });
+    expect(tamperedAttested.page_count).toBe(44);
+    expect(tamperedAttested.physical_page_count).toBe(44);
+    expect(tamperedAttested.printed_page_count).toBe(45);
+    expect(tamperedAttested.missing_printed_pages).toEqual(['20/45']);
+    expect(tamperedAttested.pagination_note).toContain('20/45 absente du scan');
+
+    // 2. Refuse l'attestation sur une simple déclaration client (DECLARED) ou sans checksum_status
+    for (const badStatus of ['DECLARED', undefined] as const) {
+      const rejected = applyVerifiedDocumentPagination({
+        ...attestedBase,
+        checksum_status: badStatus,
+        physical_page_count: 44,
+        printed_page_count: 45,
+        missing_printed_pages: ['20/45'],
+        pagination_note: 'Fausse note injectée',
+      });
+      expect(rejected.page_count).toBe(45);
+      expect(rejected.physical_page_count).toBeNull();
+      expect(rejected.printed_page_count).toBeNull();
+      expect(rejected.missing_printed_pages).toBeNull();
+      expect(rejected.pagination_note).toBeNull();
+    }
+
+    // 3. Refuse une taille binaire absente ou divergente, un autre exercice/institution, un document multipart ou TO_VERIFY
+    const contradictoryCases: Partial<PublicDocument>[] = [
+      { file_size_bytes: undefined },
+      { file_size_bytes: 14_072_942 },
+      { is_multipart: true },
+      { checksum_algorithm: 'SHA256_PARTS_MANIFEST_V1' },
+      { institution_id: 'inst-com-tiassale' },
+      { fiscal_year: 2025 },
+      { status: 'TO_VERIFY', verification_status: 'TO_VERIFY' },
+    ];
+    for (const override of contradictoryCases) {
+      const rejected = applyVerifiedDocumentPagination({ ...attestedBase, ...override });
+      expect(rejected.physical_page_count).toBeNull();
+      expect(rejected.printed_page_count).toBeNull();
+      expect(rejected.missing_printed_pages).toBeNull();
+      expect(rejected.pagination_note).toBeNull();
+      expect(rejected.page_count).toBe(45);
+    }
+
+    // 4. Refuse une empreinte inconnue ou malformée sans altérer les champs existants
+    const unknownSha = applyVerifiedDocumentPagination({
+      ...attestedBase,
+      checksum_sha256: 'a'.repeat(64),
+      page_count: 22,
+    });
+    expect(unknownSha.page_count).toBe(22);
+    expect(unknownSha.pagination_note).toBeUndefined();
   });
 });

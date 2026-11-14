@@ -52,7 +52,7 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
         '20261113011327_security_definer_hardening_20261026213000.sql',
         '20261026213000_security_definer_hardening.sql'
       ].find(name => existsSync(resolve(`supabase/migrations/${name}`))) || '20261113011327_security_definer_hardening_20261026213000.sql';
-      for(let run=0;run<2;run++) for(const path of ['20261013165625_admin_dashboard_persistence_hardening.sql','20261013200000_multipart_ca_documents.sql',hardeningMigration]) await actual.exec(readFileSync(resolve(`supabase/migrations/${path}`),'utf8'));
+      for(let run=0;run<2;run++) for(const path of ['20261013165625_admin_dashboard_persistence_hardening.sql','20261013200000_multipart_ca_documents.sql',hardeningMigration,'20261114183000_reconcile_security_definer_and_private_rls.sql']) await actual.exec(readFileSync(resolve(`supabase/migrations/${path}`),'utf8'));
       expect((await actual.query('select is_multipart,parts_count,is_scanned,has_text_layer,ocr_status,manifest_sha256,checksum_sha256 from public.public_documents')).rows).toEqual([{is_multipart:null,parts_count:null,is_scanned:null,has_text_layer:null,ocr_status:null,manifest_sha256:null,checksum_sha256:'a'.repeat(64)}]);
       expect((await actual.query('select total_budget_fcfa from public.institutions')).rows).toEqual([{total_budget_fcfa:'123.00'}]);
       expect((await actual.query('select public.admin_persistence_version() version')).rows).toEqual([{version:3}]);
@@ -434,13 +434,116 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
     await expect(session(null,()=>db.query('select public.admin_baseline_visibility(null, array[]::text[])'))).rejects.toThrow(/permission/);
     await expect(session(citizen,()=>db.query("select public.admin_baseline_visibility('institutions', null)"))).rejects.toThrow(/Staff authorization required/);
     await session(admin,()=>mutate('institutions','admin-secret-draft',null,{name:'Brouillon secret admin',type:'MAIRIE'}),true);
-    const probed = (await session(admin,()=>db.query<{v:string[]}>("select public.admin_baseline_visibility('institutions', array['admin-secret-draft','reload-test']) v"))).rows[0].v;
+    const probed = (await session(admin,()=>db.query<{v:string[]}>("select public.admin_baseline_visibility('institutions', array['admin-secret-draft','csv-secret-draft','import-secret-draft','reload-test']) v"))).rows[0].v;
     expect(probed).toContain('reload-test');
     expect(probed).not.toContain('admin-secret-draft');
+    expect(probed).not.toContain('csv-secret-draft');
+    expect(probed).not.toContain('import-secret-draft');
     // 3. private.admin_file_checked et private.admin_media_link_allowed refusent CITIZEN avec 42501 mais autorisent le contexte serveur/superuser (migrations/maintenance)
     await expect(session(citizen,()=>db.query("select private.admin_file_checked('x','public_documents','x',repeat('a',64),10)"))).rejects.toThrow(/Staff authorization required/);
     await expect(session(citizen,()=>db.query("select private.admin_media_link_allowed('storage://admin_media/x','institutions','x')"))).rejects.toThrow(/Staff authorization required/);
     expect((await db.query<{ok:boolean}>("select private.admin_file_checked('x','public_documents','x',repeat('a',64),10) ok")).rows[0].ok).toBe(false);
     expect((await db.query<{ok:boolean}>("select private.admin_media_link_allowed('storage://admin_media/x','institutions','x') ok")).rows[0].ok).toBe(false);
   });
+
+  it('réconcilie les privilèges effectifs de toutes les fonctions SECURITY DEFINER et active RLS (default-deny) sur les tables du schéma private',async()=>{
+    const actual=await createProductionSchemaFixture();
+    try {
+      for (const path of [
+        '20261013165625_admin_dashboard_persistence_hardening.sql',
+        '20261013200000_multipart_ca_documents.sql',
+        '20261016090000_document_delivery_counter.sql',
+        '20261113011327_security_definer_hardening_20261026213000.sql',
+        '20261114183000_reconcile_security_definer_and_private_rls.sql',
+      ]) {
+        await actual.exec(readFileSync(resolve(`supabase/migrations/${path}`),'utf8'));
+      }
+
+      // 1. RLS activée (default-deny, 0 politique permissive) et 0 privilège client/service_role sur private.*
+      const privTables = await actual.query<{
+        tbl: string;
+        rls_enabled: boolean;
+        policies: number;
+        anon_sel: boolean;
+        auth_sel: boolean;
+        svc_sel: boolean;
+      }>(`
+        select
+          n.nspname || '.' || c.relname as tbl,
+          c.relrowsecurity as rls_enabled,
+          (select count(*)::int from pg_policies pol where pol.schemaname=n.nspname and pol.tablename=c.relname) as policies,
+          has_table_privilege('anon', c.oid, 'SELECT') as anon_sel,
+          has_table_privilege('authenticated', c.oid, 'SELECT') as auth_sel,
+          has_table_privilege('service_role', c.oid, 'SELECT') as svc_sel
+        from pg_class c
+        join pg_namespace n on n.oid = c.relnamespace
+        where n.nspname = 'private' and c.relkind = 'r'
+        order by 1;
+      `);
+      expect(privTables.rows).toEqual([
+        { tbl: 'private.admin_document_file_checks', rls_enabled: true, policies: 0, anon_sel: false, auth_sel: false, svc_sel: false },
+        { tbl: 'private.document_delivery_receipts', rls_enabled: true, policies: 0, anon_sel: false, auth_sel: false, svc_sel: false },
+      ]);
+
+      // 2. Matrice exacte des privilèges EXECUTE sur l'ensemble des 21 fonctions SECURITY DEFINER
+      const secDef = await actual.query<{
+        sig: string;
+        pub: boolean;
+        anon: boolean;
+        auth: boolean;
+        svc: boolean;
+      }>(`
+        select
+          n.nspname || '.' || p.proname as sig,
+          has_function_privilege('public', p.oid, 'EXECUTE') as pub,
+          has_function_privilege('anon', p.oid, 'EXECUTE') as anon,
+          has_function_privilege('authenticated', p.oid, 'EXECUTE') as auth,
+          has_function_privilege('service_role', p.oid, 'EXECUTE') as svc
+        from pg_proc p
+        join pg_namespace n on n.oid = p.pronamespace
+        where n.nspname in ('public', 'private') and p.prosecdef = true
+        order by 1;
+      `);
+      expect(secDef.rows).toHaveLength(21);
+      const byName = Object.fromEntries(secDef.rows.map(r => [r.sig, r]));
+
+      // Projection citoyenne publique uniquement (via view public.public_citizen_proofs)
+      expect(byName['private.published_citizen_proofs']).toMatchObject({ pub: false, anon: true, auth: true, svc: false });
+
+      // Fonctions réservées exclusivement à service_role
+      for (const fn of ['public.admin_confirm_document_integrity', 'public.record_document_delivery']) {
+        expect(byName[fn]).toMatchObject({ pub: false, anon: false, auth: false, svc: true });
+      }
+
+      // Fonctions triggers SECURITY DEFINER : aucune exécution directe autorisée
+      for (const fn of [
+        'private.admin_record_event',
+        'private.admin_source_withdrawal',
+        'private.apec_submission_event',
+        'public.handle_new_user',
+        'public.protect_profile_privileges',
+        'public.rls_auto_enable',
+      ]) {
+        expect(byName[fn]).toMatchObject({ pub: false, anon: false, auth: false, svc: false });
+      }
+
+      // Fonctions métier et helpers staff : authenticated uniquement (public=false, anon=false, service_role=false)
+      for (const fn of [
+        'private.admin_file_checked',
+        'private.admin_media_link_allowed',
+        'private.admin_original_unreferenced',
+        'private.has_staff_role',
+        'public.admin_baseline_visibility',
+        'public.admin_staff_directory',
+        'public.apec_link_targets',
+        'public.import_data_batch',
+        'public.publish_apec_need',
+        'public.record_apec_decision',
+        'public.review_data_import',
+        'public.withdraw_apec_need',
+      ]) {
+        expect(byName[fn]).toMatchObject({ pub: false, anon: false, auth: true, svc: false });
+      }
+    } finally { await actual.close(); }
+  },60000);
 });

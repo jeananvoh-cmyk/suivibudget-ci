@@ -257,7 +257,7 @@ export const ExamineCADocumentModal: React.FC<ExamineCADocumentModalProps> = ({
                       <span>
                         Pages : <strong>
                           {document.physical_page_count && document.printed_page_count
-                            ? `${document.physical_page_count} pages physiques PDF (imprimées jusqu'à 44/${document.printed_page_count})`
+                            ? `${document.physical_page_count} pages physiques PDF (imprimées jusqu'à ${Math.max(1, document.printed_page_count - (document.missing_printed_pages?.length ?? 0))}/${document.printed_page_count})`
                             : document.page_count}
                         </strong>
                       </span>

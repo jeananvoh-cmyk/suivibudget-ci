@@ -289,6 +289,8 @@ export function findOfficialDocumentByChecksum(sha256: string, documents: readon
 export interface VerifiedDocumentPaginationControl {
   readonly sha256: string;
   readonly fileSizeBytes: number;
+  readonly institutionIds: readonly string[];
+  readonly fiscalYear: number;
   readonly physicalPageCount: number;
   readonly printedPageCount: number;
   readonly missingPrintedPages: readonly string[];
@@ -299,6 +301,8 @@ export const VERIFIED_DOCUMENT_PAGINATION_CONTROLS: Readonly<Record<string, Veri
   '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf': {
     sha256: '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf',
     fileSizeBytes: 14072943,
+    institutionIds: ['inst-com-cocody', 'commune-cocody'],
+    fiscalYear: 2024,
     physicalPageCount: 44,
     printedPageCount: 45,
     missingPrintedPages: ['20/45'],
@@ -306,19 +310,43 @@ export const VERIFIED_DOCUMENT_PAGINATION_CONTROLS: Readonly<Record<string, Veri
   },
 });
 
+export function isVerifiedDocumentPaginationAttested(
+  doc: PublicDocument,
+  control: VerifiedDocumentPaginationControl,
+): boolean {
+  const sha = doc.checksum_sha256?.trim().toLowerCase();
+  if (!sha || !isDocumentSha256(sha) || sha !== control.sha256) return false;
+  if (doc.checksum_status !== 'COMPUTED') return false;
+  if (doc.file_size_bytes !== control.fileSizeBytes) return false;
+  if (doc.is_multipart === true) return false;
+  if (doc.checksum_algorithm && doc.checksum_algorithm !== 'SHA256_FILE_V1') return false;
+  if ((doc.status !== 'VERIFIED' && doc.status !== 'PUBLISHED') || doc.verification_status !== 'VERIFIED') return false;
+  if (doc.institution_id && !control.institutionIds.includes(doc.institution_id)) return false;
+  if ((doc.fiscal_year ?? doc.year) !== control.fiscalYear) return false;
+  return true;
+}
+
 export function applyVerifiedDocumentPagination(doc: PublicDocument): PublicDocument {
-  const sha = doc.checksum_sha256?.toLowerCase().trim();
+  const sha = doc.checksum_sha256?.trim().toLowerCase();
   const control = sha ? VERIFIED_DOCUMENT_PAGINATION_CONTROLS[sha] : undefined;
   if (!control) return doc;
-  const correctedPageCount = doc.page_count == null || doc.page_count === control.printedPageCount
-    ? control.physicalPageCount
-    : doc.page_count;
+  if (!isVerifiedDocumentPaginationAttested(doc, control)) {
+    return {
+      ...doc,
+      physical_page_count: null,
+      printed_page_count: null,
+      missing_printed_pages: null,
+      pagination_note: null,
+    };
+  }
   return {
     ...doc,
-    page_count: correctedPageCount,
-    physical_page_count: doc.physical_page_count ?? control.physicalPageCount,
-    printed_page_count: doc.printed_page_count ?? control.printedPageCount,
-    missing_printed_pages: doc.missing_printed_pages ?? [...control.missingPrintedPages],
-    pagination_note: doc.pagination_note ?? control.paginationNote,
+    checksum_sha256: control.sha256,
+    file_size_bytes: control.fileSizeBytes,
+    page_count: control.physicalPageCount,
+    physical_page_count: control.physicalPageCount,
+    printed_page_count: control.printedPageCount,
+    missing_printed_pages: [...control.missingPrintedPages],
+    pagination_note: control.paginationNote,
   };
 }

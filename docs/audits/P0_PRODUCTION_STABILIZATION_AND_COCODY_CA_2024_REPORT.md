@@ -27,20 +27,22 @@
 2. **Privilèges effectifs (`relacl` et `USAGE` sur `private`)** :
    - Sur le schéma `private`, `revoke all on schema private from public, anon, authenticated, service_role;` est appliqué.
    - Sur les deux tables, `relacl` en base vaut `{postgres=arwdDxtm/postgres}` : ni `anon`, ni `authenticated`, ni `service_role` ne disposent de privilèges `SELECT`, `INSERT`, `UPDATE` ou `DELETE` directs.
-3. **Activation de RLS sans politique permissive (`supabase/migrations/20261026213000_security_definer_hardening.sql`)** :
+3. **Activation de RLS sans politique permissive (`supabase/migrations/20261114183000_reconcile_security_definer_and_private_rls.sql`, complétant `20261113011327_security_definer_hardening_20261026213000.sql`)** :
    - `alter table private.admin_document_file_checks enable row level security;`
    - `alter table private.document_delivery_receipts enable row level security;`
+   - `revoke all on table private.admin_document_file_checks, private.document_delivery_receipts from public, anon, authenticated, service_role;` (note : l'horodatage initial `20261026213000` avait été renommé en `20261113011327_security_definer_hardening_20261026213000.sql` et n'avait pas encore inclus ces `ENABLE ROW LEVEL SECURITY` / `REVOKE ALL ON TABLE` ; la migration additive `20261114183000_reconcile_security_definer_and_private_rls.sql` corrige l'état cible et reste à appliquer par le propriétaire).
    - `revoke all on table private.admin_document_file_checks from public, anon, authenticated, service_role;`
    - `revoke all on table private.document_delivery_receipts from public, anon, authenticated, service_role;`
    - **0 politique permissive factice ajoutée** : tout accès non-propriétaire est refusé par défaut (`default-deny`), tandis que les fonctions serveur `SECURITY DEFINER` détenues par `postgres` (`public.admin_confirm_document_integrity`, `private.admin_file_checked`, `private.admin_original_unreferenced`, `public.record_document_delivery`) continuent de fonctionner normalement en tant que propriétaire des tables.
 
-### 1.3 Audit complet des 21 fonctions `SECURITY DEFINER` (`supabase/migrations/20261026213000_security_definer_hardening.sql`)
+### 1.3 Audit complet des 21 fonctions `SECURITY DEFINER` (`20261113011327_security_definer_hardening_20261026213000.sql` + réconciliation `20261114183000_reconcile_security_definer_and_private_rls.sql`)
 
 Toutes les 21 fonctions `SECURITY DEFINER` des schémas `public` et `private` ont `proowner = postgres` et `search_path = ''`. Les contrôles et durcissements appliqués sont :
 
 1. **`public.admin_baseline_visibility(p_table text, p_ids text[])`** :
    - Garde explicite `if p_table is null or p_ids is null` levant `'Invalid baseline request'`.
-   - Liste blanche stricte sur 4 tables (`public_documents`, `local_budgets`, `administrative_accounts`, `admin_entities`).
+   - Liste blanche stricte sur les 4 tables du baseline statique couvertes par `refreshAdminEntities` (`institutions`, `budget_projects`, `news_articles`, `caidp_directory`), avec exclusion étendue (`id not like 'admin-%'`, `id not like 'csv-%'`, `id not like 'import-%'`).
+   - Privilèges effectifs : `EXECUTE` révoqué pour `public`, `anon` et `service_role`, réservé à `authenticated` (le client public `src/services/dataStore.ts` ne l'appelle plus en session anonyme). `USAGE ON SCHEMA private` reste accordé à `anon, authenticated` uniquement pour préserver `public.public_citizen_proofs` (`security_invoker = true`) via `private.published_citizen_proofs()`.
    - Exclusion des identifiants brouillons créés dynamiquement (`id not like 'admin-%' and id not like 'csv-%' and id not like 'import-%'`) afin qu'un appelant anonyme (`anon`) ou `CITIZEN` ne puisse jamais sonder l'existence d'un brouillon administratif hors référentiel statique.
    - Révocation de `EXECUTE` pour `public` et `service_role` (`EXECUTE` conservé uniquement pour `anon` et `authenticated` pour la synchronisation initiale du catalogue public).
 2. **`public.admin_staff_directory()`** :
@@ -87,7 +89,7 @@ Toutes les 21 fonctions `SECURITY DEFINER` des schémas `public` et `private` on
 - **Taille exacte** : `14 072 943` octets
 - **Empreinte SHA-256** : `941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf`
 - **Pagination physique vs pagination imprimée** :
-  - **Pages physiques du fichier PDF** : **`44` pages physiques** (scannées en 2 fascicules de 22 pages chacun : `580b42cd...` pages 1–22 et `796921a9...` pages 23–44). En base distante `public_documents`, `page_count` est actuellement `null` ; le normaliseur déterministe `applyVerifiedDocumentPagination` (`src/data/officialPublicDocumentsCatalog.ts`) renseigne `page_count = 44`, `physical_page_count = 44`, `printed_page_count = 45` et `missing_printed_pages = ['20/45']` dès l'hydratation.
+  - **Pages physiques du fichier PDF** : **`44` pages physiques** (les deux fascicules locaux scannés font 22 pages chacun, soit 44 pages physiques au total ; en base distante `public_documents`, `page_count` vaut désormais `44` depuis la publication du 13/11/2026, avec `checksum_status = 'COMPUTED'` et `file_size_bytes = 14072943`). Le normaliseur déterministe `applyVerifiedDocumentPagination` (`src/data/officialPublicDocumentsCatalog.ts`) n'applique les valeurs `page_count = 44`, `physical_page_count = 44`, `printed_page_count = 45` et `missing_printed_pages = ['20/45']` que si le document présente une empreinte SHA-256 attestée (`checksum_status = 'COMPUTED'`, `file_size_bytes = 14072943`, `is_multipart !== true`, statut `VERIFIED`/`PUBLISHED` et correspondance `institution_id`/`fiscal_year`).
   - **Pagination imprimée en pied de page** : numérotée jusqu'à **`44/45`** sur **`45` pages annoncées**.
   - **Page absente du scan d'origine** : la page imprimée **`20/45`** est absente de la reliure scannée d'origine (entre la page PDF 19 imprimée `19/45` et la page PDF 20 imprimée `21/45`) ; son contenu n'est jamais inventé ni interpolé (`contenu non restitué`).
 - **Actes officiels attestés sur la pièce** :
@@ -193,7 +195,7 @@ Conformément aux règles non négociables (`REMOTE_SUPABASE_WRITES = 0`), **auc
 
 | Jalon | Statut | Justification |
 |---|---|---|
-| **Prêt pour revue indépendante (`READY_FOR_INDEPENDENT_REVIEW`)** | **OUI** | Code, migration `20261026213000_security_definer_hardening.sql`, tests PGlite/Vitest (`912/912`), recette navigateur (`16/16`) et lot Cocody 2024 vérifiés et poussés sur la PR #65. |
+| **Prêt pour revue indépendante (`READY_FOR_INDEPENDENT_REVIEW`)** | **OUI** | Réconciliation effectuée sur `fix/p0-cocody-sql-audit-reconciliation` (pagination Cocody attestée, `20261114183000_reconcile_security_definer_and_private_rls.sql`, audit `AUDIT_POST_FUSIONS_ET_STATUT_COCODY_2024.md`). |
 | **Prêt pour fusion (`READY_FOR_MERGE`)** | **OUI (après approbation propriétaire)** | CI GitHub Actions `Quality` et déploiement Vercel Preview au vert (`SUCCESS`), aucun conflit avec `master`. |
-| **Prêt pour migration backend (`READY_FOR_BACKEND_MIGRATION`)** | **OUI (sur action propriétaire)** | `supabase/migrations/20261026213000_security_definer_hardening.sql` est idempotente, purement sécuritaire (`ENABLE ROW LEVEL SECURITY`, `CREATE OR REPLACE FUNCTION`, `REVOKE ALL`), sans modification destructive de table ni de données. |
-| **Prêt pour publication production Cocody 2024 (`READY_FOR_PRODUCTION_PUBLICATION`)** | **EN ATTENTE D'AUTORISATION PROPRIÉTAIRE** | Lot JSON certifié prêt à être soumis dans `import_data_batch` -> `review_data_import('VERIFY')` -> `review_data_import('PUBLISH', true)` par un opérateur `ADMIN` / `DATA_MANAGER`. |
+| **Prêt pour migration backend (`READY_FOR_BACKEND_MIGRATION`)** | **OUI (sur action propriétaire)** | `20261113011327_security_definer_hardening_20261026213000.sql` + `20261114183000_reconcile_security_definer_and_private_rls.sql` sont idempotentes et non destructives ; la seconde ajoute l'activation RLS sur les 2 tables `private.*`, le filtre `csv-%`/`import-%` et l'alignement strict des privilèges des 21 fonctions `SECURITY DEFINER`. |
+| **Statut publication production Cocody 2024 (`PRODUCTION_PUBLICATION_STATUS`)** | **PUBLIÉ EN PRODUCTION (avec réserves d'affichage mineures)** | Contrôle GET lecture seule du 14/11/2026 : `doc-dff4865a...` (`PUBLISHED`, `page_count: 44`, `checksum_status: COMPUTED`, `file_size_bytes: 14072943`), `ca-cocody-2024` (`PUBLISHED`/`RECONCILED`), `57` opérations et `28` rapprochements déjà en production depuis le 13/11/2026. Restent à corriger à terme : `arithmetic_difference = 0` (affiche `+0 FCFA`) et `doc.approval_date = '2025-08-13'` vs `2025-07-08`. |
