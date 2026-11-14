@@ -97,7 +97,7 @@ export const BudgetReportsView: React.FC = () => {
       case 'SANTE': return 'Rapport Thématique : Santé Publique & Équipements Médicaux 2026';
       case 'EDUCATION': return 'Rapport Thématique : Éducation Nationale & Universités 2026';
       case 'EAU_POTABLE': return 'Rapport Thématique : Hydraulique, Eau Potable & Assainissement 2026';
-      case 'LOCAL': return 'Rapport de Décentralisation : Investissements des 201 Mairies & 33 Régions 2026';
+      case 'LOCAL': return 'Rapport de Décentralisation : Investissements des 201 Communes, 31 Conseils Régionaux & 2 Districts Autonomes 2026';
       default: return 'Bilan Annuel Global de l\'Observatoire Budgétaire & Citoyen 2026';
     }
   };
@@ -117,7 +117,7 @@ export const BudgetReportsView: React.FC = () => {
               Rapports Budgétaires & Bilans Citoyens 2026
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
-              Consultez, imprimez et partagez les bilans consolidés des investissements publics votés dans la Loi de Finances 2026 et vérifiés sur le terrain par les citoyens.
+              Consultez, imprimez et partagez les bilans consolidés des investissements publics votés dans la Loi de Finances 2026 et suivis par les citoyens.
             </p>
           </div>
 
@@ -189,7 +189,7 @@ export const BudgetReportsView: React.FC = () => {
           <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-right flex-shrink-0">
             <div className="text-[10px] font-black text-slate-400 uppercase">Édition du Rapport</div>
             <div className="text-xs font-black text-slate-800">{formatDateFR(new Date().toISOString())}</div>
-            <div className="text-[10px] font-bold text-emerald-700"> Données Officielles Vérifiées</div>
+            <div className="text-[10px] font-bold text-slate-600">Classification automatisée — à vérifier sur pièce</div>
           </div>
         </div>
 
@@ -224,10 +224,10 @@ export const BudgetReportsView: React.FC = () => {
             <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200">
               <span className="text-xs font-bold text-slate-500 block">Couverture Territoriale</span>
               <span className="text-xl sm:text-2xl font-black text-slate-900 mt-1 block">
-                234 Collectivités
+                232 Collectivités
               </span>
               <span className="text-[11px] text-slate-500">
-                201 Mairies & 33 Conseils Régionaux
+                201 Communes & 31 Conseils Régionaux (+ 2 Districts)
               </span>
             </div>
 
@@ -255,7 +255,7 @@ export const BudgetReportsView: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black text-brand-blue uppercase flex items-center gap-1.5">
                   <Building className="w-3.5 h-3.5 text-brand-blue" />
-                  <span>Grands Chantiers de l'État</span>
+                  <span>Grands Projets & Opérations de l'État</span>
                 </span>
                 <span className="text-xs font-black text-slate-800">
                   {stats.totalAmount > 0 ? ((stats.nationalAmount / stats.totalAmount) * 100).toFixed(1) : '0'} %
@@ -302,7 +302,7 @@ export const BudgetReportsView: React.FC = () => {
                 <tr>
                   <th className="p-3.5">Rang</th>
                   <th className="p-3.5">Autorité / Ministère / Collectivité</th>
-                  <th className="p-3.5 text-center">Nombre de Chantiers</th>
+                  <th className="p-3.5 text-center">Opérations répertoriées</th>
                   <th className="p-3.5 text-right">Budget Alloué (FCFA)</th>
                   <th className="p-3.5 text-right">Poids Budgétaire</th>
                 </tr>
@@ -361,7 +361,7 @@ export const BudgetReportsView: React.FC = () => {
             Document généré automatiquement par SuiviBudget Côte d'Ivoire — Observatoire & Plateforme Citoyenne de Transparence Budgétaire.
           </p>
           <p className="text-[11px]">
-            Données 100 % issues de la Loi de Finances 2026 de la République de Côte d'Ivoire (DGBF) et des budgets primitifs communaux.
+            Extraction issue des catalogues budgétaires (LFI 2026, budgets primitifs et données ouvertes) — classification algorithmique à vérifier sur pièce.
           </p>
         </div>
 

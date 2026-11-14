@@ -182,9 +182,9 @@ export const CommuneComparatorModal: React.FC<CommuneComparatorModalProps> = ({
                 )
               )}
 
-              {/* Chantiers liés */}
+              {/* Opérations liées */}
               <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-xs text-slate-500 font-medium">{projectsA} chantiers répertoriés</span>
+                <span className="text-xs text-slate-500 font-medium">{projectsA} opérations répertoriées (auto.)</span>
                 <button
                   onClick={() => {
                     onClose();
@@ -250,9 +250,9 @@ export const CommuneComparatorModal: React.FC<CommuneComparatorModalProps> = ({
                 )
               )}
 
-              {/* Chantiers liés */}
+              {/* Opérations liées */}
               <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-xs text-slate-500 font-medium">{projectsB} chantiers répertoriés</span>
+                <span className="text-xs text-slate-500 font-medium">{projectsB} opérations répertoriées (auto.)</span>
                 <button
                   onClick={() => {
                     onClose();

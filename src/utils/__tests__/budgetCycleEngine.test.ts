@@ -334,7 +334,9 @@ describe('Budget Cycle Engine — Tests Structurés du Cycle Budgétaire (Items 
     expect(tiassale?.amount_precision).toBe('APPROXIMATE');
     expect(tiassale?.operating_amount).toBeNull();
     expect(tiassale?.investment_amount).toBeNull();
-    expect(tiassale?.verification_status).toBe('AIP_VERIFIED');
+    expect(tiassale?.verification_status).toBe('AIP_REPORTED');
+    expect(tiassale?.source_role).toBe('SECONDARY');
+    expect(tiassale?.sources[0].role).toBe('SECONDARY');
     expect(tiassale?.document_url).toBeUndefined();
     expect(tiassale?.primary_source_url).toBe('https://www.aip.ci/cote-divoire-aip-la-commune-de-tiassale-adopte-un-budget-primitif-de-plus-de-17-milliard-fcfa/');
   });

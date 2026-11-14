@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CitizenProof, ProjectStatus, BudgetProject } from '../types';
 import { dataStore } from '../services/dataStore';
-import { formatFCFA, formatAmountInWords, formatDateFR, getStatusConfig } from '../utils/formatters';
+import { formatFCFA, formatCompactFCFA, formatAmountInWords, formatDateFR, getStatusConfig } from '../utils/formatters';
 import { BudgetReportsView } from '../components/BudgetReportsView';
 import { publicCitizenIdentity, buildCitizenObservationBadge } from '../review/domain/citizen';
 import { buildInstitutionalResponseBadge } from '../review/domain/responses';
@@ -120,8 +120,9 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
     dataStore.confirmProof(proofId);
   };
 
-  // Metrics for Budget Voté vs Avancement Constaté
-  const totalVerifiedProofs = approvedProofs.length + STRATEGIC_PROJECTS_LIST.length;
+  const publicIndicators = dataStore.getPublicIndicators();
+  const approvedProofsCount = approvedProofs.length;
+  const strategicCount = STRATEGIC_PROJECTS_LIST.length;
   const inProgressCount = STRATEGIC_PROJECTS_LIST.filter(p => p.status === 'IN_PROGRESS').length + approvedProofs.filter(p => p.citizen_status_claim === 'IN_PROGRESS').length;
   const completedCount = STRATEGIC_PROJECTS_LIST.filter(p => p.status === 'COMPLETED').length + approvedProofs.filter(p => p.citizen_status_claim === 'COMPLETED').length;
   const notStartedProofs = approvedProofs.filter(p => p.citizen_status_claim === 'NOT_STARTED').length;
@@ -164,10 +165,10 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight font-sans">
-              Observatoire Citoyen des Chantiers Publics
+              Observatoire Citoyen des Investissements & Opérations Publics
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
-              Suivi photographique de terrain, veille contractuelle et vérification citoyenne indépendante des <strong>3 453,8 Milliards FCFA</strong> d'investissements de l'État et des collectivités locales.
+              Suivi photographique de terrain, veille contractuelle et observations citoyennes indépendantes sur <strong>{publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée</strong> ({formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa)} côté État extrait et {formatCompactFCFA(publicIndicators.investments.localCsvPhysical2026AmountFcfa)} côté collectivités LFI, hors {publicIndicators.investments.localPortalBouakePhysical2026Count} projets portail Bouaké de {formatCompactFCFA(publicIndicators.investments.localPortalBouakePhysical2026AmountFcfa)} et {publicIndicators.investments.multiYearPre2026Count} marché pluriannuel 2021 de {formatCompactFCFA(publicIndicators.investments.multiYearPre2026AmountFcfa)}).
             </p>
           </div>
 
@@ -196,7 +197,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
             }`}
           >
             <Camera className="w-4 h-4 text-brand-orange" />
-            <span>Galerie & Chantiers Stratégiques ({STRATEGIC_PROJECTS_LIST.length + approvedProofs.length})</span>
+            <span>Galerie ({strategicCount} dossier stratégique • {approvedProofsCount} constat{approvedProofsCount > 1 ? 's' : ''} citoyen{approvedProofsCount > 1 ? 's' : ''})</span>
           </button>
 
           <button
@@ -227,12 +228,12 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                     Budget Voté vs Avancement Constaté sur le Terrain
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Synthèse des observations vérifiées par la communauté citoyenne et les sentinelles régionales
+                    Synthèse des observations citoyennes modérées par la communauté et les sentinelles régionales (sans certification d'audit ou d'ingénierie)
                   </p>
                 </div>
 
                 <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold self-start sm:self-auto border border-slate-200/70">
-                  {totalVerifiedProofs} chantiers & constats répertoriés
+                  {strategicCount} enquête stratégique • {approvedProofsCount} / {publicIndicators.citizenProofs.target2026.toLocaleString('fr-FR')} constats publiés
                 </span>
               </div>
 
@@ -271,6 +272,40 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                   </div>
                   <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">
                     <span className="w-3.5 h-3.5 rounded-full bg-slate-400"></span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 6-State Citizen Proof Metrics Breakdown */}
+              <div className="pt-3 border-t border-slate-100">
+                <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center justify-between">
+                  <span>Traçabilité & Statuts du Contrôle Citoyen</span>
+                  <span className="text-[10px] text-slate-400 font-medium">Modération éditoriale staff (P7: non certifié audit/ingénierie)</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-center">
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-[11px] text-slate-500 block font-medium">Soumises</span>
+                    <span className="text-base font-black text-slate-900">{publicIndicators.citizenProofs.totalSubmittedCount}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-amber-50/60 border border-amber-200">
+                    <span className="text-[11px] text-amber-800 block font-medium">En attente</span>
+                    <span className="text-base font-black text-amber-900">{publicIndicators.citizenProofs.pendingCount}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                    <span className="text-[11px] text-emerald-800 block font-medium">Approuvées (modération)</span>
+                    <span className="text-base font-black text-emerald-900">{publicIndicators.citizenProofs.approvedCount}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-rose-50/60 border border-rose-200">
+                    <span className="text-[11px] text-rose-800 block font-medium">Rejetées</span>
+                    <span className="text-base font-black text-rose-900">{publicIndicators.citizenProofs.rejectedCount}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-blue-50/60 border border-blue-200">
+                    <span className="text-[11px] text-blue-800 block font-medium">Vérifiées indépendamment</span>
+                    <span className="text-base font-black text-blue-900">{publicIndicators.citizenProofs.independentlyVerifiedCount ?? 0}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-purple-50/60 border border-purple-200">
+                    <span className="text-[11px] text-purple-800 block font-medium">Objectif 2026</span>
+                    <span className="text-base font-black text-purple-900">{publicIndicators.citizenProofs.target2026.toLocaleString('fr-FR')}</span>
                   </div>
                 </div>
               </div>
@@ -327,7 +362,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                       {/* Top Left Badge: Certified Proof */}
                       <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 border border-white/10">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Constat terrain vérifié</span>
+                        <span>Observation terrain documentée (modération staff)</span>
                       </div>
 
                       {/* Top Right Badge: Location */}
@@ -631,7 +666,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-900">
-                    Grands Chantiers Publics sous Veille Stratégique
+                    Grands Projets & Opérations sous Veille Stratégique
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Portfolio des investissements structurants suivis en continu à travers les 31 régions de Côte d'Ivoire.
@@ -639,7 +674,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                 </div>
 
                 <span className="text-xs text-slate-600 font-bold bg-slate-100 px-3 py-1 rounded-full border border-slate-200 self-start sm:self-auto">
-                  {filteredStrategicProjects.length} chantiers nationaux
+                  {filteredStrategicProjects.length} opérations nationales
                 </span>
               </div>
 
@@ -857,7 +892,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-900">
-                    Veille Citoyenne de Proximité • Chantiers Communaux & Régionaux
+                    Veille Citoyenne de Proximité • Opérations Communales & Régionales
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Constats photographiques des sentinelles citoyennes dans les collectivités territoriales (Poro, Gbêkê, etc.).
@@ -976,7 +1011,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                   {/* Candidate projects waiting for inspection */}
                   <div className="max-w-3xl mx-auto text-left pt-2 border-t border-slate-100">
                     <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
-                      Chantiers prioritaires à vérifier près de chez vous :
+                      Opérations prioritaires à vérifier sur le terrain :
                     </h4>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

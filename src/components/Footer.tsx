@@ -60,8 +60,8 @@ export const Footer: React.FC<FooterProps> = ({
     let csvContent = '';
 
     if (type === 'PROJECTS') {
-      filename = `SuiviBudget_CI_4701_Chantiers_LFI_${new Date().getFullYear()}.csv`;
       const projects = dataStore.getProjects();
+      filename = `SuiviBudget_CI_${projects.length}_Projets_Physiques_${new Date().getFullYear()}.csv`;
       csvContent = "ID;Titre;Categorie;Region;Commune;Ministere;Budget_FCFA;Statut;Avancement_Pct;Annee\n" +
         projects.map(p => [
           sanitizeCsvCell(p.id),
@@ -146,11 +146,11 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Left : Value Prop & Action Buttons */}
           <div className="lg:col-span-6 space-y-2.5">
             <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
-              Suivez les budgets & chantiers publics en Côte d'Ivoire
+              Suivez les budgets & opérations d'investissement en Côte d'Ivoire
             </h2>
 
             <p className="text-slate-600 text-xs leading-relaxed max-w-xl">
-              Alertes citoyennes, chantiers de votre commune et guides d'accès aux documents publics (Loi CAIDP).
+              Alertes citoyennes, opérations de votre commune et guides d'accès aux documents publics (Loi CAIDP).
             </p>
 
             <div className="pt-1 flex flex-wrap items-center gap-2">
@@ -309,9 +309,9 @@ export const Footer: React.FC<FooterProps> = ({
               <button
                 onClick={() => handleExportCsv('PROJECTS')}
                 className="hover:text-slate-900 transition-colors text-left text-slate-600 cursor-pointer"
-                title="Télécharger l'intégralité des 4 701 chantiers publics d'investissement LFI 2026 en CSV"
+                title={`Télécharger les ${dataStore.getPublicIndicators().investments.physicalAllCount.toLocaleString('fr-FR')} projets et opérations physiques répertoriés selon une classification automatisée en CSV`}
               >
-                4 701 Chantiers Publics (LFI)
+                {dataStore.getPublicIndicators().investments.physicalAllCount.toLocaleString('fr-FR')} Projets Physiques (Auto. CSV)
               </button>
             </li>
             <li>
@@ -402,9 +402,9 @@ export const Footer: React.FC<FooterProps> = ({
               <button
                 onClick={() => onNavigateTab('documents')}
                 className="hover:text-slate-900 transition-colors text-left text-slate-600 cursor-pointer"
-                title="Consulter la Loi de Finances 2026 (15 339,2 Milliards FCFA)"
+                title="Consulter la Loi de Finances 2026 (Loi n° 2025-987 — Budget de l'État 17 350,2 Milliards FCFA)"
               >
-                Loi de Finances 2026 (15 339 Mrds)
+                Loi de Finances 2026 (17 350,2 Mrds)
               </button>
             </li>
             <li>

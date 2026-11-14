@@ -1,7 +1,7 @@
 {
   "name": "SuiviBudget Côte d'Ivoire - Observatoire Citoyen",
   "short_name": "SuiviBudget CI",
-  "description": "Plateforme citoyenne de transparence budgétaire et de suivi des chantiers publics en Côte d'Ivoire",
+  "description": "Plateforme citoyenne de transparence budgétaire et de suivi des investissements et opérations publics en Côte d'Ivoire",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

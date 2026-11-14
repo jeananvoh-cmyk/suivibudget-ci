@@ -65,9 +65,10 @@ export type LocalSourceType =
  * Hiérarchie de confiance et statut de vérification
  */
 export type LocalVerificationStatus = 
-  | 'OFFICIAL_DOCUMENT'         // ✓ Source officielle (document visé / délibération)
+  | 'OFFICIAL_DOCUMENT'         // ✓ Source officielle (document visé / délibération originale consultée sur pièce)
   | 'OFFICIAL_INSTITUTION'      // ✓ Source institutionnelle vérifiée
-  | 'AIP_VERIFIED'              // ✓ Dépêche AIP vérifiée
+  | 'AIP_REPORTED'              // ℹ Dépêche AIP rapportée (source secondaire publique de référence — délibération primaire non consultée)
+  | 'AIP_VERIFIED'              // [Rétro-compatibilité : préférer AIP_REPORTED]
   | 'SECONDARY_TO_CORROBORATE'  // ⚠ À corroborer (source secondaire en attente d'attestation)
   | 'CALCULATED_TO_VERIFY'      // À vérifier par recalcul
   | 'SOURCE_ANOMALY'            // ⚠ Anomalie détectée dans les chiffres sources
@@ -78,7 +79,7 @@ export type LocalVerificationStatus =
 /**
  * Rôle de la source pour un budget
  */
-export type SourceRole = 'PRIMARY' | 'CORROBORATION' | 'CONTEXT' | 'SUPERSEDED';
+export type SourceRole = 'PRIMARY' | 'SECONDARY' | 'CORROBORATION' | 'CONTEXT' | 'SUPERSEDED';
 
 /**
  * Modèle d'une source documentaire
@@ -200,6 +201,7 @@ export interface LocalBudget {
   source_access_date?: string;             // Date de consultation par l'équipe SuiviBudget
 
   // Provenance et traçabilité
+  source_role?: SourceRole;
   verification_status: LocalVerificationStatus;
   confidence_level: 'HIGH' | 'MEDIUM' | 'LOW';
   notes?: string;

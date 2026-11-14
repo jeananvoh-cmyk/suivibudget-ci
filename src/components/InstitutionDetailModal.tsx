@@ -693,7 +693,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
           {[
             {
               id: 'PROJECTS',
-              label: 'Chantiers & Projets',
+              label: 'Opérations & Projets',
               badge: relatedProjects.length > 0 ? `${relatedProjects.length}` : undefined
             },
             {
@@ -760,7 +760,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     <span>Observatoire Citoyen</span>
                   </div>
                   <h3 className="text-base sm:text-lg font-black tracking-tight">
-                    Chantiers & Investissements Concrets
+                    Opérations & Investissements Concrets
                   </h3>
                   <p className="text-xs text-blue-100">
                     Projets d'investissement référencés pour <strong>{institution.name}</strong>.
@@ -769,7 +769,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
 
                 <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/15 flex-shrink-0">
                   <div className="text-center pr-3 border-r border-white/20">
-                    <span className="text-[10px] font-bold uppercase text-blue-200 block">Chantiers</span>
+                    <span className="text-[10px] font-bold uppercase text-blue-200 block">Opérations</span>
                     <span className="text-xl font-black text-white">{relatedProjects.length}</span>
                   </div>
                   <div className="text-left pl-1">
@@ -870,7 +870,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                       : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                   }`}
                 >
-                  <span>Tous les chantiers</span>
+                  <span>Toutes les opérations</span>
                   <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${selectedTier === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
                     {relatedProjects.length}
                   </span>
@@ -1084,7 +1084,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   <div className="flex justify-center"><Search className="w-7 h-7 text-slate-300" /></div>
                   <h5 className="text-sm font-black text-slate-800">Aucun projet ne correspond à ce filtre</h5>
                   <p className="text-xs text-slate-500">
-                    Consultez l'ensemble des {relatedProjects.length} chantiers en réinitialisant les critères.
+                    Consultez l'ensemble des {relatedProjects.length} opérations en réinitialisant les critères.
                   </p>
                   <button
                     onClick={() => {
