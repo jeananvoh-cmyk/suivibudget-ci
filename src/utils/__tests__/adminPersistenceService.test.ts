@@ -1,6 +1,6 @@
 import { beforeAll, afterAll, beforeEach, describe, it, expect, vi } from 'vitest';
 import { createAdminPersistenceFixture } from './adminPersistenceFixtures';
-import { adminCreationId, importAdminCsv, mutateAdminEntity, mutateAdminBatch, parseAdminCsv, summarizeCsvAmounts, readAdminRows, requireAdminPersistence } from '../../services/adminPersistenceService';
+import { adminCreationId, hiddenBaselineIds, importAdminCsv, mutateAdminEntity, mutateAdminBatch, parseAdminCsv, summarizeCsvAmounts, readAdminRows, requireAdminPersistence } from '../../services/adminPersistenceService';
 
 const api=vi.hoisted(()=>({configured:vi.fn(()=>true),getUser:vi.fn(),rpc:vi.fn(),from:vi.fn()}));
 vi.mock('../../services/supabase',()=>({isSupabaseConfigured:api.configured,supabase:{auth:{getUser:api.getUser},rpc:api.rpc,from:api.from}}));
@@ -178,5 +178,43 @@ describe('Persistance réelle du service sur PostgreSQL isolé, sans réseau ext
   it('gère séparateurs et guillemets tout en rejetant les CSV ambigus',()=>{
     expect(parseAdminCsv('title;source\n"Titre; avec séparateur";"Source ""citée"""')).toEqual([{title:'Titre; avec séparateur',source:'Source "citée"'}]);
     for(const input of ['id;id\na;b','id;name\na','id;name\na;"ouvert','id;name\na;b;c']) expect(()=>parseAdminCsv(input)).toThrow();
+  });
+
+  it('neutralise et intercepte gracieusement toute erreur d’autorisation sur hiddenBaselineIds', async () => {
+    expect(await hiddenBaselineIds('institutions', [])).toEqual(new Set());
+    api.configured.mockReturnValueOnce(false);
+    expect(await hiddenBaselineIds('institutions', ['inst-1'])).toEqual(new Set());
+
+    api.rpc.mockResolvedValueOnce({ data: ['inst-hidden-1', 'inst-hidden-2'], error: null });
+    expect(await hiddenBaselineIds('institutions', ['inst-1', 'inst-hidden-1', 'inst-hidden-2'])).toEqual(
+      new Set(['inst-hidden-1', 'inst-hidden-2'])
+    );
+
+    api.rpc.mockResolvedValueOnce({
+      data: null,
+      error: { code: '42501', message: 'Staff authorization required' },
+    });
+    expect(await hiddenBaselineIds('institutions', ['inst-1'])).toEqual(new Set());
+
+    api.rpc.mockResolvedValueOnce({
+      data: null,
+      error: { status: 401, message: 'JWT expired or unauthorized' },
+    });
+    expect(await hiddenBaselineIds('institutions', ['inst-1'])).toEqual(new Set());
+
+    api.rpc.mockResolvedValueOnce({
+      data: null,
+      error: { status: 403, message: 'Forbidden' },
+    });
+    expect(await hiddenBaselineIds('institutions', ['inst-1'])).toEqual(new Set());
+
+    api.rpc.mockResolvedValueOnce({
+      data: null,
+      error: { code: 'PGRST202', message: 'Function not found' },
+    });
+    expect(await hiddenBaselineIds('institutions', ['inst-1'])).toEqual(new Set());
+
+    api.rpc.mockRejectedValueOnce(new Error('Network connection dropped'));
+    expect(await hiddenBaselineIds('institutions', ['inst-1'])).toEqual(new Set());
   });
 });

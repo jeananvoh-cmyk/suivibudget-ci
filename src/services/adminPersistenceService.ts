@@ -100,12 +100,28 @@ export async function resolveAdminMedia(row: PersistedRow, table: 'institutions'
 }
 
 export async function hiddenBaselineIds(table: AdminEntityTable, ids: string[]): Promise<Set<string>> {
-  const {data,error}=await supabase.rpc('admin_baseline_visibility',{p_table:table,p_ids:ids});
-  if(error) {
-    if(error.code==='PGRST202') return new Set();
-    throw error;
+  if (!isSupabaseConfigured() || !ids || ids.length === 0) return new Set();
+  try {
+    const { data, error } = await supabase.rpc('admin_baseline_visibility', { p_table: table, p_ids: ids });
+    if (error) {
+      const err = error as { code?: string; status?: number; message?: string };
+      if (
+        err.code === 'PGRST202' ||
+        err.code === '42501' ||
+        err.code === 'PGRST301' ||
+        err.status === 401 ||
+        err.status === 403 ||
+        err.message?.includes('authorization') ||
+        err.message?.includes('permission denied')
+      ) {
+        return new Set();
+      }
+      return new Set();
+    }
+    return new Set(Array.isArray(data) ? data : []);
+  } catch {
+    return new Set();
   }
-  return new Set(Array.isArray(data) ? data : []);
 }
 
 export async function readStaffOperators(): Promise<{id:string;full_name:string;role:string}[]> {

@@ -544,6 +544,19 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
       ]) {
         expect(byName[fn]).toMatchObject({ pub: false, anon: false, auth: true, svc: false });
       }
+
+      // 3. Étanchéité storage.objects et requêtes anonymes :
+      // Vérifier que la requête anon sur storage.objects évalue les politiques RLS sans lever "permission denied for function has_staff_role"
+      await actual.exec(`
+        insert into storage.buckets(id,name,public) values('public_documents','public_documents',false) on conflict do nothing;
+        insert into storage.buckets(id,name,public) values('citizen_photos','citizen_photos',false) on conflict do nothing;
+        insert into storage.objects(bucket_id,name) values('public_documents','isolated-check.pdf') on conflict do nothing;
+        grant select on storage.objects to anon;
+      `);
+      await actual.exec("begin; set local role anon; select set_config('request.jwt.claim.sub', '', true);");
+      const anonObjects = await actual.query<{ name: string }>("select name from storage.objects where bucket_id = 'public_documents'");
+      expect(anonObjects.rows).toEqual([]);
+      await actual.exec('rollback');
     } finally { await actual.close(); }
   },60000);
 });
