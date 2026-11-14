@@ -471,7 +471,7 @@ class DataStore {
           investment_voted_fcfa: current.investment_amount ?? null,
           functioning_voted_fcfa: current.operating_amount ?? null,
           voted_date: current.adoption_date || '2026',
-          source: current.primary_source_label || (current as any).import_provenance?.source?.name || 'Source officielle',
+          source: current.primary_source_label || (current as any).import_provenance?.source?.name || 'Source déclarée',
           source_url: current.primary_source_url,
           precision: current.amount_precision,
           session_notes: current.session_notes || current.notes,

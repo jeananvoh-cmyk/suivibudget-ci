@@ -146,11 +146,11 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Left : Value Prop & Action Buttons */}
           <div className="lg:col-span-6 space-y-2.5">
             <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
-              Suivez les budgets & chantiers publics en Côte d'Ivoire
+              Suivez les budgets & opérations d'investissement en Côte d'Ivoire
             </h2>
 
             <p className="text-slate-600 text-xs leading-relaxed max-w-xl">
-              Alertes citoyennes, chantiers de votre commune et guides d'accès aux documents publics (Loi CAIDP).
+              Alertes citoyennes, opérations de votre commune et guides d'accès aux documents publics (Loi CAIDP).
             </p>
 
             <div className="pt-1 flex flex-wrap items-center gap-2">

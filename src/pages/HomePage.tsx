@@ -239,7 +239,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Suivi Terrain & Constats
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Photographiez l'avancement réel des chantiers dans votre commune et déposez un constat citoyen vérifiable.
+                Photographiez l'avancement des réalisations dans votre commune et déposez un constat citoyen vérifiable.
               </p>
             </div>
             <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-brand-blue">
@@ -265,7 +265,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </p>
             </div>
             <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-brand-blue">
-              <span>Consulter les chantiers</span>
+              <span>Consulter les opérations</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
@@ -557,7 +557,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 border-b border-slate-200 pb-5">
           <div className="max-w-3xl">
             <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Chantiers Communaux & Régionaux de Proximité
+              Opérations Communales & Régionales de Proximité
             </h3>
             <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1 leading-relaxed">
               Découvrez et suivez en direct les projets de développement local financés et exécutés par vos Mairies et Conseils Régionaux.
@@ -580,7 +580,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="flex items-center justify-between gap-3 text-xs">
             <span className="font-bold text-slate-700 flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-brand-blue" />
-              <span>Filtrer les chantiers de proximité par localité :</span>
+              <span>Filtrer les opérations de proximité par localité :</span>
             </span>
 
             {selectedProximityCity !== 'ALL' && (
@@ -630,11 +630,11 @@ export const HomePage: React.FC<HomePageProps> = ({
             <span className="font-medium">
               {selectedProximityCity !== 'ALL' ? (
                 <>
-                  <span className="font-bold text-slate-900">{proximityFilteredProjects.length}</span> chantiers d'infrastructure affichés pour <span className="font-bold text-brand-blue">« {selectedProximityCity} »</span>
+                  <span className="font-bold text-slate-900">{proximityFilteredProjects.length}</span> opérations d'infrastructure affichées pour <span className="font-bold text-brand-blue">« {selectedProximityCity} »</span>
                 </>
               ) : (
                 <>
-                  Panorama des chantiers concrets de voirie, santé, écoles et eau potable à travers la Côte d'Ivoire
+                  Panorama des opérations concrètes de voirie, santé, écoles et eau potable à travers la Côte d'Ivoire
                 </>
               )}
             </span>

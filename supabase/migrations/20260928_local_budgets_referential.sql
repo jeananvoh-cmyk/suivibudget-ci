@@ -88,9 +88,10 @@ CREATE TABLE IF NOT EXISTS public.local_budgets (
     source_access_date DATE,
     
     -- Traçabilité et confiance
-    verification_status TEXT NOT NULL DEFAULT 'AIP_VERIFIED' CHECK (verification_status IN (
+    verification_status TEXT NOT NULL DEFAULT 'AIP_REPORTED' CHECK (verification_status IN (
         'OFFICIAL_DOCUMENT',
         'OFFICIAL_INSTITUTION',
+        'AIP_REPORTED',
         'AIP_VERIFIED',
         'SECONDARY_TO_CORROBORATE',
         'CALCULATED_TO_VERIFY',

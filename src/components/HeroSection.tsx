@@ -50,7 +50,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             onClick={onExploreClick}
             className="px-6 py-3 bg-brand-blue hover:bg-brand-blue-dark active:scale-95 text-white rounded-xl text-sm font-bold transition-all shadow-sm flex items-center gap-2"
           >
-            <span>Trouver les chantiers de ma commune</span>
+            <span>Trouver les opérations de ma commune</span>
           </button>
           
           {onNavigateTab && (

@@ -139,8 +139,8 @@ export function validateBudgetRecord(budget: Partial<LocalBudget>): BudgetCohere
     });
   }
 
-  // 9. Contrôle Incompatibilité Source / Statut de vérification (AIP_VERIFIED vs Source de presse générale)
-  if (budget.verification_status === 'AIP_VERIFIED') {
+  // 9. Contrôle Incompatibilité Source / Statut de vérification (AIP_VERIFIED / AIP_REPORTED vs Source de presse générale)
+  if (budget.verification_status === 'AIP_VERIFIED' || budget.verification_status === 'AIP_REPORTED') {
     const sourceTexts: string[] = [];
     if (budget.primary_source_label) sourceTexts.push(budget.primary_source_label);
     if (budget.primary_source_url) sourceTexts.push(budget.primary_source_url);
@@ -162,7 +162,7 @@ export function validateBudgetRecord(budget: Partial<LocalBudget>): BudgetCohere
         issues.push({
           code: 'ERR_SOURCE_VERIFICATION_MISMATCH',
           severity: 'ERROR',
-          message: 'Contradiction de provenance : Le statut AIP_VERIFIED ne peut pas être attribué à une source de presse générale. Utiliser SECONDARY_TO_CORROBORATE.',
+          message: `Contradiction de provenance : Le statut ${budget.verification_status} ne peut pas être attribué à une source de presse générale. Utiliser SECONDARY_TO_CORROBORATE.`,
           budget_id: budget.id,
           institution_id: budget.institution_id,
           fiscal_year: budget.fiscal_year,
@@ -182,12 +182,12 @@ export function validateImportProvenanceConsistency(row: any): { valid: boolean;
   const sourceName = `${row.source.name || ''} ${row.source.reference || ''} ${row.source.url || ''}`.toLowerCase();
   const verificationStatus = row.data.verification_status;
 
-  if (verificationStatus === 'AIP_VERIFIED') {
+  if (verificationStatus === 'AIP_VERIFIED' || verificationStatus === 'AIP_REPORTED') {
     const isAIP = sourceName.includes('aip') || sourceName.includes('agence ivoirienne de presse');
     if (!isAIP) {
       return {
         valid: false,
-        error: `Incohérence de provenance : la source "${row.source.name}" n'est pas une dépêche AIP et ne peut pas porter le statut AIP_VERIFIED. Utiliser SECONDARY_TO_CORROBORATE pour une source de presse.`,
+        error: `Incohérence de provenance : la source "${row.source.name}" n'est pas une dépêche AIP et ne peut pas porter le statut ${verificationStatus}. Utiliser SECONDARY_TO_CORROBORATE pour une source de presse.`,
       };
     }
   }

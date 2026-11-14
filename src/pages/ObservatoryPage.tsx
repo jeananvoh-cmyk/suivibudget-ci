@@ -666,7 +666,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-900">
-                    Grands Chantiers Publics sous Veille Stratégique
+                    Grands Projets & Opérations sous Veille Stratégique
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Portfolio des investissements structurants suivis en continu à travers les 31 régions de Côte d'Ivoire.
@@ -674,7 +674,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                 </div>
 
                 <span className="text-xs text-slate-600 font-bold bg-slate-100 px-3 py-1 rounded-full border border-slate-200 self-start sm:self-auto">
-                  {filteredStrategicProjects.length} chantiers nationaux
+                  {filteredStrategicProjects.length} opérations nationales
                 </span>
               </div>
 
@@ -892,7 +892,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-900">
-                    Veille Citoyenne de Proximité • Chantiers Communaux & Régionaux
+                    Veille Citoyenne de Proximité • Opérations Communales & Régionales
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Constats photographiques des sentinelles citoyennes dans les collectivités territoriales (Poro, Gbêkê, etc.).
@@ -1011,7 +1011,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                   {/* Candidate projects waiting for inspection */}
                   <div className="max-w-3xl mx-auto text-left pt-2 border-t border-slate-100">
                     <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
-                      Chantiers prioritaires à vérifier près de chez vous :
+                      Opérations prioritaires à vérifier sur le terrain :
                     </h4>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

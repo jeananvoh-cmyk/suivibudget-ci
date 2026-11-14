@@ -287,7 +287,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <span><span className="hidden sm:inline">Grands </span>Chantiers</span>
+              <span><span className="hidden sm:inline">Grands </span>Projets</span>
               <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black ${
                 selectedScope === 'NATIONAL' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
               }`}>
@@ -379,7 +379,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
               <input
                 type="text"
                 aria-label="Rechercher un projet par nom, commune ou catégorie"
-                placeholder="Rechercher un chantier, une commune, un collège, un hôpital..."
+                placeholder="Rechercher une opération, une commune, un collège, un hôpital..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -513,7 +513,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
       {sortedProjects.length === 0 ? (
         <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center my-8">
           <Building2 className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-lg font-black text-slate-900">Aucun chantier ne correspond à vos critères</h3>
+          <h3 className="text-lg font-black text-slate-900">Aucune opération ne correspond à vos critères</h3>
           <p className="text-xs text-slate-500 mt-1">Essayez d'élargir vos filtres ou de changer de région.</p>
           <button
             onClick={() => {
@@ -552,7 +552,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
             <table className="w-full text-left text-xs text-slate-700 border-collapse">
               <thead className="bg-slate-50 text-[11px] uppercase font-black tracking-wider text-slate-500 border-b border-slate-200">
                 <tr>
-                  <th className="py-3.5 px-3 min-w-[200px]">Intitulé du Chantier</th>
+                  <th className="py-3.5 px-3 min-w-[200px]">Intitulé de l'Opération</th>
                   <th className="py-3.5 px-3 whitespace-nowrap min-w-[150px] w-[20%]">Entité en Charge</th>
                   <th className="py-3.5 px-3 whitespace-nowrap min-w-[110px] w-[13%]">Secteur</th>
                   <th className="py-3.5 px-3 text-right whitespace-nowrap min-w-[140px] w-[17%]">Budget Alloué</th>
