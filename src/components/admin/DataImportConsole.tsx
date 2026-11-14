@@ -94,7 +94,7 @@ export function DataImportConsole({ role, initialDocument }: DataImportConsolePr
   const [sourceDateKind, setSourceDateKind] = useState<'PUBLISHED' | 'ACCESSED' | 'RECORDED'>('RECORDED');
   const [sourceUrl, setSourceUrl] = useState<string>(initialDocument?.file_url || '');
   const [sourcePage, setSourcePage] = useState<number | undefined>(initialDocument?.page_count ? 1 : undefined);
-  const [evidenceLevel, setEvidenceLevel] = useState<'OFFICIAL_DOCUMENT' | 'OFFICIAL_INSTITUTION' | 'AIP_VERIFIED' | 'SECONDARY_TO_CORROBORATE'>('OFFICIAL_DOCUMENT');
+  const [evidenceLevel, setEvidenceLevel] = useState<'OFFICIAL_DOCUMENT' | 'OFFICIAL_INSTITUTION' | 'AIP_REPORTED' | 'AIP_VERIFIED' | 'SECONDARY_TO_CORROBORATE'>('OFFICIAL_DOCUMENT');
   const [amountSemantics, setAmountSemantics] = useState<'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN'>('DELTA');
   const [notes, setNotes] = useState<string>('');
 
@@ -542,7 +542,8 @@ export function DataImportConsole({ role, initialDocument }: DataImportConsolePr
               >
                 <option value="OFFICIAL_DOCUMENT">Document officiel primaire</option>
                 <option value="OFFICIAL_INSTITUTION">Institution publique officielle</option>
-                <option value="AIP_VERIFIED">Dépêche AIP vérifiée</option>
+                <option value="AIP_REPORTED">Dépêche AIP rapportée (source secondaire)</option>
+                <option value="AIP_VERIFIED">Dépêche AIP vérifiée (historique)</option>
                 <option value="SECONDARY_TO_CORROBORATE">Source secondaire à corroborer</option>
               </select>
             </div>

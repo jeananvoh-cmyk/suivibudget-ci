@@ -224,7 +224,9 @@ describe('Réconciliation & Fiabilisation — Tiassalé Compte Administratif 202
       expect(bingerville?.operating_amount).toBe(1877888000);
       expect(bingerville?.investment_amount).toBe(2168334000);
       expect(bingerville?.status).toBe('PUBLISHED');
-      expect(bingerville?.verification_status).toBe('AIP_VERIFIED');
+      expect(bingerville?.verification_status).toBe('AIP_REPORTED');
+      expect(bingerville?.source_role).toBe('SECONDARY');
+      expect(bingerville?.sources[0].role).toBe('SECONDARY');
     });
 
     it('conserve le support budget partiel Cocody BP 2026 intact', () => {

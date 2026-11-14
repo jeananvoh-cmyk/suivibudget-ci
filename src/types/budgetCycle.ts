@@ -244,7 +244,7 @@ export interface ProposedFinancialValue {
 /**
  * Métadonnées d'un document budgétaire à ingérer
  */
-export type DocumentEvidenceLevel = 'OFFICIAL_DOCUMENT' | 'OFFICIAL_INSTITUTION' | 'AIP_VERIFIED' | 'SECONDARY_TO_CORROBORATE';
+export type DocumentEvidenceLevel = 'OFFICIAL_DOCUMENT' | 'OFFICIAL_INSTITUTION' | 'AIP_REPORTED' | 'AIP_VERIFIED' | 'SECONDARY_TO_CORROBORATE';
 
 export interface DocumentIngestionMetadata {
   institution_id: string;

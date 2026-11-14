@@ -3,7 +3,7 @@ import { OFFICIAL_PRIMITIVE_BUDGETS } from '../../data/officialPrimitiveBudgets'
 import exceptions from '../../../docs/audits/local-budgets/2026_UNRECONCILED_PRIMITIVE_SPLITS.json';
 
 describe('2026 communal and regional primitive budget integrity', () => {
-  it('retains the 46 existing municipal and regional BP source references', () => {
+  it('retains the 46 existing municipal and regional BP source references with normalized secondary metadata', () => {
     const entries = Object.entries(OFFICIAL_PRIMITIVE_BUDGETS);
     expect(entries).toHaveLength(46);
     for (const [id, budget] of entries) {
@@ -12,6 +12,13 @@ describe('2026 communal and regional primitive budget integrity', () => {
       expect(Number.isSafeInteger(budget.total_voted_fcfa), id).toBe(true);
       expect(budget.source_url, id).toMatch(/^https:\/\//);
       expect(['EXACT', 'APPROXIMATE', 'LOWER_BOUND']).toContain(budget.precision);
+      expect(budget.source_type, id).toBe('SECONDARY_MEDIA');
+      expect(['REPORTED', 'APPROXIMATE', 'LOWER_BOUND']).toContain(budget.verification_status);
+      expect(budget.source_title?.trim().length, id).toBeGreaterThan(0);
+      expect(budget.verification_note?.trim().length, id).toBeGreaterThan(0);
+      if (budget.investment_voted_fcfa != null && budget.total_voted_fcfa > 0) {
+        expect((budget.investment_voted_fcfa / budget.total_voted_fcfa).toFixed(4), id).not.toBe('0.6000');
+      }
     }
   });
 
