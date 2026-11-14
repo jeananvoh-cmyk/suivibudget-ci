@@ -148,6 +148,7 @@ export interface CitizenProofSummary {
   verificationRatePct: number | null;
   target2026: number;
   strategicShowcasesCount: number;
+  independentlyVerifiedCount: number;
 }
 
 export type IndicatorVerificationStatus =
@@ -500,7 +501,9 @@ export function computePublicIndicators(params: {
   const catalogReconciliation = reconcileBudgetCatalog(rawProjects);
   const classifiedProjects = classifyAndDeduplicateCatalog(projects).filter(
     ({ classification }) =>
-      !classification.isCrossCatalogOverlap && !classification.isExactDuplicate
+      (classification.category === 'PROJECT_PHYSICAL' || classification.isPhysicalProject) &&
+      !classification.isCrossCatalogOverlap &&
+      !classification.isExactDuplicate
   );
 
   let physicalAllAmountFcfa = 0;
@@ -778,7 +781,7 @@ export function computePublicIndicators(params: {
       sourceUrl: 'https://suivibudget.vercel.app/observatoire',
       sourcePage: 'Observatoire citoyen',
       verificationStatus: 'REPORTED',
-      calculationMethod: 'Comptage dynamique des preuves citoyennes publiées (APPROVED), objectif 2026 : 1 000 (constat citoyen distinct d\'une certification comptable officielle).',
+      calculationMethod: 'Comptage dynamique des preuves citoyennes modérées et publiées (APPROVED = modération éditoriale, 0 vérification indépendante certifiée), objectif 2026 : 1 000 (constat citoyen distinct d\'une certification comptable officielle).',
     },
   };
 
@@ -836,6 +839,7 @@ export function computePublicIndicators(params: {
       verificationRatePct,
       target2026: CITIZEN_PROOF_TARGET_2026,
       strategicShowcasesCount,
+      independentlyVerifiedCount: 0,
     },
     sectorBreakdown2026: computeSectorBreakdown(
       classifiedProjects.map(({ project }) => project),

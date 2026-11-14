@@ -1,3 +1,83 @@
+## 14 novembre 2026 — Clôture Technique & Financière PR #68 : Réconciliation des Indicateurs Publics, LFI 2026 et Budgets Primitifs Locaux
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/68 (`fix/reconcile-public-indicators` ciblant `master` `c9bd106bf37e8e24e9e2d334cb43de51e2c94224`).
+- **Titre PR** : `fix(indicators): fiabilisation documentaire et réconciliation LFI 2026 des indicateurs publics`
+- **Garde-fous respectés** :
+  - `REMOTE_SUPABASE_WRITES = 0` (validé par `npm run verify:supabase:read-only` : `clientInitialized: true`, `allowedMethods: ["GET", "HEAD"]`, `remoteSupabaseWrites: 0`, statut `PASS`).
+  - `UNTRACKED_AGENTS_STAGED = 0` : `.agents/`, `scripts/adversarial-stress-m4.mjs`, `scripts/adversarial-stress-m4-rep.mjs` strictement exclus de git.
+  - Aucune fusion automatique effectuée ; réconciliation sans écrasement ni fabrication de données ; intégrité Cocody CA 2024 (44 pages physiques / manquante 20/45) et Bingerville intacte.
+  - PRs #69 à #75 préservées et non touchées.
+
+### Rapport d'Intégrité en 16 Points (Charte & Règles AGENTS.md § 3)
+
+1. **Understanding before data dump** : Partition intégrale et documentée des 7 169 lignes brutes du catalogue (`RAW_BUDGET_PROJECTS`, 3 611,6 Mds FCFA bruts). Le moteur `computePublicIndicators` filtre désormais strictement `(classification.category === 'PROJECT_PHYSICAL' || classification.isPhysicalProject)` et élimine les chevauchements et doublons, garantissant 3 279 lignes physiques réconciliées (1 332,6 Mds FCFA) quel que soit le point d'entrée, sans déverser de données brutes ou non vérifiées sur les écrans citoyens.
+2. **Provenance by default** : Chaque indicateur public majeur remonte à sa source légale primaire : Loi de finances n° 2025-987 du 19 décembre 2025 (Articles 1, 6, 7, 8, 13, 16, 21), dépêches secondaires identifiées pour les 46 BP de presse, et observations citoyennes étiquetées `CITIZEN_OBSERVATION` avec statut de modération `APPROVED`.
+3. **Complete accountability cycle** : Le cycle complet est respecté : prévision LFI 2026 (4 195,7 Mds investissements) → ventilation par pool et secteur → fiches de projets répertoriés → recueil des constats de terrain modérés → reddition des comptes (comptes administratifs publiés).
+4. **No participation black hole** : Chaque observation citoyenne soumise dispose d'un identifiant unique, d'un statut traçable (`PENDING`, `APPROVED`, `REJECTED`), d'un horodatage et d'un affichage observable sur l'Observatoire citoyen.
+5. **Participation is not representativeness** : Les constats citoyens affichés sur l'Observatoire et dans les bannières d'impact sont explicitement qualifiés de contributions territoriales sentinelles qualitatives et ne sont jamais présentés comme un échantillon statistique représentatif.
+6. **Digital + field** : Complémentarité assurée entre le recueil des données documentaires d'État (DGBF / LFI 2026) et les observations de terrain documentées par les sentinelles locales et associations de proximité.
+7. **Financial != Physical** : Règle d'or rigoureusement respectée : une dépense budgétisée ou ordonnancée ne préjuge en rien d'un avancement physique. L'ensemble des 3 279 projets physiques porte la mention obligatoire *"classification automatisée — à vérifier sur pièce"*, et les photos citoyennes portent le badge *"Observation terrain documentée (modération staff)"* et non plus *"Constat terrain vérifié"*.
+8. **Right of reply** : La structure d'accueil du droit de réponse institutionnel (`INSTITUTION_RESPONSE`) est préservée et clairement distinguée des constats citoyens dans les fiches projets et les modales.
+9. **Absence of data != data of absence** : Les 185 collectivités territoriales (sur les 232) dont les budgets primitifs 2026 ne sont pas publics portent le statut `NOT_AVAILABLE` / `UNVERIFIED`. Aucun montant nul ni moyenne fictive n'est injecté.
+10. **Project Accountability Passport** : Les fiches du passeport de projet maintiennent le statut `PENDING_DOCUMENTATION` / `UNVERIFIED_INPUT` pour les extractions de catalogue sans pièce justificative primaire, interdisant toute promotion infondée en `VERIFIED_OFFICIAL`.
+11. **Political neutrality** : Neutralité réaffirmée : aucun classement partisan entre mairies ou régions ; présentation ordonnée selon les nomenclatures budgétaires et géographiques officielles de la République de Côte d'Ivoire.
+12. **Budget calendar drives participation** : Les modules d'engagement et de signalement citoyen sont alignés sur le calendrier budgétaire de l'exercice 2026 et les phases de passation et d'exécution des marchés.
+13. **Information must enable action** : Chaque écran fournit des leviers concrets : consultation du texte légal source, filtrage territorial par commune/région, téléchargement du CSV réconcilié, dépôt d'une observation citoyenne ou orientation vers une demande CAIDP.
+14. **Close the feedback loop** : Les statistiques de traitement des signalements citoyens sont transparentes et complètes, exposant le nombre de contributions soumises, en attente, approuvées en modération et rejetées.
+15. **Impact > traffic** : Élimination définitive des approximations sensationnalistes et des montants fantômes historiques au profit d'une réconciliation comptable stricte et auditable.
+16. **Extensible architecture, focused product** : Périmètre produit rigoureusement circonscrit aux 232 collectivités territoriales (201 communes + 31 conseils régionaux) et 2 districts autonomes présentés séparément, avec architecture sous-jacente prête pour les ministères et institutions nationales.
+
+### Tableau Réconciliation Avant / Après
+
+| Indicateur / Composant | Avant Clôture PR #68 | Après Réconciliation & Clôture | Gain Méthodologique & Intégrité |
+| :--- | :--- | :--- | :--- |
+| **Filtrage source `computePublicIndicators`** | Filtrait uniquement les doublons/chevauchements ; renvoyait 5 144 lignes si appelé avec `RAW_BUDGET_PROJECTS`. | Filtre explicitement `(category === 'PROJECT_PHYSICAL' \|\| isPhysicalProject)` ; renvoie exactement **3 279** lignes physiques (1 332,6 Mds FCFA). | Règle R1 & AC1 satisfaites à 100% : exclusion absolue des équipements (816), études (107), fonctionnement (28), transferts (2 087) et indéterminés (761). |
+| **Cohérence `dataStore.ts`** | Cohérence 1:1 dépendante d'un pré-filtrage interne dans `dataStore.ts`. | Cohérence 1:1 blindée à la source dans `publicIndicators.ts`, vérifiée par test unitaire dédié. | Résilience totale contre tout appelant externe ou refactoring futur. |
+| **SpotlightSearchModal (`SpotlightSearchModal.tsx:167`)** | Texte : *"201 communes, 33 régions, membres du gouvernement et 4 586 chantiers publics"*. | Texte : *"201 communes, 31 conseils régionaux, 2 districts autonomes, membres du gouvernement et opérations répertoriées"*. | Conformité stricte à la Charte territoriale (232 collectivités + 2 districts) et suppression des reliquats obsolètes ("33 régions", "4 586 chantiers"). |
+| **Contrôle citoyen (`StatImpactBanner.tsx`)** | Affichage partiel du nombre de preuves approuvées sans détails sur la modération. | Affichage explicite des 6 statuts : `{verifiedCount}` modérés (APPROVED), **0 vérification indépendante certifiée**, `{pendingProofsCount}` en attente, Objectif 2026 : **1 000**. | Transparence absolue : distinction entre modération éditoriale et certification d'audit. |
+| **Observatoire citoyen (`ObservatoryPage.tsx:331`)** | Badge photo : *"Constat terrain vérifié"*. | Badge photo : *"Observation terrain documentée (modération staff)"*. Grille des 6 statuts citoyenne intégrée. | Élimination de toute confusion entre constat staff/citoyen et certification officielle (P7). |
+| **Accueil (`HomePage.tsx:308, 397`)** | *"constats citoyens validés"*, *"{sec.count} chantiers"*. | *"constats citoyens modérés"*, *"{sec.count} opérations répertoriées"*. | Clarté sémantique et élimination de claims physiques non certifiés. |
+| **Budgets primitifs 2026 (46 vs 47 vs 232)** | Risque de confusion entre 46 BP de presse et 47 BP avec Tiassalé. | Documenté et sécurisé : 46 BP dans `officialPrimitiveBudgets.ts`, 47 dans `localBudgetsReferential.ts` (+Tiassalé), 100% presse secondaire, 0 document primaire PDF, total national = `null` (`NOT_CONSOLIDATED`). | Interdiction formelle de sommer des montants approximatifs ou de créer un faux total national. |
+| **9 Montants nationaux** | Risque de réapparition des 6 montants obsolètes (`3 461`, `3 453,8`, `1 611,1`, `195,1`, `1 806,2`, `1 910,9` Mds). | Traçabilité intégrale dans le code et les tests ; 6 montants interdits par regex (`forbiddenPatterns`) ; seuls `17 350,2 Mds` et `4 195,7 Mds` (LFI 2026) et `104,7 Mds` (pluriannuel 2021 isolé) sont autorisés. | Éradication complète des montants fantômes historiques. |
+| **Robustesse de la suite de tests** | Test 1 sujet à timeout aléatoire (5 000ms Vitest default sous charge CPU parallèle). | Timeout explicite fixé à 25 000ms sur le test 1 ; ajout d'un test direct sur `RAW_BUDGET_PROJECTS` (15/15 tests PASS). | 100% de succès déterministe sous CI parallèle. |
+
+### Vérifications & Recette d'Intégrité
+
+- **Tests unitaires et d'intégration (`npm test`)** :
+  ```text
+  Test Files  68 passed (68)
+  Tests       931 passed (931)
+  Duration    152.48s
+  ```
+- **Test unitaire ciblé (`npx vitest run src/utils/__tests__/publicIndicators.test.tsx`)** :
+  ```text
+  Test Files  1 passed (1)
+  Tests       15 passed (15)
+  Duration    26.74s
+  ```
+- **Compilation TypeScript & Build de production (`npm run build`)** :
+  ```text
+  ✓ 1770 modules transformed.
+  ✓ built in 48.44s (0 erreur TypeScript, code 0)
+  ```
+- **Build de revue (`npm run build:review`)** :
+  ```text
+  ✓ 39 modules transformed.
+  ✓ built in 7.39s (code 0)
+  ```
+- **Garde-fou Supabase en lecture seule (`npm run verify:supabase:read-only`)** :
+  ```json
+  {"clientInitialized":true,"credential":"anon","allowedMethods":["GET","HEAD"],"results":[{"table":"institutions","status":200,"ok":true,"rows":1,"errorCode":null},{"table":"public_documents","status":200,"ok":true,"rows":1,"errorCode":null},{"table":"local_budgets","status":200,"ok":true,"rows":1,"errorCode":null}],"remoteSupabaseWrites":0,"status":"PASS"}
+  ```
+
+### Verdict Final
+
+**`READY FOR FINAL REVIEW`**
+
+- **NEXT_EXECUTABLE_TASK** : Revue finale par l'auditeur indépendant / autorité de fusion, validation du déploiement Vercel Preview, et fusion de la PR #68 sur `master`.
+
+---
+
 ## 27 octobre 2026 — Corrections Post-Audit P0 : Sécurité Supabase (`private` RLS & 21 `SECURITY DEFINER`), Pagination Contrôlée Cocody CA 2024 et Stabilisation PR #65 (Antigravity)
 
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/65 (`codex/p0-production-cocody-2024` ciblant `master` `901a2033084c5aa1ca76bc4ce4625e1884d48ab9`).

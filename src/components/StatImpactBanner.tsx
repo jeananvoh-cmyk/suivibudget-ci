@@ -111,10 +111,13 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
             </div>
             <p className="text-xs text-slate-600 font-semibold mt-1.5 leading-snug">
               {verifiedCount > 0
-                ? `${verifiedCount.toLocaleString('fr-FR')} observation${verifiedCount > 1 ? 's' : ''} citoyenne${verifiedCount > 1 ? 's' : ''} publiée${verifiedCount > 1 ? 's' : ''}`
+                ? `${verifiedCount.toLocaleString('fr-FR')} observation${verifiedCount > 1 ? 's' : ''} citoyenne${verifiedCount > 1 ? 's' : ''} modérée${verifiedCount > 1 ? 's' : ''} et publiée${verifiedCount > 1 ? 's' : ''}`
                 : pendingProofsCount > 0
                   ? `${pendingProofsCount} observation(s) en attente de modération`
                   : 'Collecte citoyenne ouverte — aucun constat publié'}
+            </p>
+            <p className="text-[11px] text-slate-500 mt-1 leading-snug">
+              {verifiedCount} modéré{verifiedCount > 1 ? 's' : ''} (APPROVED) • 0 vérification indépendante certifiée • {pendingProofsCount} en attente
             </p>
           </div>
         </div>

@@ -275,6 +275,40 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                   </div>
                 </div>
               </div>
+
+              {/* 6-State Citizen Proof Metrics Breakdown */}
+              <div className="pt-3 border-t border-slate-100">
+                <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center justify-between">
+                  <span>Traçabilité & Statuts du Contrôle Citoyen</span>
+                  <span className="text-[10px] text-slate-400 font-medium">Modération éditoriale staff (P7: non certifié audit/ingénierie)</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-center">
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-[11px] text-slate-500 block font-medium">Soumises</span>
+                    <span className="text-base font-black text-slate-900">{publicIndicators.citizenProofs.totalSubmittedCount}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-amber-50/60 border border-amber-200">
+                    <span className="text-[11px] text-amber-800 block font-medium">En attente</span>
+                    <span className="text-base font-black text-amber-900">{publicIndicators.citizenProofs.pendingCount}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                    <span className="text-[11px] text-emerald-800 block font-medium">Approuvées (modération)</span>
+                    <span className="text-base font-black text-emerald-900">{publicIndicators.citizenProofs.approvedCount}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-rose-50/60 border border-rose-200">
+                    <span className="text-[11px] text-rose-800 block font-medium">Rejetées</span>
+                    <span className="text-base font-black text-rose-900">{publicIndicators.citizenProofs.rejectedCount}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-blue-50/60 border border-blue-200">
+                    <span className="text-[11px] text-blue-800 block font-medium">Vérifiées indépendamment</span>
+                    <span className="text-base font-black text-blue-900">{publicIndicators.citizenProofs.independentlyVerifiedCount ?? 0}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-purple-50/60 border border-purple-200">
+                    <span className="text-[11px] text-purple-800 block font-medium">Objectif 2026</span>
+                    <span className="text-base font-black text-purple-900">{publicIndicators.citizenProofs.target2026.toLocaleString('fr-FR')}</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* ========================================================================= */}
@@ -328,7 +362,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                       {/* Top Left Badge: Certified Proof */}
                       <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 border border-white/10">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Constat terrain vérifié</span>
+                        <span>Observation terrain documentée (modération staff)</span>
                       </div>
 
                       {/* Top Right Badge: Location */}

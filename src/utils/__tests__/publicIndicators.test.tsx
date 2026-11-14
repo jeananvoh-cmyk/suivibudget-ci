@@ -123,7 +123,27 @@ describe('Public Indicators Reconciliation & Traceability', () => {
     expect(collectivitiesTotalInvestments2026.verificationStatus).toBe('NOT_CONSOLIDATED');
     expect(snapshot.indicators.collectivitiesReferenced.verificationStatus).toBe('REPORTED');
     expect(snapshot.indicators.citizenProofsVerified.verificationStatus).toBe('REPORTED');
-  });
+  }, 25000);
+
+  it('strictly excludes non-physical categories and deduplicates when computePublicIndicators receives RAW_BUDGET_PROJECTS directly', () => {
+    const snapshotRaw = computePublicIndicators({
+      projects: RAW_BUDGET_PROJECTS,
+      rawProjects: RAW_BUDGET_PROJECTS,
+      institutions: [],
+      proofs: [],
+    });
+
+    expect(RAW_BUDGET_PROJECTS.length).toBe(7169);
+    // Must strictly filter PROJECT_PHYSICAL and exclude studies, equipment, functioning, transfers, personnel, admin, and undetermined
+    expect(snapshotRaw.investments.physicalAllCount).toBe(3279);
+    expect(snapshotRaw.investments.physicalAllAmountFcfa).toBe(1_332_569_184_570);
+    expect(snapshotRaw.investments.physical2026Count).toBe(3278);
+    expect(snapshotRaw.investments.multiYearPre2026Count).toBe(1);
+    expect(snapshotRaw.investments.statePhysical2026Count).toBe(248);
+    expect(snapshotRaw.investments.localCsvPhysical2026Count).toBe(3026);
+    expect(snapshotRaw.investments.localPortalBouakePhysical2026Count).toBe(4);
+    expect(snapshotRaw.citizenProofs.independentlyVerifiedCount).toBe(0);
+  }, 25000);
 
   it('prevents reappearance of erroneous legal reference Loi n° 2025-998 and enforces Loi n° 2025-987', () => {
     const lfiDoc = INITIAL_PUBLIC_DOCUMENTS.find((d) => d.id === 'doc-lfi-2026-officiel-dgbf');

@@ -305,7 +305,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Observatoire & Rapports
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Baromètre d'exécution, constats citoyens validés et analyses budgétaires synthétiques.
+                Baromètre d'exécution, constats citoyens modérés et analyses budgétaires synthétiques.
               </p>
             </div>
             <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-brand-blue">
@@ -394,7 +394,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                       <span className="text-xs font-bold text-slate-700">
-                        <strong className="text-slate-900 font-black">{sec.count.toLocaleString('fr-FR')}</strong> chantiers
+                        <strong className="text-slate-900 font-black">{sec.count.toLocaleString('fr-FR')}</strong> opérations répertoriées
                       </span>
                     </div>
                     <span className="text-[11px] font-bold text-slate-500">
