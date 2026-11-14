@@ -22,7 +22,7 @@ import { dataStore } from '../services/dataStore';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
 import { PublicDocument, DocumentCategory } from '../types';
 import { matchesSmartSearch } from '../utils/searchHelpers';
-import { publicDocumentMetadata } from '../review/domain/documents';
+import { publicDocumentMetadata, isDocumentSha256 } from '../review/domain/documents';
 import { openDataCsv, openDataJson, auditedObservationsFromCatalog } from '../review/domain/history';
 import { getReviewSourceDocuments } from '../data/officialPublicDocumentsCatalog';
 import { downloadPublicDocument } from '../services/documentStorageService';
@@ -434,10 +434,11 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
             const isOfflineOr404 = doc.http_status === 404 || doc.availability === 'NOT_FOUND_PUBLICLY';
             const isPriorAcquisition = doc.availability === 'AVAILABLE_FROM_PRIOR_OFFICIAL_ACQUISITION';
             const isOfficial = !isOfflineOr404 && doc.is_official && doc.source_provenance === 'OFFICIAL_SOURCE';
-            const isVerified = !isOfflineOr404 && doc.extraction_status === 'VERIFIED' && Boolean(doc.control_scope) && Boolean(doc.checksum_sha256);
-            const isRepertorie = !isOfflineOr404 && doc.http_status === 200 && Boolean(doc.checksum_sha256);
+            const isVerified = !isOfflineOr404 && doc.extraction_status === 'VERIFIED' && Boolean(doc.control_scope) && Boolean(doc.checksum_sha256) && isDocumentSha256(doc.checksum_sha256);
+            const isRepertorie = !isOfflineOr404 && doc.http_status === 200 && Boolean(doc.checksum_sha256) && isDocumentSha256(doc.checksum_sha256);
+            const isPublie = !isOfflineOr404 && !isPriorAcquisition && doc.http_status === 200 && Boolean(doc.file_url) && Boolean(doc.checksum_sha256) && isDocumentSha256(doc.checksum_sha256);
             const budgetNature = getBudgetNatureLabel(doc);
-            const hasSha256 = Boolean(doc.checksum_sha256);
+            const hasSha256 = Boolean(doc.checksum_sha256) && isDocumentSha256(doc.checksum_sha256);
             const isCopied = copiedHashId === doc.id;
 
             return (
@@ -515,7 +516,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                       <span className="inline-flex items-center gap-1 text-[10px] font-medium text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">
                         <span>Document officiel répertorié</span>
                       </span>
-                    ) : !isOfflineOr404 && !isPriorAcquisition ? (
+                    ) : isPublie ? (
                       <span className="inline-flex items-center gap-1 text-[10px] font-medium text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">
                         <span>Document officiel publié</span>
                       </span>

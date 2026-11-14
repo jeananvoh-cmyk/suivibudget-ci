@@ -20,7 +20,12 @@ import {
   applyVerifiedDocumentPagination,
 } from '../../data/officialPublicDocumentsCatalog';
 import { validateDocumentPageRanges } from '../../services/documentStorageService';
-import { isDocumentSha256, verifyDocumentaryAudit } from '../../review/domain/documents';
+import { 
+  isDocumentSha256, 
+  verifyDocumentaryAudit, 
+  resolveCitation, 
+  canPublishOfficialObservation 
+} from '../../review/domain/documents';
 import { OFFICIAL_DOCUMENTARY_AUDITS } from '../../review/catalog';
 import type { PublicDocument } from '../../types';
 
@@ -132,7 +137,7 @@ describe('Intégrité de la Chaîne Documentaire & Pagination Républicaine (§5
       expect(declaredDoc.pagination_note).toBeNull();
     });
 
-    it('n’attribue pas les badges vérifié ou répertorié à un document sans SHA-256 dans DocumentsPage', () => {
+    it('n’attribue pas les badges vérifié, répertorié ou publié à un document sans SHA-256 dans DocumentsPage', () => {
       const docWithoutSha: PublicDocument = {
         id: 'doc-sans-sha',
         title: 'Document sans empreinte',
@@ -151,11 +156,17 @@ describe('Intégrité de la Chaîne Documentaire & Pagination Républicaine (§5
         checksum_sha256: null,
       };
 
-      // Un document sans SHA-256 ne doit pas être "Document officiel vérifié" ni "Document officiel répertorié"
-      const isVerified = docWithoutSha.extraction_status === 'VERIFIED' && Boolean(docWithoutSha.control_scope) && Boolean(docWithoutSha.checksum_sha256);
-      const isRepertorie = docWithoutSha.http_status === 200 && Boolean(docWithoutSha.checksum_sha256);
-      expect(isVerified).toBe(false);
-      expect(isRepertorie).toBe(false);
+      const originalDocs = dataStore.getDocuments();
+      try {
+        (dataStore as any).documents = [docWithoutSha];
+        const html = renderToStaticMarkup(React.createElement(DocumentsPage));
+        // Aucun badge affirmatif d'officialité ne doit être attribué sans empreinte cryptographique
+        expect(html).not.toContain('Document officiel vérifié');
+        expect(html).not.toContain('Document officiel répertorié');
+        expect(html).not.toContain('Document officiel publié');
+      } finally {
+        (dataStore as any).documents = originalDocs;
+      }
     });
   });
 
@@ -304,6 +315,26 @@ describe('Intégrité de la Chaîne Documentaire & Pagination Républicaine (§5
       // Le compte ne doit pas pouvoir revendiquer une attestation primaire sans fichier lié
       const isCertifiable = unlinkedFinancialRecord.source_document_id !== null && unlinkedFinancialRecord.reconciliation_status === 'RECONCILED';
       expect(isCertifiable).toBe(false);
+
+      // Vérification via le moteur de revue financière (resolveCitation et canPublishOfficialObservation)
+      const unlinkedObs = {
+        id: 'obs-tiassale-2024',
+        institutionId: 'inst-com-tiassale',
+        scope: 'COMMUNE',
+        periodEnd: '2024-12-31',
+        precision: 'EXACT' as const,
+        fiscalYear: 2024,
+        section: 'FONCTIONNEMENT' as const,
+        sectionCode: 'FONCTIONNEMENT',
+        measure: 'DEPENSES' as const,
+        amount: 250_000_000,
+        currency: 'XOF' as const,
+        evidence: null,
+      };
+      const reviewResult = canPublishOfficialObservation(unlinkedObs as any, []);
+      expect(reviewResult.value).toBeNull();
+      expect(reviewResult.status).toBe('UNKNOWN');
+      expect(reviewResult.reasons).toContain('DOCUMENTARY_EVIDENCE_REQUIRED');
     });
 
     it('un document stocké sans liaison financière reste un document sans attribution', () => {
@@ -326,6 +357,22 @@ describe('Intégrité de la Chaîne Documentaire & Pagination Républicaine (§5
       // Sans control_scope ni extraction_status VERIFIED, extractionStatus reste non vérifié
       expect(orphanDoc.control_scope).toBeNull();
       expect(orphanDoc.extraction_status).not.toBe('VERIFIED');
+
+      // Tentative de résolution de citation avec un document orphelin non vérifié
+      const orphanEvidence = {
+        documentId: orphanDoc.id,
+        page: 1,
+        reference: null,
+        fiscalYear: 2024,
+        verification: 'TO_VERIFY' as const,
+      };
+      expect(resolveCitation(orphanEvidence, [])).toBeNull();
+
+      // De même, getReviewSourceDocuments classe les documents non rattachés en UNVERIFIED
+      const sourceDocs = getReviewSourceDocuments([orphanDoc]);
+      expect(sourceDocs[0].provenance).toBe('UNVERIFIED');
+      expect(sourceDocs[0].verification).toBe('TO_VERIFY');
+      expect(sourceDocs[0].extractionStatus).toBe('TO_VERIFY');
     });
   });
 
@@ -384,6 +431,102 @@ describe('Intégrité de la Chaîne Documentaire & Pagination Républicaine (§5
       expect(nonOfficialSources.length).toBe(2);
       expect(nonOfficialSources.map(d => d.id)).toEqual(['DGBF-RAP-2022', 'CAIDP-LOI-2013-867']);
       expect(nonOfficialSources.every(d => d.http_status === 404)).toBe(true);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // Tests de Durcissement Adversarial (Remédiation Challengers M1)
+  // -----------------------------------------------------------------------
+  describe('Tests de durcissement adversarial (Remédiation Challengers M1)', () => {
+    it('n’affiche pas "Document officiel publié" pour un document avec HTTP 500', () => {
+      const doc500: PublicDocument = {
+        ...attestedCocodyBase,
+        id: 'doc-http-500',
+        http_status: 500,
+        status: 'PUBLISHED',
+      };
+      const originalDocs = dataStore.getDocuments();
+      try {
+        (dataStore as any).documents = [doc500];
+        const html = renderToStaticMarkup(React.createElement(DocumentsPage));
+        expect(html).not.toContain('Document officiel publié');
+        expect(html).not.toContain('Document officiel vérifié');
+        expect(html).not.toContain('Document officiel répertorié');
+      } finally {
+        (dataStore as any).documents = originalDocs;
+      }
+    });
+
+    it('n’affiche pas "Document officiel publié" pour un document avec URL vide', () => {
+      const docEmptyUrl: PublicDocument = {
+        ...attestedCocodyBase,
+        id: 'doc-empty-url',
+        file_url: '',
+        http_status: 200,
+        status: 'PUBLISHED',
+      };
+      const originalDocs = dataStore.getDocuments();
+      try {
+        (dataStore as any).documents = [docEmptyUrl];
+        const html = renderToStaticMarkup(React.createElement(DocumentsPage));
+        expect(html).not.toContain('Document officiel publié');
+        expect(html).not.toContain('Document officiel vérifié');
+      } finally {
+        (dataStore as any).documents = originalDocs;
+      }
+    });
+
+    it('n’attribue pas "Document officiel vérifié" à un document avec empreinte SHA-256 forgée non valide', () => {
+      const docForgedSha: PublicDocument = {
+        ...attestedCocodyBase,
+        id: 'doc-forged-sha',
+        checksum_sha256: 'deadbeef',
+        extraction_status: 'VERIFIED',
+        control_scope: 'Contrôle simulé',
+        http_status: 200,
+        status: 'PUBLISHED',
+      };
+      const originalDocs = dataStore.getDocuments();
+      try {
+        (dataStore as any).documents = [docForgedSha];
+        const html = renderToStaticMarkup(React.createElement(DocumentsPage));
+        expect(html).not.toContain('Document officiel vérifié');
+        expect(html).not.toContain('Document officiel publié');
+        expect(html).not.toContain('Document officiel répertorié');
+      } finally {
+        (dataStore as any).documents = originalDocs;
+      }
+    });
+
+    it('rejette l’attestation de pagination si institution_id est manquant ou indéfini', () => {
+      const control = VERIFIED_DOCUMENT_PAGINATION_CONTROLS['941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf'];
+      const docNoInstitution: PublicDocument = {
+        ...attestedCocodyBase,
+        institution_id: undefined,
+      };
+      expect(isVerifiedDocumentPaginationAttested(docNoInstitution, control)).toBe(false);
+
+      const docNullInstitution: PublicDocument = {
+        ...attestedCocodyBase,
+        institution_id: null as any,
+      };
+      expect(isVerifiedDocumentPaginationAttested(docNullInstitution, control)).toBe(false);
+    });
+
+    it('purge la pagination et la note injectée si le SHA est altéré sur un candidat Cocody CA 2024', () => {
+      const tamperedCocodyDoc: PublicDocument = {
+        ...attestedCocodyBase,
+        checksum_sha256: '0'.repeat(64),
+        pagination_note: '44 pages physiques PDF (attestation injectée frauduleusement)',
+        physical_page_count: 44,
+        printed_page_count: 45,
+        missing_printed_pages: ['20/45'],
+      };
+      const result = applyVerifiedDocumentPagination(tamperedCocodyDoc);
+      expect(result.pagination_note).toBeNull();
+      expect(result.physical_page_count).toBeNull();
+      expect(result.printed_page_count).toBeNull();
+      expect(result.missing_printed_pages).toBeNull();
     });
   });
 });

@@ -323,6 +323,19 @@ export const VERIFIED_DOCUMENT_PAGINATION_CONTROLS: Readonly<Record<string, Veri
   },
 });
 
+export function isCocodyCa2024Candidate(doc: PublicDocument): boolean {
+  if (doc.id === 'doc-dff4865a-c6a8-418e-8895-626258e409d0') return true;
+  const instId = doc.institution_id;
+  const isCocodyInst = instId === 'inst-com-cocody' || instId === 'commune-cocody';
+  const isYear2024 = (doc.fiscal_year ?? doc.year) === 2024;
+  if (isCocodyInst && isYear2024) return true;
+  const title = (doc.title ?? '').toLowerCase();
+  if (title.includes('cocody') && (title.includes('2024') || isYear2024) && (title.includes('compte administratif') || title.includes('ca ') || doc.category === 'COMPTE_ADMINISTRATIF')) {
+    return true;
+  }
+  return false;
+}
+
 export function isVerifiedDocumentPaginationAttested(
   doc: PublicDocument,
   control: VerifiedDocumentPaginationControl,
@@ -334,7 +347,7 @@ export function isVerifiedDocumentPaginationAttested(
   if (doc.is_multipart === true) return false;
   if (doc.checksum_algorithm && doc.checksum_algorithm !== 'SHA256_FILE_V1') return false;
   if ((doc.status !== 'VERIFIED' && doc.status !== 'PUBLISHED') || doc.verification_status !== 'VERIFIED') return false;
-  if (doc.institution_id && !control.institutionIds.includes(doc.institution_id)) return false;
+  if (!doc.institution_id || !control.institutionIds.includes(doc.institution_id)) return false;
   if ((doc.fiscal_year ?? doc.year) !== control.fiscalYear) return false;
   return true;
 }
@@ -342,7 +355,18 @@ export function isVerifiedDocumentPaginationAttested(
 export function applyVerifiedDocumentPagination(doc: PublicDocument): PublicDocument {
   const sha = doc.checksum_sha256?.trim().toLowerCase();
   const control = sha ? VERIFIED_DOCUMENT_PAGINATION_CONTROLS[sha] : undefined;
-  if (!control) return doc;
+  if (!control) {
+    if (isCocodyCa2024Candidate(doc)) {
+      return {
+        ...doc,
+        physical_page_count: doc.physical_page_count !== undefined ? null : undefined,
+        printed_page_count: doc.printed_page_count !== undefined ? null : undefined,
+        missing_printed_pages: doc.missing_printed_pages !== undefined ? null : undefined,
+        pagination_note: doc.pagination_note !== undefined ? null : undefined,
+      };
+    }
+    return doc;
+  }
   if (!isVerifiedDocumentPaginationAttested(doc, control)) {
     return {
       ...doc,
