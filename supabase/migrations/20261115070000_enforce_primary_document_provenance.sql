@@ -7,6 +7,16 @@ ALTER TABLE public.local_budgets
   ALTER COLUMN verification_status SET DEFAULT 'DOCUMENT_TO_EXTRACT';
 ALTER TABLE public.budget_revenue_sources
   ALTER COLUMN verification_status SET DEFAULT 'DOCUMENT_TO_EXTRACT';
+
+ALTER TABLE public.budget_revenue_sources
+  ADD COLUMN IF NOT EXISTS source_document_id text REFERENCES public.public_documents(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS source_page integer,
+  ADD COLUMN IF NOT EXISTS source_url text;
+ALTER TABLE public.budget_revenue_sources
+  ADD CONSTRAINT budget_revenue_sources_source_page_positive
+  CHECK (source_page IS NULL OR source_page > 0);
+CREATE INDEX IF NOT EXISTS idx_budget_revenue_sources_source_document_id
+  ON public.budget_revenue_sources(source_document_id);
 ALTER TABLE public.administrative_accounts
   ALTER COLUMN verification_status SET DEFAULT 'TO_VERIFY';
 ALTER TABLE public.ca_procurement_matches
@@ -508,6 +518,186 @@ CREATE TRIGGER enforce_budget_line_primary_document_evidence
   BEFORE INSERT OR UPDATE OF verification_status, publication_status, source_document_id, source_page, budget_id, amount
   ON public.budget_lines FOR EACH ROW
   EXECUTE FUNCTION private.enforce_budget_line_primary_document_evidence();
+
+-- Revenue-source amounts may be certified only against the exact verified source
+-- document and page of the published parent local budget.
+CREATE OR REPLACE FUNCTION private.enforce_budget_revenue_source_evidence()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $
+DECLARE
+  parent_budget public.local_budgets%rowtype;
+  primary_status boolean;
+BEGIN
+  primary_status := NEW.verification_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'VERIFIED');
+
+  IF TG_OP = 'UPDATE'
+    AND OLD.verification_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'VERIFIED')
+    AND NEW.verification_status = OLD.verification_status
+    AND (
+      NEW.amount IS DISTINCT FROM OLD.amount
+      OR NEW.source_document_id IS DISTINCT FROM OLD.source_document_id
+      OR NEW.source_page IS DISTINCT FROM OLD.source_page
+      OR NEW.source_url IS DISTINCT FROM OLD.source_url
+    ) THEN
+    RAISE EXCEPTION 'Changing a certified revenue amount or its source requires a new review';
+  END IF;
+
+  IF NOT primary_status THEN
+    RETURN NEW;
+  END IF;
+
+  SELECT * INTO parent_budget
+  FROM public.local_budgets
+  WHERE id = NEW.budget_id
+  FOR SHARE;
+
+  IF NOT FOUND
+    OR parent_budget.status <> 'PUBLISHED'
+    OR parent_budget.source_document_id IS NULL
+    OR NEW.source_document_id IS DISTINCT FROM parent_budget.source_document_id
+    OR NEW.source_page IS NULL
+    OR NEW.source_page <= 0
+    OR NEW.source_url IS DISTINCT FROM parent_budget.document_url THEN
+    RAISE EXCEPTION 'Primary revenue source requires the exact document and page of its published parent budget';
+  END IF;
+
+  PERFORM 1
+  FROM public.public_documents d
+  WHERE d.id = NEW.source_document_id
+    AND d.status = 'PUBLISHED'
+    AND d.verification_status = 'VERIFIED'
+    AND d.checksum_status IN ('COMPUTED', 'VERIFIED')
+    AND d.checksum_sha256 ~ '^[a-f0-9]{64}
+
+REVOKE ALL ON FUNCTION private.enforce_primary_document_evidence() FROM public, anon, authenticated, service_role;
+
+-- Les autorisations de gestion reposent sur le rôle actif côté serveur.
+DROP POLICY IF EXISTS "Allow admin write on sources" ON public.sources;
+CREATE POLICY "Allow admin write on sources"
+  ON public.sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin full access on local budgets" ON public.local_budgets;
+CREATE POLICY "Allow admin full access on local budgets"
+  ON public.local_budgets FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget sources" ON public.budget_sources;
+CREATE POLICY "Allow admin write on budget sources"
+  ON public.budget_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget revenue sources" ON public.budget_revenue_sources;
+CREATE POLICY "Allow admin write on budget revenue sources"
+  ON public.budget_revenue_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+-- Child budget references are visible only with their published parent budget.
+DROP POLICY IF EXISTS "Allow public read on budget sources" ON public.budget_sources;
+CREATE POLICY "Allow public read on budget sources"
+  ON public.budget_sources FOR SELECT TO public
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.local_budgets lb
+      WHERE lb.id = budget_sources.budget_id
+        AND lb.status = 'PUBLISHED'
+    )
+  );
+
+DROP POLICY IF EXISTS "Allow public read on budget revenue sources" ON public.budget_revenue_sources;
+CREATE POLICY "Allow public read on budget revenue sources"
+  ON public.budget_revenue_sources FOR SELECT TO public
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.local_budgets lb
+      WHERE lb.id = budget_revenue_sources.budget_id
+        AND lb.status = 'PUBLISHED'
+    )
+  );
+
+DROP POLICY IF EXISTS "Allow admin write on budget lines" ON public.budget_lines;
+DROP POLICY IF EXISTS "admin_entity_staff" ON public.budget_lines;
+CREATE POLICY "Allow admin write on budget lines"
+  ON public.budget_lines FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin read on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin read on budget revisions"
+  ON public.budget_revision_history FOR SELECT TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER','AUDITOR']));
+
+DROP POLICY IF EXISTS "Allow admin insert on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin insert on budget revisions"
+  ON public.budget_revision_history FOR INSERT TO authenticated
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin full access on CA" ON public.administrative_accounts;
+CREATE POLICY "Allow admin full access on CA"
+  ON public.administrative_accounts FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA operations" ON public.ca_investment_operations;
+CREATE POLICY "Allow admin write on CA operations"
+  ON public.ca_investment_operations FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA procurement matches" ON public.ca_procurement_matches;
+CREATE POLICY "Allow admin write on CA procurement matches"
+  ON public.ca_procurement_matches FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin and moderator full access on responses" ON public.ca_institution_responses;
+CREATE POLICY "Allow admin and moderator full access on responses"
+  ON public.ca_institution_responses FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write access on projects" ON public.projects;
+CREATE POLICY "Allow admin write access on projects"
+  ON public.projects FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+-- Preserve the deployed citizen submission, moderation and deletion policies.
+-- Only remove the legacy all-operations policy if it exists; do not grant
+-- moderators additional INSERT or DELETE permissions.
+DROP POLICY IF EXISTS "Allow moderators full management on citizen proofs" ON public.citizen_proofs;
+
+-- Preserve the verified newsletter, document and Storage policies by name and predicate.
+
+COMMIT;
+
+    AND d.institution_id = parent_budget.institution_id
+    AND d.fiscal_year = parent_budget.fiscal_year
+    AND d.document_type IN ('BUDGET_PRIMITIF', 'BUDGET_MODIFICATIF')
+    AND d.source_url = NEW.source_url
+  FOR SHARE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Primary revenue source requires a published checksum-verified document';
+  END IF;
+
+  RETURN NEW;
+END;
+$;
+REVOKE ALL ON FUNCTION private.enforce_budget_revenue_source_evidence()
+  FROM public, anon, authenticated, service_role;
+
+DROP TRIGGER IF EXISTS enforce_budget_revenue_source_evidence ON public.budget_revenue_sources;
+CREATE TRIGGER enforce_budget_revenue_source_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url, budget_id, amount
+  ON public.budget_revenue_sources FOR EACH ROW
+  EXECUTE FUNCTION private.enforce_budget_revenue_source_evidence();
 
 REVOKE ALL ON FUNCTION private.enforce_primary_document_evidence() FROM public, anon, authenticated, service_role;
 
