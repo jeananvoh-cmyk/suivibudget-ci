@@ -57,6 +57,7 @@ UPDATE public.local_budgets
           AND d.verification_status = 'VERIFIED'
           AND d.checksum_status IN ('COMPUTED', 'VERIFIED')
           AND d.checksum_sha256 IS NOT NULL
+          AND d.source_url = local_budgets.document_url
       )
     );
 
@@ -77,6 +78,7 @@ UPDATE public.administrative_accounts
           AND d.verification_status = 'VERIFIED'
           AND d.checksum_status IN ('COMPUTED', 'VERIFIED')
           AND d.checksum_sha256 IS NOT NULL
+          AND d.source_url = administrative_accounts.source_url
       )
     );
 
@@ -92,6 +94,8 @@ UPDATE public.ca_procurement_matches
           AND d.status = 'PUBLISHED'
           AND d.verification_status = 'VERIFIED'
           AND d.checksum_status IN ('COMPUTED', 'VERIFIED')
+          AND d.source_url = ca_procurement_matches.source_url
+          AND d.source_url = budget_projects.source_url
           AND d.checksum_sha256 IS NOT NULL
       )
     );
@@ -237,6 +241,7 @@ BEGIN
           AND pd.verification_status = 'VERIFIED'
           AND pd.checksum_status IN ('COMPUTED','VERIFIED')
           AND pd.checksum_sha256 IS NOT NULL
+          AND pd.source_url = s ->> 'url'
       ) THEN
       RAISE EXCEPTION 'Primary document requires a published, checksum-verified catalogue record, official URL and exact page';
     END IF;
