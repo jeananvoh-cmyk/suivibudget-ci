@@ -299,6 +299,7 @@ BEGIN
         AND pd.verification_status = 'VERIFIED'
         AND pd.checksum_status IN ('COMPUTED','VERIFIED')
         AND pd.checksum_sha256 IS NOT NULL
+        AND pd.source_url = source_url_value
     ) THEN
       RAISE EXCEPTION 'Primary certification requires a published, verified catalogue document with SHA-256';
     END IF;
