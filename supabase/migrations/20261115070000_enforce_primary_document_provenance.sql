@@ -58,20 +58,20 @@ UPDATE public.local_budgets
   SET verification_status = 'SECONDARY_TO_CORROBORATE'
   WHERE verification_status = 'AIP_VERIFIED';
 
-UPDATE public.local_budgets
+UPDATE public.local_budgets AS lb
   SET verification_status = 'DOCUMENT_TO_EXTRACT'
-  WHERE verification_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION')
+  WHERE lb.verification_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION')
     AND (
-      source_document_id IS NULL OR source_page IS NULL OR document_url IS NULL
-      OR document_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
+      lb.source_document_id IS NULL OR lb.source_page IS NULL OR lb.document_url IS NULL
+      OR lb.document_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
       OR NOT EXISTS (
         SELECT 1 FROM public.public_documents d
-        WHERE d.id = local_budgets.source_document_id
+        WHERE d.id = lb.source_document_id
           AND d.status = 'PUBLISHED'
           AND d.verification_status = 'VERIFIED'
           AND d.checksum_status IN ('COMPUTED', 'VERIFIED')
           AND d.checksum_sha256 IS NOT NULL
-          AND d.source_url = local_budgets.document_url
+          AND d.source_url = lb.document_url
       )
     );
 
@@ -79,58 +79,58 @@ UPDATE public.budget_revenue_sources
   SET verification_status = 'SECONDARY_TO_CORROBORATE'
   WHERE verification_status = 'AIP_VERIFIED';
 
-UPDATE public.administrative_accounts
+UPDATE public.administrative_accounts AS aa
   SET verification_status = 'TO_VERIFY'
-  WHERE verification_status IN ('OFFICIAL_DOCUMENT', 'VERIFIED')
+  WHERE aa.verification_status IN ('OFFICIAL_DOCUMENT', 'VERIFIED')
     AND (
-      source_document_id IS NULL OR source_page IS NULL OR source_url IS NULL
-      OR source_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
+      aa.source_document_id IS NULL OR aa.source_page IS NULL OR aa.source_url IS NULL
+      OR aa.source_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
       OR NOT EXISTS (
         SELECT 1 FROM public.public_documents d
-        WHERE d.id = administrative_accounts.source_document_id
+        WHERE d.id = aa.source_document_id
           AND d.status = 'PUBLISHED'
           AND d.verification_status = 'VERIFIED'
           AND d.checksum_status IN ('COMPUTED', 'VERIFIED')
           AND d.checksum_sha256 IS NOT NULL
-          AND d.source_url = administrative_accounts.source_url
+          AND d.source_url = aa.source_url
       )
     );
 
-UPDATE public.ca_procurement_matches
+UPDATE public.ca_procurement_matches AS cm
   SET verification_status = 'TO_VERIFY'
-  WHERE verification_status IN ('Vérifié DGMP', 'VERIFIED', 'OFFICIAL_DOCUMENT')
+  WHERE cm.verification_status IN ('Vérifié DGMP', 'VERIFIED', 'OFFICIAL_DOCUMENT')
     AND (
-      source_document_id IS NULL OR source_page IS NULL OR source_url IS NULL
-      OR source_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
+      cm.source_document_id IS NULL OR cm.source_page IS NULL OR cm.source_url IS NULL
+      OR cm.source_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
       OR NOT EXISTS (
         SELECT 1 FROM public.public_documents d
-        WHERE d.id = ca_procurement_matches.source_document_id
+        WHERE d.id = cm.source_document_id
           AND d.status = 'PUBLISHED'
           AND d.verification_status = 'VERIFIED'
           AND d.checksum_status IN ('COMPUTED', 'VERIFIED')
-          AND d.source_url = ca_procurement_matches.source_url
-          AND d.source_url = budget_projects.source_url
           AND d.checksum_sha256 IS NOT NULL
+          AND d.source_url = cm.source_url
       )
     );
 
-UPDATE public.budget_projects
+UPDATE public.budget_projects AS bp
   SET data_provenance = 'DECLARED_ADMIN',
       financial_verification_status = 'TO_VERIFY'
   WHERE (
-      data_provenance = 'OFFICIAL_SOURCE'
-      OR financial_verification_status IN ('VERIFIED','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE')
+      bp.data_provenance = 'OFFICIAL_SOURCE'
+      OR bp.financial_verification_status IN ('VERIFIED','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE')
     )
     AND (
-      source_document_id IS NULL OR source_page IS NULL OR source_url IS NULL
-      OR source_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
+      bp.source_document_id IS NULL OR bp.source_page IS NULL OR bp.source_url IS NULL
+      OR bp.source_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
       OR NOT EXISTS (
         SELECT 1 FROM public.public_documents d
-        WHERE d.id = budget_projects.source_document_id
+        WHERE d.id = bp.source_document_id
           AND d.status = 'PUBLISHED'
           AND d.verification_status = 'VERIFIED'
           AND d.checksum_status IN ('COMPUTED', 'VERIFIED')
           AND d.checksum_sha256 IS NOT NULL
+          AND d.source_url = bp.source_url
       )
     );
 
