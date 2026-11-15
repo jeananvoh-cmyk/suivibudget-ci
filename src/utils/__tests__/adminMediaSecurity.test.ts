@@ -16,7 +16,7 @@ const request=(body:object,identity?:string)=>new Request('https://isolated.exam
 
 beforeAll(async()=>{
   fixture=await createAdminPersistenceFixture();
-  await fixture.db.exec(readFileSync('supabase/migrations/20261016090000_document_delivery_counter.sql','utf8'));
+  await fixture.db.exec(readFileSync('supabase/migrations/20261026184048_document_delivery_counter_pr63.sql','utf8'));
   api.getUser.mockResolvedValue({data:{user:{id:fixture.admin}},error:null});
   const source=readFileSync('supabase/functions/admin-media-url/index.ts','utf8').replace(/^import .*;\r?\n/gm,'');
   const js=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;

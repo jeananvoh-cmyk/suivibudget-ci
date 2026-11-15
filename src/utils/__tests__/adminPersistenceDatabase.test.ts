@@ -50,9 +50,9 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
       const hardeningMigration = [
         '20261026213727_security_definer_hardening_20261026213000.sql',
         '20261113011327_security_definer_hardening_20261026213000.sql',
-        '20261026213000_security_definer_hardening.sql'
+        '20261113011327_security_definer_hardening_20261026213000.sql'
       ].find(name => existsSync(resolve(`supabase/migrations/${name}`))) || '20261113011327_security_definer_hardening_20261026213000.sql';
-      for(let run=0;run<2;run++) for(const path of ['20261013165625_admin_dashboard_persistence_hardening.sql','20261013200000_multipart_ca_documents.sql',hardeningMigration]) await actual.exec(readFileSync(resolve(`supabase/migrations/${path}`),'utf8'));
+      for(let run=0;run<2;run++) for(const path of ['20261026183930_admin_dashboard_persistence_hardening_pr63.sql','20261026184038_multipart_ca_convergence_pr63.sql',hardeningMigration]) await actual.exec(readFileSync(resolve(`supabase/migrations/${path}`),'utf8'));
       expect((await actual.query('select is_multipart,parts_count,is_scanned,has_text_layer,ocr_status,manifest_sha256,checksum_sha256 from public.public_documents')).rows).toEqual([{is_multipart:null,parts_count:null,is_scanned:null,has_text_layer:null,ocr_status:null,manifest_sha256:null,checksum_sha256:'a'.repeat(64)}]);
       expect((await actual.query('select total_budget_fcfa from public.institutions')).rows).toEqual([{total_budget_fcfa:'123.00'}]);
       expect((await actual.query('select public.admin_persistence_version() version')).rows).toEqual([{version:3}]);
@@ -112,9 +112,9 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
         );
         alter table public.public_documents enable trigger user;
       `);
-      // 3. Run 20261013165625_admin_dashboard_persistence_hardening.sql WITHOUT any JWT claim (as supabase db push / SQL Editor runs)
-      await remote.exec(readFileSync('supabase/migrations/20261013165625_admin_dashboard_persistence_hardening.sql','utf8'));
-      await remote.exec(readFileSync('supabase/migrations/20261013200000_multipart_ca_documents.sql','utf8'));
+      // 3. Run 20261026183930_admin_dashboard_persistence_hardening_pr63.sql WITHOUT any JWT claim (as supabase db push / SQL Editor runs)
+      await remote.exec(readFileSync('supabase/migrations/20261026183930_admin_dashboard_persistence_hardening_pr63.sql','utf8'));
+      await remote.exec(readFileSync('supabase/migrations/20261026184038_multipart_ca_convergence_pr63.sql','utf8'));
 
       const docState=(await remote.query<{status:string;verification_status:string;checksum_status:string;revision:number}>(
         "select status,verification_status,checksum_status,revision from public.public_documents where id='doc-dff4865a-c6a8-418e-8895-626258e409d0'"

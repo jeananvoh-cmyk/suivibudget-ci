@@ -40,9 +40,9 @@ beforeAll(async () => {
     ['20260928_local_budgets_referential.sql',['local_budgets']],
     ['20260928_administrative_accounts.sql',['administrative_accounts','ca_investment_operations','ca_procurement_matches']],
   ] as const){const sql=readFileSync(`supabase/migrations/${file}`,'utf8');for(const name of names) await db.exec(sql.match(new RegExp(`CREATE TABLE IF NOT EXISTS public\\.${name} \\([\\s\\S]*?\\n\\);`))![0]);}
-  const migration=readFileSync('supabase/migrations/20261001091748_controlled_data_import.sql','utf8');
+  const migration=readFileSync('supabase/migrations/20261001093613_controlled_data_import.sql','utf8');
   await db.exec(migration);
-  await db.exec(readFileSync('supabase/migrations/20261001144423_import_console_qualified_amounts.sql','utf8'));
+  await db.exec(readFileSync('supabase/migrations/20261001150911_import_console_qualified_amounts.sql','utf8'));
 }, 60000);
 afterAll(async()=>{await db?.close();});
 
