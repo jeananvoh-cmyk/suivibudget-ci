@@ -69,7 +69,7 @@ UPDATE public.administrative_accounts
   SET verification_status = 'TO_VERIFY'
   WHERE verification_status IN ('OFFICIAL_DOCUMENT', 'VERIFIED')
     AND (
-      source_document_id IS NULL OR source_url IS NULL
+      source_document_id IS NULL OR source_page IS NULL OR source_url IS NULL
       OR source_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
       OR NOT EXISTS (
         SELECT 1 FROM public.public_documents d
@@ -269,7 +269,6 @@ DECLARE
   source_url_value text;
   source_page_value integer;
   evidence_status text;
-  needs_page boolean := true;
 BEGIN
   source_id := row_data ->> 'source_document_id';
   source_url_value := COALESCE(row_data ->> 'source_url', row_data ->> 'document_url');
@@ -280,16 +279,12 @@ BEGIN
   ELSE
     evidence_status := row_data ->> 'verification_status';
   END IF;
-  IF TG_TABLE_NAME = 'administrative_accounts' THEN
-    needs_page := false;
-  END IF;
-
   IF evidence_status IN ('OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED','Vérifié DGMP') THEN
     IF source_id IS NULL OR source_url_value IS NULL
       OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
       RAISE EXCEPTION 'Primary certification requires a catalogue document ID and institutional HTTPS URL';
     END IF;
-    IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
+    IF source_page_value IS NULL OR source_page_value <= 0 THEN
       RAISE EXCEPTION 'Primary certification requires the exact source page';
     END IF;
     IF NOT EXISTS (

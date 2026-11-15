@@ -24,6 +24,8 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toContain('CREATE OR REPLACE FUNCTION private.enforce_primary_document_evidence()');
     expect(migration).toContain('CREATE TRIGGER enforce_local_budget_primary_evidence');
     expect(migration).toContain('CREATE TRIGGER enforce_administrative_account_primary_evidence');
+    expect(migration).toContain('source_document_id IS NULL OR source_page IS NULL OR source_url IS NULL');
+    expect(migration).toContain('IF source_page_value IS NULL OR source_page_value <= 0 THEN');
     expect(migration).toContain('CREATE TRIGGER enforce_procurement_primary_evidence');
     expect(migration).toContain('CREATE TRIGGER enforce_budget_project_primary_evidence');
     expect(migration).toContain('ALTER TABLE public.ca_procurement_matches');
