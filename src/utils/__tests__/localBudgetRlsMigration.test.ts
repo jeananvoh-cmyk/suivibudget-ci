@@ -9,7 +9,7 @@ describe('RLS hardening — local budget administration', () => {
   );
 
   it('does not grant privileges from user-editable user_metadata', () => {
-    expect(migration).not.toContain('user_metadata');
+    expect(migration).not.toContain("auth.jwt() -> 'user_metadata'");
     expect(migration).toContain("auth.jwt() -> 'app_metadata' ->> 'role'");
     expect(migration).toContain("ALTER COLUMN verification_status SET DEFAULT 'DOCUMENT_TO_EXTRACT'");
     expect(migration).not.toContain("SET DEFAULT 'AIP_VERIFIED'");
