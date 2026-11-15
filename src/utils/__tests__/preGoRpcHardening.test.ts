@@ -27,10 +27,10 @@ describe('pre-GO privileged RPC exposure hardening', () => {
       CREATE FUNCTION public.admin_staff_directory() RETURNS TABLE(id uuid,full_name text,role text) LANGUAGE sql SECURITY DEFINER AS $$ SELECT '00000000-0000-0000-0000-000000000001'::uuid,'Staff'::text,'ADMIN'::text $$;
       CREATE FUNCTION public.apec_link_targets(text,integer) RETURNS jsonb LANGUAGE sql SECURITY DEFINER AS $$ SELECT '{}'::jsonb $$;
       CREATE FUNCTION public.import_data_batch(jsonb,boolean,text) RETURNS jsonb LANGUAGE sql SECURITY DEFINER AS $$ SELECT '{}'::jsonb $$;
-      CREATE FUNCTION public.publish_apec_need(uuid,text,text,text,date,boolean) RETURNS void LANGUAGE sql SECURITY DEFINER AS $$ SELECT $$;
-      CREATE FUNCTION public.record_apec_decision(uuid,text,text,text,date,integer,text,text,uuid) RETURNS void LANGUAGE sql SECURITY DEFINER AS $$ SELECT $$;
+      CREATE FUNCTION public.publish_apec_need(uuid,text,text,text,date,boolean) RETURNS void LANGUAGE sql SECURITY DEFINER AS $ SELECT NULL::void $;
+      CREATE FUNCTION public.record_apec_decision(uuid,text,text,text,date,integer,text,text,uuid) RETURNS void LANGUAGE sql SECURITY DEFINER AS $ SELECT NULL::void $;
       CREATE FUNCTION public.review_data_import(text[],text,text,boolean) RETURNS jsonb LANGUAGE sql SECURITY DEFINER AS $$ SELECT '{}'::jsonb $$;
-      CREATE FUNCTION public.withdraw_apec_need(uuid,text) RETURNS void LANGUAGE sql SECURITY DEFINER AS $$ SELECT $$;
+      CREATE FUNCTION public.withdraw_apec_need(uuid,text) RETURNS void LANGUAGE sql SECURITY DEFINER AS $ SELECT NULL::void $;
     `);
     await db.exec(migration);
 
