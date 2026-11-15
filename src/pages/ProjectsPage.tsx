@@ -5,6 +5,7 @@ import { ProjectCard } from '../components/ProjectCard';
 import { CATEGORIES, getCategoryBadgeClass } from '../data/categories';
 import { dataStore } from '../services/dataStore';
 import { formatCompactFCFA, formatFCFA, formatAmountInWords, getProjectEntityInfo } from '../utils/formatters';
+import { sanitizeCsvCell } from '../utils/security';
 import {
   Camera,
   Search,
@@ -41,6 +42,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   onOpenShare,
 }) => {
   const allProjects = dataStore.getProjects();
+  const [selectedFiscalYear, setSelectedFiscalYear] = useState<number | 'ALL'>(2026);
   const [selectedScope, setSelectedScope] = useState<'LOCAL' | 'NATIONAL' | 'ALL'>('ALL');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
@@ -52,7 +54,8 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
 
   const activeFiltersCount = (selectedCategory !== 'ALL' ? 1 : 0) +
     (selectedRegion !== 'ALL' ? 1 : 0) +
-    (sortBy !== 'amount-desc' ? 1 : 0);
+    (sortBy !== 'amount-desc' ? 1 : 0) +
+    (selectedFiscalYear !== 2026 ? 1 : 0);
 
   // Helper for physical infrastructure filter (youth filter)
   const isAbstractProject = (p: BudgetProject) => {
@@ -63,8 +66,11 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
            titleLow.startsWith('provision pour investissement');
   };
 
-  // Base scope pools (dynamically reactive to onlyPhysical toggle)
-  const activePool = onlyPhysical ? allProjects.filter(p => !isAbstractProject(p)) : allProjects;
+  // Base scope pools (filtered by fiscal year and dynamically reactive to onlyPhysical toggle)
+  const poolByYear = selectedFiscalYear === 'ALL'
+    ? allProjects
+    : allProjects.filter(p => (p.fiscal_year ?? 2026) === selectedFiscalYear);
+  const activePool = onlyPhysical ? poolByYear.filter(p => !isAbstractProject(p)) : poolByYear;
   const localProjectsTotal = activePool.filter(p => p.scope_level !== 'NATIONAL');
   const nationalProjectsTotal = activePool.filter(p => p.scope_level === 'NATIONAL');
 
@@ -165,25 +171,35 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
 
   // Export CSV
   const handleExportCSV = () => {
-    const headers = ['ID', 'Intitule', 'Entite_En_Charge', 'Region', 'Secteur', 'Budget_FCFA', 'Statut'];
+    const headers = ['ID', 'Intitule', 'Entite_En_Charge', 'Region', 'Secteur', 'Budget_FCFA', 'Statut', 'Exercice', 'Provenance_Source'];
     const rows = sortedProjects.map(p => {
       const entity = getProjectEntityInfo(p.commune_name, p.region_name);
+      const provenance = p.fiscal_year && p.fiscal_year < 2026
+        ? 'MARCHE_PLURIANNUEL_ANTERIEUR'
+        : p.data_provenance === 'LOCAL_PORTAL_BOUAKE' || p.source?.includes('mairiedebouake.ci')
+          ? 'PORTAIL_MUNICIPAL_EXTERNE'
+          : p.scope_level === 'NATIONAL'
+            ? 'LFI_2026_ETAT'
+            : 'LFI_2026_LOCAL_CSV';
       return [
-        p.id,
-        `"${p.title.replace(/"/g, '""')}"`,
-        `"${entity.entityName}"`,
-        `"${p.region_name || ''}"`,
-        `"${p.category || ''}"`,
-        p.budget_amount_fcfa,
-        p.current_status
-      ];
+        sanitizeCsvCell(p.id),
+        sanitizeCsvCell(p.title),
+        sanitizeCsvCell(entity.entityName),
+        sanitizeCsvCell(p.region_name || ''),
+        sanitizeCsvCell(p.category || ''),
+        p.budget_amount_fcfa ?? '',
+        sanitizeCsvCell(p.current_status || ''),
+        p.fiscal_year ?? 2026,
+        provenance,
+      ].join(';');
     });
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
+    const csvContent = [headers.join(';'), ...rows].join('\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `vie-publique-ci-chantiers-${new Date().toISOString().slice(0, 10)}.csv`);
+    link.href = url;
+    link.setAttribute('download', `suivibudget-ci-chantiers-${selectedFiscalYear}-${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -200,13 +216,13 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-5">
           <div>
             <div className="inline-flex items-center px-3 py-1 rounded-full bg-brand-orange text-white text-xs font-black uppercase tracking-wider mb-2 shadow-2xs">
-              <span>Investissements Publics 2026</span>
+              <span>{selectedFiscalYear === 2026 ? 'Investissements Publics 2026' : 'Investissements Publics Répertoriés (Tous Exercices)'}</span>
             </div>
             <h1 className="text-xl sm:text-3xl font-black tracking-tight text-white">
               Observatoire des Lignes Budgétaires & Opérations d'Investissement en Côte d'Ivoire
             </h1>
             <p className="text-xs sm:text-sm text-slate-200 mt-1.5 max-w-2xl leading-relaxed">
-              Explorez les <strong>{localProjectsTotal.length.toLocaleString('fr-FR')} opérations locales recensées</strong> et <strong>{nationalProjectsTotal.length.toLocaleString('fr-FR')} opérations d'État (classification automatisée — à vérifier sur pièce)</strong>, et contribuez avec vos constats sur le terrain.
+              Explorez les <strong>{localProjectsTotal.length.toLocaleString('fr-FR')} opérations locales recensées</strong> et <strong>{nationalProjectsTotal.length.toLocaleString('fr-FR')} opérations d'État {selectedFiscalYear === 2026 ? 'de l\'exercice 2026' : 'répertoriées (classification automatisée — à vérifier sur pièce)'}{selectedFiscalYear === 2026 ? ' (hors marchés pluriannuels antérieurs)' : ''}</strong>, et contribuez avec vos constats sur le terrain.
             </p>
           </div>
 
@@ -296,8 +312,40 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
             </button>
           </div>
 
-          {/* Secondary Controls: Physical Filter + View Mode Switcher + Export CSV */}
+          {/* Secondary Controls: Fiscal Year + Physical Filter + View Mode Switcher + Export CSV */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between lg:justify-end gap-2.5 w-full lg:w-auto">
+            {/* Fiscal Year Switcher (Séparation stricte des exercices budgétaires) */}
+            <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-2xl border border-slate-200/70 text-xs w-full sm:w-auto">
+              <button
+                onClick={() => {
+                  setSelectedFiscalYear(2026);
+                  setCurrentPage(1);
+                }}
+                className={`py-2 px-3 text-center rounded-xl font-extrabold transition-all cursor-pointer ${
+                  selectedFiscalYear === 2026
+                    ? 'bg-brand-orange text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="Exercice Budgétaire 2026 (LFI 2026)"
+              >
+                Exercice 2026
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedFiscalYear('ALL');
+                  setCurrentPage(1);
+                }}
+                className={`py-2 px-3 text-center rounded-xl font-extrabold transition-all cursor-pointer ${
+                  selectedFiscalYear === 'ALL'
+                    ? 'bg-slate-900 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="Tous les exercices (inclut les marchés pluriannuels antérieurs ex. 2021)"
+              >
+                Tous Exercices
+              </button>
+            </div>
+
             {/* Real Projects Filter: 50/50 symmetric grid on mobile, inline on sm+ */}
             <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-2xl border border-slate-200/70 text-xs w-full sm:w-auto">
               <button
@@ -574,9 +622,23 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
                     >
                       {/* Col 1: Intitulé de l'Opération */}
                       <td className="py-3 px-3 font-bold text-slate-900">
-                        <button type="button" onClick={() => onSelectProject(p)} aria-label={`Consulter la fiche du projet : ${p.title}`} className="text-left line-clamp-2 group-hover:text-brand-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue transition-colors text-xs font-black leading-snug">
-                          {p.title}
-                        </button>
+                        <div className="space-y-1">
+                          <button type="button" onClick={() => onSelectProject(p)} aria-label={`Consulter la fiche du projet : ${p.title}`} className="text-left line-clamp-2 group-hover:text-brand-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue transition-colors text-xs font-black leading-snug">
+                            {p.title}
+                          </button>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {p.fiscal_year && p.fiscal_year < 2026 && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-100 text-amber-800 border border-amber-200">
+                                Marché {p.fiscal_year}
+                              </span>
+                            )}
+                            {(p.data_provenance === 'LOCAL_PORTAL_BOUAKE' || p.source?.includes('mairiedebouake.ci')) && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-sky-100 text-sky-800 border border-sky-200">
+                                Portail Bouaké
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </td>
 
                       {/* Col 2: Entité en Charge (Maître d'ouvrage) */}

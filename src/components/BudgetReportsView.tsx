@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { dataStore } from '../services/dataStore';
 import { formatFCFA, formatAmountInWords, formatDateFR } from '../utils/formatters';
+import { normalizeSectorCategory } from '../utils/publicIndicators';
 import {
   FileText,
   Printer,
@@ -24,19 +25,21 @@ export const BudgetReportsView: React.FC = () => {
   const allProjects = dataStore.getProjects();
   const approvedProofs = dataStore.getApprovedProofs();
 
-  // Statistics calculation for the report
+  const projects2026 = useMemo(() => allProjects.filter(p => (p.fiscal_year ?? 2026) === 2026), [allProjects]);
+
+  // Statistics calculation for the 2026 report (strict fiscal year isolation)
   const stats = useMemo(() => {
-    let filteredProjects = allProjects;
+    let filteredProjects = projects2026;
     if (selectedReport === 'INFRASTRUCTURE') {
-      filteredProjects = allProjects.filter(p => p.category === 'INFRASTRUCTURE');
+      filteredProjects = projects2026.filter(p => normalizeSectorCategory(p.category) === 'INFRASTRUCTURE');
     } else if (selectedReport === 'SANTE') {
-      filteredProjects = allProjects.filter(p => p.category === 'SANTE');
+      filteredProjects = projects2026.filter(p => normalizeSectorCategory(p.category) === 'HEALTH');
     } else if (selectedReport === 'EDUCATION') {
-      filteredProjects = allProjects.filter(p => p.category === 'EDUCATION');
+      filteredProjects = projects2026.filter(p => normalizeSectorCategory(p.category) === 'EDUCATION');
     } else if (selectedReport === 'EAU_POTABLE') {
-      filteredProjects = allProjects.filter(p => p.category === 'EAU_POTABLE');
+      filteredProjects = projects2026.filter(p => normalizeSectorCategory(p.category) === 'WATER');
     } else if (selectedReport === 'LOCAL') {
-      filteredProjects = allProjects.filter(p => p.scope_level === 'LOCAL');
+      filteredProjects = projects2026.filter(p => p.scope_level === 'LOCAL');
     }
 
     const totalAmount = filteredProjects.reduce((sum, p) => sum + (p.budget_amount_fcfa ?? 0), 0);
@@ -85,7 +88,7 @@ export const BudgetReportsView: React.FC = () => {
       categoryBreakdown,
       totalProofs: approvedProofs.length,
     };
-  }, [allProjects, approvedProofs, selectedReport]);
+  }, [projects2026, approvedProofs, selectedReport]);
 
   const handlePrint = () => {
     window.print();
@@ -227,7 +230,7 @@ export const BudgetReportsView: React.FC = () => {
                 232 Collectivités
               </span>
               <span className="text-[11px] text-slate-500">
-                201 Communes & 31 Conseils Régionaux (+ 2 Districts)
+                232 Collectivités territoriales : 201 Communes & 31 Conseils Régionaux | 2 Districts Autonomes à statut particulier
               </span>
             </div>
 
@@ -285,7 +288,25 @@ export const BudgetReportsView: React.FC = () => {
               <p className="text-xs text-slate-600 leading-relaxed">
                 Gérés directement par les Mairies et Conseils Régionaux pour les écoles primaires, centres de santé de proximité et hydraulique villageoise.
               </p>
+              <span className="block text-[10px] text-emerald-800 font-semibold pt-1 border-t border-emerald-100">
+                Dont 122,5 Mds FCFA extraits du Programme 2204040 LFI et 42,7 Mds FCFA de grands projets du portail municipal de Bouaké (AFD/C2D/PPP, source secondaire à vérifier).
+              </span>
             </div>
+          </div>
+
+          {/* Marchés Pluriannuels Antérieurs (Hors LFI 2026) */}
+          <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+            <div className="space-y-0.5">
+              <span className="font-black text-amber-900 uppercase text-[10px] tracking-wider block">
+                Marchés Pluriannuels de l'État Engagés Antérieurement (Hors LFI 2026)
+              </span>
+              <p className="text-amber-800 font-medium">
+                1 grand projet pluriannuel rattaché à l'exercice 2021 (Axe Séguéla-Sifié-Touba & pont sur le Sassandra, 104,7 Mds FCFA sur fonds propres Trésor, 80 % d'avancement déclaré) est maintenu sous suivi citoyen indépendant, sans contamination des totaux de la Loi de Finances 2026.
+              </p>
+            </div>
+            <span className="px-3 py-1 rounded-xl bg-amber-200 text-amber-900 font-black text-xs whitespace-nowrap self-start sm:self-auto">
+              + 104,7 Mds FCFA (2021)
+            </span>
           </div>
         </div>
 

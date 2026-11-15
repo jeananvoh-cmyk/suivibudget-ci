@@ -260,8 +260,12 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                     </div>
                   </div>
                   <div className="text-[11px] text-slate-500 mt-3 pt-3 border-t border-slate-200 flex items-center justify-between">
-                    <span>Source officielle</span>
-                    <span className="font-semibold text-slate-800">{project.source || 'Loi de Finances (DGBF)'}</span>
+                    <span>{project.data_provenance === 'LOCAL_PORTAL_BOUAKE' || project.source?.includes('mairiedebouake.ci') || (project.fiscal_year && project.fiscal_year < 2026) ? 'Source documentaire' : 'Source officielle'}</span>
+                    <span className="font-semibold text-slate-800">
+                      {project.data_provenance === 'LOCAL_PORTAL_BOUAKE' || project.source?.includes('mairiedebouake.ci')
+                        ? 'Portail municipal de Bouaké (Source secondaire — hors dotation LFI directe)'
+                        : (project.source || 'Loi de Finances (DGBF)')}
+                    </span>
                   </div>
                 </div>
 

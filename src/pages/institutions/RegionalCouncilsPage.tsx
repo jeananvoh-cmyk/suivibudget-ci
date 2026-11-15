@@ -27,6 +27,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
   onNavigateToProjects,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedEntityType, setSelectedEntityType] = useState<'ALL' | 'REGION' | 'DISTRICT'>('ALL');
   const [selectedDistrictFilter, setSelectedDistrictFilter] = useState('ALL');
   const [selectedGender, setSelectedGender] = useState<'ALL' | 'M' | 'F'>('ALL');
   const [page, setPage] = useState(1);
@@ -49,20 +50,31 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
 
   // Dynamic Parity Stats for Regional Councils & Districts
   const allRegions = institutions.filter(i => i.type === 'REGION');
+  const allDistricts = institutions.filter(i => i.type === 'DISTRICT');
   const totalRegionsCount = allRegions.length;
-  const femaleRegionsCount = allRegions.filter(r => getInstitutionLeaderGender(r) === 'F').length;
-  const maleRegionsCount = totalRegionsCount - femaleRegionsCount;
-  const femaleRegionsPct = totalRegionsCount > 0 ? Math.round((femaleRegionsCount / totalRegionsCount) * 100) : 0;
-  const maleRegionsPct = totalRegionsCount > 0 ? 100 - femaleRegionsPct : 0;
+  const totalDistrictsCount = allDistricts.length;
+  const totalTerritorialCount = totalRegionsCount + totalDistrictsCount;
+
+  const activePoolForParity = selectedEntityType === 'DISTRICT'
+    ? allDistricts
+    : selectedEntityType === 'REGION'
+    ? allRegions
+    : institutions.filter(i => i.type === 'REGION' || i.type === 'DISTRICT');
+  const parityPoolCount = activePoolForParity.length;
+  const femaleRegionsCount = activePoolForParity.filter(r => getInstitutionLeaderGender(r) === 'F').length;
+  const maleRegionsCount = parityPoolCount - femaleRegionsCount;
+  const femaleRegionsPct = parityPoolCount > 0 ? Math.round((femaleRegionsCount / parityPoolCount) * 100) : 0;
+  const maleRegionsPct = parityPoolCount > 0 ? 100 - femaleRegionsPct : 0;
 
   // Unique Districts
   const uniqueDistricts = Array.from(
-    new Set(institutions.filter(i => i.type === 'REGION' && i.district).map(i => i.district))
+    new Set(institutions.filter(i => (i.type === 'REGION' || i.type === 'DISTRICT') && i.district).map(i => i.district))
   ).filter(Boolean).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
-  // Filtered Regions
+  // Filtered Regions & Districts
   const filteredRegions = institutions.filter(i => {
-    if (i.type !== 'REGION') return false;
+    if (i.type !== 'REGION' && i.type !== 'DISTRICT') return false;
+    if (selectedEntityType !== 'ALL' && i.type !== selectedEntityType) return false;
 
     const matchesGender = selectedGender === 'ALL' || getInstitutionLeaderGender(i) === selectedGender;
 
@@ -92,16 +104,64 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-sans">
-            Conseils Régionaux (31)
+            Conseils Régionaux (31) & Districts Autonomes (2)
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl font-medium">
-            Les 31 conseils régionaux de Côte d'Ivoire, leurs budgets, présidents, projets et contacts officiels. Les districts autonomes sont traités séparément.
+            Les 31 conseils régionaux (collectivités territoriales de la Loi n° 2012-1128) et les 2 districts autonomes à statut particulier (Abidjan et Yamoussoukro, Lois n° 2014-453 et 2014-454).
           </p>
         </div>
       </div>
 
       {/* Filter Toolbar & Observatoire Parité */}
       <div className="max-w-3xl mx-auto space-y-3">
+        {/* Filtre de segmentation : 31 Conseils Régionaux vs 2 Districts Autonomes */}
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl border border-slate-200/70">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedEntityType('ALL');
+              setPage(1);
+            }}
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all text-center cursor-pointer ${
+              selectedEntityType === 'ALL'
+                ? 'bg-slate-900 text-white shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Tous <span className="ml-1 text-[11px] font-semibold opacity-80">{totalTerritorialCount}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedEntityType('REGION');
+              setPage(1);
+            }}
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all text-center cursor-pointer ${
+              selectedEntityType === 'REGION'
+                ? 'bg-brand-blue text-white shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+            title="31 Conseils Régionaux (Collectivités territoriales, Loi n° 2012-1128)"
+          >
+            31 Conseils Régionaux
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedEntityType('DISTRICT');
+              setPage(1);
+            }}
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all text-center cursor-pointer ${
+              selectedEntityType === 'DISTRICT'
+                ? 'bg-brand-orange text-white shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+            title="2 Districts Autonomes (Statuts particuliers, Lois n° 2014-453 et 2014-454)"
+          >
+            2 Districts Autonomes
+          </button>
+        </div>
+
         {/* Filtre paritaire républicain (Segmented Control tactile) */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-2 sm:p-2.5 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-xl w-full sm:w-auto">
@@ -117,7 +177,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
               }`}
             >
-              Tous <span className="ml-1 text-[11px] font-semibold text-slate-500">{totalRegionsCount}</span>
+              Tous <span className="ml-1 text-[11px] font-semibold text-slate-500">{parityPoolCount}</span>
             </button>
             <button
               type="button"
@@ -159,7 +219,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
         <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1 ml-1">
-              District Autonome ({uniqueDistricts.length})
+              District géographique ({uniqueDistricts.length})
             </label>
             <div className="relative">
               <select

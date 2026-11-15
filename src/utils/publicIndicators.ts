@@ -247,17 +247,18 @@ export const LFI_2026_OFFICIAL_MACRO = {
   comptesSpeciauxMilliardsLabel: '1 540,2 Mds FCFA',
 } as const;
 
-function normalizeCategoryToken(rawCategory?: string): string {
+export function normalizeCategoryToken(rawCategory?: string | null): string {
   return (rawCategory || '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[_\-]+/g, ' ')
+    .replace(/['’/\\.,;:!?()[\]{}"#+&]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase();
 }
 
-export function normalizeSectorCategory(rawCategory?: string): PublicSectorId | null {
+export function normalizeSectorCategory(rawCategory?: string | null): PublicSectorId | null {
   const token = normalizeCategoryToken(rawCategory);
   if (!token) return null;
 

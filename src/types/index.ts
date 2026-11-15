@@ -212,10 +212,15 @@ export interface ApecEvent {
 }
 
 export interface BudgetProject {
-  financial_verification_status?: 'TO_VERIFY' | 'VERIFIED';
+  financial_verification_status?: 'TO_VERIFY' | 'VERIFIED' | 'SECONDARY_SOURCE';
   financial_verified_by?: string | null;
   financial_verified_at?: string | null;
-  data_provenance?: 'OFFICIAL_SOURCE' | 'DECLARED_ADMIN';
+  data_provenance?:
+    | 'OFFICIAL_SOURCE'
+    | 'DECLARED_ADMIN'
+    | 'SECONDARY_SOURCE'
+    | 'LOCAL_PORTAL_BOUAKE'
+    | 'STATE_MULTIYEAR_PRE_2026';
   revision?: number;
   publication_status?: 'DRAFT' | 'IN_REVIEW' | 'PUBLISHED' | 'ARCHIVED';
   archived_at?: string | null;

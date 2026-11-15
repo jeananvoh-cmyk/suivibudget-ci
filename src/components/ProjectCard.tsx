@@ -51,10 +51,22 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-black/30" />
 
           {/* Top Badges over image */}
-          <div className="absolute top-3 inset-x-3 flex items-center justify-between gap-1.5 pointer-events-none">
-            <span className={`inline-flex items-center px-2.5 py-1 rounded-xl text-[11px] font-black border backdrop-blur-md shadow-xs ${tierBadge.badgeClass}`}>
-              <span>{tierBadge.shortLabel}</span>
-            </span>
+          <div className="absolute top-3 inset-x-3 flex items-center justify-between gap-1.5 pointer-events-none flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className={`inline-flex items-center px-2.5 py-1 rounded-xl text-[11px] font-black border backdrop-blur-md shadow-xs ${tierBadge.badgeClass}`}>
+                <span>{tierBadge.shortLabel}</span>
+              </span>
+              {project.fiscal_year && project.fiscal_year < 2026 && (
+                <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-amber-500/90 text-white border border-amber-300/50 backdrop-blur-md shadow-xs">
+                  Marché {project.fiscal_year}
+                </span>
+              )}
+              {(project.data_provenance === 'LOCAL_PORTAL_BOUAKE' || project.source?.includes('mairiedebouake.ci')) && (
+                <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-sky-500/90 text-white border border-sky-300/50 backdrop-blur-md shadow-xs">
+                  Portail Bouaké
+                </span>
+              )}
+            </div>
 
             {project.category && (
               <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider border backdrop-blur-md shadow-xs ${getCategoryBadgeClass(project.category)}`}>
@@ -87,9 +99,21 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           {/* Badges row if no cover photo */}
           {!project.image_url && (
             <div className="flex flex-wrap items-center justify-between gap-1.5 mb-3">
-              <span className={`inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-black border leading-tight ${tierBadge.badgeClass}`}>
-                <span>{tierBadge.label}</span>
-              </span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-black border leading-tight ${tierBadge.badgeClass}`}>
+                  <span>{tierBadge.label}</span>
+                </span>
+                {project.fiscal_year && project.fiscal_year < 2026 && (
+                  <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300">
+                    Marché {project.fiscal_year}
+                  </span>
+                )}
+                {(project.data_provenance === 'LOCAL_PORTAL_BOUAKE' || project.source?.includes('mairiedebouake.ci')) && (
+                  <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-sky-100 text-sky-800 border border-sky-300">
+                    Portail Bouaké (Hors LFI)
+                  </span>
+                )}
+              </div>
 
               {project.category && (
                 <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider border ${getCategoryBadgeClass(project.category)}`}>

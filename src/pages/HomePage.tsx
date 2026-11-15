@@ -5,9 +5,8 @@ import { HeroSection } from '../components/HeroSection';
 import { StatImpactBanner } from '../components/StatImpactBanner';
 import { ProjectCard } from '../components/ProjectCard';
 import { dataStore, isTangiblePhysicalProject } from '../services/dataStore';
-import { LFI_2026_OFFICIAL_MACRO } from '../utils/publicIndicators';
+import { LFI_2026_OFFICIAL_MACRO, computeSectorBreakdown, normalizeCategoryToken } from '../utils/publicIndicators';
 import { formatFCFA, formatCompactFCFA, formatAmountInWords } from '../utils/formatters';
-import { computeSectorBreakdown } from '../utils/publicIndicators';
 import {
   ArrowRight,
   Camera,
@@ -73,18 +72,18 @@ export const HomePage: React.FC<HomePageProps> = ({
     });
   }, []);
 
-  // Filter projects for the search / category
+  // Filter projects for the search / category with accent & case insensitivity
   const filteredProjects = allProjects.filter((p) => {
     const matchesSearch =
       !searchQuery ||
-      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.commune_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.region_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchQuery.toLowerCase());
+      normalizeCategoryToken(p.title).includes(normalizeCategoryToken(searchQuery)) ||
+      normalizeCategoryToken(p.commune_name).includes(normalizeCategoryToken(searchQuery)) ||
+      normalizeCategoryToken(p.region_name).includes(normalizeCategoryToken(searchQuery)) ||
+      normalizeCategoryToken(p.category).includes(normalizeCategoryToken(searchQuery));
 
     const matchesCategory =
       selectedCategory === 'ALL' ||
-      p.category.toLowerCase().includes(selectedCategory.toLowerCase());
+      normalizeCategoryToken(p.category).includes(normalizeCategoryToken(selectedCategory));
 
     return matchesSearch && matchesCategory;
   });
@@ -342,6 +341,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div
                 key={sec.id}
                 onClick={() => {
+                  setSearchQuery(sec.filterKey);
                   setSelectedCategory(sec.filterKey);
                   onNavigateTab('projects');
                 }}
@@ -404,6 +404,63 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Global Reconciliation & Budget Integrity Row */}
+          <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-brand-blue flex-shrink-0" />
+                <h4 className="text-sm font-black text-slate-900 uppercase tracking-wide">
+                  Réconciliation Globale de l'Enveloppe d'Investissement 2026
+                </h4>
+              </div>
+              <span className="px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-brand-blue border border-blue-200 self-start sm:self-auto">
+                100 % de l'enveloppe ventilée
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+              <div className="bg-white p-3.5 rounded-xl border border-slate-200/80">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  Total des 8 Secteurs Votés
+                </span>
+                <span className="text-base sm:text-lg font-black text-slate-900 mt-0.5 block">
+                  {formatCompactFCFA(sectorBreakdown2026.totalAmountFcfa)}
+                </span>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  {sectorBreakdown2026.totalProjects.toLocaleString('fr-FR')} opérations physiques 2026
+                </span>
+              </div>
+
+              <div className="bg-white p-3.5 rounded-xl border border-slate-200/80">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  Marché Pluriannuel Antérieur
+                </span>
+                <span className="text-base sm:text-lg font-black text-amber-700 mt-0.5 block">
+                  + {formatCompactFCFA(sectorBreakdown2026.excludedOtherYearsAmountFcfa)}
+                </span>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  1 marché engagé en 2021 (Axe Séguéla-Touba, 80 % réalisé)
+                </span>
+              </div>
+
+              <div className="bg-white p-3.5 rounded-xl border border-slate-200/80">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  Enveloppe Légale Globale LFI 2026
+                </span>
+                <span className="text-base sm:text-lg font-black text-brand-blue mt-0.5 block">
+                  {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel}
+                </span>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  Loi n° 2025-987 (vote parlementaire global)
+                </span>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-slate-500 leading-relaxed font-normal pt-1">
+              <strong>Précision méthodologique & traçabilité :</strong> La totalité des 8 secteurs présentés couvre 100 % des {sectorBreakdown2026.totalProjects.toLocaleString('fr-FR')} opérations physiques tangibles extraites de la LFI 2026 ({formatCompactFCFA(sectorBreakdown2026.totalAmountFcfa)}). Le reliquat jusqu'aux {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel} votés par le Parlement correspond aux investissements non géolocalisés, acquisitions d'équipements lourds, études d'assistance technique, programmes de défense sous réserve et transferts institutionnels globaux.
+            </p>
           </div>
         </div>
       </section>

@@ -61,6 +61,7 @@ export const InstitutionsPage: React.FC<InstitutionsPageProps> = ({
 
   const mairiesCount = institutions.filter(i => i.type === 'MAIRIE').length;
   const regionsCount = institutions.filter(i => i.type === 'REGION').length;
+  const districtsCount = institutions.filter(i => i.type === 'DISTRICT').length;
   const ministersCount = GOVERNMENT_OFFICIALS.length;
   const institutionsCount = NATIONAL_INSTITUTIONS_DATA.filter(
     i => !i.name.toLowerCase().startsWith('ministère') && !i.name.toLowerCase().startsWith('ministere') && !i.name.toLowerCase().includes('délégué')
@@ -95,7 +96,7 @@ export const InstitutionsPage: React.FC<InstitutionsPageProps> = ({
     { id: 'INSTITUTIONS' as AnnuaireView, label: 'Institutions', count: institutionsCount },
     { id: 'REGULATORS' as AnnuaireView, label: 'Régulateurs', count: regulatorsCount },
     { id: 'MUNICIPAL' as AnnuaireView, label: 'Mairies', count: mairiesCount },
-    { id: 'REGIONAL' as AnnuaireView, label: 'Régions & Districts', count: regionsCount },
+    { id: 'REGIONAL' as AnnuaireView, label: '31 Régions + 2 Districts', count: regionsCount + districtsCount },
   ];
 
   return (
@@ -181,7 +182,7 @@ export const InstitutionsPage: React.FC<InstitutionsPageProps> = ({
           />
         )}
 
-        {/* 6. Page Conseils Régionaux & Districts (33 Collectivités) */}
+        {/* 6. Page Conseils Régionaux & Districts (31 Régions + 2 Districts Autonomes) */}
         {currentView === 'REGIONAL' && (
           <RegionalCouncilsPage
             onBack={() => handleNavigateToSection('INDEX')}

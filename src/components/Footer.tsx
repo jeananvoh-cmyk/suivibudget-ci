@@ -62,19 +62,29 @@ export const Footer: React.FC<FooterProps> = ({
     if (type === 'PROJECTS') {
       const projects = dataStore.getProjects();
       filename = `SuiviBudget_CI_${projects.length}_Projets_Physiques_${new Date().getFullYear()}.csv`;
-      csvContent = "ID;Titre;Categorie;Region;Commune;Ministere;Budget_FCFA;Statut;Avancement_Pct;Annee\n" +
-        projects.map(p => [
-          sanitizeCsvCell(p.id),
-          sanitizeCsvCell(p.title),
-          sanitizeCsvCell(p.category || ''),
-          sanitizeCsvCell(p.region_name || ''),
-          sanitizeCsvCell(p.commune_name || ''),
-          sanitizeCsvCell(p.ministry_name || ''),
-          p.budget_amount_fcfa ?? '',
-          sanitizeCsvCell(p.current_status || ''),
-          p.progress_percentage || 0,
-          p.fiscal_year || 2026
-        ].join(';')).join('\n');
+      csvContent = "ID;Titre;Categorie;Region;Commune;Ministere;Budget_FCFA;Statut;Avancement_Pct;Exercice;Provenance\n" +
+        projects.map(p => {
+          const provenance = p.fiscal_year && p.fiscal_year < 2026
+            ? 'MARCHE_PLURIANNUEL_ANTERIEUR'
+            : p.data_provenance === 'LOCAL_PORTAL_BOUAKE' || p.source?.includes('mairiedebouake.ci')
+              ? 'PORTAIL_MUNICIPAL_EXTERNE'
+              : p.scope_level === 'NATIONAL'
+                ? 'LFI_2026_ETAT'
+                : 'LFI_2026_LOCAL_CSV';
+          return [
+            sanitizeCsvCell(p.id),
+            sanitizeCsvCell(p.title),
+            sanitizeCsvCell(p.category || ''),
+            sanitizeCsvCell(p.region_name || ''),
+            sanitizeCsvCell(p.commune_name || ''),
+            sanitizeCsvCell(p.ministry_name || ''),
+            p.budget_amount_fcfa ?? '',
+            sanitizeCsvCell(p.current_status || ''),
+            p.progress_percentage || 0,
+            p.fiscal_year ?? 2026,
+            provenance,
+          ].join(';');
+        }).join('\n');
     } else if (type === 'COMMUNES') {
       filename = `SuiviBudget_CI_201_Communes_${new Date().getFullYear()}.csv`;
       const mairies = institutions.filter(i => i.type === 'MAIRIE');

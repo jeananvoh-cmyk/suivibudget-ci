@@ -249,7 +249,7 @@ export const AnnuaireIndexPage: React.FC<AnnuaireIndexPageProps> = ({
             </div>
 
             <div className="pt-4 mt-5 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-xs font-black text-slate-700">{regionsCount} collectivités</span>
+              <span className="text-xs font-black text-slate-700">{regionsCount} Régions + 2 Districts</span>
               <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-slate-900 group-hover:text-white group-hover:translate-x-0.5 transition-all">
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>

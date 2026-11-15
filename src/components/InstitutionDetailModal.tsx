@@ -1,7 +1,7 @@
 import { BudgetReferenceHeader } from './institutions/MinistryBudgetHeader';
 import React, { useState, useEffect, useRef } from 'react';
 import { Institution, BudgetProject, BudgetLineItem } from '../types';
-import { formatFCFA, formatAmountInWords, getProjectTier, getProjectTierBadge } from '../utils/formatters';
+import { formatFCFA, formatCompactFCFA, formatAmountInWords, getProjectTier, getProjectTierBadge } from '../utils/formatters';
 import { getProjectsForInstitution } from '../utils/institutionProjects';
 import { X, Globe, ExternalLink, MapPin, Phone, Mail, Building2, FileText, ArrowRight, ShieldCheck, User, CheckCircle2, Share2, Layers, Search, Filter, GraduationCap, Briefcase, FolderOpen, History } from 'lucide-react';
 import { OfficialDocRequestModal } from './OfficialDocRequestModal';
@@ -473,6 +473,13 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   });
 
   const totalProjectsBudget = relatedProjects.reduce((sum, p) => sum + (p.budget_amount_fcfa || 0), 0);
+  const projects2026 = relatedProjects.filter(p => (p.fiscal_year ?? 2026) === 2026);
+  const priorMultiYearProjects = relatedProjects.filter(p => p.fiscal_year && p.fiscal_year < 2026);
+  const totalProjectsBudget2026 = projects2026.reduce((sum, p) => sum + (p.budget_amount_fcfa || 0), 0);
+  const totalPriorMultiYearBudget = priorMultiYearProjects.reduce((sum, p) => sum + (p.budget_amount_fcfa || 0), 0);
+  const isBouake = institution.id === 'inst-com-bouake' || institution.name.toLowerCase().includes('bouaké');
+  const bouakePortalProjects = isBouake ? relatedProjects.filter(p => p.data_provenance === 'LOCAL_PORTAL_BOUAKE' || p.source?.includes('mairiedebouake.ci')) : [];
+  const lfiProjects = isBouake ? relatedProjects.filter(p => !(p.data_provenance === 'LOCAL_PORTAL_BOUAKE' || p.source?.includes('mairiedebouake.ci'))) : relatedProjects;
 
   const isDistrictAutonome = (institution.district && institution.district.toLowerCase().includes('autonome')) ||
     (institution.region && (institution.region.toLowerCase().includes('abidjan') || institution.region.toLowerCase().includes('yamoussoukro')));
@@ -769,20 +776,69 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
 
                 <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/15 flex-shrink-0">
                   <div className="text-center pr-3 border-r border-white/20">
-                    <span className="text-[10px] font-bold uppercase text-blue-200 block">Opérations</span>
-                    <span className="text-xl font-black text-white">{relatedProjects.length}</span>
+                    <span className="text-[10px] font-bold uppercase text-blue-200 block">{priorMultiYearProjects.length > 0 ? 'Opérations 2026' : 'Opérations'}</span>
+                    <span className="text-xl font-black text-white">{priorMultiYearProjects.length > 0 ? projects2026.length : relatedProjects.length}</span>
                   </div>
                   <div className="text-left pl-1">
-                    <span className="text-[10px] font-bold uppercase text-blue-200 block">Montants des projets référencés</span>
+                    <span className="text-[10px] font-bold uppercase text-blue-200 block">{priorMultiYearProjects.length > 0 ? 'Montant LFI 2026' : 'Montants des projets référencés'}</span>
                     <span className="text-sm sm:text-base font-black text-amber-300">
-                      {formatFCFA(relatedProjects.length > 0 && relatedProjects.every(project => project.budget_amount_fcfa != null) ? totalProjectsBudget : null)}
+                      {formatFCFA(projects2026.length > 0 && projects2026.every(project => project.budget_amount_fcfa != null) ? totalProjectsBudget2026 : null)}
                     </span>
                     <span className="text-[10px] font-medium text-blue-100 block">
-                      ({formatAmountInWords(relatedProjects.length > 0 && relatedProjects.every(project => project.budget_amount_fcfa != null) ? totalProjectsBudget : null)})
+                      ({formatAmountInWords(projects2026.length > 0 && projects2026.every(project => project.budget_amount_fcfa != null) ? totalProjectsBudget2026 : null)})
                     </span>
+                    {priorMultiYearProjects.length > 0 && (
+                      <span className="text-[10px] font-bold text-amber-200 block mt-0.5">
+                        + {formatCompactFCFA(totalPriorMultiYearBudget)} ({priorMultiYearProjects.length} marché pluriannuel {priorMultiYearProjects[0].fiscal_year})
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
+
+              {/* Bannières contextuelles pour marchés pluriannuels antérieurs (Séguéla-Touba) */}
+              {priorMultiYearProjects.length > 0 && (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3.5 text-xs text-amber-950 shadow-2xs">
+                  <div className="p-2.5 bg-amber-100 rounded-xl text-amber-700 flex-shrink-0">
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-black text-amber-900 uppercase text-[10px] tracking-wider">
+                        Marché Pluriannuel Antérieur Isolé • Séparation des Exercices
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-200/80 text-amber-900 border border-amber-300">
+                        Exercice {priorMultiYearProjects[0].fiscal_year}
+                      </span>
+                    </div>
+                    <p className="text-amber-800 leading-relaxed font-medium">
+                      Le marché pluriannuel <strong>{priorMultiYearProjects[0].title}</strong> ({formatCompactFCFA(totalPriorMultiYearBudget)}, engagé en {priorMultiYearProjects[0].fiscal_year}) est présenté à titre d'information citoyenne et ne contamine pas les crédits d'investissement de l'exercice 2026.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Bannières contextuelles pour la Mairie de Bouaké (Double source documentaire) */}
+              {isBouake && bouakePortalProjects.length > 0 && (
+                <div className="p-4 bg-sky-50 border border-sky-200 rounded-2xl flex items-start gap-3.5 text-xs text-sky-950 shadow-2xs">
+                  <div className="p-2.5 bg-sky-100 rounded-xl text-brand-blue flex-shrink-0">
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-black text-sky-950 uppercase text-[10px] tracking-wider">
+                        Double Source Documentaire • Bouaké
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-sky-200/70 text-sky-900 border border-sky-300">
+                        {lfiProjects.length} LFI + {bouakePortalProjects.length} Portail Municipal
+                      </span>
+                    </div>
+                    <p className="text-sky-800 leading-relaxed font-medium">
+                      Cette fiche présente séparément les <strong>{lfiProjects.length} opérations décentralisées</strong> issues de la Loi de Finances 2026 (Programme 2204040) et les <strong>{bouakePortalProjects.length} grands projets partenariaux</strong> (Grand Marché MABY, logements sociaux) annoncés sur le portail municipal (partenariats AFD/C2D/PPP — source secondaire municipale hors dotation LFI directe).
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Bannières contextuelles d'investissements Grand Abidjan */}
               {isPeripheralAbidjan && (
