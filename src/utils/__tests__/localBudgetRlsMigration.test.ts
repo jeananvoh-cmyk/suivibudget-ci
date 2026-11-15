@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 describe('RLS hardening — local budget administration', () => {
   const migration = readFileSync(
-    join(process.cwd(), 'supabase/migrations/20261115_harden_local_budget_admin_rls.sql'),
+    join(process.cwd(), 'supabase/migrations/20261115060000_harden_local_budget_admin_rls.sql'),
     'utf8'
   );
 
