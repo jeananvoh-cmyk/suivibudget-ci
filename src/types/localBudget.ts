@@ -213,6 +213,7 @@ export interface LocalBudget {
   primary_source_label?: string;
   primary_source_url?: string;
   document_url?: string;                   // Lien direct vers le document officiel PDF / Délibération
+  source_document_id?: string;             // Référence vers public_documents vérifié
   document_name?: string;
   source_page?: number;                    // Page du document officiel source
 
