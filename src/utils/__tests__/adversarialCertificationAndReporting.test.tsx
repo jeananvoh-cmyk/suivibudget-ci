@@ -11,6 +11,7 @@ import {
   checkVerifiedExecutionEvidence,
   checkVerifiedPhysicalEvidence,
   checkVerifiedAuditEvidence,
+  isOfficialPrimarySourceUrl,
   STAGE_CERTIFICATION_SPECIFICATIONS,
   findMatchingCaOperationResult,
 } from '../projectPassport';
@@ -625,6 +626,15 @@ describe('Tests Adversariaux P0/P1 — Certification du Passeport de Redevabilit
     expect(passportExactTiassale.stages.find(s => s.id === 'AUDIT_ACCOUNTABILITY')?.status).toBe('PENDING_DOCUMENTATION');
     expect(checkVerifiedPhysicalEvidence(exactTiassaleProject)).toBe(false);
     expect(checkVerifiedAuditEvidence(exactTiassaleProject)).toBe(false);
+  });
+
+  it('Cas 15 (P0 provenance) : seuls les domaines institutionnels autorisés peuvent soutenir une certification primaire', () => {
+    expect(isOfficialPrimarySourceUrl('https://www.marchespublics.ci/avis/2024.pdf')).toBe(true);
+    expect(isOfficialPrimarySourceUrl('https://dgbf.gouv.ci/budget/2026.pdf')).toBe(true);
+    expect(isOfficialPrimarySourceUrl('https://courdescomptes.ci/rapports/2025.pdf')).toBe(true);
+    expect(isOfficialPrimarySourceUrl('https://example.com/avis-officiel.pdf')).toBe(false);
+    expect(isOfficialPrimarySourceUrl('http://www.marchespublics.ci/avis.pdf')).toBe(false);
+    expect(isOfficialPrimarySourceUrl('https://marchespublics.ci.evil.example/avis.pdf')).toBe(false);
   });
 
   it('Cas 14 (Section 4) : computeSectorBreakdown et computePublicIndicators distinguent montants documentés, montants à 0 FCFA et montants inconnus (null) sans total consolidé trompeur', () => {
