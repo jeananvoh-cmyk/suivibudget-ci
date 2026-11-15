@@ -256,6 +256,7 @@ export interface DocumentIngestionMetadata {
   source_date: string;
   source_date_kind: 'PUBLISHED' | 'ACCESSED' | 'RECORDED';
   source_url?: string;
+  source_document_id?: string;
   source_page?: number;
   evidence_level?: DocumentEvidenceLevel;
   adoption_date?: string;
