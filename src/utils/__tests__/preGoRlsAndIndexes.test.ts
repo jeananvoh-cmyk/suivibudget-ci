@@ -69,7 +69,7 @@ describe('pre-GO RLS and foreign-key index migration', () => {
         'idx_apec_events_actor_id','idx_apec_events_contribution_id',
         'idx_apec_needs_local_budget_id','idx_apec_needs_project_id',
         'idx_budget_lines_source_document_id','idx_budget_lines_verified_by',
-        'idx_budget_projects_financial_verified_by','idx_budget_projects_source_document_id_advisor'
+        'idx_budget_projects_financial_verified_by','idx_budget_projects_source_document_id'
        )`
     );
     expect(indexes.rows[0].count).toBe(10);
