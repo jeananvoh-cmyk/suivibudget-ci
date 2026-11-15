@@ -53,7 +53,7 @@ UPDATE public.local_budgets
         WHERE d.id = local_budgets.source_document_id
           AND d.status = 'PUBLISHED'
           AND d.verification_status = 'VERIFIED'
-          AND d.checksum_status = 'VERIFIED'
+          AND d.checksum_status IN ('COMPUTED','VERIFIED')
           AND d.checksum_sha256 IS NOT NULL
       )
     );
@@ -71,7 +71,7 @@ UPDATE public.administrative_accounts
         WHERE d.id = administrative_accounts.source_document_id
           AND d.status = 'PUBLISHED'
           AND d.verification_status = 'VERIFIED'
-          AND d.checksum_status = 'VERIFIED'
+          AND d.checksum_status IN ('COMPUTED','VERIFIED')
           AND d.checksum_sha256 IS NOT NULL
       )
     );
@@ -86,7 +86,7 @@ UPDATE public.ca_procurement_matches
         WHERE d.id = ca_procurement_matches.source_document_id
           AND d.status = 'PUBLISHED'
           AND d.verification_status = 'VERIFIED'
-          AND d.checksum_status = 'VERIFIED'
+          AND d.checksum_status IN ('COMPUTED','VERIFIED')
           AND d.checksum_sha256 IS NOT NULL
       )
     );
@@ -103,7 +103,7 @@ UPDATE public.budget_projects
         WHERE d.id = budget_projects.source_document_id
           AND d.status = 'PUBLISHED'
           AND d.verification_status = 'VERIFIED'
-          AND d.checksum_status = 'VERIFIED'
+          AND d.checksum_status IN ('COMPUTED','VERIFIED')
           AND d.checksum_sha256 IS NOT NULL
       )
     );
@@ -185,7 +185,7 @@ BEGIN
       WHERE d.id = source_id
         AND d.status = 'PUBLISHED'
         AND d.verification_status = 'VERIFIED'
-        AND d.checksum_status = 'VERIFIED'
+        AND d.checksum_status IN ('COMPUTED','VERIFIED')
         AND d.checksum_sha256 IS NOT NULL
     ) THEN
       RAISE EXCEPTION 'Certification primaire refusée : le document lié doit être publié, vérifié et doté d’une empreinte SHA-256 vérifiée';
@@ -312,15 +312,23 @@ CREATE POLICY "Allow admin write access on projects"
   WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
 
 DROP POLICY IF EXISTS "Allow moderators full management on citizen proofs" ON public.citizen_proofs;
-CREATE POLICY "Allow moderators full management on citizen proofs"
-  ON public.citizen_proofs FOR ALL TO authenticated
+DROP POLICY IF EXISTS "Moderators insert citizen proofs" ON public.citizen_proofs;
+CREATE POLICY "Moderators insert citizen proofs"
+  ON public.citizen_proofs FOR INSERT TO authenticated
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+
+DROP POLICY IF EXISTS "Moderators update citizen proofs" ON public.citizen_proofs;
+CREATE POLICY "Moderators update citizen proofs"
+  ON public.citizen_proofs FOR UPDATE TO authenticated
   USING (private.has_staff_role(array['ADMIN','MODERATOR']))
   WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
 
+DROP POLICY IF EXISTS "Moderators delete citizen proofs" ON public.citizen_proofs;
+CREATE POLICY "Moderators delete citizen proofs"
+  ON public.citizen_proofs FOR DELETE TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']));
+
 DROP POLICY IF EXISTS "Allow admin only read on newsletter subscribers" ON public.newsletter_subscribers;
-CREATE POLICY "Allow admin only read on newsletter subscribers"
-  ON public.newsletter_subscribers FOR SELECT TO authenticated
-  USING (private.has_staff_role(array['ADMIN']));
 
 -- Les documents sont déjà gérés par "Staff manage documents" et les fichiers
 -- par les politiques de staging privées basées sur private.has_staff_role.
@@ -378,7 +386,7 @@ BEGIN
       WHERE d.id = source_id
         AND d.status = 'PUBLISHED'
         AND d.verification_status = 'VERIFIED'
-        AND d.checksum_status = 'VERIFIED'
+        AND d.checksum_status IN ('COMPUTED','VERIFIED')
         AND d.checksum_sha256 IS NOT NULL
     ) THEN
       RAISE EXCEPTION 'Certification primaire refusée : le document lié doit être publié, vérifié et doté d’une empreinte SHA-256 vérifiée';
@@ -568,7 +576,7 @@ BEGIN
       WHERE d.id = source_id
         AND d.status = 'PUBLISHED'
         AND d.verification_status = 'VERIFIED'
-        AND d.checksum_status = 'VERIFIED'
+        AND d.checksum_status IN ('COMPUTED','VERIFIED')
         AND d.checksum_sha256 IS NOT NULL
     ) THEN
       RAISE EXCEPTION 'Certification primaire refusée : le document lié doit être publié, vérifié et doté d’une empreinte SHA-256 vérifiée';
@@ -766,7 +774,7 @@ BEGIN
       WHERE d.id = source_id
         AND d.status = 'PUBLISHED'
         AND d.verification_status = 'VERIFIED'
-        AND d.checksum_status = 'VERIFIED'
+        AND d.checksum_status IN ('COMPUTED','VERIFIED')
         AND d.checksum_sha256 IS NOT NULL
     ) THEN
       RAISE EXCEPTION 'Certification primaire refusée : le document lié doit être publié, vérifié et doté d’une empreinte SHA-256 vérifiée';
@@ -983,7 +991,7 @@ BEGIN
       WHERE d.id = source_id
         AND d.status = 'PUBLISHED'
         AND d.verification_status = 'VERIFIED'
-        AND d.checksum_status = 'VERIFIED'
+        AND d.checksum_status IN ('COMPUTED','VERIFIED')
         AND d.checksum_sha256 IS NOT NULL
     ) THEN
       RAISE EXCEPTION 'Certification primaire refusée : le document lié doit être publié, vérifié et doté d’une empreinte SHA-256 vérifiée';
@@ -1174,7 +1182,7 @@ BEGIN
       WHERE d.id = source_id
         AND d.status = 'PUBLISHED'
         AND d.verification_status = 'VERIFIED'
-        AND d.checksum_status = 'VERIFIED'
+        AND d.checksum_status IN ('COMPUTED','VERIFIED')
         AND d.checksum_sha256 IS NOT NULL
     ) THEN
       RAISE EXCEPTION 'Certification primaire refusée : le document lié doit être publié, vérifié et doté d’une empreinte SHA-256 vérifiée';
@@ -1372,7 +1380,7 @@ BEGIN
       WHERE d.id = source_id
         AND d.status = 'PUBLISHED'
         AND d.verification_status = 'VERIFIED'
-        AND d.checksum_status = 'VERIFIED'
+        AND d.checksum_status IN ('COMPUTED','VERIFIED')
         AND d.checksum_sha256 IS NOT NULL
     ) THEN
       RAISE EXCEPTION 'Certification primaire refusée : le document lié doit être publié, vérifié et doté d’une empreinte SHA-256 vérifiée';
@@ -1524,7 +1532,7 @@ COMMIT;
         WHERE pd.id = d ->> 'source_document_id'
           AND pd.status = 'PUBLISHED'
           AND pd.verification_status = 'VERIFIED'
-          AND pd.checksum_status = 'VERIFIED'
+          AND pd.checksum_status IN ('COMPUTED','VERIFIED')
           AND pd.checksum_sha256 IS NOT NULL
       ) THEN
       RAISE EXCEPTION 'Primary document requires a published, checksum-verified catalogue record, official URL and exact page';
@@ -1583,7 +1591,7 @@ BEGIN
       WHERE d.id = source_id
         AND d.status = 'PUBLISHED'
         AND d.verification_status = 'VERIFIED'
-        AND d.checksum_status = 'VERIFIED'
+        AND d.checksum_status IN ('COMPUTED','VERIFIED')
         AND d.checksum_sha256 IS NOT NULL
     ) THEN
       RAISE EXCEPTION 'Certification primaire refusée : le document lié doit être publié, vérifié et doté d’une empreinte SHA-256 vérifiée';
