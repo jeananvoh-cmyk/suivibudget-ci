@@ -110,6 +110,28 @@ describe('RLS hardening — local budget administration', () => {
          ) ORDER BY tgname`
       );
       expect(triggers.rows).toHaveLength(4);
+
+      // A certified CA must not retain its certification if its exact source page is removed.
+      await db.exec(`
+        INSERT INTO public.public_documents
+          (id,title,category,institution_name,file_url,file_name,status,verification_status,checksum_status,checksum_sha256,source_url)
+        VALUES
+          ('migration-primary-ca-doc','CA primaire de test','CA','Commune de test',
+           'https://dgbf.ci/ca-2023.pdf','ca-2023.pdf','PUBLISHED','VERIFIED','COMPUTED',repeat('a',64),
+           'https://dgbf.ci/ca-2023.pdf');
+        INSERT INTO public.administrative_accounts
+          (id,institution_id,institution_type,institution_name,fiscal_year,status,source_document,
+           source_document_id,source_url,source_page,verification_status,reconciliation_status)
+        VALUES
+          ('migration-ca-certified','migration-inst','COMMUNE','Commune de test',2023,'VERIFIED',
+           'CA primaire de test','migration-primary-ca-doc','https://dgbf.ci/ca-2023.pdf',5,
+           'OFFICIAL_DOCUMENT','TO_VERIFY');
+      `);
+      await expect(db.query(
+        `UPDATE public.administrative_accounts
+         SET source_page = NULL
+         WHERE id = 'migration-ca-certified'`
+      )).rejects.toThrow('Primary certification requires the exact source page');
       await expect(db.query(
         `INSERT INTO public.budget_projects
           (commune_name,region_name,category,title,budget_amount_fcfa,data_provenance,financial_verification_status)
