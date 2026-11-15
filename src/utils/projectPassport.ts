@@ -108,6 +108,8 @@ export function isOfficialPrimarySourceUrl(value?: string | null): boolean {
       || host.endsWith('.dgbf.ci')
       || host === 'marchespublics.ci'
       || host.endsWith('.marchespublics.ci')
+      || host === 'courdescomptes.ci'
+      || host.endsWith('.courdescomptes.ci')
       || host.endsWith('.gouv.ci');
   } catch {
     return false;
