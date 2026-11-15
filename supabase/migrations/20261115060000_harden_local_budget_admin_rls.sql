@@ -78,8 +78,8 @@ CREATE POLICY "Allow admin write on CA procurement matches"
 DROP POLICY IF EXISTS "Allow admin and moderator full access on responses" ON public.ca_institution_responses;
 CREATE POLICY "Allow admin and moderator full access on responses"
   ON public.ca_institution_responses FOR ALL TO authenticated
-  USING (private.has_staff_role(array['ADMIN','MODERATOR','DATA_MANAGER']))
-  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR','DATA_MANAGER']));
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
 
 -- Champs de preuve primaire manquants sur les rapprochements DGMP.
 ALTER TABLE public.ca_procurement_matches
