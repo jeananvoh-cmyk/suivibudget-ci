@@ -2143,6 +2143,12 @@
           "not_null": false
         },
         {
+          "name": "publication_status",
+          "type": "text",
+          "default": "'PUBLISHED'::text",
+          "not_null": true
+        },
+        {
           "name": "progress_percentage",
           "type": "integer",
           "default": "0",
