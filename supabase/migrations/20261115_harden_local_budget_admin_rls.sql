@@ -55,4 +55,30 @@ CREATE POLICY "Allow admin insert on budget revisions"
   ON public.budget_revision_history FOR INSERT TO authenticated
   WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'));
 
+-- Les mêmes défauts d'autorisation existaient sur les Comptes Administratifs,
+-- leurs opérations, les marchés associés et les réponses institutionnelles.
+DROP POLICY IF EXISTS "Allow admin full access on CA" ON public.administrative_accounts;
+CREATE POLICY "Allow admin full access on CA"
+  ON public.administrative_accounts FOR ALL TO authenticated
+  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'))
+  WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'));
+
+DROP POLICY IF EXISTS "Allow admin write on CA operations" ON public.ca_investment_operations;
+CREATE POLICY "Allow admin write on CA operations"
+  ON public.ca_investment_operations FOR ALL TO authenticated
+  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'))
+  WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'));
+
+DROP POLICY IF EXISTS "Allow admin write on CA procurement matches" ON public.ca_procurement_matches;
+CREATE POLICY "Allow admin write on CA procurement matches"
+  ON public.ca_procurement_matches FOR ALL TO authenticated
+  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'))
+  WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'));
+
+DROP POLICY IF EXISTS "Allow admin and moderator full access on responses" ON public.ca_institution_responses;
+CREATE POLICY "Allow admin and moderator full access on responses"
+  ON public.ca_institution_responses FOR ALL TO authenticated
+  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'MODERATOR', 'DATA_MANAGER'))
+  WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'MODERATOR', 'DATA_MANAGER'));
+
 COMMIT;
