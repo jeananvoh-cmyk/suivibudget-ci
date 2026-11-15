@@ -762,7 +762,13 @@ export function buildStandardImportEnvelope(
   let kind: 'BP' | 'CA' = 'BP';
   if (metadata.document_type === 'COMPTE_ADMINISTRATIF') {
     kind = 'CA';
-    dataObj.verification_status = metadata.evidence_level ?? 'OFFICIAL_DOCUMENT';
+    const rawEvidence = metadata.evidence_level;
+    dataObj.verification_status =
+      rawEvidence == null
+        ? 'DOCUMENT_TO_EXTRACT'
+        : rawEvidence === 'AIP_REPORTED' || rawEvidence === 'AIP_VERIFIED'
+          ? 'SECONDARY_TO_CORROBORATE'
+          : rawEvidence;
     dataObj.accounting_stage = 'ORDONNANCE';
     if (metadata.adoption_date) dataObj.approval_date = metadata.adoption_date;
     if (metadata.source_date) dataObj.prefecture_visa_date = metadata.source_date;
@@ -801,9 +807,13 @@ export function buildStandardImportEnvelope(
     if (metadata.adoption_date) dataObj.adoption_date = metadata.adoption_date;
     // Le schéma PostgreSQL local_budgets en production n'inclut pas encore 'AIP_REPORTED' dans sa contrainte CHECK ;
     // toute source AIP secondaire rapportée sans délibération primaire est persistée comme 'SECONDARY_TO_CORROBORATE'.
-    const rawEvidence = metadata.evidence_level ?? 'OFFICIAL_DOCUMENT';
+    const rawEvidence = metadata.evidence_level;
     dataObj.verification_status =
-      rawEvidence === 'AIP_REPORTED' ? 'SECONDARY_TO_CORROBORATE' : rawEvidence;
+      rawEvidence == null
+        ? 'DOCUMENT_TO_EXTRACT'
+        : rawEvidence === 'AIP_REPORTED' || rawEvidence === 'AIP_VERIFIED'
+          ? 'SECONDARY_TO_CORROBORATE'
+          : rawEvidence;
     // Confiance par défaut qualifiée (Item 10)
     dataObj.confidence_level = metadata.source_date_kind === 'PUBLISHED' ? 'MEDIUM' : 'LOW';
     if (metadata.notes) dataObj.notes = metadata.notes;
