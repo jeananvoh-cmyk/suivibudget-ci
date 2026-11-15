@@ -38,6 +38,9 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toContain('IF source_page_value IS NULL OR source_page_value <= 0 THEN');
     expect(migration).toContain('CREATE TRIGGER enforce_procurement_primary_evidence');
     expect(migration).toContain('CREATE TRIGGER enforce_budget_project_primary_evidence');
+    expect(migration).toContain('DROP POLICY IF EXISTS "Allow public read on budget sources"');
+    expect(migration).toContain('DROP POLICY IF EXISTS "Allow public read on budget revenue sources"');
+    expect(migration).toContain("lb.status = 'PUBLISHED'");
     expect(migration).toContain('ALTER TABLE public.ca_procurement_matches');
 
     expect(migration).toContain('d.checksum_status IN (\'COMPUTED\', \'VERIFIED\')');
