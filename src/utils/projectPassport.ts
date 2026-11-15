@@ -25,12 +25,271 @@ export type PassportStageStatus =
   | 'NOT_FOUND_PUBLICLY'    // Non retrouvé dans les sources publiques actuelles
   | 'SOURCE_CONFLICT';      // Divergence identifiée entre sources documentaires
 
+export type PassportProvenanceClass =
+  | 'OFFICIAL_PRIMARY_SOURCE'
+  | 'OFFICIAL_SECONDARY_SOURCE'
+  | 'AUTOMATED_EXTRACTION'
+  | 'DECLARED_ADMIN'
+  | 'CITIZEN_OBSERVATION'
+  | 'SUIVIBUDGET_CALCULATION'
+  | 'INSTITUTION_RESPONSE'
+  | 'UNKNOWN';
+
 export type DataProvenance =
-  | 'OFFICIAL_SOURCE'          // Document officiel vérifié (Loi, CA, DGMP)
-  | 'SUIVIBUDGET_CALCULATION'  // Rapprochement ou calcul algorithmique SuiviBudget
-  | 'CITIZEN_OBSERVATION'      // Constat de terrain ou preuve citoyenne
-  | 'INSTITUTION_RESPONSE'     // Réponse institutionnelle ou droit de réponse
-  | 'UNVERIFIED_INPUT';        // Donnée déclarative ou non corroborée
+  | 'OFFICIAL_SOURCE'            // Source primaire officielle vérifiée (alias rétrocompatible de OFFICIAL_PRIMARY_SOURCE)
+  | 'OFFICIAL_PRIMARY_SOURCE'    // Pièce budgétaire ou administrative primaire vérifiée (Loi de Finances, CA, DGMP)
+  | 'OFFICIAL_SECONDARY_SOURCE'  // Source secondaire (dépêche AIP, portail municipal déclaratif, presse)
+  | 'AUTOMATED_EXTRACTION'       // Extraction automatisée d'un catalogue sans certification individuelle de la pièce
+  | 'DECLARED_ADMIN'             // Déclaration ou saisie administrative non certifiée
+  | 'SUIVIBUDGET_CALCULATION'    // Rapprochement ou calcul algorithmique SuiviBudget
+  | 'CITIZEN_OBSERVATION'        // Constat de terrain ou preuve citoyenne
+  | 'INSTITUTION_RESPONSE'       // Réponse institutionnelle ou droit de réponse
+  | 'UNVERIFIED_INPUT'           // Donnée déclarative ou non corroborée
+  | 'UNKNOWN';                   // Provenance documentaire absente ou non qualifiée
+
+const SECONDARY_SOURCE_PATTERNS = [
+  /\baip\b/i,
+  /aip\.ci/i,
+  /agence ivoirienne de presse/i,
+  /mairiedebouake\.ci/i,
+  /portail municipal/i,
+  /site web municipal/i,
+  /local_portal/i,
+  /abidjan\.net/i,
+  /koaci/i,
+  /fratmat/i,
+  /linfodrome/i,
+  /\bpresse\b/i,
+  /\bmédia\b/i,
+  /\bmedia\b/i,
+  /communiqué de presse/i,
+  /communique de presse/i,
+  /compte[- ]rendu de session/i,
+  /source secondaire/i,
+  /secondary/i,
+];
+
+const GENERIC_PLACEHOLDER_SOURCES = new Set([
+  'source',
+  'source officielle',
+  'document officiel',
+  'document',
+  'officiel',
+  'inconnu',
+  'non renseigné',
+  'non renseigne',
+  'non relié',
+  'non relie',
+  'n/a',
+  'na',
+  'aucune',
+  'à vérifier',
+  'a verifier',
+]);
+
+export function isSecondarySourceReference(source?: string | null, sourceUrl?: string | null): boolean {
+  const combined = `${source || ''} ${sourceUrl || ''}`.trim();
+  if (!combined) return false;
+  return SECONDARY_SOURCE_PATTERNS.some(pattern => pattern.test(combined));
+}
+
+export function isGenericSourcePlaceholder(source?: string | null): boolean {
+  if (!source || !source.trim()) return true;
+  const normalized = source.trim().toLowerCase().replace(/\s+/g, ' ');
+  return normalized.length < 5 || GENERIC_PLACEHOLDER_SOURCES.has(normalized);
+}
+
+/**
+ * Règle F : Un document officiel doit être identifiable et vérifiable :
+ * - organisme émetteur identifiable ;
+ * - document source nommé et non générique ;
+ * - URL ou référence documentaire vérifiable ;
+ * - exercice budgétaire valide ;
+ * - absence de qualification secondaire, déclarative ou d'extraction brute non certifiée.
+ */
+export function hasIdentifiableOfficialDocument(project: BudgetProject): boolean {
+  if (!project) return false;
+  if (
+    project.data_provenance === 'DECLARED_ADMIN' ||
+    project.data_provenance === 'OFFICIAL_SECONDARY_SOURCE' ||
+    project.data_provenance === 'AUTOMATED_EXTRACTION' ||
+    project.data_provenance === 'CITIZEN_OBSERVATION' ||
+    project.data_provenance === 'SUIVIBUDGET_CALCULATION' ||
+    project.data_provenance === 'INSTITUTION_RESPONSE' ||
+    project.data_provenance === 'UNKNOWN'
+  ) {
+    return false;
+  }
+  if (isSecondarySourceReference(project.source, project.source_url)) {
+    return false;
+  }
+  const hasIssuingBody = Boolean(
+    project.institution_id?.trim() ||
+    project.commune_name?.trim() ||
+    project.ministry_name?.trim() ||
+    project.master_builder?.trim()
+  );
+  const hasValidFiscalYear =
+    typeof project.fiscal_year === 'number' &&
+    Number.isFinite(project.fiscal_year) &&
+    project.fiscal_year >= 2000;
+  const hasNamedSourceDocument =
+    !isGenericSourcePlaceholder(project.source) ||
+    Boolean(project.source_document_id?.trim());
+  const hasVerifiableReferenceOrUrl =
+    Boolean(project.source_document_id?.trim()) ||
+    Boolean(project.source_url && /^https?:\/\/[^\s]+$/i.test(project.source_url.trim()));
+
+  return hasIssuingBody && hasValidFiscalYear && hasNamedSourceDocument && hasVerifiableReferenceOrUrl;
+}
+
+/**
+ * Classification explicite de la provenance d'un projet selon les 7 catégories réglementaires :
+ * - OFFICIAL_PRIMARY_SOURCE
+ * - OFFICIAL_SECONDARY_SOURCE
+ * - AUTOMATED_EXTRACTION
+ * - DECLARED_ADMIN
+ * - CITIZEN_OBSERVATION
+ * - SUIVIBUDGET_CALCULATION
+ * - UNKNOWN (+ INSTITUTION_RESPONSE le cas échéant)
+ */
+export function classifyProjectProvenance(project: BudgetProject): PassportProvenanceClass {
+  if (!project) return 'UNKNOWN';
+  if (project.data_provenance === 'CITIZEN_OBSERVATION') return 'CITIZEN_OBSERVATION';
+  if (project.data_provenance === 'SUIVIBUDGET_CALCULATION') return 'SUIVIBUDGET_CALCULATION';
+  if (project.data_provenance === 'INSTITUTION_RESPONSE') return 'INSTITUTION_RESPONSE';
+  if (project.data_provenance === 'DECLARED_ADMIN') return 'DECLARED_ADMIN';
+  if (
+    project.data_provenance === 'OFFICIAL_SECONDARY_SOURCE' ||
+    isSecondarySourceReference(project.source, project.source_url)
+  ) {
+    return 'OFFICIAL_SECONDARY_SOURCE';
+  }
+  if (project.data_provenance === 'AUTOMATED_EXTRACTION') {
+    return 'AUTOMATED_EXTRACTION';
+  }
+  if (project.data_provenance === 'UNKNOWN') {
+    return 'UNKNOWN';
+  }
+
+  const hasAnySourceTrace = Boolean(
+    project.source?.trim() ||
+    project.source_document_id?.trim() ||
+    project.source_url?.trim() ||
+    (typeof project.source_page === 'number' && project.source_page > 0)
+  );
+  if (!hasAnySourceTrace) {
+    return 'UNKNOWN';
+  }
+
+  // Règles B, D, F : Une ligne disposant d'une trace documentaire ou d'une page mais dont la correspondance
+  // avec le montant n'a pas été vérifiée humainement (financial_verification_status !== 'VERIFIED')
+  // ou dont le document n'est pas intégralement identifiable reste une AUTOMATED_EXTRACTION ou UNKNOWN.
+  if (!hasIdentifiableOfficialDocument(project)) {
+    return isGenericSourcePlaceholder(project.source) && !project.source_document_id?.trim()
+      ? 'UNKNOWN'
+      : 'AUTOMATED_EXTRACTION';
+  }
+
+  if (project.financial_verification_status !== 'VERIFIED') {
+    return 'AUTOMATED_EXTRACTION';
+  }
+
+  return 'OFFICIAL_PRIMARY_SOURCE';
+}
+
+export function resolveProjectDataProvenance(project: BudgetProject): DataProvenance {
+  const provenanceClass = classifyProjectProvenance(project);
+  switch (provenanceClass) {
+    case 'OFFICIAL_PRIMARY_SOURCE':
+      return 'OFFICIAL_SOURCE';
+    case 'OFFICIAL_SECONDARY_SOURCE':
+      return 'OFFICIAL_SECONDARY_SOURCE';
+    case 'AUTOMATED_EXTRACTION':
+      return 'AUTOMATED_EXTRACTION';
+    case 'DECLARED_ADMIN':
+      return 'UNVERIFIED_INPUT';
+    case 'CITIZEN_OBSERVATION':
+      return 'CITIZEN_OBSERVATION';
+    case 'SUIVIBUDGET_CALCULATION':
+      return 'SUIVIBUDGET_CALCULATION';
+    case 'INSTITUTION_RESPONSE':
+      return 'INSTITUTION_RESPONSE';
+    case 'UNKNOWN':
+    default:
+      return 'UNKNOWN';
+  }
+}
+
+/**
+ * Règles A, B, C, D, E, F, G :
+ * Vérifie si le budget voté du projet est certifié par une pièce officielle primaire identifiable.
+ * - N'hérite JAMAIS du Compte Administratif (Étape 4) ni d'un rapprochement automatique (Règle E).
+ * - Une référence de page seule ne suffit JAMAIS (Règle D).
+ * - Exige un document officiel primaire identifiable, une page précise (> 0), un montant fini et
+ *   une correspondance vérifiée (`financial_verification_status === 'VERIFIED'`).
+ */
+export function checkVerifiedBudgetEvidence(project: BudgetProject): boolean {
+  if (!project || project.publication_status === 'DRAFT') return false;
+  if (classifyProjectProvenance(project) !== 'OFFICIAL_PRIMARY_SOURCE') return false;
+  if (!hasIdentifiableOfficialDocument(project)) return false;
+  if (project.financial_verification_status !== 'VERIFIED') return false;
+  if (typeof project.source_page !== 'number' || !Number.isInteger(project.source_page) || project.source_page <= 0) {
+    return false;
+  }
+  if (project.budget_amount_fcfa == null || !Number.isFinite(project.budget_amount_fcfa) || project.budget_amount_fcfa < 0) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Vérifie si l'attribution du marché public (Étape 3) est certifiée par une pièce officielle DGMP.
+ * Un rapprochement automatique STRONG ne suffit pas à lui seul sans avis DGMP vérifié et référencé.
+ */
+export function checkVerifiedProcurementEvidence(
+  matchedProc: ProcurementMatch | undefined,
+  matchResult: CaOperationMatchResult
+): boolean {
+  if (!matchedProc) return false;
+  if (matchResult.confidence !== 'STRONG') return false;
+  if (matchResult.conflictingFields && matchResult.conflictingFields.length > 0) return false;
+  if (!matchedProc.tender_number?.trim() && !matchedProc.contract_number?.trim()) return false;
+  if (!matchedProc.contractor?.trim()) return false;
+  if (!isExactAmount(matchedProc, 'award_amount')) return false;
+  if (!matchedProc.source?.trim() || isGenericSourcePlaceholder(matchedProc.source)) return false;
+  if (isSecondarySourceReference(matchedProc.source, matchedProc.source_url)) return false;
+  if (!matchedProc.source_url || !/^https?:\/\/[^\s]+$/i.test(matchedProc.source_url.trim())) return false;
+  const verif = matchedProc.verification_status?.trim();
+  if (verif !== 'Vérifié DGMP' && verif !== 'VERIFIED' && verif !== 'OFFICIAL_DOCUMENT') return false;
+  return true;
+}
+
+/**
+ * Vérifie si l'exécution financière au Compte Administratif (Étape 4) est certifiée par une pièce primaire.
+ * - Un rapprochement automatique STRONG ne certifie jamais à lui seul une opération sans CA officiel vérifié,
+ *   document source identifiable, page précise et montant exact sans conflit.
+ * - Une réponse institutionnelle ne certifie jamais l'exécution financière.
+ */
+export function checkVerifiedExecutionEvidence(
+  matchedOp: CAInvestmentOperation | undefined,
+  account: AdministrativeAccount | undefined,
+  matchResult: CaOperationMatchResult
+): boolean {
+  if (!matchedOp || !account) return false;
+  if (matchResult.confidence !== 'STRONG') return false;
+  if (matchResult.conflictingFields && matchResult.conflictingFields.length > 0) return false;
+  if (account.status !== 'VERIFIED' && account.status !== 'PUBLISHED') return false;
+  if (account.verification_status !== 'OFFICIAL_DOCUMENT' && account.verification_status !== 'VERIFIED') return false;
+  const hasAccountDoc =
+    (!isGenericSourcePlaceholder(account.source_document) && !isSecondarySourceReference(account.source_document, account.source_url)) ||
+    Boolean(account.source_document_id?.trim());
+  if (!hasAccountDoc) return false;
+  const page = matchedOp.source_page ?? account.source_page;
+  if (typeof page !== 'number' || !Number.isInteger(page) || page <= 0) return false;
+  if (!isExactAmount(matchedOp, 'executed_amount')) return false;
+  return true;
+}
 
 export type DataAvailability =
   | 'AVAILABLE'
@@ -57,6 +316,7 @@ export interface PassportFact {
   value: string | number | null;
   availability: 'AVAILABLE' | 'UNKNOWN' | 'NOT_FOUND_PUBLICLY';
   provenance: DataProvenance;
+  provenanceClass?: PassportProvenanceClass;
   source_document_id: string | null;
   source_page: number | null;
   source_reference: string | null;
@@ -72,6 +332,7 @@ export interface PassportDataPoint {
   label: string;
   value: string;
   provenance: DataProvenance;
+  provenanceClass?: PassportProvenanceClass;
   availability?: DataAvailability;
   sourceDetails?: string;
   sourceUrl?: string;
@@ -94,6 +355,10 @@ export interface ProjectAccountabilityPassportData {
   projectTitle: string;
   institutionName: string;
   fiscalYear: number | null;
+  projectProvenanceClass: PassportProvenanceClass;
+  hasVerifiedBudgetEvidence: boolean;
+  hasVerifiedProcurementEvidence: boolean;
+  hasVerifiedExecutionEvidence: boolean;
   stages: PassportStage[];
   /** Indice de complétude documentaire (0 à 100 %). Ne constitue en aucun cas une note politique ou de gouvernance. */
   documentationCompletenessPct: number;
@@ -353,33 +618,106 @@ export function generateProjectPassport(
   const projectSource = { source_document_id: project.source_document_id || null, source_page: project.source_page ?? null, source_reference: project.source || null, source_url: project.source_url || null };
   const marketSource = { source_document_id: null, source_page: null, source_reference: matchedProc?.source || null, source_url: matchedProc?.source_url || null };
   const emptySource = { source_document_id: null, source_page: null, source_reference: null, source_url: null };
-  const fact = (label: string, value: string | number | null | undefined, provenance: DataProvenance, source: Pick<PassportFact, 'source_document_id' | 'source_page' | 'source_reference' | 'source_url'> = emptySource): PassportFact => ({ label, value: value ?? null, availability: value == null || value === '' ? 'UNKNOWN' : 'AVAILABLE', provenance, ...source });
+  const provenanceToClass = (prov: DataProvenance, fallbackClass?: PassportProvenanceClass): PassportProvenanceClass => {
+    if (fallbackClass) return fallbackClass;
+    switch (prov) {
+      case 'OFFICIAL_SOURCE':
+      case 'OFFICIAL_PRIMARY_SOURCE':
+        return 'OFFICIAL_PRIMARY_SOURCE';
+      case 'OFFICIAL_SECONDARY_SOURCE':
+        return 'OFFICIAL_SECONDARY_SOURCE';
+      case 'AUTOMATED_EXTRACTION':
+        return 'AUTOMATED_EXTRACTION';
+      case 'DECLARED_ADMIN':
+      case 'UNVERIFIED_INPUT':
+        return 'DECLARED_ADMIN';
+      case 'CITIZEN_OBSERVATION':
+        return 'CITIZEN_OBSERVATION';
+      case 'SUIVIBUDGET_CALCULATION':
+        return 'SUIVIBUDGET_CALCULATION';
+      case 'INSTITUTION_RESPONSE':
+        return 'INSTITUTION_RESPONSE';
+      case 'UNKNOWN':
+      default:
+        return 'UNKNOWN';
+    }
+  };
+  const fact = (
+    label: string,
+    value: string | number | null | undefined,
+    provenance: DataProvenance,
+    source: Pick<PassportFact, 'source_document_id' | 'source_page' | 'source_reference' | 'source_url'> = emptySource,
+    explicitClass?: PassportProvenanceClass
+  ): PassportFact => ({
+    label,
+    value: value ?? null,
+    availability: value == null || value === '' ? 'UNKNOWN' : 'AVAILABLE',
+    provenance,
+    provenanceClass: provenanceToClass(provenance, explicitClass),
+    ...source,
+  });
+
   const responseCandidate = account?.institution_response;
   const response = responseCandidate?.response_status === 'PUBLISHED'
     && (!responseCandidate.operation_id || responseCandidate.operation_id === matchedOp?.id)
     && (!responseCandidate.ca_id || responseCandidate.ca_id === account?.id) ? responseCandidate : undefined;
-  const projectProvenance: DataProvenance=project.data_provenance==='DECLARED_ADMIN' ? 'UNVERIFIED_INPUT' : 'OFFICIAL_SOURCE';
+
+  const projectProvenanceClass = classifyProjectProvenance(project);
+  const projectProvenance = resolveProjectDataProvenance(project);
+  const hasVerifiedBudgetEvidence = checkVerifiedBudgetEvidence(project);
+  const hasVerifiedProcurementEvidence = checkVerifiedProcurementEvidence(matchedProc, matchResult);
+  const hasVerifiedExecutionEvidence = checkVerifiedExecutionEvidence(matchedOp, account, matchResult);
+
+  const caDataProvenance: DataProvenance = !account
+    ? 'UNKNOWN'
+    : isSecondarySourceReference(account.source_document, account.source_url)
+      ? 'OFFICIAL_SECONDARY_SOURCE'
+      : (account.verification_status === 'OFFICIAL_DOCUMENT' || account.verification_status === 'VERIFIED') &&
+        (account.status === 'VERIFIED' || account.status === 'PUBLISHED') &&
+        (!isGenericSourcePlaceholder(account.source_document) || Boolean(account.source_document_id?.trim()))
+        ? 'OFFICIAL_SOURCE'
+        : 'AUTOMATED_EXTRACTION';
+
+  const marketDataProvenance: DataProvenance = !matchedProc
+    ? 'UNKNOWN'
+    : isSecondarySourceReference(matchedProc.source, matchedProc.source_url)
+      ? 'OFFICIAL_SECONDARY_SOURCE'
+      : hasVerifiedProcurementEvidence
+        ? 'OFFICIAL_SOURCE'
+        : 'AUTOMATED_EXTRACTION';
+
+  const physicalProvenance: DataProvenance = approvedProofs.length
+    ? 'CITIZEN_OBSERVATION'
+    : project.official_progress_source
+      ? (project.data_provenance === 'DECLARED_ADMIN' ? 'UNVERIFIED_INPUT' : 'INSTITUTION_RESPONSE')
+      : 'UNVERIFIED_INPUT';
+  const physicalProvenanceClass: PassportProvenanceClass = approvedProofs.length
+    ? 'CITIZEN_OBSERVATION'
+    : project.official_progress_source
+      ? (project.data_provenance === 'DECLARED_ADMIN' ? 'DECLARED_ADMIN' : 'INSTITUTION_RESPONSE')
+      : 'UNKNOWN';
+
   const facts: Record<PassportField, PassportFact> = {
-    institution_id: fact('Institution', project.institution_id, projectProvenance, projectSource),
-    institution_type: fact('Type d’institution', account?.institution_type || project.institution_type, projectProvenance, account ? caSource : projectSource),
-    fiscal_year: fact('Exercice', project.fiscal_year || null, projectProvenance, projectSource),
-    object_label: fact('Quoi ?', project.title, projectProvenance, projectSource),
-    localisation: fact('Où ?', project.locality_village_neighborhood || matchedOp?.location, projectProvenance, project.locality_village_neighborhood ? projectSource : caSource),
-    budget_amount: fact('Budget prévu (FCFA)', project.budget_amount_fcfa, projectProvenance, projectSource),
-    procurement_amount: fact('Marché attribué (FCFA)', matchedProc?.award_amount, 'OFFICIAL_SOURCE', marketSource),
-    executed_amount: fact('Exécution indiquée au CA (FCFA)', matchedOp?.executed_amount, 'OFFICIAL_SOURCE', caSource),
-    contract_reference: fact('Référence du marché / appel d’offres', matchedProc?.contract_number || matchedProc?.tender_number, 'OFFICIAL_SOURCE', marketSource),
-    supplier: fact('Attributaire', matchedProc?.contractor, 'OFFICIAL_SOURCE', marketSource),
-    source_document_id: fact('Document source relié', caSource.source_document_id, 'OFFICIAL_SOURCE', caSource),
-    source_page: fact('Page source', caSource.source_page, 'OFFICIAL_SOURCE', caSource),
-    source_reference: fact('Libellé exact de la source', caSource.source_reference || project.source, account ? 'OFFICIAL_SOURCE' : projectProvenance, account ? caSource : projectSource),
-    financial_status: fact('Situation financière', matchedOp && isExactAmount(matchedOp, 'executed_amount') ? (matchedOp.executed_amount === 0 ? 'CA_REPORTED_ZERO' : 'CA_REPORTED_EXECUTION') : null, 'SUIVIBUDGET_CALCULATION', caSource),
-    physical_status: fact('Réalisation physique', approvedProofs.length ? 'CITIZEN_OBSERVATION' : project.official_progress_source ? 'OFFICIAL_DECLARATION' : null, approvedProofs.length ? 'CITIZEN_OBSERVATION' : project.official_progress_source ? projectProvenance : 'UNVERIFIED_INPUT', approvedProofs.length ? { ...emptySource, source_reference: `Constat citoyen ${approvedProofs[0].id}` } : project.official_progress_source ? { ...emptySource, source_reference: project.official_progress_source } : emptySource),
-    citizen_evidence_status: fact('Preuves terrain', approvedProofs.length ? 'APPROVED' : 'NOT_FOUND_PUBLICLY', 'CITIZEN_OBSERVATION'),
-    institution_response_status: fact('Réponse institutionnelle', response ? 'PUBLISHED' : 'NOT_FOUND_PUBLICLY', 'INSTITUTION_RESPONSE', response ? { ...emptySource, source_reference: response.supporting_document_name || response.response_text, source_url: response.supporting_document_url || null } : emptySource),
-    matching_confidence: fact('Confiance du rapprochement', matchResult.confidence, 'SUIVIBUDGET_CALCULATION'),
-    matching_method: fact('Méthode de rapprochement', matchResult.matchingMethod, 'SUIVIBUDGET_CALCULATION'),
-    verification_status: fact('Vérification documentaire', account?.verification_status || 'NOT_FOUND_PUBLICLY', 'OFFICIAL_SOURCE', caSource),
+    institution_id: fact('Institution', project.institution_id, projectProvenance, projectSource, projectProvenanceClass),
+    institution_type: fact('Type d’institution', account?.institution_type || project.institution_type, account ? caDataProvenance : projectProvenance, account ? caSource : projectSource, account ? undefined : projectProvenanceClass),
+    fiscal_year: fact('Exercice', project.fiscal_year || null, projectProvenance, projectSource, projectProvenanceClass),
+    object_label: fact('Quoi ?', project.title, projectProvenance, projectSource, projectProvenanceClass),
+    localisation: fact('Où ?', project.locality_village_neighborhood || matchedOp?.location, project.locality_village_neighborhood ? projectProvenance : (matchedOp?.location ? caDataProvenance : projectProvenance), project.locality_village_neighborhood ? projectSource : caSource, project.locality_village_neighborhood ? projectProvenanceClass : undefined),
+    budget_amount: fact('Budget prévu (FCFA)', project.budget_amount_fcfa, projectProvenance, projectSource, projectProvenanceClass),
+    procurement_amount: fact('Marché attribué (FCFA)', matchedProc?.award_amount, marketDataProvenance, marketSource),
+    executed_amount: fact('Exécution indiquée au CA (FCFA)', matchedOp?.executed_amount, caDataProvenance, caSource),
+    contract_reference: fact('Référence du marché / appel d’offres', matchedProc?.contract_number || matchedProc?.tender_number, marketDataProvenance, marketSource),
+    supplier: fact('Attributaire', matchedProc?.contractor, marketDataProvenance, marketSource),
+    source_document_id: fact('Document source relié', caSource.source_document_id, caDataProvenance, caSource),
+    source_page: fact('Page source', caSource.source_page, caDataProvenance, caSource),
+    source_reference: fact('Libellé exact de la source', caSource.source_reference || project.source, account ? caDataProvenance : projectProvenance, account ? caSource : projectSource, account ? undefined : projectProvenanceClass),
+    financial_status: fact('Situation financière', matchedOp && isExactAmount(matchedOp, 'executed_amount') ? (matchedOp.executed_amount === 0 ? 'CA_REPORTED_ZERO' : 'CA_REPORTED_EXECUTION') : null, 'SUIVIBUDGET_CALCULATION', caSource, 'SUIVIBUDGET_CALCULATION'),
+    physical_status: fact('Réalisation physique', approvedProofs.length ? 'CITIZEN_OBSERVATION' : project.official_progress_source ? 'OFFICIAL_DECLARATION' : null, physicalProvenance, approvedProofs.length ? { ...emptySource, source_reference: `Constat citoyen ${approvedProofs[0].id}` } : project.official_progress_source ? { ...emptySource, source_reference: project.official_progress_source } : emptySource, physicalProvenanceClass),
+    citizen_evidence_status: fact('Preuves terrain', approvedProofs.length ? 'APPROVED' : 'NOT_FOUND_PUBLICLY', 'CITIZEN_OBSERVATION', emptySource, 'CITIZEN_OBSERVATION'),
+    institution_response_status: fact('Réponse institutionnelle', response ? 'PUBLISHED' : 'NOT_FOUND_PUBLICLY', 'INSTITUTION_RESPONSE', response ? { ...emptySource, source_reference: response.supporting_document_name || response.response_text, source_url: response.supporting_document_url || null } : emptySource, 'INSTITUTION_RESPONSE'),
+    matching_confidence: fact('Confiance du rapprochement', matchResult.confidence, 'SUIVIBUDGET_CALCULATION', emptySource, 'SUIVIBUDGET_CALCULATION'),
+    matching_method: fact('Méthode de rapprochement', matchResult.matchingMethod, 'SUIVIBUDGET_CALCULATION', emptySource, 'SUIVIBUDGET_CALCULATION'),
+    verification_status: fact('Vérification documentaire', account?.verification_status || 'NOT_FOUND_PUBLICLY', caDataProvenance, caSource),
   };
   for (const value of Object.values(facts)) if (value.value === 'NOT_FOUND_PUBLICLY') value.availability = 'NOT_FOUND_PUBLICLY';
 
@@ -388,16 +726,21 @@ export function generateProjectPassport(
   // -------------------------------------------------------------------------
   // ÉTAPE 1 : BESOIN & PROGRAMMATION
   // RÈGLE CARDINALE (Section 7) : L'INSCRIPTION BUDGÉTAIRE NE PROUVE PAS LE BESOIN CITOYEN INITIAL
+  // Aucune étape n'hérite du statut officiel d'une autre étape (account exclu).
   // -------------------------------------------------------------------------
   const hasProgram = Boolean(project.program_name || project.details);
   const citizenNeedOrigin = project.citizen_need_origin?.trim() || project.initiative_source?.trim();
   const citizenNeedRecorded = Boolean(citizenNeedOrigin);
 
-  const hasVerifiedBudgetEvidence = Boolean(
-    account ||
-    (project.data_provenance !== 'DECLARED_ADMIN' &&
-      (project.financial_verification_status === 'VERIFIED' || Boolean(project.source_page)))
-  );
+  const needStatusLabel = !hasProgram
+    ? 'Donnée non retrouvée publiquement'
+    : hasVerifiedBudgetEvidence
+      ? 'Programmation Budgétaire Officielle'
+      : projectProvenanceClass === 'OFFICIAL_SECONDARY_SOURCE'
+        ? 'Programmation rapportée par source secondaire (à corroborer)'
+        : projectProvenanceClass === 'DECLARED_ADMIN'
+          ? 'Programmation déclarée (pièce officielle requise)'
+          : 'Programmation cataloguée (source à relier)';
 
   stages.push({
     id: 'NEED_PROGRAMMING',
@@ -405,13 +748,15 @@ export function generateProjectPassport(
     label: 'Besoin & Programmation',
     shortDescription: 'Traçabilité du besoin citoyen d\'origine et inscription au programme d\'investissement',
     status: hasProgram ? (hasVerifiedBudgetEvidence ? 'VERIFIED_OFFICIAL' : 'PENDING_DOCUMENTATION') : 'NOT_FOUND_PUBLICLY',
-    statusLabel: hasProgram ? (hasVerifiedBudgetEvidence ? 'Programmation Budgétaire Officielle' : 'Programmation cataloguée (source à relier)') : 'Donnée non retrouvée publiquement',
+    statusLabel: needStatusLabel,
     dataPoints: [
       {
         label: 'Programmation budgétaire',
         value: project.program_name || project.details || 'Ligne d\'investissement inscrite au budget',
         provenance: projectProvenance,
+        provenanceClass: projectProvenanceClass,
         sourceDetails: project.source || 'Document budgétaire source non relié',
+        sourceUrl: project.source_url,
       },
       {
         label: 'Expression du besoin citoyen',
@@ -419,6 +764,7 @@ export function generateProjectPassport(
           ? citizenNeedOrigin!
           : 'Non documenté publiquement dans l\'extrait budgétaire',
         provenance: citizenNeedRecorded ? 'CITIZEN_OBSERVATION' : 'SUIVIBUDGET_CALCULATION',
+        provenanceClass: citizenNeedRecorded ? 'CITIZEN_OBSERVATION' : 'SUIVIBUDGET_CALCULATION',
         availability: citizenNeedRecorded ? 'AVAILABLE' : 'NOT_FOUND_PUBLICLY',
         sourceDetails: citizenNeedRecorded
           ? 'Processus participatif / APEC'
@@ -428,98 +774,137 @@ export function generateProjectPassport(
         label: 'Niveau d\'action',
         value: project.scope_level === 'NATIONAL' ? 'Projet d\'envergure nationale' : 'Projet local / communal',
         provenance: projectProvenance,
+        provenanceClass: projectProvenanceClass,
       },
       {
         label: 'Secteur public',
         value: project.category || 'Général',
         provenance: projectProvenance,
+        provenanceClass: projectProvenanceClass,
       },
     ],
   });
 
   // -------------------------------------------------------------------------
   // ÉTAPE 2 : BUDGET VOTÉ
+  // Distinction stricte entre montant inconnu (null) et montant zéro documenté (0).
   // -------------------------------------------------------------------------
-  const hasVotedAmount = project.publication_status !== 'DRAFT' && project.budget_amount_fcfa != null && project.budget_amount_fcfa > 0;
+  const hasDocumentedAmount =
+    project.publication_status !== 'DRAFT' &&
+    project.budget_amount_fcfa != null &&
+    Number.isFinite(project.budget_amount_fcfa) &&
+    project.budget_amount_fcfa >= 0;
+  const isZeroDocumentedAmount = hasDocumentedAmount && project.budget_amount_fcfa === 0;
+  const hasPositiveVotedAmount = hasDocumentedAmount && project.budget_amount_fcfa! > 0;
+
+  const budgetVotedStatus: PassportStageStatus =
+    hasVerifiedBudgetEvidence && hasDocumentedAmount
+      ? 'VERIFIED_OFFICIAL'
+      : 'PENDING_DOCUMENTATION';
+
+  const budgetVotedStatusLabel =
+    projectProvenanceClass === 'DECLARED_ADMIN'
+      ? 'Montant déclaré, vérification distincte requise'
+      : projectProvenanceClass === 'OFFICIAL_SECONDARY_SOURCE'
+        ? 'Montant issu de source secondaire (délibération primaire requise)'
+        : !hasDocumentedAmount
+          ? 'Montant non renseigné'
+          : isZeroDocumentedAmount
+            ? (hasVerifiedBudgetEvidence ? 'Montant nul documenté (0 FCFA — source vérifiée)' : 'Montant nul documenté (0 FCFA — pièce à vérifier)')
+            : hasVerifiedBudgetEvidence
+              ? 'Voté au Budget (source vérifiée)'
+              : 'Ligne cataloguée — page/pièce officielle à vérifier';
+
   stages.push({
     id: 'BUDGET_VOTED',
     stepNumber: 2,
     label: 'Budget Voté (BP)',
     shortDescription: 'Crédits votés par l\'autorité délibérante (Loi de Finances ou Conseil Municipal)',
-    status: (project.data_provenance !== 'DECLARED_ADMIN' && hasVerifiedBudgetEvidence && hasVotedAmount) ? 'VERIFIED_OFFICIAL' : 'PENDING_DOCUMENTATION',
-    statusLabel: project.data_provenance === 'DECLARED_ADMIN'
-      ? 'Montant déclaré, vérification distincte requise'
-      : !hasVotedAmount
-        ? 'Montant non renseigné'
-        : hasVerifiedBudgetEvidence
-          ? 'Voté au Budget (source vérifiée)'
-          : 'Ligne cataloguée — page/pièce officielle à vérifier',
+    status: budgetVotedStatus,
+    statusLabel: budgetVotedStatusLabel,
     dataPoints: [
       {
         label: 'Exercice fiscal',
         value: project.fiscal_year ? String(project.fiscal_year) : 'Non renseigné',
         provenance: projectProvenance,
+        provenanceClass: projectProvenanceClass,
       },
       {
         label: 'Montant inscrit',
-        value: (project.publication_status !== 'DRAFT' && project.budget_amount_fcfa != null && project.budget_amount_fcfa > 0) ? formatFCFA(project.budget_amount_fcfa) : 'Non renseigné',
+        value: isZeroDocumentedAmount
+          ? '0 FCFA (montant nul documenté)'
+          : hasPositiveVotedAmount
+            ? formatFCFA(project.budget_amount_fcfa!)
+            : 'Non renseigné',
         provenance: projectProvenance,
+        provenanceClass: projectProvenanceClass,
+        availability: hasDocumentedAmount ? 'AVAILABLE' : 'NOT_FOUND_PUBLICLY',
         sourceDetails: project.source || 'Document budgétaire source non relié',
+        sourceUrl: project.source_url,
       },
       {
         label: 'Nature de la dépense',
         value: project.nature_expense || 'Investissements',
         provenance: projectProvenance,
+        provenanceClass: projectProvenanceClass,
       },
       {
         label: 'Maîtrise d\'Ouvrage',
         value: project.master_builder || project.commune_name || project.region_name || 'Collectivité / Ministère',
         provenance: projectProvenance,
+        provenanceClass: projectProvenanceClass,
       },
     ],
   });
 
   // -------------------------------------------------------------------------
   // ÉTAPE 3 : COMMANDE PUBLIQUE & MARCHÉ (DGMP)
-  // RÈGLE : LA SIMPLE PRÉSENCE D'UN TITULAIRE DANS BUDGETPROJECT NE PROUVE PAS UN MARCHÉ DGMP
+  // RÈGLE : LA SIMPLE PRÉSENCE D'UN TITULAIRE OU UN RAPPROCHEMENT AUTOMATIQUE NE PROUVE PAS UN MARCHÉ DGMP CERTIFIÉ
   // -------------------------------------------------------------------------
   if (matchedProc) {
-    const isProbable = matchResult.confidence === 'PROBABLE';
+    const procurementStatus: PassportStageStatus = hasVerifiedProcurementEvidence
+      ? 'VERIFIED_OFFICIAL'
+      : 'PROBABLE_MATCH';
+    const procurementStatusLabel = hasVerifiedProcurementEvidence
+      ? 'Marché Officiel Attribué'
+      : matchResult.confidence === 'PROBABLE'
+        ? 'Marché Officiel Probable'
+        : 'Marché rapproché (avis DGMP primaire à certifier)';
     stages.push({
       id: 'PROCUREMENT_DGMP',
       stepNumber: 3,
       label: 'Commande Publique & Attribution (DGMP)',
       shortDescription: 'Attribution du marché public rapprochée des avis officiels de la DGMP',
-      status: isProbable ? 'PROBABLE_MATCH' : 'VERIFIED_OFFICIAL',
-      statusLabel: isProbable ? 'Marché Officiel Probable' : 'Marché Officiel Attribué',
+      status: procurementStatus,
+      statusLabel: procurementStatusLabel,
       alertMessage: matchResult.temporalJustification,
       dataPoints: [
         {
           label: 'N° Appel d\'Offres',
           value: matchedProc.tender_number || 'Non renseigné',
-          provenance: 'OFFICIAL_SOURCE',
+          provenance: marketDataProvenance,
           sourceDetails: matchedProc.source,
           sourceUrl: matchedProc.source_url,
         },
         {
           label: 'Objet officiel du marché',
           value: matchedProc.procurement_object,
-          provenance: 'OFFICIAL_SOURCE',
+          provenance: marketDataProvenance,
         },
         {
           label: 'Entreprise adjudicataire',
           value: matchedProc.contractor,
-          provenance: 'OFFICIAL_SOURCE',
+          provenance: marketDataProvenance,
         },
         {
           label: 'Montant adjugé',
           value: formatRecordAmount(matchedProc, 'award_amount'),
-          provenance: 'OFFICIAL_SOURCE',
+          provenance: marketDataProvenance,
         },
         {
           label: 'Date d\'attribution',
           value: matchedProc.award_date || '2024',
-          provenance: 'OFFICIAL_SOURCE',
+          provenance: marketDataProvenance,
         },
       ],
     });
@@ -537,12 +922,14 @@ export function generateProjectPassport(
           label: 'Entreprise déclarée',
           value: project.contractor_name,
           provenance: 'UNVERIFIED_INPUT',
+          provenanceClass: 'DECLARED_ADMIN',
           sourceDetails: 'Mention administrative déclarative non corroborée par un avis d\'attribution DGMP vérifié.',
         },
         {
           label: 'Avis d\'attribution DGMP',
           value: 'En attente de rapprochement avec le répertoire officiel des marchés',
           provenance: 'SUIVIBUDGET_CALCULATION',
+          provenanceClass: 'SUIVIBUDGET_CALCULATION',
           availability: 'PENDING_COLLECTION',
         },
       ],
@@ -560,6 +947,7 @@ export function generateProjectPassport(
           label: 'Statut du marché',
           value: 'Aucun avis d\'attribution rapproché pour le moment',
           provenance: 'SUIVIBUDGET_CALCULATION',
+          provenanceClass: 'SUIVIBUDGET_CALCULATION',
           availability: 'NOT_FOUND_PUBLICLY',
           sourceDetails: 'Avis DGMP consultés : l\'absence de résultat ne prouve pas l\'absence d\'appel d\'offres (Principe 9).',
         },
@@ -570,46 +958,66 @@ export function generateProjectPassport(
   // -------------------------------------------------------------------------
   // ÉTAPE 4 : EXÉCUTION BUDGÉTAIRE (COMPTE ADMINISTRATIF)
   // RÈGLE : STRICTEMENT NEUTRE, AUCUNE INTERPRÉTATION CAUSALE ("REPORT PROBABLE" INTERDIT)
+  // Un rapprochement automatique STRONG ou une réponse institutionnelle ne certifie jamais à lui seul l'exécution.
   // -------------------------------------------------------------------------
   if (matchedOp) {
     const isZeroExecuted = isExactAmount(matchedOp, 'executed_amount') && matchedOp.executed_amount === 0;
     const isUncertainExecuted = !isExactAmount(matchedOp, 'executed_amount');
-    const isProbable = matchResult.confidence === 'PROBABLE';
 
     // Formulation factuelle et neutre obligatoire (Section 5.3)
     const alertMessage = isZeroExecuted
       ? 'Le Compte Administratif consulté indique 0 FCFA exécuté/ordonnancé pour cette opération sur l’exercice observé. La cause de cet écart n’est pas établie par les sources actuellement reliées.'
       : matchResult.temporalJustification;
 
+    const executionStageStatus: PassportStageStatus = isUncertainExecuted
+      ? 'PENDING_DOCUMENTATION'
+      : isZeroExecuted
+        ? 'ANOMALY_DETECTED'
+        : hasVerifiedExecutionEvidence
+          ? 'VERIFIED_OFFICIAL'
+          : 'PROBABLE_MATCH';
+
+    const executionStageStatusLabel = isUncertainExecuted
+      ? 'Montant d’exécution qualifié ou à confirmer'
+      : isZeroExecuted
+        ? 'Exécution financière à 0 FCFA'
+        : hasVerifiedExecutionEvidence
+          ? 'Mandaté au Compte Administratif'
+          : matchResult.confidence === 'PROBABLE'
+            ? 'Opération CA Probable'
+            : 'Rapprochement CA automatique (pièce primaire à certifier)';
+
     stages.push({
       id: 'BUDGET_EXECUTION_CA',
       stepNumber: 4,
       label: 'Exécution Budgétaire (Compte Administratif)',
       shortDescription: 'Crédits mandatés et ordonnancés inscrits au Compte Administratif audité',
-      status: isUncertainExecuted ? 'PENDING_DOCUMENTATION' : isZeroExecuted ? 'ANOMALY_DETECTED' : (isProbable ? 'PROBABLE_MATCH' : 'VERIFIED_OFFICIAL'),
-      statusLabel: isUncertainExecuted ? 'Montant d’exécution qualifié ou à confirmer' : isZeroExecuted ? 'Exécution financière à 0 FCFA' : (isProbable ? 'Opération CA Probable' : 'Mandaté au Compte Administratif'),
+      status: executionStageStatus,
+      statusLabel: executionStageStatusLabel,
       alertMessage,
       dataPoints: [
         {
           label: 'Exercice CA',
           value: String(matchedOp.fiscal_year),
-          provenance: 'OFFICIAL_SOURCE',
+          provenance: caDataProvenance,
         },
         {
           label: 'Ligne opération',
           value: matchedOp.operation_reference || 'Ligne d\'investissement',
-          provenance: 'OFFICIAL_SOURCE',
+          provenance: caDataProvenance,
         },
         {
           label: 'Crédits prévus au CA',
           value: formatRecordAmount(matchedOp, 'planned_amount'),
-          provenance: 'OFFICIAL_SOURCE',
+          provenance: caDataProvenance,
         },
         {
           label: 'Montant effectivement ordonnancé',
           value: formatRecordAmount(matchedOp, 'executed_amount'),
-          provenance: 'OFFICIAL_SOURCE',
-          sourceDetails: `Page ${matchedOp.source_page || 'CA'} du Compte Administratif officiel`,
+          provenance: caDataProvenance,
+          sourceDetails: matchedOp.source_page
+            ? `Page ${matchedOp.source_page} du Compte Administratif`
+            : 'Page du Compte Administratif à préciser',
         },
       ],
     });
@@ -628,6 +1036,7 @@ export function generateProjectPassport(
           label: 'Statut du contrôle',
           value: 'Opération candidate identifiée mais non affirmée (écart d\'exercice)',
           provenance: 'SUIVIBUDGET_CALCULATION',
+          provenanceClass: 'SUIVIBUDGET_CALCULATION',
           availability: 'PENDING_COLLECTION',
           sourceDetails: matchResult.matchingReason,
         },
@@ -646,6 +1055,7 @@ export function generateProjectPassport(
           label: 'Compte Administratif',
           value: 'En attente de réception ou de publication du document certifié',
           provenance: 'SUIVIBUDGET_CALCULATION',
+          provenanceClass: 'SUIVIBUDGET_CALCULATION',
           availability: 'NOT_FOUND_PUBLICLY',
           sourceDetails: 'La publication officielle du CA relève de la collectivité locale.',
         },
@@ -656,7 +1066,7 @@ export function generateProjectPassport(
   // -------------------------------------------------------------------------
   // ÉTAPE 5 : RÉALISATION PHYSIQUE & PREUVES TERRAIN
   // RÈGLE CARDINALE : UNE DÉPENSE FINANCIÈRE NE PROUVE PAS UNE RÉALISATION PHYSIQUE (Principe 7)
-  // OBSERVATION CITOYENNE != VÉRITÉ ADMINISTRATIVE
+  // UNE RÉALISATION PHYSIQUE DÉCLARÉE NE DEVIENT JAMAIS UNE RÉALISATION CERTIFIÉE (VERIFIED_OFFICIAL)
   // -------------------------------------------------------------------------
   const hasOfficialRate = Boolean(project.official_progress_source) && project.progress_percentage > 0;
   const hasFieldProofs = approvedProofs.length > 0;
@@ -685,13 +1095,15 @@ export function generateProjectPassport(
       {
         label: 'Taux administratif déclaré',
         value: hasOfficialRate ? `${project.progress_percentage}%` : 'Non communiqué par la maîtrise d\'ouvrage',
-        provenance: project.data_provenance==='DECLARED_ADMIN' ? 'UNVERIFIED_INPUT' : 'INSTITUTION_RESPONSE',
+        provenance: project.data_provenance === 'DECLARED_ADMIN' ? 'UNVERIFIED_INPUT' : 'INSTITUTION_RESPONSE',
+        provenanceClass: project.data_provenance === 'DECLARED_ADMIN' ? 'DECLARED_ADMIN' : 'INSTITUTION_RESPONSE',
         sourceDetails: project.official_progress_source || project.master_builder || 'Déclaration administrative non corroborée par constat indépendant (Principe 7).',
       },
       {
         label: 'Contributions citoyennes publiées',
         value: hasFieldProofs ? `${approvedProofs.length} constat(s) photo/vidéo approuvé(s)` : '0 constat pour l\'instant',
         provenance: 'CITIZEN_OBSERVATION',
+        provenanceClass: 'CITIZEN_OBSERVATION',
       },
       {
         label: 'Dernier statut terrain observé',
@@ -699,14 +1111,16 @@ export function generateProjectPassport(
           ? (approvedProofs[0].citizen_status_claim === 'COMPLETED' ? 'Achèvement déclaré par un citoyen' : approvedProofs[0].citizen_status_claim === 'IN_PROGRESS' ? 'Travaux déclarés en cours' : 'Non démarré selon le citoyen')
           : 'Non documenté sur place',
         provenance: 'CITIZEN_OBSERVATION',
+        provenanceClass: 'CITIZEN_OBSERVATION',
       },
     ],
   });
 
   // -------------------------------------------------------------------------
   // ÉTAPE 6 : REDDITION DE COMPTES & AUDIT
+  // RÈGLE : Une réponse institutionnelle ou un rapprochement non vérifié ne certifie pas l'audit.
   // -------------------------------------------------------------------------
-  const isAuditVerified = matchedOp !== undefined;
+  const isAuditVerified = hasVerifiedExecutionEvidence && (!matchedProc || hasVerifiedProcurementEvidence);
   stages.push({
     id: 'AUDIT_ACCOUNTABILITY',
     stepNumber: 6,
@@ -719,16 +1133,21 @@ export function generateProjectPassport(
         label: 'Contrôle contradictoire',
         value: isAuditVerified ? 'Rapproché avec CA officiel et/ou DGMP' : 'En attente de documents complémentaires',
         provenance: 'SUIVIBUDGET_CALCULATION',
+        provenanceClass: 'SUIVIBUDGET_CALCULATION',
       },
       {
         label: 'Droit d\'accès à l\'information (CAIDP)',
         value: 'Modèle de requête légale disponible sur la plateforme',
         provenance: 'SUIVIBUDGET_CALCULATION',
+        provenanceClass: 'SUIVIBUDGET_CALCULATION',
       },
       {
         label: 'Droit de réponse institutionnel',
-        value: 'Ouvert à la collectivité et aux services techniques',
+        value: response
+          ? `Réponse publiée (${response.supporting_document_name || 'droit de réponse institutionnel'}) — ne vaut pas certification financière`
+          : 'Ouvert à la collectivité et aux services techniques',
         provenance: 'INSTITUTION_RESPONSE',
+        provenanceClass: 'INSTITUTION_RESPONSE',
       },
     ],
   });
@@ -751,6 +1170,10 @@ export function generateProjectPassport(
     projectTitle: project.title,
     institutionName: project.commune_name || project.region_name || project.ministry_name || 'Collectivité',
     fiscalYear: project.fiscal_year || null,
+    projectProvenanceClass,
+    hasVerifiedBudgetEvidence,
+    hasVerifiedProcurementEvidence,
+    hasVerifiedExecutionEvidence,
     stages,
     documentationCompletenessPct,
     overallAccountabilityScorePct: documentationCompletenessPct,

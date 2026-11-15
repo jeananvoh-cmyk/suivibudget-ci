@@ -145,12 +145,26 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
     }
   };
 
-  const getProvenanceBadge = (provenance: string) => {
-    switch (provenance) {
+  const getProvenanceBadge = (provenance: string, provenanceClass?: string) => {
+    const effective = provenanceClass || provenance;
+    switch (effective) {
+      case 'OFFICIAL_PRIMARY_SOURCE':
       case 'OFFICIAL_SOURCE':
         return (
           <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
             Source Officielle
+          </span>
+        );
+      case 'OFFICIAL_SECONDARY_SOURCE':
+        return (
+          <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-300">
+            Source Secondaire
+          </span>
+        );
+      case 'AUTOMATED_EXTRACTION':
+        return (
+          <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-300">
+            Extraction Automatisée
           </span>
         );
       case 'SUIVIBUDGET_CALCULATION':
@@ -171,18 +185,45 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
             Réponse Institutionnelle
           </span>
         );
+      case 'DECLARED_ADMIN':
       case 'UNVERIFIED_INPUT':
         return (
           <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
             Donnée Déclarative
           </span>
         );
+      case 'UNKNOWN':
       default:
         return (
           <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
-            Donnée Publique
+            Source Non Reliée
           </span>
         );
+    }
+  };
+
+  const getFactProvenanceDescription = (fact: PassportFact) => {
+    const effective = fact.provenanceClass || fact.provenance;
+    switch (effective) {
+      case 'OFFICIAL_PRIMARY_SOURCE':
+      case 'OFFICIAL_SOURCE':
+        return 'Source officielle primaire vérifiée';
+      case 'OFFICIAL_SECONDARY_SOURCE':
+        return 'Source secondaire (presse / portail — à corroborer par pièce primaire)';
+      case 'AUTOMATED_EXTRACTION':
+        return 'Extraction automatisée du catalogue (correspondance documentaire à vérifier)';
+      case 'SUIVIBUDGET_CALCULATION':
+        return 'Calcul / rapprochement SuiviBudget';
+      case 'CITIZEN_OBSERVATION':
+        return 'Observation citoyenne';
+      case 'INSTITUTION_RESPONSE':
+        return 'Réponse institutionnelle (ne vaut pas certification financière)';
+      case 'DECLARED_ADMIN':
+      case 'UNVERIFIED_INPUT':
+        return 'Information déclarative non corroborée';
+      case 'UNKNOWN':
+      default:
+        return 'Provenance documentaire non reliée';
     }
   };
 
@@ -224,7 +265,7 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
           {Object.entries(passport.facts).map(([key, fact]) => (
             <div key={key} className="min-w-0 rounded-xl border border-slate-100 p-3 break-words">
               <dt className="text-xs font-bold text-slate-500">{fact.label}</dt><dd className="text-sm font-medium">{showFact(fact)}</dd>
-              <dd className="mt-1 text-xs text-slate-600">{fact.provenance === 'OFFICIAL_SOURCE' ? 'Source officielle' : fact.provenance === 'SUIVIBUDGET_CALCULATION' ? 'Calcul / rapprochement SuiviBudget' : fact.provenance === 'CITIZEN_OBSERVATION' ? 'Observation citoyenne' : fact.provenance === 'INSTITUTION_RESPONSE' ? 'Réponse institutionnelle' : 'Information non corroborée'}</dd>
+              <dd className="mt-1 text-xs text-slate-600">{getFactProvenanceDescription(fact)}</dd>
               <dd className="text-xs text-slate-600">{fact.source_reference || 'Référence non disponible'}{fact.source_page != null ? ` — page ${fact.source_page}` : ''}</dd>
               {fact.source_url?.startsWith('https://') && <dd><a className="text-sm text-blue-700 underline focus-visible:outline" href={fact.source_url} target="_blank" rel="noopener noreferrer">Consulter la source</a></dd>}
               {fact.source_document_id && <dd><button type="button" className="min-h-[44px] text-sm text-blue-700 underline focus-visible:outline" onClick={() => void openSource(fact.source_document_id!)}>Ouvrir le document publié</button></dd>}
@@ -396,7 +437,7 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
                           <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                             {dp.label}
                           </span>
-                          {getProvenanceBadge(dp.provenance)}
+                          {getProvenanceBadge(dp.provenance, dp.provenanceClass)}
                         </div>
                         <div className="text-xs sm:text-sm font-black text-slate-900 break-words">
                           {dp.value}
@@ -414,7 +455,11 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:text-emerald-900 mt-1 hover:underline"
                           >
-                            <span>Consulter la source officielle</span>
+                            <span>
+                              {dp.provenance === 'OFFICIAL_SOURCE' || dp.provenance === 'OFFICIAL_PRIMARY_SOURCE'
+                                ? 'Consulter la source officielle'
+                                : 'Consulter la source référencée'}
+                            </span>
                             <ExternalLink className="w-3 h-3" />
                           </a>
                         )}

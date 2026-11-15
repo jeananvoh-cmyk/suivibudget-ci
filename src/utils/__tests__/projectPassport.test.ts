@@ -315,13 +315,28 @@ describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
   });
 
   it('Section 10.G : sépare strictement le besoin citoyen de la programmation budgétaire (Besoin ≠ Programmation)', () => {
-    const passport = generateProjectPassport(mockGenericProject);
+    // 1. Projet générique sans document source identifiable -> provenance UNKNOWN (Règles F & G)
+    const unlinkedPassport = generateProjectPassport(mockGenericProject);
+    const unlinkedNeedStage = unlinkedPassport.stages.find(s => s.id === 'NEED_PROGRAMMING');
+    expect(unlinkedNeedStage?.dataPoints.find(dp => dp.label === 'Programmation budgétaire')?.provenance).toBe('UNKNOWN');
+
+    // 2. Projet issu d'une pièce primaire officielle identifiable et vérifiée -> OFFICIAL_SOURCE (OFFICIAL_PRIMARY_SOURCE),
+    // mais le besoin citoyen initial reste distinct et NOT_FOUND_PUBLICLY
+    const verifiedLfiProject: BudgetProject = {
+      ...mockGenericProject,
+      program_name: 'Programme Voirie et Réseaux Divers 2026',
+      source: 'Annexe 4 LFI 2026 — Loi de Finances n°2025-988',
+      source_url: 'https://dgbf.gouv.ci/wp-content/uploads/2026/01/Annexe-4-LFI-2026.pdf',
+      source_page: 25,
+      financial_verification_status: 'VERIFIED',
+    };
+    const passport = generateProjectPassport(verifiedLfiProject);
     const needProgStage = passport.stages.find(s => s.id === 'NEED_PROGRAMMING');
 
     expect(needProgStage).toBeDefined();
-    // Programmation officielle dans la LFI
     const progDp = needProgStage?.dataPoints.find(dp => dp.label === 'Programmation budgétaire');
     expect(progDp?.provenance).toBe('OFFICIAL_SOURCE');
+    expect(progDp?.provenanceClass).toBe('OFFICIAL_PRIMARY_SOURCE');
 
     // Mais besoin citoyen initial non documenté dans l'extrait
     const needDp = needProgStage?.dataPoints.find(dp => dp.label === 'Expression du besoin citoyen');
