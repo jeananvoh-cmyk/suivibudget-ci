@@ -2126,9 +2126,9 @@
         },
         {
           "name": "budget_amount_fcfa",
-          "type": "numeric(15,2)",
+          "type": "numeric",
           "default": null,
-          "not_null": true
+          "not_null": false
         },
         {
           "name": "fiscal_year",
@@ -2236,6 +2236,66 @@
           "name": "project_tier",
           "type": "text",
           "default": "'MUNICIPAL'::text",
+          "not_null": false
+        },
+        {
+          "name": "revision",
+          "type": "integer",
+          "default": "1",
+          "not_null": true
+        },
+        {
+          "name": "archived_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "not_null": false
+        },
+        {
+          "name": "project_metadata",
+          "type": "jsonb",
+          "default": "'{}'::jsonb",
+          "not_null": true
+        },
+        {
+          "name": "source_document_id",
+          "type": "text",
+          "default": null,
+          "not_null": false
+        },
+        {
+          "name": "source_page",
+          "type": "integer",
+          "default": null,
+          "not_null": false
+        },
+        {
+          "name": "source_url",
+          "type": "text",
+          "default": null,
+          "not_null": false
+        },
+        {
+          "name": "data_provenance",
+          "type": "text",
+          "default": "'OFFICIAL_SOURCE'::text",
+          "not_null": true
+        },
+        {
+          "name": "financial_verification_status",
+          "type": "text",
+          "default": "'TO_VERIFY'::text",
+          "not_null": true
+        },
+        {
+          "name": "financial_verified_by",
+          "type": "uuid",
+          "default": null,
+          "not_null": false
+        },
+        {
+          "name": "financial_verified_at",
+          "type": "timestamp with time zone",
+          "default": null,
           "not_null": false
         }
       ],
@@ -7301,6 +7361,18 @@
       "type": "f",
       "table": "data_import_events",
       "definition": "FOREIGN KEY (row_id) REFERENCES data_import_rows(id)"
+    },
+    {
+      "name": "budget_projects_source_document_id_fkey",
+      "type": "f",
+      "table": "budget_projects",
+      "definition": "FOREIGN KEY (source_document_id) REFERENCES public_documents(id)"
+    },
+    {
+      "name": "budget_projects_financial_verified_by_fkey",
+      "type": "f",
+      "table": "budget_projects",
+      "definition": "FOREIGN KEY (financial_verified_by) REFERENCES profiles(id)"
     }
   ]
 }
