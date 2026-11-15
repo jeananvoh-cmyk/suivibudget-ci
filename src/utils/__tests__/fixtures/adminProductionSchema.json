@@ -3221,6 +3221,54 @@
           "type": "timestamp with time zone",
           "default": "now()",
           "not_null": false
+        },
+        {
+          "name": "revision",
+          "type": "integer",
+          "default": "1",
+          "not_null": true
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "clock_timestamp()",
+          "not_null": true
+        },
+        {
+          "name": "archived_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "not_null": false
+        },
+        {
+          "name": "publication_status",
+          "type": "text",
+          "default": "'DRAFT'::text",
+          "not_null": true
+        },
+        {
+          "name": "verification_status",
+          "type": "text",
+          "default": "'TO_VERIFY'::text",
+          "not_null": true
+        },
+        {
+          "name": "verified_by",
+          "type": "uuid",
+          "default": null,
+          "not_null": false
+        },
+        {
+          "name": "verified_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "not_null": false
+        },
+        {
+          "name": "source_document_id",
+          "type": "text",
+          "default": null,
+          "not_null": false
         }
       ],
       "force_rls": false
