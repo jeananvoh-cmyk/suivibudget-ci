@@ -100,8 +100,13 @@ GRANT EXECUTE ON FUNCTION public.review_data_import(text[], text, text, boolean)
 GRANT EXECUTE ON FUNCTION public.withdraw_apec_need(uuid, text) TO authenticated;
 
 -- site_settings contains contact_email and internal settings_metadata. The public
--- SELECT policy exposed every column to anon/authenticated. Keep staff-only access;
--- the public application uses its safe defaults and no public direct table read.
+-- SELECT policy exposed every column to anon/authenticated. Keep staff-only access.
 DROP POLICY IF EXISTS admin_entity_public ON public.site_settings;
+
+-- Legacy projects/sources tables are empty in Production and are not read by the
+-- current client. Their unfiltered public SELECT policies would expose future rows
+-- without a publication or verification contract. Keep staff write policies only.
+DROP POLICY IF EXISTS "Allow public read access on projects" ON public.projects;
+DROP POLICY IF EXISTS "Allow public read on sources" ON public.sources;
 
 COMMIT;
