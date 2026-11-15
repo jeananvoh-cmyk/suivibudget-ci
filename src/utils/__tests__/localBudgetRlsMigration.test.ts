@@ -38,8 +38,41 @@ describe('RLS hardening — local budget administration', () => {
   it('replays on an isolated production-schema fixture without touching the remote database', async () => {
     const db = await createProductionSchemaFixture();
     try {
+      await db.exec(`
+        INSERT INTO public.institutions(id,name,type) VALUES ('migration-inst','Commune de test','MAIRIE');
+        INSERT INTO public.local_budgets
+          (id,institution_id,institution_type,institution_name,fiscal_year,budget_type,total_amount,verification_status)
+        VALUES ('migration-budget','migration-inst','COMMUNE','Commune de test',2026,'PRIMITIF_ADOPTE',100,'AIP_VERIFIED');
+        INSERT INTO public.budget_revenue_sources
+          (id,budget_id,category,label,amount,verification_status)
+        VALUES ('migration-revenue','migration-budget','OWN_REVENUE','Recettes propres',25,'AIP_VERIFIED');
+        INSERT INTO public.administrative_accounts
+          (id,institution_id,institution_type,institution_name,fiscal_year,source_document,operating_planned,verification_status)
+        VALUES ('migration-ca','migration-inst','COMMUNE','Commune de test',2024,'CA 2024.pdf',20,'OFFICIAL_DOCUMENT');
+        INSERT INTO public.ca_investment_operations
+          (id,ca_id,institution_id,fiscal_year,title,sector,planned_amount,executed_amount)
+        VALUES ('migration-operation','migration-ca','migration-inst',2024,'École test','Éducation',50,10);
+        INSERT INTO public.ca_procurement_matches
+          (id,operation_id,procurement_object,contractor,award_amount,verification_status)
+        VALUES ('migration-market','migration-operation','Travaux école','Entreprise test',40,'Vérifié DGMP');
+      `);
       await db.exec(migration);
       await db.exec(migration);
+      const demotions = await db.query<{ table_name: string; status: string; amount: string | number }>(
+        `SELECT 'local_budgets' table_name,verification_status status,total_amount::text amount FROM public.local_budgets WHERE id='migration-budget'
+         UNION ALL
+         SELECT 'budget_revenue_sources',verification_status,amount::text FROM public.budget_revenue_sources WHERE id='migration-revenue'
+         UNION ALL
+         SELECT 'administrative_accounts',verification_status,operating_planned::text FROM public.administrative_accounts WHERE id='migration-ca'
+         UNION ALL
+         SELECT 'ca_procurement_matches',verification_status,award_amount::text FROM public.ca_procurement_matches WHERE id='migration-market'`
+      );
+      expect(demotions.rows).toEqual(expect.arrayContaining([
+        { table_name: 'local_budgets', status: 'SECONDARY_TO_CORROBORATE', amount: '100' },
+        { table_name: 'budget_revenue_sources', status: 'SECONDARY_TO_CORROBORATE', amount: '25' },
+        { table_name: 'administrative_accounts', status: 'TO_VERIFY', amount: '20' },
+        { table_name: 'ca_procurement_matches', status: 'TO_VERIFY', amount: '40' }
+      ]));
       const defaults = await db.query<{ table_name: string; column_name: string; column_default: string | null }>(
         `SELECT table_name,column_name,column_default
          FROM information_schema.columns
