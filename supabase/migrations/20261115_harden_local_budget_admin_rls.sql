@@ -8,6 +8,13 @@
 
 BEGIN;
 
+-- Ne jamais attribuer implicitement un statut AIP vérifié à un budget inséré
+-- sans qualification documentaire explicite.
+ALTER TABLE public.local_budgets
+  ALTER COLUMN verification_status SET DEFAULT 'DOCUMENT_TO_EXTRACT';
+ALTER TABLE public.budget_revenue_sources
+  ALTER COLUMN verification_status SET DEFAULT 'DOCUMENT_TO_EXTRACT';
+
 DROP POLICY IF EXISTS "Allow admin write on sources" ON public.sources;
 CREATE POLICY "Allow admin write on sources"
   ON public.sources FOR ALL TO authenticated
