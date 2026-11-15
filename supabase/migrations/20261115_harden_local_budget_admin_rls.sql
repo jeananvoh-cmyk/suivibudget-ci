@@ -1,0 +1,51 @@
+-- =========================================================================
+-- SUIVIBUDGET CI — HARDENING RLS DES BUDGETS LOCAUX
+-- Les rôles d'autorisation ne doivent provenir que de app_metadata,
+-- modifiable côté serveur de confiance. user_metadata est modifiable par
+-- l'utilisateur et ne doit jamais accorder de privilèges.
+-- Migration additive : aucune donnée n'est modifiée.
+-- =========================================================================
+
+BEGIN;
+
+DROP POLICY IF EXISTS "Allow admin write on sources" ON public.sources;
+CREATE POLICY "Allow admin write on sources"
+  ON public.sources FOR ALL TO authenticated
+  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'))
+  WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'));
+
+DROP POLICY IF EXISTS "Allow admin full access on local budgets" ON public.local_budgets;
+CREATE POLICY "Allow admin full access on local budgets"
+  ON public.local_budgets FOR ALL TO authenticated
+  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'))
+  WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'));
+
+DROP POLICY IF EXISTS "Allow admin write on budget sources" ON public.budget_sources;
+CREATE POLICY "Allow admin write on budget sources"
+  ON public.budget_sources FOR ALL TO authenticated
+  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'))
+  WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'));
+
+DROP POLICY IF EXISTS "Allow admin write on budget revenue sources" ON public.budget_revenue_sources;
+CREATE POLICY "Allow admin write on budget revenue sources"
+  ON public.budget_revenue_sources FOR ALL TO authenticated
+  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'))
+  WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'));
+
+DROP POLICY IF EXISTS "Allow admin write on budget lines" ON public.budget_lines;
+CREATE POLICY "Allow admin write on budget lines"
+  ON public.budget_lines FOR ALL TO authenticated
+  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'))
+  WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'));
+
+DROP POLICY IF EXISTS "Allow admin read on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin read on budget revisions"
+  ON public.budget_revision_history FOR SELECT TO authenticated
+  USING ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER', 'AUDITOR'));
+
+DROP POLICY IF EXISTS "Allow admin insert on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin insert on budget revisions"
+  ON public.budget_revision_history FOR INSERT TO authenticated
+  WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'role') IN ('ADMIN', 'DATA_MANAGER'));
+
+COMMIT;
