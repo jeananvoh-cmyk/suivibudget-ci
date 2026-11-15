@@ -175,7 +175,7 @@ La liste exacte des fichiers et numstat est livrée dans `scope.json` ; le workt
 - `src/utils/projectPassport.ts`
 - `supabase/functions/admin-media-url/index.ts`
 - `supabase/functions/public-document-url/index.ts`
-- `supabase/migrations/20261013165625_admin_dashboard_persistence_hardening.sql`
+- `supabase/migrations/20261026183930_admin_dashboard_persistence_hardening_pr63.sql`
 
 Chevauchements observés avec #62 : `src/services/dataStore.ts`, `src/types/publicDocument.ts`, `src/components/admin/SingleCAUploadModal.tsx`, `src/components/admin/ExamineCADocumentModal.tsx`, `docs/AGENT_HANDOFF.md`, `docs/CODEX_CHECKPOINT.md`. Résolution attendue après stabilisation : préserver le dry-run financier, la documentation pilote et les tests Cocody d'Antigravity ; conserver les six métadonnées ; combiner ses champs avec les contrôles serveur, origines réellement téléversées, UNKNOWN et qualification séparée. Remplacer les saisies de SHA manuelles et pages automatiques par ce contrat de fichiers contrôlés, sans écraser les ajouts financiers. Ses fichiers budgetDocumentDryRun et cocodyCa2024Pilot ne sont pas réécrits dans ce worktree.
 

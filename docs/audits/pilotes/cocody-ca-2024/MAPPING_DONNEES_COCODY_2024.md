@@ -3,7 +3,7 @@
 
 **Document source :** Fascicule du Compte Administratif 2024 — Commune de Cocody  
 **Empreinte SHA-256 :** `941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf`  
-**Schéma cible :** Contrat de ligne `private.validate_import_row` (Migration `20261001091748_controlled_data_import.sql` & `20261001144423_import_console_qualified_amounts.sql`)
+**Schéma cible :** Contrat de ligne `private.validate_import_row` (Migration `20261001093613_controlled_data_import.sql` & `20261001150911_import_console_qualified_amounts.sql`)
 
 ---
 
