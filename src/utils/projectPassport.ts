@@ -280,7 +280,7 @@ export function checkVerifiedExecutionEvidence(
   if (matchResult.confidence !== 'STRONG') return false;
   if (matchResult.conflictingFields && matchResult.conflictingFields.length > 0) return false;
   if (account.status !== 'VERIFIED' && account.status !== 'PUBLISHED') return false;
-  if (account.verification_status !== 'OFFICIAL_DOCUMENT' && account.verification_status !== 'VERIFIED') return false;
+  if (account.verification_status !== 'OFFICIAL_DOCUMENT' && account.verification_status !== 'OFFICIAL_INSTITUTION') return false;
   const hasAccountDoc =
     (!isGenericSourcePlaceholder(account.source_document) && !isSecondarySourceReference(account.source_document, account.source_url)) ||
     Boolean(account.source_document_id?.trim());
@@ -672,7 +672,7 @@ export function generateProjectPassport(
     ? 'UNKNOWN'
     : isSecondarySourceReference(account.source_document, account.source_url)
       ? 'OFFICIAL_SECONDARY_SOURCE'
-      : (account.verification_status === 'OFFICIAL_DOCUMENT' || account.verification_status === 'VERIFIED') &&
+      : (account.verification_status === 'OFFICIAL_DOCUMENT' || account.verification_status === 'OFFICIAL_INSTITUTION') &&
         (account.status === 'VERIFIED' || account.status === 'PUBLISHED') &&
         (!isGenericSourcePlaceholder(account.source_document) || Boolean(account.source_document_id?.trim()))
         ? 'OFFICIAL_SOURCE'

@@ -34,6 +34,7 @@ interface ProjectAccountabilityPassportProps {
   proofs?: CitizenProof[];
   onOpenSendProof?: (project: BudgetProject) => void;
   onOpenDocRequest?: (project: BudgetProject) => void;
+  defaultExpandedStageId?: string | null;
 }
 
 export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPassportProps> = ({
@@ -41,8 +42,9 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
   proofs = [],
   onOpenSendProof,
   onOpenDocRequest,
+  defaultExpandedStageId = null,
 }) => {
-  const [expandedStageId, setExpandedStageId] = useState<string | null>(null);
+  const [expandedStageId, setExpandedStageId] = useState<string | null>(defaultExpandedStageId);
   const [sourceMessage, setSourceMessage] = useState('');
 
   const passport: ProjectAccountabilityPassportData = React.useMemo(() => {
