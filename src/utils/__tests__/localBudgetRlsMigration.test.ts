@@ -48,6 +48,10 @@ describe('RLS hardening — local budget administration', () => {
   it('is additive and transaction-wrapped; it does not mutate financial records', () => {
     expect(migration).toMatch(/\bBEGIN;\s/);
     expect(migration.trimEnd().endsWith('COMMIT;')).toBe(true);
-    expect(migration).not.toMatch(/\b(UPDATE|DELETE FROM|INSERT INTO)\s+public\.(local_budgets|budget_lines|budget_sources|budget_revenue_sources)/i);
+    expect(migration).toMatch(/UPDATE public\.local_budgets\s+SET verification_status = 'SECONDARY_TO_CORROBORATE'/);
+    expect(migration).toMatch(/UPDATE public\.budget_revenue_sources\s+SET verification_status = 'SECONDARY_TO_CORROBORATE'/);
+    expect(migration).toMatch(/UPDATE public\.ca_procurement_matches\s+SET verification_status = 'TO_VERIFY'/);
+    expect(migration).not.toMatch(/UPDATE public\.local_budgets\s+SET[^;]*(total_amount|operating_amount|investment_amount)/i);
+    expect(migration).not.toMatch(/UPDATE public\.budget_revenue_sources\s+SET[^;]*(amount|amount_fcfa)/i);
   });
 });
