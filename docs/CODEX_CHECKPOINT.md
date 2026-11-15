@@ -3,7 +3,7 @@
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/65 (`codex/p0-production-cocody-2024` ciblant `master` `901a2033084c5aa1ca76bc4ce4625e1884d48ab9`).
 - **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0`.
 - **Livrables vérifiés et durcis** :
-  - `supabase/migrations/20261026213000_security_definer_hardening.sql` : activation de RLS (`ENABLE ROW LEVEL SECURITY`, 0 politique permissive) et `REVOKE ALL` sur `private.admin_document_file_checks` et `private.document_delivery_receipts` ; durcissement de `admin_baseline_visibility` (`id not like 'admin-%'`, `csv-%`, `import-%`), `admin_staff_directory`, `admin_confirm_document_integrity`, `admin_file_checked`, `admin_media_link_allowed`, et révocation des privilèges `EXECUTE` superflus sur les helpers `private.*` et les 7 fonctions triggers `SECURITY DEFINER`.
+  - `supabase/migrations/20261113011327_security_definer_hardening_20261026213000.sql` : activation de RLS (`ENABLE ROW LEVEL SECURITY`, 0 politique permissive) et `REVOKE ALL` sur `private.admin_document_file_checks` et `private.document_delivery_receipts` ; durcissement de `admin_baseline_visibility` (`id not like 'admin-%'`, `csv-%`, `import-%`), `admin_staff_directory`, `admin_confirm_document_integrity`, `admin_file_checked`, `admin_media_link_allowed`, et révocation des privilèges `EXECUTE` superflus sur les helpers `private.*` et les 7 fonctions triggers `SECURITY DEFINER`.
   - `src/types/publicDocument.ts`, `src/data/officialPublicDocumentsCatalog.ts`, `src/services/dataStore.ts`, `src/pages/DocumentsPage.tsx`, `src/components/AdministrativeAccountView.tsx`, `src/components/admin/ExamineCADocumentModal.tsx` : contrôle déterministe de pagination pour le CA 2024 de Cocody (`44` pages physiques PDF vs numérotation imprimée jusqu'à `44/45` sur `45` annoncées, page imprimée `20/45` absente du scan d'origine signalée sans inventer son contenu).
   - `docs/audits/P0_PRODUCTION_STABILIZATION_AND_COCODY_CA_2024_REPORT.md` : rapport complet post-audit P0 (tables `private`, 21 fonctions `SECURITY DEFINER`, `auth_leaked_password_protection`, lot JSON certifié Cocody 2024).
 - **Résultats de validation** : `tsc` PASS, `npm run build` PASS, Vitest `66/66` suites (`912/912` tests) PASS, Chromium E2E `16/16` PASS (`360/640/768/1024/1440 px`, `0` erreur).
@@ -41,7 +41,7 @@ Validation : 50 tests SQL/RLS/Edge avant modification ; test supplémentaire de 
 
 - Base relue : `aa874ef864142ab86313ff6f8ac4fd112d3850f0`, PR ouverte vers master, 9 commits devant / 0 derrière. Changements locaux préexistants repris sans écrasement.
 - Compteur : RPC `record_document_delivery`, service_role uniquement, mise à jour atomique de `downloads_count`, reçus privés/idempotence 24 h et limite 20/minute par empreinte d'adresse relayée. L'Edge vérifie les octets SHA-256 avant de rendre le fichier. La mesure porte sur la réponse fichier délivrée, pas sur sa réception complète. Consultations, liens externes, refus et erreurs exclus ; aucun incrément navigateur. Le frontend relit la base et préserve le catalogue national.
-- Migration `20261016090000_document_delivery_counter.sql` PREPARED, non appliquée. Convergence du schéma admin conservée ; backfill non committé de fausses attestations supprimé et test corrigé. Relecture réelle des octets requise pour les documents historiques DECLARED. Aucun statut de publication ni montant de production modifié.
+- Migration `20261026184048_document_delivery_counter_pr63.sql` PREPARED, non appliquée. Convergence du schéma admin conservée ; backfill non committé de fausses attestations supprimé et test corrigé. Relecture réelle des octets requise pour les documents historiques DECLARED. Aucun statut de publication ni montant de production modifié.
 - Validation : 904/904 tests, 66 suites ; 50 tests ciblés SQL/RLS/Edge et TypeScript PASS. Build production PASS (1766 modules ; avertissement de taille des données préexistant). PostgreSQL PGlite réel ; Auth/Storage/transport simulés. Les requêtes parallèles passent sur une instance PGlite ; ce n'est pas une recette de plusieurs sessions Supabase distantes.
 - UX/UI Documents : contrôle navigateur NOT_STARTED pour ce bloc. Recette Supabase complète BLOCKED : Docker absent, aucun environnement distant de test autorisé. Production : écritures 0, migrations 0, déploiements 0, fusion 0.
 - NEXT_EXECUTABLE_TASK : pousser ce bloc après build, remplacer le comptage PDF par un analyseur réel et vérifier les deux fascicules Cocody présents localement. Ne pas réimporter Bingerville.
@@ -123,7 +123,7 @@ Validation : 50 tests SQL/RLS/Edge avant modification ; test supplémentaire de 
   2. Élimination totale des Blobs vides (`new Blob([], ...)`), validation préalable de non-vacuité et politique de remplacement partiel avec préservation des métadonnées existantes.
   3. Compensation automatique Storage en cas d'échec d'enregistrement PostgreSQL via `deleteStorageFiles` sur `newlyUploadedPaths` uniquement.
   4. Résolution de l'incompatibilité de type UUID dans `verified_by` sous PostgreSQL.
-  5. Validation PGlite de la migration `20261013200000_multipart_ca_documents.sql`.
+  5. Validation PGlite de la migration `20261026184038_multipart_ca_convergence_pr63.sql`.
 - **Statut de validation** : 820/820 tests passés (62 suites), `npm run build` réussi sans erreur (code 0).
 - **Prochaine étape** : Revue et fusion de la PR #62 sur `master`.
 
@@ -153,7 +153,7 @@ Validation : 50 tests SQL/RLS/Edge avant modification ; test supplémentaire de 
      - Mise à jour instantanée de l'état React local de la matrice des 232 collectivités sans nécessiter de rechargement de page.
      - Badges multi-parties dans le tableau d'administration.
 - **Migration SQL** :
-  - `supabase/migrations/20261013200000_multipart_ca_documents.sql` : colonnes `is_multipart`, `parts_count`, `document_parts` (JSONB), `is_scanned`, `has_text_layer`, `ocr_status` (`CHECK (ocr_status IN ('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'MANUAL_TRANSCRIPTION', 'FAILED'))`).
+  - `supabase/migrations/20261026184038_multipart_ca_convergence_pr63.sql` : colonnes `is_multipart`, `parts_count`, `document_parts` (JSONB), `is_scanned`, `has_text_layer`, `ocr_status` (`CHECK (ocr_status IN ('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'MANUAL_TRANSCRIPTION', 'FAILED'))`).
 - **Tests & Validation** :
   - Suite dédiée multi-parties & cycle : `src/utils/__tests__/caMultipartAndValidation.test.ts` (**14/14 tests passés**).
   - Suite pilote Cocody 2024 : `src/utils/__tests__/cocodyCa2024Pilot.test.ts` (**11/11 tests passés**).
@@ -334,7 +334,7 @@ Console privée ADMIN/DATA_MANAGER : dry-run, import, rapports et provenance lig
 
 Tests-first critiques puis 174 tests / 11 fichiers PASS ; TypeScript/build PASS (1726 modules), six HTTP/RLS PASS. Huit largeurs 360 à 1920 px sans overflow ni erreur JS ; captures 375/1440 inspectées. Parcours privés vérifiés avec API interceptée, MODERATOR refusé, simulation invalidée après édition et publication impossible sans confirmation. Aucun compte ni fixture en production.
 
-Nouvelle migration locale `20261001144423_import_console_qualified_amounts.sql` appliquée une seule fois sous version distante `20261001150911` ; anciennes migrations APPLIED intactes et non rejouées. Staging/journal/BP=0 ; CA/opérations/DGMP=3 chacun. RLS et grants vérifiés, advisors inchangés documentés dans AGENT_HANDOFF.md. Les limites historiques CLI et affichage des montants qualifiés sont levées ; les corrections de versions conflictuelles restent hors périmètre. Mode opératoire actualisé dans DATA_IMPORT.md.
+Nouvelle migration locale `20261001150911_import_console_qualified_amounts.sql` appliquée une seule fois sous version distante `20261001150911` ; anciennes migrations APPLIED intactes et non rejouées. Staging/journal/BP=0 ; CA/opérations/DGMP=3 chacun. RLS et grants vérifiés, advisors inchangés documentés dans AGENT_HANDOFF.md. Les limites historiques CLI et affichage des montants qualifiés sont levées ; les corrections de versions conflictuelles restent hors périmètre. Mode opératoire actualisé dans DATA_IMPORT.md.
 
 ## 1er octobre — pipeline contrôlé des données réelles
 
@@ -344,7 +344,7 @@ Pipeline opérateur JSON/JSONL : simulation sans écriture, plan lié au fichier
 
 Tests-first : huit règles critiques initialement rouges puis implémentées et étendues à seize contrôles. Petites fixtures locales Abobo/Bingerville/Tiassalé/Cocody provenant du dépôt, aucune ingestion réelle. Cocody conserve UNKNOWN pour sa ventilation contestée ; dates de fixtures étiquetées RECORDED. Résultat final : 166 tests / 11 fichiers, TypeScript et Vite build PASS (1724 modules), parseur CLI contrôlé, six tests HTTP/RLS ciblés PASS. Aucun audit historique répété.
 
-Migration locale `20261001091748_controlled_data_import.sql` appliquée une seule fois sous version distante `20261001093613` ; ne jamais rejouer, ni la migration APEC `20261001044508`. État distant après contrôle : staging=0, journal=0, BP=0, CA=3, opérations=3, marchés=3. Aucune fixture ni compte créé. Advisors : six RPC SECURITY DEFINER intentionnelles (dont deux import) contrôlées par profiles et moindre privilège ; avertissement Auth préexistant inchangé. Garde-fous et [remédiations](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable) documentés dans AGENT_HANDOFF.md.
+Migration locale `20261001093613_controlled_data_import.sql` appliquée une seule fois sous version distante `20261001093613` ; ne jamais rejouer, ni la migration APEC `20261001044508`. État distant après contrôle : staging=0, journal=0, BP=0, CA=3, opérations=3, marchés=3. Aucune fixture ni compte créé. Advisors : six RPC SECURITY DEFINER intentionnelles (dont deux import) contrôlées par profiles et moindre privilège ; avertissement Auth préexistant inchangé. Garde-fous et [remédiations](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable) documentés dans AGENT_HANDOFF.md.
 
 Mode opératoire : DATA_IMPORT.md. Limites explicites : CLI, pas encore de console graphique ; aucune correction automatique de version/conflict ; CA/opérations/DGMP incertains conservés privés avant prise en charge fidèle par les écrans. BP à précision homogène connue publiable. La publication refuse toute donnée obligatoire absente au lieu d’inventer un zéro. Vérifier la CI du HEAD poussé, sans boucle de commits de hash ; ne pas fusionner la nouvelle PR.
 
@@ -354,7 +354,7 @@ Mode opératoire : DATA_IMPORT.md. Limites explicites : CLI, pas encore de conso
 
 Entrée Participation APEC depuis les fiches communes/régions même sans projet, filtre d’exercice éditable et accès Passport conservé. Dépôt, suivi privé, contributions et décisions sourcées préservés. Publication séparée : besoin VERIFIED, résumé rédigé spécifiquement pour le public, confirmation explicite d’absence de données privées, RPC réservées ADMIN/DATA_MANAGER. Projection de dix champs sans identité/contact des originaux, provenance CITIZEN_OBSERVATION permanente, retrait et versions conservées dans l’historique privé. L’anonymisation du texte libre requiert une relecture humaine ; aucune publication automatique.
 
-Migration additive `20261001043805_apec_moderated_publication.sql` APPLIED une seule fois sous version distante `20261001044508` sur cdesuvcozcetdtvibgqs. Aucune migration antérieure rejouée, aucune ingestion ni fixture de production. Zéro résumé public/besoin privé, trois CA préservés au contrôle distant.
+Migration additive `20261001044508_apec_moderated_publication.sql` APPLIED une seule fois sous version distante `20261001044508` sur cdesuvcozcetdtvibgqs. Aucune migration antérieure rejouée, aucune ingestion ni fixture de production. Zéro résumé public/besoin privé, trois CA préservés au contrôle distant.
 
 Validation finale : 150 tests / 10 fichiers dont 27 PostgreSQL PASS, TypeScript et Vite build PASS (1724 modules). Quatre contrôles HTTP publics ciblés PASS. Fiches communes/régions sans projet vérifiées sur huit largeurs 360 à 1920 px, sans débordement ni erreur JS, captures 375/1440 inspectées ; navigation mobile en grille. Publication/retrait, parcours staff, connexion/dépôt et maintien Passport vérifiés avec API interceptée localement, état vide réel vérifié sur Supabase. Advisors : quatre RPC SECURITY DEFINER intentionnelles protégées par profiles/search_path/grants, avertissement Auth préexistant inchangé. Aucun autre signal sécurité. Bundles de données volumineux préexistants.
 
@@ -366,7 +366,7 @@ Sur autorisation explicite, #3 → #4 → #5 fusionnées dans cet ordre, avec re
 
 Branche `codex/apec-phase-2c`. Tests critiques écrits avant implémentation. Nouveau modèle additif cycle / besoin / contribution / événements : provenance citoyenne permanente, vérification staff, priorité documentée, rattachement institution/exercice au budget publié ou projet canonique, suivi et réponse institutionnelle sourcée. Historique immutable et dépôts avec ID ; pas de représentativité déduite de la participation. Tables privées protégées par RLS et grants minimaux. Deux RPC staff à search_path vide, sans SQL dynamique, évitent de distribuer les droits de mutation directe. Sources originales non modifiables par les clients.
 
-Panneau APEC intégré après les informations Passport existantes, avec connexion/inscription citoyenne Auth (back-office inchangé), dépôt, contributions, sources, historique et décisions staff. Aucune donnée métier fabriquée, aucune ingestion. Migration locale `20260930223840_apec_participation_cycle.sql` appliquée une seule fois sous version distante `20261001040746` sur cdesuvcozcetdtvibgqs ; quatre tables vides après contrôles, trois CA préservés.
+Panneau APEC intégré après les informations Passport existantes, avec connexion/inscription citoyenne Auth (back-office inchangé), dépôt, contributions, sources, historique et décisions staff. Aucune donnée métier fabriquée, aucune ingestion. Migration locale `20261001040746_apec_participation_cycle.sql` appliquée une seule fois sous version distante `20261001040746` sur cdesuvcozcetdtvibgqs ; quatre tables vides après contrôles, trois CA préservés.
 
 Validation : 145 tests / 10 fichiers PASS (22 PostgreSQL dont 9 nouveaux APEC), TypeScript + Vite PASS (1724 modules), diff du bloc sans défaut d’espacement. Dix contrôles HTTP réels APEC PASS. Huit largeurs 360/375/390/430/768/1280/1440/1920 et parcours connexion/dépôt citoyen avec API interceptée localement ; état public vide réel vérifié, captures 375/1440 inspectées, aucun overflow/erreur JS du parcours staff. Aucun compte ou fixture créé en production. Le premier test SQL a révélé une fixture sans les colonnes réelles et un test historique de rejeu à isoler du nouveau schéma initial ; corrigés avant application. Les premiers appels réseau natifs étaient bloqués par le sandbox ; les contrôles autorisés hors sandbox passent.
 
@@ -389,7 +389,7 @@ Phase 2B est VALIDATED sans ingestion DGMP massive. Prochaine tâche : APEC Phas
 
 Branche `codex/passport-phase-2a` créée depuis `9457f07`, après confirmation de la CI de la fondation et inspection du diff de PR #3 contre master. PR #3 reste ouverte, non fusionnée. Les contrôles antérieurs HTTP/Storage/Edge ne sont pas rejoués intégralement.
 
-Migration locale `20260930153716_least_privilege_passport_boundary.sql` appliquée sous la version distante `20260930153938` : retrait TRUNCATE/REFERENCES/TRIGGER de service_role sur dix relations sensibles, et lecture citoyenne des local_budgets limitée à PUBLISHED. SELECT service_role sur documents/preuves préservé. Transactions SQL temporaires annulées pour ADMIN/DATA_MANAGER/MODERATOR/CITIZEN ; contrôle HTTP public 23/23. État final : 1 compte Auth, 3 CA VERIFIED, 0 document/preuve/objet Storage. Matrice explicite dans CA_SECURITY_STATUS_20260929.md.
+Migration locale `20260930153938_least_privilege_passport_boundary.sql` appliquée sous la version distante `20260930153938` : retrait TRUNCATE/REFERENCES/TRIGGER de service_role sur dix relations sensibles, et lecture citoyenne des local_budgets limitée à PUBLISHED. SELECT service_role sur documents/preuves préservé. Transactions SQL temporaires annulées pour ADMIN/DATA_MANAGER/MODERATOR/CITIZEN ; contrôle HTTP public 23/23. État final : 1 compte Auth, 3 CA VERIFIED, 0 document/preuve/objet Storage. Matrice explicite dans CA_SECURITY_STATUS_20260929.md.
 
 Passport : vingt faits typés avec provenance et source, conflits et champs manquants explicites, plus de défaut d’exercice 2026, preuves limitées au projet et hors démonstration, réponse institutionnelle publiée et liée à l’opération/CA. UI Comprendre / Explorer / Vérifier. Trois correspondances Tiassalé préservées, aucun détail inventé pour Abobo/Bingerville ; 0 FCFA ne devient ni retard ni abandon et aucune dépense ne prouve le physique.
 
@@ -428,8 +428,8 @@ GitHub : master distant `529db22012848e34afdf8b286983eebfc917b9f7`. Branche PR a
 - Workflow CA : Découplage strict entre `VERIFIED` (audit de conformité) et `PUBLISHED` (visibilité citoyenne). La matrice dynamique des 232 collectivités calcule en temps réel les comptes manquants sans insertion de lignes factices.
 
 ## Migrations Préparées (supabase/migrations/)
-- `20260929121225_publication_boundaries.sql` : RLS de publication parent pour les opérations financières, contrôle staff sur documents et modération des preuves, trigger `enforce_document_publication_audit()`.
-- `20260929121408_document_metadata_versions.sql` : Colonnes de métadonnées et versionnement documentaire avec contraintes d'unicité.
+- `20260930030614_publication_boundaries.sql` : RLS de publication parent pour les opérations financières, contrôle staff sur documents et modération des preuves, trigger `enforce_document_publication_audit()`.
+- `20260930030522_document_metadata_versions.sql` : Colonnes de métadonnées et versionnement documentaire avec contraintes d'unicité.
 - Prêtes pour validation et application après inspection de drift.
 
 ## UX/UI Responsive & Accessibilité

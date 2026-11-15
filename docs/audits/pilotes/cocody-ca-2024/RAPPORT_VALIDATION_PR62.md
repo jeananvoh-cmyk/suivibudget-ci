@@ -17,7 +17,7 @@
 | **P2. Élimination des Blobs vides** | Risque d'écrasement ou d'incohérence via dummy Blob (`new Blob([], ...)`). | Suppression totale de dummy Blob. Validation préalable bloquant tout fichier de taille 0 octet. Politique de remplacement partiel explicite : préservation certifiée des métadonnées et chemins des volets inchangés. | 3 tests dédiés (rejet fichier vide, rejet sans référence, upload mixte partiel). |
 | **P3. Compensation Transactionnelle** | Fichiers orphelins dans Supabase Storage si l'insertion ou mise à jour PostgreSQL échoue. | Enregistrement de `newlyUploadedPaths`. En cas d'échec PostgreSQL, appel automatique à `deleteStorageFiles` sur les seuls nouveaux fichiers. Remontée d'alerte critique si la compensation échoue. Les fichiers historiques ne sont jamais touchés. | 3 tests de compensation Storage et résilience aux pannes réseau. |
 | **P4. Fix Validation CA Cocody 2024** | Erreur de syntaxe UUID PostgreSQL lors de l'assignation de `verified_by = 'Administrateur'` (colonne de type `uuid references profiles(id)`). | Validation stricte du format UUID (`/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`). Transmission de l'UUID de session authentifiée (`userId`), ou `null`/`undefined` pour laisser le trigger PostgreSQL assigner `auth.uid()`. | Test de validation et publication complète avec UUID conforme. |
-| **P5. Rétrocompatibilité & Schéma SQL** | Vérification de la compatibilité des documents à fascicule unique et multi-fascicules, contraintes de statut OCR. | Migration `20261013200000_multipart_ca_documents.sql` validée sous PGlite. Gestion des codes d'erreur PostgreSQL (`42501` RLS, `42703` migration manquante). | 3 tests PGlite exécutant la migration SQL réelle. |
+| **P5. Rétrocompatibilité & Schéma SQL** | Vérification de la compatibilité des documents à fascicule unique et multi-fascicules, contraintes de statut OCR. | Migration `20261026184038_multipart_ca_convergence_pr63.sql` validée sous PGlite. Gestion des codes d'erreur PostgreSQL (`42501` RLS, `42703` migration manquante). | 3 tests PGlite exécutant la migration SQL réelle. |
 
 ---
 
@@ -60,7 +60,7 @@
   - Cycle découplé Examine $\rightarrow$ Verify $\rightarrow$ Publish avec UUID valide.
   - Contrôle d'accès RBAC Fail-Closed (non-authentifié, session expirée, citoyen, modérateur, responsable données, administrateur).
   - Propagation des erreurs RLS PostgreSQL `42501`.
-  - Exécution SQL réelle de la migration `20261013200000_multipart_ca_documents.sql` sous PGlite (WASM).
+  - Exécution SQL réelle de la migration `20261026184038_multipart_ca_convergence_pr63.sql` sous PGlite (WASM).
 
 ---
 

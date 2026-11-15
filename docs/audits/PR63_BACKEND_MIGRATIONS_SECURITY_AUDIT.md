@@ -35,7 +35,7 @@ Source Cocody rendue et contrôlée visuellement : PDF global 40 = fascicule 2 p
 
 Ce fichier préexistait non committé. Les inventaires distants ci-dessous sont des observations héritées, pas une nouvelle recette production. La reprise a détecté puis supprimé le backfill qui transformait un SHA déclaré en SHA calculé sans lecture des octets. La migration laisse les documents historiques `DECLARED` ; `admin-media-url` peut relire leurs originaux et attester leur identité immuable avec la RPC réservée au serveur. Aucun acteur humain n'est attribué automatiquement par une migration.
 
-Compteur : migration additive `20261016090000_document_delivery_counter.sql`, RPC `record_document_delivery` réservée à `service_role`, incrément atomique de `public_documents.downloads_count`. Le chemin `public-document-url`, action `download`, ne compte qu'après lecture et comparaison SHA-256 de l'original et avant remise de la réponse binaire. Il ne certifie pas la réception complète par le client. Consultation signée, lien externe, refus, octets absents/altérés et annulation déjà détectée : aucun incrément. Rejeu du même UUID dédupliqué pendant 24 h ; plafond de 20 délivrances/minute par empreinte serveur de l'adresse relayée par la passerelle. Cette limite suppose que la passerelle maîtrise `x-forwarded-for` ; ce n'est pas une mesure d'utilisateurs uniques. Aucun IP brut n'est conservé.
+Compteur : migration additive `20261026184048_document_delivery_counter_pr63.sql`, RPC `record_document_delivery` réservée à `service_role`, incrément atomique de `public_documents.downloads_count`. Le chemin `public-document-url`, action `download`, ne compte qu'après lecture et comparaison SHA-256 de l'original et avant remise de la réponse binaire. Il ne certifie pas la réception complète par le client. Consultation signée, lien externe, refus, octets absents/altérés et annulation déjà détectée : aucun incrément. Rejeu du même UUID dédupliqué pendant 24 h ; plafond de 20 délivrances/minute par empreinte serveur de l'adresse relayée par la passerelle. Cette limite suppose que la passerelle maîtrise `x-forwarded-for` ; ce n'est pas une mesure d'utilisateurs uniques. Aucun IP brut n'est conservé.
 
 La colonne ne peut pas être modifiée directement par les visiteurs ; les permissions par colonne préservent les mutations administratives existantes. Les trois triggers admin ne dérogent que pour une modification du compteur seul de +1 sous le rôle serveur. Les reçus privés tracent l'événement séparément de la validation humaine des données.
 
@@ -62,14 +62,14 @@ Ordre futur, uniquement après autorisation : convergence du schéma admin, mult
 | `20261001091748_create_import_data_batch_rpc.sql` | **APPLIQUÉE** | RPC `public.import_data_batch` (présente en production). |
 | `20261001144423_harden_financial_publication_pipeline.sql` | **APPLIQUÉE** | Tables `data_import_rows`, `data_import_events`, RPC `public.review_data_import` (présentes en production). |
 | `20261013000000_administrative_accounts_and_citizen_Needs.sql` | **APPLIQUÉE** | Tables `administrative_accounts`, `ca_investment_operations`, `ca_procurement_matches`, `citizen_territorial_needs`. |
-| `20261013165625_admin_dashboard_persistence_hardening.sql` | **NON APPLIQUÉE DISTANTE** | Ajoutée sur `master` par le commit `f9ebadbe` (fusionné après le déploiement de la PR #62). Contient `admin_tasks`, `admin_audit_events`, `admin_operation_receipts`, `private.admin_document_file_checks`, et les RPC `admin_persistence_version`, `admin_mutate`, `admin_mutate_batch`, `admin_confirm_document_integrity`, `admin_baseline_visibility`, `admin_staff_directory`. |
-| `20261013200000_multipart_ca_documents.sql` | **APPLIQUÉE SOUS VERSION `20261014155231` (v1 PR #62)** | La version initiale issue de la PR #62 (`db96ed7`) a été appliquée sur `cdesuvcozcetdtvibgqs` sous le timestamp `20261014155231`. Le commit `f9ebadbe` sur `master` a ensuite assoupli `NOT NULL`/`DEFAULT` sur `is_multipart`, `parts_count`, `is_scanned`, `has_text_layer`, `ocr_status` et ajouté `'FAILED'` à `chk_pubdocs_ocr_status` + `manifest_sha256`. |
+| `20261026183930_admin_dashboard_persistence_hardening_pr63.sql` | **NON APPLIQUÉE DISTANTE** | Ajoutée sur `master` par le commit `f9ebadbe` (fusionné après le déploiement de la PR #62). Contient `admin_tasks`, `admin_audit_events`, `admin_operation_receipts`, `private.admin_document_file_checks`, et les RPC `admin_persistence_version`, `admin_mutate`, `admin_mutate_batch`, `admin_confirm_document_integrity`, `admin_baseline_visibility`, `admin_staff_directory`. |
+| `20261026184038_multipart_ca_convergence_pr63.sql` | **APPLIQUÉE SOUS VERSION `20261014155231` (v1 PR #62)** | La version initiale issue de la PR #62 (`db96ed7`) a été appliquée sur `cdesuvcozcetdtvibgqs` sous le timestamp `20261014155231`. Le commit `f9ebadbe` sur `master` a ensuite assoupli `NOT NULL`/`DEFAULT` sur `is_multipart`, `parts_count`, `is_scanned`, `has_text_layer`, `ocr_status` et ajouté `'FAILED'` à `chk_pubdocs_ocr_status` + `manifest_sha256`. |
 
-### Convergence idempotente garantie dans `20261013165625_admin_dashboard_persistence_hardening.sql`
+### Convergence idempotente garantie dans `20261026183930_admin_dashboard_persistence_hardening_pr63.sql`
 
-Pour éviter tout blocage lors de l'application future de `20261013165625_admin_dashboard_persistence_hardening.sql` sur `cdesuvcozcetdtvibgqs` (où `20261014155231` est déjà appliquée et où le document `doc-dff4865a-c6a8-418e-8895-626258e409d0` de Cocody est déjà `PUBLISHED`/`VERIFIED` avec `is_multipart = false` et `parts_count = null`) :
+Pour éviter tout blocage lors de l'application future de `20261026183930_admin_dashboard_persistence_hardening_pr63.sql` sur `cdesuvcozcetdtvibgqs` (où `20261014155231` est déjà appliquée et où le document `doc-dff4865a-c6a8-418e-8895-626258e409d0` de Cocody est déjà `PUBLISHED`/`VERIFIED` avec `is_multipart = false` et `parts_count = null`) :
 
-1. **Convergence DDL multipart/OCR intégrée** : `20261013165625_admin_dashboard_persistence_hardening.sql` supprime de façon idempotente les contraintes `NOT NULL` et `DEFAULT` héritées de `20261014155231` sur `is_multipart`, `parts_count`, `is_scanned`, `has_text_layer`, `ocr_status` et met à jour `chk_pubdocs_ocr_status` (incluant `'FAILED'`).
+1. **Convergence DDL multipart/OCR intégrée** : `20261026183930_admin_dashboard_persistence_hardening_pr63.sql` supprime de façon idempotente les contraintes `NOT NULL` et `DEFAULT` héritées de `20261014155231` sur `is_multipart`, `parts_count`, `is_scanned`, `has_text_layer`, `ocr_status` et met à jour `chk_pubdocs_ocr_status` (incluant `'FAILED'`).
 2. **Aucune certification automatique des documents historiques** : la présence d'un objet Storage et d'une empreinte déclarée ne prouve pas leur correspondance. Les reçus de contrôle restent absents jusqu'à relecture des octets par `admin-media-url` ; le statut demeure `DECLARED` pendant la convergence. Les tests préservent les statuts documentaires historiques et exigent une attestation serveur avant leur modification administrative.
 3. **Normalisation `parts_count` (`null` ↔ `1`) pour les documents mono-fichier (`is_multipart = false`)** : dans `private.admin_validate_document_integrity()`, la transition de `old.parts_count = null` vers `new.parts_count = 1` sur un document mono-fichier (`is_multipart = false`) est reconnue comme équivalente et ne déclenche pas à tort `'Create a new version for documentary identity'`.
 4. **Exécution sans JWT (`auth.uid() is null`)** : les triggers `admin_validate`, `admin_audit` et `admin_document_integrity` sont désactivés avant les `UPDATE` internes de la migration puis recréés, garantissant l'exécution via `supabase db push` ou SQL Editor sans nécessiter de session JWT opérateur.
@@ -88,10 +88,10 @@ Pour éviter tout blocage lors de l'application future de `20261013165625_admin_
 | `public.ca_procurement_matches` | **PRÉSENTE** | 3 lignes publiées rattachées à `ca-tiassale-2024`. |
 | `public.local_budgets` | **PRÉSENTE** | 3 lignes publiées (`inst-com-bingerville` 2026, `inst-com-cocody` 2026, `inst-com-tiassale` 2024). |
 | `public.institutions` | **PRÉSENTE** | 4 lignes (`inst-com-cocody`, `inst-com-bingerville`, `inst-com-tiassale`, `inst-min-sante`). Colonnes en attente de `20261013165625` : `revision`, `archived_at`, `publication_status`, `profile_metadata`. |
-| `public.admin_tasks` | **ABSENTE (en attente de `20261013165625`)** | Sera créée par `20261013165625_admin_dashboard_persistence_hardening.sql`. |
-| `public.admin_audit_events` | **ABSENTE (en attente de `20261013165625`)** | Sera créée par `20261013165625_admin_dashboard_persistence_hardening.sql`. |
-| `public.admin_operation_receipts` | **ABSENTE (en attente de `20261013165625`)** | Sera créée par `20261013165625_admin_dashboard_persistence_hardening.sql`. |
-| `private.admin_document_file_checks` | **ABSENTE (en attente de `20261013165625`)** | Sera créée, sans attestation historique automatique, par `20261013165625_admin_dashboard_persistence_hardening.sql`. |
+| `public.admin_tasks` | **ABSENTE (en attente de `20261013165625`)** | Sera créée par `20261026183930_admin_dashboard_persistence_hardening_pr63.sql`. |
+| `public.admin_audit_events` | **ABSENTE (en attente de `20261013165625`)** | Sera créée par `20261026183930_admin_dashboard_persistence_hardening_pr63.sql`. |
+| `public.admin_operation_receipts` | **ABSENTE (en attente de `20261013165625`)** | Sera créée par `20261026183930_admin_dashboard_persistence_hardening_pr63.sql`. |
+| `private.admin_document_file_checks` | **ABSENTE (en attente de `20261013165625`)** | Sera créée, sans attestation historique automatique, par `20261026183930_admin_dashboard_persistence_hardening_pr63.sql`. |
 
 ### 2.2 RPC PostgreSQL
 
@@ -147,9 +147,9 @@ Aucun rôle ne dépend de `user_metadata` ni d'un paramètre client : toutes les
    - Exporter l'état actuel des tables critiques (`public_documents`, `administrative_accounts`, `ca_investment_operations`, `ca_procurement_matches`, `local_budgets`, `institutions`, `profiles`) avant toute DDL.
 2. **Étape 2 — Migrations SQL Supabase (`cdesuvcozcetdtvibgqs`)** :
    - Appliquer dans l'ordre :
-     1. `supabase/migrations/20261013165625_admin_dashboard_persistence_hardening.sql`
-     2. `supabase/migrations/20261013200000_multipart_ca_documents.sql` (convergence de la version distante `20261014155231`, pas réimport des documents).
-     3. `supabase/migrations/20261016090000_document_delivery_counter.sql` (après les deux précédentes).
+     1. `supabase/migrations/20261026183930_admin_dashboard_persistence_hardening_pr63.sql`
+     2. `supabase/migrations/20261026184038_multipart_ca_convergence_pr63.sql` (convergence de la version distante `20261014155231`, pas réimport des documents).
+     3. `supabase/migrations/20261026184048_document_delivery_counter_pr63.sql` (après les deux précédentes).
    - Vérifier immédiatement en SQL :
      - `SELECT public.admin_persistence_version();` → doit retourner `3`.
      - Contrôler les statuts existants et `revision` sans assimiler `PUBLISHED` à une empreinte calculée : `checksum_status` reste `DECLARED` sans attestation des octets.

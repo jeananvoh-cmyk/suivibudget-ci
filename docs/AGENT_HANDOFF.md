@@ -130,7 +130,7 @@ Une distinction capitale est désormais documentée et garantie par la suite de 
 
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/65 (`codex/p0-production-cocody-2024` ciblant `master` `901a2033084c5aa1ca76bc4ce4625e1884d48ab9`).
 - **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0` (aucune écriture ni réexécution de migration sur `cdesuvcozcetdtvibgqs`).
-- **Chantier P0 — Sécurité Supabase (`supabase/migrations/20261026213000_security_definer_hardening.sql`)** :
+- **Chantier P0 — Sécurité Supabase (`supabase/migrations/20261113011327_security_definer_hardening_20261026213000.sql`)** :
   - **Tables du schéma `private`** (`private.admin_document_file_checks`, `private.document_delivery_receipts`) :
     - Vérification que le schéma `private` n'est pas exposé dans l'API PostgREST (`public`, `storage`, `graphql_public`) et que `relacl` vaut `{postgres=arwdDxtm/postgres}`.
     - Activation de RLS (`ENABLE ROW LEVEL SECURITY`) sur les deux tables avec **0 politique permissive** (refus par défaut pour tout rôle non-propriétaire) et `REVOKE ALL ON TABLE ... FROM public, anon, authenticated, service_role`, tout en préservant le fonctionnement des fonctions serveur détenues par `postgres` (`admin_confirm_document_integrity`, `admin_file_checked`, `admin_original_unreferenced`, `record_document_delivery`).
@@ -152,7 +152,7 @@ Une distinction capitale est désormais documentée et garantie par la suite de 
   - `npx vitest run` : **PASS** (`66/66` fichiers, `912/912` tests).
   - Recette navigateur `scripts/verify-admin-persistence-browser.cjs` : **PASS** (`16/16` scénarios Chromium E2E, viewports `360/640/768/1024/1440 px`, `0` erreur console/API, `0` fuite externe).
   - Rapport complet et lot JSON certifié prêt pour import : `docs/audits/P0_PRODUCTION_STABILIZATION_AND_COCODY_CA_2024_REPORT.md`.
-- **NEXT_EXECUTABLE_TASK** : Approbation et fusion de la PR #65 par le propriétaire, application de `20261026213000_security_definer_hardening.sql`, activation de `Prevent use of leaked passwords` dans Supabase Auth, puis import/publication contrôlée du lot certifié du CA 2024 de Cocody via `import_data_batch` -> `review_data_import`.
+- **NEXT_EXECUTABLE_TASK** : Approbation et fusion de la PR #65 par le propriétaire, application de `20261113011327_security_definer_hardening_20261026213000.sql`, activation de `Prevent use of leaked passwords` dans Supabase Auth, puis import/publication contrôlée du lot certifié du CA 2024 de Cocody via `import_data_batch` -> `review_data_import`.
 
 ## 26 octobre 2026 — Clôture C/D/E/F et limites explicites
 
@@ -187,7 +187,7 @@ Validation : 50 tests SQL/RLS/Edge avant modification ; test supplémentaire de 
 
 - Base relue : `aa874ef864142ab86313ff6f8ac4fd112d3850f0`, PR ouverte vers master, 9 commits devant / 0 derrière. Changements locaux préexistants repris sans écrasement.
 - Compteur : RPC `record_document_delivery`, service_role uniquement, mise à jour atomique de `downloads_count`, reçus privés/idempotence 24 h et limite 20/minute par empreinte d'adresse relayée. L'Edge vérifie les octets SHA-256 avant de rendre le fichier. La mesure porte sur la réponse fichier délivrée, pas sur sa réception complète. Consultations, liens externes, refus et erreurs exclus ; aucun incrément navigateur. Le frontend relit la base et préserve le catalogue national.
-- Migration `20261016090000_document_delivery_counter.sql` PREPARED, non appliquée. Convergence du schéma admin conservée ; backfill non committé de fausses attestations supprimé et test corrigé. Relecture réelle des octets requise pour les documents historiques DECLARED. Aucun statut de publication ni montant de production modifié.
+- Migration `20261026184048_document_delivery_counter_pr63.sql` PREPARED, non appliquée. Convergence du schéma admin conservée ; backfill non committé de fausses attestations supprimé et test corrigé. Relecture réelle des octets requise pour les documents historiques DECLARED. Aucun statut de publication ni montant de production modifié.
 - Validation : 904/904 tests, 66 suites ; 50 tests ciblés SQL/RLS/Edge et TypeScript PASS. Build production PASS (1766 modules ; avertissement de taille des données préexistant). PostgreSQL PGlite réel ; Auth/Storage/transport simulés. Les requêtes parallèles passent sur une instance PGlite ; ce n'est pas une recette de plusieurs sessions Supabase distantes.
 - UX/UI Documents : contrôle navigateur NOT_STARTED pour ce bloc. Recette Supabase complète BLOCKED : Docker absent, aucun environnement distant de test autorisé. Production : écritures 0, migrations 0, déploiements 0, fusion 0.
 - NEXT_EXECUTABLE_TASK : pousser ce bloc après build, remplacer le comptage PDF par un analyseur réel et vérifier les deux fascicules Cocody présents localement. Ne pas réimporter Bingerville.
@@ -301,7 +301,7 @@ Validation : 50 tests SQL/RLS/Edge avant modification ; test supplémentaire de 
      - Diagnostic : la colonne `verified_by` est de type `UUID references profiles(id)` sous PostgreSQL. L'envoi d'une chaîne textuelle telle que `'Administrateur'` provoquait `invalid input syntax for type uuid: "Administrateur"`.
      - Correction : validation regex du format UUID (`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`). Seul un UUID valide (`userId`) est transmis, sinon `null`/`undefined` est passé pour laisser le trigger PostgreSQL assigner `auth.uid()`.
   5. **Schéma & Migration SQL Locale (PGlite)** :
-     - Validation sous PGlite (WASM) de la migration `supabase/migrations/20261013200000_multipart_ca_documents.sql`.
+     - Validation sous PGlite (WASM) de la migration `supabase/migrations/20261026184038_multipart_ca_convergence_pr63.sql`.
      - Vérification de la rétrocompatibilité (défauts `is_multipart = false`, `parts_count = null`, `ocr_status = 'NOT_APPLICABLE'`).
      - Vérification de la contrainte `chk_pubdocs_ocr_status`.
 - **Validation Globale** :
@@ -337,7 +337,7 @@ Validation : 50 tests SQL/RLS/Edge avant modification ; test supplémentaire de 
      - Mise à jour instantanée de l'état React local de la matrice des 232 collectivités sans nécessiter de rechargement de page.
      - Badges multi-parties dans le tableau d'administration.
 - **Migration SQL** :
-  - `supabase/migrations/20261013200000_multipart_ca_documents.sql` : colonnes `is_multipart`, `parts_count`, `document_parts` (JSONB), `is_scanned`, `has_text_layer`, `ocr_status` (`CHECK (ocr_status IN ('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'MANUAL_TRANSCRIPTION', 'FAILED'))`).
+  - `supabase/migrations/20261026184038_multipart_ca_convergence_pr63.sql` : colonnes `is_multipart`, `parts_count`, `document_parts` (JSONB), `is_scanned`, `has_text_layer`, `ocr_status` (`CHECK (ocr_status IN ('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'MANUAL_TRANSCRIPTION', 'FAILED'))`).
 - **Tests & Validation** :
   - Suite dédiée multi-parties & cycle : `src/utils/__tests__/caMultipartAndValidation.test.ts` (**14/14 tests passés**).
   - Suite pilote Cocody 2024 : `src/utils/__tests__/cocodyCa2024Pilot.test.ts` (**11/11 tests passés**).
@@ -805,7 +805,7 @@ Les **quatre reliquats historiques non entièrement expliqués** sont documenté
     - `src/pages/AdminDashboardPage.tsx` : Suppression de l'auto-split 55%/45% dans `handleSaveQuickWeb`, `handleSaveInstitution` et dans les formulaires de saisie de budget primitif.
     - `src/data/communesData.ts` : Suppression du fallback `c.functioningRatio || 0.35` affecté arbitrairement aux 188 communes hors Abidjan. Les communes sans ratio documenté ont désormais `budget_functioning_fcfa: null` et `budget_investment_fcfa: null`.
 - **2. Schéma Supabase, Suppression de DEFAULT 0 & Assainissement Legacy Ciblé** :
-  - Migration locale complétée : `supabase/migrations/20261005100000_drop_default_zero_institutions_budget.sql` :
+  - Migration locale complétée : `supabase/migrations/20261005121837_drop_default_zero_institutions_budget.sql` :
     - `ALTER TABLE public.institutions ALTER COLUMN total_budget_fcfa DROP DEFAULT;`
     - `ALTER TABLE public.institutions ALTER COLUMN budget_functioning_fcfa DROP DEFAULT;`
     - `ALTER TABLE public.institutions ALTER COLUMN budget_investment_fcfa DROP DEFAULT;`
@@ -1029,7 +1029,7 @@ Les **quatre reliquats historiques non entièrement expliqués** sont documenté
   - **C. Publication canonique Supabase** : **EFFECTUÉE**.
 - **Traçage du flux de bout en bout et ruptures identifiées/corrigées** :
   - Flux : Supabase `local_budgets` → `administrativeAccountsService.fetchPublishedLocalBudgets` → `dataStore.initSupabaseSync` / `enrichInstitutionsWithBudgets` → `dataStore.institutions` / `primitive_budget` → `InstitutionDetailModal` / `MunicipalitiesPage` → Rendu citoyen.
-  - **Rupture DDL (Base de données)** : Le rôle `anon` ne disposait pas de `GRANT SELECT ON public.local_budgets TO anon;` (omis lors de `20260929141800_grant_schema_privileges.sql`), causant un HTTP 401 / code `42501 permission denied for table local_budgets` pour les citoyens non connectés malgré la policy RLS `USING (status = 'PUBLISHED')`.
+  - **Rupture DDL (Base de données)** : Le rôle `anon` ne disposait pas de `GRANT SELECT ON public.local_budgets TO anon;` (omis lors de `20260930030702_grant_schema_privileges.sql`), causant un HTTP 401 / code `42501 permission denied for table local_budgets` pour les citoyens non connectés malgré la policy RLS `USING (status = 'PUBLISHED')`.
     - Migration additive rédigée : `supabase/migrations/20261002010000_grant_anon_published_local_budgets.sql` (`GRANT SELECT ON public.local_budgets TO anon;`).
     - Test PGlite ajouté dans `src/utils/__tests__/publicationDatabase.test.ts` garantissant que `anon` lit les budgets `PUBLISHED` mais que les budgets non publiés (`VERIFIED`, `TO_VERIFY`, `DRAFT`) restent strictement invisibles.
   - **Rupture Synchronisation Frontend (`dataStore.ts`)** : `initSupabaseSync` mettait à jour `this.localBudgets` mais ne ré-enrichissait pas `this.institutions`. Ajout de la méthode `enrichInstitutionsWithBudgets()` appelée après la récupération des budgets distants et dans `saveLocalBudget`.
@@ -1064,7 +1064,7 @@ Les **quatre reliquats historiques non entièrement expliqués** sont documenté
 - #8 contrôlée brièvement puis fusionnée au SHA attendu ; master synchronisé sans perte à 8e934d1. Post-merge ciblé : 16 tests pipeline PASS.
 - Console ADMIN/DATA_MANAGER : JSON/JSONL, simulation obligatoire, rapport ligne par ligne, pagination, source/provenance et historique privés. VERIFY / REJECT / PUBLISH séparés ; confirmation explicite contrôlée aussi en SQL. Aucun service_role client, RLS inchangée.
 - BP / CA / opérations / DGMP et Passport : EXACT, Environ, Plus de, Montant à confirmer ; UNKNOWN reste null, zéro exact distinct. Pas de taux/écart calculé sur montants incertains, aucune réalisation physique inférée.
-- Migration locale `20261001144423_import_console_qualified_amounts.sql` APPLIED une seule fois sous version distante `20261001150911`. Montants nullables sans suppression de données, provenance par champ conservée. Ne rejouer aucune version APPLIED, notamment 20261001093613 et 20261001044508.
+- Migration locale `20261001150911_import_console_qualified_amounts.sql` APPLIED une seule fois sous version distante `20261001150911`. Montants nullables sans suppression de données, provenance par champ conservée. Ne rejouer aucune version APPLIED, notamment 20261001093613 et 20261001044508.
 - Validation finale : 174 tests / 11 fichiers, TypeScript + build PASS (1726 modules), six HTTP/RLS PASS. RLS active, RPC refusée à anon/service_role et profil contrôlé pour authenticated. Base préservée : staging/journal/BP=0, CA/opérations/DGMP=3 chacun. Aucun import réel.
 - UX/UI VALIDATED sur console, CA/opérations/DGMP, historique BP et Passport : huit largeurs 360/375/390/430/768/1280/1440/1920, aucune erreur JS ni débordement ; captures mobile/desktop inspectées. Parcours privés avec API interceptée localement, refus MODERATOR et confirmation de publication vérifiés.
 - Advisors inchangés : six RPC SECURITY DEFINER intentionnelles protégées par profiles/search_path/grants ([règle 0029](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable)) ; [protection Auth des mots de passe compromis](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) toujours désactivée. Bundles de données volumineux préexistants.
@@ -1149,16 +1149,16 @@ Les blocs suivants sont historiques ; leurs anciennes interdictions de fusion et
 ## MIGRATIONS_REMOTE / REMOTE_SCHEMA_STATE
 | Fichier local | Version distante | État |
 | --- | --- | --- |
-| 20260929121408_document_metadata_versions.sql | 20260930030522 | APPLIED |
-| 20260929121225_publication_boundaries.sql | 20260930030614 | APPLIED |
-| 20260929141800_grant_schema_privileges.sql | 20260930030702 | APPLIED |
-| 20260930030840_public_proof_projection_boundary.sql | 20260930031058 | APPLIED |
-| 20260930033244_foundation_http_access.sql | 20260930144753 | APPLIED |
-| 20260930153716_least_privilege_passport_boundary.sql | 20260930153938 | APPLIED |
-| 20260930223840_apec_participation_cycle.sql | 20261001040746 | APPLIED |
-| 20261001043805_apec_moderated_publication.sql | 20261001044508 | APPLIED |
-| 20261001091748_controlled_data_import.sql | 20261001093613 | APPLIED |
-| 20261001144423_import_console_qualified_amounts.sql | 20261001150911 | APPLIED |
+| 20260930030522_document_metadata_versions.sql | 20260930030522 | APPLIED |
+| 20260930030614_publication_boundaries.sql | 20260930030614 | APPLIED |
+| 20260930030702_grant_schema_privileges.sql | 20260930030702 | APPLIED |
+| 20260930031058_public_proof_projection_boundary.sql | 20260930031058 | APPLIED |
+| 20260930144753_foundation_http_access.sql | 20260930144753 | APPLIED |
+| 20260930153938_least_privilege_passport_boundary.sql | 20260930153938 | APPLIED |
+| 20261001040746_apec_participation_cycle.sql | 20261001040746 | APPLIED |
+| 20261001044508_apec_moderated_publication.sql | 20261001044508 | APPLIED |
+| 20261001093613_controlled_data_import.sql | 20261001093613 | APPLIED |
+| 20261001150911_import_console_qualified_amounts.sql | 20261001150911 | APPLIED |
 | 20261002010000_grant_anon_published_local_budgets.sql | 20261002090824 | APPLIED |
 
 Les quatre premières migrations n’ont pas été rejouées. Les horodatages distants sont attribués par l’outil ; ne pas rejouer sur la seule différence de préfixe. Schéma metadata, vue publique, triggers, grants et RLS contrôlés.
