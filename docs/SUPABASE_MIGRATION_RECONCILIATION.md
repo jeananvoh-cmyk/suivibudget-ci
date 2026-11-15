@@ -47,9 +47,9 @@ Les anciens fichiers de migration du dépôt dont le timestamp ou le contenu ne 
 
 Les trois fichiers de bootstrap suivants restent dans `supabase/migrations/` :
 
-- `20260902_init_rls.sql`
-- `20260928_administrative_accounts.sql`
-- `20260928_local_budgets_referential.sql`
+- `20260902000000_init_rls.sql`
+- `20260928000000_administrative_accounts.sql`
+- `20260928010000_local_budgets_referential.sql`
 
 Ils ne figurent pas dans les 26 versions enregistrées par Production. Ils sont donc considérés comme un socle préhistorique/local à vérifier, et non comme des migrations Production confirmées. **Ne pas lancer `supabase db push` tant que leur statut et leur nécessité ne sont pas formellement réconciliés.**
 

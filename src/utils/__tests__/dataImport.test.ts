@@ -37,8 +37,8 @@ beforeAll(async () => {
   for(const pilot of CA_PILOT_FIXTURES) await db.query("insert into public.institutions values ($1,$2,'MAIRIE')",[pilot.institution_id,pilot.institution_name]);
   await db.exec("insert into public.institutions values ('inst-com-cocody','Mairie de Cocody','MAIRIE')");
   for(const [file,names] of [
-    ['20260928_local_budgets_referential.sql',['local_budgets']],
-    ['20260928_administrative_accounts.sql',['administrative_accounts','ca_investment_operations','ca_procurement_matches']],
+    ['20260928010000_local_budgets_referential.sql',['local_budgets']],
+    ['20260928000000_administrative_accounts.sql',['administrative_accounts','ca_investment_operations','ca_procurement_matches']],
   ] as const){const sql=readFileSync(`supabase/migrations/${file}`,'utf8');for(const name of names) await db.exec(sql.match(new RegExp(`CREATE TABLE IF NOT EXISTS public\\.${name} \\([\\s\\S]*?\\n\\);`))![0]);}
   const migration=readFileSync('supabase/migrations/20261001093613_controlled_data_import.sql','utf8');
   await db.exec(migration);

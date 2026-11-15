@@ -1,9 +1,17 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { createProductionSchemaFixture } from './adminPersistenceFixtures';
 import { join } from 'node:path';
 
 describe('RLS hardening — local budget administration', () => {
+  it('uses unique 14-digit versions for every active migration file', () => {
+    const migrationDir = join(process.cwd(), 'supabase', 'migrations');
+    const files = readdirSync(migrationDir).filter(file => file.endsWith('.sql'));
+    const versions = files.map(file => file.match(/^(\\d{14})_/)?.[1]);
+    expect(versions.every(Boolean)).toBe(true);
+    expect(new Set(versions).size).toBe(files.length);
+  });
+
   const migration = readFileSync(
     join(process.cwd(), 'supabase/migrations/20261115070000_enforce_primary_document_provenance.sql'),
     'utf8'

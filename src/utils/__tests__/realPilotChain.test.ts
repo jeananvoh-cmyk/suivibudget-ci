@@ -67,8 +67,8 @@ beforeAll(async () => {
   await db.exec("insert into public.institutions values ('inst-com-cocody', 'Mairie de Cocody', 'MAIRIE')");
 
   for (const [file, names] of [
-    ['20260928_local_budgets_referential.sql', ['local_budgets']],
-    ['20260928_administrative_accounts.sql', ['administrative_accounts', 'ca_investment_operations', 'ca_procurement_matches']],
+    ['20260928010000_local_budgets_referential.sql', ['local_budgets']],
+    ['20260928000000_administrative_accounts.sql', ['administrative_accounts', 'ca_investment_operations', 'ca_procurement_matches']],
   ] as const) {
     const sql = readFileSync(`supabase/migrations/${file}`, 'utf8');
     for (const name of names) {

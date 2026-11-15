@@ -126,7 +126,7 @@ async function initialize() {
       values ('cocody-reference','Cocody 2024','CA','Cocody','','ca.pdf','historical',2024,2024,'COMPTE_ADMINISTRATIF','ca-v1.pdf',repeat('a',64));
     insert into public.citizen_proofs(id,project_id,image_url,comment,verification_status,citizen_name,citizen_whatsapp,citizen_user_id) values('pending-proof','project','photo','Observation','PENDING','Identité privée isolée','+000000','${citizen}');
   `);
-  const budgets = readFileSync(resolve('supabase/migrations/20260928_local_budgets_referential.sql'),'utf8');
+  const budgets = readFileSync(resolve('supabase/migrations/20260928010000_local_budgets_referential.sql'),'utf8');
   await db.exec('create table public.projects(id text primary key)');
   for (const table of ['local_budgets','budget_lines']) {
     const sql=budgets.match(new RegExp('CREATE TABLE IF NOT EXISTS public\\.'+table+' \\([\\s\\S]*?\\n\\);'))?.[0];

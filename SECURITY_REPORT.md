@@ -39,7 +39,7 @@ Cet audit de sécurité approfondi a porté sur l'intégralité du code source d
 
 ## 3. 🗄️ Audit Supabase & Architecture Row Level Security (RLS)
 
-Un schéma SQL de production complet a été généré dans [`supabase/schema.sql`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/supabase/schema.sql) et [`supabase/migrations/20260902_init_rls.sql`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/supabase/migrations/20260902_init_rls.sql).
+Un schéma SQL de production complet a été généré dans [`supabase/schema.sql`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/supabase/schema.sql) et [`supabase/migrations/20260902000000_init_rls.sql`](file:///C:/Users/Couple%20ANVOH/Projects/civicdata-ci/supabase/migrations/20260902000000_init_rls.sql).
 
 ### Matrice des Politiques RLS Déployées :
 
