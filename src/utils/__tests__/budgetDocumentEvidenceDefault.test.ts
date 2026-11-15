@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Institution } from '../../types';
 import type { DocumentIngestionMetadata, ProposedFinancialValue } from '../../types/budgetCycle';
-import { buildStandardImportEnvelope } from '../budgetDocumentDryRun';
+import { buildStandardImportEnvelope, runDocumentDryRun } from '../budgetDocumentDryRun';
 
 const institution = {
   id: 'inst-test',
@@ -54,6 +54,24 @@ describe('Budget document import evidence defaults', () => {
       expect(ca.data.verification_status).toBe('SECONDARY_TO_CORROBORATE');
     }
   );
+
+  it('blocks primary evidence when its URL is not institutionally allowlisted or its exact page is missing', () => {
+    const context = { knownInstitutions: [institution], existingBudgets: [], existingAccounts: [] };
+    const thirdParty = runDocumentDryRun({
+      ...metadata('BUDGET_PRIMITIF', 'OFFICIAL_DOCUMENT'),
+      source_url: 'https://example.com/fake-official-budget.pdf',
+      source_page: 1,
+    }, [value], context);
+    expect(thirdParty.can_import).toBe(false);
+    expect(thirdParty.errors.join(' ')).toContain('domaine institutionnel');
+
+    const missingPage = runDocumentDryRun({
+      ...metadata('BUDGET_PRIMITIF', 'OFFICIAL_DOCUMENT'),
+      source_url: 'https://dgbf.gouv.ci/budget-2026.pdf',
+    }, [value], context);
+    expect(missingPage.can_import).toBe(false);
+    expect(missingPage.errors.join(' ')).toContain('page exacte');
+  });
 
   it('preserves an explicitly selected primary official document status', () => {
     const envelope = buildStandardImportEnvelope(metadata('BUDGET_PRIMITIF', 'OFFICIAL_DOCUMENT'), [value], institution);
