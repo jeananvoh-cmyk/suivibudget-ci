@@ -331,7 +331,7 @@ CREATE TRIGGER enforce_local_budget_primary_evidence
 
 DROP TRIGGER IF EXISTS enforce_administrative_account_primary_evidence ON public.administrative_accounts;
 CREATE TRIGGER enforce_administrative_account_primary_evidence
-  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_url
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url
   ON public.administrative_accounts FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
 
 DROP TRIGGER IF EXISTS enforce_procurement_primary_evidence ON public.ca_procurement_matches;
