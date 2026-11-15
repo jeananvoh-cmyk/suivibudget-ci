@@ -614,7 +614,10 @@ describe('Tests Adversariaux P0/P1 — Certification du Passeport de Redevabilit
     );
     expect(passportExactTiassale.stages.find(s => s.id === 'NEED_PROGRAMMING')?.status).toBe('NOT_FOUND_PUBLICLY');
     expect(passportExactTiassale.stages.find(s => s.id === 'BUDGET_VOTED')?.status).toBe('PENDING_DOCUMENTATION');
-    expect(passportExactTiassale.stages.find(s => s.id === 'PROCUREMENT_DGMP')?.status).toBe('VERIFIED_OFFICIAL');
+    // L'avis DGMP est relié à un PDF institutionnel, mais son identifiant documentaire
+    // et sa page précise ne sont pas enregistrés : il reste probable, jamais certifié.
+    expect(passportExactTiassale.hasVerifiedProcurementEvidence).toBe(false);
+    expect(passportExactTiassale.stages.find(s => s.id === 'PROCUREMENT_DGMP')?.status).toBe('PROBABLE_MATCH');
     expect(passportExactTiassale.stages.find(s => s.id === 'BUDGET_EXECUTION_CA')?.status).toBe('VERIFIED_OFFICIAL');
     expect(passportExactTiassale.stages.find(s => s.id === 'PHYSICAL_REALIZATION')?.status).toBe('CITIZEN_DOCUMENTED');
     expect(passportExactTiassale.stages.find(s => s.id === 'AUDIT_ACCOUNTABILITY')?.status).toBe('PENDING_DOCUMENTATION');
