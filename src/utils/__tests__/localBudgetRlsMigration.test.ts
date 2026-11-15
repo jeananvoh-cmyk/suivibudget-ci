@@ -57,7 +57,6 @@ describe('RLS hardening — local budget administration', () => {
         VALUES ('migration-market','migration-operation','Travaux école','Entreprise test',40,'Vérifié DGMP');
       `);
       await db.exec(migration);
-      await db.exec(migration);
       const demotions = await db.query<{ table_name: string; status: string; amount: string | number }>(
         `SELECT 'local_budgets' table_name,verification_status status,total_amount::text amount FROM public.local_budgets WHERE id='migration-budget'
          UNION ALL
