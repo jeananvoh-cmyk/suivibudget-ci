@@ -1,0 +1,73 @@
+# Réconciliation de l’historique des migrations Supabase
+
+Date du contrôle : 15 novembre 2026  
+Projet contrôlé en lecture seule : `cdesuvcozcetdtvibgqs`  
+Branche Git contrôlée : `fix/reconcile-public-indicators`
+
+## Source de vérité consultée
+
+L’historique réel a été lu dans `supabase_migrations.schema_migrations`. La table contient les colonnes `version`, `name`, `statements`, `created_by`, `idempotency_key` et `rollback`. Les 26 enregistrements présents possèdent chacun une instruction SQL conservée dans `statements[1]`.
+
+Les fichiers canoniques de `supabase/migrations/` sont restaurés à partir de ces instructions SQL enregistrées, et non réécrits à partir de souvenirs ou de noms de fichiers. Cela rétablit les 26 versions exactes suivies par la base.
+
+## Historique Production restauré dans Git
+
+| Version | Nom enregistré dans Supabase |
+|---|---|
+| 20260929111429 | secure_staff_rbac_20260929 |
+| 20260929111435 | protect_profiles_20260929 |
+| 20260929111443 | ca_document_workflow_20260929 |
+| 20260929111449 | private_storage_workflow_20260929 |
+| 20260929111509 | security_cleanup_indexes_20260929 |
+| 20260929111944 | private_rbac_helper_20260929 |
+| 20260929111958 | private_storage_remove_public_read_20260929 |
+| 20260929112029 | ca_v3_financial_provenance_20260929 |
+| 20260929112823 | remove_duplicate_ca_index_20260929 |
+| 20260930030522 | document_metadata_versions |
+| 20260930030614 | publication_boundaries |
+| 20260930030702 | grant_schema_privileges |
+| 20260930031058 | public_proof_projection_boundary |
+| 20260930144753 | foundation_http_access |
+| 20260930153938 | least_privilege_passport_boundary |
+| 20261001040746 | apec_participation_cycle |
+| 20261001044508 | apec_moderated_publication |
+| 20261001093613 | controlled_data_import |
+| 20261001150911 | import_console_qualified_amounts |
+| 20261002090824 | grant_anon_published_local_budgets |
+| 20261005121837 | drop_default_zero_institutions_budget |
+| 20261014155231 | multipart_ca_documents_20261013 |
+| 20261026183930 | admin_dashboard_persistence_hardening_pr63 |
+| 20261026184038 | multipart_ca_convergence_pr63 |
+| 20261026184048 | document_delivery_counter_pr63 |
+| 20261113011327 | security_definer_hardening_20261026213000 |
+
+## Fichiers préexistants conservés hors du chemin actif
+
+Les anciens fichiers de migration du dépôt dont le timestamp ou le contenu ne correspondait pas exactement à l’historique Production sont conservés dans `supabase/migrations_archive/`. Ils ne sont pas exécutés par le mécanisme normal de découverte des migrations.
+
+Les trois fichiers de bootstrap suivants restent dans `supabase/migrations/` :
+
+- `20260902_init_rls.sql`
+- `20260928_administrative_accounts.sql`
+- `20260928_local_budgets_referential.sql`
+
+Ils ne figurent pas dans les 26 versions enregistrées par Production. Ils sont donc considérés comme un socle préhistorique/local à vérifier, et non comme des migrations Production confirmées. **Ne pas lancer `supabase db push` tant que leur statut et leur nécessité ne sont pas formellement réconciliés.**
+
+## Migration de fiabilisation en attente
+
+`20261115070000_enforce_primary_document_provenance.sql` est une nouvelle migration proposée dans la PR #68. Elle n’est pas présente dans l’historique Production et n’a pas été appliquée. Elle doit rester en attente jusqu’à revue et test sur une base non-production.
+
+## Limites et prochaines vérifications
+
+- La restauration des 26 fichiers canoniques ne modifie pas la base Production et ne prouve pas à elle seule que le bootstrap local reproduit le schéma initial de Production.
+- Le contrôle CLI `supabase migration list --remote` et le replay complet des migrations sur une base jetable restent à exécuter.
+- Le projet ne possède actuellement aucune branche Supabase de développement. La création d’une Preview Branch peut engendrer des frais (Compute, stockage, egress). La tentative de création a été arrêtée par le mécanisme de confirmation de coût ; aucune branche n’a été créée.
+- Supabase CLI v3 cible le local par défaut : tout contrôle hébergé doit préciser `--remote`. Toute commande modifiant un projet hébergé doit rester explicitement approuvée.
+- Aucun `migration repair`, `db push`, `apply_migration`, changement de schéma, changement de données, fusion Git ou déploiement Production n’a été effectué pendant ce contrôle.
+
+## État à ce commit
+
+- 26 versions Production récupérées depuis leur SQL réellement enregistré.
+- 3 fichiers bootstrap préhistoriques conservés et signalés.
+- 1 migration de fiabilisation proposée, non appliquée.
+- 0 écriture sur Supabase Production.

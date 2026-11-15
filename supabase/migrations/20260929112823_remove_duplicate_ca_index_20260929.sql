@@ -1,0 +1,1 @@
+drop index if exists public.uq_administrative_accounts_institution_year;

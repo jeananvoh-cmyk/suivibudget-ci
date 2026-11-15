@@ -1,0 +1,1 @@
+GRANT SELECT ON public.local_budgets TO anon;
