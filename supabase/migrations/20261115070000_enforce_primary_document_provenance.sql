@@ -401,29 +401,11 @@ CREATE POLICY "Allow admin write access on projects"
   USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
   WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
 
--- Le staff peut modérer les preuves citoyennes sans élargir la politique de lecture.
+-- Preserve the deployed citizen submission, moderation and deletion policies.
+-- Only remove the legacy all-operations policy if it exists; do not grant
+-- moderators additional INSERT or DELETE permissions.
 DROP POLICY IF EXISTS "Allow moderators full management on citizen proofs" ON public.citizen_proofs;
-DROP POLICY IF EXISTS "Moderators insert citizen proofs" ON public.citizen_proofs;
-CREATE POLICY "Moderators insert citizen proofs"
-  ON public.citizen_proofs FOR INSERT TO authenticated
-  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
 
-DROP POLICY IF EXISTS "Moderators update citizen proofs" ON public.citizen_proofs;
-CREATE POLICY "Moderators update citizen proofs"
-  ON public.citizen_proofs FOR UPDATE TO authenticated
-  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
-  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
-
-DROP POLICY IF EXISTS "Moderators delete citizen proofs" ON public.citizen_proofs;
-CREATE POLICY "Moderators delete citizen proofs"
-  ON public.citizen_proofs FOR DELETE TO authenticated
-  USING (private.has_staff_role(array['ADMIN','MODERATOR']));
-
--- Les politiques sécurisées de publication/staging restent en place.
-DROP POLICY IF EXISTS "Allow admin only read on newsletter subscribers" ON public.newsletter_subscribers;
-DROP POLICY IF EXISTS "Allow staff full access on public documents" ON public.public_documents;
-DROP POLICY IF EXISTS "Staff can upload public documents files" ON storage.objects;
-DROP POLICY IF EXISTS "Staff can delete public documents files" ON storage.objects;
-DROP POLICY IF EXISTS "Public documents files are publicly readable" ON storage.objects;
+-- Preserve the verified newsletter, document and Storage policies by name and predicate.
 
 COMMIT;

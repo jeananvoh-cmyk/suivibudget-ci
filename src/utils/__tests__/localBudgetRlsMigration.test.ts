@@ -26,10 +26,7 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toContain('CREATE TRIGGER enforce_procurement_primary_evidence');
     expect(migration).toContain('CREATE TRIGGER enforce_budget_project_primary_evidence');
     expect(migration).toContain('ALTER TABLE public.ca_procurement_matches');
-    expect(migration).toContain('DROP POLICY IF EXISTS "Allow staff full access on public documents"');
-    expect(migration).toContain('DROP POLICY IF EXISTS "Public documents files are publicly readable"');
-    expect(migration).toContain('DROP POLICY IF EXISTS "Staff can upload public documents files"');
-    expect(migration).toContain('DROP POLICY IF EXISTS "Staff can delete public documents files"');
+
     expect(migration).toContain('d.checksum_status IN (\'COMPUTED\', \'VERIFIED\')');
   });
 
@@ -47,16 +44,17 @@ describe('RLS hardening — local budget administration', () => {
       'Allow admin write on CA procurement matches',
       'Allow admin and moderator full access on responses',
       'Allow admin write access on projects',
-      'Moderators insert citizen proofs',
-      'Moderators update citizen proofs',
-      'Moderators delete citizen proofs',
+
     ];
 
     for (const policy of policies) {
       expect(migration).toContain(`DROP POLICY IF EXISTS "${policy}"`);
       expect(migration).toContain(`CREATE POLICY "${policy}"`);
     }
-    expect((migration.match(/WITH CHECK/g) || []).length).toBe(13);
+    expect(migration).toContain('DROP POLICY IF EXISTS "Allow moderators full management on citizen proofs"');
+    expect(migration).not.toContain('CREATE POLICY "Moderators delete citizen proofs"');
+    expect(migration).not.toContain('CREATE POLICY "Moderators insert citizen proofs"');
+    expect((migration.match(/WITH CHECK/g) || []).length).toBe(11);
   });
 
   it('is additive and transaction-wrapped; it does not mutate financial records', () => {
