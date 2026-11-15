@@ -71,6 +71,27 @@ Le dépôt ne contenait pas de `supabase/config.toml`. Un fichier minimal est d�
 
 Après installation de Supabase CLI v3 et authentification, l'opérateur devra exécuter `supabase link --project-ref cdesuvcozcetdtvibgqs`, puis `supabase migration list --remote`. En CLI v3, `migration list`, `migration fetch` et `migration repair` ciblent le local par défaut ; `--remote` est obligatoire pour la cible hébergée. La commande `supabase migration fetch --remote` peut ensuite être utilisée comme vérification indépendante des 26 fichiers restaurés.
 
+## Validation automatisée du correctif
+
+Sur le commit `3bea1dfb1e3e30c03ff5eb56a7dc957229c86119`, le workflow GitHub Quality #477 a réussi :
+
+- 72/72 fichiers de tests réussis ;
+- 980/980 tests réussis ;
+- le test `localBudgetRlsMigration.test.ts` exécute réellement la migration sur un fixture PGlite isolé construit à partir du schéma de production ;
+- le test vérifie le déclassement des statuts locaux, recettes, CA et rapprochements DGMP sans modifier les montants ;
+- le test vérifie que les certifications de projets sans document primaire/page exacte sont rejetées ;
+- `npm run build` : PASS (1 770 modules) ;
+- `npm run build:review` : PASS (39 modules) ;
+- Vercel Preview : PASS.
+
+Ce test PGlite est un replay local isolé, pas une Preview Branch Supabase hébergée. Il valide la syntaxe PostgreSQL et le comportement sur le schéma-fixture, mais ne remplace pas un dry-run hébergé avec les extensions et services Supabase réels.
+
+## Vérification du socle préhistorique
+
+Les 18 tables déclarées par les trois fichiers bootstrap (7 + 5 + 6) existent actuellement dans le schéma Production. Les objets clés du fichier local historique `20260929_security_ca_document_foundation.sql` existent également : `ca_financial_lines`, `private.has_staff_role(text[])` et `public.enforce_document_publication_audit()`. Les migrations Production canoniques `20260929112029_ca_v3_financial_provenance_20260929.sql` et les migrations documentaires antérieures portent les changements correspondants.
+
+Cela confirme que le socle a été créé ou recréé avant/pendant l'établissement de l'historique suivi, mais **ne prouve pas à lui seul que le contenu exact de chaque fichier bootstrap a été appliqué**. Les trois versions bootstrap restent absentes de `schema_migrations`. Aucune commande `migration repair` n'a été exécutée.
+
 ## État à ce commit
 
 - 26 versions Production récupérées depuis leur SQL réellement enregistré.
