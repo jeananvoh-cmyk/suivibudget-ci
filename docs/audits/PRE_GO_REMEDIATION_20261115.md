@@ -51,3 +51,15 @@ Le hash actuel est seulement calculé sur le fichier stocké. L'original binaire
 ## Verdict
 
 **NO-GO maintenu.** Ces commits préparent des corrections ; ils ne prouvent pas leur application sur Production. Ne pas fusionner, migrer ni déployer tant que les validations ci-dessus ne sont pas terminées et que le risque Auth résiduel n'est pas explicitement accepté ou éliminé.
+
+
+## Complément de sécurité et résultat CI — 15 novembre 2026
+
+- La migration `20261115180000` retire aussi les politiques de lecture publique sans filtre des tables historiques `public.projects` et `public.sources`. Le contrôle SQL Production en lecture seule a confirmé 0 ligne dans chacune ; aucune lecture directe de ces tables n'a été trouvée dans le client courant. Les politiques de gestion staff restent présentes.
+- Les cinq tables examinées (`projects`, `sources`, `site_settings`, `budget_sources`, `budget_revenue_sources`) étaient vides en Production au contrôle. Les deux dernières sont protégées par la migration #77 via le statut du parent ; les trois premières sont traitées par les migrations de cette branche.
+- **CI #514 PASS** sur `0bea7d68b5d43b07a143cf74147083493728b980` : 75/75 fichiers de tests, 989/989 tests, `npm run build` PASS (11,14 s), `npm run build:review` PASS (1,12 s). Aucun échec de test, TypeScript ou build.
+- Ce résultat CI prouve la cohérence du code et des fixtures PGlite ; il ne prouve pas l'application des migrations dans le projet Supabase hébergé.
+- Vercel a publié un statut Preview Ready dans le fil de la PR #78. L'accès API Vercel de cette session n'a pas permis de confirmer indépendamment le SHA exact du déploiement ; cette Preview n'est donc pas utilisée comme preuve de release.
+- Les alertes Supabase Production restent inchangées tant que les migrations ne sont pas appliquées. Aucun changement Production n'a été effectué.
+
+**Verdict inchangé : NO-GO.** Les barrières Auth serveur, la revue indépendante, la recette Supabase hébergée et les preuves documentaires Cocody restent ouvertes.
