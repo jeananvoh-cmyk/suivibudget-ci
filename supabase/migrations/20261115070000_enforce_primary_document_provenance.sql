@@ -350,6 +350,7 @@ CREATE POLICY "Allow admin write on budget revenue sources"
   USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
   WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
 
+DROP POLICY IF EXISTS "Allow admin write on budget lines" ON public.budget_lines;
 DROP POLICY IF EXISTS "admin_entity_staff" ON public.budget_lines;
 CREATE POLICY "Allow admin write on budget lines"
   ON public.budget_lines FOR ALL TO authenticated
