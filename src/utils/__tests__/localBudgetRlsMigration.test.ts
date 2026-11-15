@@ -16,6 +16,7 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toContain("ALTER COLUMN verification_status SET DEFAULT 'TO_VERIFY'");
     expect(migration).toContain("ALTER COLUMN data_provenance SET DEFAULT 'DECLARED_ADMIN'");
     expect(migration).toContain('CREATE OR REPLACE FUNCTION private.validate_import_row(r jsonb)');
+    expect(migration).toContain("private.has_staff_role(array['ADMIN','MODERATOR','DATA_MANAGER'])");
     expect(migration).toContain("'source_document_id'");
     expect(migration).toContain('Primary document requires a published, checksum-verified catalogue record');
     expect(migration).toContain("pd.source_url = s ->> 'url'");
@@ -36,7 +37,7 @@ describe('RLS hardening — local budget administration', () => {
       'Allow admin full access on local budgets',
       'Allow admin write on budget sources',
       'Allow admin write on budget revenue sources',
-      'Allow admin write on budget lines',
+      'admin_entity_staff',
       'Allow admin read on budget revisions',
       'Allow admin insert on budget revisions',
       'Allow admin full access on CA',

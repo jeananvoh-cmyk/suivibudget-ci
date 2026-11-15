@@ -355,7 +355,7 @@ CREATE POLICY "Allow admin write on budget revenue sources"
   USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
   WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
 
-DROP POLICY IF EXISTS "Allow admin write on budget lines" ON public.budget_lines;
+DROP POLICY IF EXISTS "admin_entity_staff" ON public.budget_lines;
 CREATE POLICY "Allow admin write on budget lines"
   ON public.budget_lines FOR ALL TO authenticated
   USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
@@ -392,8 +392,8 @@ CREATE POLICY "Allow admin write on CA procurement matches"
 DROP POLICY IF EXISTS "Allow admin and moderator full access on responses" ON public.ca_institution_responses;
 CREATE POLICY "Allow admin and moderator full access on responses"
   ON public.ca_institution_responses FOR ALL TO authenticated
-  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
-  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+  USING (private.has_staff_role(array['ADMIN','MODERATOR','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR','DATA_MANAGER']));
 
 DROP POLICY IF EXISTS "Allow admin write access on projects" ON public.projects;
 CREATE POLICY "Allow admin write access on projects"
