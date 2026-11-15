@@ -99,8 +99,12 @@ export const PUBLIC_SECTOR_DEFINITIONS: readonly PublicSectorDefinition[] = [
 
 export interface PublicSectorSummary extends PublicSectorDefinition {
   amountFcfa: number;
+  consolidatedAmountFcfa: number | null;
   count: number;
+  documentedAmountCount: number;
   unknownAmountCount: number;
+  zeroAmountCount: number;
+  isPartialSum: boolean;
   exactPct: number;
   pct: number;
   stateCount: number;
@@ -115,7 +119,11 @@ export interface SectorBreakdownResult {
   denominatorAmountFcfa: number;
   totalProjects: number;
   totalAmountFcfa: number;
+  consolidatedTotalAmountFcfa: number | null;
+  documentedAmountProjectsCount: number;
   unknownAmountProjectsCount: number;
+  zeroAmountProjectsCount: number;
+  isPartialSum: boolean;
   unmappedCategoryProjectsCount: number;
   unmappedCategoryAmountFcfa: number;
   excludedOtherYearsCount: number;
@@ -123,6 +131,7 @@ export interface SectorBreakdownResult {
   excludedOverlapOrDupesCount: number;
   isExhaustiveCoverage: boolean;
   methodologyNotice: string;
+  partialSumNotice: string | null;
   sectors: PublicSectorSummary[];
 }
 
@@ -179,8 +188,10 @@ export interface StructuredPublicIndicator {
 export interface PublicInvestmentScopeSummary {
   physicalAllCount: number;
   physicalAllAmountFcfa: number;
+  consolidatedPhysicalAllAmountFcfa: number | null;
   physical2026Count: number;
   physical2026AmountFcfa: number;
+  consolidatedPhysical2026AmountFcfa: number | null;
   statePhysical2026Count: number;
   statePhysical2026AmountFcfa: number;
   localPhysical2026Count: number;
@@ -195,7 +206,10 @@ export interface PublicInvestmentScopeSummary {
   localRegionalPhysical2026AmountFcfa: number;
   multiYearPre2026Count: number;
   multiYearPre2026AmountFcfa: number;
+  documentedAmountProjectsCount: number;
   unknownAmountProjectsCount: number;
+  zeroAmountProjectsCount: number;
+  isPartialSum: boolean;
   rawCatalogLinesCount: number;
   stateRawCatalog2026Count: number;
   stateRawCatalog2026AmountFcfa: number;
@@ -349,7 +363,9 @@ export function computeSectorBreakdown(
     const confirmed = getConfirmedAmount(project.budget_amount_fcfa);
     if (fiscalYearFilter !== 'ALL' && project.fiscal_year !== fiscalYearFilter) {
       excludedOtherYearsCount += 1;
-      excludedOtherYearsAmountFcfa += confirmed ?? 0;
+      if (confirmed !== null) {
+        excludedOtherYearsAmountFcfa += confirmed;
+      }
       continue;
     }
 
@@ -364,7 +380,9 @@ export function computeSectorBreakdown(
     {
       amountFcfa: number;
       count: number;
+      documentedAmountCount: number;
       unknownAmountCount: number;
+      zeroAmountCount: number;
       stateCount: number;
       stateAmountFcfa: number;
       localCount: number;
@@ -376,7 +394,9 @@ export function computeSectorBreakdown(
     buckets.set(def.id, {
       amountFcfa: 0,
       count: 0,
+      documentedAmountCount: 0,
       unknownAmountCount: 0,
+      zeroAmountCount: 0,
       stateCount: 0,
       stateAmountFcfa: 0,
       localCount: 0,
@@ -385,7 +405,9 @@ export function computeSectorBreakdown(
   }
 
   let totalAmountFcfa = 0;
+  let documentedAmountProjectsCount = 0;
   let unknownAmountProjectsCount = 0;
+  let zeroAmountProjectsCount = 0;
   let unmappedCategoryProjectsCount = 0;
   let unmappedCategoryAmountFcfa = 0;
 
@@ -398,6 +420,8 @@ export function computeSectorBreakdown(
       if (confirmed === null) {
         unknownAmountProjectsCount += 1;
       } else {
+        documentedAmountProjectsCount += 1;
+        if (confirmed === 0) zeroAmountProjectsCount += 1;
         unmappedCategoryAmountFcfa += confirmed;
         totalAmountFcfa += confirmed;
       }
@@ -410,6 +434,12 @@ export function computeSectorBreakdown(
       bucket.unknownAmountCount += 1;
       unknownAmountProjectsCount += 1;
     } else {
+      bucket.documentedAmountCount += 1;
+      if (confirmed === 0) {
+        bucket.zeroAmountCount += 1;
+        zeroAmountProjectsCount += 1;
+      }
+      documentedAmountProjectsCount += 1;
       bucket.amountFcfa += confirmed;
       totalAmountFcfa += confirmed;
       if (isState) {
@@ -430,11 +460,16 @@ export function computeSectorBreakdown(
     const b = buckets.get(def.id)!;
     const exactPct = totalAmountFcfa > 0 ? (b.amountFcfa / totalAmountFcfa) * 100 : 0;
     const pct = totalAmountFcfa > 0 ? Math.round(exactPct * 10) / 10 : 0;
+    const sectorPartial = b.unknownAmountCount > 0;
     return {
       ...def,
       amountFcfa: b.amountFcfa,
+      consolidatedAmountFcfa: sectorPartial ? null : b.amountFcfa,
       count: b.count,
+      documentedAmountCount: b.documentedAmountCount,
       unknownAmountCount: b.unknownAmountCount,
+      zeroAmountCount: b.zeroAmountCount,
+      isPartialSum: sectorPartial,
       exactPct,
       pct,
       stateCount: b.stateCount,
@@ -444,6 +479,7 @@ export function computeSectorBreakdown(
     };
   });
 
+  const isPartialSum = unknownAmountProjectsCount > 0;
   const isExhaustiveCoverage =
     unmappedCategoryProjectsCount === 0 && unknownAmountProjectsCount === 0 && totalAmountFcfa > 0;
 
@@ -451,13 +487,21 @@ export function computeSectorBreakdown(
     ? "Répartition exhaustive sur le périmètre classifié présenté (total ≈ 100 % à l'arrondi près)."
     : 'Principaux secteurs recensés — pourcentage calculé sur le périmètre présenté';
 
+  const partialSumNotice = isPartialSum
+    ? `Somme partielle des montants connus (${unknownAmountProjectsCount} projet(s) à montant non communiqué hors somme financière, jamais comptés comme 0 FCFA).`
+    : null;
+
   return {
     fiscalYearFilter,
     scopeKind,
     denominatorAmountFcfa: totalAmountFcfa,
     totalProjects: scopedItems.length,
     totalAmountFcfa,
+    consolidatedTotalAmountFcfa: isPartialSum ? null : totalAmountFcfa,
+    documentedAmountProjectsCount,
     unknownAmountProjectsCount,
+    zeroAmountProjectsCount,
+    isPartialSum,
     unmappedCategoryProjectsCount,
     unmappedCategoryAmountFcfa,
     excludedOtherYearsCount,
@@ -465,6 +509,7 @@ export function computeSectorBreakdown(
     excludedOverlapOrDupesCount,
     isExhaustiveCoverage,
     methodologyNotice,
+    partialSumNotice,
     sectors,
   };
 }
@@ -523,44 +568,69 @@ export function computePublicIndicators(params: {
   let localRegionalPhysical2026AmountFcfa = 0;
   let multiYearPre2026Count = 0;
   let multiYearPre2026AmountFcfa = 0;
+  let documentedAmountProjectsCount = 0;
   let unknownAmountProjectsCount = 0;
+  let unknownAmount2026ProjectsCount = 0;
+  let zeroAmountProjectsCount = 0;
 
   for (const { project: p, classification } of classifiedProjects) {
     const confirmed = getConfirmedAmount(p.budget_amount_fcfa);
     if (confirmed === null) {
       unknownAmountProjectsCount += 1;
+      if (p.fiscal_year === 2026) {
+        unknownAmount2026ProjectsCount += 1;
+      }
     } else {
+      documentedAmountProjectsCount += 1;
+      if (confirmed === 0) {
+        zeroAmountProjectsCount += 1;
+      }
       physicalAllAmountFcfa += confirmed;
     }
-    const amt = confirmed ?? 0;
 
     if (p.fiscal_year === 2026) {
       physical2026Count += 1;
-      physical2026AmountFcfa += amt;
+      if (confirmed !== null) {
+        physical2026AmountFcfa += confirmed;
+      }
       if (isStateProject(p)) {
         statePhysical2026Count += 1;
-        statePhysical2026AmountFcfa += amt;
+        if (confirmed !== null) {
+          statePhysical2026AmountFcfa += confirmed;
+        }
       } else {
         localPhysical2026Count += 1;
-        localPhysical2026AmountFcfa += amt;
+        if (confirmed !== null) {
+          localPhysical2026AmountFcfa += confirmed;
+        }
         if (classification.provenancePool === 'LOCAL_PORTAL_BOUAKE_2026') {
           localPortalBouakePhysical2026Count += 1;
-          localPortalBouakePhysical2026AmountFcfa += amt;
+          if (confirmed !== null) {
+            localPortalBouakePhysical2026AmountFcfa += confirmed;
+          }
         } else {
           localCsvPhysical2026Count += 1;
-          localCsvPhysical2026AmountFcfa += amt;
+          if (confirmed !== null) {
+            localCsvPhysical2026AmountFcfa += confirmed;
+          }
         }
         if (p.project_tier === 'REGIONAL') {
           localRegionalPhysical2026Count += 1;
-          localRegionalPhysical2026AmountFcfa += amt;
+          if (confirmed !== null) {
+            localRegionalPhysical2026AmountFcfa += confirmed;
+          }
         } else {
           localMunicipalPhysical2026Count += 1;
-          localMunicipalPhysical2026AmountFcfa += amt;
+          if (confirmed !== null) {
+            localMunicipalPhysical2026AmountFcfa += confirmed;
+          }
         }
       }
     } else {
       multiYearPre2026Count += 1;
-      multiYearPre2026AmountFcfa += amt;
+      if (confirmed !== null) {
+        multiYearPre2026AmountFcfa += confirmed;
+      }
     }
   }
 
@@ -573,13 +643,17 @@ export function computePublicIndicators(params: {
   for (const { project: p, classification } of classifiedRaw) {
     if (classification.isExactDuplicate || classification.isCrossCatalogOverlap) continue;
     if (p.fiscal_year !== 2026) continue;
-    const amt = getConfirmedAmount(p.budget_amount_fcfa) ?? 0;
+    const confirmedRaw = getConfirmedAmount(p.budget_amount_fcfa);
     if (isStateProject(p)) {
       stateRawCatalog2026Count += 1;
-      stateRawCatalog2026AmountFcfa += amt;
+      if (confirmedRaw !== null) {
+        stateRawCatalog2026AmountFcfa += confirmedRaw;
+      }
     } else {
       localRawCatalog2026Count += 1;
-      localRawCatalog2026AmountFcfa += amt;
+      if (confirmedRaw !== null) {
+        localRawCatalog2026AmountFcfa += confirmedRaw;
+      }
     }
   }
 
@@ -789,8 +863,12 @@ export function computePublicIndicators(params: {
     investments: {
       physicalAllCount: dedupedPhysicalCount,
       physicalAllAmountFcfa,
+      consolidatedPhysicalAllAmountFcfa:
+        unknownAmountProjectsCount > 0 ? null : physicalAllAmountFcfa,
       physical2026Count,
       physical2026AmountFcfa,
+      consolidatedPhysical2026AmountFcfa:
+        unknownAmount2026ProjectsCount > 0 ? null : physical2026AmountFcfa,
       statePhysical2026Count,
       statePhysical2026AmountFcfa,
       localPhysical2026Count,
@@ -805,7 +883,10 @@ export function computePublicIndicators(params: {
       localRegionalPhysical2026AmountFcfa,
       multiYearPre2026Count,
       multiYearPre2026AmountFcfa,
+      documentedAmountProjectsCount,
       unknownAmountProjectsCount,
+      zeroAmountProjectsCount,
+      isPartialSum: unknownAmountProjectsCount > 0,
       rawCatalogLinesCount: rawProjects.length,
       stateRawCatalog2026Count,
       stateRawCatalog2026AmountFcfa,

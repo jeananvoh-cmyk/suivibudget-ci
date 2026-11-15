@@ -19,7 +19,9 @@ import { BudgetReportsView, computeBudgetReportStats } from '../../components/Bu
 import { CommuneComparatorModal } from '../../components/CommuneComparatorModal';
 import { ADMINISTRATIVE_ACCOUNTS_DATA } from '../../data/administrativeAccountsData';
 import { CA_PILOT_FIXTURES } from './caPilotFixtures';
-import type { BudgetProject, Institution } from '../../types';
+import { computeSectorBreakdown, computePublicIndicators } from '../publicIndicators';
+import { publicCitizenProof, publicCitizenIdentity } from '../../review/domain/citizen';
+import type { BudgetProject, CitizenProof, Institution } from '../../types';
 import type { AdministrativeAccount } from '../../types/administrativeAccount';
 
 describe('Tests Adversariaux P0/P1 — Certification du Passeport de Redevabilité & Rapports Financiers', () => {
@@ -602,5 +604,112 @@ describe('Tests Adversariaux P0/P1 — Certification du Passeport de Redevabilit
     expect(passportExactTiassale.stages.find(s => s.id === 'AUDIT_ACCOUNTABILITY')?.status).toBe('PENDING_DOCUMENTATION');
     expect(checkVerifiedPhysicalEvidence(exactTiassaleProject)).toBe(false);
     expect(checkVerifiedAuditEvidence(exactTiassaleProject)).toBe(false);
+  });
+
+  it('Cas 14 (Section 4) : computeSectorBreakdown et computePublicIndicators distinguent montants documentés, montants à 0 FCFA et montants inconnus (null) sans total consolidé trompeur', () => {
+    const sampleProjects: BudgetProject[] = [
+      {
+        ...baseProject,
+        id: 'proj-sec-known-100m',
+        title: 'Construction d’un centre de santé urbain',
+        category: 'Santé',
+        budget_amount_fcfa: 100_000_000,
+        fiscal_year: 2026,
+      },
+      {
+        ...baseProject,
+        id: 'proj-sec-zero',
+        title: 'Réhabilitation dispensaire rural (dotation 0 FCFA)',
+        category: 'Santé',
+        budget_amount_fcfa: 0,
+        fiscal_year: 2026,
+      },
+      {
+        ...baseProject,
+        id: 'proj-sec-unknown',
+        title: 'Construction maternité municipale (montant non communiqué)',
+        category: 'Santé',
+        budget_amount_fcfa: null,
+        fiscal_year: 2026,
+      },
+    ];
+
+    const breakdown = computeSectorBreakdown(sampleProjects, { fiscalYear: 2026 });
+    expect(breakdown.totalProjects).toBe(3);
+    expect(breakdown.documentedAmountProjectsCount).toBe(2);
+    expect(breakdown.zeroAmountProjectsCount).toBe(1);
+    expect(breakdown.unknownAmountProjectsCount).toBe(1);
+    expect(breakdown.isPartialSum).toBe(true);
+    expect(breakdown.totalAmountFcfa).toBe(100_000_000);
+    expect(breakdown.consolidatedTotalAmountFcfa).toBeNull();
+    expect(breakdown.isExhaustiveCoverage).toBe(false);
+    expect(breakdown.partialSumNotice).toContain('Somme partielle des montants connus');
+    expect(breakdown.partialSumNotice).toContain('jamais comptés comme 0 FCFA');
+
+    const healthSector = breakdown.sectors.find(s => s.id === 'HEALTH')!;
+    expect(healthSector.count).toBe(3);
+    expect(healthSector.documentedAmountCount).toBe(2);
+    expect(healthSector.zeroAmountCount).toBe(1);
+    expect(healthSector.unknownAmountCount).toBe(1);
+    expect(healthSector.isPartialSum).toBe(true);
+    expect(healthSector.amountFcfa).toBe(100_000_000);
+    expect(healthSector.consolidatedAmountFcfa).toBeNull();
+
+    const snapshot = computePublicIndicators({
+      projects: sampleProjects,
+      institutions: [],
+      proofs: [],
+    });
+    expect(snapshot.investments.documentedAmountProjectsCount).toBe(2);
+    expect(snapshot.investments.zeroAmountProjectsCount).toBe(1);
+    expect(snapshot.investments.unknownAmountProjectsCount).toBe(1);
+    expect(snapshot.investments.isPartialSum).toBe(true);
+    expect(snapshot.investments.physical2026AmountFcfa).toBe(100_000_000);
+    expect(snapshot.investments.consolidatedPhysicalAllAmountFcfa).toBeNull();
+    expect(snapshot.investments.consolidatedPhysical2026AmountFcfa).toBeNull();
+  });
+
+  it('Cas 15 (Section 7) : Protection des données citoyennes — publicCitizenProof masque systématiquement le nom réel, le WhatsApp/téléphone et bloque les preuves non modérées', () => {
+    const rawSubmittedProof: CitizenProof & Record<string, unknown> = {
+      id: 'proof-pii-check',
+      project_id: 'proj-1',
+      project_title: 'Centre de santé',
+      commune_name: 'Cocody',
+      citizen_name: 'Kouamé Aya Marie',
+      user_name: 'Kouamé Aya Marie',
+      citizen_whatsapp: '+2250708091011',
+      citizen_contact: 'aya.kouame@example.ci',
+      moderator_notes: 'Vérifié par appel téléphonique interne',
+      tracking_code: 'TRK-SECRET-999',
+      image_url: 'https://example.ci/photo.jpg',
+      citizen_status_claim: 'IN_PROGRESS',
+      comment: 'Les murs sont montés jusqu’au chaînage.',
+      verification_status: 'PENDING',
+      confirmations_count: 1,
+      created_at: '2026-04-10',
+    };
+
+    // Tant que la preuve est PENDING ou REJECTED, elle ne peut jamais être exposée publiquement
+    expect(publicCitizenProof(rawSubmittedProof as CitizenProof)).toBeNull();
+    expect(
+      publicCitizenProof({
+        ...(rawSubmittedProof as CitizenProof),
+        verification_status: 'REJECTED',
+      })
+    ).toBeNull();
+
+    // Une fois APPROVED, seules les données publiques anonymisées sont projetées
+    const approvedProjection = publicCitizenProof({
+      ...(rawSubmittedProof as CitizenProof),
+      verification_status: 'APPROVED',
+    });
+    expect(approvedProjection).not.toBeNull();
+    expect(approvedProjection!.citizen_name).toBe(publicCitizenIdentity());
+    expect(approvedProjection!.user_name).toBe('Sentinelle citoyenne');
+    expect(approvedProjection!.citizen_name).not.toContain('Kouamé');
+    expect(Object.prototype.hasOwnProperty.call(approvedProjection, 'citizen_whatsapp')).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(approvedProjection, 'citizen_contact')).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(approvedProjection, 'moderator_notes')).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(approvedProjection, 'tracking_code')).toBe(false);
   });
 });
