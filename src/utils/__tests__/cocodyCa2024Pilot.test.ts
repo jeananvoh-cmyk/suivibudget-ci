@@ -135,9 +135,9 @@ beforeAll(async () => {
     }
   }
 
-  const migration1 = readFileSync('supabase/migrations/20261001091748_controlled_data_import.sql', 'utf8');
+  const migration1 = readFileSync('supabase/migrations/20261001093613_controlled_data_import.sql', 'utf8');
   await db.exec(migration1);
-  const migration2 = readFileSync('supabase/migrations/20261001144423_import_console_qualified_amounts.sql', 'utf8');
+  const migration2 = readFileSync('supabase/migrations/20261001150911_import_console_qualified_amounts.sql', 'utf8');
   await db.exec(migration2);
 }, 60000);
 

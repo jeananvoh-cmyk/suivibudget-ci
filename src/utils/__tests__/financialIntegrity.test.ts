@@ -312,7 +312,7 @@ describe('Financial Integrity & Data Sanitation (LOT 1)', () => {
   });
 
   describe('Database Schema & Migration Integrity (LOT 1 Clôture Définitive)', () => {
-    const migrationSql = readFileSync('supabase/migrations/20261005100000_drop_default_zero_institutions_budget.sql', 'utf8');
+    const migrationSql = readFileSync('supabase/migrations/20261005121837_drop_default_zero_institutions_budget.sql', 'utf8');
     const schemaSql = readFileSync('supabase/schema.sql', 'utf8');
     const supabaseSchemaSql = readFileSync('supabase_schema.sql', 'utf8');
 
