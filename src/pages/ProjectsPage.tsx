@@ -153,8 +153,15 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
     return a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' });
   });
 
-  // Calculate stats
-  const totalBudgetFiltered = filteredProjects.reduce((acc, curr) => acc + (curr.budget_amount_fcfa ?? 0), 0);
+  // Calculate stats without coercing null to 0
+  const documentedFilteredProjects = filteredProjects.filter(
+    curr => typeof curr.budget_amount_fcfa === 'number' && Number.isFinite(curr.budget_amount_fcfa) && curr.budget_amount_fcfa >= 0
+  );
+  const unknownFilteredCount = filteredProjects.length - documentedFilteredProjects.length;
+  const totalBudgetFiltered =
+    documentedFilteredProjects.length > 0
+      ? documentedFilteredProjects.reduce((acc, curr) => acc + curr.budget_amount_fcfa!, 0)
+      : null;
 
   // Pagination bounds
   const totalPages = Math.ceil(sortedProjects.length / PAGE_SIZE) || 1;
@@ -218,8 +225,17 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
             </div>
             <div className="w-px h-8 bg-white/20 mx-1"></div>
             <div>
-              <span className="text-[10px] text-slate-300 block font-bold uppercase tracking-wider">Budget Alloué</span>
-              <span className="text-lg sm:text-2xl font-black text-brand-orange">{formatCompactFCFA(totalBudgetFiltered)}</span>
+              <span className="text-[10px] text-slate-300 block font-bold uppercase tracking-wider">
+                {unknownFilteredCount > 0 ? 'Somme partielle renseignée' : 'Budget Alloué'}
+              </span>
+              <span className="text-lg sm:text-2xl font-black text-brand-orange">
+                {totalBudgetFiltered !== null ? formatCompactFCFA(totalBudgetFiltered) : 'Non documenté'}
+              </span>
+              {unknownFilteredCount > 0 && (
+                <span className="text-[10px] text-amber-200 block font-semibold">
+                  {unknownFilteredCount.toLocaleString('fr-FR')} sans montant connu
+                </span>
+              )}
             </div>
           </div>
         </div>

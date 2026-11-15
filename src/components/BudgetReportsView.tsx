@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { BudgetProject } from '../types';
 import { dataStore } from '../services/dataStore';
 import { formatFCFA, formatAmountInWords, formatDateFR } from '../utils/formatters';
 import {
@@ -17,75 +18,315 @@ import {
   Share2
 } from 'lucide-react';
 
-type ReportType = 'GLOBAL' | 'INFRASTRUCTURE' | 'SANTE' | 'EDUCATION' | 'EAU_POTABLE' | 'LOCAL';
+export type ReportType = 'GLOBAL' | 'INFRASTRUCTURE' | 'SANTE' | 'EDUCATION' | 'EAU_POTABLE' | 'LOCAL';
 
-export const BudgetReportsView: React.FC = () => {
+export interface BudgetReportEntitySummary {
+  name: string;
+  count: number;
+  documentedCount: number;
+  unknownCount: number;
+  zeroCount: number;
+  amount: number | null;
+  documentedAmount: number | null;
+  consolidatedAmount: number | null;
+  isPartial: boolean;
+  percentageOfDocumented: number | null;
+  isPercentagePartial: boolean;
+}
+
+export interface BudgetReportCategorySummary {
+  category: string;
+  count: number;
+  documentedCount: number;
+  unknownCount: number;
+  zeroCount: number;
+  amount: number | null;
+  documentedAmount: number | null;
+  consolidatedAmount: number | null;
+  isPartial: boolean;
+  percentage: number | null;
+  percentageOfDocumented: number | null;
+  isPercentagePartial: boolean;
+}
+
+export interface BudgetReportStats {
+  totalProjects: number;
+  documentedProjectsCount: number;
+  unknownAmountProjectsCount: number;
+  zeroAmountProjectsCount: number;
+  documentedTotalAmount: number | null;
+  consolidatedTotalAmount: number | null;
+  /** @deprecated Utiliser documentedTotalAmount ou consolidatedTotalAmount selon le besoin */
+  totalAmount: number | null;
+  isCompleteCoverage: boolean;
+  isPartialSum: boolean;
+  isPercentagePartial: boolean;
+  nationalCount: number;
+  nationalDocumentedCount: number;
+  nationalUnknownCount: number;
+  nationalZeroCount: number;
+  nationalAmount: number | null;
+  nationalConsolidatedAmount: number | null;
+  nationalPercentage: number | null;
+  localCount: number;
+  localDocumentedCount: number;
+  localUnknownCount: number;
+  localZeroCount: number;
+  localAmount: number | null;
+  localConsolidatedAmount: number | null;
+  localPercentage: number | null;
+  topEntities: BudgetReportEntitySummary[];
+  categoryBreakdown: BudgetReportCategorySummary[];
+  totalProofs: number;
+}
+
+function isDocumentedBudgetAmount(value: number | null | undefined): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0;
+}
+
+/**
+ * Calcule les agrégats financiers d'un rapport budgétaire sans jamais transformer `null` en `0`.
+ * Distingue strictement :
+ * 1. Nombre total de projets recensés (`totalProjects`)
+ * 2. Nombre de projets avec montant renseigné (`documentedProjectsCount`)
+ * 3. Nombre de projets sans montant connu (`unknownAmountProjectsCount`)
+ * 4. Nombre de projets avec montant nul documenté (`zeroAmountProjectsCount`)
+ * 5. Somme des montants renseignés (`documentedTotalAmount`)
+ * 6. Total consolidé (`consolidatedTotalAmount`), non-null uniquement si tous les projets recensés ont un montant renseigné.
+ */
+export function computeBudgetReportStats(
+  allProjects: BudgetProject[],
+  selectedReport: ReportType = 'GLOBAL',
+  totalProofs = 0
+): BudgetReportStats {
+  let filteredProjects = allProjects;
+  if (selectedReport === 'INFRASTRUCTURE') {
+    filteredProjects = allProjects.filter(p => p.category === 'INFRASTRUCTURE');
+  } else if (selectedReport === 'SANTE') {
+    filteredProjects = allProjects.filter(p => p.category === 'SANTE');
+  } else if (selectedReport === 'EDUCATION') {
+    filteredProjects = allProjects.filter(p => p.category === 'EDUCATION');
+  } else if (selectedReport === 'EAU_POTABLE') {
+    filteredProjects = allProjects.filter(p => p.category === 'EAU_POTABLE');
+  } else if (selectedReport === 'LOCAL') {
+    filteredProjects = allProjects.filter(p => p.scope_level === 'LOCAL');
+  }
+
+  const totalProjects = filteredProjects.length;
+  const documentedProjects = filteredProjects.filter(p => isDocumentedBudgetAmount(p.budget_amount_fcfa));
+  const documentedProjectsCount = documentedProjects.length;
+  const unknownAmountProjectsCount = totalProjects - documentedProjectsCount;
+  const zeroAmountProjectsCount = documentedProjects.filter(p => p.budget_amount_fcfa === 0).length;
+
+  const documentedTotalAmount =
+    documentedProjectsCount > 0
+      ? documentedProjects.reduce((sum, p) => sum + p.budget_amount_fcfa!, 0)
+      : null;
+
+  const isCompleteCoverage = totalProjects > 0 && unknownAmountProjectsCount === 0;
+  const isPartialSum = unknownAmountProjectsCount > 0 && documentedProjectsCount > 0;
+  const isPercentagePartial = unknownAmountProjectsCount > 0;
+  const consolidatedTotalAmount = isCompleteCoverage ? documentedTotalAmount : null;
+
+  const nationalProjects = filteredProjects.filter(p => p.scope_level === 'NATIONAL');
+  const nationalCount = nationalProjects.length;
+  const nationalDocumented = nationalProjects.filter(p => isDocumentedBudgetAmount(p.budget_amount_fcfa));
+  const nationalDocumentedCount = nationalDocumented.length;
+  const nationalUnknownCount = nationalCount - nationalDocumentedCount;
+  const nationalZeroCount = nationalDocumented.filter(p => p.budget_amount_fcfa === 0).length;
+  const nationalAmount =
+    nationalDocumentedCount > 0
+      ? nationalDocumented.reduce((sum, p) => sum + p.budget_amount_fcfa!, 0)
+      : null;
+  const nationalConsolidatedAmount =
+    nationalCount > 0 && nationalUnknownCount === 0 ? nationalAmount : null;
+
+  const localProjects = filteredProjects.filter(p => p.scope_level === 'LOCAL');
+  const localCount = localProjects.length;
+  const localDocumented = localProjects.filter(p => isDocumentedBudgetAmount(p.budget_amount_fcfa));
+  const localDocumentedCount = localDocumented.length;
+  const localUnknownCount = localCount - localDocumentedCount;
+  const localZeroCount = localDocumented.filter(p => p.budget_amount_fcfa === 0).length;
+  const localAmount =
+    localDocumentedCount > 0
+      ? localDocumented.reduce((sum, p) => sum + p.budget_amount_fcfa!, 0)
+      : null;
+  const localConsolidatedAmount =
+    localCount > 0 && localUnknownCount === 0 ? localAmount : null;
+
+  const nationalPercentage =
+    documentedTotalAmount != null && documentedTotalAmount > 0 && nationalAmount != null
+      ? (nationalAmount / documentedTotalAmount) * 100
+      : null;
+  const localPercentage =
+    documentedTotalAmount != null && documentedTotalAmount > 0 && localAmount != null
+      ? (localAmount / documentedTotalAmount) * 100
+      : null;
+
+  // Top entities in this report
+  const entityMap = new Map<
+    string,
+    {
+      name: string;
+      count: number;
+      documentedCount: number;
+      unknownCount: number;
+      zeroCount: number;
+      sumDocumented: number;
+    }
+  >();
+
+  filteredProjects.forEach(p => {
+    const name = p.ministry_name || p.institution_name || p.commune_name || p.region_name || 'Collectivité';
+    const existing = entityMap.get(name) || {
+      name,
+      count: 0,
+      documentedCount: 0,
+      unknownCount: 0,
+      zeroCount: 0,
+      sumDocumented: 0,
+    };
+    existing.count += 1;
+    if (isDocumentedBudgetAmount(p.budget_amount_fcfa)) {
+      existing.documentedCount += 1;
+      existing.sumDocumented += p.budget_amount_fcfa;
+      if (p.budget_amount_fcfa === 0) {
+        existing.zeroCount += 1;
+      }
+    } else {
+      existing.unknownCount += 1;
+    }
+    entityMap.set(name, existing);
+  });
+
+  const topEntities: BudgetReportEntitySummary[] = Array.from(entityMap.values())
+    .map(ent => {
+      const documentedAmount = ent.documentedCount > 0 ? ent.sumDocumented : null;
+      const consolidatedAmount = ent.count > 0 && ent.unknownCount === 0 ? documentedAmount : null;
+      const isPartial = ent.unknownCount > 0;
+      const percentageOfDocumented =
+        documentedTotalAmount != null && documentedTotalAmount > 0 && documentedAmount != null
+          ? (documentedAmount / documentedTotalAmount) * 100
+          : null;
+      return {
+        name: ent.name,
+        count: ent.count,
+        documentedCount: ent.documentedCount,
+        unknownCount: ent.unknownCount,
+        zeroCount: ent.zeroCount,
+        amount: documentedAmount,
+        documentedAmount,
+        consolidatedAmount,
+        isPartial,
+        percentageOfDocumented,
+        isPercentagePartial: isPercentagePartial || isPartial,
+      };
+    })
+    .sort((a, b) => (b.documentedAmount ?? -1) - (a.documentedAmount ?? -1) || b.count - a.count)
+    .slice(0, 8);
+
+  // Categories breakdown
+  const catMap = new Map<
+    string,
+    {
+      category: string;
+      count: number;
+      documentedCount: number;
+      unknownCount: number;
+      zeroCount: number;
+      sumDocumented: number;
+    }
+  >();
+
+  filteredProjects.forEach(p => {
+    const cat = p.category || 'Autres';
+    const existing = catMap.get(cat) || {
+      category: cat,
+      count: 0,
+      documentedCount: 0,
+      unknownCount: 0,
+      zeroCount: 0,
+      sumDocumented: 0,
+    };
+    existing.count += 1;
+    if (isDocumentedBudgetAmount(p.budget_amount_fcfa)) {
+      existing.documentedCount += 1;
+      existing.sumDocumented += p.budget_amount_fcfa;
+      if (p.budget_amount_fcfa === 0) {
+        existing.zeroCount += 1;
+      }
+    } else {
+      existing.unknownCount += 1;
+    }
+    catMap.set(cat, existing);
+  });
+
+  const categoryBreakdown: BudgetReportCategorySummary[] = Array.from(catMap.values())
+    .map(cat => {
+      const documentedAmount = cat.documentedCount > 0 ? cat.sumDocumented : null;
+      const consolidatedAmount = cat.count > 0 && cat.unknownCount === 0 ? documentedAmount : null;
+      const isPartial = cat.unknownCount > 0;
+      const percentageOfDocumented =
+        documentedTotalAmount != null && documentedTotalAmount > 0 && documentedAmount != null
+          ? (documentedAmount / documentedTotalAmount) * 100
+          : null;
+      return {
+        category: cat.category,
+        count: cat.count,
+        documentedCount: cat.documentedCount,
+        unknownCount: cat.unknownCount,
+        zeroCount: cat.zeroCount,
+        amount: documentedAmount,
+        documentedAmount,
+        consolidatedAmount,
+        isPartial,
+        percentage: percentageOfDocumented,
+        percentageOfDocumented,
+        isPercentagePartial: isPercentagePartial || isPartial,
+      };
+    })
+    .sort((a, b) => (b.documentedAmount ?? -1) - (a.documentedAmount ?? -1) || b.count - a.count);
+
+  return {
+    totalProjects,
+    documentedProjectsCount,
+    unknownAmountProjectsCount,
+    zeroAmountProjectsCount,
+    documentedTotalAmount,
+    consolidatedTotalAmount,
+    totalAmount: documentedTotalAmount,
+    isCompleteCoverage,
+    isPartialSum,
+    isPercentagePartial,
+    nationalCount,
+    nationalDocumentedCount,
+    nationalUnknownCount,
+    nationalZeroCount,
+    nationalAmount,
+    nationalConsolidatedAmount,
+    nationalPercentage,
+    localCount,
+    localDocumentedCount,
+    localUnknownCount,
+    localZeroCount,
+    localAmount,
+    localConsolidatedAmount,
+    localPercentage,
+    topEntities,
+    categoryBreakdown,
+    totalProofs,
+  };
+}
+
+export const BudgetReportsView: React.FC<{ projectsOverride?: BudgetProject[] }> = ({ projectsOverride }) => {
   const [selectedReport, setSelectedReport] = useState<ReportType>('GLOBAL');
-  const allProjects = dataStore.getProjects();
+  const allProjects = projectsOverride ?? dataStore.getProjects();
   const approvedProofs = dataStore.getApprovedProofs();
 
-  // Statistics calculation for the report
-  const stats = useMemo(() => {
-    let filteredProjects = allProjects;
-    if (selectedReport === 'INFRASTRUCTURE') {
-      filteredProjects = allProjects.filter(p => p.category === 'INFRASTRUCTURE');
-    } else if (selectedReport === 'SANTE') {
-      filteredProjects = allProjects.filter(p => p.category === 'SANTE');
-    } else if (selectedReport === 'EDUCATION') {
-      filteredProjects = allProjects.filter(p => p.category === 'EDUCATION');
-    } else if (selectedReport === 'EAU_POTABLE') {
-      filteredProjects = allProjects.filter(p => p.category === 'EAU_POTABLE');
-    } else if (selectedReport === 'LOCAL') {
-      filteredProjects = allProjects.filter(p => p.scope_level === 'LOCAL');
-    }
-
-    const totalAmount = filteredProjects.reduce((sum, p) => sum + (p.budget_amount_fcfa ?? 0), 0);
-    const nationalCount = filteredProjects.filter(p => p.scope_level === 'NATIONAL').length;
-    const localCount = filteredProjects.filter(p => p.scope_level === 'LOCAL').length;
-    const nationalAmount = filteredProjects.filter(p => p.scope_level === 'NATIONAL').reduce((sum, p) => sum + (p.budget_amount_fcfa ?? 0), 0);
-    const localAmount = filteredProjects.filter(p => p.scope_level === 'LOCAL').reduce((sum, p) => sum + (p.budget_amount_fcfa ?? 0), 0);
-
-    // Top entities in this report
-    const entityMap = new Map<string, { name: string; amount: number; count: number }>();
-    filteredProjects.forEach(p => {
-      const name = p.ministry_name || p.institution_name || p.commune_name || p.region_name || 'Collectivité';
-      const existing = entityMap.get(name) || { name, amount: 0, count: 0 };
-      if(p.budget_amount_fcfa != null) existing.amount += p.budget_amount_fcfa;
-      existing.count += 1;
-      entityMap.set(name, existing);
-    });
-
-    const topEntities = Array.from(entityMap.values())
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 8);
-
-    // Categories breakdown
-    const catMap = new Map<string, number>();
-    filteredProjects.forEach(p => {
-      const cat = p.category || 'Autres';
-      catMap.set(cat, (catMap.get(cat) || 0) + (p.budget_amount_fcfa ?? 0));
-    });
-
-    const categoryBreakdown = Array.from(catMap.entries())
-      .map(([category, amount]) => ({
-        category,
-        amount,
-        percentage: totalAmount > 0 ? (amount / totalAmount) * 100 : 0
-      }))
-      .sort((a, b) => b.amount - a.amount);
-
-    return {
-      totalProjects: filteredProjects.length,
-      totalAmount,
-      nationalCount,
-      localCount,
-      nationalAmount,
-      localAmount,
-      topEntities,
-      categoryBreakdown,
-      totalProofs: approvedProofs.length,
-    };
-  }, [allProjects, approvedProofs, selectedReport]);
+  const stats = useMemo(
+    () => computeBudgetReportStats(allProjects, selectedReport, approvedProofs.length),
+    [allProjects, approvedProofs.length, selectedReport]
+  );
 
   const handlePrint = () => {
     window.print();
@@ -200,23 +441,56 @@ export const BudgetReportsView: React.FC = () => {
             <span>1. Synthèse Exécutive & Volumes Budgétaires</span>
           </h3>
 
+          {stats.unknownAmountProjectsCount > 0 && (
+            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-xs text-amber-950 flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="font-black">Somme partielle — Total consolidé non disponible :</span>{' '}
+                <span>
+                  {stats.unknownAmountProjectsCount.toLocaleString('fr-FR')} opération(s) sur{' '}
+                  {stats.totalProjects.toLocaleString('fr-FR')} ne disposent pas d'un montant renseigné (`null`). Conformément à la charte d'intégrité, aucune valeur inconnue n'est remplacée par 0 FCFA et la somme ci-dessous porte uniquement sur les {stats.documentedProjectsCount.toLocaleString('fr-FR')} opération(s) documentée(s).
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-xs font-bold text-slate-500 block">Volume Budgétaire Total</span>
-              <span className="text-xl sm:text-2xl font-black text-slate-900 mt-1 block">
-                {formatFCFA(stats.totalAmount)}
+              <span className="text-xs font-bold text-slate-500 block">
+                {stats.consolidatedTotalAmount !== null
+                  ? 'Total Consolidé (100% renseigné)'
+                  : stats.documentedTotalAmount !== null
+                    ? 'Somme des Montants Renseignés (Partielle)'
+                    : 'Montant Budgétaire'}
               </span>
-              <span className="text-[11px] font-bold text-brand-blue">
-                {formatAmountInWords(stats.totalAmount)} FCFA
+              <span className="text-xl sm:text-2xl font-black text-slate-900 mt-1 block">
+                {stats.documentedTotalAmount !== null
+                  ? formatFCFA(stats.documentedTotalAmount)
+                  : 'Montant inconnu (non documenté)'}
+              </span>
+              <span className="text-[11px] font-bold text-brand-blue block">
+                {stats.documentedTotalAmount !== null
+                  ? `(${formatAmountInWords(stats.documentedTotalAmount)})`
+                  : 'Aucun montant renseigné sur ce périmètre'}
+              </span>
+              <span className="text-[10px] font-bold text-slate-600 mt-1 block">
+                {stats.consolidatedTotalAmount !== null
+                  ? 'Total consolidé justifié (0 montant inconnu)'
+                  : `Total consolidé : Non consolidé (${stats.unknownAmountProjectsCount} inconnu(s))`}
               </span>
             </div>
 
             <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-xs font-bold text-slate-500 block">Nombre de Projets Votés</span>
+              <span className="text-xs font-bold text-slate-500 block">Projets Recensés & Couverture</span>
               <span className="text-xl sm:text-2xl font-black text-slate-900 mt-1 block">
-                {stats.totalProjects.toLocaleString('fr-FR')}
+                {stats.totalProjects.toLocaleString('fr-FR')} recensés
               </span>
-              <span className="text-[11px] text-slate-500">
+              <span className="text-[11px] text-slate-600 block font-semibold">
+                {stats.documentedProjectsCount.toLocaleString('fr-FR')} avec montant renseigné •{' '}
+                {stats.unknownAmountProjectsCount.toLocaleString('fr-FR')} sans montant connu
+                {stats.zeroAmountProjectsCount > 0 ? ` • ${stats.zeroAmountProjectsCount} à 0 FCFA documenté` : ''}
+              </span>
+              <span className="text-[10px] text-slate-500 block mt-0.5">
                 {stats.nationalCount} Nationaux • {stats.localCount} Locaux
               </span>
             </div>
@@ -252,17 +526,31 @@ export const BudgetReportsView: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="p-6 rounded-2xl bg-blue-50/50 border border-blue-200 space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <span className="text-xs font-black text-brand-blue uppercase flex items-center gap-1.5">
                   <Building className="w-3.5 h-3.5 text-brand-blue" />
                   <span>Grands Projets & Opérations de l'État</span>
                 </span>
-                <span className="text-xs font-black text-slate-800">
-                  {stats.totalAmount > 0 ? ((stats.nationalAmount / stats.totalAmount) * 100).toFixed(1) : '0'} %
+                <span className="text-xs font-black text-slate-800 text-right">
+                  {stats.nationalPercentage !== null
+                    ? `${stats.nationalPercentage.toFixed(1)} %${stats.isPercentagePartial ? ' (des montants renseignés)' : ''}`
+                    : 'Part non calculable'}
                 </span>
               </div>
               <div className="text-2xl font-black text-slate-900">
-                {formatFCFA(stats.nationalAmount)} <span className="block text-xs font-semibold text-slate-500 break-words">({formatAmountInWords(stats.nationalAmount)} FCFA)</span>
+                {stats.nationalAmount !== null ? (
+                  <>
+                    {formatFCFA(stats.nationalAmount)}{' '}
+                    <span className="block text-xs font-semibold text-slate-500 break-words">
+                      ({formatAmountInWords(stats.nationalAmount)})
+                      {stats.nationalUnknownCount > 0
+                        ? ` — Somme partielle (${stats.nationalDocumentedCount}/${stats.nationalCount} renseignés, ${stats.nationalUnknownCount} inconnu(s))`
+                        : ''}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-base font-bold text-slate-500">Montant non documenté ({stats.nationalUnknownCount} inconnu(s))</span>
+                )}
               </div>
               <p className="text-xs text-slate-600 leading-relaxed">
                 Pilotés par les Ministères sectoriels pour les grandes liaisons routières, hôpitaux régionaux, universités et centrales électriques.
@@ -270,23 +558,84 @@ export const BudgetReportsView: React.FC = () => {
             </div>
 
             <div className="p-6 rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <span className="text-xs font-black text-emerald-800 uppercase flex items-center gap-1.5">
                   <Layers className="w-3.5 h-3.5 text-emerald-700" />
                   <span>Investissements Locaux & Communaux</span>
                 </span>
-                <span className="text-xs font-black text-slate-800">
-                  {stats.totalAmount > 0 ? ((stats.localAmount / stats.totalAmount) * 100).toFixed(1) : '0'} %
+                <span className="text-xs font-black text-slate-800 text-right">
+                  {stats.localPercentage !== null
+                    ? `${stats.localPercentage.toFixed(1)} %${stats.isPercentagePartial ? ' (des montants renseignés)' : ''}`
+                    : 'Part non calculable'}
                 </span>
               </div>
               <div className="text-2xl font-black text-slate-900">
-                {formatFCFA(stats.localAmount)} <span className="block text-xs font-semibold text-slate-500 break-words">({formatAmountInWords(stats.localAmount)} FCFA)</span>
+                {stats.localAmount !== null ? (
+                  <>
+                    {formatFCFA(stats.localAmount)}{' '}
+                    <span className="block text-xs font-semibold text-slate-500 break-words">
+                      ({formatAmountInWords(stats.localAmount)})
+                      {stats.localUnknownCount > 0
+                        ? ` — Somme partielle (${stats.localDocumentedCount}/${stats.localCount} renseignés, ${stats.localUnknownCount} inconnu(s))`
+                        : ''}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-base font-bold text-slate-500">Montant non documenté ({stats.localUnknownCount} inconnu(s))</span>
+                )}
               </div>
               <p className="text-xs text-slate-600 leading-relaxed">
                 Gérés directement par les Mairies et Conseils Régionaux pour les écoles primaires, centres de santé de proximité et hydraulique villageoise.
               </p>
             </div>
           </div>
+
+          {/* Graphique de répartition par catégorie (respectant les montants inconnus et nuls) */}
+          {stats.categoryBreakdown.length > 0 && (
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <span className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <BarChart3 className="w-4 h-4 text-brand-blue" />
+                  <span>Répartition Sectorielle des Montants Renseignés (FCFA — Exercice 2026)</span>
+                </span>
+                <span className="text-[11px] font-semibold text-slate-500">
+                  {stats.isPercentagePartial
+                    ? `Dénominateur partiel : ${stats.documentedProjectsCount}/${stats.totalProjects} opération(s) renseignée(s)`
+                    : `Base exhaustive : ${stats.totalProjects} opération(s) renseignée(s)`}
+                </span>
+              </div>
+              <div className="space-y-2.5">
+                {stats.categoryBreakdown.map(cat => (
+                  <div key={cat.category} className="space-y-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                      <span className="font-bold text-slate-800">
+                        {cat.category}{' '}
+                        <span className="text-slate-500 font-medium">
+                          ({cat.documentedCount}/{cat.count} renseigné(s)
+                          {cat.unknownCount > 0 ? `, ${cat.unknownCount} inconnu(s)` : ''}
+                          {cat.zeroCount > 0 ? `, ${cat.zeroCount} à 0 FCFA documenté` : ''})
+                        </span>
+                      </span>
+                      <span className="font-black text-slate-900">
+                        {cat.documentedAmount !== null
+                          ? `${formatFCFA(cat.documentedAmount)}${cat.isPartial ? ' (somme partielle)' : ''}`
+                          : 'Montant inconnu'}
+                        {cat.percentageOfDocumented !== null
+                          ? ` • ${cat.percentageOfDocumented.toFixed(1)} %${cat.isPercentagePartial ? ' (des renseignés)' : ''}`
+                          : ''}
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-brand-blue rounded-full transition-all"
+                        style={{ width: `${Math.min(100, Math.max(0, cat.percentageOfDocumented ?? 0))}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 3. TOP DES MAÎTRES D'OUVRAGE & ENTITÉS LES PLUS DOTÉES */}
@@ -302,9 +651,11 @@ export const BudgetReportsView: React.FC = () => {
                 <tr>
                   <th className="p-3.5">Rang</th>
                   <th className="p-3.5">Autorité / Ministère / Collectivité</th>
-                  <th className="p-3.5 text-center">Opérations répertoriées</th>
-                  <th className="p-3.5 text-right">Budget Alloué (FCFA)</th>
-                  <th className="p-3.5 text-right">Poids Budgétaire</th>
+                  <th className="p-3.5 text-center">Opérations (Renseignées / Total)</th>
+                  <th className="p-3.5 text-right">Montant Renseigné (FCFA)</th>
+                  <th className="p-3.5 text-right">
+                    Poids Budgétaire {stats.isPercentagePartial ? '(sur renseignés)' : ''}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
@@ -312,10 +663,36 @@ export const BudgetReportsView: React.FC = () => {
                   <tr key={idx} className="hover:bg-slate-50 transition-colors">
                     <td className="p-3.5 font-bold text-slate-500">#{idx + 1}</td>
                     <td className="p-3.5 font-black text-slate-900">{ent.name}</td>
-                    <td className="p-3.5 text-center font-bold text-slate-700">{ent.count}</td>
-                    <td className="p-3.5 text-right font-black text-slate-900">{formatFCFA(ent.amount)}<span className="block text-[10px] font-semibold text-slate-500 break-words">({formatAmountInWords(ent.amount)} FCFA)</span></td>
+                    <td className="p-3.5 text-center font-bold text-slate-700">
+                      {ent.documentedCount} / {ent.count}
+                      {ent.unknownCount > 0 && (
+                        <span className="block text-[10px] font-semibold text-amber-700">
+                          {ent.unknownCount} sans montant connu
+                        </span>
+                      )}
+                      {ent.zeroCount > 0 && (
+                        <span className="block text-[10px] font-semibold text-slate-500">
+                          {ent.zeroCount} à 0 FCFA documenté
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-3.5 text-right font-black text-slate-900">
+                      {ent.documentedAmount !== null ? (
+                        <>
+                          {formatFCFA(ent.documentedAmount)}
+                          <span className="block text-[10px] font-semibold text-slate-500 break-words">
+                            ({formatAmountInWords(ent.documentedAmount)})
+                            {ent.isPartial ? ' — Somme partielle' : ''}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-slate-500 font-semibold">Montant inconnu</span>
+                      )}
+                    </td>
                     <td className="p-3.5 text-right font-bold text-brand-blue">
-                      {stats.totalAmount > 0 ? ((ent.amount / stats.totalAmount) * 100).toFixed(1) : '0'} %
+                      {ent.percentageOfDocumented !== null
+                        ? `${ent.percentageOfDocumented.toFixed(1)} %${ent.isPercentagePartial ? ' (partiel)' : ''}`
+                        : 'Non calculable'}
                     </td>
                   </tr>
                 ))}

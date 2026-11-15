@@ -472,7 +472,14 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
     return matchesSearch && matchesCat && matchesTier;
   });
 
-  const totalProjectsBudget = relatedProjects.reduce((sum, p) => sum + (p.budget_amount_fcfa || 0), 0);
+  const documentedRelatedProjects = relatedProjects.filter(
+    p => typeof p.budget_amount_fcfa === 'number' && Number.isFinite(p.budget_amount_fcfa) && p.budget_amount_fcfa >= 0
+  );
+  const unknownRelatedProjectsCount = relatedProjects.length - documentedRelatedProjects.length;
+  const totalProjectsBudget =
+    documentedRelatedProjects.length > 0
+      ? documentedRelatedProjects.reduce((sum, p) => sum + p.budget_amount_fcfa!, 0)
+      : null;
 
   const isDistrictAutonome = (institution.district && institution.district.toLowerCase().includes('autonome')) ||
     (institution.region && (institution.region.toLowerCase().includes('abidjan') || institution.region.toLowerCase().includes('yamoussoukro')));
@@ -773,12 +780,17 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     <span className="text-xl font-black text-white">{relatedProjects.length}</span>
                   </div>
                   <div className="text-left pl-1">
-                    <span className="text-[10px] font-bold uppercase text-blue-200 block">Montants des projets référencés</span>
+                    <span className="text-[10px] font-bold uppercase text-blue-200 block">
+                      {unknownRelatedProjectsCount > 0 ? 'Somme partielle renseignée' : 'Montants des projets référencés'}
+                    </span>
                     <span className="text-sm sm:text-base font-black text-amber-300">
-                      {formatFCFA(relatedProjects.length > 0 && relatedProjects.every(project => project.budget_amount_fcfa != null) ? totalProjectsBudget : null)}
+                      {formatFCFA(totalProjectsBudget)}
                     </span>
                     <span className="text-[10px] font-medium text-blue-100 block">
-                      ({formatAmountInWords(relatedProjects.length > 0 && relatedProjects.every(project => project.budget_amount_fcfa != null) ? totalProjectsBudget : null)})
+                      ({formatAmountInWords(totalProjectsBudget)})
+                      {unknownRelatedProjectsCount > 0
+                        ? ` — ${documentedRelatedProjects.length}/${relatedProjects.length} renseignés (${unknownRelatedProjectsCount} inconnu(s))`
+                        : ''}
                     </span>
                   </div>
                 </div>
@@ -1267,12 +1279,28 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                                 Sous-total des lignes affichées ({filteredLines.length})
                               </td>
                               <td className="p-3 pr-4 text-right font-black text-slate-900 break-words">
-                                <div className="text-sm text-slate-900">
-                                  {formatFCFA(filteredLines.reduce((acc, l) => acc + (l.montant_fcfa || 0), 0))}
-                                </div>
-                                <div className="text-[10px] font-bold text-slate-500 tracking-tight">
-                                  {formatAmountInWords(filteredLines.reduce((acc, l) => acc + (l.montant_fcfa || 0), 0))}
-                                </div>
+                                {(() => {
+                                  const documentedLines = filteredLines.filter(
+                                    l => typeof l.montant_fcfa === 'number' && Number.isFinite(l.montant_fcfa) && l.montant_fcfa >= 0
+                                  );
+                                  const subtotal =
+                                    documentedLines.length > 0
+                                      ? documentedLines.reduce((acc, l) => acc + l.montant_fcfa, 0)
+                                      : null;
+                                  return (
+                                    <>
+                                      <div className="text-sm text-slate-900">
+                                        {formatFCFA(subtotal)}
+                                      </div>
+                                      <div className="text-[10px] font-bold text-slate-500 tracking-tight">
+                                        {formatAmountInWords(subtotal)}
+                                        {documentedLines.length < filteredLines.length
+                                          ? ` (${documentedLines.length}/${filteredLines.length} lignes renseignées)`
+                                          : ''}
+                                      </div>
+                                    </>
+                                  );
+                                })()}
                               </td>
                             </tr>
                           </tfoot>

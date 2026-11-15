@@ -51,17 +51,34 @@ export const CommuneComparatorModal: React.FC<CommuneComparatorModalProps> = ({
   const projectsA = getProjectsCount(communeA);
   const projectsB = getProjectsCount(communeB);
 
-  const hasBreakdownA = communeA.budget_functioning_fcfa != null && communeA.budget_investment_fcfa != null && (communeA.total_budget_fcfa ?? 0) > 0;
+  const hasValidTotalA =
+    typeof communeA.total_budget_fcfa === 'number' &&
+    Number.isFinite(communeA.total_budget_fcfa) &&
+    communeA.total_budget_fcfa >= 0;
+  const hasBreakdownA =
+    communeA.budget_functioning_fcfa != null &&
+    communeA.budget_investment_fcfa != null &&
+    hasValidTotalA &&
+    communeA.total_budget_fcfa! > 0;
   const functioningPctA = hasBreakdownA ? Math.round((communeA.budget_functioning_fcfa! / communeA.total_budget_fcfa!) * 100) : 0;
   const investmentPctA = hasBreakdownA ? (100 - functioningPctA) : 0;
 
-  const hasBreakdownB = communeB.budget_functioning_fcfa != null && communeB.budget_investment_fcfa != null && (communeB.total_budget_fcfa ?? 0) > 0;
+  const hasValidTotalB =
+    typeof communeB.total_budget_fcfa === 'number' &&
+    Number.isFinite(communeB.total_budget_fcfa) &&
+    communeB.total_budget_fcfa >= 0;
+  const hasBreakdownB =
+    communeB.budget_functioning_fcfa != null &&
+    communeB.budget_investment_fcfa != null &&
+    hasValidTotalB &&
+    communeB.total_budget_fcfa! > 0;
   const functioningPctB = hasBreakdownB ? Math.round((communeB.budget_functioning_fcfa! / communeB.total_budget_fcfa!) * 100) : 0;
   const investmentPctB = hasBreakdownB ? (100 - functioningPctB) : 0;
 
-  const totalA = communeA.total_budget_fcfa ?? 0;
-  const totalB = communeB.total_budget_fcfa ?? 0;
-  const budgetDiff = Math.abs(totalA - totalB);
+  const budgetDiff =
+    hasValidTotalA && hasValidTotalB
+      ? Math.abs(communeA.total_budget_fcfa! - communeB.total_budget_fcfa!)
+      : null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
@@ -278,7 +295,15 @@ export const CommuneComparatorModal: React.FC<CommuneComparatorModalProps> = ({
           {!communeA.is_tax_quota_commune && !communeB.is_tax_quota_commune && (
             <div className="bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between text-xs text-slate-600">
               <span className="font-semibold">Écart de dotation de l'État :</span>
-              <strong className="text-slate-900 font-black text-sm">{formatFCFA(budgetDiff)} <span className="text-brand-blue text-xs font-bold">({formatAmountInWords(budgetDiff)})</span></strong>
+              {budgetDiff !== null ? (
+                <strong className="text-slate-900 font-black text-sm">
+                  {formatFCFA(budgetDiff)} <span className="text-brand-blue text-xs font-bold">({formatAmountInWords(budgetDiff)})</span>
+                </strong>
+              ) : (
+                <strong className="text-slate-500 font-bold text-xs">
+                  Écart non calculable (au moins un montant non documenté)
+                </strong>
+              )}
             </div>
           )}
 
