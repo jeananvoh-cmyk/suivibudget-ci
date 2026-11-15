@@ -65,6 +65,14 @@ Ils ne figurent pas dans les 26 versions enregistrées par Production. Ils sont 
 - Supabase CLI v3 cible le local par défaut : tout contrôle hébergé doit préciser `--remote`. Toute commande modifiant un projet hébergé doit rester explicitement approuvée.
 - Aucun `migration repair`, `db push`, `apply_migration`, changement de schéma, changement de données, fusion Git ou déploiement Production n’a été effectué pendant ce contrôle.
 
+### Comparaison des objets bootstrap avec le schéma Production
+
+- Les **18/18 tables** déclarées dans les trois migrations bootstrap sont présentes.
+- Les objets du fichier local historique du 29 septembre sont aussi présents : `ca_financial_lines`, `private.has_staff_role(text[])` et `public.enforce_document_publication_audit()`. La migration Production canonique `20260929112029_ca_v3_financial_provenance_20260929.sql` porte ces objets.
+- Les index des modules Comptes Administratifs et budgets locaux sont présents. Les anciens index citoyens `idx_proofs_project_id` et `idx_proofs_status` ont des équivalents actuels `idx_citizen_proofs_project` et `idx_citizen_proofs_verification`. L'index `idx_institutions_name` déclaré par le bootstrap n'a pas été retrouvé dans la liste actuelle ; son éventuel remplacement reste à confirmer.
+- Plusieurs politiques RLS bootstrap ont été remplacées par les politiques actuelles plus restrictives : lecture newsletter (`Only admins can view subscribers`), administration des institutions/budget lines (`admin_entity_staff`), et modération des preuves citoyennes (politiques séparées INSERT/UPDATE/DELETE et lecture propre).
+- Ces écarts sont cohérents avec les migrations de durcissement postérieures, mais ils empêchent d'affirmer que le schéma actuel est le résultat exact et inchangé de ces trois fichiers. Ils doivent être pris en compte avant toute réparation de l'historique.
+
 ## Configuration CLI locale
 
 Le dépôt ne contenait pas de `supabase/config.toml`. Un fichier minimal est désormais ajouté avec `project_id = "suivibudget-ci"` et `db.major_version = 17`, conforme au moteur PostgreSQL 17.6.1.166 observé sur le projet. Il ne contient aucun secret. `supabase/.temp/` et `supabase/.branches/` sont ignorés par Git.
