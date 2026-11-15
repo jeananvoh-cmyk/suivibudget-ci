@@ -354,6 +354,71 @@ CREATE TRIGGER enforce_budget_project_primary_evidence
   BEFORE INSERT OR UPDATE OF financial_verification_status, data_provenance, source_document_id, source_page, source_url
   ON public.budget_projects FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
 
+-- A document cannot be downgraded, replaced or detached while certified financial
+-- records still rely on it. Revoke dependent certifications first, then change it.
+CREATE OR REPLACE FUNCTION private.prevent_revoking_referenced_primary_document()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $
+DECLARE
+  has_certified_dependents boolean;
+BEGIN
+  IF TG_OP = 'UPDATE'
+    AND OLD.status IN ('VERIFIED', 'PUBLISHED')
+    AND (
+      NEW.status NOT IN ('VERIFIED', 'PUBLISHED')
+      OR NEW.verification_status <> 'VERIFIED'
+      OR NEW.checksum_status NOT IN ('COMPUTED', 'VERIFIED')
+      OR NEW.checksum_sha256 IS DISTINCT FROM OLD.checksum_sha256
+      OR NEW.source_url IS DISTINCT FROM OLD.source_url
+      OR NEW.source_name IS DISTINCT FROM OLD.source_name
+      OR NEW.institution_id IS DISTINCT FROM OLD.institution_id
+      OR NEW.fiscal_year IS DISTINCT FROM OLD.fiscal_year
+      OR NEW.document_type IS DISTINCT FROM OLD.document_type
+      OR NEW.file_url IS DISTINCT FROM OLD.file_url
+      OR NEW.storage_path IS DISTINCT FROM OLD.storage_path
+    ) THEN
+    SELECT
+      EXISTS (SELECT 1 FROM public.local_budgets lb
+        WHERE lb.source_document_id = OLD.id
+          AND (lb.status = 'PUBLISHED' OR lb.verification_status IN ('OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION')))
+      OR EXISTS (SELECT 1 FROM public.budget_projects bp
+        WHERE bp.source_document_id = OLD.id
+          AND (bp.publication_status = 'PUBLISHED' OR bp.financial_verification_status = 'VERIFIED'))
+      OR EXISTS (SELECT 1 FROM public.budget_lines bl
+        WHERE bl.source_document_id = OLD.id
+          AND (bl.publication_status = 'PUBLISHED' OR bl.verification_status = 'VERIFIED'))
+      OR EXISTS (SELECT 1 FROM public.budget_revenue_sources brs
+        WHERE brs.source_document_id = OLD.id
+          AND brs.verification_status IN ('OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','VERIFIED'))
+      OR EXISTS (SELECT 1 FROM public.administrative_accounts aa
+        WHERE aa.source_document_id = OLD.id
+          AND (aa.status IN ('VERIFIED','PUBLISHED')
+            OR aa.verification_status IN ('OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','VERIFIED')))
+      OR EXISTS (SELECT 1 FROM public.ca_procurement_matches cm
+        WHERE cm.source_document_id = OLD.id
+          AND cm.verification_status IN ('Vérifié DGMP','OFFICIAL_DOCUMENT','VERIFIED'))
+    INTO has_certified_dependents;
+
+    IF has_certified_dependents THEN
+      RAISE EXCEPTION 'Cannot revoke a primary document while certified financial records depend on it; downgrade those records first';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$;
+REVOKE ALL ON FUNCTION private.prevent_revoking_referenced_primary_document()
+  FROM public, anon, authenticated, service_role;
+
+DROP TRIGGER IF EXISTS prevent_revoking_referenced_primary_document ON public.public_documents;
+CREATE TRIGGER prevent_revoking_referenced_primary_document
+  BEFORE UPDATE OF status, verification_status, checksum_status, checksum_sha256,
+    source_url, source_name, institution_id, fiscal_year, document_type, file_url, storage_path
+  ON public.public_documents FOR EACH ROW
+  EXECUTE FUNCTION private.prevent_revoking_referenced_primary_document();
+
 -- A verified budget line must point to the same checksum-verified primary document
 -- as its published parent budget; the legacy admin_validate_change trigger did not
 -- require checksum_status and did not bind the line to the parent's document ID.
