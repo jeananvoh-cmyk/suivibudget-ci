@@ -1,3 +1,9 @@
+## 15 novembre 2026 — Clôture Mission Globale Remédiation P0 (`antigravity/p0-financial-compliance-remediation`)
+
+- **Branche** : `antigravity/p0-financial-compliance-remediation` (synchronisée sur `origin`, `origin/master` intact à `c9bd106bf37e8e24e9e2d334cb43de51e2c94224`).
+- **Garde-fou Supabase** : `remoteSupabaseWrites: 0` (`PASS`).
+- **Livrables** : Blocs 0 à 6 complétés, testés et poussés ; dossier complet `docs/audits/p0-remediation/` (`01` à `06` + `FINAL_REMEDIATION_REPORT.md`).
+
 ## 27 octobre 2026 — Corrections Post-Audit P0 : Sécurité Supabase (`private` RLS & 21 `SECURITY DEFINER`), Pagination Contrôlée Cocody CA 2024 et Stabilisation PR #65 (Antigravity)
 
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/65 (`codex/p0-production-cocody-2024` ciblant `master` `901a2033084c5aa1ca76bc4ce4625e1884d48ab9`).
