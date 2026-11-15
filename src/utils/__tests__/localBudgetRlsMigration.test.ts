@@ -28,6 +28,7 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toContain('DROP POLICY IF EXISTS "Public documents files are publicly readable"');
     expect(migration).toContain('DROP POLICY IF EXISTS "Staff can upload public documents files"');
     expect(migration).toContain('DROP POLICY IF EXISTS "Staff can delete public documents files"');
+    expect(migration).toContain('d.checksum_status IN (\'COMPUTED\',\'VERIFIED\')');
   });
 
   it('replaces every local-budget administrative policy with trusted role checks', () => {
@@ -44,15 +45,16 @@ describe('RLS hardening — local budget administration', () => {
       'Allow admin write on CA procurement matches',
       'Allow admin and moderator full access on responses',
       'Allow admin write access on projects',
-      'Allow moderators full management on citizen proofs',
-      'Allow admin only read on newsletter subscribers',
+      'Moderators insert citizen proofs',
+      'Moderators update citizen proofs',
+      'Moderators delete citizen proofs',
     ];
 
     for (const policy of policies) {
       expect(migration).toContain(`DROP POLICY IF EXISTS "${policy}"`);
       expect(migration).toContain(`CREATE POLICY "${policy}"`);
     }
-    expect((migration.match(/WITH CHECK/g) || []).length).toBe(12);
+    expect((migration.match(/WITH CHECK/g) || []).length).toBe(13);
   });
 
   it('is additive and transaction-wrapped; it does not mutate financial records', () => {
