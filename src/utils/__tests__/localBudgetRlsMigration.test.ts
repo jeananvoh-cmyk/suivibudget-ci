@@ -132,6 +132,8 @@ describe('RLS hardening — local budget administration', () => {
 
       // A certified CA must not retain its certification if its exact source page is removed.
       await db.exec(`
+        INSERT INTO auth.users(id,email)
+        VALUES ('00000000-0000-0000-0000-000000000001','admin-isole@example.invalid');
         INSERT INTO public.profiles(id,email,full_name,role,is_active)
         VALUES ('00000000-0000-0000-0000-000000000001','admin-isole@example.invalid','Admin isolé','ADMIN',true);
         SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',false);
