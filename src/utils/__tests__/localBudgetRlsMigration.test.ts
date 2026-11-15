@@ -38,6 +38,9 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toContain('IF source_page_value IS NULL OR source_page_value <= 0 THEN');
     expect(migration).toContain('CREATE TRIGGER enforce_procurement_primary_evidence');
     expect(migration).toContain('CREATE TRIGGER enforce_budget_project_primary_evidence');
+    expect(migration).toContain('CREATE OR REPLACE FUNCTION private.enforce_budget_line_primary_document_evidence()');
+    expect(migration).toContain('CREATE TRIGGER enforce_budget_line_primary_document_evidence');
+    expect(migration).toContain('NEW.source_document_id IS DISTINCT FROM parent_budget.source_document_id');
     expect(migration).toContain('DROP POLICY IF EXISTS "Allow public read on budget sources"');
     expect(migration).toContain('DROP POLICY IF EXISTS "Allow public read on budget revenue sources"');
     expect(migration).toContain("lb.status = 'PUBLISHED'");
@@ -109,10 +112,11 @@ describe('RLS hardening — local budget administration', () => {
            'enforce_local_budget_primary_evidence',
            'enforce_administrative_account_primary_evidence',
            'enforce_procurement_primary_evidence',
-           'enforce_budget_project_primary_evidence'
+           'enforce_budget_project_primary_evidence',
+           'enforce_budget_line_primary_document_evidence'
          ) ORDER BY tgname`
       );
-      expect(triggers.rows).toHaveLength(4);
+      expect(triggers.rows).toHaveLength(5);
 
       // A certified CA must not retain its certification if its exact source page is removed.
       await db.exec(`
