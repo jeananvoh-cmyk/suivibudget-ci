@@ -21,7 +21,7 @@ const value: ProposedFinancialValue = {
   status: 'VALIDATED',
 };
 
-function metadata(document_type: DocumentIngestionMetadata['document_type'], evidence_level?: DocumentIngestionMetadata['evidence_level'], source_document_id?: string): DocumentIngestionMetadata {
+function metadata(document_type: DocumentIngestionMetadata['document_type'], evidence_level?: DocumentIngestionMetadata['evidence_level'], source_document_id?: string, source_page?: number): DocumentIngestionMetadata {
   return {
     institution_id: institution.id,
     fiscal_year: 2026,
@@ -31,6 +31,7 @@ function metadata(document_type: DocumentIngestionMetadata['document_type'], evi
     source_date: '2026-01-01',
     source_date_kind: 'RECORDED',
     ...(source_document_id ? { source_document_id } : {}),
+    ...(source_page ? { source_page } : {}),
     ...(evidence_level ? { evidence_level } : {}),
   };
 }
@@ -84,13 +85,13 @@ describe('Budget document import evidence defaults', () => {
     expect(noId.errors.join(' ')).toContain('identifiant du document');
 
     const withId = buildStandardImportEnvelope(
-      metadata('BUDGET_PRIMITIF', 'OFFICIAL_DOCUMENT', 'doc-test-verified'),
+      metadata('BUDGET_PRIMITIF', 'OFFICIAL_DOCUMENT', 'doc-test-verified', 12),
       [value],
       institution
     );
     expect(withId.data.source_document_id).toBe('doc-test-verified');
     expect(toPipelineImportRow(withId).data.source_document_id).toBe('doc-test-verified');
-    expect(toPipelineImportRow(withId).data.source_page).toBeUndefined();
+    expect(toPipelineImportRow(withId).data.source_page).toBe(12);
   });
 
   it('preserves an explicitly selected primary official document status', () => {
