@@ -1273,9 +1273,14 @@ export function generateProjectPassport(
       ? 'Le Compte Administratif consulté indique 0 FCFA exécuté/ordonnancé pour cette opération sur l’exercice observé. La cause de cet écart n’est pas établie par les sources actuellement reliées.'
       : matchResult.temporalJustification;
 
+    // Un montant nul ne constitue une anomalie financière que si le CA, la pièce
+    // source et le rapprochement de l'opération sont tous officiellement vérifiés.
+    // Un zéro issu d'un rapprochement non certifié reste une donnée à corroborer.
+    const isVerifiedZeroExecuted = isZeroExecuted && hasVerifiedExecutionEvidence;
+
     const executionStageStatus: PassportStageStatus = isUncertainExecuted
       ? 'PENDING_DOCUMENTATION'
-      : isZeroExecuted
+      : isVerifiedZeroExecuted
         ? 'ANOMALY_DETECTED'
         : hasVerifiedExecutionEvidence
           ? 'VERIFIED_OFFICIAL'
@@ -1283,13 +1288,15 @@ export function generateProjectPassport(
 
     const executionStageStatusLabel = isUncertainExecuted
       ? 'Montant d’exécution qualifié ou à confirmer'
-      : isZeroExecuted
-        ? 'Exécution financière à 0 FCFA'
-        : hasVerifiedExecutionEvidence
-          ? 'Mandaté au Compte Administratif'
-          : matchResult.confidence === 'PROBABLE'
-            ? 'Opération CA Probable'
-            : 'Rapprochement CA automatique (pièce primaire à certifier)';
+      : isVerifiedZeroExecuted
+        ? 'Exécution financière à 0 FCFA (CA et rapprochement vérifiés)'
+        : isZeroExecuted
+          ? 'Montant nul rapproché — certification documentaire en attente'
+          : hasVerifiedExecutionEvidence
+            ? 'Mandaté au Compte Administratif'
+            : matchResult.confidence === 'PROBABLE'
+              ? 'Opération CA Probable'
+              : 'Rapprochement CA automatique (pièce primaire à certifier)';
 
     stages.push({
       id: 'BUDGET_EXECUTION_CA',
