@@ -65,6 +65,12 @@ Ils ne figurent pas dans les 26 versions enregistrées par Production. Ils sont 
 - Supabase CLI v3 cible le local par défaut : tout contrôle hébergé doit préciser `--remote`. Toute commande modifiant un projet hébergé doit rester explicitement approuvée.
 - Aucun `migration repair`, `db push`, `apply_migration`, changement de schéma, changement de données, fusion Git ou déploiement Production n’a été effectué pendant ce contrôle.
 
+## Configuration CLI locale
+
+Le dépôt ne contenait pas de `supabase/config.toml`. Un fichier minimal est désormais ajouté avec `project_id = "suivibudget-ci"` et `db.major_version = 17`, conforme au moteur PostgreSQL 17.6.1.166 observé sur le projet. Il ne contient aucun secret. `supabase/.temp/` et `supabase/.branches/` sont ignorés par Git.
+
+Après installation de Supabase CLI v3 et authentification, l'opérateur devra exécuter `supabase link --project-ref cdesuvcozcetdtvibgqs`, puis `supabase migration list --remote`. En CLI v3, `migration list`, `migration fetch` et `migration repair` ciblent le local par défaut ; `--remote` est obligatoire pour la cible hébergée. La commande `supabase migration fetch --remote` peut ensuite être utilisée comme vérification indépendante des 26 fichiers restaurés.
+
 ## État à ce commit
 
 - 26 versions Production récupérées depuis leur SQL réellement enregistré.
