@@ -222,11 +222,11 @@ describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
     expect(passport.hasCitizenFieldProofs).toBe(true);
 
     const procurementStage = passport.stages.find(s => s.id === 'PROCUREMENT_DGMP');
-    expect(procurementStage?.status).toBe('VERIFIED_OFFICIAL');
+    expect(procurementStage?.status).toBe('PROBABLE_MATCH');
     expect(procurementStage?.dataPoints.some(d => d.value.includes('AOO24062605757'))).toBe(true);
 
     const caStage = passport.stages.find(s => s.id === 'BUDGET_EXECUTION_CA');
-    expect(caStage?.status).toBe('VERIFIED_OFFICIAL');
+    expect(caStage?.status).toBe('PROBABLE_MATCH');
     expect(caStage?.dataPoints.some(d => d.value.includes('27 850 646'))).toBe(true);
   });
 
@@ -266,10 +266,9 @@ describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
     expect(passport.hasMatchedDgmpTender).toBe(true);
 
     const caStage = passport.stages.find(s => s.id === 'BUDGET_EXECUTION_CA');
-    expect(caStage?.status).toBe('ANOMALY_DETECTED');
-    expect(caStage?.alertMessage).toBe(
-      'Le Compte Administratif consulté indique 0 FCFA exécuté/ordonnancé pour cette opération sur l’exercice observé. La cause de cet écart n’est pas établie par les sources actuellement reliées.'
-    );
+    expect(caStage?.status).toBe('PROBABLE_MATCH');
+    expect(caStage?.statusLabel).toContain('certification documentaire en attente');
+    expect(caStage?.status).not.toBe('ANOMALY_DETECTED');
     // Vérification stricte : aucun mot interprétatif non prouvé
     expect(caStage?.alertMessage).not.toContain('report probable');
     expect(caStage?.alertMessage).not.toContain('retard');
@@ -326,6 +325,7 @@ describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
       ...mockGenericProject,
       program_name: 'Programme Voirie et Réseaux Divers 2026',
       source: 'Annexe 4 LFI 2026 — Loi de Finances n°2025-988',
+      source_document_id: 'test-lfi-2026-annexe4',
       source_url: 'https://dgbf.gouv.ci/wp-content/uploads/2026/01/Annexe-4-LFI-2026.pdf',
       source_page: 25,
       financial_verification_status: 'VERIFIED',
