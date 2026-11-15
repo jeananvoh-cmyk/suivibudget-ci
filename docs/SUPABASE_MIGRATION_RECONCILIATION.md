@@ -51,7 +51,7 @@ Les trois fichiers de bootstrap suivants restent dans `supabase/migrations/` :
 - `20260928000000_administrative_accounts.sql`
 - `20260928010000_local_budgets_referential.sql`
 
-Ils ne figurent pas dans les 26 versions enregistrées par Production. Ils sont donc considérés comme un socle préhistorique/local à vérifier, et non comme des migrations Production confirmées. **Ne pas lancer `supabase db push` tant que leur statut et leur nécessité ne sont pas formellement réconciliés.**
+Le 15 novembre 2026, leurs trois versions ont été inscrites dans `supabase_migrations.schema_migrations` comme versions appliquées, après comparaison des objets attendus avec le schéma Production. Cette opération a modifié uniquement l'historique de suivi : aucun SQL de ces fichiers n'a été rejoué. Les tables et politiques correspondantes existaient déjà sous des formes parfois évoluées. Cette inscription ne signifie donc pas que le contenu textuel exact des trois fichiers a été exécuté tel quel.
 
 ## Migration de fiabilisation en attente
 
@@ -60,16 +60,16 @@ Ils ne figurent pas dans les 26 versions enregistrées par Production. Ils sont 
 ## Limites et prochaines vérifications
 
 - La restauration des 26 fichiers canoniques ne modifie pas la base Production et ne prouve pas à elle seule que le bootstrap local reproduit le schéma initial de Production.
-- Le contrôle CLI `supabase migration list --remote` et le replay complet des migrations sur une base jetable restent à exécuter.
+- Le contrôle CLI `supabase migration list --remote` reste à exécuter dès que Supabase CLI sera disponible. L'historique distant a toutefois été relu via le connecteur Supabase après l'opération : 29 versions enregistrées, dont les trois versions bootstrap.
 - Le projet ne possède actuellement aucune branche Supabase de développement. La création d’une Preview Branch peut engendrer des frais (Compute, stockage, egress). La tentative de création a été arrêtée par le mécanisme de confirmation de coût ; aucune branche n’a été créée.
 - Supabase CLI v3 cible le local par défaut : tout contrôle hébergé doit préciser `--remote`. Toute commande modifiant un projet hébergé doit rester explicitement approuvée.
-- Aucun `migration repair`, `db push`, `apply_migration`, changement de schéma, changement de données, fusion Git ou déploiement Production n’a été effectué pendant ce contrôle.
+- Le CLI Supabase n'étant pas disponible dans l'environnement, l'inscription des trois versions a été réalisée par un INSERT ciblé et idempotent sur `supabase_migrations.schema_migrations` (colonnes `version`, `name` uniquement), après vérification qu'elles étaient absentes. L'opération a été relue immédiatement : 29 versions au total, 3/3 versions bootstrap présentes et `20261115070000` absente. Aucun `db push`, `apply_migration`, changement de schéma ou de données métier, fusion Git ou déploiement Production n'a été effectué.
 
 ### Comparaison des objets bootstrap avec le schéma Production
 
 - Les **18/18 tables** déclarées dans les trois migrations bootstrap sont présentes.
 - Les objets du fichier local historique du 29 septembre sont aussi présents : `ca_financial_lines`, `private.has_staff_role(text[])` et `public.enforce_document_publication_audit()`. La migration Production canonique `20260929112029_ca_v3_financial_provenance_20260929.sql` porte ces objets.
-- Les index des modules Comptes Administratifs et budgets locaux sont présents. Les anciens index citoyens `idx_proofs_project_id` et `idx_proofs_status` ont des équivalents actuels `idx_citizen_proofs_project` et `idx_citizen_proofs_verification`. L'index `idx_institutions_name` déclaré par le bootstrap n'a pas été retrouvé dans la liste actuelle ; son éventuel remplacement reste à confirmer.
+- Les index des modules Comptes Administratifs et budgets locaux sont présents. Les anciens index citoyens `idx_proofs_project_id` et `idx_proofs_status` ont des équivalents actuels `idx_citizen_proofs_project` et `idx_citizen_proofs_verification`. L'index `idx_institutions_name` déclaré par le bootstrap est absent et aucun remplacement n'a été identifié. Le contrôle du 15 novembre 2026 a relevé seulement 4 institutions (4 noms distincts) ; cet index B-tree sur `name` est une optimisation facultative, pas une exigence fonctionnelle ou d'intégrité à ce volume. Il n'a pas été créé en Production. À réévaluer si le volume ou les plans de requêtes le justifient.
 - Plusieurs politiques RLS bootstrap ont été remplacées par les politiques actuelles plus restrictives : lecture newsletter (`Only admins can view subscribers`), administration des institutions/budget lines (`admin_entity_staff`), et modération des preuves citoyennes (politiques séparées INSERT/UPDATE/DELETE et lecture propre).
 - Ces écarts sont cohérents avec les migrations de durcissement postérieures, mais ils empêchent d'affirmer que le schéma actuel est le résultat exact et inchangé de ces trois fichiers. Ils doivent être pris en compte avant toute réparation de l'historique.
 
@@ -95,15 +95,17 @@ Sur le commit `fb745e3668217621ecfdad000a7481f8c0b3f2c4`, le workflow GitHub Qua
 
 Ce test PGlite est un replay local isolé, pas une Preview Branch Supabase hébergée. Il valide la syntaxe PostgreSQL et le comportement sur le schéma-fixture, mais ne remplace pas un dry-run hébergé avec les extensions et services Supabase réels.
 
-## Vérification du socle préhistorique
+## Vérification et réconciliation du socle préhistorique
 
 Les 18 tables déclarées par les trois fichiers bootstrap (7 + 5 + 6) existent actuellement dans le schéma Production. Les objets clés du fichier local historique `20260929_security_ca_document_foundation.sql` existent également : `ca_financial_lines`, `private.has_staff_role(text[])` et `public.enforce_document_publication_audit()`. Les migrations Production canoniques `20260929112029_ca_v3_financial_provenance_20260929.sql` et les migrations documentaires antérieures portent les changements correspondants.
 
-Cela confirme que le socle a été créé ou recréé avant/pendant l'établissement de l'historique suivi, mais **ne prouve pas à lui seul que le contenu exact de chaque fichier bootstrap a été appliqué**. Les trois versions bootstrap restent absentes de `schema_migrations`. Aucune commande `migration repair` n'a été exécutée.
+Les trois versions bootstrap ont été enregistrées comme appliquées le 15 novembre 2026, après constat de la présence du socle et de son évolution ultérieure. Il subsiste des différences historiques : notamment l'index facultatif `idx_institutions_name` absent et des politiques RLS remplacées par des versions plus récentes. Le statut « applied » réconcilie le suivi des migrations et évite que ces scripts de fondation soient rejoués comme des changements incrémentaux ; il ne constitue pas une preuve d'exécution littérale des fichiers actuels.
 
-## État à ce commit
+## État après réconciliation de l'historique
 
-- 26 versions Production récupérées depuis leur SQL réellement enregistré.
-- 3 fichiers bootstrap préhistoriques conservés et signalés.
-- 1 migration de fiabilisation proposée, non appliquée.
-- 0 écriture sur Supabase Production.
+- 26 migrations Production canoniques récupérées depuis leur SQL réellement enregistré.
+- 3 versions bootstrap ajoutées à l'historique distant par opération history-only vérifiée.
+- 29 versions présentes dans l'historique Supabase après contrôle.
+- 1 migration de fiabilisation proposée (`20261115070000_enforce_primary_document_provenance.sql`), toujours non appliquée en Production.
+- Aucun changement de schéma ni de données métier en Production ; seule la table de suivi des migrations a reçu les trois enregistrements documentés ci-dessus.
+- Aucun merge Git ni déploiement Production.
