@@ -73,15 +73,16 @@ Après installation de Supabase CLI v3 et authentification, l'opérateur devra e
 
 ## Validation automatisée du correctif
 
-Sur le commit `3bea1dfb1e3e30c03ff5eb56a7dc957229c86119`, le workflow GitHub Quality #477 a réussi :
+Sur le commit `fb745e3668217621ecfdad000a7481f8c0b3f2c4`, le workflow GitHub Quality #480 a réussi :
 
 - 72/72 fichiers de tests réussis ;
-- 980/980 tests réussis ;
+- 981/981 tests réussis ;
 - le test `localBudgetRlsMigration.test.ts` exécute réellement la migration sur un fixture PGlite isolé construit à partir du schéma de production ;
 - le test vérifie le déclassement des statuts locaux, recettes, CA et rapprochements DGMP sans modifier les montants ;
 - le test vérifie que les certifications de projets sans document primaire/page exacte sont rejetées ;
 - `npm run build` : PASS (1 770 modules) ;
 - `npm run build:review` : PASS (39 modules) ;
+- les 30 migrations actives ont des timestamps de 14 chiffres uniques ; un test CI vérifie l'absence de doublons ;
 - Vercel Preview : PASS.
 
 Ce test PGlite est un replay local isolé, pas une Preview Branch Supabase hébergée. Il valide la syntaxe PostgreSQL et le comportement sur le schéma-fixture, mais ne remplace pas un dry-run hébergé avec les extensions et services Supabase réels.
