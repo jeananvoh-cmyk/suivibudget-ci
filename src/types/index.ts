@@ -234,6 +234,15 @@ export interface BudgetProject {
   source_url?: string;
   citizen_need_origin?: string;
   initiative_source?: string;
+  citizen_need_verification_status?: 'TO_VERIFY' | 'VERIFIED' | 'UNVERIFIED';
+  citizen_need_source_document_id?: string;
+  citizen_need_source_url?: string;
+  citizen_need_source_page?: number;
+  audit_report_reference?: string;
+  audit_source_document_id?: string;
+  audit_source_url?: string;
+  audit_source_page?: number;
+  audit_verification_status?: 'TO_VERIFY' | 'VERIFIED' | 'UNVERIFIED';
   id: string;
   institution_id?: string;
   institution_name?: string;

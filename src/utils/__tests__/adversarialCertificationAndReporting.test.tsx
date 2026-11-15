@@ -5,9 +5,13 @@ import {
   generateProjectPassport,
   classifyProjectProvenance,
   resolveProjectDataProvenance,
+  checkVerifiedNeedEvidence,
   checkVerifiedBudgetEvidence,
   checkVerifiedProcurementEvidence,
   checkVerifiedExecutionEvidence,
+  checkVerifiedPhysicalEvidence,
+  checkVerifiedAuditEvidence,
+  STAGE_CERTIFICATION_SPECIFICATIONS,
   findMatchingCaOperationResult,
 } from '../projectPassport';
 import { ProjectAccountabilityPassport } from '../../components/ProjectAccountabilityPassport';
@@ -463,5 +467,140 @@ describe('Tests Adversariaux P0/P1 — Certification du Passeport de Redevabilit
     expect(caStage.status).toBe('PROBABLE_MATCH');
     expect(auditStage.status).not.toBe('VERIFIED_OFFICIAL');
     expect(auditStage.status).toBe('PENDING_DOCUMENTATION');
+  });
+
+  it('Cas 11 (Section 3.1 & 3.5) : Budget officiellement vérifié, mais besoin citoyen non documenté -> BUDGET_VOTED est VERIFIED_OFFICIAL mais NEED_PROGRAMMING reste PENDING_DOCUMENTATION', () => {
+    const verifiedBudgetNoNeedProject: BudgetProject = {
+      ...baseProject,
+      id: 'adv-case-11-budget-only',
+      data_provenance: 'OFFICIAL_PRIMARY_SOURCE',
+      budget_amount_fcfa: 250_000_000,
+      source: 'Loi de Finances n° 2025-987 du 19 décembre 2025 — Annexe 4',
+      source_document_id: 'doc-lfi-2026-annexe-4',
+      source_url: 'https://dgbf.gouv.ci/wp-content/uploads/2026/01/Annexe-4-LFI-2026.pdf',
+      source_page: 88,
+      financial_verification_status: 'VERIFIED',
+      citizen_need_origin: undefined,
+      initiative_source: undefined,
+    };
+
+    expect(checkVerifiedBudgetEvidence(verifiedBudgetNoNeedProject)).toBe(true);
+    expect(checkVerifiedNeedEvidence(verifiedBudgetNoNeedProject)).toBe(false);
+
+    const passport = generateProjectPassport(verifiedBudgetNoNeedProject, [], []);
+    expect(passport.hasVerifiedBudgetEvidence).toBe(true);
+    expect(passport.hasVerifiedNeedEvidence).toBe(false);
+    expect(passport.hasVerifiedProcurementEvidence).toBe(false);
+    expect(passport.hasVerifiedExecutionEvidence).toBe(false);
+    expect(passport.hasVerifiedPhysicalEvidence).toBe(false);
+    expect(passport.hasVerifiedAuditEvidence).toBe(false);
+
+    const needStage = passport.stages.find(s => s.id === 'NEED_PROGRAMMING')!;
+    const budgetStage = passport.stages.find(s => s.id === 'BUDGET_VOTED')!;
+    expect(needStage.status).toBe('PENDING_DOCUMENTATION');
+    expect(needStage.status).not.toBe('VERIFIED_OFFICIAL');
+    expect(needStage.statusLabel).toContain('besoin citoyen initial non documenté');
+    expect(budgetStage.status).toBe('VERIFIED_OFFICIAL');
+
+    // Aucune des 5 autres étapes ne reçoit VERIFIED_OFFICIAL
+    const verifiedStages = passport.stages.filter(s => s.status === 'VERIFIED_OFFICIAL');
+    expect(verifiedStages.map(s => s.id)).toEqual(['BUDGET_VOTED']);
+  });
+
+  it('Cas 12 (Section 3.2) : Besoin citoyen déclaré par un administrateur ne produit jamais VERIFIED_OFFICIAL ni CITIZEN_OBSERVATION', () => {
+    const adminDeclaredNeedOnVerifiedBudget: BudgetProject = {
+      ...baseProject,
+      id: 'adv-case-12-admin-need',
+      data_provenance: 'OFFICIAL_PRIMARY_SOURCE',
+      budget_amount_fcfa: 180_000_000,
+      source: 'Loi de Finances n° 2025-987 du 19 décembre 2025 — Annexe 4',
+      source_document_id: 'doc-lfi-2026-annexe-4',
+      source_url: 'https://dgbf.gouv.ci/wp-content/uploads/2026/01/Annexe-4-LFI-2026.pdf',
+      source_page: 92,
+      financial_verification_status: 'VERIFIED',
+      citizen_need_origin: 'Besoin déclaré et saisi par l’administrateur municipal sans PV',
+      citizen_need_verification_status: 'UNVERIFIED',
+    };
+
+    expect(checkVerifiedNeedEvidence(adminDeclaredNeedOnVerifiedBudget)).toBe(false);
+    const passport = generateProjectPassport(adminDeclaredNeedOnVerifiedBudget, [], []);
+    const needStage = passport.stages.find(s => s.id === 'NEED_PROGRAMMING')!;
+    expect(needStage.status).toBe('PENDING_DOCUMENTATION');
+    expect(needStage.status).not.toBe('VERIFIED_OFFICIAL');
+
+    const needDp = needStage.dataPoints.find(d => d.label === 'Expression du besoin citoyen')!;
+    expect(needDp.provenance).toBe('UNVERIFIED_INPUT');
+    expect(needDp.provenanceClass).toBe('DECLARED_ADMIN');
+    expect(needDp.provenance).not.toBe('CITIZEN_OBSERVATION');
+    expect(needDp.provenance).not.toBe('OFFICIAL_SOURCE');
+  });
+
+  it('Cas 13 (Section 3.6, 3.7, 3.8, 3.10 & Règle 9) : Correspondance algorithmique par mots-clés, entreprise déclarée, CA vérifié sans audit et observation citoyenne n’entraînent jamais de certification abusive', () => {
+    // Vérifie que les 6 spécifications d'étape sont définies indépendamment
+    expect(Object.keys(STAGE_CERTIFICATION_SPECIFICATIONS)).toEqual([
+      'NEED_PROGRAMMING',
+      'BUDGET_VOTED',
+      'PROCUREMENT_DGMP',
+      'BUDGET_EXECUTION_CA',
+      'PHYSICAL_REALIZATION',
+      'AUDIT_ACCOUNTABILITY',
+    ]);
+
+    // 13.A : Projet rapproché par similarité algorithmique de mots-clés (intitulé non identique et sans linked_project_id)
+    const keywordMatchedProject: BudgetProject = {
+      id: 'proj-tiassale-algorithmic-keywords',
+      title: 'Travaux de construction de vingt magasins modernes au grand marché central de Tiassalé',
+      commune_name: 'Mairie de Tiassalé',
+      region_name: 'Agnéby-Tiassa',
+      category: 'Commerce & Marchés',
+      nature_expense: 'Investissements',
+      budget_amount_fcfa: 28_000_000,
+      fiscal_year: 2024,
+      current_status: 'IN_PROGRESS',
+      progress_percentage: 85,
+      created_at: '2024-01-01',
+      scope_level: 'LOCAL',
+      institution_id: 'inst-com-tiassale',
+    };
+
+    const passportKeyword = generateProjectPassport(keywordMatchedProject, [], CA_PILOT_FIXTURES);
+    // Règle 9 : Une correspondance algorithmique par mots-clés ne devient jamais VERIFIED_OFFICIAL
+    expect(passportKeyword.hasVerifiedProcurementEvidence).toBe(false);
+    expect(passportKeyword.hasVerifiedExecutionEvidence).toBe(false);
+    for (const stage of passportKeyword.stages) {
+      expect(stage.status).not.toBe('VERIFIED_OFFICIAL');
+    }
+
+    // 13.B : Même sur l'opération Tiassalé exactement vérifiée (Étapes 3 et 4 VERIFIED_OFFICIAL),
+    // l'Étape 6 (AUDIT_ACCOUNTABILITY) n'hérite JAMAIS automatiquement de VERIFIED_OFFICIAL sans rapport d'audit indépendant
+    const exactTiassaleProject: BudgetProject = {
+      ...keywordMatchedProject,
+      id: 'proj-tiassale-marche-20',
+      title: 'Construction de vingt (20) magasins au marché de Tiassalé',
+    };
+    const passportExactTiassale = generateProjectPassport(
+      exactTiassaleProject,
+      [
+        {
+          id: 'proof-approved-1',
+          project_id: 'proj-tiassale-marche-20',
+          image_url: 'https://example.ci/photo.jpg',
+          citizen_status_claim: 'COMPLETED',
+          comment: 'Magasins construits',
+          verification_status: 'APPROVED',
+          confirmations_count: 3,
+          created_at: '2026-03-01',
+        },
+      ],
+      CA_PILOT_FIXTURES
+    );
+    expect(passportExactTiassale.stages.find(s => s.id === 'NEED_PROGRAMMING')?.status).toBe('NOT_FOUND_PUBLICLY');
+    expect(passportExactTiassale.stages.find(s => s.id === 'BUDGET_VOTED')?.status).toBe('PENDING_DOCUMENTATION');
+    expect(passportExactTiassale.stages.find(s => s.id === 'PROCUREMENT_DGMP')?.status).toBe('VERIFIED_OFFICIAL');
+    expect(passportExactTiassale.stages.find(s => s.id === 'BUDGET_EXECUTION_CA')?.status).toBe('VERIFIED_OFFICIAL');
+    expect(passportExactTiassale.stages.find(s => s.id === 'PHYSICAL_REALIZATION')?.status).toBe('CITIZEN_DOCUMENTED');
+    expect(passportExactTiassale.stages.find(s => s.id === 'AUDIT_ACCOUNTABILITY')?.status).toBe('PENDING_DOCUMENTATION');
+    expect(checkVerifiedPhysicalEvidence(exactTiassaleProject)).toBe(false);
+    expect(checkVerifiedAuditEvidence(exactTiassaleProject)).toBe(false);
   });
 });

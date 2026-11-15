@@ -338,7 +338,10 @@ describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
     expect(progDp?.provenance).toBe('OFFICIAL_SOURCE');
     expect(progDp?.provenanceClass).toBe('OFFICIAL_PRIMARY_SOURCE');
 
-    // Mais besoin citoyen initial non documenté dans l'extrait
+    // Mais besoin citoyen initial non documenté dans l'extrait -> NEED_PROGRAMMING ne devient JAMAIS VERIFIED_OFFICIAL
+    expect(needProgStage?.status).toBe('PENDING_DOCUMENTATION');
+    expect(needProgStage?.status).not.toBe('VERIFIED_OFFICIAL');
+    expect(passport.stages.find(s => s.id === 'BUDGET_VOTED')?.status).toBe('VERIFIED_OFFICIAL');
     const needDp = needProgStage?.dataPoints.find(dp => dp.label === 'Expression du besoin citoyen');
     expect(needDp?.availability).toBe('NOT_FOUND_PUBLICLY');
     expect(needDp?.sourceDetails).toContain('Principe 4');
