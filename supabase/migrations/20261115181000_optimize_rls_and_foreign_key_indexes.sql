@@ -30,7 +30,7 @@ CREATE INDEX IF NOT EXISTS idx_budget_lines_verified_by
   ON public.budget_lines(verified_by);
 CREATE INDEX IF NOT EXISTS idx_budget_projects_financial_verified_by
   ON public.budget_projects(financial_verified_by);
-CREATE INDEX IF NOT EXISTS idx_budget_projects_source_document_id_advisor
+CREATE INDEX IF NOT EXISTS idx_budget_projects_source_document_id
   ON public.budget_projects(source_document_id);
 
 COMMIT;
