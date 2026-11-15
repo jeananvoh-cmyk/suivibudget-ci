@@ -94,7 +94,7 @@ export function DataImportConsole({ role, initialDocument }: DataImportConsolePr
   const [adoptionDate, setAdoptionDate] = useState<string>(initialDocument?.adoption_date || '');
   const [sourceDateKind, setSourceDateKind] = useState<'PUBLISHED' | 'ACCESSED' | 'RECORDED'>('RECORDED');
   const [sourceUrl, setSourceUrl] = useState<string>(initialDocument?.file_url || '');
-  const [sourcePage, setSourcePage] = useState<number | undefined>(initialDocument?.page_count ? 1 : undefined);
+  const [sourcePage, setSourcePage] = useState<number | undefined>(undefined);
   const [evidenceLevel, setEvidenceLevel] = useState<DocumentEvidenceLevel>('DOCUMENT_TO_EXTRACT');
   const [amountSemantics, setAmountSemantics] = useState<'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN'>('DELTA');
   const [notes, setNotes] = useState<string>('');
