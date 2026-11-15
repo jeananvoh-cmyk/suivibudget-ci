@@ -18,7 +18,7 @@ describe('Pwned Passwords k-anonymity guard', () => {
     const [url, options] = fetchMock.mock.calls[0];
     expect(url).toBe('https://api.pwnedpasswords.com/range/5BAA6');
     expect(options.headers).toEqual({ 'Add-Padding': 'true' });
-    expect(JSON.stringify([url, options])).not.toContain('password');
+    expect(options.body).toBeUndefined();
     expect(options.cache).toBe('no-store');
     expect(options.referrerPolicy).toBe('no-referrer');
   });
