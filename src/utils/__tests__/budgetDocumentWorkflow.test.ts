@@ -815,7 +815,7 @@ describe('Budget Document Workflow — Dry-Run & Assistant Documentaire (Items 7
       { id: '3', field: 'investment_amount', label: 'Investissement', section: 'INVESTISSEMENT', nature: 'PREVISION', amount: null, precision: 'UNKNOWN', confidence: 'LOW', status: 'MARKED_UNKNOWN' }
     ];
     const envelope = buildStandardImportEnvelope(meta, proposed, mockInstitutions[0]);
-    expect(envelope.data.verification_status).toBe('AIP_VERIFIED');
+    expect(envelope.data.verification_status).toBe('SECONDARY_TO_CORROBORATE');
     expect(envelope.data.total_amount).toBe(820_150_000);
     expect(envelope.data.adoption_date).toBe('2024-03-12');
     expect(envelope.data.operating_amount).toBeNull();
