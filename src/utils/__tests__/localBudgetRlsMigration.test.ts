@@ -16,6 +16,10 @@ describe('RLS hardening — local budget administration', () => {
     join(process.cwd(), 'supabase/migrations/20261115070000_enforce_primary_document_provenance.sql'),
     'utf8'
   );
+  const hardeningMigration = readFileSync(
+    join(process.cwd(), 'supabase/migrations/20261115110000_harden_financial_evidence_guards.sql'),
+    'utf8'
+  );
 
   it('does not grant privileges from user-editable user_metadata', () => {
     expect(migration).not.toContain("auth.jwt() -> 'user_metadata'");
@@ -38,16 +42,17 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toContain('IF source_page_value IS NULL OR source_page_value <= 0 THEN');
     expect(migration).toContain('CREATE TRIGGER enforce_procurement_primary_evidence');
     expect(migration).toContain('CREATE TRIGGER enforce_budget_project_primary_evidence');
-    expect(migration).toContain('CREATE OR REPLACE FUNCTION private.prevent_revoking_referenced_primary_document()');
-    expect(migration).toContain('CREATE TRIGGER prevent_revoking_referenced_primary_document');
-    expect(migration).toContain('CREATE OR REPLACE FUNCTION private.enforce_budget_line_primary_document_evidence()');
-    expect(migration).toContain('CREATE TRIGGER enforce_budget_line_primary_document_evidence');
-    expect(migration).toContain('CREATE OR REPLACE FUNCTION private.enforce_budget_revenue_source_evidence()');
-    expect(migration).toContain('CREATE TRIGGER enforce_budget_revenue_source_evidence');
-    expect(migration).toContain('NEW.source_document_id IS DISTINCT FROM parent_budget.source_document_id');
-    expect(migration).toContain('DROP POLICY IF EXISTS "Allow public read on budget sources"');
-    expect(migration).toContain('DROP POLICY IF EXISTS "Allow public read on budget revenue sources"');
-    expect(migration).toContain("lb.status = 'PUBLISHED'");
+    expect(hardeningMigration).toContain('BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url');
+    expect(hardeningMigration).toContain('CREATE OR REPLACE FUNCTION private.prevent_revoking_referenced_primary_document()');
+    expect(hardeningMigration).toContain('CREATE TRIGGER prevent_revoking_referenced_primary_document');
+    expect(hardeningMigration).toContain('CREATE OR REPLACE FUNCTION private.enforce_budget_line_primary_document_evidence()');
+    expect(hardeningMigration).toContain('CREATE TRIGGER enforce_budget_line_primary_document_evidence');
+    expect(hardeningMigration).toContain('CREATE OR REPLACE FUNCTION private.enforce_budget_revenue_source_evidence()');
+    expect(hardeningMigration).toContain('CREATE TRIGGER enforce_budget_revenue_source_evidence');
+    expect(hardeningMigration).toContain('NEW.source_document_id IS DISTINCT FROM parent_budget.source_document_id');
+    expect(hardeningMigration).toContain('DROP POLICY IF EXISTS "Allow public read on budget sources"');
+    expect(hardeningMigration).toContain('DROP POLICY IF EXISTS "Allow public read on budget revenue sources"');
+    expect(hardeningMigration).toContain("lb.status = 'PUBLISHED'");
     expect(migration).toContain('ALTER TABLE public.ca_procurement_matches');
 
     expect(migration).toContain('d.checksum_status IN (\'COMPUTED\', \'VERIFIED\')');
@@ -76,6 +81,7 @@ describe('RLS hardening — local budget administration', () => {
         VALUES ('migration-market','migration-operation','Travaux école','Entreprise test',40,'Vérifié DGMP');
       `);
       await db.exec(migration);
+      await db.exec(hardeningMigration);
       const demotions = await db.query<{ table_name: string; status: string; amount: string | number }>(
         `SELECT 'local_budgets' table_name,verification_status status,total_amount::text amount FROM public.local_budgets WHERE id='migration-budget'
          UNION ALL
