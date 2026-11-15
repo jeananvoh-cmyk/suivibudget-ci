@@ -618,7 +618,9 @@ describe('Tests Adversariaux P0/P1 — Certification du Passeport de Redevabilit
     // et sa page précise ne sont pas enregistrés : il reste probable, jamais certifié.
     expect(passportExactTiassale.hasVerifiedProcurementEvidence).toBe(false);
     expect(passportExactTiassale.stages.find(s => s.id === 'PROCUREMENT_DGMP')?.status).toBe('PROBABLE_MATCH');
-    expect(passportExactTiassale.stages.find(s => s.id === 'BUDGET_EXECUTION_CA')?.status).toBe('VERIFIED_OFFICIAL');
+    // Le CA de fixture ne possède ni source_document_id ni URL primaire : le statut vérifié serait abusif.
+    expect(passportExactTiassale.hasVerifiedExecutionEvidence).toBe(false);
+    expect(passportExactTiassale.stages.find(s => s.id === 'BUDGET_EXECUTION_CA')?.status).toBe('PROBABLE_MATCH');
     expect(passportExactTiassale.stages.find(s => s.id === 'PHYSICAL_REALIZATION')?.status).toBe('CITIZEN_DOCUMENTED');
     expect(passportExactTiassale.stages.find(s => s.id === 'AUDIT_ACCOUNTABILITY')?.status).toBe('PENDING_DOCUMENTATION');
     expect(checkVerifiedPhysicalEvidence(exactTiassaleProject)).toBe(false);
