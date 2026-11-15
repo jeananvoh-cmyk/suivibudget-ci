@@ -209,7 +209,7 @@ BEGIN
           AND (lb.status = 'PUBLISHED' OR lb.verification_status IN ('OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION')))
       OR EXISTS (SELECT 1 FROM public.budget_projects bp
         WHERE bp.source_document_id = OLD.id
-          AND (bp.publication_status = 'PUBLISHED' OR bp.financial_verification_status = 'VERIFIED'))
+          AND (bp.data_provenance = 'OFFICIAL_SOURCE' OR bp.financial_verification_status IN ('VERIFIED','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION')))
       OR EXISTS (SELECT 1 FROM public.budget_lines bl
         WHERE bl.source_document_id = OLD.id
           AND (bl.publication_status = 'PUBLISHED' OR bl.verification_status = 'VERIFIED'))
