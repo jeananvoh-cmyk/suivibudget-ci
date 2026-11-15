@@ -15,6 +15,9 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).not.toContain("SET DEFAULT 'AIP_VERIFIED'");
     expect(migration).toContain("ALTER COLUMN verification_status SET DEFAULT 'TO_VERIFY'");
     expect(migration).toContain("ALTER COLUMN data_provenance SET DEFAULT 'DECLARED_ADMIN'");
+    expect(migration).toContain('CREATE OR REPLACE FUNCTION private.validate_import_row(r jsonb)');
+    expect(migration).toContain("'source_document_id'");
+    expect(migration).toContain('Primary document requires a published, checksum-verified catalogue record');
     expect(migration).toContain('CREATE OR REPLACE FUNCTION private.enforce_primary_document_evidence()');
     expect(migration).toContain('CREATE TRIGGER enforce_local_budget_primary_evidence');
     expect(migration).toContain('CREATE TRIGGER enforce_administrative_account_primary_evidence');
