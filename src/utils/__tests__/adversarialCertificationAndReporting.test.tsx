@@ -289,6 +289,22 @@ describe('Tests Adversariaux P0/P1 — Certification du Passeport de Redevabilit
     for (const stage of passportUnverifiedCa.stages) {
       expect(stage.status).not.toBe('VERIFIED_OFFICIAL');
     }
+
+    // Un montant exécuté nul dans un CA non certifié ne doit pas devenir une anomalie financière.
+    const unverifiedZeroAccount: AdministrativeAccount = {
+      ...structuredClone(unverifiedAccount),
+      operations: unverifiedAccount.operations.map(op => ({ ...op, executed_amount: 0 })),
+    };
+    const passportUnverifiedZero = generateProjectPassport(
+      unverifiedProjectMatchingTiassale,
+      [],
+      [unverifiedZeroAccount]
+    );
+    const unverifiedZeroStage = passportUnverifiedZero.stages.find(s => s.id === 'BUDGET_EXECUTION_CA')!;
+    expect(passportUnverifiedZero.hasVerifiedExecutionEvidence).toBe(false);
+    expect(unverifiedZeroStage.status).toBe('PROBABLE_MATCH');
+    expect(unverifiedZeroStage.status).not.toBe('ANOMALY_DETECTED');
+    expect(unverifiedZeroStage.statusLabel).toContain('certification documentaire en attente');
   });
 
   it('Cas 7 : Un montant null reste inconnu dans les rapports et empêche tout total consolidé abusif', () => {
