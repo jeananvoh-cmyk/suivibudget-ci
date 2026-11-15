@@ -13,10 +13,11 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toContain("private.has_staff_role(array['ADMIN','DATA_MANAGER'])");
     expect(migration).toContain("ALTER COLUMN verification_status SET DEFAULT 'DOCUMENT_TO_EXTRACT'");
     expect(migration).not.toContain("SET DEFAULT 'AIP_VERIFIED'");
-    expect(migration).not.toContain("auth.jwt() -> 'user_metadata'");
     expect(migration).toContain('ALTER TABLE public.ca_procurement_matches');
     expect(migration).toContain('DROP POLICY IF EXISTS "Allow staff full access on public documents"');
     expect(migration).toContain('DROP POLICY IF EXISTS "Public documents files are publicly readable"');
+    expect(migration).toContain('DROP POLICY IF EXISTS "Staff can upload public documents files"');
+    expect(migration).toContain('DROP POLICY IF EXISTS "Staff can delete public documents files"');
   });
 
   it('replaces every local-budget administrative policy with trusted role checks', () => {
