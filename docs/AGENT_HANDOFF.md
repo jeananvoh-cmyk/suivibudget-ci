@@ -1,3 +1,35 @@
+## 15 novembre 2026 — Mission Corrective Finale PR #68 : Provenance Stricte du Passeport de Redevabilité, Rapports Financiers sans Faux Zéro et Tests Adversariaux (10 cas)
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/68 (`fix/reconcile-public-indicators` ciblant `master` `c9bd106bf37e8e24e9e2d334cb43de51e2c94224`).
+- **HEAD initial audité** : `1813de0879880ccc063181f72fc54e1133d4fd2e`.
+- **Garde-fous respectés** :
+  - `REMOTE_SUPABASE_WRITES = 0` (`npm run verify:supabase:read-only` -> `PASS`).
+  - `UNTRACKED_AGENTS_STAGED = 0` (`.agents/`, `scripts/adversarial-stress-m4.mjs`, `scripts/adversarial-stress-m4-rep.mjs` exclus).
+  - Aucune fusion, aucun déploiement Vercel de production, aucune écriture Supabase Production.
+- **Corrections livrées par blocs sur `fix/reconcile-public-indicators`** :
+  1. **Bloc 1 (`0f3a5ba`) — Provenance stricte du Passeport de Redevabilité (`src/utils/projectPassport.ts`, `src/components/ProjectAccountabilityPassport.tsx`, `src/components/ProjectCard.tsx`, `src/components/ProjectDetailModal.tsx`)** :
+     - Suppression définitive du raccourci binaire `project.data_provenance === 'DECLARED_ADMIN' ? 'UNVERIFIED_INPUT' : 'OFFICIAL_SOURCE'`.
+     - Classification explicite `PassportProvenanceClass` en 8 catégories : `OFFICIAL_PRIMARY_SOURCE`, `OFFICIAL_SECONDARY_SOURCE`, `AUTOMATED_EXTRACTION`, `DECLARED_ADMIN`, `CITIZEN_OBSERVATION`, `SUIVIBUDGET_CALCULATION`, `INSTITUTION_RESPONSE`, `UNKNOWN`.
+     - Application stricte des Règles A à G : aucune source secondaire (AIP, presse), aucune extraction automatisée (`Budget Citoyen / Annexe LFI (DGBF)`, `import-*`, `csv-*`), aucune saisie administrative (`DECLARED_ADMIN`), aucune référence de page isolée (`page 42` sans pièce identifiable) et aucun rapprochement heuristique automatique ne peut produire `VERIFIED_OFFICIAL`.
+     - Certification indépendante étape par étape (`checkVerifiedBudgetEvidence`, `checkVerifiedProcurementEvidence`, `checkVerifiedExecutionEvidence`) : aucune étape n'hérite automatiquement du statut officiel d'une autre étape ; suppression de `Boolean(account)` dans `hasVerifiedBudgetEvidence`.
+  2. **Bloc 2 (`ae9efde`) — Rapports financiers et élimination des faux zéros (`src/components/BudgetReportsView.tsx`, `src/components/InstitutionDetailModal.tsx`, `src/pages/ProjectsPage.tsx`, `src/components/CommuneComparatorModal.tsx`)** :
+     - Suppression de toutes les coercitions `budget_amount_fcfa ?? 0` / `|| 0` et `total_budget_fcfa ?? 0`.
+     - Création de `computeBudgetReportStats` dans `BudgetReportsView.tsx` distinguant explicitement : (1) `totalProjects`, (2) `documentedProjectsCount`, (3) `unknownAmountProjectsCount`, (4) `zeroAmountProjectsCount`, (5) `documentedTotalAmount` (somme partielle des seuls montants finis), et (6) `consolidatedTotalAmount` (non-nul uniquement si `unknownAmountProjectsCount === 0` et `totalProjects > 0`).
+     - Qualification explicite des dénominateurs partiels (`% du total documenté`) et bannière d'avertissement dès qu'au moins un projet a un montant `null`.
+  3. **Bloc 3 (`1ceccdd`) — Suite de 10 tests adversariaux (`src/utils/__tests__/adversarialCertificationAndReporting.test.tsx`)** :
+     - Couverture unitaire et SSR (`renderToStaticMarkup`) des 10 cas adversariaux obligatoires : (1) `DECLARED_ADMIN` non certifié, (2) extraction automatisée sans pièce primaire non certifiée, (3) source secondaire AIP/média non certifiée et non primaire, (4) référence de page seule non certifiante, (5) rapprochement automatique non certifiant sans pièce primaire, (6) non-héritage du statut `VERIFIED_OFFICIAL` entre étapes du Passeport, (7) projet à montant `null` dans `BudgetReportsView` non compté comme `0`, (8) ensemble mixte (`100M`, `250M`, `null`, `0`) distinguant total documenté (`350M`), `3` projets documentés, `1` montant inconnu, `1` montant égal à zéro et total consolidé `null`, (9) observation citoyenne maintenue en `CITIZEN_OBSERVATION`, (10) réponse institutionnelle maintenue en `INSTITUTION_RESPONSE`.
+- **Validation technique & financière** :
+  - `npx vitest run` : **70/70 fichiers PASS, 963/963 tests PASS** (`code 0`).
+  - `npx tsc --noEmit` : **0 erreur** (`code 0`).
+  - `npm run build` : **PASS** (`1770 modules transformed`).
+  - `npm run build:review` : **PASS** (`39 modules transformed`).
+  - `npm run verify:supabase:read-only` : **PASS** (`remoteSupabaseWrites: 0`).
+  - Audit multi-viewports Playwright (`1440×900` desktop et `375×812` mobile, `overflowX: false` sur les 10 parcours publics).
+- **Verdict Final** : **`READY FOR INDEPENDENT AUDIT`**
+- **NEXT_EXECUTABLE_TASK** : Contre-vérification indépendante finale de la PR #68 avant autorisation de fusion sur `master`.
+
+---
+
 ## 14 novembre 2026 — Clôture Technique & Financière PR #68 : Réconciliation des Indicateurs Publics, Harmonisation des Sources du Référentiel Local et Vérification Dual-Référentiel
 
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/68 (`fix/reconcile-public-indicators` ciblant `master` `c9bd106bf37e8e24e9e2d334cb43de51e2c94224`).

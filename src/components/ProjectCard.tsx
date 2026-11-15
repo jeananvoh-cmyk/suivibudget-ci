@@ -4,6 +4,7 @@ import { formatFCFA, formatAmountInWords, getProjectEntityInfo, getProjectTier, 
 import { getCategoryBadgeClass } from '../data/categories';
 import { MapPin, ArrowRight, Camera, Share2, Landmark, CheckCircle2 } from 'lucide-react';
 import { dataStore } from '../services/dataStore';
+import { classifyProjectProvenance } from '../utils/projectPassport';
 
 interface ProjectCardProps {
   project: BudgetProject;
@@ -21,6 +22,18 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   const entityInfo = getProjectEntityInfo(project.commune_name, project.region_name, project.ministry_name);
   const tier = getProjectTier(project);
   const tierBadge = getProjectTierBadge(tier);
+  const provenanceClass = classifyProjectProvenance(project);
+  const budgetLabel =
+    provenanceClass === 'OFFICIAL_PRIMARY_SOURCE'
+      ? 'Budget Alloué'
+      : provenanceClass === 'OFFICIAL_SECONDARY_SOURCE'
+        ? 'Montant rapporté (presse)'
+        : provenanceClass === 'AUTOMATED_EXTRACTION'
+          ? 'Montant extrait (catalogue)'
+          : provenanceClass === 'DECLARED_ADMIN'
+            ? 'Montant prévu déclaré'
+            : 'Montant répertorié';
+  const hasFiniteBudget = typeof project.budget_amount_fcfa === 'number' && Number.isFinite(project.budget_amount_fcfa);
   const approvedContributionsCount = dataStore
     .getProofsForProject(project.id)
     .filter(p => p.verification_status === 'APPROVED').length;
@@ -135,14 +148,16 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       {/* Middle: Budget & Status */}
       <div className="px-5 py-3.5 bg-slate-50/70 border-t border-slate-100 space-y-2.5">
         <div className="flex items-baseline justify-between gap-2">
-          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{project.data_provenance === 'DECLARED_ADMIN' ? 'Montant prévu déclaré' : 'Budget Alloué'}</span>
+          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{budgetLabel}</span>
           <div className="text-right">
             <div className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
               {formatFCFA(project.budget_amount_fcfa)}
             </div>
-            <div className="text-[11px] font-bold text-brand-blue">
-              ({formatAmountInWords(project.budget_amount_fcfa)} FCFA)
-            </div>
+            {hasFiniteBudget && (
+              <div className="text-[11px] font-bold text-brand-blue">
+                ({formatAmountInWords(project.budget_amount_fcfa)} FCFA)
+              </div>
+            )}
             <div className="text-[9px] text-slate-400 font-medium">
               Budget voté ≠ réalisation physique (P7)
             </div>
@@ -219,7 +234,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           <button
             onClick={() => onShare(project)}
             className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 transition-all active:scale-95 flex-shrink-0"
-            title="Partager ce chantier sur WhatsApp"
+            title="Partager cette opération sur WhatsApp"
           >
             <Share2 className="w-4 h-4" />
           </button>
