@@ -10,6 +10,7 @@ import { isSafeUrl } from '../../utils/security';
 import type { Institution, PublicDocument } from '../../types';
 import type {
   DocumentIngestionMetadata,
+  DocumentEvidenceLevel,
   ProposedFinancialValue,
   BudgetDocumentCategory,
   DocumentDryRunResult
@@ -94,7 +95,7 @@ export function DataImportConsole({ role, initialDocument }: DataImportConsolePr
   const [sourceDateKind, setSourceDateKind] = useState<'PUBLISHED' | 'ACCESSED' | 'RECORDED'>('RECORDED');
   const [sourceUrl, setSourceUrl] = useState<string>(initialDocument?.file_url || '');
   const [sourcePage, setSourcePage] = useState<number | undefined>(initialDocument?.page_count ? 1 : undefined);
-  const [evidenceLevel, setEvidenceLevel] = useState<'OFFICIAL_DOCUMENT' | 'OFFICIAL_INSTITUTION' | 'AIP_REPORTED' | 'AIP_VERIFIED' | 'SECONDARY_TO_CORROBORATE'>('OFFICIAL_DOCUMENT');
+  const [evidenceLevel, setEvidenceLevel] = useState<DocumentEvidenceLevel>('DOCUMENT_TO_EXTRACT');
   const [amountSemantics, setAmountSemantics] = useState<'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN'>('DELTA');
   const [notes, setNotes] = useState<string>('');
 
@@ -540,6 +541,7 @@ export function DataImportConsole({ role, initialDocument }: DataImportConsolePr
                   setDryRunResult(null);
                 }}
               >
+                <option value="DOCUMENT_TO_EXTRACT">Non qualifié — document à extraire / vérifier</option>
                 <option value="OFFICIAL_DOCUMENT">Document officiel primaire</option>
                 <option value="OFFICIAL_INSTITUTION">Institution publique officielle</option>
                 <option value="AIP_REPORTED">Dépêche AIP rapportée (source secondaire)</option>
