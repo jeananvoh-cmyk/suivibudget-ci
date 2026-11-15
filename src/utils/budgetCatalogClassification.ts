@@ -63,6 +63,10 @@ export interface CatalogPoolBreakdown {
 
 export interface CatalogReconciliationSummary {
   totalRawLines: number;
+  knownAmountLinesCount: number;
+  unknownAmountLinesCount: number;
+  isPartialRawAmount: boolean;
+  consolidatedRawAmountFcfa: number | null;
   totalRawAmountFcfa: number;
   physicalProjectsCount: number;
   physicalProjectsAmountFcfa: number;
@@ -409,11 +413,14 @@ export function classifyAndDeduplicateCatalog(
 
   for (const project of projects) {
     const base = classifyBudgetCatalogLine(project);
-    const dedupKey = `${base.provenancePool}|${project.fiscal_year ?? ''}|${normalizeForClassification(
-      project.commune_name || project.institution_name
-    )}|${normalizeForClassification(project.title)}|${project.budget_amount_fcfa ?? 'NULL'}`;
+    const hasKnownAmount = typeof project.budget_amount_fcfa === 'number' && Number.isFinite(project.budget_amount_fcfa);
+    const dedupKey = hasKnownAmount
+      ? `${base.provenancePool}|${project.fiscal_year ?? ''}|${normalizeForClassification(
+          project.commune_name || project.institution_name
+        )}|${normalizeForClassification(project.title)}|${project.budget_amount_fcfa}`
+      : null;
 
-    const existingId = seenExactKeys.get(dedupKey);
+    const existingId = dedupKey ? seenExactKeys.get(dedupKey) : undefined;
     if (existingId && existingId !== project.id) {
       results.push({
         project,
@@ -424,7 +431,7 @@ export function classifyAndDeduplicateCatalog(
         },
       });
     } else {
-      seenExactKeys.set(dedupKey, project.id);
+      if (dedupKey) seenExactKeys.set(dedupKey, project.id);
       results.push({ project, classification: base });
     }
   }
@@ -484,6 +491,8 @@ export function reconcileBudgetCatalog(
   };
 
   let totalRawAmountFcfa = 0;
+  let knownAmountLinesCount = 0;
+  let unknownAmountLinesCount = 0;
   let physicalProjectsCount = 0;
   let physicalProjectsAmountFcfa = 0;
   let equipmentAcquisitionsCount = 0;
@@ -498,9 +507,10 @@ export function reconcileBudgetCatalog(
   let crossCatalogOverlapAmountFcfa = 0;
 
   for (const { project, classification } of classified) {
-    const amount = typeof project.budget_amount_fcfa === 'number' && Number.isFinite(project.budget_amount_fcfa)
-      ? project.budget_amount_fcfa
-      : 0;
+    const hasKnownAmount = typeof project.budget_amount_fcfa === 'number' && Number.isFinite(project.budget_amount_fcfa);
+    const amount = hasKnownAmount ? project.budget_amount_fcfa as number : 0;
+    if (hasKnownAmount) knownAmountLinesCount += 1;
+    else unknownAmountLinesCount += 1;
     const pool = byProvenancePool[classification.provenancePool];
 
     totalRawAmountFcfa += amount;
@@ -549,6 +559,10 @@ export function reconcileBudgetCatalog(
 
   return {
     totalRawLines: projects.length,
+    knownAmountLinesCount,
+    unknownAmountLinesCount,
+    isPartialRawAmount: unknownAmountLinesCount > 0,
+    consolidatedRawAmountFcfa: unknownAmountLinesCount > 0 ? null : totalRawAmountFcfa,
     totalRawAmountFcfa,
     physicalProjectsCount,
     physicalProjectsAmountFcfa,
