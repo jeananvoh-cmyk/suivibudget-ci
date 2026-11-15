@@ -1296,3 +1296,12 @@ NEXT_EXECUTABLE_TASK : validation finale humaine de la PR corrective dépendante
 - Les migrations `20261115180000` et `20261115181000` ne sont pas appliquées en Production. Elles doivent passer la CI et une revue indépendante.
 - Supabase Production reste en lecture seule. Aucun merge, aucun déploiement, aucune modification de configuration Auth.
 - **GO : NO-GO maintenu** tant que CI, replay PGlite complet, revue indépendante, preuve binaire indépendante du PDF Cocody, justification de l'opération dépassant le montant prévu et arbitrage du risque HIBP serveur ne sont pas clos.
+
+
+## PRE_GO_CI_RESULT_20261115
+
+- CI #514 : **SUCCESS** sur `0bea7d68b5d43b07a143cf74147083493728b980` — 75/75 fichiers, 989/989 tests, build production PASS, build Review PASS.
+- Le test PGlite des huit wrappers RPC et de la révocation des politiques publiques legacy `projects`/`sources` passe ; les tests RLS initplan et index FK passent ; le test HIBP k-anonymity passe.
+- Le dernier commit documentaire de cette branche suit ce SHA. Une nouvelle exécution CI doit donc être attendue sur le HEAD actualisé avant de déclarer la branche entièrement validée.
+- Les alertes Supabase en Production ne sont pas réputées résolues : aucune migration hébergée n'a été appliquée.
+- **NO-GO maintenu** : pas de fusion, pas de migration Production, pas de déploiement Production.
