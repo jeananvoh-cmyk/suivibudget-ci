@@ -93,6 +93,27 @@ export function isSecondarySourceReference(source?: string | null, sourceUrl?: s
   return SECONDARY_SOURCE_PATTERNS.some(pattern => pattern.test(combined));
 }
 
+/**
+ * Allowlist fermée des domaines institutionnels primaires ivoiriens utilisés
+ * par les parcours financiers. Un simple HTTPS ou un libellé "officiel" ne
+ * transforme pas un domaine tiers en source primaire.
+ */
+export function isOfficialPrimarySourceUrl(value?: string | null): boolean {
+  if (!value) return false;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || url.username || url.password) return false;
+    const host = url.hostname.toLowerCase().replace(/^www\./, '');
+    return host === 'dgbf.ci'
+      || host.endsWith('.dgbf.ci')
+      || host === 'marchespublics.ci'
+      || host.endsWith('.marchespublics.ci')
+      || host.endsWith('.gouv.ci');
+  } catch {
+    return false;
+  }
+}
+
 export function isGenericSourcePlaceholder(source?: string | null): boolean {
   if (!source || !source.trim()) return true;
   const normalized = source.trim().toLowerCase().replace(/\s+/g, ' ');
@@ -463,7 +484,11 @@ export function checkVerifiedProcurementEvidence(
   if (!isExactAmount(matchedProc, 'award_amount')) return false;
   if (!matchedProc.source?.trim() || isGenericSourcePlaceholder(matchedProc.source)) return false;
   if (isSecondarySourceReference(matchedProc.source, matchedProc.source_url)) return false;
-  if (!matchedProc.source_url || !/^https?:\/\/[^\s]+$/i.test(matchedProc.source_url.trim())) return false;
+  // La certification DGMP exige une pièce primaire traçable : identifiant documentaire,
+  // page exacte et URL HTTPS hébergée sur un domaine institutionnel autorisé.
+  if (!matchedProc.source_document_id?.trim()) return false;
+  if (typeof matchedProc.source_page !== 'number' || !Number.isInteger(matchedProc.source_page) || matchedProc.source_page <= 0) return false;
+  if (!isOfficialPrimarySourceUrl(matchedProc.source_url)) return false;
   const verif = matchedProc.verification_status?.trim();
   if (verif !== 'Vérifié DGMP' && verif !== 'VERIFIED' && verif !== 'OFFICIAL_DOCUMENT') return false;
   return true;
