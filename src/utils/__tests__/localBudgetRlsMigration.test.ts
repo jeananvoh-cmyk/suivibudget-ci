@@ -69,6 +69,16 @@ describe('RLS hardening — local budget administration', () => {
          ) ORDER BY tgname`
       );
       expect(triggers.rows).toHaveLength(4);
+      await expect(db.query(
+        `INSERT INTO public.budget_projects
+          (commune_name,region_name,category,title,budget_amount_fcfa,data_provenance,financial_verification_status)
+         VALUES ('Commune test','Région test','Éducation','Projet non documenté',100,'OFFICIAL_SOURCE','TO_VERIFY')`
+      )).rejects.toThrow('Primary certification requires');
+      await expect(db.query(
+        `INSERT INTO public.budget_projects
+          (commune_name,region_name,category,title,budget_amount_fcfa,data_provenance,financial_verification_status)
+         VALUES ('Commune test','Région test','Éducation','Projet certifié sans pièce',100,'DECLARED_ADMIN','VERIFIED')`
+      )).rejects.toThrow('Primary certification requires');
     } finally {
       await db.close();
     }

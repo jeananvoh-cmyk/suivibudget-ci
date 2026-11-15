@@ -137,11 +137,13 @@ UPDATE public.ca_procurement_matches
 UPDATE public.budget_projects
   SET data_provenance = 'DECLARED_ADMIN',
       financial_verification_status = 'TO_VERIFY'
-  WHERE data_provenance = 'OFFICIAL_SOURCE'
+  WHERE (
+      data_provenance = 'OFFICIAL_SOURCE'
+      OR financial_verification_status IN ('VERIFIED','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE')
+    )
     AND (
       source_document_id IS NULL OR source_page IS NULL OR source_url IS NULL
       OR source_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
-      OR financial_verification_status <> 'VERIFIED'
       OR NOT EXISTS (
         SELECT 1 FROM public.public_documents d
         WHERE d.id = budget_projects.source_document_id
@@ -309,11 +311,16 @@ BEGIN
   source_page_value := NULLIF(row_data ->> 'source_page', '')::integer;
 
   IF TG_TABLE_NAME = 'budget_projects' THEN
-    evidence_status := row_data ->> 'financial_verification_status';
+    IF row_data ->> 'data_provenance' = 'OFFICIAL_SOURCE'
+      OR row_data ->> 'financial_verification_status' IN ('OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED') THEN
+      evidence_status := 'PRIMARY';
+    ELSE
+      evidence_status := NULL;
+    END IF;
   ELSE
     evidence_status := row_data ->> 'verification_status';
   END IF;
-  IF evidence_status IN ('OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED','Vérifié DGMP') THEN
+  IF evidence_status IN ('PRIMARY','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED','Vérifié DGMP') THEN
     IF source_id IS NULL OR source_url_value IS NULL
       OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
       RAISE EXCEPTION 'Primary certification requires a catalogue document ID and institutional HTTPS URL';
