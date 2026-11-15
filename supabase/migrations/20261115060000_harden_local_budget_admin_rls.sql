@@ -48,6 +48,14 @@ UPDATE public.local_budgets
     AND (
       source_document_id IS NULL OR source_page IS NULL OR document_url IS NULL
       OR document_url !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)'
+      OR NOT EXISTS (
+        SELECT 1 FROM public.public_documents d
+        WHERE d.id = local_budgets.source_document_id
+          AND d.status = 'PUBLISHED'
+          AND d.verification_status = 'VERIFIED'
+          AND d.checksum_status = 'VERIFIED'
+          AND d.checksum_sha256 IS NOT NULL
+      )
     );
 UPDATE public.budget_revenue_sources
   SET verification_status = 'SECONDARY_TO_CORROBORATE'
