@@ -13,6 +13,13 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toContain("private.has_staff_role(array['ADMIN','DATA_MANAGER'])");
     expect(migration).toContain("ALTER COLUMN verification_status SET DEFAULT 'DOCUMENT_TO_EXTRACT'");
     expect(migration).not.toContain("SET DEFAULT 'AIP_VERIFIED'");
+    expect(migration).toContain("ALTER COLUMN verification_status SET DEFAULT 'TO_VERIFY'");
+    expect(migration).toContain("ALTER COLUMN data_provenance SET DEFAULT 'DECLARED_ADMIN'");
+    expect(migration).toContain('CREATE OR REPLACE FUNCTION private.enforce_primary_document_evidence()');
+    expect(migration).toContain('CREATE TRIGGER enforce_local_budget_primary_evidence');
+    expect(migration).toContain('CREATE TRIGGER enforce_administrative_account_primary_evidence');
+    expect(migration).toContain('CREATE TRIGGER enforce_procurement_primary_evidence');
+    expect(migration).toContain('CREATE TRIGGER enforce_budget_project_primary_evidence');
     expect(migration).toContain('ALTER TABLE public.ca_procurement_matches');
     expect(migration).toContain('DROP POLICY IF EXISTS "Allow staff full access on public documents"');
     expect(migration).toContain('DROP POLICY IF EXISTS "Public documents files are publicly readable"');
@@ -51,6 +58,8 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toMatch(/UPDATE public\.local_budgets\s+SET verification_status = 'SECONDARY_TO_CORROBORATE'/);
     expect(migration).toMatch(/UPDATE public\.budget_revenue_sources\s+SET verification_status = 'SECONDARY_TO_CORROBORATE'/);
     expect(migration).toMatch(/UPDATE public\.ca_procurement_matches\s+SET verification_status = 'TO_VERIFY'/);
+    expect(migration).toMatch(/UPDATE public\.administrative_accounts\s+SET verification_status = 'TO_VERIFY'/);
+    expect(migration).toMatch(/UPDATE public.budget_projects\s+SET data_provenance = 'DECLARED_ADMIN'/);
     expect(migration).not.toMatch(/UPDATE public\.local_budgets\s+SET[^;]*(total_amount|operating_amount|investment_amount)/i);
     expect(migration).not.toMatch(/UPDATE public\.budget_revenue_sources\s+SET[^;]*(amount|amount_fcfa)/i);
   });
