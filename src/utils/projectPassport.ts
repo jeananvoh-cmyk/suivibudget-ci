@@ -315,11 +315,9 @@ export function hasIdentifiableOfficialDocument(project: BudgetProject): boolean
     Number.isFinite(project.fiscal_year) &&
     project.fiscal_year >= 2000;
   const hasNamedSourceDocument =
-    !isGenericSourcePlaceholder(project.source) ||
+    !isGenericSourcePlaceholder(project.source) &&
     Boolean(project.source_document_id?.trim());
-  const hasVerifiableReferenceOrUrl =
-    Boolean(project.source_document_id?.trim()) ||
-    Boolean(project.source_url && /^https?:\/\/[^\s]+$/i.test(project.source_url.trim()));
+  const hasVerifiableReferenceOrUrl = isOfficialPrimarySourceUrl(project.source_url);
 
   return hasIssuingBody && hasValidFiscalYear && hasNamedSourceDocument && hasVerifiableReferenceOrUrl;
 }
@@ -418,10 +416,8 @@ export function checkVerifiedNeedEvidence(project: BudgetProject): boolean {
   if (isSecondarySourceReference(needOrigin, project.citizen_need_source_url || project.source_url)) return false;
   if (/déclar|declar|saisi par|administrateur/i.test(needOrigin)) return false;
   if (project.citizen_need_verification_status !== 'VERIFIED') return false;
-  const hasNeedDocOrUrl =
-    Boolean(project.citizen_need_source_document_id?.trim()) ||
-    Boolean(project.citizen_need_source_url && /^https?:\/\/[^\s]+$/i.test(project.citizen_need_source_url.trim()));
-  if (!hasNeedDocOrUrl) return false;
+  if (!project.citizen_need_source_document_id?.trim()) return false;
+  if (!isOfficialPrimarySourceUrl(project.citizen_need_source_url)) return false;
   if (
     typeof project.citizen_need_source_page !== 'number' ||
     !Number.isInteger(project.citizen_need_source_page) ||
@@ -520,10 +516,11 @@ export function checkVerifiedExecutionEvidence(
   }
   if (account.status !== 'VERIFIED' && account.status !== 'PUBLISHED') return false;
   if (account.verification_status !== 'OFFICIAL_DOCUMENT' && account.verification_status !== 'OFFICIAL_INSTITUTION') return false;
-  const hasAccountDoc =
-    (!isGenericSourcePlaceholder(account.source_document) && !isSecondarySourceReference(account.source_document, account.source_url)) ||
-    Boolean(account.source_document_id?.trim());
-  if (!hasAccountDoc) return false;
+  // Un statut VERIFIED et un titre de document saisi ne suffisent pas :
+  // l'identité documentaire et l'URL institutionnelle primaire doivent être présentes.
+  if (isGenericSourcePlaceholder(account.source_document)) return false;
+  if (!account.source_document_id?.trim()) return false;
+  if (!isOfficialPrimarySourceUrl(account.source_url)) return false;
   const page = matchedOp.source_page ?? account.source_page;
   if (typeof page !== 'number' || !Number.isInteger(page) || page <= 0) return false;
   if (!isExactAmount(matchedOp, 'executed_amount')) return false;
@@ -556,10 +553,8 @@ export function checkVerifiedAuditEvidence(project: BudgetProject): boolean {
   const auditRef = project.audit_report_reference?.trim();
   if (!auditRef || isGenericSourcePlaceholder(auditRef)) return false;
   if (isSecondarySourceReference(auditRef, project.audit_source_url)) return false;
-  const hasAuditDocOrUrl =
-    Boolean(project.audit_source_document_id?.trim()) ||
-    Boolean(project.audit_source_url && /^https?:\/\/[^\s]+$/i.test(project.audit_source_url.trim()));
-  if (!hasAuditDocOrUrl) return false;
+  if (!project.audit_source_document_id?.trim()) return false;
+  if (!isOfficialPrimarySourceUrl(project.audit_source_url)) return false;
   if (
     typeof project.audit_source_page !== 'number' ||
     !Number.isInteger(project.audit_source_page) ||
