@@ -132,6 +132,10 @@ describe('RLS hardening — local budget administration', () => {
 
       // A certified CA must not retain its certification if its exact source page is removed.
       await db.exec(`
+        INSERT INTO public.profiles(id,full_name,role,is_active)
+        VALUES ('00000000-0000-0000-0000-000000000001','Admin isolé','ADMIN',true);
+        SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',false);
+        SELECT set_config('app.admin_reason','Validation de test du document primaire',false);
         INSERT INTO public.public_documents
           (id,title,category,institution_name,file_url,file_name,status,verification_status,checksum_status,
            checksum_sha256,source_url,source_name,institution_id,fiscal_year,document_type)
@@ -139,8 +143,6 @@ describe('RLS hardening — local budget administration', () => {
           ('migration-primary-ca-doc','CA primaire de test','CA','Commune de test',
            'https://dgbf.ci/ca-2023.pdf','ca-2023.pdf','TO_VERIFY','TO_VERIFY','COMPUTED',repeat('a',64),
            'https://dgbf.ci/ca-2023.pdf','DGBF — CA primaire','migration-inst',2023,'COMPTE_ADMINISTRATIF');
-        SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',false);
-        SELECT set_config('app.admin_reason','Validation de test du document primaire',false);
         UPDATE public.public_documents SET status='VERIFIED' WHERE id='migration-primary-ca-doc';
         UPDATE public.public_documents SET status='PUBLISHED' WHERE id='migration-primary-ca-doc';
         INSERT INTO public.administrative_accounts
