@@ -19,9 +19,17 @@ describe('pre-GO privileged RPC exposure hardening', () => {
       CREATE ROLE service_role;
       CREATE SCHEMA private;
       CREATE TABLE public.site_settings(id text primary key, contact_email text, settings_metadata jsonb);
+      CREATE TABLE public.projects(id text primary key);
+      CREATE TABLE public.sources(id text primary key);
       ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
+      ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
+      ALTER TABLE public.sources ENABLE ROW LEVEL SECURITY;
       CREATE POLICY admin_entity_public ON public.site_settings FOR SELECT TO anon, authenticated USING (true);
       CREATE POLICY admin_entity_staff ON public.site_settings FOR ALL TO authenticated USING (true) WITH CHECK (true);
+      CREATE POLICY \"Allow public read access on projects\" ON public.projects FOR SELECT TO public USING (true);
+      CREATE POLICY \"Allow admin write access on projects\" ON public.projects FOR ALL TO authenticated USING (true) WITH CHECK (true);
+      CREATE POLICY \"Allow public read on sources\" ON public.sources FOR SELECT TO public USING (true);
+      CREATE POLICY \"Allow admin write on sources\" ON public.sources FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
       CREATE FUNCTION public.admin_baseline_visibility(text,text[]) RETURNS jsonb LANGUAGE sql SECURITY DEFINER AS $$ SELECT '[]'::jsonb $$;
       CREATE FUNCTION public.admin_staff_directory() RETURNS TABLE(id uuid,full_name text,role text) LANGUAGE sql SECURITY DEFINER AS $$ SELECT '00000000-0000-0000-0000-000000000001'::uuid,'Staff'::text,'ADMIN'::text $$;
@@ -70,5 +78,9 @@ describe('pre-GO privileged RPC exposure hardening', () => {
       "SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='site_settings'"
     );
     expect(policies.rows.map(row => row.policyname)).toEqual(['admin_entity_staff']);
+    const legacyPublicPolicies = await db.query<{ tablename: string; policyname: string }>(
+      \"SELECT tablename,policyname FROM pg_policies WHERE schemaname='public' AND tablename IN ('projects','sources') AND cmd='SELECT' AND 'public'=ANY(roles)\"
+    );
+    expect(legacyPublicPolicies.rows).toEqual([]);
   });
 });
