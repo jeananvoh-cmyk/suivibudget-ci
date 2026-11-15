@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from './supabase';
+import { assertPasswordNotPwned } from './pwnedPassword';
 
 export interface ModeratorUser {
   id: string;
@@ -133,6 +134,11 @@ export class AuthSecurityService {
     const strength = this.evaluatePasswordStrength(newPassword);
     if (!strength.isValid) {
       return { success: false, error: 'Utilisez au moins 8 caractères avec majuscule, minuscule et chiffre ou caractère spécial.' };
+    }
+    try {
+      await assertPasswordNotPwned(newPassword);
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Mot de passe refusé par le contrôle de sécurité.' };
     }
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     return error ? { success: false, error: error.message } : { success: true };
