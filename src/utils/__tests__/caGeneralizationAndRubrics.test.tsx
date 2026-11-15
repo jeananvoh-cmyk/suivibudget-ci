@@ -200,7 +200,7 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
         source_date_kind: 'RECORDED' as const,
         source_url: 'storage://public_documents/ca/2024/commune-de-cocody/COMMUNE_DE_COCODY.pdf',
         source_page: 40,
-        evidence_level: 'OFFICIAL_DOCUMENT' as const,
+        evidence_level: 'DOCUMENT_TO_EXTRACT' as const,
         amount_semantics: 'REVISED_TOTAL' as const,
         notes: 'Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45). Report exercice précédent : +944 FCFA ; Résultat cumulé : +2 237 134 734 FCFA.'
       };
@@ -835,7 +835,7 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
         source_date: '2025-05-15',
         source_date_kind: 'RECORDED' as const,
         source_page: 12,
-        evidence_level: 'OFFICIAL_DOCUMENT' as const,
+        evidence_level: 'DOCUMENT_TO_EXTRACT' as const,
         amount_semantics: 'REVISED_TOTAL' as const
       };
 
