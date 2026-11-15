@@ -38,6 +38,8 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toContain('IF source_page_value IS NULL OR source_page_value <= 0 THEN');
     expect(migration).toContain('CREATE TRIGGER enforce_procurement_primary_evidence');
     expect(migration).toContain('CREATE TRIGGER enforce_budget_project_primary_evidence');
+    expect(migration).toContain('CREATE OR REPLACE FUNCTION private.prevent_revoking_referenced_primary_document()');
+    expect(migration).toContain('CREATE TRIGGER prevent_revoking_referenced_primary_document');
     expect(migration).toContain('CREATE OR REPLACE FUNCTION private.enforce_budget_line_primary_document_evidence()');
     expect(migration).toContain('CREATE TRIGGER enforce_budget_line_primary_document_evidence');
     expect(migration).toContain('CREATE OR REPLACE FUNCTION private.enforce_budget_revenue_source_evidence()');
@@ -116,10 +118,11 @@ describe('RLS hardening — local budget administration', () => {
            'enforce_procurement_primary_evidence',
            'enforce_budget_project_primary_evidence',
            'enforce_budget_line_primary_document_evidence',
-           'enforce_budget_revenue_source_evidence'
+           'enforce_budget_revenue_source_evidence',
+           'prevent_revoking_referenced_primary_document'
          ) ORDER BY tgname`
       );
-      expect(triggers.rows).toHaveLength(6);
+      expect(triggers.rows).toHaveLength(7);
 
       // A certified CA must not retain its certification if its exact source page is removed.
       await db.exec(`
@@ -147,6 +150,11 @@ describe('RLS hardening — local budget administration', () => {
          SET source_page = NULL
          WHERE id = 'migration-ca-certified'`
       )).rejects.toThrow('Primary certification requires the exact source page');
+      await expect(db.query(
+        `UPDATE public.public_documents
+         SET status = 'TO_VERIFY'
+         WHERE id = 'migration-primary-ca-doc'`
+      )).rejects.toThrow('Cannot revoke a primary document while certified financial records depend on it');
       await expect(db.query(
         `INSERT INTO public.budget_projects
           (commune_name,region_name,category,title,budget_amount_fcfa,data_provenance,financial_verification_status)
