@@ -43,8 +43,10 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toContain('CREATE TRIGGER enforce_procurement_primary_evidence');
     expect(migration).toContain('CREATE TRIGGER enforce_budget_project_primary_evidence');
     expect(hardeningMigration).toContain('BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url');
+    expect(hardeningMigration).toContain('GRANT SELECT ON TABLE public.budget_sources, public.budget_revenue_sources TO anon, authenticated;');
+    expect(hardeningMigration).toContain('GRANT INSERT, UPDATE ON TABLE public.budget_sources, public.budget_revenue_sources TO authenticated;');
     expect(hardeningMigration).toContain('CREATE OR REPLACE FUNCTION private.prevent_revoking_referenced_primary_document()');
-    expect(hardeningMigration).toContain('CREATE TRIGGER prevent_revoking_referenced_primary_document');
+    expect(hardeningMigration).toContain('CREATE TRIGGER prevent_revoking_referenced_primary_document\n  BEFORE UPDATE ON public.public_documents');
     expect(hardeningMigration).toContain('CREATE OR REPLACE FUNCTION private.enforce_budget_line_primary_document_evidence()');
     expect(hardeningMigration).toContain('CREATE TRIGGER enforce_budget_line_primary_document_evidence');
     expect(hardeningMigration).toContain('CREATE OR REPLACE FUNCTION private.enforce_budget_revenue_source_evidence()');
@@ -53,6 +55,8 @@ describe('RLS hardening — local budget administration', () => {
     expect(hardeningMigration).toContain('DROP POLICY IF EXISTS "Allow public read on budget sources"');
     expect(hardeningMigration).toContain('DROP POLICY IF EXISTS "Allow public read on budget revenue sources"');
     expect(hardeningMigration).toContain("lb.status = 'PUBLISHED'");
+    expect(migration).toContain('ALTER TABLE public.budget_projects DISABLE TRIGGER USER;');
+    expect(migration).toContain('ALTER TABLE public.budget_projects ENABLE TRIGGER USER;');
     expect(migration).toContain('ALTER TABLE public.ca_procurement_matches');
 
     expect(migration).toContain('d.checksum_status IN (\'COMPUTED\', \'VERIFIED\')');
@@ -63,7 +67,22 @@ describe('RLS hardening — local budget administration', () => {
     const db = await createProductionSchemaFixture();
     try {
       await db.exec(`
+        CREATE OR REPLACE FUNCTION private.simulate_immutable_project_provenance()
+        RETURNS trigger LANGUAGE plpgsql AS $$
+        BEGIN
+          IF TG_OP = 'UPDATE' AND NEW.data_provenance IS DISTINCT FROM OLD.data_provenance THEN
+            RAISE EXCEPTION 'Immutable project provenance';
+          END IF;
+          RETURN NEW;
+        END;
+        $$;
+        CREATE TRIGGER admin_validate_project_provenance
+          BEFORE UPDATE ON public.budget_projects
+          FOR EACH ROW EXECUTE FUNCTION private.simulate_immutable_project_provenance();
         INSERT INTO public.institutions(id,name,type) VALUES ('migration-inst','Commune de test','MAIRIE');
+        INSERT INTO public.budget_projects
+          (id,institution_id,commune_name,region_name,category,title,budget_amount_fcfa,fiscal_year,data_provenance,financial_verification_status)
+        VALUES ('migration-project','migration-inst','Commune de test','Région test','Éducation','Projet préexistant sans pièce',150,2026,'OFFICIAL_SOURCE','VERIFIED');
         INSERT INTO public.local_budgets
           (id,institution_id,institution_type,institution_name,fiscal_year,budget_type,total_amount,verification_status)
         VALUES ('migration-budget','migration-inst','COMMUNE','Commune de test',2026,'PRIMITIF_ADOPTE',100,'AIP_VERIFIED');
@@ -87,15 +106,18 @@ describe('RLS hardening — local budget administration', () => {
          UNION ALL
          SELECT 'budget_revenue_sources',verification_status,amount::text FROM public.budget_revenue_sources WHERE id='migration-revenue'
          UNION ALL
-         SELECT 'administrative_accounts',verification_status,operating_planned::text FROM public.administrative_accounts WHERE id='migration-ca'
+         SELECT 'administrative_accounts',verification_status,operating_planned::text amount FROM public.administrative_accounts WHERE id='migration-ca'
          UNION ALL
-         SELECT 'ca_procurement_matches',verification_status,award_amount::text FROM public.ca_procurement_matches WHERE id='migration-market'`
+         SELECT 'ca_procurement_matches',verification_status,award_amount::text amount FROM public.ca_procurement_matches WHERE id='migration-market'
+         UNION ALL
+         SELECT 'budget_projects',data_provenance || ':' || financial_verification_status,budget_amount_fcfa::text amount FROM public.budget_projects WHERE id='migration-project'`
       );
       expect(demotions.rows).toEqual(expect.arrayContaining([
         { table_name: 'local_budgets', status: 'SECONDARY_TO_CORROBORATE', amount: '100' },
         { table_name: 'budget_revenue_sources', status: 'SECONDARY_TO_CORROBORATE', amount: '25' },
         { table_name: 'administrative_accounts', status: 'TO_VERIFY', amount: '20' },
-        { table_name: 'ca_procurement_matches', status: 'TO_VERIFY', amount: '40' }
+        { table_name: 'ca_procurement_matches', status: 'TO_VERIFY', amount: '40' },
+        { table_name: 'budget_projects', status: 'DECLARED_ADMIN:TO_VERIFY', amount: '150' }
       ]));
       const defaults = await db.query<{ table_name: string; column_name: string; column_default: string | null }>(
         `SELECT table_name,column_name,column_default
@@ -175,6 +197,122 @@ describe('RLS hardening — local budget administration', () => {
           (commune_name,region_name,category,title,budget_amount_fcfa,data_provenance,financial_verification_status)
          VALUES ('Commune test','Région test','Éducation','Projet certifié sans pièce',100,'DECLARED_ADMIN','VERIFIED')`
       )).rejects.toThrow('Primary certification requires');
+
+      // P1-3: Silent amount mutation on a certified record without resetting verification_status is blocked.
+      await expect(db.query(
+        `UPDATE public.administrative_accounts
+         SET operating_planned = 999999
+         WHERE id = 'migration-ca-certified'`
+      )).rejects.toThrow('Changing a certified financial amount requires resetting verification status for a new review');
+
+      // P1-3: Cross-institution or cross-fiscal-year document spoofing is rejected.
+      await expect(db.query(
+        `INSERT INTO public.administrative_accounts
+          (id,institution_id,institution_type,institution_name,fiscal_year,status,source_document,
+           source_document_id,source_url,source_page,verification_status,reconciliation_status)
+         VALUES
+          ('migration-ca-wrong-year','migration-inst','COMMUNE','Commune de test',2025,'VERIFIED',
+           'CA mauvaise année','migration-primary-ca-doc','https://dgbf.ci/ca-2023.pdf',5,
+           'OFFICIAL_DOCUMENT','TO_VERIFY')`
+      )).rejects.toThrow('Primary certification requires a published, verified catalogue document with SHA-256');
+
+      // P0-2: Even when an earlier BEFORE UPDATE trigger (like admin_document_integrity)
+      // downgrades NEW.status to TO_VERIFY on a page_count change, prevent_revoking_referenced_primary_document
+      // still fires and blocks revoking the referenced primary document.
+      await db.exec(`
+        CREATE OR REPLACE FUNCTION private.simulate_admin_doc_page_downgrade()
+        RETURNS trigger LANGUAGE plpgsql AS $$
+        BEGIN
+          IF NEW.page_count IS DISTINCT FROM OLD.page_count THEN
+            NEW.status := 'TO_VERIFY';
+            NEW.verification_status := 'TO_VERIFY';
+          END IF;
+          RETURN NEW;
+        END;
+        $$;
+        CREATE TRIGGER a_simulate_admin_doc_page_downgrade
+          BEFORE UPDATE ON public.public_documents
+          FOR EACH ROW EXECUTE FUNCTION private.simulate_admin_doc_page_downgrade();
+      `);
+      await expect(db.query(
+        `UPDATE public.public_documents
+         SET page_count = 42
+         WHERE id = 'migration-primary-ca-doc'`
+      )).rejects.toThrow('Cannot revoke a primary document while certified financial records depend on it');
+
+      // Also block archiving a PUBLISHED document while certified records depend on it.
+      await expect(db.query(
+        `UPDATE public.public_documents
+         SET status = 'ARCHIVED'
+         WHERE id = 'migration-primary-ca-doc'`
+      )).rejects.toThrow('Cannot revoke a primary document while certified financial records depend on it');
+
+      // P0-1: Under SET LOCAL ROLE authenticated (non-superuser staff session),
+      // updating public_documents must not fail with 42501 permission denied on budget_revenue_sources,
+      // and RLS/grants on budget_sources and budget_revenue_sources work for authenticated and anon roles.
+      await db.exec('BEGIN');
+      try {
+        await db.exec(`
+          SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
+          SET LOCAL ROLE authenticated;
+        `);
+        await expect(db.query(
+          `UPDATE public.public_documents
+           SET status = 'TO_VERIFY'
+           WHERE id = 'migration-primary-ca-doc'`
+        )).rejects.toThrow('Cannot revoke a primary document while certified financial records depend on it');
+      } finally {
+        await db.exec('ROLLBACK');
+      }
+
+      // Verify anon visibility of budget_revenue_sources depends on published parent local_budget.
+      await db.exec(`
+        UPDATE public.local_budgets SET status = 'DRAFT' WHERE id = 'migration-budget';
+      `);
+      await db.exec('BEGIN');
+      try {
+        await db.exec('SET LOCAL ROLE anon');
+        const draftRead = await db.query(
+          `SELECT id FROM public.budget_revenue_sources WHERE id = 'migration-revenue'`
+        );
+        expect(draftRead.rows).toHaveLength(0);
+      } finally {
+        await db.exec('ROLLBACK');
+      }
+      await db.exec(`
+        UPDATE public.local_budgets SET status = 'PUBLISHED' WHERE id = 'migration-budget';
+      `);
+      await db.exec('BEGIN');
+      try {
+        await db.exec('SET LOCAL ROLE anon');
+        const publishedRead = await db.query(
+          `SELECT id FROM public.budget_revenue_sources WHERE id = 'migration-revenue'`
+        );
+        expect(publishedRead.rows).toHaveLength(1);
+      } finally {
+        await db.exec('ROLLBACK');
+      }
+
+      // P1-1: Archived budget_lines / budget_projects (archived_at IS NOT NULL, publication_status = 'ARCHIVED')
+      // do not deadlock document revocation once active certifications are downgraded.
+      await db.exec(`
+        UPDATE public.administrative_accounts
+        SET status = 'DRAFT', verification_status = 'TO_VERIFY'
+        WHERE id = 'migration-ca-certified';
+        INSERT INTO public.budget_projects
+          (id,institution_id,commune_name,region_name,category,title,budget_amount_fcfa,fiscal_year,
+           publication_status,archived_at,data_provenance,financial_verification_status,
+           source_document_id,source_page,source_url)
+        VALUES
+          ('migration-archived-proj','migration-inst','Commune de test','Région test','Éducation',
+           'Projet archivé',100,2023,'ARCHIVED',now(),'DECLARED_ADMIN','VERIFIED',
+           'migration-primary-ca-doc',5,'https://dgbf.ci/ca-2023.pdf');
+      `);
+      await expect(db.query(
+        `UPDATE public.public_documents
+         SET status = 'TO_VERIFY'
+         WHERE id = 'migration-primary-ca-doc'`
+      )).resolves.toBeDefined();
     } finally {
       await db.close();
     }

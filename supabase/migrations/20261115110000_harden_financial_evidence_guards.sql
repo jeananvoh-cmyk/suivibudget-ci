@@ -2,11 +2,151 @@
 -- À exécuter après 20261115070000_enforce_primary_document_provenance.sql.
 BEGIN;
 
--- Recreate the CA trigger so a page-only change cannot bypass source validation.
+-- Grant explicit PostgREST table privileges on child budget reference tables
+-- that were omitted after 20260930030702_grant_schema_privileges.sql revoked
+-- default privileges, while keeping RLS authoritative and DELETE disabled.
+REVOKE ALL ON TABLE public.budget_sources, public.budget_revenue_sources FROM anon, authenticated;
+GRANT SELECT ON TABLE public.budget_sources, public.budget_revenue_sources TO anon, authenticated;
+GRANT INSERT, UPDATE ON TABLE public.budget_sources, public.budget_revenue_sources TO authenticated;
+
+-- Harden primary document evidence trigger function:
+-- 1. SECURITY DEFINER with empty search_path and revoked direct EXECUTE so row
+--    triggers evaluate catalogue evidence consistently under authenticated/anon roles.
+-- 2. Reject silent modifications of certified financial amounts without re-review.
+-- 3. Bind institution_id and fiscal_year to the catalogue document when present.
+CREATE OR REPLACE FUNCTION private.enforce_primary_document_evidence()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+DECLARE
+  row_data jsonb := to_jsonb(NEW);
+  old_data jsonb := CASE WHEN TG_OP = 'UPDATE' THEN to_jsonb(OLD) ELSE NULL END;
+  source_id text;
+  source_url_value text;
+  source_page_value integer;
+  evidence_status text;
+  old_evidence_status text;
+  inst_id text;
+  fy_value integer;
+BEGIN
+  source_id := row_data ->> 'source_document_id';
+  source_url_value := COALESCE(row_data ->> 'source_url', row_data ->> 'document_url');
+  source_page_value := NULLIF(row_data ->> 'source_page', '')::integer;
+  inst_id := NULLIF(row_data ->> 'institution_id', '');
+  fy_value := NULLIF(row_data ->> 'fiscal_year', '')::integer;
+
+  IF TG_TABLE_NAME = 'budget_projects' THEN
+    IF row_data ->> 'data_provenance' = 'OFFICIAL_SOURCE'
+      OR row_data ->> 'financial_verification_status' IN ('OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED') THEN
+      evidence_status := 'PRIMARY';
+    ELSE
+      evidence_status := NULL;
+    END IF;
+    IF TG_OP = 'UPDATE' AND (
+      old_data ->> 'data_provenance' = 'OFFICIAL_SOURCE'
+      OR old_data ->> 'financial_verification_status' IN ('OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED')
+    ) THEN
+      old_evidence_status := 'PRIMARY';
+    ELSE
+      old_evidence_status := NULL;
+    END IF;
+  ELSE
+    evidence_status := row_data ->> 'verification_status';
+    old_evidence_status := CASE WHEN TG_OP = 'UPDATE' THEN old_data ->> 'verification_status' ELSE NULL END;
+  END IF;
+
+  IF TG_OP = 'UPDATE'
+    AND old_evidence_status IN ('PRIMARY','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED','Vérifié DGMP')
+    AND evidence_status IN ('PRIMARY','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED','Vérifié DGMP') THEN
+    IF (TG_TABLE_NAME = 'local_budgets' AND (
+          row_data -> 'total_amount' IS DISTINCT FROM old_data -> 'total_amount'
+          OR row_data -> 'operating_amount' IS DISTINCT FROM old_data -> 'operating_amount'
+          OR row_data -> 'investment_amount' IS DISTINCT FROM old_data -> 'investment_amount'
+        ))
+      OR (TG_TABLE_NAME = 'administrative_accounts' AND (
+          row_data -> 'operating_planned' IS DISTINCT FROM old_data -> 'operating_planned'
+          OR row_data -> 'operating_realized' IS DISTINCT FROM old_data -> 'operating_realized'
+          OR row_data -> 'operating_revenue_realized' IS DISTINCT FROM old_data -> 'operating_revenue_realized'
+          OR row_data -> 'investment_planned' IS DISTINCT FROM old_data -> 'investment_planned'
+          OR row_data -> 'investment_realized' IS DISTINCT FROM old_data -> 'investment_realized'
+          OR row_data -> 'investment_revenue_realized' IS DISTINCT FROM old_data -> 'investment_revenue_realized'
+          OR row_data -> 'total_planned' IS DISTINCT FROM old_data -> 'total_planned'
+          OR row_data -> 'total_realized' IS DISTINCT FROM old_data -> 'total_realized'
+        ))
+      OR (TG_TABLE_NAME = 'ca_procurement_matches' AND (
+          row_data -> 'award_amount' IS DISTINCT FROM old_data -> 'award_amount'
+        ))
+      OR (TG_TABLE_NAME = 'budget_projects' AND (
+          row_data -> 'budget_amount_fcfa' IS DISTINCT FROM old_data -> 'budget_amount_fcfa'
+        )) THEN
+      RAISE EXCEPTION 'Changing a certified financial amount requires resetting verification status for a new review';
+    END IF;
+  END IF;
+
+  IF evidence_status IN ('PRIMARY','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED','Vérifié DGMP') THEN
+    IF source_id IS NULL OR source_url_value IS NULL
+      OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
+      RAISE EXCEPTION 'Primary certification requires a catalogue document ID and institutional HTTPS URL';
+    END IF;
+    IF source_page_value IS NULL OR source_page_value <= 0 THEN
+      RAISE EXCEPTION 'Primary certification requires the exact source page';
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM public.public_documents pd
+      WHERE pd.id = source_id
+        AND pd.status = 'PUBLISHED'
+        AND pd.verification_status = 'VERIFIED'
+        AND pd.checksum_status IN ('COMPUTED','VERIFIED')
+        AND pd.checksum_sha256 ~ '^[a-f0-9]{64}$'
+        AND pd.source_url = source_url_value
+        AND (
+          TG_TABLE_NAME NOT IN ('local_budgets','administrative_accounts','budget_projects')
+          OR (
+            (inst_id IS NULL OR pd.institution_id IS NULL OR pd.institution_id = inst_id)
+            AND (fy_value IS NULL OR pd.fiscal_year IS NULL OR pd.fiscal_year = fy_value)
+          )
+        )
+    ) THEN
+      RAISE EXCEPTION 'Primary certification requires a published, verified catalogue document with SHA-256';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION private.enforce_primary_document_evidence()
+  FROM public, anon, authenticated, service_role;
+
+-- Recreate evidence triggers so page-only or amount-only changes cannot bypass validation.
+DROP TRIGGER IF EXISTS enforce_local_budget_primary_evidence ON public.local_budgets;
+CREATE TRIGGER enforce_local_budget_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, document_url,
+    institution_id, fiscal_year, total_amount, operating_amount, investment_amount
+  ON public.local_budgets FOR EACH ROW
+  EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
 DROP TRIGGER IF EXISTS enforce_administrative_account_primary_evidence ON public.administrative_accounts;
 CREATE TRIGGER enforce_administrative_account_primary_evidence
-  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url,
+    status, institution_id, fiscal_year, operating_planned, operating_realized,
+    operating_revenue_realized, investment_planned, investment_realized,
+    investment_revenue_realized, total_planned, total_realized
   ON public.administrative_accounts FOR EACH ROW
+  EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_procurement_primary_evidence ON public.ca_procurement_matches;
+CREATE TRIGGER enforce_procurement_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url, award_amount
+  ON public.ca_procurement_matches FOR EACH ROW
+  EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_budget_project_primary_evidence ON public.budget_projects;
+CREATE TRIGGER enforce_budget_project_primary_evidence
+  BEFORE INSERT OR UPDATE OF financial_verification_status, data_provenance, source_document_id,
+    source_page, source_url, institution_id, fiscal_year, budget_amount_fcfa
+  ON public.budget_projects FOR EACH ROW
   EXECUTE FUNCTION private.enforce_primary_document_evidence();
 
 -- Revenue breakdown rows need explicit provenance fields before they can be
@@ -29,6 +169,7 @@ CREATE INDEX IF NOT EXISTS idx_budget_revenue_sources_source_document_id
 CREATE OR REPLACE FUNCTION private.enforce_budget_line_primary_document_evidence()
 RETURNS trigger
 LANGUAGE plpgsql
+SECURITY DEFINER
 SET search_path = ''
 AS $function$
 DECLARE
@@ -46,6 +187,7 @@ BEGIN
   IF NOT FOUND
     OR parent_budget.status <> 'PUBLISHED'
     OR parent_budget.source_document_id IS NULL
+    OR parent_budget.document_url IS NULL
     OR NEW.source_document_id IS DISTINCT FROM parent_budget.source_document_id
     OR NEW.source_page IS NULL
     OR NEW.source_page <= 0 THEN
@@ -87,6 +229,7 @@ CREATE TRIGGER enforce_budget_line_primary_document_evidence
 CREATE OR REPLACE FUNCTION private.enforce_budget_revenue_source_evidence()
 RETURNS trigger
 LANGUAGE plpgsql
+SECURITY DEFINER
 SET search_path = ''
 AS $function$
 DECLARE
@@ -119,6 +262,7 @@ BEGIN
   IF NOT FOUND
     OR parent_budget.status <> 'PUBLISHED'
     OR parent_budget.source_document_id IS NULL
+    OR parent_budget.document_url IS NULL
     OR NEW.source_document_id IS DISTINCT FROM parent_budget.source_document_id
     OR NEW.source_page IS NULL
     OR NEW.source_page <= 0
@@ -181,9 +325,15 @@ CREATE POLICY "Allow public read on budget revenue sources"
 
 -- A document cannot be downgraded, replaced or detached while certified financial
 -- records still rely on it. Revoke dependent certifications first, then change it.
+-- Declared SECURITY DEFINER so cross-table dependency checks never fail with
+-- 42501 or miss rows under authenticated/anon RLS policies, and triggered on
+-- every BEFORE UPDATE (without column restriction) so indirect status downgrades
+-- performed by earlier BEFORE triggers (e.g. admin_document_integrity on
+-- page_count / is_scanned / has_text_layer / ocr_status) cannot bypass this guard.
 CREATE OR REPLACE FUNCTION private.prevent_revoking_referenced_primary_document()
 RETURNS trigger
 LANGUAGE plpgsql
+SECURITY DEFINER
 SET search_path = ''
 AS $function$
 DECLARE
@@ -191,7 +341,8 @@ DECLARE
 BEGIN
   IF OLD.status IN ('VERIFIED', 'PUBLISHED')
     AND (
-      NEW.status NOT IN ('VERIFIED', 'PUBLISHED')
+      (OLD.status = 'PUBLISHED' AND NEW.status <> 'PUBLISHED')
+      OR (OLD.status = 'VERIFIED' AND NEW.status NOT IN ('VERIFIED', 'PUBLISHED'))
       OR NEW.verification_status <> 'VERIFIED'
       OR NEW.checksum_status NOT IN ('COMPUTED', 'VERIFIED')
       OR NEW.checksum_sha256 IS DISTINCT FROM OLD.checksum_sha256
@@ -209,9 +360,15 @@ BEGIN
           AND (lb.status = 'PUBLISHED' OR lb.verification_status IN ('OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION')))
       OR EXISTS (SELECT 1 FROM public.budget_projects bp
         WHERE bp.source_document_id = OLD.id
-          AND (bp.publication_status = 'PUBLISHED' OR bp.financial_verification_status = 'VERIFIED'))
+          AND bp.archived_at IS NULL
+          AND bp.publication_status <> 'ARCHIVED'
+          AND (bp.publication_status = 'PUBLISHED'
+            OR bp.data_provenance = 'OFFICIAL_SOURCE'
+            OR bp.financial_verification_status IN ('VERIFIED','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE')))
       OR EXISTS (SELECT 1 FROM public.budget_lines bl
         WHERE bl.source_document_id = OLD.id
+          AND bl.archived_at IS NULL
+          AND bl.publication_status <> 'ARCHIVED'
           AND (bl.publication_status = 'PUBLISHED' OR bl.verification_status = 'VERIFIED'))
       OR EXISTS (SELECT 1 FROM public.budget_revenue_sources brs
         WHERE brs.source_document_id = OLD.id
@@ -239,9 +396,8 @@ REVOKE ALL ON FUNCTION private.prevent_revoking_referenced_primary_document()
 
 DROP TRIGGER IF EXISTS prevent_revoking_referenced_primary_document ON public.public_documents;
 CREATE TRIGGER prevent_revoking_referenced_primary_document
-  BEFORE UPDATE OF status, verification_status, checksum_status, checksum_sha256,
-    source_url, source_name, institution_id, fiscal_year, document_type, file_url, storage_path
-  ON public.public_documents FOR EACH ROW
+  BEFORE UPDATE ON public.public_documents
+  FOR EACH ROW
   EXECUTE FUNCTION private.prevent_revoking_referenced_primary_document();
 
 COMMIT;
