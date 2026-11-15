@@ -93,7 +93,8 @@ export function DataImportConsole({ role, initialDocument }: DataImportConsolePr
   );
   const [adoptionDate, setAdoptionDate] = useState<string>(initialDocument?.adoption_date || '');
   const [sourceDateKind, setSourceDateKind] = useState<'PUBLISHED' | 'ACCESSED' | 'RECORDED'>('RECORDED');
-  const [sourceUrl, setSourceUrl] = useState<string>(initialDocument?.file_url || '');
+  const [sourceUrl, setSourceUrl] = useState<string>(initialDocument?.source_url || '');
+  const [sourceDocumentId, setSourceDocumentId] = useState<string>(initialDocument?.id || '');
   const [sourcePage, setSourcePage] = useState<number | undefined>(undefined);
   const [evidenceLevel, setEvidenceLevel] = useState<DocumentEvidenceLevel>('DOCUMENT_TO_EXTRACT');
   const [amountSemantics, setAmountSemantics] = useState<'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN'>('DELTA');
@@ -251,6 +252,7 @@ export function DataImportConsole({ role, initialDocument }: DataImportConsolePr
       source_date: sourceDate,
       source_date_kind: sourceDateKind,
       source_url: sourceUrl || undefined,
+      source_document_id: sourceDocumentId || undefined,
       source_page: sourcePage,
       evidence_level: evidenceLevel,
       adoption_date: adoptionDate || undefined,
@@ -594,6 +596,22 @@ export function DataImportConsole({ role, initialDocument }: DataImportConsolePr
                 value={sourceReference}
                 onChange={e => {
                   setSourceReference(e.target.value);
+                  setDryRunResult(null);
+                }}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold uppercase text-slate-600">
+                Identifiant du document vérifié dans le catalogue
+              </label>
+              <input
+                type="text"
+                placeholder="ID public_documents (doc-...)"
+                className={input}
+                value={sourceDocumentId}
+                onChange={e => {
+                  setSourceDocumentId(e.target.value);
                   setDryRunResult(null);
                 }}
               />
