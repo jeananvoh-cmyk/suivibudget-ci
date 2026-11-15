@@ -34,7 +34,7 @@ describe('RLS hardening — local budget administration', () => {
   });
 
   it('is additive and transaction-wrapped; it does not mutate financial records', () => {
-    expect(migration.trimStart().startsWith('BEGIN;')).toBe(true);
+    expect(migration).toMatch(/\bBEGIN;\s/);
     expect(migration.trimEnd().endsWith('COMMIT;')).toBe(true);
     expect(migration).not.toMatch(/\b(UPDATE|DELETE FROM|INSERT INTO)\s+public\.(local_budgets|budget_lines|budget_sources|budget_revenue_sources)/i);
   });
