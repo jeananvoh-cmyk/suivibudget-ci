@@ -4,6 +4,15 @@
 // =========================================================================
 
 import type { Institution } from '../types';
+import type { LocalBudget } from '../types/localBudget';
+import type { AdministrativeAccount } from '../types/administrativeAccount';
+import type {
+  DocumentIngestionMetadata,
+  ProposedFinancialValue,
+  DocumentDryRunResult,
+  BudgetDocumentCategory
+} from '../types/budgetCycle';
+
 /**
  * Vérifie qu'une URL de preuve primaire appartient à un domaine institutionnel ivoirien autorisé.
  * Les URL HTTPS de domaines tiers ne sont jamais suffisantes pour attribuer OFFICIAL_DOCUMENT.
@@ -26,15 +35,6 @@ export function isOfficialPrimaryEvidenceUrl(value?: string | null): boolean {
   }
 }
 
-
-import type { LocalBudget } from '../types/localBudget';
-import type { AdministrativeAccount } from '../types/administrativeAccount';
-import type {
-  DocumentIngestionMetadata,
-  ProposedFinancialValue,
-  DocumentDryRunResult,
-  BudgetDocumentCategory
-} from '../types/budgetCycle';
 
 /**
  * Normalise le type de document pour l'identification et le calcul d'empreinte déterministe
