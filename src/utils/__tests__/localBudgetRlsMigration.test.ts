@@ -37,7 +37,7 @@ describe('RLS hardening — local budget administration', () => {
       'Allow admin full access on local budgets',
       'Allow admin write on budget sources',
       'Allow admin write on budget revenue sources',
-      'admin_entity_staff',
+      'Allow admin write on budget lines',
       'Allow admin read on budget revisions',
       'Allow admin insert on budget revisions',
       'Allow admin full access on CA',
@@ -53,6 +53,7 @@ describe('RLS hardening — local budget administration', () => {
       expect(migration).toContain(`CREATE POLICY "${policy}"`);
     }
     expect(migration).toContain('DROP POLICY IF EXISTS "Allow moderators full management on citizen proofs"');
+    expect(migration).toContain('DROP POLICY IF EXISTS "admin_entity_staff"');
     expect(migration).not.toContain('CREATE POLICY "Moderators delete citizen proofs"');
     expect(migration).not.toContain('CREATE POLICY "Moderators insert citizen proofs"');
     expect((migration.match(/WITH CHECK/g) || []).length).toBe(11);
