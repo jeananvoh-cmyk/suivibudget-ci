@@ -24,13 +24,17 @@ describe('RLS hardening — local budget administration', () => {
       'Allow admin write on budget lines',
       'Allow admin read on budget revisions',
       'Allow admin insert on budget revisions',
+      'Allow admin full access on CA',
+      'Allow admin write on CA operations',
+      'Allow admin write on CA procurement matches',
+      'Allow admin and moderator full access on responses',
     ];
 
     for (const policy of policies) {
       expect(migration).toContain(`DROP POLICY IF EXISTS "${policy}"`);
       expect(migration).toContain(`CREATE POLICY "${policy}"`);
     }
-    expect((migration.match(/WITH CHECK/g) || []).length).toBe(6);
+    expect((migration.match(/WITH CHECK/g) || []).length).toBe(10);
   });
 
   it('is additive and transaction-wrapped; it does not mutate financial records', () => {
