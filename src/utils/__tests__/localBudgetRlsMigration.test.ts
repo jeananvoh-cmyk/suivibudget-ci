@@ -7,7 +7,7 @@ describe('RLS hardening — local budget administration', () => {
   it('uses unique 14-digit versions for every active migration file', () => {
     const migrationDir = join(process.cwd(), 'supabase', 'migrations');
     const files = readdirSync(migrationDir).filter(file => file.endsWith('.sql'));
-    const versions = files.map(file => file.match(/^(\\d{14})_/)?.[1]);
+    const versions = files.map(file => file.match(/^(\d{14})_/)?.[1]);
     expect(versions.every(Boolean)).toBe(true);
     expect(new Set(versions).size).toBe(files.length);
   });
