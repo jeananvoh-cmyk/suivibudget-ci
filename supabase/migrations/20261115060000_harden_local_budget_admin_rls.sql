@@ -47,7 +47,7 @@ UPDATE public.local_budgets
   WHERE verification_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION')
     AND (
       source_document_id IS NULL OR source_page IS NULL OR document_url IS NULL
-      OR document_url !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)'
+      OR document_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
       OR NOT EXISTS (
         SELECT 1 FROM public.public_documents d
         WHERE d.id = local_budgets.source_document_id
@@ -65,7 +65,7 @@ UPDATE public.administrative_accounts
   WHERE verification_status IN ('OFFICIAL_DOCUMENT', 'VERIFIED')
     AND (
       source_document_id IS NULL OR source_url IS NULL
-      OR source_url !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)'
+      OR source_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
       OR NOT EXISTS (
         SELECT 1 FROM public.public_documents d
         WHERE d.id = administrative_accounts.source_document_id
@@ -80,7 +80,7 @@ UPDATE public.ca_procurement_matches
   WHERE verification_status IN ('Vérifié DGMP', 'VERIFIED', 'OFFICIAL_DOCUMENT')
     AND (
       source_document_id IS NULL OR source_page IS NULL OR source_url IS NULL
-      OR source_url !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)'
+      OR source_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
       OR NOT EXISTS (
         SELECT 1 FROM public.public_documents d
         WHERE d.id = ca_procurement_matches.source_document_id
@@ -96,7 +96,7 @@ UPDATE public.budget_projects
   WHERE data_provenance = 'OFFICIAL_SOURCE'
     AND (
       source_document_id IS NULL OR source_page IS NULL OR source_url IS NULL
-      OR source_url !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)'
+      OR source_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
       OR financial_verification_status <> 'VERIFIED'
       OR NOT EXISTS (
         SELECT 1 FROM public.public_documents d
@@ -174,7 +174,7 @@ BEGIN
 
   IF evidence_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'OFFICIAL_SOURCE', 'VERIFIED', 'Vérifié DGMP') THEN
     IF source_id IS NULL OR source_url_value IS NULL
-       OR source_url_value !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)' THEN
+       OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
       RAISE EXCEPTION 'Certification primaire refusée : identifiant documentaire et URL institutionnelle HTTPS obligatoires';
     END IF;
     IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
@@ -367,7 +367,7 @@ BEGIN
 
   IF evidence_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'OFFICIAL_SOURCE', 'VERIFIED', 'Vérifié DGMP') THEN
     IF source_id IS NULL OR source_url_value IS NULL
-       OR source_url_value !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)' THEN
+       OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
       RAISE EXCEPTION 'Certification primaire refusée : identifiant documentaire et URL institutionnelle HTTPS obligatoires';
     END IF;
     IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
@@ -557,7 +557,7 @@ BEGIN
 
   IF evidence_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'OFFICIAL_SOURCE', 'VERIFIED', 'Vérifié DGMP') THEN
     IF source_id IS NULL OR source_url_value IS NULL
-       OR source_url_value !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)' THEN
+       OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
       RAISE EXCEPTION 'Certification primaire refusée : identifiant documentaire et URL institutionnelle HTTPS obligatoires';
     END IF;
     IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
@@ -755,7 +755,7 @@ BEGIN
 
   IF evidence_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'OFFICIAL_SOURCE', 'VERIFIED', 'Vérifié DGMP') THEN
     IF source_id IS NULL OR source_url_value IS NULL
-       OR source_url_value !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)' THEN
+       OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
       RAISE EXCEPTION 'Certification primaire refusée : identifiant documentaire et URL institutionnelle HTTPS obligatoires';
     END IF;
     IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
@@ -972,7 +972,7 @@ BEGIN
 
   IF evidence_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'OFFICIAL_SOURCE', 'VERIFIED', 'Vérifié DGMP') THEN
     IF source_id IS NULL OR source_url_value IS NULL
-       OR source_url_value !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)' THEN
+       OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
       RAISE EXCEPTION 'Certification primaire refusée : identifiant documentaire et URL institutionnelle HTTPS obligatoires';
     END IF;
     IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
@@ -1163,7 +1163,7 @@ BEGIN
 
   IF evidence_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'OFFICIAL_SOURCE', 'VERIFIED', 'Vérifié DGMP') THEN
     IF source_id IS NULL OR source_url_value IS NULL
-       OR source_url_value !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)' THEN
+       OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
       RAISE EXCEPTION 'Certification primaire refusée : identifiant documentaire et URL institutionnelle HTTPS obligatoires';
     END IF;
     IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
@@ -1361,7 +1361,7 @@ BEGIN
 
   IF evidence_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'OFFICIAL_SOURCE', 'VERIFIED', 'Vérifié DGMP') THEN
     IF source_id IS NULL OR source_url_value IS NULL
-       OR source_url_value !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)' THEN
+       OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
       RAISE EXCEPTION 'Certification primaire refusée : identifiant documentaire et URL institutionnelle HTTPS obligatoires';
     END IF;
     IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
@@ -1518,7 +1518,7 @@ DROP POLICY IF EXISTS "Public documents files are publicly readable" ON storage.
 
 COMMIT;
 
-      OR COALESCE(s ->> 'url','') !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)'
+      OR COALESCE(s ->> 'url','') !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
       OR NOT EXISTS (
         SELECT 1 FROM public.public_documents pd
         WHERE pd.id = d ->> 'source_document_id'
@@ -1572,7 +1572,7 @@ BEGIN
 
   IF evidence_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'OFFICIAL_SOURCE', 'VERIFIED', 'Vérifié DGMP') THEN
     IF source_id IS NULL OR source_url_value IS NULL
-       OR source_url_value !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)' THEN
+       OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
       RAISE EXCEPTION 'Certification primaire refusée : identifiant documentaire et URL institutionnelle HTTPS obligatoires';
     END IF;
     IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
