@@ -371,6 +371,29 @@ CREATE POLICY "Allow admin write on budget revenue sources"
   USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
   WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
 
+-- Child budget references are visible only with their published parent budget.
+DROP POLICY IF EXISTS "Allow public read on budget sources" ON public.budget_sources;
+CREATE POLICY "Allow public read on budget sources"
+  ON public.budget_sources FOR SELECT TO public
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.local_budgets lb
+      WHERE lb.id = budget_sources.budget_id
+        AND lb.status = 'PUBLISHED'
+    )
+  );
+
+DROP POLICY IF EXISTS "Allow public read on budget revenue sources" ON public.budget_revenue_sources;
+CREATE POLICY "Allow public read on budget revenue sources"
+  ON public.budget_revenue_sources FOR SELECT TO public
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.local_budgets lb
+      WHERE lb.id = budget_revenue_sources.budget_id
+        AND lb.status = 'PUBLISHED'
+    )
+  );
+
 DROP POLICY IF EXISTS "Allow admin write on budget lines" ON public.budget_lines;
 DROP POLICY IF EXISTS "admin_entity_staff" ON public.budget_lines;
 CREATE POLICY "Allow admin write on budget lines"
