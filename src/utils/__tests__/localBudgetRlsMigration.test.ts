@@ -18,6 +18,8 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toContain('CREATE OR REPLACE FUNCTION private.validate_import_row(r jsonb)');
     expect(migration).toContain("'source_document_id'");
     expect(migration).toContain('Primary document requires a published, checksum-verified catalogue record');
+    expect(migration).toContain("pd.source_url = s ->> 'url'");
+    expect(migration).toContain('d.source_url = source_url_value');
     expect(migration).toContain('CREATE OR REPLACE FUNCTION private.enforce_primary_document_evidence()');
     expect(migration).toContain('CREATE TRIGGER enforce_local_budget_primary_evidence');
     expect(migration).toContain('CREATE TRIGGER enforce_administrative_account_primary_evidence');
