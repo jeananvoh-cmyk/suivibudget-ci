@@ -108,6 +108,1439 @@ UPDATE public.budget_projects
       )
     );
 
+-- Étendre le contrat SQL d'import pour transporter l'identifiant documentaire
+-- et la page exacte jusqu'aux tables canoniques.
+CREATE OR REPLACE FUNCTION private.validate_import_row(r jsonb)
+RETURNS text
+LANGUAGE plpgsql
+SET search_path = ''
+AS $
+DECLARE
+  kind text := r ->> 'kind';
+  d jsonb := r -> 'data';
+  s jsonb := r -> 'source';
+  k text;
+  v jsonb;
+  money text[];
+  allowed text[];
+  identity_parts jsonb;
+  inst public.institutions%rowtype;
+BEGIN
+  IF jsonb_typeof(r) IS DISTINCT FROM 'object'
+    OR jsonb_typeof(d) IS DISTINCT FROM 'object'
+    OR jsonb_typeof(s) IS DISTINCT FROM 'object'
+    OR jsonb_typeof(r -> 'precision') IS DISTINCT FROM 'object' THEN
+    RAISE EXCEPTION 'Row, data, source and precision must be objects';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM jsonb_object_keys(r) x
+    WHERE x NOT IN ('kind','institution_id','institution_type','fiscal_year','source','data','precision')
+  ) THEN RAISE EXCEPTION 'Unknown envelope field'; END IF;
+
+  SELECT * INTO inst FROM public.institutions WHERE id = r ->> 'institution_id';
+  IF NOT FOUND
+    OR r ->> 'institution_type' IS DISTINCT FROM (
+      CASE inst.type WHEN 'MAIRIE' THEN 'COMMUNE' WHEN 'REGION' THEN 'REGIONAL_COUNCIL' END
+    )
+    OR r ->> 'institution_type' NOT IN ('COMMUNE','REGIONAL_COUNCIL') THEN
+    RAISE EXCEPTION 'Institution/type mismatch';
+  END IF;
+  IF COALESCE(r ->> 'fiscal_year','') !~ '^[0-9]{4}
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $
+DECLARE
+  row_data jsonb := to_jsonb(NEW);
+  source_id text;
+  source_url_value text;
+  source_page_value integer;
+  evidence_status text;
+  needs_page boolean := true;
+BEGIN
+  source_id := row_data ->> 'source_document_id';
+  source_url_value := COALESCE(row_data ->> 'source_url', row_data ->> 'document_url');
+  source_page_value := NULLIF(row_data ->> 'source_page', '')::integer;
+
+  IF TG_TABLE_NAME = 'budget_projects' THEN
+    evidence_status := row_data ->> 'financial_verification_status';
+  ELSE
+    evidence_status := row_data ->> 'verification_status';
+  END IF;
+
+  IF TG_TABLE_NAME = 'administrative_accounts' THEN
+    needs_page := false; -- la page est portée par chaque opération du CA
+  END IF;
+
+  IF evidence_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'OFFICIAL_SOURCE', 'VERIFIED', 'Vérifié DGMP') THEN
+    IF source_id IS NULL OR source_url_value IS NULL
+       OR source_url_value !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)' THEN
+      RAISE EXCEPTION 'Certification primaire refusée : identifiant documentaire et URL institutionnelle HTTPS obligatoires';
+    END IF;
+    IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
+      RAISE EXCEPTION 'Certification primaire refusée : page exacte du document obligatoire';
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM public.public_documents d
+      WHERE d.id = source_id
+        AND d.status = 'PUBLISHED'
+        AND d.verification_status = 'VERIFIED'
+        AND d.checksum_status = 'VERIFIED'
+        AND d.checksum_sha256 IS NOT NULL
+    ) THEN
+      RAISE EXCEPTION 'Certification primaire refusée : le document lié doit être publié, vérifié et doté d’une empreinte SHA-256 vérifiée';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$;
+
+DROP TRIGGER IF EXISTS enforce_local_budget_primary_evidence ON public.local_budgets;
+CREATE TRIGGER enforce_local_budget_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, document_url
+  ON public.local_budgets FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_administrative_account_primary_evidence ON public.administrative_accounts;
+CREATE TRIGGER enforce_administrative_account_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_url
+  ON public.administrative_accounts FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_procurement_primary_evidence ON public.ca_procurement_matches;
+CREATE TRIGGER enforce_procurement_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url
+  ON public.ca_procurement_matches FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_budget_project_primary_evidence ON public.budget_projects;
+CREATE TRIGGER enforce_budget_project_primary_evidence
+  BEFORE INSERT OR UPDATE OF financial_verification_status, data_provenance, source_document_id, source_page, source_url
+  ON public.budget_projects FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+-- Les anciens statuts AIP_VERIFIED ne doivent plus être présentés comme preuve primaire.
+UPDATE public.local_budgets
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+UPDATE public.budget_revenue_sources
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+
+-- Un rapprochement DGMP sans identifiant de document primaire et page exacte
+-- reste à vérifier, même si une ancienne version portait le libellé VERIFIED.
+UPDATE public.ca_procurement_matches
+  SET verification_status = 'TO_VERIFY'
+  WHERE verification_status IN ('Vérifié DGMP', 'VERIFIED', 'OFFICIAL_DOCUMENT')
+    AND (source_document_id IS NULL OR source_page IS NULL);
+
+DROP POLICY IF EXISTS "Allow admin write on sources" ON public.sources;
+CREATE POLICY "Allow admin write on sources"
+  ON public.sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin full access on local budgets" ON public.local_budgets;
+CREATE POLICY "Allow admin full access on local budgets"
+  ON public.local_budgets FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget sources" ON public.budget_sources;
+CREATE POLICY "Allow admin write on budget sources"
+  ON public.budget_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget revenue sources" ON public.budget_revenue_sources;
+CREATE POLICY "Allow admin write on budget revenue sources"
+  ON public.budget_revenue_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget lines" ON public.budget_lines;
+CREATE POLICY "Allow admin write on budget lines"
+  ON public.budget_lines FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin read on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin read on budget revisions"
+  ON public.budget_revision_history FOR SELECT TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER','AUDITOR']));
+
+DROP POLICY IF EXISTS "Allow admin insert on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin insert on budget revisions"
+  ON public.budget_revision_history FOR INSERT TO authenticated
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+-- Les mêmes défauts d'autorisation existaient sur les Comptes Administratifs,
+-- leurs opérations, les marchés associés et les réponses institutionnelles.
+DROP POLICY IF EXISTS "Allow admin full access on CA" ON public.administrative_accounts;
+CREATE POLICY "Allow admin full access on CA"
+  ON public.administrative_accounts FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA operations" ON public.ca_investment_operations;
+CREATE POLICY "Allow admin write on CA operations"
+  ON public.ca_investment_operations FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA procurement matches" ON public.ca_procurement_matches;
+CREATE POLICY "Allow admin write on CA procurement matches"
+  ON public.ca_procurement_matches FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin and moderator full access on responses" ON public.ca_institution_responses;
+CREATE POLICY "Allow admin and moderator full access on responses"
+  ON public.ca_institution_responses FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+
+-- Champs de preuve primaire manquants sur les rapprochements DGMP.
+ALTER TABLE public.ca_procurement_matches
+  ADD COLUMN IF NOT EXISTS source_document_id text REFERENCES public.public_documents(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS source_page integer;
+
+-- Suppression des anciennes politiques permissives fondées sur user_metadata.
+-- Les politiques de publication et de gestion staff ci-dessous sont déjà
+-- remplacées par les migrations de frontières de publication et de persistance.
+DROP POLICY IF EXISTS "Allow admin write access on projects" ON public.projects;
+CREATE POLICY "Allow admin write access on projects"
+  ON public.projects FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow moderators full management on citizen proofs" ON public.citizen_proofs;
+CREATE POLICY "Allow moderators full management on citizen proofs"
+  ON public.citizen_proofs FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+
+DROP POLICY IF EXISTS "Allow admin only read on newsletter subscribers" ON public.newsletter_subscribers;
+CREATE POLICY "Allow admin only read on newsletter subscribers"
+  ON public.newsletter_subscribers FOR SELECT TO authenticated
+  USING (private.has_staff_role(array['ADMIN']));
+
+-- Les documents sont déjà gérés par "Staff manage documents" et les fichiers
+-- par les politiques de staging privées basées sur private.has_staff_role.
+DROP POLICY IF EXISTS "Allow staff full access on public documents" ON public.public_documents;
+DROP POLICY IF EXISTS "Staff can upload public documents files" ON storage.objects;
+DROP POLICY IF EXISTS "Staff can delete public documents files" ON storage.objects;
+DROP POLICY IF EXISTS "Public documents files are publicly readable" ON storage.objects;
+
+COMMIT;
+
+    OR (r ->> 'fiscal_year')::int NOT BETWEEN 2000 AND 2100 THEN
+    RAISE EXCEPTION 'Fiscal year required';
+  END IF;
+  IF jsonb_typeof(s -> 'name') IS DISTINCT FROM 'string'
+    OR jsonb_typeof(s -> 'reference') IS DISTINCT FROM 'string'
+    OR COALESCE(btrim(s ->> 'name'),'') = ''
+    OR COALESCE(btrim(s ->> 'reference'),'') = ''
+    OR COALESCE(s ->> 'date','') !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $
+DECLARE
+  row_data jsonb := to_jsonb(NEW);
+  source_id text;
+  source_url_value text;
+  source_page_value integer;
+  evidence_status text;
+  needs_page boolean := true;
+BEGIN
+  source_id := row_data ->> 'source_document_id';
+  source_url_value := COALESCE(row_data ->> 'source_url', row_data ->> 'document_url');
+  source_page_value := NULLIF(row_data ->> 'source_page', '')::integer;
+
+  IF TG_TABLE_NAME = 'budget_projects' THEN
+    evidence_status := row_data ->> 'financial_verification_status';
+  ELSE
+    evidence_status := row_data ->> 'verification_status';
+  END IF;
+
+  IF TG_TABLE_NAME = 'administrative_accounts' THEN
+    needs_page := false; -- la page est portée par chaque opération du CA
+  END IF;
+
+  IF evidence_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'OFFICIAL_SOURCE', 'VERIFIED', 'Vérifié DGMP') THEN
+    IF source_id IS NULL OR source_url_value IS NULL
+       OR source_url_value !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)' THEN
+      RAISE EXCEPTION 'Certification primaire refusée : identifiant documentaire et URL institutionnelle HTTPS obligatoires';
+    END IF;
+    IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
+      RAISE EXCEPTION 'Certification primaire refusée : page exacte du document obligatoire';
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM public.public_documents d
+      WHERE d.id = source_id
+        AND d.status = 'PUBLISHED'
+        AND d.verification_status = 'VERIFIED'
+        AND d.checksum_status = 'VERIFIED'
+        AND d.checksum_sha256 IS NOT NULL
+    ) THEN
+      RAISE EXCEPTION 'Certification primaire refusée : le document lié doit être publié, vérifié et doté d’une empreinte SHA-256 vérifiée';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$;
+
+DROP TRIGGER IF EXISTS enforce_local_budget_primary_evidence ON public.local_budgets;
+CREATE TRIGGER enforce_local_budget_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, document_url
+  ON public.local_budgets FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_administrative_account_primary_evidence ON public.administrative_accounts;
+CREATE TRIGGER enforce_administrative_account_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_url
+  ON public.administrative_accounts FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_procurement_primary_evidence ON public.ca_procurement_matches;
+CREATE TRIGGER enforce_procurement_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url
+  ON public.ca_procurement_matches FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_budget_project_primary_evidence ON public.budget_projects;
+CREATE TRIGGER enforce_budget_project_primary_evidence
+  BEFORE INSERT OR UPDATE OF financial_verification_status, data_provenance, source_document_id, source_page, source_url
+  ON public.budget_projects FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+-- Les anciens statuts AIP_VERIFIED ne doivent plus être présentés comme preuve primaire.
+UPDATE public.local_budgets
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+UPDATE public.budget_revenue_sources
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+
+-- Un rapprochement DGMP sans identifiant de document primaire et page exacte
+-- reste à vérifier, même si une ancienne version portait le libellé VERIFIED.
+UPDATE public.ca_procurement_matches
+  SET verification_status = 'TO_VERIFY'
+  WHERE verification_status IN ('Vérifié DGMP', 'VERIFIED', 'OFFICIAL_DOCUMENT')
+    AND (source_document_id IS NULL OR source_page IS NULL);
+
+DROP POLICY IF EXISTS "Allow admin write on sources" ON public.sources;
+CREATE POLICY "Allow admin write on sources"
+  ON public.sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin full access on local budgets" ON public.local_budgets;
+CREATE POLICY "Allow admin full access on local budgets"
+  ON public.local_budgets FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget sources" ON public.budget_sources;
+CREATE POLICY "Allow admin write on budget sources"
+  ON public.budget_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget revenue sources" ON public.budget_revenue_sources;
+CREATE POLICY "Allow admin write on budget revenue sources"
+  ON public.budget_revenue_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget lines" ON public.budget_lines;
+CREATE POLICY "Allow admin write on budget lines"
+  ON public.budget_lines FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin read on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin read on budget revisions"
+  ON public.budget_revision_history FOR SELECT TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER','AUDITOR']));
+
+DROP POLICY IF EXISTS "Allow admin insert on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin insert on budget revisions"
+  ON public.budget_revision_history FOR INSERT TO authenticated
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+-- Les mêmes défauts d'autorisation existaient sur les Comptes Administratifs,
+-- leurs opérations, les marchés associés et les réponses institutionnelles.
+DROP POLICY IF EXISTS "Allow admin full access on CA" ON public.administrative_accounts;
+CREATE POLICY "Allow admin full access on CA"
+  ON public.administrative_accounts FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA operations" ON public.ca_investment_operations;
+CREATE POLICY "Allow admin write on CA operations"
+  ON public.ca_investment_operations FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA procurement matches" ON public.ca_procurement_matches;
+CREATE POLICY "Allow admin write on CA procurement matches"
+  ON public.ca_procurement_matches FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin and moderator full access on responses" ON public.ca_institution_responses;
+CREATE POLICY "Allow admin and moderator full access on responses"
+  ON public.ca_institution_responses FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+
+-- Champs de preuve primaire manquants sur les rapprochements DGMP.
+ALTER TABLE public.ca_procurement_matches
+  ADD COLUMN IF NOT EXISTS source_document_id text REFERENCES public.public_documents(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS source_page integer;
+
+-- Suppression des anciennes politiques permissives fondées sur user_metadata.
+-- Les politiques de publication et de gestion staff ci-dessous sont déjà
+-- remplacées par les migrations de frontières de publication et de persistance.
+DROP POLICY IF EXISTS "Allow admin write access on projects" ON public.projects;
+CREATE POLICY "Allow admin write access on projects"
+  ON public.projects FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow moderators full management on citizen proofs" ON public.citizen_proofs;
+CREATE POLICY "Allow moderators full management on citizen proofs"
+  ON public.citizen_proofs FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+
+DROP POLICY IF EXISTS "Allow admin only read on newsletter subscribers" ON public.newsletter_subscribers;
+CREATE POLICY "Allow admin only read on newsletter subscribers"
+  ON public.newsletter_subscribers FOR SELECT TO authenticated
+  USING (private.has_staff_role(array['ADMIN']));
+
+-- Les documents sont déjà gérés par "Staff manage documents" et les fichiers
+-- par les politiques de staging privées basées sur private.has_staff_role.
+DROP POLICY IF EXISTS "Allow staff full access on public documents" ON public.public_documents;
+DROP POLICY IF EXISTS "Staff can upload public documents files" ON storage.objects;
+DROP POLICY IF EXISTS "Staff can delete public documents files" ON storage.objects;
+DROP POLICY IF EXISTS "Public documents files are publicly readable" ON storage.objects;
+
+COMMIT;
+
+    OR COALESCE(s ->> 'date_kind','') NOT IN ('PUBLISHED','ACCESSED','RECORDED') THEN
+    RAISE EXCEPTION 'Source name/reference/date/date_kind required';
+  END IF;
+  PERFORM (s ->> 'date')::date;
+  IF s ? 'url' AND COALESCE(s ->> 'url','') !~ '^https?://[^[:space:]]+
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $
+DECLARE
+  row_data jsonb := to_jsonb(NEW);
+  source_id text;
+  source_url_value text;
+  source_page_value integer;
+  evidence_status text;
+  needs_page boolean := true;
+BEGIN
+  source_id := row_data ->> 'source_document_id';
+  source_url_value := COALESCE(row_data ->> 'source_url', row_data ->> 'document_url');
+  source_page_value := NULLIF(row_data ->> 'source_page', '')::integer;
+
+  IF TG_TABLE_NAME = 'budget_projects' THEN
+    evidence_status := row_data ->> 'financial_verification_status';
+  ELSE
+    evidence_status := row_data ->> 'verification_status';
+  END IF;
+
+  IF TG_TABLE_NAME = 'administrative_accounts' THEN
+    needs_page := false; -- la page est portée par chaque opération du CA
+  END IF;
+
+  IF evidence_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'OFFICIAL_SOURCE', 'VERIFIED', 'Vérifié DGMP') THEN
+    IF source_id IS NULL OR source_url_value IS NULL
+       OR source_url_value !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)' THEN
+      RAISE EXCEPTION 'Certification primaire refusée : identifiant documentaire et URL institutionnelle HTTPS obligatoires';
+    END IF;
+    IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
+      RAISE EXCEPTION 'Certification primaire refusée : page exacte du document obligatoire';
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM public.public_documents d
+      WHERE d.id = source_id
+        AND d.status = 'PUBLISHED'
+        AND d.verification_status = 'VERIFIED'
+        AND d.checksum_status = 'VERIFIED'
+        AND d.checksum_sha256 IS NOT NULL
+    ) THEN
+      RAISE EXCEPTION 'Certification primaire refusée : le document lié doit être publié, vérifié et doté d’une empreinte SHA-256 vérifiée';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$;
+
+DROP TRIGGER IF EXISTS enforce_local_budget_primary_evidence ON public.local_budgets;
+CREATE TRIGGER enforce_local_budget_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, document_url
+  ON public.local_budgets FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_administrative_account_primary_evidence ON public.administrative_accounts;
+CREATE TRIGGER enforce_administrative_account_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_url
+  ON public.administrative_accounts FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_procurement_primary_evidence ON public.ca_procurement_matches;
+CREATE TRIGGER enforce_procurement_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url
+  ON public.ca_procurement_matches FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_budget_project_primary_evidence ON public.budget_projects;
+CREATE TRIGGER enforce_budget_project_primary_evidence
+  BEFORE INSERT OR UPDATE OF financial_verification_status, data_provenance, source_document_id, source_page, source_url
+  ON public.budget_projects FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+-- Les anciens statuts AIP_VERIFIED ne doivent plus être présentés comme preuve primaire.
+UPDATE public.local_budgets
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+UPDATE public.budget_revenue_sources
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+
+-- Un rapprochement DGMP sans identifiant de document primaire et page exacte
+-- reste à vérifier, même si une ancienne version portait le libellé VERIFIED.
+UPDATE public.ca_procurement_matches
+  SET verification_status = 'TO_VERIFY'
+  WHERE verification_status IN ('Vérifié DGMP', 'VERIFIED', 'OFFICIAL_DOCUMENT')
+    AND (source_document_id IS NULL OR source_page IS NULL);
+
+DROP POLICY IF EXISTS "Allow admin write on sources" ON public.sources;
+CREATE POLICY "Allow admin write on sources"
+  ON public.sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin full access on local budgets" ON public.local_budgets;
+CREATE POLICY "Allow admin full access on local budgets"
+  ON public.local_budgets FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget sources" ON public.budget_sources;
+CREATE POLICY "Allow admin write on budget sources"
+  ON public.budget_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget revenue sources" ON public.budget_revenue_sources;
+CREATE POLICY "Allow admin write on budget revenue sources"
+  ON public.budget_revenue_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget lines" ON public.budget_lines;
+CREATE POLICY "Allow admin write on budget lines"
+  ON public.budget_lines FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin read on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin read on budget revisions"
+  ON public.budget_revision_history FOR SELECT TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER','AUDITOR']));
+
+DROP POLICY IF EXISTS "Allow admin insert on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin insert on budget revisions"
+  ON public.budget_revision_history FOR INSERT TO authenticated
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+-- Les mêmes défauts d'autorisation existaient sur les Comptes Administratifs,
+-- leurs opérations, les marchés associés et les réponses institutionnelles.
+DROP POLICY IF EXISTS "Allow admin full access on CA" ON public.administrative_accounts;
+CREATE POLICY "Allow admin full access on CA"
+  ON public.administrative_accounts FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA operations" ON public.ca_investment_operations;
+CREATE POLICY "Allow admin write on CA operations"
+  ON public.ca_investment_operations FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA procurement matches" ON public.ca_procurement_matches;
+CREATE POLICY "Allow admin write on CA procurement matches"
+  ON public.ca_procurement_matches FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin and moderator full access on responses" ON public.ca_institution_responses;
+CREATE POLICY "Allow admin and moderator full access on responses"
+  ON public.ca_institution_responses FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+
+-- Champs de preuve primaire manquants sur les rapprochements DGMP.
+ALTER TABLE public.ca_procurement_matches
+  ADD COLUMN IF NOT EXISTS source_document_id text REFERENCES public.public_documents(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS source_page integer;
+
+-- Suppression des anciennes politiques permissives fondées sur user_metadata.
+-- Les politiques de publication et de gestion staff ci-dessous sont déjà
+-- remplacées par les migrations de frontières de publication et de persistance.
+DROP POLICY IF EXISTS "Allow admin write access on projects" ON public.projects;
+CREATE POLICY "Allow admin write access on projects"
+  ON public.projects FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow moderators full management on citizen proofs" ON public.citizen_proofs;
+CREATE POLICY "Allow moderators full management on citizen proofs"
+  ON public.citizen_proofs FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+
+DROP POLICY IF EXISTS "Allow admin only read on newsletter subscribers" ON public.newsletter_subscribers;
+CREATE POLICY "Allow admin only read on newsletter subscribers"
+  ON public.newsletter_subscribers FOR SELECT TO authenticated
+  USING (private.has_staff_role(array['ADMIN']));
+
+-- Les documents sont déjà gérés par "Staff manage documents" et les fichiers
+-- par les politiques de staging privées basées sur private.has_staff_role.
+DROP POLICY IF EXISTS "Allow staff full access on public documents" ON public.public_documents;
+DROP POLICY IF EXISTS "Staff can upload public documents files" ON storage.objects;
+DROP POLICY IF EXISTS "Staff can delete public documents files" ON storage.objects;
+DROP POLICY IF EXISTS "Public documents files are publicly readable" ON storage.objects;
+
+COMMIT;
+ THEN
+    RAISE EXCEPTION 'Invalid source URL';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM jsonb_object_keys(s) x
+    WHERE x NOT IN ('name','reference','date','date_kind','url')
+  ) THEN RAISE EXCEPTION 'Unknown source field'; END IF;
+
+  CASE kind
+    WHEN 'BP' THEN
+      money := ARRAY['total_amount','operating_amount','investment_amount'];
+      allowed := money || ARRAY['budget_type','source_page','source_document_id','version_number','adoption_date','tutelle_approval_date','notes','verification_status','confidence_level'];
+      IF COALESCE(d ->> 'budget_type','') NOT IN ('PRIMITIF_ADOPTE','PRIMITIF_APRES_TUTELLE','AUTORISATION_EXECUTION','MODIFICATIF_1','MODIFICATIF_2','AUTRE_MODIFICATIF')
+        OR COALESCE(d ->> 'version_number','') !~ '^[1-9][0-9]{0,3}
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $
+DECLARE
+  row_data jsonb := to_jsonb(NEW);
+  source_id text;
+  source_url_value text;
+  source_page_value integer;
+  evidence_status text;
+  needs_page boolean := true;
+BEGIN
+  source_id := row_data ->> 'source_document_id';
+  source_url_value := COALESCE(row_data ->> 'source_url', row_data ->> 'document_url');
+  source_page_value := NULLIF(row_data ->> 'source_page', '')::integer;
+
+  IF TG_TABLE_NAME = 'budget_projects' THEN
+    evidence_status := row_data ->> 'financial_verification_status';
+  ELSE
+    evidence_status := row_data ->> 'verification_status';
+  END IF;
+
+  IF TG_TABLE_NAME = 'administrative_accounts' THEN
+    needs_page := false; -- la page est portée par chaque opération du CA
+  END IF;
+
+  IF evidence_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'OFFICIAL_SOURCE', 'VERIFIED', 'Vérifié DGMP') THEN
+    IF source_id IS NULL OR source_url_value IS NULL
+       OR source_url_value !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)' THEN
+      RAISE EXCEPTION 'Certification primaire refusée : identifiant documentaire et URL institutionnelle HTTPS obligatoires';
+    END IF;
+    IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
+      RAISE EXCEPTION 'Certification primaire refusée : page exacte du document obligatoire';
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM public.public_documents d
+      WHERE d.id = source_id
+        AND d.status = 'PUBLISHED'
+        AND d.verification_status = 'VERIFIED'
+        AND d.checksum_status = 'VERIFIED'
+        AND d.checksum_sha256 IS NOT NULL
+    ) THEN
+      RAISE EXCEPTION 'Certification primaire refusée : le document lié doit être publié, vérifié et doté d’une empreinte SHA-256 vérifiée';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$;
+
+DROP TRIGGER IF EXISTS enforce_local_budget_primary_evidence ON public.local_budgets;
+CREATE TRIGGER enforce_local_budget_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, document_url
+  ON public.local_budgets FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_administrative_account_primary_evidence ON public.administrative_accounts;
+CREATE TRIGGER enforce_administrative_account_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_url
+  ON public.administrative_accounts FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_procurement_primary_evidence ON public.ca_procurement_matches;
+CREATE TRIGGER enforce_procurement_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url
+  ON public.ca_procurement_matches FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_budget_project_primary_evidence ON public.budget_projects;
+CREATE TRIGGER enforce_budget_project_primary_evidence
+  BEFORE INSERT OR UPDATE OF financial_verification_status, data_provenance, source_document_id, source_page, source_url
+  ON public.budget_projects FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+-- Les anciens statuts AIP_VERIFIED ne doivent plus être présentés comme preuve primaire.
+UPDATE public.local_budgets
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+UPDATE public.budget_revenue_sources
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+
+-- Un rapprochement DGMP sans identifiant de document primaire et page exacte
+-- reste à vérifier, même si une ancienne version portait le libellé VERIFIED.
+UPDATE public.ca_procurement_matches
+  SET verification_status = 'TO_VERIFY'
+  WHERE verification_status IN ('Vérifié DGMP', 'VERIFIED', 'OFFICIAL_DOCUMENT')
+    AND (source_document_id IS NULL OR source_page IS NULL);
+
+DROP POLICY IF EXISTS "Allow admin write on sources" ON public.sources;
+CREATE POLICY "Allow admin write on sources"
+  ON public.sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin full access on local budgets" ON public.local_budgets;
+CREATE POLICY "Allow admin full access on local budgets"
+  ON public.local_budgets FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget sources" ON public.budget_sources;
+CREATE POLICY "Allow admin write on budget sources"
+  ON public.budget_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget revenue sources" ON public.budget_revenue_sources;
+CREATE POLICY "Allow admin write on budget revenue sources"
+  ON public.budget_revenue_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget lines" ON public.budget_lines;
+CREATE POLICY "Allow admin write on budget lines"
+  ON public.budget_lines FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin read on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin read on budget revisions"
+  ON public.budget_revision_history FOR SELECT TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER','AUDITOR']));
+
+DROP POLICY IF EXISTS "Allow admin insert on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin insert on budget revisions"
+  ON public.budget_revision_history FOR INSERT TO authenticated
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+-- Les mêmes défauts d'autorisation existaient sur les Comptes Administratifs,
+-- leurs opérations, les marchés associés et les réponses institutionnelles.
+DROP POLICY IF EXISTS "Allow admin full access on CA" ON public.administrative_accounts;
+CREATE POLICY "Allow admin full access on CA"
+  ON public.administrative_accounts FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA operations" ON public.ca_investment_operations;
+CREATE POLICY "Allow admin write on CA operations"
+  ON public.ca_investment_operations FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA procurement matches" ON public.ca_procurement_matches;
+CREATE POLICY "Allow admin write on CA procurement matches"
+  ON public.ca_procurement_matches FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin and moderator full access on responses" ON public.ca_institution_responses;
+CREATE POLICY "Allow admin and moderator full access on responses"
+  ON public.ca_institution_responses FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+
+-- Champs de preuve primaire manquants sur les rapprochements DGMP.
+ALTER TABLE public.ca_procurement_matches
+  ADD COLUMN IF NOT EXISTS source_document_id text REFERENCES public.public_documents(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS source_page integer;
+
+-- Suppression des anciennes politiques permissives fondées sur user_metadata.
+-- Les politiques de publication et de gestion staff ci-dessous sont déjà
+-- remplacées par les migrations de frontières de publication et de persistance.
+DROP POLICY IF EXISTS "Allow admin write access on projects" ON public.projects;
+CREATE POLICY "Allow admin write access on projects"
+  ON public.projects FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow moderators full management on citizen proofs" ON public.citizen_proofs;
+CREATE POLICY "Allow moderators full management on citizen proofs"
+  ON public.citizen_proofs FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+
+DROP POLICY IF EXISTS "Allow admin only read on newsletter subscribers" ON public.newsletter_subscribers;
+CREATE POLICY "Allow admin only read on newsletter subscribers"
+  ON public.newsletter_subscribers FOR SELECT TO authenticated
+  USING (private.has_staff_role(array['ADMIN']));
+
+-- Les documents sont déjà gérés par "Staff manage documents" et les fichiers
+-- par les politiques de staging privées basées sur private.has_staff_role.
+DROP POLICY IF EXISTS "Allow staff full access on public documents" ON public.public_documents;
+DROP POLICY IF EXISTS "Staff can upload public documents files" ON storage.objects;
+DROP POLICY IF EXISTS "Staff can delete public documents files" ON storage.objects;
+DROP POLICY IF EXISTS "Public documents files are publicly readable" ON storage.objects;
+
+COMMIT;
+ THEN
+        RAISE EXCEPTION 'BP type/version required';
+      END IF;
+      identity_parts := jsonb_build_array(kind,inst.id,r ->> 'fiscal_year',d ->> 'budget_type',d ->> 'version_number');
+    WHEN 'CA' THEN
+      money := ARRAY['operating_planned','operating_realized','operating_revenue_realized','investment_planned','investment_realized','investment_revenue_realized','total_planned','total_realized','surplus_or_deficit','operating_revenue_planned','operating_revenue_emitted','operating_revenue_collected','operating_expenditure_planned','operating_expenditure_engaged','investment_revenue_planned','investment_revenue_emitted','investment_revenue_collected','investment_expenditure_planned','investment_expenditure_engaged','total_revenue_collected','total_expenditure_engaged','arithmetic_difference'];
+      allowed := money || ARRAY['source_page','source_document_id','approval_date','prefecture_visa_date','notes','verification_status'];
+      identity_parts := jsonb_build_array(kind,inst.id,r ->> 'fiscal_year');
+    WHEN 'OPERATION' THEN
+      money := ARRAY['planned_amount','executed_amount'];
+      allowed := money || ARRAY['ca_id','operation_reference','title','sector','location','source_page','notes'];
+      IF COALESCE(btrim(d ->> 'ca_id'),'') = '' OR COALESCE(btrim(d ->> 'operation_reference'),'') = '' THEN
+        RAISE EXCEPTION 'CA id and operation reference required';
+      END IF;
+      identity_parts := jsonb_build_array(kind,inst.id,r ->> 'fiscal_year',d ->> 'ca_id',d ->> 'operation_reference');
+    WHEN 'DGMP' THEN
+      money := ARRAY['award_amount'];
+      allowed := money || ARRAY['source_page','source_document_id','operation_id','tender_number','contract_number','procurement_object','contractor','award_date','lot','match_level','match_evidence','notes'];
+      IF COALESCE(btrim(d ->> 'tender_number'),'') = '' THEN RAISE EXCEPTION 'Tender number required'; END IF;
+      IF COALESCE(d ->> 'match_level','') NOT IN ('STRONG','PARTIAL','NONE','TO_VERIFY') THEN RAISE EXCEPTION 'Explicit matching status required'; END IF;
+      identity_parts := jsonb_build_array(kind,inst.id,r ->> 'fiscal_year',d ->> 'tender_number',COALESCE(d ->> 'lot',''));
+    ELSE
+      RAISE EXCEPTION 'Unknown import kind';
+  END CASE;
+
+  FOR k,v IN SELECT * FROM jsonb_each(d) LOOP
+    IF NOT k = ANY(allowed) THEN RAISE EXCEPTION 'Unsupported data field: %',k; END IF;
+    IF k = ANY(money) THEN
+      IF COALESCE(r -> 'precision' ->> k,'') NOT IN ('EXACT','APPROXIMATE','LOWER_BOUND','UNKNOWN') THEN RAISE EXCEPTION 'Amount precision required: %',k; END IF;
+      IF r -> 'precision' ->> k = 'UNKNOWN' THEN
+        IF v <> 'null'::jsonb THEN RAISE EXCEPTION 'UNKNOWN amount must be null'; END IF;
+      ELSIF jsonb_typeof(v) IS DISTINCT FROM 'number'
+        OR v::text !~ '^-?[0-9]+
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $
+DECLARE
+  row_data jsonb := to_jsonb(NEW);
+  source_id text;
+  source_url_value text;
+  source_page_value integer;
+  evidence_status text;
+  needs_page boolean := true;
+BEGIN
+  source_id := row_data ->> 'source_document_id';
+  source_url_value := COALESCE(row_data ->> 'source_url', row_data ->> 'document_url');
+  source_page_value := NULLIF(row_data ->> 'source_page', '')::integer;
+
+  IF TG_TABLE_NAME = 'budget_projects' THEN
+    evidence_status := row_data ->> 'financial_verification_status';
+  ELSE
+    evidence_status := row_data ->> 'verification_status';
+  END IF;
+
+  IF TG_TABLE_NAME = 'administrative_accounts' THEN
+    needs_page := false; -- la page est portée par chaque opération du CA
+  END IF;
+
+  IF evidence_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'OFFICIAL_SOURCE', 'VERIFIED', 'Vérifié DGMP') THEN
+    IF source_id IS NULL OR source_url_value IS NULL
+       OR source_url_value !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)' THEN
+      RAISE EXCEPTION 'Certification primaire refusée : identifiant documentaire et URL institutionnelle HTTPS obligatoires';
+    END IF;
+    IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
+      RAISE EXCEPTION 'Certification primaire refusée : page exacte du document obligatoire';
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM public.public_documents d
+      WHERE d.id = source_id
+        AND d.status = 'PUBLISHED'
+        AND d.verification_status = 'VERIFIED'
+        AND d.checksum_status = 'VERIFIED'
+        AND d.checksum_sha256 IS NOT NULL
+    ) THEN
+      RAISE EXCEPTION 'Certification primaire refusée : le document lié doit être publié, vérifié et doté d’une empreinte SHA-256 vérifiée';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$;
+
+DROP TRIGGER IF EXISTS enforce_local_budget_primary_evidence ON public.local_budgets;
+CREATE TRIGGER enforce_local_budget_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, document_url
+  ON public.local_budgets FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_administrative_account_primary_evidence ON public.administrative_accounts;
+CREATE TRIGGER enforce_administrative_account_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_url
+  ON public.administrative_accounts FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_procurement_primary_evidence ON public.ca_procurement_matches;
+CREATE TRIGGER enforce_procurement_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url
+  ON public.ca_procurement_matches FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_budget_project_primary_evidence ON public.budget_projects;
+CREATE TRIGGER enforce_budget_project_primary_evidence
+  BEFORE INSERT OR UPDATE OF financial_verification_status, data_provenance, source_document_id, source_page, source_url
+  ON public.budget_projects FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+-- Les anciens statuts AIP_VERIFIED ne doivent plus être présentés comme preuve primaire.
+UPDATE public.local_budgets
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+UPDATE public.budget_revenue_sources
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+
+-- Un rapprochement DGMP sans identifiant de document primaire et page exacte
+-- reste à vérifier, même si une ancienne version portait le libellé VERIFIED.
+UPDATE public.ca_procurement_matches
+  SET verification_status = 'TO_VERIFY'
+  WHERE verification_status IN ('Vérifié DGMP', 'VERIFIED', 'OFFICIAL_DOCUMENT')
+    AND (source_document_id IS NULL OR source_page IS NULL);
+
+DROP POLICY IF EXISTS "Allow admin write on sources" ON public.sources;
+CREATE POLICY "Allow admin write on sources"
+  ON public.sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin full access on local budgets" ON public.local_budgets;
+CREATE POLICY "Allow admin full access on local budgets"
+  ON public.local_budgets FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget sources" ON public.budget_sources;
+CREATE POLICY "Allow admin write on budget sources"
+  ON public.budget_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget revenue sources" ON public.budget_revenue_sources;
+CREATE POLICY "Allow admin write on budget revenue sources"
+  ON public.budget_revenue_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget lines" ON public.budget_lines;
+CREATE POLICY "Allow admin write on budget lines"
+  ON public.budget_lines FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin read on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin read on budget revisions"
+  ON public.budget_revision_history FOR SELECT TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER','AUDITOR']));
+
+DROP POLICY IF EXISTS "Allow admin insert on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin insert on budget revisions"
+  ON public.budget_revision_history FOR INSERT TO authenticated
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+-- Les mêmes défauts d'autorisation existaient sur les Comptes Administratifs,
+-- leurs opérations, les marchés associés et les réponses institutionnelles.
+DROP POLICY IF EXISTS "Allow admin full access on CA" ON public.administrative_accounts;
+CREATE POLICY "Allow admin full access on CA"
+  ON public.administrative_accounts FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA operations" ON public.ca_investment_operations;
+CREATE POLICY "Allow admin write on CA operations"
+  ON public.ca_investment_operations FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA procurement matches" ON public.ca_procurement_matches;
+CREATE POLICY "Allow admin write on CA procurement matches"
+  ON public.ca_procurement_matches FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin and moderator full access on responses" ON public.ca_institution_responses;
+CREATE POLICY "Allow admin and moderator full access on responses"
+  ON public.ca_institution_responses FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+
+-- Champs de preuve primaire manquants sur les rapprochements DGMP.
+ALTER TABLE public.ca_procurement_matches
+  ADD COLUMN IF NOT EXISTS source_document_id text REFERENCES public.public_documents(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS source_page integer;
+
+-- Suppression des anciennes politiques permissives fondées sur user_metadata.
+-- Les politiques de publication et de gestion staff ci-dessous sont déjà
+-- remplacées par les migrations de frontières de publication et de persistance.
+DROP POLICY IF EXISTS "Allow admin write access on projects" ON public.projects;
+CREATE POLICY "Allow admin write access on projects"
+  ON public.projects FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow moderators full management on citizen proofs" ON public.citizen_proofs;
+CREATE POLICY "Allow moderators full management on citizen proofs"
+  ON public.citizen_proofs FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+
+DROP POLICY IF EXISTS "Allow admin only read on newsletter subscribers" ON public.newsletter_subscribers;
+CREATE POLICY "Allow admin only read on newsletter subscribers"
+  ON public.newsletter_subscribers FOR SELECT TO authenticated
+  USING (private.has_staff_role(array['ADMIN']));
+
+-- Les documents sont déjà gérés par "Staff manage documents" et les fichiers
+-- par les politiques de staging privées basées sur private.has_staff_role.
+DROP POLICY IF EXISTS "Allow staff full access on public documents" ON public.public_documents;
+DROP POLICY IF EXISTS "Staff can upload public documents files" ON storage.objects;
+DROP POLICY IF EXISTS "Staff can delete public documents files" ON storage.objects;
+DROP POLICY IF EXISTS "Public documents files are publicly readable" ON storage.objects;
+
+COMMIT;
+
+        OR abs(v::text::numeric) > 9007199254740991
+        OR (v::text::numeric < 0 AND k NOT IN ('surplus_or_deficit','arithmetic_difference')) THEN
+        RAISE EXCEPTION 'Invalid FCFA integer: %',k;
+      END IF;
+    ELSIF k = 'source_page' THEN
+      IF v::text !~ '^[1-9][0-9]*
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $
+DECLARE
+  row_data jsonb := to_jsonb(NEW);
+  source_id text;
+  source_url_value text;
+  source_page_value integer;
+  evidence_status text;
+  needs_page boolean := true;
+BEGIN
+  source_id := row_data ->> 'source_document_id';
+  source_url_value := COALESCE(row_data ->> 'source_url', row_data ->> 'document_url');
+  source_page_value := NULLIF(row_data ->> 'source_page', '')::integer;
+
+  IF TG_TABLE_NAME = 'budget_projects' THEN
+    evidence_status := row_data ->> 'financial_verification_status';
+  ELSE
+    evidence_status := row_data ->> 'verification_status';
+  END IF;
+
+  IF TG_TABLE_NAME = 'administrative_accounts' THEN
+    needs_page := false; -- la page est portée par chaque opération du CA
+  END IF;
+
+  IF evidence_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'OFFICIAL_SOURCE', 'VERIFIED', 'Vérifié DGMP') THEN
+    IF source_id IS NULL OR source_url_value IS NULL
+       OR source_url_value !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)' THEN
+      RAISE EXCEPTION 'Certification primaire refusée : identifiant documentaire et URL institutionnelle HTTPS obligatoires';
+    END IF;
+    IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
+      RAISE EXCEPTION 'Certification primaire refusée : page exacte du document obligatoire';
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM public.public_documents d
+      WHERE d.id = source_id
+        AND d.status = 'PUBLISHED'
+        AND d.verification_status = 'VERIFIED'
+        AND d.checksum_status = 'VERIFIED'
+        AND d.checksum_sha256 IS NOT NULL
+    ) THEN
+      RAISE EXCEPTION 'Certification primaire refusée : le document lié doit être publié, vérifié et doté d’une empreinte SHA-256 vérifiée';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$;
+
+DROP TRIGGER IF EXISTS enforce_local_budget_primary_evidence ON public.local_budgets;
+CREATE TRIGGER enforce_local_budget_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, document_url
+  ON public.local_budgets FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_administrative_account_primary_evidence ON public.administrative_accounts;
+CREATE TRIGGER enforce_administrative_account_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_url
+  ON public.administrative_accounts FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_procurement_primary_evidence ON public.ca_procurement_matches;
+CREATE TRIGGER enforce_procurement_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url
+  ON public.ca_procurement_matches FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_budget_project_primary_evidence ON public.budget_projects;
+CREATE TRIGGER enforce_budget_project_primary_evidence
+  BEFORE INSERT OR UPDATE OF financial_verification_status, data_provenance, source_document_id, source_page, source_url
+  ON public.budget_projects FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+-- Les anciens statuts AIP_VERIFIED ne doivent plus être présentés comme preuve primaire.
+UPDATE public.local_budgets
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+UPDATE public.budget_revenue_sources
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+
+-- Un rapprochement DGMP sans identifiant de document primaire et page exacte
+-- reste à vérifier, même si une ancienne version portait le libellé VERIFIED.
+UPDATE public.ca_procurement_matches
+  SET verification_status = 'TO_VERIFY'
+  WHERE verification_status IN ('Vérifié DGMP', 'VERIFIED', 'OFFICIAL_DOCUMENT')
+    AND (source_document_id IS NULL OR source_page IS NULL);
+
+DROP POLICY IF EXISTS "Allow admin write on sources" ON public.sources;
+CREATE POLICY "Allow admin write on sources"
+  ON public.sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin full access on local budgets" ON public.local_budgets;
+CREATE POLICY "Allow admin full access on local budgets"
+  ON public.local_budgets FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget sources" ON public.budget_sources;
+CREATE POLICY "Allow admin write on budget sources"
+  ON public.budget_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget revenue sources" ON public.budget_revenue_sources;
+CREATE POLICY "Allow admin write on budget revenue sources"
+  ON public.budget_revenue_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget lines" ON public.budget_lines;
+CREATE POLICY "Allow admin write on budget lines"
+  ON public.budget_lines FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin read on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin read on budget revisions"
+  ON public.budget_revision_history FOR SELECT TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER','AUDITOR']));
+
+DROP POLICY IF EXISTS "Allow admin insert on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin insert on budget revisions"
+  ON public.budget_revision_history FOR INSERT TO authenticated
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+-- Les mêmes défauts d'autorisation existaient sur les Comptes Administratifs,
+-- leurs opérations, les marchés associés et les réponses institutionnelles.
+DROP POLICY IF EXISTS "Allow admin full access on CA" ON public.administrative_accounts;
+CREATE POLICY "Allow admin full access on CA"
+  ON public.administrative_accounts FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA operations" ON public.ca_investment_operations;
+CREATE POLICY "Allow admin write on CA operations"
+  ON public.ca_investment_operations FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA procurement matches" ON public.ca_procurement_matches;
+CREATE POLICY "Allow admin write on CA procurement matches"
+  ON public.ca_procurement_matches FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin and moderator full access on responses" ON public.ca_institution_responses;
+CREATE POLICY "Allow admin and moderator full access on responses"
+  ON public.ca_institution_responses FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+
+-- Champs de preuve primaire manquants sur les rapprochements DGMP.
+ALTER TABLE public.ca_procurement_matches
+  ADD COLUMN IF NOT EXISTS source_document_id text REFERENCES public.public_documents(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS source_page integer;
+
+-- Suppression des anciennes politiques permissives fondées sur user_metadata.
+-- Les politiques de publication et de gestion staff ci-dessous sont déjà
+-- remplacées par les migrations de frontières de publication et de persistance.
+DROP POLICY IF EXISTS "Allow admin write access on projects" ON public.projects;
+CREATE POLICY "Allow admin write access on projects"
+  ON public.projects FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow moderators full management on citizen proofs" ON public.citizen_proofs;
+CREATE POLICY "Allow moderators full management on citizen proofs"
+  ON public.citizen_proofs FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+
+DROP POLICY IF EXISTS "Allow admin only read on newsletter subscribers" ON public.newsletter_subscribers;
+CREATE POLICY "Allow admin only read on newsletter subscribers"
+  ON public.newsletter_subscribers FOR SELECT TO authenticated
+  USING (private.has_staff_role(array['ADMIN']));
+
+-- Les documents sont déjà gérés par "Staff manage documents" et les fichiers
+-- par les politiques de staging privées basées sur private.has_staff_role.
+DROP POLICY IF EXISTS "Allow staff full access on public documents" ON public.public_documents;
+DROP POLICY IF EXISTS "Staff can upload public documents files" ON storage.objects;
+DROP POLICY IF EXISTS "Staff can delete public documents files" ON storage.objects;
+DROP POLICY IF EXISTS "Public documents files are publicly readable" ON storage.objects;
+
+COMMIT;
+ THEN RAISE EXCEPTION 'Positive source page required'; END IF;
+    ELSIF k <> 'version_number' AND jsonb_typeof(v) NOT IN ('string','null') THEN
+      RAISE EXCEPTION 'Invalid text field: %',k;
+    END IF;
+    IF k LIKE '%date' AND v <> 'null'::jsonb THEN PERFORM (d ->> k)::date; END IF;
+  END LOOP;
+
+  IF d ? 'source_document_id' AND NOT EXISTS (
+    SELECT 1 FROM public.public_documents pd WHERE pd.id = d ->> 'source_document_id'
+  ) THEN RAISE EXCEPTION 'Unknown source document id'; END IF;
+
+  IF d ->> 'verification_status' IN ('OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION') THEN
+    IF COALESCE(d ->> 'source_document_id','') = ''
+      OR COALESCE(d ->> 'source_page','') !~ '^[1-9][0-9]*
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $
+DECLARE
+  row_data jsonb := to_jsonb(NEW);
+  source_id text;
+  source_url_value text;
+  source_page_value integer;
+  evidence_status text;
+  needs_page boolean := true;
+BEGIN
+  source_id := row_data ->> 'source_document_id';
+  source_url_value := COALESCE(row_data ->> 'source_url', row_data ->> 'document_url');
+  source_page_value := NULLIF(row_data ->> 'source_page', '')::integer;
+
+  IF TG_TABLE_NAME = 'budget_projects' THEN
+    evidence_status := row_data ->> 'financial_verification_status';
+  ELSE
+    evidence_status := row_data ->> 'verification_status';
+  END IF;
+
+  IF TG_TABLE_NAME = 'administrative_accounts' THEN
+    needs_page := false; -- la page est portée par chaque opération du CA
+  END IF;
+
+  IF evidence_status IN ('OFFICIAL_DOCUMENT', 'OFFICIAL_INSTITUTION', 'OFFICIAL_SOURCE', 'VERIFIED', 'Vérifié DGMP') THEN
+    IF source_id IS NULL OR source_url_value IS NULL
+       OR source_url_value !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)' THEN
+      RAISE EXCEPTION 'Certification primaire refusée : identifiant documentaire et URL institutionnelle HTTPS obligatoires';
+    END IF;
+    IF needs_page AND (source_page_value IS NULL OR source_page_value <= 0) THEN
+      RAISE EXCEPTION 'Certification primaire refusée : page exacte du document obligatoire';
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM public.public_documents d
+      WHERE d.id = source_id
+        AND d.status = 'PUBLISHED'
+        AND d.verification_status = 'VERIFIED'
+        AND d.checksum_status = 'VERIFIED'
+        AND d.checksum_sha256 IS NOT NULL
+    ) THEN
+      RAISE EXCEPTION 'Certification primaire refusée : le document lié doit être publié, vérifié et doté d’une empreinte SHA-256 vérifiée';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$;
+
+DROP TRIGGER IF EXISTS enforce_local_budget_primary_evidence ON public.local_budgets;
+CREATE TRIGGER enforce_local_budget_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, document_url
+  ON public.local_budgets FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_administrative_account_primary_evidence ON public.administrative_accounts;
+CREATE TRIGGER enforce_administrative_account_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_url
+  ON public.administrative_accounts FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_procurement_primary_evidence ON public.ca_procurement_matches;
+CREATE TRIGGER enforce_procurement_primary_evidence
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url
+  ON public.ca_procurement_matches FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+DROP TRIGGER IF EXISTS enforce_budget_project_primary_evidence ON public.budget_projects;
+CREATE TRIGGER enforce_budget_project_primary_evidence
+  BEFORE INSERT OR UPDATE OF financial_verification_status, data_provenance, source_document_id, source_page, source_url
+  ON public.budget_projects FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
+
+-- Les anciens statuts AIP_VERIFIED ne doivent plus être présentés comme preuve primaire.
+UPDATE public.local_budgets
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+UPDATE public.budget_revenue_sources
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+
+-- Un rapprochement DGMP sans identifiant de document primaire et page exacte
+-- reste à vérifier, même si une ancienne version portait le libellé VERIFIED.
+UPDATE public.ca_procurement_matches
+  SET verification_status = 'TO_VERIFY'
+  WHERE verification_status IN ('Vérifié DGMP', 'VERIFIED', 'OFFICIAL_DOCUMENT')
+    AND (source_document_id IS NULL OR source_page IS NULL);
+
+DROP POLICY IF EXISTS "Allow admin write on sources" ON public.sources;
+CREATE POLICY "Allow admin write on sources"
+  ON public.sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin full access on local budgets" ON public.local_budgets;
+CREATE POLICY "Allow admin full access on local budgets"
+  ON public.local_budgets FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget sources" ON public.budget_sources;
+CREATE POLICY "Allow admin write on budget sources"
+  ON public.budget_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget revenue sources" ON public.budget_revenue_sources;
+CREATE POLICY "Allow admin write on budget revenue sources"
+  ON public.budget_revenue_sources FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on budget lines" ON public.budget_lines;
+CREATE POLICY "Allow admin write on budget lines"
+  ON public.budget_lines FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin read on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin read on budget revisions"
+  ON public.budget_revision_history FOR SELECT TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER','AUDITOR']));
+
+DROP POLICY IF EXISTS "Allow admin insert on budget revisions" ON public.budget_revision_history;
+CREATE POLICY "Allow admin insert on budget revisions"
+  ON public.budget_revision_history FOR INSERT TO authenticated
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+-- Les mêmes défauts d'autorisation existaient sur les Comptes Administratifs,
+-- leurs opérations, les marchés associés et les réponses institutionnelles.
+DROP POLICY IF EXISTS "Allow admin full access on CA" ON public.administrative_accounts;
+CREATE POLICY "Allow admin full access on CA"
+  ON public.administrative_accounts FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA operations" ON public.ca_investment_operations;
+CREATE POLICY "Allow admin write on CA operations"
+  ON public.ca_investment_operations FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin write on CA procurement matches" ON public.ca_procurement_matches;
+CREATE POLICY "Allow admin write on CA procurement matches"
+  ON public.ca_procurement_matches FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow admin and moderator full access on responses" ON public.ca_institution_responses;
+CREATE POLICY "Allow admin and moderator full access on responses"
+  ON public.ca_institution_responses FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+
+-- Champs de preuve primaire manquants sur les rapprochements DGMP.
+ALTER TABLE public.ca_procurement_matches
+  ADD COLUMN IF NOT EXISTS source_document_id text REFERENCES public.public_documents(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS source_page integer;
+
+-- Suppression des anciennes politiques permissives fondées sur user_metadata.
+-- Les politiques de publication et de gestion staff ci-dessous sont déjà
+-- remplacées par les migrations de frontières de publication et de persistance.
+DROP POLICY IF EXISTS "Allow admin write access on projects" ON public.projects;
+CREATE POLICY "Allow admin write access on projects"
+  ON public.projects FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','DATA_MANAGER']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','DATA_MANAGER']));
+
+DROP POLICY IF EXISTS "Allow moderators full management on citizen proofs" ON public.citizen_proofs;
+CREATE POLICY "Allow moderators full management on citizen proofs"
+  ON public.citizen_proofs FOR ALL TO authenticated
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
+
+DROP POLICY IF EXISTS "Allow admin only read on newsletter subscribers" ON public.newsletter_subscribers;
+CREATE POLICY "Allow admin only read on newsletter subscribers"
+  ON public.newsletter_subscribers FOR SELECT TO authenticated
+  USING (private.has_staff_role(array['ADMIN']));
+
+-- Les documents sont déjà gérés par "Staff manage documents" et les fichiers
+-- par les politiques de staging privées basées sur private.has_staff_role.
+DROP POLICY IF EXISTS "Allow staff full access on public documents" ON public.public_documents;
+DROP POLICY IF EXISTS "Staff can upload public documents files" ON storage.objects;
+DROP POLICY IF EXISTS "Staff can delete public documents files" ON storage.objects;
+DROP POLICY IF EXISTS "Public documents files are publicly readable" ON storage.objects;
+
+COMMIT;
+
+      OR COALESCE(s ->> 'url','') !~* '^https://([a-z0-9-]+\\.)*(dgbf\\.ci|marchespublics\\.ci|courdescomptes\\.ci|gouv\\.ci)(/|$)'
+      OR NOT EXISTS (
+        SELECT 1 FROM public.public_documents pd
+        WHERE pd.id = d ->> 'source_document_id'
+          AND pd.status = 'PUBLISHED'
+          AND pd.verification_status = 'VERIFIED'
+          AND pd.checksum_status = 'VERIFIED'
+          AND pd.checksum_sha256 IS NOT NULL
+      ) THEN
+      RAISE EXCEPTION 'Primary document requires a published, checksum-verified catalogue record, official URL and exact page';
+    END IF;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM jsonb_object_keys(r -> 'precision') x
+    WHERE NOT x = ANY(money) OR NOT d ? x
+  ) THEN RAISE EXCEPTION 'Precision without matching amount'; END IF;
+
+  RETURN 'import-' || encode(sha256(convert_to(identity_parts::text,'UTF8')),'hex');
+END;
+$;
+REVOKE ALL ON FUNCTION private.validate_import_row(jsonb) FROM public,anon,authenticated,service_role;
+
 -- Garde-fou serveur : une écriture directe ou un import ne peut pas contourner
 -- les exigences de pièce officielle vérifiée, d'URL institutionnelle et de page.
 CREATE OR REPLACE FUNCTION private.enforce_primary_document_evidence()
