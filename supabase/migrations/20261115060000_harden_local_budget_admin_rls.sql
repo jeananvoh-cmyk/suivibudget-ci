@@ -15,6 +15,21 @@ ALTER TABLE public.local_budgets
 ALTER TABLE public.budget_revenue_sources
   ALTER COLUMN verification_status SET DEFAULT 'DOCUMENT_TO_EXTRACT';
 
+-- Les anciens statuts AIP_VERIFIED ne doivent plus être présentés comme preuve primaire.
+UPDATE public.local_budgets
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+UPDATE public.budget_revenue_sources
+  SET verification_status = 'SECONDARY_TO_CORROBORATE'
+  WHERE verification_status = 'AIP_VERIFIED';
+
+-- Un rapprochement DGMP sans identifiant de document primaire et page exacte
+-- reste à vérifier, même si une ancienne version portait le libellé VERIFIED.
+UPDATE public.ca_procurement_matches
+  SET verification_status = 'TO_VERIFY'
+  WHERE verification_status IN ('Vérifié DGMP', 'VERIFIED', 'OFFICIAL_DOCUMENT')
+    AND (source_document_id IS NULL OR source_page IS NULL);
+
 DROP POLICY IF EXISTS "Allow admin write on sources" ON public.sources;
 CREATE POLICY "Allow admin write on sources"
   ON public.sources FOR ALL TO authenticated
