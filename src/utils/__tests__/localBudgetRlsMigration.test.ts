@@ -30,7 +30,7 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toContain('DROP POLICY IF EXISTS "Public documents files are publicly readable"');
     expect(migration).toContain('DROP POLICY IF EXISTS "Staff can upload public documents files"');
     expect(migration).toContain('DROP POLICY IF EXISTS "Staff can delete public documents files"');
-    expect(migration).toContain('d.checksum_status IN (\'COMPUTED\',\'VERIFIED\')');
+    expect(migration).toContain('d.checksum_status IN (\'COMPUTED\', \'VERIFIED\')');
   });
 
   it('replaces every local-budget administrative policy with trusted role checks', () => {
