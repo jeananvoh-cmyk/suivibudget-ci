@@ -17,12 +17,11 @@ import type { AmountPrecision } from '../types/localBudget';
  *   sans jamais formuler d'accusation.
  */
 export function calculateExecutionRate(realizedAmount: number | null | undefined, plannedAmount: number | null | undefined, realizedPrecision: AmountPrecision = 'EXACT', plannedPrecision: AmountPrecision = 'EXACT'): ExecutionRateResult {
-  if (realizedAmount == null || plannedAmount == null || !Number.isFinite(realizedAmount) || !Number.isFinite(plannedAmount) || realizedPrecision !== 'EXACT' || plannedPrecision !== 'EXACT') {
+  if (realizedAmount == null || plannedAmount == null || !Number.isFinite(realizedAmount) || !Number.isFinite(plannedAmount) || realizedAmount < 0 || plannedAmount < 0 || realizedPrecision !== 'EXACT' || plannedPrecision !== 'EXACT') {
     return { rate: null, formatted: 'Non calculable', status: 'UNKNOWN', isOverBudget: false, statusLabel: 'Montants à confirmer ou qualifiés : taux non calculé', badgeClass: 'bg-slate-100 text-slate-700 border-slate-300' };
   }
-  // Protection contre les valeurs négatives ou non définies
-  const realized = Math.max(0, realizedAmount || 0);
-  const planned = Math.max(0, plannedAmount || 0);
+  const realized = realizedAmount;
+  const planned = plannedAmount;
 
   // Cas 1 : Prévision nulle
   if (planned === 0) {

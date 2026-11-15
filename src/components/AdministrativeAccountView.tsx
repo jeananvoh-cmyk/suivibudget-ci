@@ -544,12 +544,12 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
     );
   }
 
-  // Calculate sections shares
-  const totalRealized = currentCA.total_realized || 0;
-  const operatingShare = totalRealized > 0 && currentCA.operating_realized != null
+  // Calculate sections shares (never coerce null to 0)
+  const totalRealized = currentCA.total_realized != null && Number.isFinite(currentCA.total_realized) ? currentCA.total_realized : null;
+  const operatingShare = totalRealized != null && totalRealized > 0 && currentCA.operating_realized != null
     ? Math.round((currentCA.operating_realized / totalRealized) * 100)
     : null;
-  const investmentShare = totalRealized > 0 && currentCA.investment_realized != null
+  const investmentShare = totalRealized != null && totalRealized > 0 && currentCA.investment_realized != null
     ? Math.round((currentCA.investment_realized / totalRealized) * 100)
     : null;
 
@@ -578,11 +578,11 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
       ? "Dépenses engagées au titre de l'exercice clos (stade d'ordonnancement à confirmer sur pièce)."
       : "Dépenses exécutées au titre de l'exercice clos (stade comptable précis à confirmer sur pièce).";
 
-  // Priority 5.3: Closing result and arithmetic difference resolution
+  // Priority 5.3: Closing result and arithmetic difference resolution (strict completeness required)
   const totalRevenueResolved =
     currentCA.total_revenue_collected ??
-    (currentCA.operating_revenue_realized != null || currentCA.investment_revenue_realized != null
-      ? (currentCA.operating_revenue_realized || 0) + (currentCA.investment_revenue_realized || 0)
+    (currentCA.operating_revenue_realized != null && currentCA.investment_revenue_realized != null
+      ? currentCA.operating_revenue_realized + currentCA.investment_revenue_realized
       : null);
 
   const calculatedArithmeticDiff =

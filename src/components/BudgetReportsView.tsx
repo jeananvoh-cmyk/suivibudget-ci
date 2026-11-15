@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { BudgetProject } from '../types';
 import { dataStore } from '../services/dataStore';
 import { formatFCFA, formatAmountInWords, formatDateFR } from '../utils/formatters';
 import { normalizeSectorCategory } from '../utils/publicIndicators';
@@ -42,11 +43,13 @@ export const BudgetReportsView: React.FC = () => {
       filteredProjects = projects2026.filter(p => p.scope_level === 'LOCAL');
     }
 
-    const totalAmount = filteredProjects.reduce((sum, p) => sum + (p.budget_amount_fcfa ?? 0), 0);
+    const sumDocumented = (list: BudgetProject[]) =>
+      list.reduce((sum, p) => (p.budget_amount_fcfa != null && Number.isFinite(p.budget_amount_fcfa) ? sum + p.budget_amount_fcfa : sum), 0);
+    const totalAmount = sumDocumented(filteredProjects);
     const nationalCount = filteredProjects.filter(p => p.scope_level === 'NATIONAL').length;
     const localCount = filteredProjects.filter(p => p.scope_level === 'LOCAL').length;
-    const nationalAmount = filteredProjects.filter(p => p.scope_level === 'NATIONAL').reduce((sum, p) => sum + (p.budget_amount_fcfa ?? 0), 0);
-    const localAmount = filteredProjects.filter(p => p.scope_level === 'LOCAL').reduce((sum, p) => sum + (p.budget_amount_fcfa ?? 0), 0);
+    const nationalAmount = sumDocumented(filteredProjects.filter(p => p.scope_level === 'NATIONAL'));
+    const localAmount = sumDocumented(filteredProjects.filter(p => p.scope_level === 'LOCAL'));
 
     // Top entities in this report
     const entityMap = new Map<string, { name: string; amount: number; count: number }>();
@@ -62,11 +65,13 @@ export const BudgetReportsView: React.FC = () => {
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 8);
 
-    // Categories breakdown
+    // Categories breakdown (only documented finite amounts)
     const catMap = new Map<string, number>();
     filteredProjects.forEach(p => {
       const cat = p.category || 'Autres';
-      catMap.set(cat, (catMap.get(cat) || 0) + (p.budget_amount_fcfa ?? 0));
+      const current = catMap.get(cat) ?? 0;
+      const delta = p.budget_amount_fcfa != null && Number.isFinite(p.budget_amount_fcfa) ? p.budget_amount_fcfa : 0;
+      catMap.set(cat, current + delta);
     });
 
     const categoryBreakdown = Array.from(catMap.entries())

@@ -1201,7 +1201,7 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
     result.notice = program
       ? `Programme interne de la Présidence, déjà inclus dans les 193 633 705 615 FCFA de la section 103. Ne pas additionner au total de la section.`
       : ministry
-        ? `${ministry.section_shared_with_other_portfolio ? 'Section partagée : compter une seule fois. ' : ''}Le vote porte sur la section historique de la LFI ; l’affectation au portefeuille remanié n’est pas établie. L’Annexe 4 décrit les programmes et actions, sans prouver un transfert de crédits.`
+        ? `${ministry.section_shared_with_other_portfolio ? 'Section partagée : compter une seule fois. ' : ''}Le vote porte sur la section historique de la LFI ; l’affectation au portefeuille remanié n’est pas établie. L’Annexe 4 décrit les programmes et actions, sans prouver un transfert de crédits.${id === 'gov-007' ? ' Distinction impérative section 322 : 671 323 963 425 FCFA correspondent aux CP des programmes ministériels (Article 15, PDF p. 15) ; 8 699 982 915 992 FCFA correspondent au total récapitulatif de la section 322 incluant les dotations globales et le service de la dette publique (tableau récapitulatif, PDF p. 46) ; 2 038 854 932 647 FCFA correspondent à un ancien agrégat d’annuaire (sections 322 et 328) non certifié.' : ''}`
         : 'Crédits votés pour la section, distincts des dépenses exécutées. La concordance du total ne certifie pas une ventilation fonctionnement/investissement.';
   }
   if (primitive) {
@@ -1298,4 +1298,29 @@ export function exportInstitutionBudget(institution: Partial<Institution>, forma
     index === 0 ? view.aggregation : 'SEPARATE_SCOPE', amount.source?.source_url, amount.source?.pdf_page, amount.source?.document_title, amount.source?.sha256, view.notice,
   ]);
   return [headers, ...rows].map(row => row.map(cell).join(';')).join('\n');
+}
+
+/**
+ * Calcule le total additif LFI 2026 des grandes institutions nationales (298 579 127 196 FCFA)
+ * en excluant strictement les programmes internes de la Présidence (IGE : 9 872 577 575 FCFA,
+ * HABG : 5 552 174 916 FCFA) déjà inclus dans les 193 633 705 615 FCFA de la section 103.
+ */
+export function getAdditiveNationalInstitutionsLfiTotal(): number {
+  return Object.values(NATIONAL_INSTITUTIONS_SECTIONS)
+    .filter(entry => !entry.program_code)
+    .reduce((sum, entry) => sum + entry.lfi_amount_fcfa, 0);
+}
+
+/**
+ * Calcule le total additif des CP votés LFI 2026 pour les 34 sections ministérielles uniques
+ * (sur 35 portefeuilles), en comptant une seule fois la section 229 partagée entre gov-009 et gov-035.
+ */
+export function getAdditiveMinistriesVotedCpTotal(): number {
+  const uniqueSections = new Map<string, number>();
+  for (const row of legalCP.rows) {
+    if (!uniqueSections.has(row.section_code)) {
+      uniqueSections.set(row.section_code, row.voted_section_cp_2026_fcfa);
+    }
+  }
+  return Array.from(uniqueSections.values()).reduce((sum, cp) => sum + cp, 0);
 }

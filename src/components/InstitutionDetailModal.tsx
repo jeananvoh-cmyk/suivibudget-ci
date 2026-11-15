@@ -472,11 +472,13 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
     return matchesSearch && matchesCat && matchesTier;
   });
 
-  const totalProjectsBudget = relatedProjects.reduce((sum, p) => sum + (p.budget_amount_fcfa || 0), 0);
+  const sumDocumentedProjectBudgets = (items: BudgetProject[]) =>
+    items.reduce((sum, p) => (p.budget_amount_fcfa != null && Number.isFinite(p.budget_amount_fcfa) ? sum + p.budget_amount_fcfa : sum), 0);
+  const totalProjectsBudget = sumDocumentedProjectBudgets(relatedProjects);
   const projects2026 = relatedProjects.filter(p => (p.fiscal_year ?? 2026) === 2026);
   const priorMultiYearProjects = relatedProjects.filter(p => p.fiscal_year && p.fiscal_year < 2026);
-  const totalProjectsBudget2026 = projects2026.reduce((sum, p) => sum + (p.budget_amount_fcfa || 0), 0);
-  const totalPriorMultiYearBudget = priorMultiYearProjects.reduce((sum, p) => sum + (p.budget_amount_fcfa || 0), 0);
+  const totalProjectsBudget2026 = sumDocumentedProjectBudgets(projects2026);
+  const totalPriorMultiYearBudget = sumDocumentedProjectBudgets(priorMultiYearProjects);
   const isBouake = institution.id === 'inst-com-bouake' || institution.name.toLowerCase().includes('bouaké');
   const bouakePortalProjects = isBouake ? relatedProjects.filter(p => p.data_provenance === 'LOCAL_PORTAL_BOUAKE' || p.source?.includes('mairiedebouake.ci')) : [];
   const lfiProjects = isBouake ? relatedProjects.filter(p => !(p.data_provenance === 'LOCAL_PORTAL_BOUAKE' || p.source?.includes('mairiedebouake.ci'))) : relatedProjects;
@@ -1324,10 +1326,10 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                               </td>
                               <td className="p-3 pr-4 text-right font-black text-slate-900 break-words">
                                 <div className="text-sm text-slate-900">
-                                  {formatFCFA(filteredLines.reduce((acc, l) => acc + (l.montant_fcfa || 0), 0))}
+                                  {formatFCFA(filteredLines.reduce((acc, l) => (l.montant_fcfa != null && Number.isFinite(l.montant_fcfa) ? acc + l.montant_fcfa : acc), 0))}
                                 </div>
                                 <div className="text-[10px] font-bold text-slate-500 tracking-tight">
-                                  {formatAmountInWords(filteredLines.reduce((acc, l) => acc + (l.montant_fcfa || 0), 0))}
+                                  {formatAmountInWords(filteredLines.reduce((acc, l) => (l.montant_fcfa != null && Number.isFinite(l.montant_fcfa) ? acc + l.montant_fcfa : acc), 0))}
                                 </div>
                               </td>
                             </tr>

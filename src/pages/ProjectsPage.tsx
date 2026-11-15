@@ -159,8 +159,11 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
     return a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' });
   });
 
-  // Calculate stats
-  const totalBudgetFiltered = filteredProjects.reduce((acc, curr) => acc + (curr.budget_amount_fcfa ?? 0), 0);
+  // Calculate stats (sum only documented finite amounts; never coerce null to 0 FCFA on individual cards)
+  const totalBudgetFiltered = filteredProjects.reduce(
+    (acc, curr) => (curr.budget_amount_fcfa != null && Number.isFinite(curr.budget_amount_fcfa) ? acc + curr.budget_amount_fcfa : acc),
+    0
+  );
 
   // Pagination bounds
   const totalPages = Math.ceil(sortedProjects.length / PAGE_SIZE) || 1;

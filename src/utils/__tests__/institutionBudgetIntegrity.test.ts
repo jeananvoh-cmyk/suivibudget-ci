@@ -1,14 +1,21 @@
 import { describe, it, expect } from 'vitest';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { 
   resolveInstitutionBudgetPresentation,
+  resolveInstitutionFinancialView,
   assessInstitutionBudget, 
   calculateSafePercentages, 
+  getAdditiveNationalInstitutionsLfiTotal,
+  getAdditiveMinistriesVotedCpTotal,
   InstitutionBudgetAssessment 
 } from '../institutionBudgetHelper';
+import { calculateExecutionRate } from '../budgetCalculations';
 import { formatFCFA, formatAmountInWords } from '../formatters';
 import { NATIONAL_INSTITUTIONS_DATA } from '../../data/nationalBudgetData';
-import { ALL_COMMUNES_DATA } from '../../data/officialDataFromCsv';
+import { ALL_COMMUNES_DATA, ALL_REGIONS_DATA } from '../../data/officialDataFromCsv';
 import { getBudgetLinesForEntity } from '../../data/budgetLinesData';
+import { CommuneComparatorModal } from '../../components/CommuneComparatorModal';
 import { Institution } from '../../types';
 
 describe('Institution Budget Integrity & Safe Rendering', () => {
@@ -230,6 +237,97 @@ describe('Institution Budget Integrity & Safe Rendering', () => {
       expect(assessment.totalFormatted).toBe('0 FCFA (non vérifié)');
       expect(assessment.functioningPct).toBeNull();
       expect(assessment.investmentPct).toBeNull();
+    });
+  });
+
+  describe('Bloc 5: District Autonome d\'Abidjan, calculateExecutionRate, CommuneComparatorModal & Additive LFI Totals', () => {
+    it('does not retain an unverified 0 FCFA investment amount for District Autonome d\'Abidjan', () => {
+      const abidjan = ALL_REGIONS_DATA.find(r => r.id === 'inst-reg-district-autonome-d-abidjan')!;
+      expect(abidjan).toBeDefined();
+      expect(abidjan.budget_investment_fcfa).toBeNull();
+      expect(abidjan.budget_functioning_fcfa).toBeNull();
+      const view = resolveInstitutionFinancialView(abidjan, 2026);
+      expect(view.investment_amount_fcfa).toBeNull();
+      expect(view.investment_formatted).toBeNull();
+      expect(view.has_breakdown).toBe(false);
+    });
+
+    it('rejects null, undefined, and negative numbers in calculateExecutionRate without coercing to 0', () => {
+      expect(calculateExecutionRate(null, 1_000_000).status).toBe('UNKNOWN');
+      expect(calculateExecutionRate(500_000, null).status).toBe('UNKNOWN');
+      expect(calculateExecutionRate(-100, 1_000_000)).toMatchObject({ rate: null, formatted: 'Non calculable', status: 'UNKNOWN' });
+      expect(calculateExecutionRate(100, -1_000_000)).toMatchObject({ rate: null, formatted: 'Non calculable', status: 'UNKNOWN' });
+      expect(calculateExecutionRate(0, 1_000_000)).toMatchObject({ rate: 0, formatted: '0,00 %', status: 'ZERO_EXECUTED' });
+    });
+
+    it('renders "Comparaison non calculable (montant non documenté)" in CommuneComparatorModal when a commune budget is null', () => {
+      const mairies: Institution[] = [
+        {
+          id: 'inst-com-test-a',
+          name: 'Mairie Documentée',
+          type: 'MAIRIE',
+          region: 'Région A',
+          district: 'District A',
+          departement: 'Dép A',
+          address: '',
+          contact_email: '',
+          contact_phone: '',
+          info_officer_name: 'RI A',
+          info_officer_email: 'a@ci',
+          info_officer_phone: '',
+          budget_functioning_fcfa: null,
+          budget_investment_fcfa: null,
+          total_budget_fcfa: 500_000_000,
+        },
+        {
+          id: 'inst-com-test-b',
+          name: 'Mairie Non Documentée',
+          type: 'MAIRIE',
+          region: 'Région B',
+          district: 'District B',
+          departement: 'Dép B',
+          address: '',
+          contact_email: '',
+          contact_phone: '',
+          info_officer_name: 'RI B',
+          info_officer_email: 'b@ci',
+          info_officer_phone: '',
+          budget_functioning_fcfa: null,
+          budget_investment_fcfa: null,
+          total_budget_fcfa: null,
+        },
+      ];
+      const html = renderToStaticMarkup(
+        createElement(CommuneComparatorModal, {
+          isOpen: true,
+          onClose: () => {},
+          institutions: mairies,
+          projects: [],
+          initialCommuneA: mairies[0],
+          initialCommuneB: mairies[1],
+          onNavigateToProjects: () => {},
+        })
+      );
+      expect(html).toContain('Comparaison non calculable (montant non documenté)');
+      expect(html).toContain('Montant à confirmer');
+      expect(html).not.toContain('>0 FCFA<');
+    });
+
+    it('reconciles gov-007 three distinct amounts and prevents double-counting of section 103 (IGE/HABG) and section 229 (gov-009/gov-035)', () => {
+      const gov007 = resolveInstitutionBudgetPresentation({ id: 'gov-007', type: 'MINISTERE', total_budget_fcfa: 2_038_854_932_647 });
+      expect(gov007.reference.amount_fcfa).toBe(671_323_963_425);
+      expect(gov007.notice).toContain('671 323 963 425 FCFA');
+      expect(gov007.notice).toContain('8 699 982 915 992 FCFA');
+      expect(gov007.notice).toContain('2 038 854 932 647 FCFA');
+
+      // 11 unique sections for National Institutions = 298,579,127,196 FCFA (excluding IGE 9,872,577,575 + HABG 5,552,174,916 = 15,424,752,491)
+      expect(getAdditiveNationalInstitutionsLfiTotal()).toBe(298_579_127_196);
+      const rawNationalSum = NATIONAL_INSTITUTIONS_DATA.reduce((s, i) => s + (i.total_budget_fcfa ?? 0), 0);
+      expect(rawNationalSum - getAdditiveNationalInstitutionsLfiTotal()).toBe(9_872_577_575 + 5_552_174_916);
+
+      // 34 unique sections for 35 Ministries (counting shared section 229 = 333,878,089,526 FCFA once)
+      const uniqueMinistriesTotal = getAdditiveMinistriesVotedCpTotal();
+      expect(uniqueMinistriesTotal).toBeGreaterThan(0);
     });
   });
 });
