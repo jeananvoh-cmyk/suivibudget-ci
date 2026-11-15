@@ -79,7 +79,7 @@ describe('pre-GO privileged RPC exposure hardening', () => {
     );
     expect(policies.rows.map(row => row.policyname)).toEqual(['admin_entity_staff']);
     const legacyPublicPolicies = await db.query<{ tablename: string; policyname: string }>(
-      \"SELECT tablename,policyname FROM pg_policies WHERE schemaname='public' AND tablename IN ('projects','sources') AND cmd='SELECT' AND 'public'=ANY(roles)\"
+      `SELECT tablename,policyname FROM pg_policies WHERE schemaname='public' AND tablename IN ('projects','sources') AND cmd='SELECT' AND roles @> ARRAY['public']::name[]`
     );
     expect(legacyPublicPolicies.rows).toEqual([]);
   });
