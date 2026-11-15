@@ -4,6 +4,29 @@
 // =========================================================================
 
 import type { Institution } from '../types';
+/**
+ * Vérifie qu'une URL de preuve primaire appartient à un domaine institutionnel ivoirien autorisé.
+ * Les URL HTTPS de domaines tiers ne sont jamais suffisantes pour attribuer OFFICIAL_DOCUMENT.
+ */
+export function isOfficialPrimaryEvidenceUrl(value?: string | null): boolean {
+  if (!value) return false;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || url.username || url.password) return false;
+    const host = url.hostname.toLowerCase().replace(/^www\./, '');
+    return host === 'dgbf.ci'
+      || host.endsWith('.dgbf.ci')
+      || host === 'marchespublics.ci'
+      || host.endsWith('.marchespublics.ci')
+      || host === 'courdescomptes.ci'
+      || host.endsWith('.courdescomptes.ci')
+      || host.endsWith('.gouv.ci');
+  } catch {
+    return false;
+  }
+}
+
+
 import type { LocalBudget } from '../types/localBudget';
 import type { AdministrativeAccount } from '../types/administrativeAccount';
 import type {
@@ -402,8 +425,19 @@ export function runDocumentDryRun(
   }
 
   // Contrôle de la page source (Item 9)
-  if (metadata.source_page !== undefined && metadata.source_page <= 0) {
+  if (metadata.source_page !== undefined &&
+      (!Number.isInteger(metadata.source_page) || metadata.source_page <= 0)) {
     errors.push('Page source invalide : Le numéro de page doit être un entier strictement positif.');
+  }
+
+  // Une qualification primaire est impossible sans URL institutionnelle autorisée et page précise.
+  if (metadata.evidence_level === 'OFFICIAL_DOCUMENT' || metadata.evidence_level === 'OFFICIAL_INSTITUTION') {
+    if (!isOfficialPrimaryEvidenceUrl(metadata.source_url)) {
+      errors.push('Preuve primaire invalide : une URL HTTPS d’un domaine institutionnel ivoirien autorisé est obligatoire.');
+    }
+    if (!Number.isInteger(metadata.source_page) || (metadata.source_page ?? 0) <= 0) {
+      errors.push('Preuve primaire incomplète : la page exacte du document est obligatoire.');
+    }
   }
 
   // 4. Détection déterministe des doublons par fingerprint documentaire (Items 7 & 8)
