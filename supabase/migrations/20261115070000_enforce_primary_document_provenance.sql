@@ -32,16 +32,36 @@ ALTER TABLE public.budget_projects
 ALTER TABLE public.local_budgets
   ADD COLUMN IF NOT EXISTS source_document_id text REFERENCES public.public_documents(id) ON DELETE SET NULL,
   ADD COLUMN IF NOT EXISTS source_page integer;
-ALTER TABLE public.local_budgets
-  ADD CONSTRAINT local_budgets_source_page_positive
-  CHECK (source_page IS NULL OR source_page > 0);
+DO $
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'local_budgets_source_page_positive'
+      AND conrelid = 'public.local_budgets'::regclass
+  ) THEN
+    ALTER TABLE public.local_budgets
+      ADD CONSTRAINT local_budgets_source_page_positive
+      CHECK (source_page IS NULL OR source_page > 0);
+  END IF;
+END;
+$;
 
 ALTER TABLE public.ca_procurement_matches
   ADD COLUMN IF NOT EXISTS source_document_id text REFERENCES public.public_documents(id) ON DELETE SET NULL,
   ADD COLUMN IF NOT EXISTS source_page integer;
-ALTER TABLE public.ca_procurement_matches
-  ADD CONSTRAINT ca_procurement_matches_source_page_positive
-  CHECK (source_page IS NULL OR source_page > 0);
+DO $
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'ca_procurement_matches_source_page_positive'
+      AND conrelid = 'public.ca_procurement_matches'::regclass
+  ) THEN
+    ALTER TABLE public.ca_procurement_matches
+      ADD CONSTRAINT ca_procurement_matches_source_page_positive
+      CHECK (source_page IS NULL OR source_page > 0);
+  END IF;
+END;
+$;
 
 CREATE INDEX IF NOT EXISTS idx_local_budgets_source_document_id
   ON public.local_budgets(source_document_id);

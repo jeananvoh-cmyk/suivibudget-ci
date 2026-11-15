@@ -39,6 +39,7 @@ describe('RLS hardening — local budget administration', () => {
     const db = await createProductionSchemaFixture();
     try {
       await db.exec(migration);
+      await db.exec(migration);
       const defaults = await db.query<{ table_name: string; column_name: string; column_default: string | null }>(
         `SELECT table_name,column_name,column_default
          FROM information_schema.columns
