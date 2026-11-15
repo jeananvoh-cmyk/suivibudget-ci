@@ -101,6 +101,26 @@ Les 18 tables déclarées par les trois fichiers bootstrap (7 + 5 + 6) existent 
 
 Les trois versions bootstrap ont été enregistrées comme appliquées le 15 novembre 2026, après constat de la présence du socle et de son évolution ultérieure. Il subsiste des différences historiques : notamment l'index facultatif `idx_institutions_name` absent et des politiques RLS remplacées par des versions plus récentes. Le statut « applied » réconcilie le suivi des migrations et évite que ces scripts de fondation soient rejoués comme des changements incrémentaux ; il ne constitue pas une preuve d'exécution littérale des fichiers actuels.
 
+## Revue des alertes Supabase (15 novembre 2026)
+
+Les advisors Supabase ont été relus après la réconciliation de l'historique. Cette revue est une analyse en lecture seule ; aucun réglage Auth, privilège, index, politique RLS ou schéma Production n'a été modifié.
+
+### Sécurité
+
+- **8 fonctions `SECURITY DEFINER` accessibles au rôle PostgreSQL `authenticated`** : `admin_baseline_visibility`, `admin_staff_directory`, `apec_link_targets`, `import_data_batch`, `publish_apec_need`, `record_apec_decision`, `review_data_import`, `withdraw_apec_need`. Leurs définitions ont été inspectées individuellement : chacune vérifie explicitement `private.has_staff_role(...)` avant toute lecture sensible ou mutation. Elles fixent aussi `search_path TO ''`, ce qui réduit le risque d'injection par résolution d'objets. Le droit EXECUTE au rôle `authenticated` est donc un point d'exposition à documenter, mais la seule appartenance à ce rôle ne suffit pas à passer les contrôles internes. Ne pas révoquer globalement EXECUTE sans refonte des appels PostgREST et des tests de parcours du personnel ; cela casserait les parcours administratifs légitimes.
+- **Protection des mots de passe compromis désactivée** : réglage Auth du projet à activer dans la configuration Supabase Auth (contrôle HaveIBeenPwned). Ce paramètre n'est pas une migration SQL et n'a pas été modifié dans cette intervention. Référence : https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
+
+### Performance
+
+- **10 clés étrangères sans index couvrant** : 1 en schéma privé et 9 en schéma public, notamment sur les références documentaires, profils, événements APEC et liaisons projet/budget. Alerte de niveau INFO. Ne pas ajouter des index en Production sans mesurer les volumes, les requêtes et le coût d'écriture ; préparer une migration dédiée avec tests et revue de plans si les usages le justifient.
+- **1 avertissement RLS initplan** sur `admin_operation_receipts.admin_receipt_read`. La politique filtre par `actor_id = auth.uid()` et appelle `private.admin_domain_allowed(...)`. La correction ciblée recommandée est de remplacer `auth.uid()` par `(select auth.uid())` dans la condition, puis de vérifier le plan et les tests RLS sur une base non-production.
+- **18 avertissements de politiques permissives multiples** : ils correspondent principalement à la combinaison intentionnelle d'une lecture publique des seules lignes publiées et d'un accès du personnel. Il faut examiner chaque paire de politiques et ses commandes RLS avant de fusionner les conditions ; ne pas supprimer les règles de lecture publique ou de personnel en masse.
+- **26 index signalés inutilisés** : cette mesure reflète les statistiques d'utilisation observées et ne prouve pas qu'un index est inutile (redémarrage récent, faible trafic ou parcours rarement utilisés). Aucun index n'a été supprimé.
+
+### Décision de sécurité
+
+Ces alertes ne justifient pas une modification aveugle de Production. Les actions restantes sont : activer la protection des mots de passe compromis dans Auth ; préparer et tester séparément l'optimisation `auth.uid()` ; mesurer les clés étrangères non indexées ; revoir individuellement les politiques permissives. Les fonctions `SECURITY DEFINER` restent sous surveillance, avec leurs contrôles internes de rôle documentés ci-dessus.
+
 ## État après réconciliation de l'historique
 
 - 26 migrations Production canoniques récupérées depuis leur SQL réellement enregistré.
@@ -109,3 +129,4 @@ Les trois versions bootstrap ont été enregistrées comme appliquées le 15 nov
 - 1 migration de fiabilisation proposée (`20261115070000_enforce_primary_document_provenance.sql`), toujours non appliquée en Production.
 - Aucun changement de schéma ni de données métier en Production ; seule la table de suivi des migrations a reçu les trois enregistrements documentés ci-dessus.
 - Aucun merge Git ni déploiement Production.
+- Les alertes Supabase ont été triées et documentées ; aucun réglage Auth, privilège, index ou politique RLS n'a été changé en Production.
