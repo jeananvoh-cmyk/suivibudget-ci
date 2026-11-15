@@ -435,6 +435,9 @@ export function runDocumentDryRun(
     if (!isOfficialPrimaryEvidenceUrl(metadata.source_url)) {
       errors.push('Preuve primaire invalide : une URL HTTPS d’un domaine institutionnel ivoirien autorisé est obligatoire.');
     }
+    if (!metadata.source_document_id?.trim()) {
+      errors.push('Preuve primaire incomplète : l’identifiant du document vérifié dans le catalogue est obligatoire.');
+    }
     if (!Number.isInteger(metadata.source_page) || (metadata.source_page ?? 0) <= 0) {
       errors.push('Preuve primaire incomplète : la page exacte du document est obligatoire.');
     }
@@ -772,6 +775,9 @@ export function buildStandardImportEnvelope(
   if (metadata.source_page) {
     dataObj.source_page = metadata.source_page;
   }
+  if (metadata.source_document_id) {
+    dataObj.source_document_id = metadata.source_document_id;
+  }
 
   const sourceObj: { 
     name: string; 
@@ -902,6 +908,7 @@ const CA_PIPELINE_MONEY_FIELDS = [
 const CA_PIPELINE_ALLOWED_FIELDS = [
   ...CA_PIPELINE_MONEY_FIELDS,
   'source_page',
+  'source_document_id',
   'approval_date',
   'prefecture_visa_date',
   'notes',
@@ -917,6 +924,8 @@ const BP_PIPELINE_MONEY_FIELDS = [
 const BP_PIPELINE_ALLOWED_FIELDS = [
   ...BP_PIPELINE_MONEY_FIELDS,
   'budget_type',
+  'source_page',
+  'source_document_id',
   'version_number',
   'adoption_date',
   'tutelle_approval_date',
