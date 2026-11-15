@@ -11,6 +11,20 @@ ALTER TABLE public.administrative_accounts
   ALTER COLUMN verification_status SET DEFAULT 'TO_VERIFY';
 ALTER TABLE public.ca_procurement_matches
   ALTER COLUMN verification_status SET DEFAULT 'TO_VERIFY';
+ALTER TABLE public.public_documents
+  ADD COLUMN IF NOT EXISTS checksum_status text NOT NULL DEFAULT 'DECLARED';
+
+ALTER TABLE public.budget_projects
+  ADD COLUMN IF NOT EXISTS source_document_id text REFERENCES public.public_documents(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS source_page integer,
+  ADD COLUMN IF NOT EXISTS source_url text,
+  ADD COLUMN IF NOT EXISTS data_provenance text NOT NULL DEFAULT 'DECLARED_ADMIN',
+  ADD COLUMN IF NOT EXISTS financial_verification_status text NOT NULL DEFAULT 'TO_VERIFY';
+
+ALTER TABLE public.budget_lines
+  ADD COLUMN IF NOT EXISTS source_document_id text REFERENCES public.public_documents(id),
+  ADD COLUMN IF NOT EXISTS source_page integer;
+
 ALTER TABLE public.budget_projects
   ALTER COLUMN data_provenance SET DEFAULT 'DECLARED_ADMIN';
 

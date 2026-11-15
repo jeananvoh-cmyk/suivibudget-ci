@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { createProductionSchemaFixture } from './adminPersistenceFixtures';
 import { join } from 'node:path';
 
 describe('RLS hardening — local budget administration', () => {
@@ -32,6 +33,45 @@ describe('RLS hardening — local budget administration', () => {
 
     expect(migration).toContain('d.checksum_status IN (\'COMPUTED\', \'VERIFIED\')');
   });
+
+
+  it('replays on an isolated production-schema fixture without touching the remote database', async () => {
+    const db = await createProductionSchemaFixture();
+    try {
+      await db.exec(migration);
+      const defaults = await db.query<{ table_name: string; column_name: string; column_default: string | null }>(
+        `SELECT table_name,column_name,column_default
+         FROM information_schema.columns
+         WHERE table_schema='public'
+           AND (table_name,column_name) IN (
+             ('local_budgets','verification_status'),
+             ('budget_revenue_sources','verification_status'),
+             ('administrative_accounts','verification_status'),
+             ('ca_procurement_matches','verification_status'),
+             ('budget_projects','data_provenance')
+           )`
+      );
+      expect(defaults.rows).toEqual(expect.arrayContaining([
+        expect.objectContaining({ table_name: 'local_budgets', column_name: 'verification_status', column_default: "'DOCUMENT_TO_EXTRACT'::text" }),
+        expect.objectContaining({ table_name: 'budget_revenue_sources', column_name: 'verification_status', column_default: "'DOCUMENT_TO_EXTRACT'::text" }),
+        expect.objectContaining({ table_name: 'administrative_accounts', column_name: 'verification_status', column_default: "'TO_VERIFY'::text" }),
+        expect.objectContaining({ table_name: 'ca_procurement_matches', column_name: 'verification_status', column_default: "'TO_VERIFY'::text" }),
+        expect.objectContaining({ table_name: 'budget_projects', column_name: 'data_provenance', column_default: "'DECLARED_ADMIN'::text" })
+      ]));
+      const triggers = await db.query<{ tgname: string }>(
+        `SELECT tgname FROM pg_trigger WHERE NOT tgisinternal
+         AND tgname IN (
+           'enforce_local_budget_primary_evidence',
+           'enforce_administrative_account_primary_evidence',
+           'enforce_procurement_primary_evidence',
+           'enforce_budget_project_primary_evidence'
+         ) ORDER BY tgname`
+      );
+      expect(triggers.rows).toHaveLength(4);
+    } finally {
+      await db.close();
+    }
+  }, 60000);
 
   it('replaces every local-budget administrative policy with trusted role checks', () => {
     const policies = [
