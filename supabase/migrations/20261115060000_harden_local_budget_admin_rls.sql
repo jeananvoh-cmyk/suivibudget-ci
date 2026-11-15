@@ -98,8 +98,8 @@ CREATE POLICY "Allow admin write access on projects"
 DROP POLICY IF EXISTS "Allow moderators full management on citizen proofs" ON public.citizen_proofs;
 CREATE POLICY "Allow moderators full management on citizen proofs"
   ON public.citizen_proofs FOR ALL TO authenticated
-  USING (private.has_staff_role(array['ADMIN','MODERATOR','DATA_MANAGER']))
-  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR','DATA_MANAGER']));
+  USING (private.has_staff_role(array['ADMIN','MODERATOR']))
+  WITH CHECK (private.has_staff_role(array['ADMIN','MODERATOR']));
 
 DROP POLICY IF EXISTS "Allow admin only read on newsletter subscribers" ON public.newsletter_subscribers;
 CREATE POLICY "Allow admin only read on newsletter subscribers"
