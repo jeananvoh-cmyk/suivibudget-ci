@@ -286,6 +286,7 @@ export function DataImportConsole({ role, initialDocument }: DataImportConsolePr
       source_date: sourceDate,
       source_date_kind: sourceDateKind,
       source_url: sourceUrl || undefined,
+      source_document_id: sourceDocumentId || undefined,
       source_page: sourcePage,
       evidence_level: evidenceLevel,
       adoption_date: adoptionDate || undefined,
