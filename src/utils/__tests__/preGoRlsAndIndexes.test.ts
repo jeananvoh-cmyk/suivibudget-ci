@@ -52,7 +52,7 @@ describe('pre-GO RLS and foreign-key index migration', () => {
        AND tablename='admin_operation_receipts' AND policyname='admin_receipt_read'`
     );
     expect(policy.rows).toHaveLength(1);
-    expect(policy.rows[0].qual).toMatch(/SELECT auth\\.uid\\(\\)/i);
+    expect(policy.rows[0].qual).toContain('SELECT auth.uid()');
     expect(policy.rows[0].qual).toContain('private.admin_domain_allowed');
 
     await db.exec('BEGIN');
