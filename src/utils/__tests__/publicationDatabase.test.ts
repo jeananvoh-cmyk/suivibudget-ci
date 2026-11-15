@@ -13,10 +13,10 @@ const migrationNames = [
   '20260930030614_publication_boundaries.sql',
   '20260930030702_grant_schema_privileges.sql',
   '20260930031058_public_proof_projection_boundary.sql',
-  '20260930033244_foundation_http_access.sql',
-  '20260930153716_least_privilege_passport_boundary.sql',
-  '20260930223840_apec_participation_cycle.sql',
-  '20261001043805_apec_moderated_publication.sql',
+  '20260930144753_foundation_http_access.sql',
+  '20260930153938_least_privilege_passport_boundary.sql',
+  '20261001040746_apec_participation_cycle.sql',
+  '20261001044508_apec_moderated_publication.sql',
   '20261002090824_grant_anon_published_local_budgets.sql',
 ];
 const migrations = () => migrationNames.map(name => readFileSync(resolve('supabase/migrations', name), 'utf8'));

@@ -48,7 +48,7 @@ describe('Contrat PostgreSQL admin, transactions et RLS isolées', () => {
       await actual.exec(`insert into public.institutions(id,name,type,total_budget_fcfa) values('isolated-historical','Historique fictif','MAIRIE',123);
         insert into public.public_documents(id,title,category,institution_name,year,file_url,file_name,status,verification_status,checksum_sha256) values('isolated-historical-doc','Historique fictif','ETUDE_TECHNIQUE','Fictive',2024,'https://example.test/old.pdf','old.pdf','TO_VERIFY','TO_VERIFY',repeat('a',64));`);
       const hardeningMigration = [
-        '20261026213727_security_definer_hardening_20261026213000.sql',
+        '20261113011327_security_definer_hardening_20261026213000.sql',
         '20261113011327_security_definer_hardening_20261026213000.sql',
         '20261113011327_security_definer_hardening_20261026213000.sql'
       ].find(name => existsSync(resolve(`supabase/migrations/${name}`))) || '20261113011327_security_definer_hardening_20261026213000.sql';
