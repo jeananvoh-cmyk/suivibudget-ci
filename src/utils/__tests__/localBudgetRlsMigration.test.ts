@@ -10,9 +10,13 @@ describe('RLS hardening — local budget administration', () => {
 
   it('does not grant privileges from user-editable user_metadata', () => {
     expect(migration).not.toContain("auth.jwt() -> 'user_metadata'");
-    expect(migration).toContain("auth.jwt() -> 'app_metadata' ->> 'role'");
+    expect(migration).toContain("private.has_staff_role(array['ADMIN','DATA_MANAGER'])");
     expect(migration).toContain("ALTER COLUMN verification_status SET DEFAULT 'DOCUMENT_TO_EXTRACT'");
     expect(migration).not.toContain("SET DEFAULT 'AIP_VERIFIED'");
+    expect(migration).not.toContain("auth.jwt() -> 'user_metadata'");
+    expect(migration).toContain('ALTER TABLE public.ca_procurement_matches');
+    expect(migration).toContain('DROP POLICY IF EXISTS "Allow staff full access on public documents"');
+    expect(migration).toContain('DROP POLICY IF EXISTS "Public documents files are publicly readable"');
   });
 
   it('replaces every local-budget administrative policy with trusted role checks', () => {
@@ -28,13 +32,16 @@ describe('RLS hardening — local budget administration', () => {
       'Allow admin write on CA operations',
       'Allow admin write on CA procurement matches',
       'Allow admin and moderator full access on responses',
+      'Allow admin write access on projects',
+      'Allow moderators full management on citizen proofs',
+      'Allow admin only read on newsletter subscribers',
     ];
 
     for (const policy of policies) {
       expect(migration).toContain(`DROP POLICY IF EXISTS "${policy}"`);
       expect(migration).toContain(`CREATE POLICY "${policy}"`);
     }
-    expect((migration.match(/WITH CHECK/g) || []).length).toBe(10);
+    expect((migration.match(/WITH CHECK/g) || []).length).toBe(12);
   });
 
   it('is additive and transaction-wrapped; it does not mutate financial records', () => {
