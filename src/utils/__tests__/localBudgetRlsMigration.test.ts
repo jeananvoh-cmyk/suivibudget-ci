@@ -152,7 +152,7 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toMatch(/UPDATE public\.budget_revenue_sources\s+SET verification_status = 'SECONDARY_TO_CORROBORATE'/);
     expect(migration).toMatch(/UPDATE public\.ca_procurement_matches(?: AS cm)?\s+SET verification_status = 'TO_VERIFY'/);
     expect(migration).toMatch(/UPDATE public\.administrative_accounts(?: AS aa)?\s+SET verification_status = 'TO_VERIFY'/);
-    expect(migration).toMatch(/UPDATE public.budget_projects\s+SET data_provenance = 'DECLARED_ADMIN'/);
+    expect(migration).toMatch(/UPDATE public.budget_projects(?: AS bp)?\s+SET data_provenance = 'DECLARED_ADMIN'/);
     expect(migration).not.toMatch(/UPDATE public\.local_budgets\s+SET[^;]*(total_amount|operating_amount|investment_amount)/i);
     expect(migration).not.toMatch(/UPDATE public\.budget_revenue_sources\s+SET[^;]*(amount|amount_fcfa)/i);
     expect(migration).not.toMatch(/UPDATE public\.administrative_accounts\s+SET[^;]*(operating_realized|investment_realized|total_realized)/i);
