@@ -38,6 +38,7 @@ describe('institution response moderation is enforced by PostgreSQL', () => {
       GRANT EXECUTE ON FUNCTION private.has_staff_role(text[]) TO authenticated;
       CREATE TABLE public.ca_institution_responses(
         id text primary key,
+        response_date date not null default current_date,
         response_status text not null CHECK (response_status IN ('PENDING','VALIDATED','PUBLISHED'))
       );
       ALTER TABLE public.ca_institution_responses ENABLE ROW LEVEL SECURITY;
@@ -56,7 +57,7 @@ describe('institution response moderation is enforced by PostgreSQL', () => {
     await db.exec('BEGIN; SET LOCAL ROLE authenticated;');
     await db.query(`SELECT set_config('request.jwt.claim.sub','${citizenId}',true)`);
     await expect(
-      db.query("INSERT INTO public.ca_institution_responses(id,response_status) VALUES ('citizen','PENDING')")
+      db.query("INSERT INTO public.ca_institution_responses(id,response_date,response_status) VALUES ('citizen','2026-11-16','PENDING')")
     ).rejects.toThrow();
     await db.exec('ROLLBACK');
 
@@ -65,11 +66,11 @@ describe('institution response moderation is enforced by PostgreSQL', () => {
     await db.query(`SELECT set_config('request.jwt.claim.sub','${adminId}',true)`);
     await db.exec('SAVEPOINT direct_insert');
     await expect(
-      db.query("INSERT INTO public.ca_institution_responses(id,response_status) VALUES ('direct-insert','PUBLISHED')")
+      db.query("INSERT INTO public.ca_institution_responses(id,response_date,response_status) VALUES ('direct-insert','2026-11-16','PUBLISHED')")
     ).rejects.toThrow();
     await db.exec('ROLLBACK TO SAVEPOINT direct_insert');
     await db.exec('RELEASE SAVEPOINT direct_insert');
-    await db.exec("INSERT INTO public.ca_institution_responses(id,response_status) VALUES ('response-1','PENDING')");
+    await db.exec("INSERT INTO public.ca_institution_responses(id,response_date,response_status) VALUES ('response-1','2026-11-16','PENDING')");
     await db.exec('SAVEPOINT direct_publish');
     await expect(
       db.query("UPDATE public.ca_institution_responses SET response_status='PUBLISHED' WHERE id='response-1'")
@@ -100,7 +101,7 @@ describe('institution response moderation is enforced by PostgreSQL', () => {
     await db.exec('ROLLBACK');
 
     // A citizen role cannot see pending records; published records remain public.
-    await db.exec("INSERT INTO public.ca_institution_responses(id,response_status) VALUES ('published-public','PENDING')");
+    await db.exec("INSERT INTO public.ca_institution_responses(id,response_date,response_status) VALUES ('published-public','2026-11-16','PENDING')");
     await db.exec("BEGIN; SET LOCAL ROLE authenticated;");
     await db.query(`SELECT set_config('request.jwt.claim.sub','${adminId}',true)`);
     await db.exec("UPDATE public.ca_institution_responses SET response_status='VALIDATED' WHERE id='published-public'");
