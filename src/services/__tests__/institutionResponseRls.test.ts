@@ -62,13 +62,19 @@ describe('institution response moderation is enforced by PostgreSQL', () => {
     // Staff cannot skip the moderation queue at insertion or publication.
     await db.exec('BEGIN; SET LOCAL ROLE authenticated;');
     await db.query(`SELECT set_config('request.jwt.claim.sub','${adminId}',true)`);
+    await db.exec('SAVEPOINT direct_insert');
     await expect(
       db.query("INSERT INTO public.ca_institution_responses(id,response_status) VALUES ('direct-insert','PUBLISHED')")
     ).rejects.toThrow();
+    await db.exec('ROLLBACK TO SAVEPOINT direct_insert');
+    await db.exec('RELEASE SAVEPOINT direct_insert');
     await db.exec("INSERT INTO public.ca_institution_responses(id,response_status) VALUES ('response-1','PENDING')");
+    await db.exec('SAVEPOINT direct_publish');
     await expect(
       db.query("UPDATE public.ca_institution_responses SET response_status='PUBLISHED' WHERE id='response-1'")
     ).rejects.toThrow();
+    await db.exec('ROLLBACK TO SAVEPOINT direct_publish');
+    await db.exec('RELEASE SAVEPOINT direct_publish');
     await db.exec("UPDATE public.ca_institution_responses SET response_status='VALIDATED' WHERE id='response-1'");
     await db.exec("UPDATE public.ca_institution_responses SET response_status='PUBLISHED' WHERE id='response-1'");
     await db.exec("UPDATE public.ca_institution_responses SET response_status='PENDING' WHERE id='response-1'");
