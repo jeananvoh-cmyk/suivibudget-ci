@@ -9,7 +9,7 @@ describe('institution response moderation is enforced by PostgreSQL', () => {
 
   it('rejects citizen writes and direct publication, and allows only moderated staff transitions', async () => {
     const migration = readFileSync(
-      join(process.cwd(), 'supabase/migrations/20261116130000_enforce_institution_response_moderation.sql'),
+      join(process.cwd(), 'supabase/migrations/20261116160000_enforce_institution_response_moderation.sql'),
       'utf8'
     );
     db = new PGlite();
