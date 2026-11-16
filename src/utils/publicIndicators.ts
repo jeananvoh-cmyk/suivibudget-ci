@@ -191,6 +191,8 @@ export interface PublicInvestmentScopeSummary {
   consolidatedPhysicalAllAmountFcfa: number | null;
   physical2026Count: number;
   physical2026AmountFcfa: number;
+  unknownAmount2026ProjectsCount: number;
+  unknownAmountPre2026ProjectsCount: number;
   consolidatedPhysical2026AmountFcfa: number | null;
   statePhysical2026Count: number;
   statePhysical2026AmountFcfa: number;
@@ -571,6 +573,7 @@ export function computePublicIndicators(params: {
   let documentedAmountProjectsCount = 0;
   let unknownAmountProjectsCount = 0;
   let unknownAmount2026ProjectsCount = 0;
+  let unknownAmountPre2026ProjectsCount = 0;
   let zeroAmountProjectsCount = 0;
 
   for (const { project: p, classification } of classifiedProjects) {
@@ -579,6 +582,8 @@ export function computePublicIndicators(params: {
       unknownAmountProjectsCount += 1;
       if (p.fiscal_year === 2026) {
         unknownAmount2026ProjectsCount += 1;
+      } else {
+        unknownAmountPre2026ProjectsCount += 1;
       }
     } else {
       documentedAmountProjectsCount += 1;
@@ -867,6 +872,8 @@ export function computePublicIndicators(params: {
         unknownAmountProjectsCount > 0 ? null : physicalAllAmountFcfa,
       physical2026Count,
       physical2026AmountFcfa,
+      unknownAmount2026ProjectsCount,
+      unknownAmountPre2026ProjectsCount,
       consolidatedPhysical2026AmountFcfa:
         unknownAmount2026ProjectsCount > 0 ? null : physical2026AmountFcfa,
       statePhysical2026Count,
