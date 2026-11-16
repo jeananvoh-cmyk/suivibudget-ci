@@ -54,6 +54,12 @@ describe('RLS hardening — local budget administration', () => {
     expect(hardeningMigration).toContain('AND source_page_value <= pd.page_count');
     expect(hardeningMigration).toContain('AND NEW.source_page <= d.page_count');
     expect(hardeningMigration).toContain('OR NEW.page_count IS DISTINCT FROM OLD.page_count');
+    expect(hardeningMigration).toContain("metadata ->> 'citizen_need_verification_status' = 'VERIFIED'");
+    expect(hardeningMigration).toContain("metadata ->> 'audit_verification_status' = 'VERIFIED'");
+    expect(hardeningMigration).toContain('Verified citizen need requires a published, checksum-verified primary document and an existing page');
+    expect(hardeningMigration).toContain('Verified audit requires a published, checksum-verified primary document and an existing page');
+    expect(hardeningMigration).toContain("'{citizen_need_verification_status}'");
+    expect(hardeningMigration).toContain("'{audit_verification_status}'");
     expect(hardeningMigration).toContain('AND pd.page_count IS NOT NULL');
     expect(hardeningMigration).toContain('AND source_page_value <= pd.page_count');
     expect(hardeningMigration).toContain('CREATE TRIGGER enforce_budget_revenue_source_evidence');
@@ -87,8 +93,9 @@ describe('RLS hardening — local budget administration', () => {
           FOR EACH ROW EXECUTE FUNCTION private.simulate_immutable_project_provenance();
         INSERT INTO public.institutions(id,name,type) VALUES ('migration-inst','Commune de test','MAIRIE');
         INSERT INTO public.budget_projects
-          (id,institution_id,commune_name,region_name,category,title,budget_amount_fcfa,fiscal_year,data_provenance,financial_verification_status)
-        VALUES ('migration-project','migration-inst','Commune de test','Région test','Éducation','Projet préexistant sans pièce',150,2026,'OFFICIAL_SOURCE','VERIFIED');
+          (id,institution_id,commune_name,region_name,category,title,budget_amount_fcfa,fiscal_year,data_provenance,financial_verification_status,project_metadata)
+        VALUES ('migration-project','migration-inst','Commune de test','Région test','Éducation','Projet préexistant sans pièce',150,2026,'OFFICIAL_SOURCE','VERIFIED',
+          '{"citizen_need_verification_status":"VERIFIED","citizen_need_source_document_id":"missing-need-doc","citizen_need_source_url":"https://gouv.ci/need.pdf","citizen_need_source_page":1,"audit_verification_status":"VERIFIED","audit_source_document_id":"missing-audit-doc","audit_source_url":"https://gouv.ci/audit.pdf","audit_source_page":2}'::jsonb);
         INSERT INTO public.local_budgets
           (id,institution_id,institution_type,institution_name,fiscal_year,budget_type,total_amount,verification_status)
         VALUES ('migration-budget','migration-inst','COMMUNE','Commune de test',2026,'PRIMITIF_ADOPTE',100,'AIP_VERIFIED');
@@ -168,11 +175,11 @@ describe('RLS hardening — local budget administration', () => {
         SELECT set_config('app.admin_reason','Validation de test du document primaire',false);
         INSERT INTO public.public_documents
           (id,title,category,institution_name,file_url,file_name,status,verification_status,checksum_status,
-           checksum_sha256,source_url,source_name,institution_id,fiscal_year,document_type)
+           checksum_sha256,source_url,source_name,institution_id,fiscal_year,document_type,page_count)
         VALUES
           ('migration-primary-ca-doc','CA primaire de test','CA','Commune de test',
            'https://dgbf.ci/ca-2023.pdf','ca-2023.pdf','TO_VERIFY','TO_VERIFY','COMPUTED',repeat('a',64),
-           'https://dgbf.ci/ca-2023.pdf','DGBF — CA primaire','migration-inst',2023,'COMPTE_ADMINISTRATIF');
+           'https://dgbf.ci/ca-2023.pdf','DGBF — CA primaire','migration-inst',2023,'COMPTE_ADMINISTRATIF',60);
         UPDATE public.public_documents SET status='VERIFIED' WHERE id='migration-primary-ca-doc';
         UPDATE public.public_documents SET status='PUBLISHED' WHERE id='migration-primary-ca-doc';
         INSERT INTO public.administrative_accounts
