@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { assertPasswordNotPwned } from '../pwnedPassword';
+import { assertPasswordNotPwned, PwnedPasswordError } from '../pwnedPassword';
 
 const passwordHash = '5BAA61E4C9B93F3F0682250B6CF8331B7EE68FD8';
 
@@ -13,6 +13,7 @@ describe('Pwned Passwords k-anonymity guard', () => {
     ));
     vi.stubGlobal('fetch', fetchMock);
 
+    await expect(assertPasswordNotPwned('password')).rejects.toBeInstanceOf(PwnedPasswordError);
     await expect(assertPasswordNotPwned('password')).rejects.toThrow(/fuites connues/);
     expect(fetchMock).toHaveBeenCalledOnce();
     const [url, options] = fetchMock.mock.calls[0];
