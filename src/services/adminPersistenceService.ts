@@ -164,7 +164,9 @@ export const projectFields = ['institution_id','commune_name','region_name','dis
   'sub_nature_expense','title','details','budget_amount_fcfa','fiscal_year','fiscal_year_label','current_status','progress_percentage',
   'contractor_name','target_delivery_date','locality_village_neighborhood','start_date','scope_level','ministry_name','program_name',
   'service_name','partner_or_donor','master_builder','project_tier','source_document_id','source_page','source_url','publication_status'] as const;
-export const projectMetadataFields=['institution_name','source','contractual_duration_months','execution_deadline','image_url','citizen_need_origin','initiative_source','official_progress_source'] as const;
+export const projectMetadataFields=['institution_name','source','contractual_duration_months','execution_deadline','image_url','citizen_need_origin','initiative_source','official_progress_source',
+  'citizen_need_verification_status','citizen_need_source_document_id','citizen_need_source_url','citizen_need_source_page',
+  'audit_report_reference','audit_source_document_id','audit_source_url','audit_source_page','audit_verification_status'] as const;
 export const directoryFields = ['company_name','category','region','commune','ri_name','ri_function','email','phone','source','source_url',
   'notes','verification_status','publication_status'] as const;
 export const budgetLineFields = ['budget_id','program_name','line_label','original_label','category','amount','sector','normalized_sector',
