@@ -8,6 +8,8 @@ import {
   ProjectAccountabilityPassportData 
 } from '../utils/projectPassport';
 import { formatQualifiedFCFA } from '../utils/formatters';
+import { buildQrSvgString } from '../utils/qrCode';
+import { QrCodeSvg } from './common/QrCodeSvg';
 import { supabase } from '../services/supabase';
 import { ApecParticipation } from './ApecParticipation';
 import { 
@@ -26,7 +28,8 @@ import {
   Scale, 
   HelpCircle,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Download
 } from 'lucide-react';
 
 interface ProjectAccountabilityPassportProps {
@@ -48,6 +51,24 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
   const passport: ProjectAccountabilityPassportData = React.useMemo(() => {
     return generateProjectPassport(project, proofs);
   }, [project, proofs]);
+
+  const passportUrl = React.useMemo(() => {
+    const query = `?tab=projects&projectId=${encodeURIComponent(project.id)}`;
+    return typeof window !== 'undefined' ? `${window.location.origin}/${query}` : `https://suivibudget.vercel.app/${query}`;
+  }, [project.id]);
+
+  const handleDownloadQrSvg = () => {
+    const svg = buildQrSvgString(passportUrl, 256);
+    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `qr-passeport-${project.id}.svg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   const showFact = (fact: PassportFact) => {
     if (fact.label.includes('FCFA')) return formatQualifiedFCFA(typeof fact.value === 'number' ? fact.value : null, fact.amount_precision);
@@ -297,6 +318,32 @@ export const ProjectAccountabilityPassport: React.FC<ProjectAccountabilityPasspo
             <span className="font-bold text-white">
               {passport.hasCitizenFieldProofs ? 'Documenté' : 'Aucun constat'}
             </span>
+          </div>
+        </div>
+
+        {/* QR Code Chantier & Export SVG */}
+        <div className="mt-4 pt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <button
+            type="button"
+            onClick={handleDownloadQrSvg}
+            className="min-h-[44px] px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-slate-100 border border-white/15 text-xs font-bold inline-flex items-center gap-1.5 transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Exporter QR Chantier (SVG)</span>
+          </button>
+
+          <div className="flex items-center gap-3 bg-white/10 border border-white/15 rounded-xl p-2 flex-shrink-0">
+            <QrCodeSvg
+              value={passportUrl}
+              size={68}
+              label={`QR Code Passeport Chantier — ${project.title}`}
+            />
+            <div className="text-[11px] text-slate-200 max-w-[160px] leading-snug">
+              <div className="font-black text-white">QR Code Chantier</div>
+              <div className="text-slate-300 text-[10px]">
+                Accès direct Passeport &amp; dépôt de preuve terrain.
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -1,0 +1,142 @@
+{
+  "generatedAt": "2026-11-16",
+  "decoders": [
+    "jsqr@1.4.0",
+    "@zxing/library"
+  ],
+  "rasterizer": "@resvg/resvg-wasm",
+  "results": [
+    {
+      "id": "v1-m-short",
+      "description": "V1-M minimal payload (12 octets, 1 bloc RS)",
+      "version": 1,
+      "errorCorrection": "M",
+      "maskPattern": 2,
+      "moduleGrid": 21,
+      "byteLength": 12,
+      "renderPx": 145,
+      "jsQrMatch": true,
+      "zxingMatch": true
+    },
+    {
+      "id": "v2-m-boundary",
+      "description": "V2-M borne max 26 octets (1 bloc RS)",
+      "version": 2,
+      "errorCorrection": "M",
+      "maskPattern": 6,
+      "moduleGrid": 25,
+      "byteLength": 26,
+      "renderPx": 165,
+      "jsQrMatch": true,
+      "zxingMatch": true
+    },
+    {
+      "id": "v3-m-max-boundary",
+      "description": "V3-M borne exacte 42 octets (1 bloc RS)",
+      "version": 3,
+      "errorCorrection": "M",
+      "maskPattern": 4,
+      "moduleGrid": 29,
+      "byteLength": 41,
+      "renderPx": 185,
+      "jsQrMatch": true,
+      "zxingMatch": true
+    },
+    {
+      "id": "v4-m-multiblock",
+      "description": "V4-M multi-blocs RS (2x32, 62 octets max)",
+      "version": 4,
+      "errorCorrection": "M",
+      "maskPattern": 3,
+      "moduleGrid": 33,
+      "byteLength": 61,
+      "renderPx": 205,
+      "jsQrMatch": true,
+      "zxingMatch": true
+    },
+    {
+      "id": "v5-m-passport-url",
+      "description": "V5-M multi-blocs RS (2x43, 84 octets max)",
+      "version": 5,
+      "errorCorrection": "M",
+      "maskPattern": 2,
+      "moduleGrid": 37,
+      "byteLength": 83,
+      "renderPx": 225,
+      "jsQrMatch": true,
+      "zxingMatch": true
+    },
+    {
+      "id": "v6-m-multiblock",
+      "description": "V6-M multi-blocs RS (4x27, 106 octets max)",
+      "version": 6,
+      "errorCorrection": "M",
+      "maskPattern": 2,
+      "moduleGrid": 41,
+      "byteLength": 103,
+      "renderPx": 245,
+      "jsQrMatch": true,
+      "zxingMatch": true
+    },
+    {
+      "id": "v7-m-version-info",
+      "description": "V7-M version info + multi-blocs RS (4x31, 122 octets max)",
+      "version": 7,
+      "errorCorrection": "M",
+      "maskPattern": 2,
+      "moduleGrid": 45,
+      "byteLength": 114,
+      "renderPx": 265,
+      "jsQrMatch": true,
+      "zxingMatch": true
+    },
+    {
+      "id": "v8-m-unequal-groups",
+      "description": "V8-M groupes asymétriques RS (2x38 + 2x39, 152 octets max)",
+      "version": 8,
+      "errorCorrection": "M",
+      "maskPattern": 6,
+      "moduleGrid": 49,
+      "byteLength": 141,
+      "renderPx": 360,
+      "jsQrMatch": true,
+      "zxingMatch": true
+    },
+    {
+      "id": "v9-m-utf8-accents",
+      "description": "V9-M multi-blocs asymétriques (3x36 + 2x37) avec UTF-8 accentué",
+      "version": 9,
+      "errorCorrection": "M",
+      "maskPattern": 2,
+      "moduleGrid": 53,
+      "byteLength": 159,
+      "renderPx": 305,
+      "jsQrMatch": true,
+      "zxingMatch": true
+    },
+    {
+      "id": "v10-m-max-boundary",
+      "description": "V10-M borne max exacte 213 octets (4x43 + 1x44, compteur 16 bits)",
+      "version": 10,
+      "errorCorrection": "M",
+      "maskPattern": 0,
+      "moduleGrid": 57,
+      "byteLength": 213,
+      "renderPx": 325,
+      "jsQrMatch": true,
+      "zxingMatch": true
+    },
+    {
+      "id": "v10-l-max-capacity",
+      "description": "V10-L capacité maximale exacte 271 octets (2x68 + 2x69, EC Level L)",
+      "version": 10,
+      "errorCorrection": "L",
+      "maskPattern": 1,
+      "moduleGrid": 57,
+      "byteLength": 270,
+      "renderPx": 390,
+      "jsQrMatch": true,
+      "zxingMatch": true
+    }
+  ]
+}
