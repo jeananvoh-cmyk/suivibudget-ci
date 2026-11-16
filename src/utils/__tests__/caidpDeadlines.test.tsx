@@ -146,4 +146,35 @@ describe('Lot P2 — CAIDP 30-Day Legal Countdown & Financial != Physical Card G
     expect(html).toContain('Non vérifié sur le terrain');
     expect(html).not.toContain('Taux officiel déclaré');
   });
+
+  it('normalizes accented collectivity names properly and distinguishes fiscal years', () => {
+    const tiassaleRequests: CaidpRequestEvent[] = [
+      {
+        ...baseRequest,
+        id: 'caidp-tiassale-2024',
+        created_at: '2026-10-03T10:00:00Z',
+        entity_name: 'Mairie de Tiassalé',
+        commune: 'Tiassalé',
+        document_titles: ['Compte Administratif 2024'],
+      },
+      {
+        ...baseRequest,
+        id: 'caidp-tiassale-2026',
+        entity_name: 'MAIRIE DE TIASSALE',
+        commune: 'Tiassale',
+        document_titles: ['Budget Primitif 2026'],
+      },
+    ];
+
+    const summary = summarizeInstitutionCaidpDeadlines(tiassaleRequests, 'Mairie de Tiassalé', {
+      now: new Date('2026-10-11T15:00:00Z'),
+      hasPublishedDocumentForRequest: (req) =>
+        (req.document_titles || []).some((t) => t.includes('2024')),
+    });
+
+    expect(summary.totalRequests).toBe(2);
+    expect(summary.overdueCount).toBe(0);
+    expect(summary.activeWithinDelayCount).toBe(1);
+    expect(summary.latestDeadline?.state).toBe('DOCUMENT_PUBLISHED');
+  });
 });

@@ -437,7 +437,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   const publishedInstitutionDocuments = dataStore.getDocuments().filter((doc) => {
     const normalize = (value: string) => value
       .normalize('NFD')
-      .replace(/[\\u0300-\\u036f]/g, '')
+      .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, ' ')
       .trim();
@@ -453,7 +453,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
       hasPublishedDocumentForRequest: (request) => {
         const normalize = (value: string) => value
           .normalize('NFD')
-          .replace(/[\\u0300-\\u036f]/g, '')
+          .replace(/[\u0300-\u036f]/g, '')
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, ' ')
           .trim();
