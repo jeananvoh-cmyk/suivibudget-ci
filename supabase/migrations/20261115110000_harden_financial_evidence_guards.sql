@@ -349,6 +349,7 @@ BEGIN
       OR NEW.verification_status <> 'VERIFIED'
       OR NEW.checksum_status NOT IN ('COMPUTED', 'VERIFIED')
       OR NEW.checksum_sha256 IS DISTINCT FROM OLD.checksum_sha256
+      OR NEW.page_count IS DISTINCT FROM OLD.page_count
       OR NEW.source_url IS DISTINCT FROM OLD.source_url
       OR NEW.source_name IS DISTINCT FROM OLD.source_name
       OR NEW.institution_id IS DISTINCT FROM OLD.institution_id
