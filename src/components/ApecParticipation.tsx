@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type { ApecDecision, ApecEvent, ApecContribution } from '../types';
 import { createApecCycle, loadApec, loadApecHistory, recordApecDecision, submitApecContribution, submitApecNeed, publishApecNeed, withdrawApecNeed } from '../services/apecService';
 import { supabase } from '../services/supabase';
-import { assertPasswordNotPwned } from '../services/pwnedPassword';
+import { assertPasswordNotPwned, PwnedPasswordError } from '../services/pwnedPassword';
 
 const labels: Record<string,string> = {
   SUBMITTED:'Besoin reçu', TO_VERIFY:'À vérifier', VERIFIED:'Vérifié — reste une contribution citoyenne', REJECTED:'Non retenu après vérification',
@@ -58,7 +58,7 @@ export function ApecParticipation({ institutionId, fiscalYear }: { institutionId
     const form=event.currentTarget;
     setBusy(true); setMessage('');
     try { setMessage(await operation(new FormData(form))); form.reset(); setRevision(v=>v+1); }
-    catch { setMessage('Action refusée ou service indisponible. Vérifiez les informations, le statut et les sources, puis réessayez.'); }
+    catch (error) { setMessage(error instanceof PwnedPasswordError ? error.message : 'Action refusée ou service indisponible. Vérifiez les informations, le statut et les sources, puis réessayez.'); }
     finally { setBusy(false); }
   }
   const sourceFields=<>
