@@ -100,16 +100,33 @@ export function estimateDataUrlBytes(dataUrl: string): number {
   return Math.max(0, Math.floor((base64.length * 3) / 4) - padding);
 }
 
+/** Rejects an encoded image that cannot meet the promised transfer budget. */
+export function assertDataUrlWithinBudget(dataUrl: string, maxBytes = DEFAULT_PROOF_IMAGE_MAX_BYTES): string {
+  if (!Number.isFinite(maxBytes) || maxBytes <= 0) {
+    throw new Error('La limite de compression doit être un nombre d’octets positif.');
+  }
+  const actualBytes = estimateDataUrlBytes(dataUrl);
+  if (actualBytes > maxBytes) {
+    throw new Error(`La photo compressée pèse encore ${Math.ceil(actualBytes / 1024)} Ko ; la limite est de ${Math.ceil(maxBytes / 1024)} Ko. Réduisez la résolution ou choisissez une autre photo.`);
+  }
+  return dataUrl;
+}
+
 function encodeCanvasUnderBudget(
   img: HTMLImageElement,
   startMaxDimension: number,
   startQuality: number,
   maxBytes: number
 ): string {
-  const dimensionSteps = [startMaxDimension, Math.min(startMaxDimension, 960), Math.min(startMaxDimension, 768)];
-  const qualitySteps = [startQuality, 0.72, 0.58, 0.45, 0.35];
-
-  let bestUrl = '';
+  const dimensionSteps = [
+    startMaxDimension,
+    Math.min(startMaxDimension, 960),
+    Math.min(startMaxDimension, 768),
+    Math.min(startMaxDimension, 640),
+    Math.min(startMaxDimension, 512),
+    Math.min(startMaxDimension, 384),
+  ];
+  const qualitySteps = [startQuality, 0.72, 0.58, 0.45, 0.35, 0.25, 0.2];
   for (const dim of dimensionSteps) {
     let width = img.width;
     let height = img.height;
@@ -127,7 +144,9 @@ function encodeCanvasUnderBudget(
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d');
-    if (!ctx) return bestUrl;
+    if (!ctx) {
+      throw new Error('Le navigateur ne permet pas de compresser cette photo.');
+    }
     ctx.drawImage(img, 0, 0, width, height);
 
     for (const q of qualitySteps) {
@@ -140,13 +159,12 @@ function encodeCanvasUnderBudget(
       } catch {
         candidate = canvas.toDataURL('image/jpeg', q);
       }
-      bestUrl = candidate;
       if (estimateDataUrlBytes(candidate) <= maxBytes) {
         return candidate;
       }
     }
   }
-  return bestUrl;
+  throw new Error(`Impossible de réduire cette photo sous ${Math.ceil(maxBytes / 1024)} Ko. Choisissez une image moins volumineuse.`);
 }
 
 /**
@@ -164,8 +182,14 @@ export async function compressAndSanitizeImage(
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        const encoded = encodeCanvasUnderBudget(img, maxDimension, quality, maxBytes);
-        resolve(encoded || (e.target?.result as string));
+        try {
+          resolve(assertDataUrlWithinBudget(
+            encodeCanvasUnderBudget(img, maxDimension, quality, maxBytes),
+            maxBytes
+          ));
+        } catch (error) {
+          reject(error instanceof Error ? error : new Error('Échec de compression de la photo.'));
+        }
       };
       img.onerror = () => reject(new Error("Impossible de décoder l'image fournie."));
       img.src = e.target?.result as string;
