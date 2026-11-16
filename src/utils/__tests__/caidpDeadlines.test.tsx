@@ -58,6 +58,25 @@ describe('Lot P2 — CAIDP 30-Day Legal Countdown & Financial != Physical Card G
     expect(published.daysOverdue).toBe(0);
   });
 
+  it('does not invent a legal deadline when the request date is missing or invalid', () => {
+    const missingDate = evaluateCaidpRequestDeadline(
+      { ...baseRequest, created_at: '' },
+      { now: new Date('2026-11-12T12:00:00Z') }
+    );
+    expect(missingDate.state).toBe('DATE_UNKNOWN');
+    expect(missingDate.requestedAtIso).toBe('');
+    expect(missingDate.dueDateIso).toBe('');
+    expect(missingDate.daysRemaining).toBe(0);
+    expect(missingDate.daysOverdue).toBe(0);
+    expect(missingDate.badgeLabel).toBe('Date de demande à confirmer');
+
+    const invalidDate = evaluateCaidpRequestDeadline(
+      { ...baseRequest, created_at: 'date-invalide' },
+      { now: new Date('2026-11-12T12:00:00Z') }
+    );
+    expect(invalidDate.state).toBe('DATE_UNKNOWN');
+  });
+
   it('summarizes CAIDP request deadlines per institution without mixing other collectivities', () => {
     const requests: CaidpRequestEvent[] = [
       baseRequest,
