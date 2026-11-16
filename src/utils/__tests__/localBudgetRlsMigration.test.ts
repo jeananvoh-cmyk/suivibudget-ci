@@ -58,6 +58,7 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toContain('AND source_page_value <= pd.page_count');
     expect(hardeningMigration).toContain('AND NEW.source_page <= d.page_count');
     expect(hardeningMigration).toContain('OR NEW.page_count IS DISTINCT FROM OLD.page_count');
+    expect(hardeningMigration).toContain("NEW.checksum_status IS DISTINCT FROM 'COMPUTED'");
     expect(passportMigration).toContain('CREATE OR REPLACE FUNCTION private.enforce_project_passport_document_evidence()');
     expect(passportMigration).toContain("metadata ->> 'citizen_need_verification_status' = 'VERIFIED'");
     expect(passportMigration).toContain("metadata ->> 'audit_verification_status' = 'VERIFIED'");
