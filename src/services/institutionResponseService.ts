@@ -140,7 +140,7 @@ export async function submitInstitutionResponse(
     .single();
   if (error) throw error;
   if (!data) {
-    throw new Error('Le droit de réponse a changé depuis son chargement. Actualisez la file de modération avant de réessayer.');
+    throw new Error("Le droit de réponse n'a pas été enregistré.");
   }
   return data as InstitutionResponse;
 }
