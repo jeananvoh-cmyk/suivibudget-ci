@@ -33,9 +33,14 @@ Le PDF reçu a été rouvert et les pages sources ont été contrôlées visuell
 - **Repère de travail « PDF 40 » ; pagination imprimée 41/45** : tableau des résultats du compte administratif.
 - **Repère de travail « PDF 43 » ; pagination imprimée 44/45** : tableau de composition du patrimoine et total général.
 
-**Réserve de pagination à ne pas perdre :** les notes antérieures n'ont pas consigné de manière suffisamment non ambiguë si les repères « PDF 40 » et « PDF 43 » sont des numéros de page en indexation zéro ou des numéros de page physiques en indexation 1. Il ne faut donc pas convertir automatiquement ces repères en numéros de page PDF certifiés.
+**Correspondance de pagination vérifiée dans le rapport de contrôle documentaire antérieur :**
+- Page PDF d'index **40 sur 44** (40e index, soit le 41e feuillet en comptage humain) = page imprimée **41/45** ; tableau des résultats du compte administratif.
+- Page PDF d'index **43 sur 44** (43e index, soit le 44e feuillet en comptage humain) = page imprimée **44/45** ; tableau de composition du patrimoine.
+- Les deux fascicules de contrôle déjà consignés comptent 22 pages chacun : `Cocody_CA_2024_pages_01-22.pdf` et `Cocody_CA_2024_pages_23-44.pdf`.
 
-Le champ `source_page` est un repère enregistré en base, pas une preuve autonome de pagination. Ses valeurs doivent être rapprochées individuellement du scan original avant d'être présentées comme des numéros de page PDF ou imprimés certifiés. En particulier, ne pas affirmer que `source_page=40` désigne sans ambiguïté la 40e page physique du PDF.
+Le classeur citoyen corrigé utilise désormais les intitulés **« Page imprimée du CA »** et **« Page imprimée du CA (pagination interne) »** pour éviter de présenter ces nombres comme des numéros de page PDF. Les valeurs numériques historiques des lignes n'ont pas été modifiées.
+
+Le champ `source_page` reste un repère de base de données. Il ne doit pas être converti automatiquement en index PDF : chaque valeur de ligne doit être interprétée à partir de la pagination imprimée et du tableau source correspondant.
 
 ### Chiffres réconciliés avec la page récapitulative
 
@@ -80,6 +85,20 @@ Les classeurs Excel historiques ne sont pas tous synchronisés avec l'état actu
 Une opération patrimoniale dépasse 100 % du montant prévu : référence PT « 5 », travaux de bitumage de 2 950 mètres linéaires ; prévu 250 000 000 FCFA, réalisé 289 464 570 FCFA, soit 115,79 %. C'est un écart à documenter, pas une preuve d'irrégularité.
 
 Le statut `TRANSCRIPTION_A_VALIDER` du CSV de travail historique ne doit pas être repris comme statut courant des lignes financières Supabase : les huit lignes structurées ont été vérifiées et portent `VERIFIED`. Les classeurs doivent toutefois être révisés avant une nouvelle diffusion afin de refléter les rapprochements DGMP actuels.
+
+## Mise à jour du classeur citoyen — 16 novembre 2026
+
+Une version corrigée du classeur a été produite et contrôlée :
+`SuiviBudget_Cocody_CA2024_edition_citoyenne_corrigee_2026-11-16.xlsx`
+
+- 5 onglets conservés.
+- 57 opérations d'investissement conservées.
+- 28 rapprochements DGMP conservés.
+- Formules de taux conservées.
+- Les colonnes de page indiquent explicitement la pagination imprimée du CA.
+- Les valeurs numériques de page et les montants n'ont pas été modifiés pendant cette correction de libellés.
+
+Le fichier corrigé est conservé dans la bibliothèque de travail SuiviBudget, dossier `Pilotes/Cocody 2024`. Il n'est pas encore commité dans ce dépôt.
 
 ## Emplacement prévu de l'original
 
