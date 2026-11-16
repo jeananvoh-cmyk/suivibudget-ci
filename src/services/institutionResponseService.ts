@@ -8,7 +8,7 @@ export interface InstitutionResponseDraft {
   ca_id: string;
   operation_id?: string | null;
   response_text: string;
-  response_date?: string;
+  response_date: string;
   author_name: string;
   author_title: string;
   supporting_document_url?: string | null;
@@ -121,14 +121,11 @@ export async function submitInstitutionResponse(
     throw new Error('Connexion Supabase requise pour enregistrer un droit de réponse.');
   }
 
-  const responseDate =
-    draft.response_date?.trim() || new Date().toISOString().slice(0, 10);
-
   const payload = {
     ca_id: draft.ca_id.trim(),
     operation_id: draft.operation_id?.trim() || null,
     response_text: draft.response_text.trim(),
-    response_date: responseDate,
+    response_date: draft.response_date.trim(),
     author_name: draft.author_name.trim(),
     author_title: draft.author_title.trim(),
     supporting_document_url: draft.supporting_document_url?.trim() || null,
@@ -142,6 +139,9 @@ export async function submitInstitutionResponse(
     .select('*')
     .single();
   if (error) throw error;
+  if (!data) {
+    throw new Error('Le droit de réponse a changé depuis son chargement. Actualisez la file de modération avant de réessayer.');
+  }
   return data as InstitutionResponse;
 }
 
@@ -166,6 +166,7 @@ export async function moderateInstitutionResponse(
     .from('ca_institution_responses')
     .update({ response_status: transition.nextStatus })
     .eq('id', responseId)
+    .eq('response_status', currentStatus)
     .select('*')
     .single();
   if (error) throw error;
