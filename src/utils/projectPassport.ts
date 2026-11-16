@@ -102,6 +102,7 @@ export interface ProjectAccountabilityPassportData {
   hasMatchedCaOperation: boolean;
   hasMatchedDgmpTender: boolean;
   hasCitizenFieldProofs: boolean;
+  approvedProofsCount?: number;
   matchedOperation?: CAInvestmentOperation;
   matchedProcurement?: ProcurementMatch;
   matchResult?: CaOperationMatchResult;
@@ -358,7 +359,10 @@ export function generateProjectPassport(
   const response = responseCandidate?.response_status === 'PUBLISHED'
     && (!responseCandidate.operation_id || responseCandidate.operation_id === matchedOp?.id)
     && (!responseCandidate.ca_id || responseCandidate.ca_id === account?.id) ? responseCandidate : undefined;
-  const projectProvenance: DataProvenance=project.data_provenance==='DECLARED_ADMIN' ? 'UNVERIFIED_INPUT' : 'OFFICIAL_SOURCE';
+  // Missing provenance is not proof of an official source; only an explicit verified marker is.
+  const projectProvenance: DataProvenance = project.data_provenance === 'OFFICIAL_SOURCE'
+    ? 'OFFICIAL_SOURCE'
+    : 'UNVERIFIED_INPUT';
   const facts: Record<PassportField, PassportFact> = {
     institution_id: fact('Institution', project.institution_id, projectProvenance, projectSource),
     institution_type: fact('Type d’institution', account?.institution_type || project.institution_type, projectProvenance, account ? caSource : projectSource),
@@ -439,8 +443,12 @@ export function generateProjectPassport(
     stepNumber: 2,
     label: 'Budget Voté (BP)',
     shortDescription: 'Crédits votés par l\'autorité délibérante (Loi de Finances ou Conseil Municipal)',
-    status: (project.data_provenance !== 'DECLARED_ADMIN' && project.publication_status !== 'DRAFT' && project.budget_amount_fcfa != null && project.budget_amount_fcfa > 0) ? 'VERIFIED_OFFICIAL' : 'PENDING_DOCUMENTATION',
-    statusLabel: project.data_provenance === 'DECLARED_ADMIN' ? 'Montant déclaré, vérification distincte requise' : (project.publication_status !== 'DRAFT' && project.budget_amount_fcfa != null && project.budget_amount_fcfa > 0) ? 'Voté au Budget' : 'Montant non renseigné',
+    status: (project.data_provenance === 'OFFICIAL_SOURCE' && project.publication_status !== 'DRAFT' && project.budget_amount_fcfa != null && project.budget_amount_fcfa > 0) ? 'VERIFIED_OFFICIAL' : 'PENDING_DOCUMENTATION',
+    statusLabel: project.data_provenance !== 'OFFICIAL_SOURCE'
+      ? 'Montant déclaré ou provenance officielle à confirmer'
+      : (project.publication_status !== 'DRAFT' && project.budget_amount_fcfa != null && project.budget_amount_fcfa > 0)
+        ? 'Voté au Budget'
+        : 'Montant non renseigné',
     dataPoints: [
       {
         label: 'Exercice fiscal',
@@ -744,6 +752,7 @@ export function generateProjectPassport(
     hasMatchedCaOperation: Boolean(matchedOp),
     hasMatchedDgmpTender: Boolean(matchedProc),
     hasCitizenFieldProofs: approvedProofs.length > 0,
+    approvedProofsCount: approvedProofs.length,
     matchedOperation: matchedOp,
     matchedProcurement: matchedProc,
     matchResult,

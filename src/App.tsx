@@ -11,7 +11,7 @@ import { ProjectDetailModal } from './components/ProjectDetailModal';
 import { OfficialDocRequestModal } from './components/OfficialDocRequestModal';
 import { Footer } from './components/Footer';
 import { CookieBanner } from './components/CookieBanner';
-import { getCleanPath, parseRoute, AnnuaireSection } from './utils/navigation';
+import { getCleanPath, parseRoute, parseProjectViewTab, AnnuaireSection, ProjectDetailTab } from './utils/navigation';
 
 // Lazy-loaded Pages for code splitting & ultra-fast initial bundle
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
@@ -46,6 +46,9 @@ export function App() {
     }
     return null;
   });
+  const [selectedProjectTab, setSelectedProjectTab] = useState<ProjectDetailTab>(() =>
+    typeof window !== 'undefined' ? parseProjectViewTab(window.location.search) : 'budget'
+  );
   const [isSendProofOpen, setIsSendProofOpen] = useState(false);
   const [targetProofProject, setTargetProofProject] = useState<BudgetProject | null>(null);
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -87,6 +90,7 @@ export function App() {
   };
 
   const handleSelectProject = (project: BudgetProject | null) => {
+    setSelectedProjectTab('budget');
     setSelectedProject(project);
     navigateTo('projects', 'INDEX', project ? project.id : null);
     if (project) {
@@ -126,6 +130,7 @@ export function App() {
       const route = parseRoute(window.location.pathname, window.location.search);
       setActiveTab(route.tab);
       setAnnuaireView(route.section);
+      setSelectedProjectTab(parseProjectViewTab(window.location.search));
       setSelectedProject(route.projectId ? dataStore.getProjectById(route.projectId) || null : null);
     };
     window.addEventListener('popstate', handlePopState);
@@ -366,6 +371,7 @@ export function App() {
         {selectedProject && (
           <ProjectDetailModal
             project={selectedProject}
+            initialTab={selectedProjectTab}
             onClose={() => handleSelectProject(null)}
             onOpenSendProof={(p) => handleOpenSendProof(p)}
             onOpenShare={(p) => handleOpenShare(p)}

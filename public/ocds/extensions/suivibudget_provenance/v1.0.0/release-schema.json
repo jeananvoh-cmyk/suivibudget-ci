@@ -1,0 +1,151 @@
+{
+  "id": "https://suivibudget.vercel.app/ocds/extensions/suivibudget_provenance/v1.0.0/release-schema.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "SuiviBudget CI Provenance & Accountability Extension (v1.0.0) for OCDS 1.1",
+  "description": "JSON Merge Patch schema extending OCDS 1.1 releases with explicit civic provenance, amount precision, and non-conflation of financial execution with physical realization.",
+  "type": "object",
+  "properties": {
+    "x_suivibudget": {
+      "title": "SuiviBudget Civic Accountability Summary",
+      "description": "Synthèse structurée du Passeport de Redevabilité séparant besoin, budget voté, marché DGMP, exécution CA et preuve physique terrain.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projectId",
+        "fiscalYear",
+        "scopeLevel",
+        "budgetAmountStatus",
+        "procurementStatus",
+        "financialExecutionStatus",
+        "physicalRealizationStatus",
+        "approvedCitizenProofsCount",
+        "documentationCompletenessPct"
+      ],
+      "properties": {
+        "projectId": {
+          "title": "Project identifier",
+          "description": "Identifiant interne stable du projet ou de la ligne budgétaire dans SuiviBudget CI.",
+          "type": "string",
+          "minLength": 1
+        },
+        "fiscalYear": {
+          "title": "Fiscal year",
+          "description": "Exercice budgétaire de rattachement (ou null s'il n'est pas documenté).",
+          "type": ["integer", "null"],
+          "minimum": 2000,
+          "maximum": 2100
+        },
+        "scopeLevel": {
+          "title": "Scope level",
+          "description": "Périmètre institutionnel du projet (collectivité locale ou budget central).",
+          "type": "string",
+          "enum": ["LOCAL", "NATIONAL"]
+        },
+        "budgetAmountStatus": {
+          "title": "Budget amount availability status",
+          "description": "Indique si une dotation chiffrée est disponible ou inconnue (jamais remplacée par 0).",
+          "type": "string",
+          "enum": ["AVAILABLE", "UNKNOWN"]
+        },
+        "procurementStatus": {
+          "title": "Procurement matching status",
+          "description": "Statut de rapprochement de la commande publique avec le BOMP / DGMP.",
+          "type": "string",
+          "enum": ["MATCHED_DGMP", "DECLARED_UNVERIFIED", "NOT_FOUND_PUBLICLY"]
+        },
+        "financialExecutionStatus": {
+          "title": "Financial execution status",
+          "description": "Statut d'exécution financière issu du Compte Administratif.",
+          "type": "string",
+          "enum": ["CA_REPORTED_EXECUTION", "CA_REPORTED_ZERO", "NOT_FOUND_PUBLICLY"]
+        },
+        "physicalRealizationStatus": {
+          "title": "Physical realization status",
+          "description": "Statut distinct de constat physique terrain (jamais déduit du paiement financier).",
+          "type": "string",
+          "enum": ["CITIZEN_OBSERVATION", "OFFICIAL_DECLARATION", "UNKNOWN"]
+        },
+        "approvedCitizenProofsCount": {
+          "title": "Approved citizen proofs count",
+          "description": "Nombre de preuves photographiques citoyennes modérées et approuvées.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "documentationCompletenessPct": {
+          "title": "Documentation completeness percentage",
+          "description": "Pourcentage des étapes documentées sur le cycle complet de redevabilité (0 à 100).",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Budget": {
+      "properties": {
+        "fiscalYear": {
+          "title": "Budget fiscal year",
+          "description": "Année d'exercice budgétaire correspondant à la ligne de planification.",
+          "type": ["integer", "null"],
+          "minimum": 2000,
+          "maximum": 2100
+        },
+        "x_amountPrecision": {
+          "title": "Amount precision qualifier",
+          "description": "Qualification explicite de la précision du montant budgétaire (ne jamais inférer EXACT sans justification).",
+          "type": "string",
+          "enum": [
+            "EXACT",
+            "APPROXIMATE",
+            "LOWER_BOUND",
+            "UPPER_BOUND",
+            "DECLARED_ADMIN",
+            "UNKNOWN"
+          ]
+        },
+        "x_dataProvenance": {
+          "title": "Budget data provenance",
+          "description": "Origine et niveau de certification de la donnée budgétaire.",
+          "type": "string",
+          "enum": [
+            "OFFICIAL_SOURCE",
+            "DECLARED_ADMIN",
+            "UNVERIFIED_INPUT",
+            "UNKNOWN"
+          ]
+        }
+      }
+    },
+    "Document": {
+      "properties": {
+        "pageStart": {
+          "title": "Starting page number",
+          "description": "Numéro de page exact dans le document PDF source où figure la ligne citée.",
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "x_provenance": {
+          "title": "Document provenance qualifier",
+          "description": "Qualification de provenance du document attaché (distinction source officielle vs saisie non vérifiée).",
+          "type": "string",
+          "enum": [
+            "OFFICIAL_SOURCE",
+            "DECLARED_ADMIN",
+            "UNVERIFIED_INPUT",
+            "UNKNOWN"
+          ]
+        }
+      }
+    },
+    "Transaction": {
+      "properties": {
+        "x_sourceReference": {
+          "title": "Textual source reference",
+          "description": "Référence textuelle du Compte Administratif ou de l'état d'exécution lorsque aucune URI HTTP(S) directe n'est disponible pour Transaction.source.",
+          "type": ["string", "null"]
+        }
+      }
+    }
+  }
+}

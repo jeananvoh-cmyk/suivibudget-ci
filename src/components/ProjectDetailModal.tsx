@@ -31,6 +31,7 @@ import { findMatchingCaOperation, findMatchingDgmpProcurement } from '../utils/p
 
 interface ProjectDetailModalProps {
   project: BudgetProject | null;
+  initialTab?: 'budget' | 'passport' | 'proofs';
   onClose: () => void;
   onOpenSendProof: (project: BudgetProject) => void;
   onOpenShare: (project: BudgetProject) => void;
@@ -39,6 +40,7 @@ interface ProjectDetailModalProps {
 
 export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   project,
+  initialTab = 'budget',
   onClose,
   onOpenSendProof,
   onOpenShare,
@@ -47,7 +49,11 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   if (!project) return null;
 
   // 3-Tab Navigation: 'budget' (Données & Budget) | 'passport' (Passeport de Redevabilité) | 'proofs' (Constats & Vidéos Citoyennes)
-  const [activeTab, setActiveTab] = useState<'budget' | 'passport' | 'proofs'>('budget');
+  const [activeTab, setActiveTab] = useState<'budget' | 'passport' | 'proofs'>(initialTab);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [project.id, initialTab]);
 
   // Close modal on Escape key press for keyboard accessibility (WCAG)
   useEffect(() => {
