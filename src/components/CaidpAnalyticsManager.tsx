@@ -138,7 +138,9 @@ export const CaidpAnalyticsManager: React.FC<CaidpAnalyticsManagerProps> = ({ on
     : 0;
 
   const overdueRequestsCount = useMemo(() => {
-    return stats.recentEvents.filter(
+    // Count the complete locally retained request log, not only the 50 events
+    // exposed in the recent-events table. DataStore currently caps local history at 500.
+    return dataStore.getCaidpRequests().filter(
       (evt) => evaluateCaidpRequestDeadline(evt).state === 'LEGAL_DELAY_EXPIRED'
     ).length;
   }, [stats.recentEvents]);
