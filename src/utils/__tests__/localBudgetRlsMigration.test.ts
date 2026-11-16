@@ -56,6 +56,8 @@ describe('RLS hardening — local budget administration', () => {
     expect(hardeningMigration).toContain('OR NEW.page_count IS DISTINCT FROM OLD.page_count');
     expect(hardeningMigration).toContain("metadata ->> 'citizen_need_verification_status' = 'VERIFIED'");
     expect(hardeningMigration).toContain("metadata ->> 'audit_verification_status' = 'VERIFIED'");
+    expect(hardeningMigration).toContain('budget_amount_fcfa, project_metadata');
+    expect(hardeningMigration).toContain('UPDATE public.budget_projects bp');
     expect(hardeningMigration).toContain('Verified citizen need requires a published, checksum-verified primary document and an existing page');
     expect(hardeningMigration).toContain('Verified audit requires a published, checksum-verified primary document and an existing page');
     expect(hardeningMigration).toContain("'{citizen_need_verification_status}'");
