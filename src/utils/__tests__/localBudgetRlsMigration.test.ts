@@ -180,10 +180,11 @@ describe('RLS hardening — local budget administration', () => {
            'enforce_budget_project_primary_evidence',
            'enforce_budget_line_primary_document_evidence',
            'enforce_budget_revenue_source_evidence',
-           'prevent_revoking_referenced_primary_document'
+           'prevent_revoking_referenced_primary_document',
+           'enforce_project_passport_document_evidence'
          ) ORDER BY tgname`
       );
-      expect(triggers.rows).toHaveLength(7);
+      expect(triggers.rows).toHaveLength(8);
 
       // A certified CA must not retain its certification if its exact source page is removed.
       await db.exec(`
