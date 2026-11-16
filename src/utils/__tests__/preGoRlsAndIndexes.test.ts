@@ -3,13 +3,13 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { PGlite } from '@electric-sql/pglite';
 
-describe('pre-GO RLS and foreign-key index migration', () => {
+describe('pre-GO admin receipt RLS optimization', () => {
   let db: PGlite | undefined;
   afterEach(async () => { await db?.close(); db = undefined; });
 
-  it('uses an initplan for auth.uid(), preserves actor/domain isolation and creates all ten indexes', async () => {
+  it('uses an initplan for auth.uid() and preserves actor/domain isolation', async () => {
     const migration = readFileSync(
-      join(process.cwd(), 'supabase/migrations/20261115181000_optimize_rls_and_foreign_key_indexes.sql'),
+      join(process.cwd(), 'supabase/migrations/20261115181000_optimize_admin_receipt_read_rls.sql'),
       'utf8'
     );
     db = new PGlite();
@@ -30,12 +30,6 @@ describe('pre-GO RLS and foreign-key index migration', () => {
       CREATE POLICY admin_receipt_read ON public.admin_operation_receipts
         FOR SELECT TO authenticated USING (actor_id = auth.uid() AND private.admin_domain_allowed(entity_type,result_data));
 
-      CREATE TABLE private.admin_document_file_checks(checked_by uuid);
-      CREATE TABLE public.admin_tasks(assignee_id uuid);
-      CREATE TABLE public.apec_events(actor_id uuid,contribution_id uuid);
-      CREATE TABLE public.apec_needs(local_budget_id text,project_id text);
-      CREATE TABLE public.budget_lines(source_document_id text,verified_by uuid);
-      CREATE TABLE public.budget_projects(financial_verified_by uuid,source_document_id text);
 
       GRANT USAGE ON SCHEMA public,auth,private TO authenticated;
       GRANT EXECUTE ON FUNCTION auth.uid(),private.admin_domain_allowed(text,jsonb) TO authenticated;
@@ -62,16 +56,5 @@ describe('pre-GO RLS and foreign-key index migration', () => {
     expect(actorOne.rows).toEqual([{id:'actor-one-allowed'}]);
     await db.exec('ROLLBACK');
 
-    const indexes = await db.query<{ count: number }>(
-      `SELECT count(*)::int AS count FROM pg_indexes
-       WHERE indexname IN (
-        'idx_admin_document_file_checks_checked_by','idx_admin_tasks_assignee_id',
-        'idx_apec_events_actor_id','idx_apec_events_contribution_id',
-        'idx_apec_needs_local_budget_id','idx_apec_needs_project_id',
-        'idx_budget_lines_source_document_id','idx_budget_lines_verified_by',
-        'idx_budget_projects_financial_verified_by','idx_budget_projects_source_document_id'
-       )`
-    );
-    expect(indexes.rows[0].count).toBe(10);
   });
 });
