@@ -85,6 +85,25 @@ describe('Lot P2 — CAIDP 30-Day Legal Countdown & Financial != Physical Card G
     expect(summary.latestDeadline?.state).toBe('WITHIN_LEGAL_DELAY');
   });
 
+  it('does not let publication of one requested document satisfy another CAIDP request', () => {
+    const requests: CaidpRequestEvent[] = [
+      baseRequest,
+      {
+        ...baseRequest,
+        id: 'caidp-req-2',
+        created_at: '2026-11-05T08:00:00Z',
+        document_titles: ['Budget primitif 2026'],
+      },
+    ];
+    const summary = summarizeInstitutionCaidpDeadlines(requests, 'Mairie de Dabou', {
+      now: new Date('2026-11-12T12:00:00Z'),
+      hasPublishedDocumentForRequest: (request) => request.id === 'caidp-req-2',
+    });
+    expect(summary.overdueCount).toBe(1);
+    expect(summary.latestDeadline?.requestId).toBe('caidp-req-2');
+    expect(summary.latestDeadline?.state).toBe('DOCUMENT_PUBLISHED');
+  });
+
   it('distinguishes declarative administrative progress from verified field realization on ProjectCard', () => {
     const declaredProject: BudgetProject = {
       id: 'proj-progress-unverified',
