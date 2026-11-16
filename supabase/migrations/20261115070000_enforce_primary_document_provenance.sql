@@ -381,22 +381,27 @@ $$;
 
 DROP TRIGGER IF EXISTS enforce_local_budget_primary_evidence ON public.local_budgets;
 CREATE TRIGGER enforce_local_budget_primary_evidence
-  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, document_url
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, document_url,
+    institution_id, fiscal_year, total_amount, operating_amount, investment_amount
   ON public.local_budgets FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
 
 DROP TRIGGER IF EXISTS enforce_administrative_account_primary_evidence ON public.administrative_accounts;
 CREATE TRIGGER enforce_administrative_account_primary_evidence
-  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_url
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url,
+    status, institution_id, fiscal_year, operating_planned, operating_realized,
+    operating_revenue_realized, investment_planned, investment_realized,
+    investment_revenue_realized, total_planned, total_realized
   ON public.administrative_accounts FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
 
 DROP TRIGGER IF EXISTS enforce_procurement_primary_evidence ON public.ca_procurement_matches;
 CREATE TRIGGER enforce_procurement_primary_evidence
-  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url, award_amount
   ON public.ca_procurement_matches FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
 
 DROP TRIGGER IF EXISTS enforce_budget_project_primary_evidence ON public.budget_projects;
 CREATE TRIGGER enforce_budget_project_primary_evidence
-  BEFORE INSERT OR UPDATE OF financial_verification_status, data_provenance, source_document_id, source_page, source_url
+  BEFORE INSERT OR UPDATE OF financial_verification_status, data_provenance, source_document_id, source_page, source_url,
+    institution_id, fiscal_year, budget_amount_fcfa
   ON public.budget_projects FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
 
 REVOKE ALL ON FUNCTION private.enforce_primary_document_evidence() FROM public, anon, authenticated, service_role;
