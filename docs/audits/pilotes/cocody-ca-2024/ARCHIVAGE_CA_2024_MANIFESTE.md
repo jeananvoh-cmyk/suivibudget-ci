@@ -29,10 +29,13 @@ Portail : https://www.cloud.influo.ci/p_consultation_arrete_commune.php
 
 ## Contrôle visuel des données financières et intégration distante — 16 novembre 2026
 
-Le PDF reçu a été rouvert et les pages sources ont été contrôlées visuellement :
-- **Page PDF 40, numérotation imprimée 41/45** : tableau des résultats du compte administratif.
-- **Page PDF 43, numérotation imprimée 44/45** : tableau de composition du patrimoine et total général.
-- Les numéros PDF (index 0 ou index 1 selon les outils) ne doivent pas être confondus avec la pagination imprimée du document. Dans la base, `source_page=40` correspond à la page PDF 40 en indexation 0 ; les références descriptives conservent aussi la page imprimée.
+Le PDF reçu a été rouvert et les pages sources ont été contrôlées visuellement. Les repères consignés lors du contrôle sont :
+- **Repère de travail « PDF 40 » ; pagination imprimée 41/45** : tableau des résultats du compte administratif.
+- **Repère de travail « PDF 43 » ; pagination imprimée 44/45** : tableau de composition du patrimoine et total général.
+
+**Réserve de pagination à ne pas perdre :** les notes antérieures n'ont pas consigné de manière suffisamment non ambiguë si les repères « PDF 40 » et « PDF 43 » sont des numéros de page en indexation zéro ou des numéros de page physiques en indexation 1. Il ne faut donc pas convertir automatiquement ces repères en numéros de page PDF certifiés.
+
+Le champ `source_page` est un repère enregistré en base, pas une preuve autonome de pagination. Ses valeurs doivent être rapprochées individuellement du scan original avant d'être présentées comme des numéros de page PDF ou imprimés certifiés. En particulier, ne pas affirmer que `source_page=40` désigne sans ambiguïté la 40e page physique du PDF.
 
 ### Chiffres réconciliés avec la page récapitulative
 
