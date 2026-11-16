@@ -78,7 +78,19 @@ describe('institution response moderation is enforced by PostgreSQL', () => {
     await db.exec('RELEASE SAVEPOINT direct_publish');
     await db.exec("UPDATE public.ca_institution_responses SET response_status='VALIDATED' WHERE id='response-1'");
     await db.exec("UPDATE public.ca_institution_responses SET response_status='PUBLISHED' WHERE id='response-1'");
-    await db.exec("UPDATE public.ca_institution_responses SET response_status='PENDING' WHERE id='response-1'");
+    await db.exec('SAVEPOINT published_edit');
+    await expect(
+      db.query("UPDATE public.ca_institution_responses SET response_text='Edited without reopening' WHERE id='response-1'")
+    ).rejects.toThrow();
+    await db.exec('ROLLBACK TO SAVEPOINT published_edit');
+    await db.exec('RELEASE SAVEPOINT published_edit');
+    await db.exec('SAVEPOINT published_delete');
+    await expect(
+      db.query("DELETE FROM public.ca_institution_responses WHERE id='response-1'")
+    ).rejects.toThrow();
+    await db.exec('ROLLBACK TO SAVEPOINT published_delete');
+    await db.exec('RELEASE SAVEPOINT published_delete');
+    await db.exec("UPDATE public.ca_institution_responses SET response_status='PENDING', response_text='Correction demandée par la modération.' WHERE id='response-1'");
     await db.exec('COMMIT');
 
     // Public access is restricted to published responses.
