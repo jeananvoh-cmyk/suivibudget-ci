@@ -1,6 +1,6 @@
 # SuiviBudget Côte d’Ivoire — Roadmap Stratégique & Opérationnelle (Standards Internationaux Civic Tech)
 
-Cette feuille de route aligne **SuiviBudget CI** sur les meilleurs référentiels et méthodologies des Civic Techs mondiales :
+Cette feuille de route aligne **SuiviBudget CI** sur les meilleurs référentiels et méthodologies des Civic Techs mondiales. Les jalons décrivent des objectifs ; leur présence dans une PR ouverte ne signifie pas qu'ils sont déjà intégrés ou disponibles en production. Le statut détaillé des lots et les PR propriétaires figurent dans [`docs/IMPLEMENTATION_PLAN_ROADMAP.md`](IMPLEMENTATION_PLAN_ROADMAP.md).
 - **GIFT** (*Global Initiative for Fiscal Transparency*) : Principes de transparence et participation publique budgétaire.
 - **OCP / OCDS** (*Open Contracting Partnership*) : Standard international des données de commande publique (*Open Contracting Data Standard v1.1*).
 - **OGP** (*Open Government Partnership*) : Cycle d'engagements mutuels État / Société Civile.
