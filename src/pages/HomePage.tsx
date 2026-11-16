@@ -91,9 +91,9 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   // Public indicators & exact 2026 sector breakdown across 100% of tangible 2026 projects
   const publicIndicators = useMemo(() => dataStore.getPublicIndicators(), [allProjects, stats]);
-  const hasCompleteState2026Amounts = publicIndicators.investments.unknownAmountState2026ProjectsCount === 0;
-  const hasCompleteLocalCsv2026Amounts = publicIndicators.investments.unknownAmountLocalCsv2026ProjectsCount === 0;
-  const hasCompleteBouake2026Amounts = publicIndicators.investments.unknownAmountLocalPortalBouake2026ProjectsCount === 0;
+  const hasCompleteState2026Amounts = publicIndicators.investments.statePhysical2026Count > 0 && publicIndicators.investments.unknownAmountState2026ProjectsCount === 0;
+  const hasCompleteLocalCsv2026Amounts = publicIndicators.investments.localCsvPhysical2026Count > 0 && publicIndicators.investments.unknownAmountLocalCsv2026ProjectsCount === 0;
+  const hasCompleteBouake2026Amounts = publicIndicators.investments.localPortalBouakePhysical2026Count > 0 && publicIndicators.investments.unknownAmountLocalPortalBouake2026ProjectsCount === 0;
   const hasCompletePre2026Amounts = publicIndicators.investments.unknownAmountPre2026ProjectsCount === 0;
   const sectorBreakdown2026 = useMemo(
     () => computeSectorBreakdown(allProjects, { fiscalYear: 2026 }),
