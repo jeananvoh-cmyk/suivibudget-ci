@@ -3,11 +3,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Institution, BudgetProject, BudgetLineItem } from '../types';
 import { formatFCFA, formatAmountInWords, getProjectTier, getProjectTierBadge } from '../utils/formatters';
 import { getProjectsForInstitution } from '../utils/institutionProjects';
-import { X, Globe, ExternalLink, MapPin, Phone, Mail, Building2, FileText, ArrowRight, ShieldCheck, User, CheckCircle2, Share2, Layers, Search, Filter, GraduationCap, Briefcase, FolderOpen, History } from 'lucide-react';
+import { X, Globe, ExternalLink, MapPin, Phone, Mail, Building2, FileText, ArrowRight, ShieldCheck, User, CheckCircle2, Share2, Layers, Search, Filter, GraduationCap, Briefcase, FolderOpen, History, Clock } from 'lucide-react';
 import { OfficialDocRequestModal } from './OfficialDocRequestModal';
 import { findCaidpRI } from '../data/caidpRiData';
 import { dataStore } from '../services/dataStore';
 import { isSafeUrl } from '../utils/security';
+import { summarizeInstitutionCaidpDeadlines } from '../utils/caidpDeadlines';
 import { AdministrativeAccountView } from './AdministrativeAccountView';
 import { LocalBudgetHistoryView } from './LocalBudgetHistoryView';
 import { getLatestAvailableCA } from '../data/administrativeAccountsData';
@@ -432,6 +433,36 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
   const riPhone = (caidpMatch?.phone && caidpMatch.phone !== "Pas de numéro" && caidpMatch.phone !== "")
     ? caidpMatch.phone
     : (institution.info_officer_phone && institution.info_officer_phone !== "Pas de numéro" ? institution.info_officer_phone : "");
+
+  const publishedInstitutionDocuments = dataStore.getDocuments().filter((doc) => {
+    const normalize = (value: string) => value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+    const sameInstitution = doc.institution_id
+      ? doc.institution_id === institution.id
+      : normalize(doc.institution_name || '') === normalize(institution.name);
+    return sameInstitution && doc.status === 'PUBLISHED' && doc.verification_status === 'VERIFIED';
+  });
+  const caidpDeadlineSummary = summarizeInstitutionCaidpDeadlines(
+    dataStore.getCaidpRequests(),
+    institution.name,
+    {
+      hasPublishedDocumentForRequest: (request) => {
+        const normalize = (value: string) => value
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, ' ')
+          .trim();
+        return (request.document_titles || []).some((requestedTitle) =>
+          publishedInstitutionDocuments.some((doc) => normalize(doc.title) === normalize(requestedTitle))
+        );
+      },
+    }
+  );
 
   // Clean entity name for project matching
   const cleanName = institution.name
@@ -1516,6 +1547,29 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                     <div className="pt-1 text-[11px] text-slate-400">
                       Contacts directs non publiés sur le registre public CAIDP. Saisine par courrier écrit ou via{' '}
                       <a href="https://caidp.ci" target="_blank" rel="noopener noreferrer" className="text-brand-orange font-bold hover:underline">caidp.ci</a>.
+                    </div>
+                  )}
+
+                  {caidpDeadlineSummary.latestDeadline && (
+                    <div
+                      className={`mt-2 p-2.5 rounded-xl border text-[11px] space-y-1 ${
+                        caidpDeadlineSummary.latestDeadline.state === 'LEGAL_DELAY_EXPIRED'
+                          ? 'bg-rose-950/60 border-rose-500/40 text-rose-100'
+                          : caidpDeadlineSummary.latestDeadline.state === 'DOCUMENT_PUBLISHED'
+                            ? 'bg-emerald-950/50 border-emerald-500/40 text-emerald-100'
+                            : 'bg-sky-950/50 border-sky-500/40 text-sky-100'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2 font-black">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>Horloge CAIDP (30j)</span>
+                        </span>
+                        <span>{caidpDeadlineSummary.latestDeadline.badgeLabel}</span>
+                      </div>
+                      <p className="text-[10.5px] opacity-90 leading-snug">
+                        {caidpDeadlineSummary.latestDeadline.citizenGuidance}
+                      </p>
                     </div>
                   )}
 
