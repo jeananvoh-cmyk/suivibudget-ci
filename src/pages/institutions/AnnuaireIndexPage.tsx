@@ -21,9 +21,9 @@ export const AnnuaireIndexPage: React.FC<AnnuaireIndexPageProps> = ({
   regulatorsCount = 7,
 }) => {
   const publicIndicators = dataStore.getPublicIndicators();
-  const hasCompleteState2026Amounts = publicIndicators.investments.unknownAmountState2026ProjectsCount === 0;
-  const hasCompleteLocalCsv2026Amounts = publicIndicators.investments.unknownAmountLocalCsv2026ProjectsCount === 0;
-  const hasCompleteBouake2026Amounts = publicIndicators.investments.unknownAmountLocalPortalBouake2026ProjectsCount === 0;
+  const hasCompleteState2026Amounts = publicIndicators.investments.statePhysical2026Count > 0 && publicIndicators.investments.unknownAmountState2026ProjectsCount === 0;
+  const hasCompleteLocalCsv2026Amounts = publicIndicators.investments.localCsvPhysical2026Count > 0 && publicIndicators.investments.unknownAmountLocalCsv2026ProjectsCount === 0;
+  const hasCompleteBouake2026Amounts = publicIndicators.investments.localPortalBouakePhysical2026Count > 0 && publicIndicators.investments.unknownAmountLocalPortalBouake2026ProjectsCount === 0;
   const hasCompletePre2026Amounts = publicIndicators.investments.unknownAmountPre2026ProjectsCount === 0;
   return (
     <div className="space-y-10 animate-in fade-in duration-300">
