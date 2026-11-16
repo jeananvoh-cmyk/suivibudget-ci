@@ -2,7 +2,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { buildCitizenSummaryData, CitizenOnePageSummary } from '../../components/CitizenOnePageSummary';
-import { BudgetProject, Institution } from '../../types';
+import { BudgetProject, Institution, PublicDocument } from '../../types';
 import { AdministrativeAccount } from '../../types/administrativeAccount';
 
 describe('Citizen One-Page A4 Summary Sheet', () => {
