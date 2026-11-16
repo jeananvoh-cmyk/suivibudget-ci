@@ -188,6 +188,7 @@ CREATE POLICY "Allow public read on budget revenue sources"
 CREATE OR REPLACE FUNCTION private.prevent_revoking_referenced_primary_document()
 RETURNS trigger
 LANGUAGE plpgsql
+SECURITY DEFINER
 SET search_path = ''
 AS $function$
 DECLARE
@@ -195,8 +196,9 @@ DECLARE
 BEGIN
   IF OLD.status IN ('VERIFIED', 'PUBLISHED')
     AND (
-      NEW.status NOT IN ('VERIFIED', 'PUBLISHED')
-      OR NEW.verification_status <> 'VERIFIED'
+      (OLD.status = 'PUBLISHED' AND NEW.status IS DISTINCT FROM 'PUBLISHED')
+      OR (OLD.status = 'VERIFIED' AND NEW.status NOT IN ('VERIFIED', 'PUBLISHED'))
+      OR NEW.verification_status IS DISTINCT FROM 'VERIFIED'
       OR NEW.checksum_status NOT IN ('COMPUTED', 'VERIFIED')
       OR NEW.checksum_sha256 IS DISTINCT FROM OLD.checksum_sha256
       OR NEW.page_count IS DISTINCT FROM OLD.page_count
@@ -214,9 +216,24 @@ BEGIN
           AND (lb.status = 'PUBLISHED' OR lb.verification_status IN ('OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION')))
       OR EXISTS (SELECT 1 FROM public.budget_projects bp
         WHERE bp.source_document_id = OLD.id
-          AND (bp.publication_status = 'PUBLISHED' OR bp.financial_verification_status = 'VERIFIED'))
+          AND bp.archived_at IS NULL
+          AND bp.publication_status <> 'ARCHIVED'
+          AND (bp.publication_status = 'PUBLISHED'
+            OR bp.data_provenance = 'OFFICIAL_SOURCE'
+            OR bp.financial_verification_status IN ('VERIFIED','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE')))
+      OR EXISTS (SELECT 1 FROM public.budget_projects bp
+        WHERE bp.archived_at IS NULL
+          AND bp.publication_status <> 'ARCHIVED'
+          AND (
+            (bp.project_metadata ->> 'citizen_need_verification_status' = 'VERIFIED'
+              AND bp.project_metadata ->> 'citizen_need_source_document_id' = OLD.id)
+            OR (bp.project_metadata ->> 'audit_verification_status' = 'VERIFIED'
+              AND bp.project_metadata ->> 'audit_source_document_id' = OLD.id)
+          ))
       OR EXISTS (SELECT 1 FROM public.budget_lines bl
         WHERE bl.source_document_id = OLD.id
+          AND bl.archived_at IS NULL
+          AND bl.publication_status <> 'ARCHIVED'
           AND (bl.publication_status = 'PUBLISHED' OR bl.verification_status = 'VERIFIED'))
       OR EXISTS (SELECT 1 FROM public.budget_revenue_sources brs
         WHERE brs.source_document_id = OLD.id
@@ -244,9 +261,7 @@ REVOKE ALL ON FUNCTION private.prevent_revoking_referenced_primary_document()
 
 DROP TRIGGER IF EXISTS prevent_revoking_referenced_primary_document ON public.public_documents;
 CREATE TRIGGER prevent_revoking_referenced_primary_document
-  BEFORE UPDATE OF status, verification_status, checksum_status, checksum_sha256, page_count,
-    source_url, source_name, institution_id, fiscal_year, document_type, file_url, storage_path
-  ON public.public_documents FOR EACH ROW
+  BEFORE UPDATE ON public.public_documents
+  FOR EACH ROW
   EXECUTE FUNCTION private.prevent_revoking_referenced_primary_document();
-
 COMMIT;
