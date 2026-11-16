@@ -48,7 +48,11 @@ function mapProcurementMethod(rawMethod?: string): OcdsTenderMethodInfo {
   if (token.includes('GRE') || token.includes('DIRECT') || token === 'ENTENTE_DIRECTE') {
     return { procurementMethod: 'direct', details: rawMethod };
   }
-  return { procurementMethod: 'limited', details: rawMethod };
+  if (token.includes('LIMITED') || token.includes('RESTREINT')) {
+    return { procurementMethod: 'limited', details: rawMethod };
+  }
+  // An unrecognized local label must not be converted into a false OCDS method.
+  return { procurementMethod: undefined, details: rawMethod };
 }
 
 interface OcdsTenderMethodInfo {
@@ -69,7 +73,8 @@ function normalizeExactAmount(value: number | null | undefined): number | undefi
  */
 export function mapProjectPassportToOcdsRelease(
   project: BudgetProject,
-  passport: ProjectAccountabilityPassportData
+  passport: ProjectAccountabilityPassportData,
+  releaseDate = new Date().toISOString()
 ): OcdsRelease {
   const ocid = buildProjectOcid(project);
   const buyerId = project.institution_id || `ci-inst-${slugifyToken(passport.institutionName) || 'public'}`;
@@ -99,7 +104,7 @@ export function mapProjectPassportToOcdsRelease(
       title: project.source || 'Source budgétaire référencée',
       url: project.source_url,
       pageStart: project.source_page,
-      x_provenance: passport.facts.budget_amount.provenance,
+      x_provenance: project.data_provenance === 'OFFICIAL_SOURCE' ? 'OFFICIAL_SOURCE' : 'UNVERIFIED_INPUT',
     });
   }
 
@@ -232,7 +237,7 @@ export function mapProjectPassportToOcdsRelease(
   return {
     ocid,
     id: `${ocid}-fy${project.fiscal_year || 'na'}`,
-    date: project.created_at || new Date().toISOString(),
+    date: releaseDate,
     language: 'fr',
     tag: tags,
     initiationType: 'tender',
@@ -247,8 +252,9 @@ export function mapProjectPassportToOcdsRelease(
         project: project.title,
         fiscalYear: project.fiscal_year || null,
         uri: project.source_url,
-        x_amountPrecision: project.data_provenance === 'DECLARED_ADMIN' ? 'DECLARED_ADMIN' : 'EXACT',
-        x_dataProvenance: passport.facts.budget_amount.provenance,
+        // No precision metadata exists on BudgetProject today; never infer EXACT from a number alone.
+        x_amountPrecision: project.data_provenance === 'DECLARED_ADMIN' ? 'DECLARED_ADMIN' : 'UNKNOWN',
+        x_dataProvenance: project.data_provenance === 'OFFICIAL_SOURCE' ? 'OFFICIAL_SOURCE' : 'UNVERIFIED_INPUT',
       },
       documents: planningDocs.length > 0 ? planningDocs : undefined,
     },
@@ -259,7 +265,7 @@ export function mapProjectPassportToOcdsRelease(
       status: awards.length > 0 ? 'complete' : 'planned',
       procurementMethod: methodInfo.procurementMethod,
       procurementMethodDetails: methodInfo.details || bompRef,
-      mainProcurementCategory: 'works',
+      // The project category does not reliably identify the procurement category.
       procuringEntity: buyerRef,
       value: budgetAmount !== undefined ? { amount: budgetAmount, currency: 'XOF' } : undefined,
     },
@@ -288,15 +294,11 @@ export function createOcdsReleasePackage(
   accounts?: AdministrativeAccount[],
   packageUri = 'https://suivibudget.vercel.app/open-data/ocds-releases.json'
 ): OcdsReleasePackage {
+  const publishedDate = new Date().toISOString();
   const releases = projects.map((project) => {
     const passport = generateProjectPassport(project, [...citizenProofs], accounts);
-    const release = mapProjectPassportToOcdsRelease(project, passport);
-    if (passport.matchedOperation && release.planning.budget) {
-      release.planning.budget.x_amountPrecision = amountPrecision(
-        passport.matchedOperation,
-        'planned_amount'
-      );
-    }
+    // The release timestamp is the package publication time, not the project's created_at.
+    const release = mapProjectPassportToOcdsRelease(project, passport, publishedDate);
     const approvedCount = citizenProofs.filter(
       (p) => p.project_id === project.id && p.verification_status === 'APPROVED' && !p.is_demo
     ).length;
@@ -307,7 +309,7 @@ export function createOcdsReleasePackage(
   return {
     uri: packageUri,
     version: '1.1',
-    publishedDate: new Date().toISOString(),
+    publishedDate,
     publisher: {
       name: "SuiviBudget Côte d'Ivoire",
       uri: 'https://suivibudget.vercel.app',
