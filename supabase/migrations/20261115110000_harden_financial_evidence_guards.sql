@@ -39,6 +39,13 @@ AS $function$
 DECLARE
   parent_budget public.local_budgets%rowtype;
 BEGIN
+  IF TG_OP = 'UPDATE'
+    AND (OLD.verification_status = 'VERIFIED' OR OLD.publication_status = 'PUBLISHED')
+    AND (NEW.verification_status = 'VERIFIED' OR NEW.publication_status = 'PUBLISHED')
+    AND NEW.amount IS DISTINCT FROM OLD.amount THEN
+    RAISE EXCEPTION 'Changing a certified financial amount requires resetting verification status for a new review';
+  END IF;
+
   IF NEW.verification_status <> 'VERIFIED' AND NEW.publication_status <> 'PUBLISHED' THEN
     RETURN NEW;
   END IF;
