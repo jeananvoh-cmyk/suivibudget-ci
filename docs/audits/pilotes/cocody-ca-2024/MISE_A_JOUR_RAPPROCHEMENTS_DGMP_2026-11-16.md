@@ -20,9 +20,9 @@ Un classeur Excel a été généré en reprenant les 28 enregistrements détaill
 
 Le fichier est conservé dans la Bibliothèque ChatGPT de l'utilisateur :
 
-`/SuiviBudget Côte d’Ivoire/Pilotes/Cocody 2024/SuiviBudget_Cocody_CA2024_edition_citoyenne_finalisee_2026-11-16.xlsx`
+`/SuiviBudget Côte d’Ivoire/Pilotes/Cocody 2024/SuiviBudget_Cocody_CA2024_edition_citoyenne_corrigee_2026-11-16.xlsx`
 
-Le binaire Excel n'est pas ajouté au dépôt par le connecteur GitHub, qui ne permet ici que la création de fichiers texte UTF-8.
+Le classeur corrigé est conservé dans la bibliothèque de travail et n'est pas inclus dans cette PR documentaire. Son ajout éventuel au dépôt fera l'objet d'une opération distincte de téléversement binaire.
 
 ## Réserves de lecture
 
