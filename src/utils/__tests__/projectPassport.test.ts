@@ -176,6 +176,7 @@ describe('Project Accountability Passport (Passeport de Redevabilité)', () => {
     progress_percentage: 0,
     created_at: '2026-01-01',
     scope_level: 'LOCAL',
+    data_provenance: 'OFFICIAL_SOURCE',
   };
 
   const mockProjectWithUnverifiedContractor: BudgetProject = {
