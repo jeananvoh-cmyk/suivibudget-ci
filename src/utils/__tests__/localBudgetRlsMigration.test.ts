@@ -203,6 +203,13 @@ describe('RLS hardening — local budget administration', () => {
            'https://dgbf.ci/ca-2023.pdf','DGBF — CA primaire','migration-inst',2023,'COMPTE_ADMINISTRATIF',60);
         UPDATE public.public_documents SET status='VERIFIED' WHERE id='migration-primary-ca-doc';
         UPDATE public.public_documents SET status='PUBLISHED' WHERE id='migration-primary-ca-doc';
+        INSERT INTO public.budget_projects
+          (id,institution_id,commune_name,region_name,category,title,budget_amount_fcfa,fiscal_year,
+           data_provenance,financial_verification_status,project_metadata)
+        VALUES
+          ('migration-passport-valid','migration-inst','Commune de test','Région test','Éducation',
+           'Projet avec pièces de besoin et audit',100,2023,'DECLARED_ADMIN','TO_VERIFY',
+           '{"citizen_need_verification_status":"VERIFIED","citizen_need_source_document_id":"migration-primary-ca-doc","citizen_need_source_url":"https://dgbf.ci/ca-2023.pdf","citizen_need_source_page":5,"audit_verification_status":"VERIFIED","audit_source_document_id":"migration-primary-ca-doc","audit_source_url":"https://dgbf.ci/ca-2023.pdf","audit_source_page":6}'::jsonb);
         INSERT INTO public.administrative_accounts
           (id,institution_id,institution_type,institution_name,fiscal_year,status,source_document,
            source_document_id,source_url,source_page,verification_status,reconciliation_status)
