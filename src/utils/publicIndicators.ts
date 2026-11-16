@@ -763,7 +763,7 @@ export function computePublicIndicators(params: {
     stateCatalogPhysical2026: {
       id: 'stateCatalogPhysical2026',
       label: `${physicalClassificationLabel} — État (2026, sous-ensemble extrait)`,
-      value: statePhysical2026AmountFcfa,
+      value: unknownAmount2026ProjectsCount > 0 ? null : statePhysical2026AmountFcfa,
       unit: 'FCFA',
       fiscalYear: 2026,
       scope: 'EXTRACTION CATALOGUE ÉTAT 2026 HORS PROGRAMME 2204040 (NON EXHAUSTIF VS 4 195,7 MDS LFI)',
@@ -778,7 +778,7 @@ export function computePublicIndicators(params: {
     localCsvPhysical2026: {
       id: 'localCsvPhysical2026',
       label: `${physicalClassificationLabel} — Collectivités (extraction LFI 2026)`,
-      value: localCsvPhysical2026AmountFcfa,
+      value: unknownAmount2026ProjectsCount > 0 ? null : localCsvPhysical2026AmountFcfa,
       unit: 'FCFA',
       fiscalYear: 2026,
       scope: 'EXTRACTION CSV COLLECTIVITÉS LFI 2026 (DÉDUPLIQUÉE, HORS SALAIRES)',
@@ -793,7 +793,7 @@ export function computePublicIndicators(params: {
     bouakePortalPhysical2026: {
       id: 'bouakePortalPhysical2026',
       label: 'Projets municipaux Bouaké sourcés sur portail communal (hors LFI 2026)',
-      value: localPortalBouakePhysical2026AmountFcfa,
+      value: unknownAmount2026ProjectsCount > 0 ? null : localPortalBouakePhysical2026AmountFcfa,
       unit: 'FCFA',
       fiscalYear: 2026,
       scope: 'PORTAIL EXTERNE MAIRIEDEBOUAKE.CI (C2D / AFD / PPP, HORS DOTATION LFI)',
@@ -808,7 +808,7 @@ export function computePublicIndicators(params: {
     multiYearStateCatalogPre2026: {
       id: 'multiYearStateCatalogPre2026',
       label: 'Grand marché pluriannuel de l’État engagé en 2021 (hors exercice 2026)',
-      value: multiYearPre2026AmountFcfa,
+      value: unknownAmountPre2026ProjectsCount > 0 ? null : multiYearPre2026AmountFcfa,
       unit: 'FCFA',
       fiscalYear: 'MULTI_YEAR',
       scope: 'EXERCICE 2021 — AXE SÉGUÉLA-SIFIÉ-TOUBA (HORS LFI 2026)',
