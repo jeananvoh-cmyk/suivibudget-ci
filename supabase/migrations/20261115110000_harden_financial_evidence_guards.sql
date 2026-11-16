@@ -2,6 +2,11 @@
 -- À exécuter après 20261115070000_enforce_primary_document_provenance.sql.
 BEGIN;
 
+-- Restore explicit PostgREST table privileges while keeping RLS authoritative.
+REVOKE ALL ON TABLE public.budget_sources, public.budget_revenue_sources FROM anon, authenticated;
+GRANT SELECT ON TABLE public.budget_sources, public.budget_revenue_sources TO anon, authenticated;
+GRANT INSERT, UPDATE ON TABLE public.budget_sources, public.budget_revenue_sources TO authenticated;
+
 -- Recreate the CA trigger so a page-only change cannot bypass source validation.
 DROP TRIGGER IF EXISTS enforce_administrative_account_primary_evidence ON public.administrative_accounts;
 CREATE TRIGGER enforce_administrative_account_primary_evidence
