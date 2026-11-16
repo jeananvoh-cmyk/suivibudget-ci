@@ -19,6 +19,14 @@ LANGUAGE plpgsql
 SET search_path = ''
 AS $function$
 BEGIN
+  IF TG_OP = 'DELETE' THEN
+    IF OLD.response_status = 'PUBLISHED' THEN
+      RAISE EXCEPTION 'A published institution response must be returned to PENDING before deletion'
+        USING ERRCODE = '23514';
+    END IF;
+    RETURN OLD;
+  END IF;
+
   IF TG_OP = 'INSERT' THEN
     IF NEW.response_status IS DISTINCT FROM 'PENDING' THEN
       RAISE EXCEPTION 'Institution responses must enter moderation as PENDING'
