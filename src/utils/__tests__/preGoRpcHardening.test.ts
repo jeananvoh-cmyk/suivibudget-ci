@@ -9,7 +9,7 @@ describe('pre-GO privileged RPC exposure hardening', () => {
 
   it('keeps public RPC contracts as INVOKER wrappers and moves privileged bodies to private', async () => {
     const migration = readFileSync(
-      join(process.cwd(), 'supabase/migrations/20261115180000_move_staff_rpcs_to_private.sql'),
+      join(process.cwd(), 'supabase/migrations/20261116150000_move_staff_rpcs_to_private.sql'),
       'utf8'
     );
     db = new PGlite();
