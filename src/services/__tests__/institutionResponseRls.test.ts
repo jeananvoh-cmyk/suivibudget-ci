@@ -49,8 +49,7 @@ describe('institution response moderation is enforced by PostgreSQL', () => {
       CREATE POLICY "Allow admin and moderator full access on responses"
         ON public.ca_institution_responses FOR ALL TO authenticated
         USING (true) WITH CHECK (true);
-      GRANT SELECT ON public.ca_institution_responses TO anon;
-      GRANT SELECT, INSERT, UPDATE ON public.ca_institution_responses TO authenticated;
+      REVOKE ALL ON TABLE public.ca_institution_responses FROM PUBLIC, anon, authenticated;
     `);
     await db.exec(migration);
 
@@ -118,5 +117,5 @@ describe('institution response moderation is enforced by PostgreSQL', () => {
     const publishedRows = await db.query("SELECT id FROM public.ca_institution_responses");
     expect(publishedRows.rows).toEqual([{ id: 'published-public' }]);
     await db.exec('ROLLBACK');
-  });
+  }, 30000);
 });

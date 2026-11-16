@@ -2,6 +2,12 @@
 -- Le contrôle React reste une aide UX ; seule cette règle serveur fait autorité.
 BEGIN;
 
+-- Restaurer les privilèges SQL de base (20260930030702_grant_schema_privileges.sql avait
+-- révoqué tous les privilèges sur public.* en omettant public.ca_institution_responses).
+REVOKE ALL ON TABLE public.ca_institution_responses FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON TABLE public.ca_institution_responses TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON TABLE public.ca_institution_responses TO authenticated;
+
 -- La date doit être fournie explicitement : aucune date implicite à l'enregistrement.
 ALTER TABLE public.ca_institution_responses
   ALTER COLUMN response_date DROP DEFAULT;
