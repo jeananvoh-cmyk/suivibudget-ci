@@ -113,6 +113,8 @@ UPDATE public.ca_procurement_matches AS cm
       )
     );
 
+ALTER TABLE public.budget_projects DISABLE TRIGGER USER;
+
 UPDATE public.budget_projects AS bp
   SET data_provenance = 'DECLARED_ADMIN',
       financial_verification_status = 'TO_VERIFY'
@@ -133,6 +135,8 @@ UPDATE public.budget_projects AS bp
           AND d.source_url = bp.source_url
       )
     );
+
+ALTER TABLE public.budget_projects ENABLE TRIGGER USER;
 
 -- Le validateur SQL accepte les nouveaux champs de traçabilité et refuse
 -- toute qualification primaire sans document publié, vérifié et page exacte.
