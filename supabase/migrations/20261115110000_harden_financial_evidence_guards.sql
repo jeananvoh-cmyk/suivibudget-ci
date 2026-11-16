@@ -199,7 +199,7 @@ BEGIN
       (OLD.status = 'PUBLISHED' AND NEW.status IS DISTINCT FROM 'PUBLISHED')
       OR (OLD.status = 'VERIFIED' AND NEW.status NOT IN ('VERIFIED', 'PUBLISHED'))
       OR NEW.verification_status IS DISTINCT FROM 'VERIFIED'
-      OR NEW.checksum_status NOT IN ('COMPUTED', 'VERIFIED')
+      OR (NEW.checksum_status IS DISTINCT FROM 'COMPUTED' AND NEW.checksum_status IS DISTINCT FROM 'VERIFIED')
       OR NEW.checksum_sha256 IS DISTINCT FROM OLD.checksum_sha256
       OR NEW.page_count IS DISTINCT FROM OLD.page_count
       OR NEW.source_url IS DISTINCT FROM OLD.source_url
