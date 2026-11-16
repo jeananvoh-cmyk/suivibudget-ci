@@ -183,6 +183,10 @@ describe('Public Indicators Reconciliation & Traceability', () => {
 
     expect(snapshot.investments.unknownAmount2026ProjectsCount).toBe(1);
     expect(snapshot.investments.consolidatedPhysical2026AmountFcfa).toBeNull();
+    expect(snapshot.indicators.stateCatalogPhysical2026.value).toBeNull();
+    expect(snapshot.indicators.localCsvPhysical2026.value).toBeNull();
+    expect(snapshot.sectorBreakdown2026.isPartialSum).toBe(true);
+    expect(snapshot.sectorBreakdown2026.consolidatedTotalAmountFcfa).toBeNull();
 
     const indicatorsSpy = vi.spyOn(dataStore, 'getPublicIndicators').mockReturnValue(snapshot);
     const heroHtml = renderToStaticMarkup(
