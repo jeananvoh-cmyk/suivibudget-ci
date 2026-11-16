@@ -131,7 +131,11 @@ export function evaluateCaidpRequestDeadline(
 export function summarizeInstitutionCaidpDeadlines(
   requests: readonly CaidpRequestEvent[],
   institutionName: string,
-  options: { now?: Date; hasPublishedDocument?: boolean } = {}
+  options: {
+    now?: Date;
+    hasPublishedDocument?: boolean;
+    hasPublishedDocumentForRequest?: (request: CaidpRequestEvent) => boolean;
+  } = {}
 ): InstitutionCaidpDeadlineSummary {
   const target = normalizeName(institutionName);
   const matching = requests
@@ -155,7 +159,14 @@ export function summarizeInstitutionCaidpDeadlines(
     };
   }
 
-  const evaluated = matching.map((req) => evaluateCaidpRequestDeadline(req, options));
+  const evaluated = matching.map((req) =>
+    evaluateCaidpRequestDeadline(req, {
+      now: options.now,
+      hasPublishedDocument: options.hasPublishedDocumentForRequest
+        ? options.hasPublishedDocumentForRequest(req)
+        : options.hasPublishedDocument,
+    })
+  );
   return {
     totalRequests: evaluated.length,
     overdueCount: evaluated.filter((d) => d.state === 'LEGAL_DELAY_EXPIRED').length,
