@@ -7,6 +7,7 @@ export const CAIDP_LEGAL_DEADLINE_DAYS = 30;
 
 export type CaidpDeadlineState =
   | 'DOCUMENT_PUBLISHED'
+  | 'DATE_UNKNOWN'
   | 'WITHIN_LEGAL_DELAY'
   | 'DUE_TODAY'
   | 'LEGAL_DELAY_EXPIRED';
@@ -40,7 +41,7 @@ function startOfUtcDay(d: Date): number {
 function normalizeName(value: string): string {
   return (value || '')
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\\u0300-\\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
@@ -48,7 +49,8 @@ function normalizeName(value: string): string {
 
 /**
  * Évalue le compte à rebours légal de 30 jours pour une demande CAIDP.
- * Ne fabrique aucune présomption si `hasPublishedDocument` est faux.
+ * Une date absente ou invalide reste explicitement inconnue : elle ne doit jamais
+ * être remplacée par la date du jour, ce qui créerait une échéance fictive.
  */
 export function evaluateCaidpRequestDeadline(
   request: Pick<CaidpRequestEvent, 'id' | 'created_at' | 'entity_name'>,
@@ -56,9 +58,25 @@ export function evaluateCaidpRequestDeadline(
 ): CaidpDeadlineStatus {
   const now = options.now ?? new Date();
   const parsed = new Date(request.created_at);
-  const requestedDate = Number.isNaN(parsed.getTime()) ? now : parsed;
-  const dueDate = new Date(startOfUtcDay(requestedDate) + CAIDP_LEGAL_DEADLINE_DAYS * MS_PER_DAY);
+  const hasValidRequestDate = Number.isFinite(parsed.getTime());
 
+  if (!hasValidRequestDate && !options.hasPublishedDocument) {
+    return {
+      requestId: request.id,
+      entityName: request.entity_name,
+      requestedAtIso: '',
+      dueDateIso: '',
+      elapsedDays: 0,
+      daysRemaining: 0,
+      daysOverdue: 0,
+      state: 'DATE_UNKNOWN',
+      badgeLabel: 'Date de demande à confirmer',
+      citizenGuidance: 'La date de réception ou d’envoi de la demande n’est pas exploitable : aucune échéance légale ne peut être calculée de façon fiable.',
+    };
+  }
+
+  const requestedDate = hasValidRequestDate ? parsed : now;
+  const dueDate = new Date(startOfUtcDay(requestedDate) + CAIDP_LEGAL_DEADLINE_DAYS * MS_PER_DAY);
   const elapsedDays = Math.max(
     0,
     Math.floor((startOfUtcDay(now) - startOfUtcDay(requestedDate)) / MS_PER_DAY)
@@ -69,8 +87,8 @@ export function evaluateCaidpRequestDeadline(
     return {
       requestId: request.id,
       entityName: request.entity_name,
-      requestedAtIso: requestedDate.toISOString(),
-      dueDateIso: dueDate.toISOString(),
+      requestedAtIso: hasValidRequestDate ? requestedDate.toISOString() : '',
+      dueDateIso: hasValidRequestDate ? dueDate.toISOString() : '',
       elapsedDays,
       daysRemaining: 0,
       daysOverdue: 0,
