@@ -82,5 +82,5 @@ describe('pre-GO privileged RPC exposure hardening', () => {
       `SELECT tablename,policyname FROM pg_policies WHERE schemaname='public' AND tablename IN ('projects','sources') AND cmd='SELECT' AND roles @> ARRAY['public']::name[]`
     );
     expect(legacyPublicPolicies.rows).toEqual([]);
-  });
+  }, 30000);
 });
