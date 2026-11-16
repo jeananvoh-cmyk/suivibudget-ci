@@ -354,6 +354,21 @@ describe('RLS hardening — local budget administration', () => {
         UPDATE public.administrative_accounts
         SET status = 'DRAFT', verification_status = 'TO_VERIFY'
         WHERE id = 'migration-ca-certified';
+      `);
+      // Passport metadata is also a certified dependency, even when the project's
+      // financial source_document_id is empty or points to another PDF.
+      await expect(db.query(
+        `UPDATE public.public_documents
+         SET page_count = 61
+         WHERE id = 'migration-primary-ca-doc'`
+      )).rejects.toThrow('Cannot revoke a primary document while certified financial records depend on it');
+      await db.exec(`
+        UPDATE public.budget_projects
+        SET project_metadata = jsonb_set(
+          jsonb_set(project_metadata, '{citizen_need_verification_status}', '"TO_VERIFY"'::jsonb, true),
+          '{audit_verification_status}', '"TO_VERIFY"'::jsonb, true
+        )
+        WHERE id = 'migration-passport-valid';
         INSERT INTO public.budget_projects
           (id,institution_id,commune_name,region_name,category,title,budget_amount_fcfa,fiscal_year,
            publication_status,archived_at,data_provenance,financial_verification_status,
