@@ -123,14 +123,20 @@ describe('RLS hardening — local budget administration', () => {
          UNION ALL
          SELECT 'ca_procurement_matches',verification_status,award_amount::text amount FROM public.ca_procurement_matches WHERE id='migration-market'
          UNION ALL
-         SELECT 'budget_projects',data_provenance || ':' || financial_verification_status,budget_amount_fcfa::text amount FROM public.budget_projects WHERE id='migration-project'`
+         SELECT 'budget_projects',data_provenance || ':' || financial_verification_status,budget_amount_fcfa::text amount FROM public.budget_projects WHERE id='migration-project'
+         UNION ALL
+         SELECT 'budget_project_need_evidence',project_metadata ->> 'citizen_need_verification_status','n/a' FROM public.budget_projects WHERE id='migration-project'
+         UNION ALL
+         SELECT 'budget_project_audit_evidence',project_metadata ->> 'audit_verification_status','n/a' FROM public.budget_projects WHERE id='migration-project'`
       );
       expect(demotions.rows).toEqual(expect.arrayContaining([
         { table_name: 'local_budgets', status: 'SECONDARY_TO_CORROBORATE', amount: '100' },
         { table_name: 'budget_revenue_sources', status: 'SECONDARY_TO_CORROBORATE', amount: '25' },
         { table_name: 'administrative_accounts', status: 'TO_VERIFY', amount: '20' },
         { table_name: 'ca_procurement_matches', status: 'TO_VERIFY', amount: '40' },
-        { table_name: 'budget_projects', status: 'DECLARED_ADMIN:TO_VERIFY', amount: '150' }
+        { table_name: 'budget_projects', status: 'DECLARED_ADMIN:TO_VERIFY', amount: '150' },
+        { table_name: 'budget_project_need_evidence', status: 'TO_VERIFY', amount: 'n/a' },
+        { table_name: 'budget_project_audit_evidence', status: 'TO_VERIFY', amount: 'n/a' }
       ]));
       const defaults = await db.query<{ table_name: string; column_name: string; column_default: string | null }>(
         `SELECT table_name,column_name,column_default
