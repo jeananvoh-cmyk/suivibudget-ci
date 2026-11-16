@@ -1284,3 +1284,24 @@ NEXT_EXECUTABLE_TASK : validation finale humaine de la PR corrective dépendante
   - Branche : `fix/recette-prod-modal-escape-hero-overflow` (PR #57 ouverte sur `master`).
 - **PROCHAINE ACTION** : Revue ChatGPT de la PR #57 et relance du déploiement Vercel après réinitialisation du quota quotidien.
 
+
+
+## PRE_GO_REMEDIATION_20261115 — branche corrective dédiée
+
+- Branche : `fix/pre-go-complete-20261115`, créée depuis le HEAD #77 `320ae4c81396b6d25973848d8e6f0811965ff808`.
+- Rapport courant : `docs/audits/PRE_GO_REMEDIATION_20261115.md`. Ce bloc supersède les anciens statuts de sécurité de ce handoff lorsque ceux-ci contredisent les Advisors Production du 15/11/2026.
+- Correctifs versionnés : contrôle gratuit HIBP k-anonymity dans les parcours de création de compte citoyen et de changement de mot de passe administrateur ; wrappers RPC publics SECURITY INVOKER avec implémentations SECURITY DEFINER déplacées dans le schéma non exposé `private` ; suppression de la lecture publique directe de `site_settings` ; optimisation RLS `auth.uid()` initplan ; dix index de clés étrangères.
+- Tests ciblés ajoutés : `pwnedPassword.test.ts`, `preGoRpcHardening.test.ts`, `preGoRlsAndIndexes.test.ts`.
+- **Limite Auth à ne pas masquer :** la protection native Supabase Auth contre les mots de passe compromis est Pro+ selon la documentation Supabase. Le contrôle HIBP côté application est une défense en profondeur, pas une barrière serveur équivalente ; un appel direct à l'API Auth peut le contourner et les mots de passe existants ne sont pas rétro-vérifiés. Aucun paiement ni changement de réglage Production.
+- Les migrations `20261115180000` et `20261115181000` ne sont pas appliquées en Production. Elles doivent passer la CI et une revue indépendante.
+- Supabase Production reste en lecture seule. Aucun merge, aucun déploiement, aucune modification de configuration Auth.
+- **GO : NO-GO maintenu** tant que CI, replay PGlite complet, revue indépendante, preuve binaire indépendante du PDF Cocody, justification de l'opération dépassant le montant prévu et arbitrage du risque HIBP serveur ne sont pas clos.
+
+
+## PRE_GO_CI_RESULT_20261115
+
+- CI #514 : **SUCCESS** sur `0bea7d68b5d43b07a143cf74147083493728b980` — 75/75 fichiers, 989/989 tests, build production PASS, build Review PASS.
+- Le test PGlite des huit wrappers RPC et de la révocation des politiques publiques legacy `projects`/`sources` passe ; les tests RLS initplan et index FK passent ; le test HIBP k-anonymity passe.
+- Le dernier commit documentaire de cette branche suit ce SHA. Une nouvelle exécution CI doit donc être attendue sur le HEAD actualisé avant de déclarer la branche entièrement validée.
+- Les alertes Supabase en Production ne sont pas réputées résolues : aucune migration hébergée n'a été appliquée.
+- **NO-GO maintenu** : pas de fusion, pas de migration Production, pas de déploiement Production.
