@@ -8,11 +8,18 @@
  * En cas d'indisponibilité du service, l'opération échoue de manière fermée :
  * aucun nouveau mot de passe n'est accepté sans contrôle.
  */
+export class PwnedPasswordError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PwnedPasswordError';
+  }
+}
+
 export async function assertPasswordNotPwned(password: string): Promise<void> {
-  if (!password) throw new Error('Saisissez un mot de passe.');
+  if (!password) throw new PwnedPasswordError('Saisissez un mot de passe.');
 
   if (!globalThis.crypto?.subtle || typeof TextEncoder === 'undefined') {
-    throw new Error('Le contrôle de sécurité des mots de passe est indisponible sur cet appareil.');
+    throw new PwnedPasswordError('Le contrôle de sécurité des mots de passe est indisponible sur cet appareil.');
   }
 
   const bytes = new TextEncoder().encode(password);
@@ -33,11 +40,11 @@ export async function assertPasswordNotPwned(password: string): Promise<void> {
       referrerPolicy: 'no-referrer',
     });
   } catch {
-    throw new Error('Impossible de vérifier ce mot de passe. Réessayez lorsque le service de contrôle sera disponible.');
+    throw new PwnedPasswordError('Impossible de vérifier ce mot de passe. Réessayez lorsque le service de contrôle sera disponible.');
   }
 
   if (!response.ok) {
-    throw new Error('Le service de contrôle des mots de passe est indisponible. Aucun changement n’a été effectué.');
+    throw new PwnedPasswordError('Le service de contrôle des mots de passe est indisponible. Aucun changement n’a été effectué.');
   }
 
   const entries = (await response.text()).split(/\r?\n/);
@@ -48,6 +55,6 @@ export async function assertPasswordNotPwned(password: string): Promise<void> {
 
   if (match) {
     const count = Number(match.trim().split(':')[1]);
-    throw new Error(`Ce mot de passe figure dans des fuites connues (${count.toLocaleString('fr-FR')} occurrences). Choisissez-en un autre.`);
+    throw new PwnedPasswordError(`Ce mot de passe figure dans des fuites connues (${count.toLocaleString('fr-FR')} occurrences). Choisissez-en un autre.`);
   }
 }
