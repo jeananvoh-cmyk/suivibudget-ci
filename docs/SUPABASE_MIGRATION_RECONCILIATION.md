@@ -145,3 +145,19 @@ Les changements de pagination nécessitent donc de déclasser d'abord les donné
 **Dernier commit de correction :** `cf44e666b342148c7125fdf801691e458762d3d8`.
 
 Cette migration reste non appliquée à Supabase Production. CI Quality et replay PGlite doivent être relancés sur le HEAD final ; les runs observés sur les commits intermédiaires ont été annulés lors des pushes successifs.
+
+
+## Correctif Passeport — preuves indépendantes des étapes Besoin et Audit (16 novembre 2026)
+
+La revue du code de `projectPassport.ts` a révélé que les étapes 1 (besoin citoyen) et 6 (audit) pouvaient afficher `VERIFIED_OFFICIAL` à partir de champs JSON déclaratifs (identifiant de document, URL institutionnelle, page et statut manuel), sans prouver que le document existait dans le catalogue documentaire, était publié, vérifié et possédait une empreinte SHA-256.
+
+Correction proposée dans `20261116100000_enforce_passport_document_evidence.sql` :
+- vérification serveur du document primaire réellement présent dans `public_documents` ;
+- contrôle du statut publié/vérifié, du checksum SHA-256, de l'URL institutionnelle exacte et de la collectivité / année ;
+- contrôle obligatoire de `source_page` dans les bornes du PDF (`page_count`) ;
+- déclencheur sur insertion et modification de `project_metadata` ;
+- rétrogradation automatique des anciennes déclarations Besoin/Audit non justifiées vers `TO_VERIFY`, sans modifier les montants.
+
+Le test PGlite `localBudgetRlsMigration.test.ts` rejoue maintenant cette migration après le durcissement financier et vérifie les déclassements et refus de fausses certifications.
+
+**Garde-fou :** migration versionnée uniquement ; aucune application sur Supabase Production. La CI Quality et le replay PGlite doivent réussir sur le HEAD final avant toute revue de fusion.
