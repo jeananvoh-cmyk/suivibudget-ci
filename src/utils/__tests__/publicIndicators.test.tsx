@@ -183,7 +183,7 @@ describe('Public Indicators Reconciliation & Traceability', () => {
 
     expect(snapshot.investments.unknownAmount2026ProjectsCount).toBe(1);
     expect(snapshot.investments.consolidatedPhysical2026AmountFcfa).toBeNull();
-    expect(snapshot.indicators.stateCatalogPhysical2026.value).toBeNull();
+    expect(snapshot.indicators.stateCatalogPhysical2026.value).toBe(0);
     expect(snapshot.indicators.localCsvPhysical2026.value).toBeNull();
     expect(snapshot.sectorBreakdown2026.isPartialSum).toBe(true);
     expect(snapshot.sectorBreakdown2026.consolidatedTotalAmountFcfa).toBeNull();
@@ -200,6 +200,50 @@ describe('Public Indicators Reconciliation & Traceability', () => {
     expect(heroHtml).toContain('1 opération(s) sans montant connu');
     expect(heroHtml).not.toContain('0 FCFA');
     indicatorsSpy.mockRestore();
+  });
+
+  it('keeps a complete source subtotal visible when another 2026 source scope has unknown amounts', () => {
+    const knownStateProject: BudgetProject = {
+      id: 'known-state-amount-2026',
+      title: 'Construction d’un centre hospitalier — projet test',
+      commune_name: 'National / Multi-Régions',
+      region_name: 'National',
+      category: 'SANTE',
+      nature_expense: 'Investissements',
+      budget_amount_fcfa: 1_250_000_000,
+      fiscal_year: 2026,
+      current_status: 'NOT_STARTED',
+      progress_percentage: 0,
+      created_at: '2026-01-01',
+      scope_level: 'NATIONAL',
+      project_tier: 'STATE',
+    };
+    const unknownLocalProject: BudgetProject = {
+      id: 'unknown-local-csv-amount-2026',
+      title: 'Construction d’un centre de santé — projet test',
+      commune_name: 'Commune test',
+      region_name: 'Région test',
+      category: 'SANTE',
+      nature_expense: 'Investissements',
+      budget_amount_fcfa: null,
+      fiscal_year: 2026,
+      current_status: 'NOT_STARTED',
+      progress_percentage: 0,
+      created_at: '2026-01-01',
+      scope_level: 'LOCAL',
+    };
+    const snapshot = computePublicIndicators({
+      projects: [knownStateProject, unknownLocalProject],
+      rawProjects: [knownStateProject, unknownLocalProject],
+      institutions: [],
+      proofs: [],
+    });
+
+    expect(snapshot.investments.unknownAmount2026ProjectsCount).toBe(1);
+    expect(snapshot.investments.unknownAmountState2026ProjectsCount).toBe(0);
+    expect(snapshot.investments.unknownAmountLocalCsv2026ProjectsCount).toBe(1);
+    expect(snapshot.indicators.stateCatalogPhysical2026.value).toBe(1_250_000_000);
+    expect(snapshot.indicators.localCsvPhysical2026.value).toBeNull();
   });
 
   it('never double-counts LFI Programme 2204040 lines when computePublicIndicators receives raw overlapping lines', () => {
