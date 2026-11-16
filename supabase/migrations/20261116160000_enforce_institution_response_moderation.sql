@@ -2,6 +2,10 @@
 -- Le contrôle React reste une aide UX ; seule cette règle serveur fait autorité.
 BEGIN;
 
+-- La date doit être fournie explicitement : aucune date implicite à l'enregistrement.
+ALTER TABLE public.ca_institution_responses
+  ALTER COLUMN response_date DROP DEFAULT;
+
 -- Ne jamais utiliser user_metadata pour une autorisation : l'utilisateur peut le modifier.
 DROP POLICY IF EXISTS "Allow admin and moderator full access on responses"
   ON public.ca_institution_responses;
@@ -35,16 +39,11 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  IF (
-    NEW.ca_id IS DISTINCT FROM OLD.ca_id
-    OR NEW.operation_id IS DISTINCT FROM OLD.operation_id
-    OR NEW.response_text IS DISTINCT FROM OLD.response_text
-    OR NEW.response_date IS DISTINCT FROM OLD.response_date
-    OR NEW.author_name IS DISTINCT FROM OLD.author_name
-    OR NEW.author_title IS DISTINCT FROM OLD.author_title
-    OR NEW.supporting_document_url IS DISTINCT FROM OLD.supporting_document_url
-    OR NEW.supporting_document_name IS DISTINCT FROM OLD.supporting_document_name
-  ) AND NEW.response_status IS DISTINCT FROM 'PENDING' THEN
+  -- Comparaison générique de la ligne : ne dépend pas d'une liste de colonnes
+  -- susceptible de diverger entre le schéma déployé et les fixtures de test.
+  IF (to_jsonb(NEW) - 'response_status' - 'created_at')
+      IS DISTINCT FROM (to_jsonb(OLD) - 'response_status' - 'created_at')
+    AND NEW.response_status IS DISTINCT FROM 'PENDING' THEN
     RAISE EXCEPTION 'Editing institution response content requires returning it to PENDING'
       USING ERRCODE = '23514';
   END IF;
