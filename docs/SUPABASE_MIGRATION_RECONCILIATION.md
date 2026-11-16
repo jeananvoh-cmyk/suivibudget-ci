@@ -130,3 +130,18 @@ Ces alertes ne justifient pas une modification aveugle de Production. Les action
 - Aucun changement de schéma ni de données métier en Production ; seule la table de suivi des migrations a reçu les trois enregistrements documentés ci-dessus.
 - Aucun merge Git ni déploiement Production.
 - Les alertes Supabase ont été triées et documentées ; aucun réglage Auth, privilège, index ou politique RLS n'a été changé en Production.
+
+
+## Correctif indépendant — pagination des preuves primaires (16 novembre 2026)
+
+La revue complémentaire a identifié qu'une page source positive n'était pas comparée au nombre de pages physiques du PDF catalogue. Les migrations pré-GO contrôlent désormais :
+- `public_documents.page_count IS NOT NULL` ;
+- `source_page <= page_count` pour les budgets locaux, comptes administratifs, projets et rapprochements de marchés ;
+- la même borne pour les lignes budgétaires et les sources de recettes rattachées au budget parent publié ;
+- l'immutabilité de `page_count` tant qu'un document primaire est référencé par des données financières certifiées.
+
+Les changements de pagination nécessitent donc de déclasser d'abord les données financières dépendantes, puis de les faire vérifier à nouveau. Les assertions correspondantes ont été ajoutées à `localBudgetRlsMigration.test.ts`.
+
+**Dernier commit de correction :** `cf44e666b342148c7125fdf801691e458762d3d8`.
+
+Cette migration reste non appliquée à Supabase Production. CI Quality et replay PGlite doivent être relancés sur le HEAD final ; les runs observés sur les commits intermédiaires ont été annulés lors des pushes successifs.
