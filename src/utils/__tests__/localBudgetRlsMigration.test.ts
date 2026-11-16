@@ -20,6 +20,10 @@ describe('RLS hardening — local budget administration', () => {
     join(process.cwd(), 'supabase/migrations/20261115110000_harden_financial_evidence_guards.sql'),
     'utf8'
   );
+  const passportMigration = readFileSync(
+    join(process.cwd(), 'supabase/migrations/20261116100000_enforce_passport_document_evidence.sql'),
+    'utf8'
+  );
 
   it('does not grant privileges from user-editable user_metadata', () => {
     expect(migration).not.toContain("auth.jwt() -> 'user_metadata'");
@@ -54,6 +58,13 @@ describe('RLS hardening — local budget administration', () => {
     expect(hardeningMigration).toContain('AND source_page_value <= pd.page_count');
     expect(hardeningMigration).toContain('AND NEW.source_page <= d.page_count');
     expect(hardeningMigration).toContain('OR NEW.page_count IS DISTINCT FROM OLD.page_count');
+    expect(passportMigration).toContain('CREATE OR REPLACE FUNCTION private.enforce_project_passport_document_evidence()');
+    expect(passportMigration).toContain("metadata ->> 'citizen_need_verification_status' = 'VERIFIED'");
+    expect(passportMigration).toContain("metadata ->> 'audit_verification_status' = 'VERIFIED'");
+    expect(passportMigration).toContain('metadata_page <= pd.page_count');
+    expect(passportMigration).toContain('BEFORE INSERT OR UPDATE OF project_metadata, institution_id, fiscal_year');
+    expect(passportMigration).toContain("'{citizen_need_verification_status}'");
+    expect(passportMigration).toContain("'{audit_verification_status}'");
     expect(hardeningMigration).toContain("metadata ->> 'citizen_need_verification_status' = 'VERIFIED'");
     expect(hardeningMigration).toContain("metadata ->> 'audit_verification_status' = 'VERIFIED'");
     expect(hardeningMigration).toContain('budget_amount_fcfa, project_metadata');
@@ -116,6 +127,7 @@ describe('RLS hardening — local budget administration', () => {
       `);
       await db.exec(migration);
       await db.exec(hardeningMigration);
+      await db.exec(passportMigration);
       const demotions = await db.query<{ table_name: string; status: string; amount: string | number }>(
         `SELECT 'local_budgets' table_name,verification_status status,total_amount::text amount FROM public.local_budgets WHERE id='migration-budget'
          UNION ALL
