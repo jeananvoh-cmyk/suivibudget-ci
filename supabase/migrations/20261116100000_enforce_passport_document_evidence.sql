@@ -84,42 +84,55 @@ CREATE TRIGGER enforce_project_passport_document_evidence
   EXECUTE FUNCTION private.enforce_project_passport_document_evidence();
 
 -- Fail closed for historical Passport claims that cannot be tied to an existing verified PDF page.
+-- Both statuses are reconciled in one UPDATE so the trigger sees a consistent final metadata object.
 UPDATE public.budget_projects bp
-SET project_metadata = jsonb_set(COALESCE(bp.project_metadata, '{}'::jsonb),
-  '{citizen_need_verification_status}', '"TO_VERIFY"'::jsonb, true)
+SET project_metadata = jsonb_set(
+  jsonb_set(
+    COALESCE(bp.project_metadata, '{}'::jsonb),
+    '{citizen_need_verification_status}',
+    CASE
+      WHEN bp.project_metadata ->> 'citizen_need_verification_status' <> 'VERIFIED'
+        THEN COALESCE(bp.project_metadata -> 'citizen_need_verification_status', '"TO_VERIFY"'::jsonb)
+      WHEN EXISTS (
+        SELECT 1 FROM public.public_documents pd
+        WHERE pd.id = NULLIF(bp.project_metadata ->> 'citizen_need_source_document_id', '')
+          AND pd.status = 'PUBLISHED'
+          AND pd.verification_status = 'VERIFIED'
+          AND pd.checksum_status IN ('COMPUTED','VERIFIED')
+          AND pd.checksum_sha256 ~ '^[a-f0-9]{64}$'
+          AND pd.page_count IS NOT NULL
+          AND CASE WHEN COALESCE(bp.project_metadata ->> 'citizen_need_source_page', '') ~ '^[1-9][0-9]{0,5}$'
+            THEN (bp.project_metadata ->> 'citizen_need_source_page')::integer ELSE NULL END <= pd.page_count
+          AND pd.source_url = bp.project_metadata ->> 'citizen_need_source_url'
+          AND (bp.institution_id IS NULL OR pd.institution_id IS NULL OR pd.institution_id = bp.institution_id)
+          AND (bp.fiscal_year IS NULL OR pd.fiscal_year IS NULL OR pd.fiscal_year = bp.fiscal_year)
+      ) THEN '"VERIFIED"'::jsonb
+      ELSE '"TO_VERIFY"'::jsonb
+    END,
+    true
+  ),
+  '{audit_verification_status}',
+  CASE
+    WHEN bp.project_metadata ->> 'audit_verification_status' <> 'VERIFIED'
+      THEN COALESCE(bp.project_metadata -> 'audit_verification_status', '"TO_VERIFY"'::jsonb)
+    WHEN EXISTS (
+      SELECT 1 FROM public.public_documents pd
+      WHERE pd.id = NULLIF(bp.project_metadata ->> 'audit_source_document_id', '')
+        AND pd.status = 'PUBLISHED'
+        AND pd.verification_status = 'VERIFIED'
+        AND pd.checksum_status IN ('COMPUTED','VERIFIED')
+        AND pd.checksum_sha256 ~ '^[a-f0-9]{64}$'
+        AND pd.page_count IS NOT NULL
+        AND CASE WHEN COALESCE(bp.project_metadata ->> 'audit_source_page', '') ~ '^[1-9][0-9]{0,5}$'
+          THEN (bp.project_metadata ->> 'audit_source_page')::integer ELSE NULL END <= pd.page_count
+        AND pd.source_url = bp.project_metadata ->> 'audit_source_url'
+        AND (bp.institution_id IS NULL OR pd.institution_id IS NULL OR pd.institution_id = bp.institution_id)
+        AND (bp.fiscal_year IS NULL OR pd.fiscal_year IS NULL OR pd.fiscal_year = bp.fiscal_year)
+    ) THEN '"VERIFIED"'::jsonb
+    ELSE '"TO_VERIFY"'::jsonb
+  END,
+  true
+)
 WHERE bp.project_metadata ->> 'citizen_need_verification_status' = 'VERIFIED'
-  AND NOT EXISTS (
-    SELECT 1 FROM public.public_documents pd
-    WHERE pd.id = NULLIF(bp.project_metadata ->> 'citizen_need_source_document_id', '')
-      AND pd.status = 'PUBLISHED'
-      AND pd.verification_status = 'VERIFIED'
-      AND pd.checksum_status IN ('COMPUTED','VERIFIED')
-      AND pd.checksum_sha256 ~ '^[a-f0-9]{64}$'
-      AND pd.page_count IS NOT NULL
-      AND CASE WHEN COALESCE(bp.project_metadata ->> 'citizen_need_source_page', '') ~ '^[1-9][0-9]{0,5}$'
-        THEN (bp.project_metadata ->> 'citizen_need_source_page')::integer ELSE NULL END <= pd.page_count
-      AND pd.source_url = bp.project_metadata ->> 'citizen_need_source_url'
-      AND (bp.institution_id IS NULL OR pd.institution_id IS NULL OR pd.institution_id = bp.institution_id)
-      AND (bp.fiscal_year IS NULL OR pd.fiscal_year IS NULL OR pd.fiscal_year = bp.fiscal_year)
-  );
-
-UPDATE public.budget_projects bp
-SET project_metadata = jsonb_set(COALESCE(bp.project_metadata, '{}'::jsonb),
-  '{audit_verification_status}', '"TO_VERIFY"'::jsonb, true)
-WHERE bp.project_metadata ->> 'audit_verification_status' = 'VERIFIED'
-  AND NOT EXISTS (
-    SELECT 1 FROM public.public_documents pd
-    WHERE pd.id = NULLIF(bp.project_metadata ->> 'audit_source_document_id', '')
-      AND pd.status = 'PUBLISHED'
-      AND pd.verification_status = 'VERIFIED'
-      AND pd.checksum_status IN ('COMPUTED','VERIFIED')
-      AND pd.checksum_sha256 ~ '^[a-f0-9]{64}$'
-      AND pd.page_count IS NOT NULL
-      AND CASE WHEN COALESCE(bp.project_metadata ->> 'audit_source_page', '') ~ '^[1-9][0-9]{0,5}$'
-        THEN (bp.project_metadata ->> 'audit_source_page')::integer ELSE NULL END <= pd.page_count
-      AND pd.source_url = bp.project_metadata ->> 'audit_source_url'
-      AND (bp.institution_id IS NULL OR pd.institution_id IS NULL OR pd.institution_id = bp.institution_id)
-      AND (bp.fiscal_year IS NULL OR pd.fiscal_year IS NULL OR pd.fiscal_year = bp.fiscal_year)
-  );
-
+   OR bp.project_metadata ->> 'audit_verification_status' = 'VERIFIED';
 COMMIT;
