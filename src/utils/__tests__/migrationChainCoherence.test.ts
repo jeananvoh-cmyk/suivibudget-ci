@@ -1,115 +1,28 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { createProductionSchemaFixture } from './adminPersistenceFixtures';
 
-const PR76_RECEIPT_RLS_SQL = `
-BEGIN;
-
-DROP POLICY IF EXISTS admin_receipt_read ON public.admin_operation_receipts;
-
-CREATE POLICY admin_receipt_read
-  ON public.admin_operation_receipts
-  FOR SELECT
-  TO authenticated
-  USING (
-    actor_id = (SELECT auth.uid())
-    AND private.admin_domain_allowed(entity_type, result_data)
-  );
-
-COMMIT;
-`;
-
-const PR75_RESPONSE_MODERATION_SQL = `
-BEGIN;
-
-GRANT SELECT ON public.ca_institution_responses TO anon, authenticated;
-GRANT INSERT, UPDATE, DELETE ON public.ca_institution_responses TO authenticated;
-
-ALTER TABLE public.ca_institution_responses
-  ALTER COLUMN response_date DROP DEFAULT;
-
-DROP POLICY IF EXISTS "Allow admin and moderator full access on responses"
-  ON public.ca_institution_responses;
-
-CREATE POLICY "Staff manage institution responses"
-  ON public.ca_institution_responses
-  FOR ALL
-  TO authenticated
-  USING (private.has_staff_role(ARRAY['ADMIN','MODERATOR','DATA_MANAGER']))
-  WITH CHECK (private.has_staff_role(ARRAY['ADMIN','MODERATOR','DATA_MANAGER']));
-
-CREATE OR REPLACE FUNCTION private.enforce_institution_response_moderation()
-RETURNS trigger
-LANGUAGE plpgsql
-SET search_path = ''
-AS $function$
-BEGIN
-  IF TG_OP = 'DELETE' THEN
-    IF OLD.response_status = 'PUBLISHED' THEN
-      RAISE EXCEPTION 'A published institution response must be returned to PENDING before deletion'
-        USING ERRCODE = '23514';
-    END IF;
-    RETURN OLD;
-  END IF;
-
-  IF TG_OP = 'INSERT' THEN
-    IF NEW.response_status IS DISTINCT FROM 'PENDING' THEN
-      RAISE EXCEPTION 'Institution responses must enter moderation as PENDING'
-        USING ERRCODE = '23514';
-    END IF;
-    RETURN NEW;
-  END IF;
-
-  IF (to_jsonb(NEW) - 'response_status' - 'created_at')
-      IS DISTINCT FROM (to_jsonb(OLD) - 'response_status' - 'created_at')
-    AND NEW.response_status IS DISTINCT FROM 'PENDING' THEN
-    RAISE EXCEPTION 'Editing institution response content requires returning it to PENDING'
-      USING ERRCODE = '23514';
-  END IF;
-
-  IF NEW.response_status IS NOT DISTINCT FROM OLD.response_status THEN
-    RETURN NEW;
-  END IF;
-
-  IF NOT (
-    (OLD.response_status = 'PENDING' AND NEW.response_status = 'VALIDATED')
-    OR (OLD.response_status = 'VALIDATED' AND NEW.response_status IN ('PUBLISHED','PENDING'))
-    OR (OLD.response_status = 'PUBLISHED' AND NEW.response_status = 'PENDING')
-  ) THEN
-    RAISE EXCEPTION 'Invalid institution response moderation transition: % -> %',
-      OLD.response_status, NEW.response_status
-      USING ERRCODE = '23514';
-  END IF;
-
-  RETURN NEW;
-END;
-$function$;
-
-REVOKE ALL ON FUNCTION private.enforce_institution_response_moderation()
-  FROM PUBLIC, anon, authenticated, service_role;
-
-DROP TRIGGER IF EXISTS enforce_institution_response_moderation
-  ON public.ca_institution_responses;
-
-CREATE TRIGGER enforce_institution_response_moderation
-  BEFORE INSERT OR UPDATE OR DELETE
-  ON public.ca_institution_responses
-  FOR EACH ROW
-  EXECUTE FUNCTION private.enforce_institution_response_moderation();
-
-COMMIT;
-`;
-
-function loadMigrationIfPresent(filename: string, fallbackSql?: string): string {
+function loadMigrationIfPresent(filename: string): string {
   const fullPath = resolve('supabase/migrations', filename);
-  if (existsSync(fullPath)) {
-    return readFileSync(fullPath, 'utf8');
+  if (!existsSync(fullPath)) {
+    throw new Error(`Missing required migration file: ${filename}`);
   }
-  if (fallbackSql) {
-    return fallbackSql;
+  return readFileSync(fullPath, 'utf8');
+}
+
+function loadMigrationFromBranch(filename: string, branchRef: string): string {
+  try {
+    return execFileSync('git', ['show', `refs/remotes/origin/${branchRef}:${filename}`], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+  } catch (error) {
+    throw new Error(
+      `Unable to load exact migration ${filename} from origin/${branchRef}. Ensure CI fetched the source branch. ${String(error)}`
+    );
   }
-  throw new Error(`Missing required migration file: ${filename}`);
 }
 
 describe('Cohérence chronologique unifiée des migrations (PR #68 -> #77 -> #76 -> #78 -> #75)', () => {
@@ -288,9 +201,9 @@ describe('Cohérence chronologique unifiée des migrations (PR #68 -> #77 -> #76
     await db.exec(loadMigrationIfPresent('20261115070000_enforce_primary_document_provenance.sql'));
     await db.exec(loadMigrationIfPresent('20261115110000_harden_financial_evidence_guards.sql'));
     await db.exec(loadMigrationIfPresent('20261116100000_enforce_passport_document_evidence.sql'));
-    await db.exec(loadMigrationIfPresent('20261116140000_optimize_admin_receipt_read_rls.sql', PR76_RECEIPT_RLS_SQL));
+    await db.exec(loadMigrationFromBranch('supabase/migrations/20261116140000_optimize_admin_receipt_read_rls.sql', 'fix/pre-go-supabase-advisors'));
     await db.exec(loadMigrationIfPresent('20261116150000_move_staff_rpcs_to_private.sql'));
-    await db.exec(loadMigrationIfPresent('20261116160000_enforce_institution_response_moderation.sql', PR75_RESPONSE_MODERATION_SQL));
+    await db.exec(loadMigrationFromBranch('supabase/migrations/20261116160000_enforce_institution_response_moderation.sql', 'feat/institution-response-workflow'));
 
     // Verify backfills downgraded unbacked legacy claims without inventing amounts
     const bpRow = (
