@@ -91,6 +91,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   // Public indicators & exact 2026 sector breakdown across 100% of tangible 2026 projects
   const publicIndicators = useMemo(() => dataStore.getPublicIndicators(), [allProjects, stats]);
+  const hasComplete2026Amounts = publicIndicators.investments.unknownAmount2026ProjectsCount === 0;
   const sectorBreakdown2026 = useMemo(
     () => computeSectorBreakdown(allProjects, { fiscalYear: 2026 }),
     [allProjects]
@@ -261,7 +262,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Budget Ouvert 2026
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Explorez {publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée ({formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa)} État extrait LFI et {formatCompactFCFA(publicIndicators.investments.localCsvPhysical2026AmountFcfa)} local extrait LFI{publicIndicators.investments.localPortalBouakePhysical2026Count > 0 ? `, hors ${publicIndicators.investments.localPortalBouakePhysical2026Count} projets portail Bouaké` : ''}).
+                Explorez {publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée ({hasComplete2026Amounts ? `${formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa)} État extrait LFI et ${formatCompactFCFA(publicIndicators.investments.localCsvPhysical2026AmountFcfa)} local extrait LFI` : `montants non consolidés — ${publicIndicators.investments.unknownAmount2026ProjectsCount} opération(s) sans montant connu`}{hasComplete2026Amounts && publicIndicators.investments.localPortalBouakePhysical2026Count > 0 ? `, hors ${publicIndicators.investments.localPortalBouakePhysical2026Count} projets portail Bouaké` : ''}).
               </p>
             </div>
             <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-brand-blue">
