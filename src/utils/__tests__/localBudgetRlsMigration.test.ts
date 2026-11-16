@@ -213,9 +213,17 @@ describe('RLS hardening — local budget administration', () => {
       )).rejects.toThrow('Primary certification requires');
       await expect(db.query(
         `INSERT INTO public.budget_projects
-          (commune_name,region_name,category,title,budget_amount_fcfa,data_provenance,financial_verification_status)
-         VALUES ('Commune test','Région test','Éducation','Projet certifié sans pièce',100,'DECLARED_ADMIN','VERIFIED')`
-      )).rejects.toThrow('Primary certification requires');
+          (commune_name,region_name,category,title,budget_amount_fcfa,data_provenance,financial_verification_status,project_metadata)
+         VALUES ('Commune test','Région test','Éducation','Besoin certifié sans pièce catalogue',100,'DECLARED_ADMIN','TO_VERIFY',
+           '{"citizen_need_verification_status":"VERIFIED","citizen_need_source_document_id":"missing-doc","citizen_need_source_url":"https://gouv.ci/need.pdf","citizen_need_source_page":1}'::jsonb)`
+      )).rejects.toThrow('Verified citizen need requires');
+
+      await expect(db.query(
+        `INSERT INTO public.budget_projects
+          (commune_name,region_name,category,title,budget_amount_fcfa,data_provenance,financial_verification_status,project_metadata)
+         VALUES ('Commune test','Région test','Éducation','Audit certifié sans pièce catalogue',100,'DECLARED_ADMIN','TO_VERIFY',
+           '{"audit_verification_status":"VERIFIED","audit_source_document_id":"missing-doc","audit_source_url":"https://gouv.ci/audit.pdf","audit_source_page":1}'::jsonb)`
+      )).rejects.toThrow('Verified audit requires');
 
       // P1-3: Silent amount mutation on a certified record without resetting verification_status is blocked.
       await expect(db.query(
