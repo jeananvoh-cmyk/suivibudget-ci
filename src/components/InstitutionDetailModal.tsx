@@ -434,14 +434,34 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
     ? caidpMatch.phone
     : (institution.info_officer_phone && institution.info_officer_phone !== "Pas de numéro" ? institution.info_officer_phone : "");
 
-  const hasPublishedLocalDoc = Boolean(
-    institution.primitive_budget?.total_voted_fcfa != null ||
-      getLatestAvailableCA(institution.id)?.status === 'PUBLISHED'
-  );
+  const publishedInstitutionDocuments = dataStore.getDocuments().filter((doc) => {
+    const normalize = (value: string) => value
+      .normalize('NFD')
+      .replace(/[\\u0300-\\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+    const sameInstitution = doc.institution_id
+      ? doc.institution_id === institution.id
+      : normalize(doc.institution_name || '') === normalize(institution.name);
+    return sameInstitution && doc.status === 'PUBLISHED' && doc.verification_status === 'VERIFIED';
+  });
   const caidpDeadlineSummary = summarizeInstitutionCaidpDeadlines(
     dataStore.getCaidpRequests(),
     institution.name,
-    { hasPublishedDocument: hasPublishedLocalDoc }
+    {
+      hasPublishedDocumentForRequest: (request) => {
+        const normalize = (value: string) => value
+          .normalize('NFD')
+          .replace(/[\\u0300-\\u036f]/g, '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, ' ')
+          .trim();
+        return (request.document_titles || []).some((requestedTitle) =>
+          publishedInstitutionDocuments.some((doc) => normalize(doc.title) === normalize(requestedTitle))
+        );
+      },
+    }
   );
 
   // Clean entity name for project matching
