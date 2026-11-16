@@ -54,8 +54,8 @@ describe('RLS hardening — local budget administration', () => {
     expect(hardeningMigration).toContain('CREATE OR REPLACE FUNCTION private.enforce_budget_line_primary_document_evidence()');
     expect(hardeningMigration).toContain('CREATE TRIGGER enforce_budget_line_primary_document_evidence');
     expect(hardeningMigration).toContain('CREATE OR REPLACE FUNCTION private.enforce_budget_revenue_source_evidence()');
-    expect(hardeningMigration).toContain('AND pd.page_count IS NOT NULL');
-    expect(hardeningMigration).toContain('AND source_page_value <= pd.page_count');
+    expect(migration).toContain('AND pd.page_count IS NOT NULL');
+    expect(migration).toContain('AND source_page_value <= pd.page_count');
     expect(hardeningMigration).toContain('AND NEW.source_page <= d.page_count');
     expect(hardeningMigration).toContain('OR NEW.page_count IS DISTINCT FROM OLD.page_count');
     expect(passportMigration).toContain('CREATE OR REPLACE FUNCTION private.enforce_project_passport_document_evidence()');
@@ -73,8 +73,8 @@ describe('RLS hardening — local budget administration', () => {
     expect(hardeningMigration).toContain('Verified audit requires a published, checksum-verified primary document and an existing page');
     expect(hardeningMigration).toContain("'{citizen_need_verification_status}'");
     expect(hardeningMigration).toContain("'{audit_verification_status}'");
-    expect(hardeningMigration).toContain('AND pd.page_count IS NOT NULL');
-    expect(hardeningMigration).toContain('AND source_page_value <= pd.page_count');
+    expect(migration).toContain('AND pd.page_count IS NOT NULL');
+    expect(migration).toContain('AND source_page_value <= pd.page_count');
     expect(hardeningMigration).toContain('CREATE TRIGGER enforce_budget_revenue_source_evidence');
     expect(hardeningMigration).toContain('NEW.source_document_id IS DISTINCT FROM parent_budget.source_document_id');
     expect(hardeningMigration).toContain('DROP POLICY IF EXISTS "Allow public read on budget sources"');
