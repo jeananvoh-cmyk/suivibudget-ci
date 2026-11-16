@@ -13,7 +13,7 @@ describe('admin_operation_receipts RLS initplan optimization', () => {
 
   it('evaluates auth.uid() as an initplan and preserves actor and domain isolation', async () => {
     const migration = readFileSync(
-      join(process.cwd(), 'supabase/migrations/20261115090000_optimize_admin_receipt_read_rls.sql'),
+      join(process.cwd(), 'supabase/migrations/20261116140000_optimize_admin_receipt_read_rls.sql'),
       'utf8'
     );
     db = new PGlite();
