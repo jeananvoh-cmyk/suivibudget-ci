@@ -35,6 +35,20 @@ export interface OcdsParty extends OcdsOrganizationReference {
   };
 }
 
+export type OcdsProvenanceQualifier =
+  | 'OFFICIAL_SOURCE'
+  | 'DECLARED_ADMIN'
+  | 'UNVERIFIED_INPUT'
+  | 'UNKNOWN';
+
+export type OcdsAmountPrecisionQualifier =
+  | 'EXACT'
+  | 'APPROXIMATE'
+  | 'LOWER_BOUND'
+  | 'UPPER_BOUND'
+  | 'DECLARED_ADMIN'
+  | 'UNKNOWN';
+
 export interface OcdsDocument {
   id: string;
   documentType: string;
@@ -42,7 +56,7 @@ export interface OcdsDocument {
   url?: string;
   datePublished?: string;
   pageStart?: number;
-  x_provenance?: string;
+  x_provenance?: OcdsProvenanceQualifier;
 }
 
 export interface OcdsPlanning {
@@ -54,8 +68,8 @@ export interface OcdsPlanning {
     project?: string;
     fiscalYear?: number | null;
     uri?: string;
-    x_amountPrecision?: string;
-    x_dataProvenance?: string;
+    x_amountPrecision?: OcdsAmountPrecisionQualifier;
+    x_dataProvenance?: OcdsProvenanceQualifier;
   };
   documents?: OcdsDocument[];
 }
@@ -94,6 +108,7 @@ export interface OcdsContract {
     transactions: Array<{
       id: string;
       source?: string;
+      x_sourceReference?: string;
       date?: string;
       value?: OcdsAmount;
       payer?: OcdsOrganizationReference;
@@ -142,6 +157,7 @@ export interface OcdsRelease {
 export interface OcdsReleasePackage {
   uri: string;
   version: '1.1';
+  extensions: string[];
   publishedDate: string;
   publisher: {
     name: "SuiviBudget Côte d'Ivoire";

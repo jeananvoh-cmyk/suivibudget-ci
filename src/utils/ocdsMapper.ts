@@ -1,10 +1,12 @@
 import { BudgetProject, CitizenProof } from '../types';
 import { AdministrativeAccount } from '../types/administrativeAccount';
 import {
+  OcdsAmountPrecisionQualifier,
   OcdsAward,
   OcdsContract,
   OcdsDocument,
   OcdsParty,
+  OcdsProvenanceQualifier,
   OcdsRelease,
   OcdsReleasePackage,
   OcdsTag,
@@ -13,6 +15,73 @@ import { generateProjectPassport, ProjectAccountabilityPassportData } from './pr
 import { amountPrecision } from './formatters';
 
 export const OCDS_CI_PREFIX = 'ocds-ci-suivibudget';
+export const SUIVIBUDGET_OCDS_EXTENSION_URL =
+  'https://suivibudget.vercel.app/ocds/extensions/suivibudget_provenance/v1.0.0/extension.json';
+
+function normalizeNonEmptyString(raw?: string | null): string | undefined {
+  if (typeof raw !== 'string') return undefined;
+  const trimmed = raw.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function normalizeValidHttpUri(raw?: string | null): string | undefined {
+  const trimmed = normalizeNonEmptyString(raw);
+  if (!trimmed) return undefined;
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.toString() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function normalizeOcdsDateTime(raw?: string | null): string | undefined {
+  const trimmed = normalizeNonEmptyString(raw);
+  if (!trimmed) return undefined;
+  const dateOnly = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (dateOnly) {
+    const year = Number(dateOnly[1]);
+    const month = Number(dateOnly[2]);
+    const day = Number(dateOnly[3]);
+    const parsed = new Date(Date.UTC(year, month - 1, day));
+    if (
+      parsed.getUTCFullYear() === year &&
+      parsed.getUTCMonth() === month - 1 &&
+      parsed.getUTCDate() === day
+    ) {
+      return `${trimmed}T00:00:00Z`;
+    }
+    return undefined;
+  }
+  const timestamp = Date.parse(trimmed);
+  return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : undefined;
+}
+
+function resolveProjectBudgetProvenance(dataProvenance?: string): OcdsProvenanceQualifier {
+  if (dataProvenance === 'OFFICIAL_SOURCE') return 'OFFICIAL_SOURCE';
+  if (dataProvenance === 'DECLARED_ADMIN') return 'DECLARED_ADMIN';
+  return 'UNVERIFIED_INPUT';
+}
+
+function resolveProcurementDocProvenance(verificationStatus?: string): OcdsProvenanceQualifier {
+  if (
+    verificationStatus === 'OFFICIAL_DOCUMENT' ||
+    verificationStatus === 'OFFICIAL_INSTITUTION' ||
+    verificationStatus === 'VERIFIED' ||
+    verificationStatus === 'Vérifié DGMP'
+  ) {
+    return 'OFFICIAL_SOURCE';
+  }
+  if (verificationStatus === 'DECLARED_ADMIN') {
+    return 'DECLARED_ADMIN';
+  }
+  return 'UNVERIFIED_INPUT';
+}
+
+function resolveBudgetAmountPrecision(dataProvenance?: string): OcdsAmountPrecisionQualifier {
+  if (dataProvenance === 'DECLARED_ADMIN') return 'DECLARED_ADMIN';
+  return 'UNKNOWN';
+}
 
 function slugifyToken(raw: string): string {
   return (raw || '')
@@ -35,24 +104,25 @@ export function buildProjectOcid(project: Pick<BudgetProject, 'id' | 'ocid'>): s
 }
 
 function mapProcurementMethod(rawMethod?: string): OcdsTenderMethodInfo {
-  const token = (rawMethod || '').trim().toUpperCase();
+  const cleanRaw = normalizeNonEmptyString(rawMethod);
+  const token = (cleanRaw || '').toUpperCase();
   if (!token || token === 'UNKNOWN') {
     return { procurementMethod: undefined, details: undefined };
   }
   if (token.includes('OPEN') || token.includes('OUVERT') || token === 'AOO') {
-    return { procurementMethod: 'open', details: rawMethod };
+    return { procurementMethod: 'open', details: cleanRaw };
   }
   if (token.includes('RESTRICT') || token.includes('RESTREINT') || token === 'AOR') {
-    return { procurementMethod: 'selective', details: rawMethod };
+    return { procurementMethod: 'selective', details: cleanRaw };
   }
   if (token.includes('GRE') || token.includes('DIRECT') || token === 'ENTENTE_DIRECTE') {
-    return { procurementMethod: 'direct', details: rawMethod };
+    return { procurementMethod: 'direct', details: cleanRaw };
   }
-  if (token.includes('LIMITED') || token.includes('RESTREINT')) {
-    return { procurementMethod: 'limited', details: rawMethod };
+  if (token.includes('LIMITED')) {
+    return { procurementMethod: 'limited', details: cleanRaw };
   }
   // An unrecognized local label must not be converted into a false OCDS method.
-  return { procurementMethod: undefined, details: rawMethod };
+  return { procurementMethod: undefined, details: cleanRaw };
 }
 
 interface OcdsTenderMethodInfo {
@@ -96,15 +166,21 @@ export function mapProjectPassportToOcdsRelease(
   ];
 
   const budgetAmount = normalizeExactAmount(project.budget_amount_fcfa);
+  const projectBudgetProvenance = resolveProjectBudgetProvenance(project.data_provenance);
   const planningDocs: OcdsDocument[] = [];
-  if (project.source || project.source_url || project.source_document_id) {
+  const validProjectSourceUrl = normalizeValidHttpUri(project.source_url);
+  const validProjectPage =
+    typeof project.source_page === 'number' && Number.isInteger(project.source_page) && project.source_page >= 1
+      ? project.source_page
+      : undefined;
+  if (project.source || validProjectSourceUrl || project.source_document_id) {
     planningDocs.push({
       id: project.source_document_id || `doc-plan-${project.id}`,
       documentType: 'budgetProject',
-      title: project.source || 'Source budgétaire référencée',
-      url: project.source_url,
-      pageStart: project.source_page,
-      x_provenance: project.data_provenance === 'OFFICIAL_SOURCE' ? 'OFFICIAL_SOURCE' : 'UNVERIFIED_INPUT',
+      title: normalizeNonEmptyString(project.source) || 'Source budgétaire référencée',
+      url: validProjectSourceUrl,
+      pageStart: validProjectPage,
+      x_provenance: projectBudgetProvenance,
     });
   }
 
@@ -137,14 +213,16 @@ export function mapProjectPassportToOcdsRelease(
     }
 
     const awardAmount = normalizeExactAmount(matchedProc.award_amount);
+    const validProcSourceUrl = normalizeValidHttpUri(matchedProc.source_url);
+    const procDateTime = normalizeOcdsDateTime(matchedProc.award_date);
     const awardDocs: OcdsDocument[] = matchedProc.source
       ? [
           {
             id: `doc-dgmp-${matchedProc.id}`,
             documentType: 'awardNotice',
             title: matchedProc.source,
-            url: matchedProc.source_url,
-            x_provenance: 'OFFICIAL_SOURCE',
+            url: validProcSourceUrl,
+            x_provenance: resolveProcurementDocProvenance(matchedProc.verification_status),
           },
         ]
       : [];
@@ -154,7 +232,7 @@ export function mapProjectPassportToOcdsRelease(
       id: awardId,
       title: matchedProc.procurement_object || project.title,
       status: 'active',
-      date: matchedProc.award_date,
+      date: procDateTime,
       value: awardAmount !== undefined ? { amount: awardAmount, currency: 'XOF' } : undefined,
       suppliers: supplierRef ? [supplierRef] : [],
       documents: awardDocs.length > 0 ? awardDocs : undefined,
@@ -169,7 +247,11 @@ export function mapProjectPassportToOcdsRelease(
         tags.push('implementation');
         transactions.push({
           id: `ca-tx-${matchedOp.id}`,
-          source: matchedOp.source_reference || passport.facts.source_reference.source_reference || 'Compte Administratif',
+          source: normalizeValidHttpUri(passport.facts.source_reference.source_url),
+          x_sourceReference:
+            normalizeNonEmptyString(matchedOp.source_reference) ||
+            normalizeNonEmptyString(passport.facts.source_reference.source_reference) ||
+            'Compte Administratif',
           value: { amount: executedAmount, currency: 'XOF' },
           payer: buyerRef,
           payee: supplierRef || undefined,
@@ -181,7 +263,7 @@ export function mapProjectPassportToOcdsRelease(
         awardID: awardId,
         title: matchedProc.procurement_object || project.title,
         status: 'active',
-        dateSigned: matchedProc.award_date,
+        dateSigned: procDateTime,
         value: awardAmount !== undefined ? { amount: awardAmount, currency: 'XOF' } : undefined,
         implementation:
           transactions.length > 0
@@ -244,27 +326,30 @@ export function mapProjectPassportToOcdsRelease(
     parties,
     buyer: buyerRef,
     planning: {
-      rationale: project.citizen_need_origin || project.program_name || project.details || undefined,
+      rationale:
+        normalizeNonEmptyString(project.citizen_need_origin) ||
+        normalizeNonEmptyString(project.program_name) ||
+        normalizeNonEmptyString(project.details),
       budget: {
         id: project.id,
-        description: project.program_name || project.category,
+        description: normalizeNonEmptyString(project.program_name) || normalizeNonEmptyString(project.category),
         amount: budgetAmount !== undefined ? { amount: budgetAmount, currency: 'XOF' } : undefined,
         project: project.title,
         fiscalYear: project.fiscal_year || null,
-        uri: project.source_url,
+        uri: validProjectSourceUrl,
         // No precision metadata exists on BudgetProject today; never infer EXACT from a number alone.
-        x_amountPrecision: project.data_provenance === 'DECLARED_ADMIN' ? 'DECLARED_ADMIN' : 'UNKNOWN',
-        x_dataProvenance: project.data_provenance === 'OFFICIAL_SOURCE' ? 'OFFICIAL_SOURCE' : 'UNVERIFIED_INPUT',
+        x_amountPrecision: resolveBudgetAmountPrecision(project.data_provenance),
+        x_dataProvenance: projectBudgetProvenance,
       },
       documents: planningDocs.length > 0 ? planningDocs : undefined,
     },
     tender: {
       id: matchedProc?.tender_number || bompRef || `tender-${project.id}`,
       title: project.title,
-      description: project.details || undefined,
+      description: normalizeNonEmptyString(project.details),
       status: awards.length > 0 ? 'complete' : 'planned',
       procurementMethod: methodInfo.procurementMethod,
-      procurementMethodDetails: methodInfo.details || bompRef,
+      procurementMethodDetails: methodInfo.details || normalizeNonEmptyString(bompRef),
       // The project category does not reliably identify the procurement category.
       procuringEntity: buyerRef,
       value: budgetAmount !== undefined ? { amount: budgetAmount, currency: 'XOF' } : undefined,
@@ -309,6 +394,7 @@ export function createOcdsReleasePackage(
   return {
     uri: packageUri,
     version: '1.1',
+    extensions: [SUIVIBUDGET_OCDS_EXTENSION_URL],
     publishedDate,
     publisher: {
       name: "SuiviBudget Côte d'Ivoire",

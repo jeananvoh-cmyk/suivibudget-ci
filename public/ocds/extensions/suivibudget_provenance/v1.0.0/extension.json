@@ -1,0 +1,21 @@
+{
+  "name": {
+    "fr": "Provenance civique, précision financière et traçabilité SuiviBudget CI",
+    "en": "SuiviBudget CI Civic Provenance, Amount Precision & Accountability Extension"
+  },
+  "description": {
+    "fr": "Extension OCDS 1.1 documentant les champs de provenance documentaire (x_provenance, x_dataProvenance), de précision des montants (x_amountPrecision), d'exercice budgétaire (fiscalYear), de pagination (pageStart), de référence textuelle de transaction (x_sourceReference) et de synthèse du Passeport de Redevabilité (x_suivibudget) sans jamais confondre dépense financière et réalisation physique.",
+    "en": "OCDS 1.1 extension documenting source provenance (x_provenance, x_dataProvenance), amount precision (x_amountPrecision), fiscal year (fiscalYear), source page references (pageStart), textual transaction source labels (x_sourceReference), and civic accountability passport summary fields (x_suivibudget)."
+  },
+  "documentationUrl": {
+    "fr": "https://suivibudget.vercel.app/ocds/extensions/suivibudget_provenance/v1.0.0/README.md",
+    "en": "https://suivibudget.vercel.app/ocds/extensions/suivibudget_provenance/v1.0.0/README.md"
+  },
+  "compatibility": ["1.1"],
+  "schemas": ["release-schema.json"],
+  "version": "1.0.0",
+  "contactPoint": {
+    "name": "SuiviBudget Côte d'Ivoire — Équipe Open Data",
+    "url": "https://suivibudget.vercel.app/documents"
+  }
+}
