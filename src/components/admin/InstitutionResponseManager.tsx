@@ -29,7 +29,7 @@ export const InstitutionResponseManager: React.FC<InstitutionResponseManagerProp
   const [operationId, setOperationId] = useState('');
   const [authorName, setAuthorName] = useState('');
   const [authorTitle, setAuthorTitle] = useState('');
-  const [responseDate, setResponseDate] = useState(new Date().toISOString().slice(0, 10));
+  const [responseDate, setResponseDate] = useState('');
   const [responseText, setResponseText] = useState('');
   const [supportingDocName, setSupportingDocName] = useState('');
   const [supportingDocUrl, setSupportingDocUrl] = useState('');
