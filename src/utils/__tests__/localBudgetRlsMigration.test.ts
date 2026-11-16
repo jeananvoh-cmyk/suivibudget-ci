@@ -47,6 +47,10 @@ describe('RLS hardening — local budget administration', () => {
     expect(migration).toContain('CREATE TRIGGER enforce_procurement_primary_evidence');
     expect(migration).toContain('CREATE TRIGGER enforce_budget_project_primary_evidence');
     expect(hardeningMigration).toContain('BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url');
+    expect(hardeningMigration).toContain('operating_revenue_realized, investment_planned, investment_realized');
+    expect(hardeningMigration).toContain('NEW.amount IS DISTINCT FROM OLD.amount');
+    expect(migration).toContain('total_amount, operating_amount, investment_amount');
+    expect(migration).toContain('budget_amount_fcfa');
     expect(hardeningMigration).toContain('GRANT SELECT ON TABLE public.budget_sources, public.budget_revenue_sources TO anon, authenticated;');
     expect(hardeningMigration).toContain('GRANT INSERT, UPDATE ON TABLE public.budget_sources, public.budget_revenue_sources TO authenticated;');
     expect(hardeningMigration).toContain('CREATE OR REPLACE FUNCTION private.prevent_revoking_referenced_primary_document()');
