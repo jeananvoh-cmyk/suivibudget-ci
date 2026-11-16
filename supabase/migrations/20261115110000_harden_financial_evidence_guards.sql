@@ -202,6 +202,8 @@ BEGIN
     AND d.checksum_sha256 ~ '^[a-f0-9]{64}$'
     AND d.institution_id = parent_budget.institution_id
     AND d.fiscal_year = parent_budget.fiscal_year
+    AND d.page_count IS NOT NULL
+    AND NEW.source_page <= d.page_count
     AND d.document_type IN ('BUDGET_PRIMITIF', 'BUDGET_MODIFICATIF')
     AND d.source_url = parent_budget.document_url
   FOR SHARE;
@@ -278,6 +280,8 @@ BEGIN
     AND d.checksum_sha256 ~ '^[a-f0-9]{64}$'
     AND d.institution_id = parent_budget.institution_id
     AND d.fiscal_year = parent_budget.fiscal_year
+    AND d.page_count IS NOT NULL
+    AND NEW.source_page <= d.page_count
     AND d.document_type IN ('BUDGET_PRIMITIF', 'BUDGET_MODIFICATIF')
     AND d.source_url = NEW.source_url
   FOR SHARE;
@@ -506,6 +510,8 @@ BEGIN
     AND d.checksum_sha256 ~ '^[a-f0-9]{64}$'
     AND d.institution_id = parent_budget.institution_id
     AND d.fiscal_year = parent_budget.fiscal_year
+    AND d.page_count IS NOT NULL
+    AND NEW.source_page <= d.page_count
     AND d.document_type IN ('BUDGET_PRIMITIF', 'BUDGET_MODIFICATIF')
     AND d.source_url = parent_budget.document_url
   FOR SHARE;
@@ -582,6 +588,8 @@ BEGIN
     AND d.checksum_sha256 ~ '^[a-f0-9]{64}$'
     AND d.institution_id = parent_budget.institution_id
     AND d.fiscal_year = parent_budget.fiscal_year
+    AND d.page_count IS NOT NULL
+    AND NEW.source_page <= d.page_count
     AND d.document_type IN ('BUDGET_PRIMITIF', 'BUDGET_MODIFICATIF')
     AND d.source_url = NEW.source_url
   FOR SHARE;
