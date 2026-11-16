@@ -22,6 +22,7 @@ describe('institution response moderation is enforced by PostgreSQL', () => {
       CREATE ROLE service_role;
       CREATE SCHEMA auth;
       CREATE SCHEMA private;
+      GRANT USAGE ON SCHEMA private TO authenticated;
       CREATE TABLE public.profiles(id uuid primary key, role text not null, is_active boolean not null);
       INSERT INTO public.profiles VALUES
         ('${adminId}', 'ADMIN', true),
