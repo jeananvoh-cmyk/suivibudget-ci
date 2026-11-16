@@ -286,10 +286,12 @@ SET search_path = ''
 AS $$
 DECLARE
   row_data jsonb := to_jsonb(NEW);
+  old_data jsonb := CASE WHEN TG_OP = 'UPDATE' THEN to_jsonb(OLD) ELSE NULL END;
   source_id text;
   source_url_value text;
   source_page_value integer;
   evidence_status text;
+  old_evidence_status text;
   inst_id text;
   fy_value integer;
 BEGIN
@@ -309,6 +311,46 @@ BEGIN
   ELSE
     evidence_status := row_data ->> 'verification_status';
   END IF;
+
+  IF TG_OP = 'UPDATE' THEN
+    IF TG_TABLE_NAME = 'budget_projects' THEN
+      IF old_data ->> 'data_provenance' = 'OFFICIAL_SOURCE'
+        OR old_data ->> 'financial_verification_status' IN ('OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED') THEN
+        old_evidence_status := 'PRIMARY';
+      END IF;
+    ELSE
+      old_evidence_status := old_data ->> 'verification_status';
+    END IF;
+  END IF;
+
+  IF TG_OP = 'UPDATE'
+    AND old_evidence_status IN ('PRIMARY','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED','Vérifié DGMP')
+    AND evidence_status IN ('PRIMARY','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED','Vérifié DGMP') THEN
+    IF (TG_TABLE_NAME = 'local_budgets' AND (
+          row_data -> 'total_amount' IS DISTINCT FROM old_data -> 'total_amount'
+          OR row_data -> 'operating_amount' IS DISTINCT FROM old_data -> 'operating_amount'
+          OR row_data -> 'investment_amount' IS DISTINCT FROM old_data -> 'investment_amount'
+        ))
+      OR (TG_TABLE_NAME = 'administrative_accounts' AND (
+          row_data -> 'operating_planned' IS DISTINCT FROM old_data -> 'operating_planned'
+          OR row_data -> 'operating_realized' IS DISTINCT FROM old_data -> 'operating_realized'
+          OR row_data -> 'operating_revenue_realized' IS DISTINCT FROM old_data -> 'operating_revenue_realized'
+          OR row_data -> 'investment_planned' IS DISTINCT FROM old_data -> 'investment_planned'
+          OR row_data -> 'investment_realized' IS DISTINCT FROM old_data -> 'investment_realized'
+          OR row_data -> 'investment_revenue_realized' IS DISTINCT FROM old_data -> 'investment_revenue_realized'
+          OR row_data -> 'total_planned' IS DISTINCT FROM old_data -> 'total_planned'
+          OR row_data -> 'total_realized' IS DISTINCT FROM old_data -> 'total_realized'
+        ))
+      OR (TG_TABLE_NAME = 'ca_procurement_matches' AND (
+          row_data -> 'award_amount' IS DISTINCT FROM old_data -> 'award_amount'
+        ))
+      OR (TG_TABLE_NAME = 'budget_projects' AND (
+          row_data -> 'budget_amount_fcfa' IS DISTINCT FROM old_data -> 'budget_amount_fcfa'
+        )) THEN
+      RAISE EXCEPTION 'Changing a certified financial amount requires resetting verification status for a new review';
+    END IF;
+  END IF;
+
   IF evidence_status IN ('PRIMARY','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED','Vérifié DGMP') THEN
     IF source_id IS NULL OR source_url_value IS NULL
       OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
