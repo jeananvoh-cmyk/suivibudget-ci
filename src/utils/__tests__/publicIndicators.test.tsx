@@ -83,6 +83,8 @@ describe('Public Indicators Reconciliation & Traceability', () => {
     expect(indicators.investments.physical2026AmountFcfa).toBe(1_227_869_184_570);
     expect(indicators.investments.multiYearPre2026AmountFcfa).toBe(104_700_000_000);
     expect(indicators.investments.physicalAllAmountFcfa).toBe(1_332_569_184_570);
+    expect(indicators.investments.unknownAmount2026ProjectsCount).toBe(0);
+    expect(indicators.investments.unknownAmountPre2026ProjectsCount).toBe(0);
 
     expect(indicators.investments.catalogReconciliation.crossCatalogOverlapCount).toBe(2024);
     expect(indicators.investments.catalogReconciliation.exactDuplicatesCount).toBe(1);
@@ -155,6 +157,45 @@ describe('Public Indicators Reconciliation & Traceability', () => {
 
     const dataStoreSource = readFileSync(join(process.cwd(), 'src/services/dataStore.ts'), 'utf8');
     expect(dataStoreSource).not.toContain('2025-998');
+  });
+
+  it('never displays partial 2026 investment sums when a classified project has no known amount', () => {
+    const unknownProject: BudgetProject = {
+      id: 'unknown-amount-local-2026',
+      title: 'Construction d’un centre de santé — projet test',
+      commune_name: 'Commune test',
+      region_name: 'Région test',
+      category: 'SANTE',
+      nature_expense: 'Investissements',
+      budget_amount_fcfa: null,
+      fiscal_year: 2026,
+      current_status: 'NOT_STARTED',
+      progress_percentage: 0,
+      created_at: '2026-01-01',
+      scope_level: 'LOCAL',
+    };
+    const snapshot = computePublicIndicators({
+      projects: [unknownProject],
+      rawProjects: [unknownProject],
+      institutions: [],
+      proofs: [],
+    });
+
+    expect(snapshot.investments.unknownAmount2026ProjectsCount).toBe(1);
+    expect(snapshot.investments.consolidatedPhysical2026AmountFcfa).toBeNull();
+
+    const indicatorsSpy = vi.spyOn(dataStore, 'getPublicIndicators').mockReturnValue(snapshot);
+    const heroHtml = renderToStaticMarkup(
+      <HeroSection
+        searchQuery=""
+        setSearchQuery={() => {}}
+        onExploreClick={() => {}}
+      />
+    );
+    expect(heroHtml).toContain('Non consolidé');
+    expect(heroHtml).toContain('1 opération(s) sans montant connu');
+    expect(heroHtml).not.toContain('0 FCFA');
+    indicatorsSpy.mockRestore();
   });
 
   it('never double-counts LFI Programme 2204040 lines when computePublicIndicators receives raw overlapping lines', () => {
