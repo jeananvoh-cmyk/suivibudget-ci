@@ -13,8 +13,8 @@ Aucune migration, écriture de données métier, modification de configuration A
 3. `src/components/ApecParticipation.tsx` : contrôle ajouté avant la création d'un compte citoyen ; la connexion existante n'est pas bloquée par une vérification de nouveau mot de passe.
 4. `20261115180000_move_staff_rpcs_to_private.sql` : déplace les huit implémentations `SECURITY DEFINER` signalées du schéma API `public` vers le schéma non exposé `private`. Les noms RPC publics sont conservés avec des wrappers `SECURITY INVOKER`. Les implémentations privées conservent leurs contrôles de rôle ; les droits EXECUTE sont explicitement limités à `authenticated`.
 5. La même migration retire la politique publique `admin_entity_public` de `site_settings`, qui exposait toutes les colonnes, y compris `contact_email` et `settings_metadata`. La lecture staff reste portée par `admin_entity_staff`.
-6. `20261115181000_optimize_admin_receipt_read_rls.sql` : remplace `auth.uid()` par `(SELECT auth.uid())` dans `admin_receipt_read` sans élargir les droits. Les dix index FK signalés par Advisors sont différés : le triage read-only #76 a observé des tables de 0 à 1 ligne et n'a pas établi de bénéfice mesurable justifiant leur coût de maintenance. Les index documentaires déjà présents dans les migrations précédentes restent inchangés.
-7. Tests ciblés ajoutés pour le contrôle HIBP, les wrappers RPC, la politique RLS et les dix index.
+6. L'optimisation RLS `auth.uid()` → `(SELECT auth.uid())` sur `admin_receipt_read` est isolée dans la PR #76 (migration `20261115090000_optimize_admin_receipt_read_rls.sql`) pour éviter une migration en doublon. Les dix index FK signalés par Advisors sont différés : le triage read-only #76 a observé des tables de 0 à 1 ligne et n'a pas établi de bénéfice mesurable justifiant leur coût de maintenance. Aucun index FK additionnel n'est créé dans cette branche.
+7. Tests ciblés ajoutés pour le contrôle HIBP et les wrappers RPC ; le test RLS ciblé est porté par la PR #76.
 
 ## Limite incontournable — protection des mots de passe compromis
 
