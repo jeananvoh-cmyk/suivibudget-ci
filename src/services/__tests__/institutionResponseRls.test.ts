@@ -64,6 +64,12 @@ describe('institution response moderation is enforced by PostgreSQL', () => {
     // Staff cannot skip the moderation queue at insertion or publication.
     await db.exec('BEGIN; SET LOCAL ROLE authenticated;');
     await db.query(`SELECT set_config('request.jwt.claim.sub','${adminId}',true)`);
+    await db.exec('SAVEPOINT missing_date');
+    await expect(
+      db.query("INSERT INTO public.ca_institution_responses(id,response_status) VALUES ('missing-date','PENDING')")
+    ).rejects.toThrow();
+    await db.exec('ROLLBACK TO SAVEPOINT missing_date');
+    await db.exec('RELEASE SAVEPOINT missing_date');
     await db.exec('SAVEPOINT direct_insert');
     await expect(
       db.query("INSERT INTO public.ca_institution_responses(id,response_date,response_status) VALUES ('direct-insert','2026-11-16','PUBLISHED')")
