@@ -14,6 +14,11 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Fetch exact migration source branches for chain replay
+        run: |
+          git fetch --no-tags origin \
+            +refs/heads/fix/pre-go-supabase-advisors:refs/remotes/origin/fix/pre-go-supabase-advisors \
+            +refs/heads/feat/institution-response-workflow:refs/remotes/origin/feat/institution-response-workflow
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
