@@ -25,9 +25,9 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
   const localCsv2026Amount = detailed?.investments.localCsvPhysical2026AmountFcfa;
   const bouakeAmount = detailed?.investments.localPortalBouakePhysical2026AmountFcfa;
   const multiYearAmount = detailed?.investments.multiYearPre2026AmountFcfa;
-  const hasCompleteState2026Amounts = detailed?.investments.unknownAmountState2026ProjectsCount === 0;
-  const hasCompleteLocalCsv2026Amounts = detailed?.investments.unknownAmountLocalCsv2026ProjectsCount === 0;
-  const hasCompleteBouake2026Amounts = detailed?.investments.unknownAmountLocalPortalBouake2026ProjectsCount === 0;
+  const hasCompleteState2026Amounts = (detailed?.investments.statePhysical2026Count ?? 0) > 0 && detailed?.investments.unknownAmountState2026ProjectsCount === 0;
+  const hasCompleteLocalCsv2026Amounts = (detailed?.investments.localCsvPhysical2026Count ?? 0) > 0 && detailed?.investments.unknownAmountLocalCsv2026ProjectsCount === 0;
+  const hasCompleteBouake2026Amounts = (detailed?.investments.localPortalBouakePhysical2026Count ?? 0) > 0 && detailed?.investments.unknownAmountLocalPortalBouake2026ProjectsCount === 0;
   const hasCompletePre2026Amounts = detailed?.investments.unknownAmountPre2026ProjectsCount === 0;
 
   const proofTarget2026 = detailed?.citizenProofs.target2026 ?? 1000;
