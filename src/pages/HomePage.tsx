@@ -92,6 +92,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   // Public indicators & exact 2026 sector breakdown across 100% of tangible 2026 projects
   const publicIndicators = useMemo(() => dataStore.getPublicIndicators(), [allProjects, stats]);
   const hasComplete2026Amounts = publicIndicators.investments.unknownAmount2026ProjectsCount === 0;
+  const hasCompletePre2026Amounts = publicIndicators.investments.unknownAmountPre2026ProjectsCount === 0;
   const sectorBreakdown2026 = useMemo(
     () => computeSectorBreakdown(allProjects, { fiscalYear: 2026 }),
     [allProjects]
@@ -328,7 +329,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Où vont les investissements publics en 2026 ?
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-                Répartition sectorielle des {sectorBreakdown2026.totalProjects.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée ({hasCompleteSectorTotals ? formatCompactFCFA(sectorBreakdown2026.consolidatedTotalAmountFcfa!) : `total non consolidé — ${sectorBreakdown2026.unknownAmountProjectsCount} opération(s) sans montant connu`} — sous-ensemble extrait sur {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel} votés en LFI 2026{sectorBreakdown2026.excludedOtherYearsCount > 0 ? `, hors ${sectorBreakdown2026.excludedOtherYearsCount} marché pluriannuel 2021 de ${formatCompactFCFA(sectorBreakdown2026.excludedOtherYearsAmountFcfa)}` : ''}). {sectorBreakdown2026.isPartialSum ? 'Les montants et pourcentages incomplets ne sont pas affichés.' : sectorBreakdown2026.methodologyNotice}
+                Répartition sectorielle des {sectorBreakdown2026.totalProjects.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée ({hasCompleteSectorTotals ? formatCompactFCFA(sectorBreakdown2026.consolidatedTotalAmountFcfa!) : `total non consolidé — ${sectorBreakdown2026.unknownAmountProjectsCount} opération(s) sans montant connu`} — sous-ensemble extrait sur {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel} votés en LFI 2026{sectorBreakdown2026.excludedOtherYearsCount > 0 ? `, hors ${sectorBreakdown2026.excludedOtherYearsCount} marché pluriannuel 2021 ${hasCompletePre2026Amounts ? `de ${formatCompactFCFA(sectorBreakdown2026.excludedOtherYearsAmountFcfa)}` : '(montant non consolidé)'}` : ''}). {sectorBreakdown2026.isPartialSum ? 'Les montants et pourcentages incomplets ne sont pas affichés.' : sectorBreakdown2026.methodologyNotice}
               </p>
             </div>
             <button
