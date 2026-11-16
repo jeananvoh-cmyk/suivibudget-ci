@@ -50,37 +50,71 @@ nav[aria-label="Navigation principale mobile"] button { min-height: 44px; }
 }
 
 /* ========================================================================= */
-/* OFFICIAL REPUBLICAN LETTER 1-PAGE A4 PRINT CONFIGURATION                  */
+/* OFFICIAL REPUBLICAN LETTER & CITIZEN 1-PAGE A4 PRINT CONFIGURATION        */
 /* ========================================================================= */
 @media print {
   @page {
     size: A4 portrait;
-    margin: 10mm 15mm 10mm 15mm;
+    margin: 10mm 12mm 10mm 12mm;
   }
-  
+
   html, body {
     background: #ffffff !important;
-    color: #0f172a !important;
+    color: #000000 !important;
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
     height: auto !important;
+    min-height: 0 !important;
     overflow: visible !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  body * {
+  /* When printing the Citizen 1-Page A4 Summary, collapse all background page
+     and modal containers via display:none so they never produce trailing blank pages. */
+  body:has(#citizen-one-page-summary) > *:not(:has(#citizen-one-page-summary)) {
+    display: none !important;
+  }
+
+  body:has(#citizen-one-page-summary) .citizen-print-portal {
+    position: static !important;
+    inset: auto !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  #citizen-one-page-summary {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  body:not(:has(#citizen-one-page-summary)) * {
     visibility: hidden;
   }
 
   #official-printable-letter,
-  #official-printable-letter *,
-  #citizen-one-page-summary,
-  #citizen-one-page-summary * {
+  #official-printable-letter * {
     visibility: visible;
   }
 
-  #official-printable-letter,
-  #citizen-one-page-summary {
+  #official-printable-letter {
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;

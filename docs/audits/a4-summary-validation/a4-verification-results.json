@@ -1,0 +1,123 @@
+{
+  "generatedAt": "2026-11-16",
+  "chromiumExecutable": "C:\\Users\\Couple ANVOH\\AppData\\Local\\ms-playwright\\chromium-1217\\chrome-win64\\chrome.exe",
+  "scenarios": [
+    {
+      "scenario": "Live App Cocody",
+      "pdfFile": "a4-cocody-live.pdf",
+      "numPages": 1,
+      "dimensionsMm": "210.2 x 297.3",
+      "dimensionsPt": "595.92 x 842.88",
+      "desktopMetrics": {
+        "width": 794,
+        "height": 613,
+        "scrollWidth": 792,
+        "clientWidth": 792,
+        "overflowX": false
+      },
+      "mobileMetrics": {
+        "width": 351,
+        "height": 1025,
+        "scrollWidth": 349,
+        "clientWidth": 349,
+        "overflowX": false
+      },
+      "printMetrics": {
+        "width": 1024,
+        "height": 492,
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "overflowX": false,
+        "a4OverflowAttr": "false",
+        "clippedTextNodes": []
+      },
+      "extractedTextLength": 1453,
+      "verifiedSnippets": [
+        "Budget Citoyen",
+        "1 Page (A4)",
+        "Cocody",
+        "Délai légal : 30 jours",
+        "Charte SuiviBudget CI"
+      ]
+    },
+    {
+      "scenario": "Faible volume (Sans données)",
+      "pdfFile": "a4-low-data.pdf",
+      "numPages": 1,
+      "dimensionsMm": "210.2 x 297.3",
+      "dimensionsPt": "595.92 x 842.88",
+      "desktopMetrics": {
+        "width": 794,
+        "height": 574,
+        "scrollWidth": 792,
+        "clientWidth": 792,
+        "overflowX": false
+      },
+      "mobileMetrics": {
+        "width": 351,
+        "height": 984,
+        "scrollWidth": 349,
+        "clientWidth": 349,
+        "overflowX": false
+      },
+      "printMetrics": {
+        "width": 1024,
+        "height": 456,
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "overflowX": false,
+        "a4OverflowAttr": "false",
+        "clippedTextNodes": []
+      },
+      "extractedTextLength": 1406,
+      "verifiedSnippets": [
+        "Mairie de San-Pédro Test",
+        "Non documenté publiquement",
+        "NOT_FOUND_PUBLICLY",
+        "Aucune empreinte SHA-256"
+      ]
+    },
+    {
+      "scenario": "Volume maximal raisonnable",
+      "pdfFile": "a4-max-volume.pdf",
+      "numPages": 1,
+      "dimensionsMm": "210.2 x 297.3",
+      "dimensionsPt": "595.92 x 842.88",
+      "desktopMetrics": {
+        "width": 794,
+        "height": 787,
+        "scrollWidth": 792,
+        "clientWidth": 792,
+        "overflowX": false
+      },
+      "mobileMetrics": {
+        "width": 351,
+        "height": 1427,
+        "scrollWidth": 349,
+        "clientWidth": 349,
+        "overflowX": false
+      },
+      "printMetrics": {
+        "width": 1024,
+        "height": 678,
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "overflowX": false,
+        "a4OverflowAttr": "false",
+        "clippedTextNodes": []
+      },
+      "extractedTextLength": 2598,
+      "verifiedSnippets": [
+        "Commune de Cocody",
+        "3 900 630 000 FCFA",
+        "1 366 100 690 FCFA",
+        "3 Projets Majeurs sur 8 Référencés",
+        "+ 2 autre(s) secteur(s)",
+        "+ 1 autre(s) empreinte(s) SHA-256",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "Délai 30j respecté"
+      ]
+    }
+  ]
+}

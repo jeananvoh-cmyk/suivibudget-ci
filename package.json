@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "build:review": "vite build --config vite.review.config.ts",
+    "verify:a4-pdf": "node scripts/verify-a4-summary-pdf.mjs",
     "verify:supabase:read-only": "node scripts/verify-supabase-readonly.mjs",
     "ingest:budget": "node scripts/import-data.mjs",
     "import:data": "node scripts/import-data.mjs"
@@ -31,6 +32,7 @@
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "playwright-core": "^1.65.1",
     "postcss": "^8.5.2",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.3",
