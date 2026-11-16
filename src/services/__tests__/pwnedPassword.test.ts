@@ -13,8 +13,9 @@ describe('Pwned Passwords k-anonymity guard', () => {
     ));
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(assertPasswordNotPwned('password')).rejects.toBeInstanceOf(PwnedPasswordError);
-    await expect(assertPasswordNotPwned('password')).rejects.toThrow(/fuites connues/);
+    const result = assertPasswordNotPwned('password');
+    await expect(result).rejects.toBeInstanceOf(PwnedPasswordError);
+    await expect(result).rejects.toThrow(/fuites connues/);
     expect(fetchMock).toHaveBeenCalledOnce();
     const [url, options] = fetchMock.mock.calls[0];
     expect(url).toBe('https://api.pwnedpasswords.com/range/5BAA6');
