@@ -24,9 +24,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 }) => {
   const indicators = dataStore.getPublicIndicators();
   const { investments } = indicators;
-  const hasCompleteState2026Amounts = investments.unknownAmountState2026ProjectsCount === 0;
-  const hasCompleteLocalCsv2026Amounts = investments.unknownAmountLocalCsv2026ProjectsCount === 0;
-  const hasCompleteBouake2026Amounts = investments.unknownAmountLocalPortalBouake2026ProjectsCount === 0;
+  const hasCompleteState2026Amounts = investments.statePhysical2026Count > 0 && investments.unknownAmountState2026ProjectsCount === 0;
+  const hasCompleteLocalCsv2026Amounts = investments.localCsvPhysical2026Count > 0 && investments.unknownAmountLocalCsv2026ProjectsCount === 0;
+  const hasCompleteBouake2026Amounts = investments.localPortalBouakePhysical2026Count > 0 && investments.unknownAmountLocalPortalBouake2026ProjectsCount === 0;
   const hasCompletePre2026Amounts = investments.unknownAmountPre2026ProjectsCount === 0;
 
   return (
