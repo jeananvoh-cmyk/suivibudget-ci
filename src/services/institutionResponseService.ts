@@ -42,8 +42,19 @@ export function validateInstitutionResponseDraft(
   if (!draft.response_text || draft.response_text.trim().length < 15) {
     errors.push('Le texte du droit de réponse doit contenir au moins 15 caractères.');
   }
-  if (draft.response_date && !/^\d{4}-\d{2}-\d{2}$/.test(draft.response_date.trim())) {
-    errors.push('La date de réponse doit respecter le format AAAA-MM-JJ.');
+  const responseDate = draft.response_date?.trim() || '';
+  const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(responseDate);
+  const parsedDate = dateMatch
+    ? new Date(Date.UTC(Number(dateMatch[1]), Number(dateMatch[2]) - 1, Number(dateMatch[3])))
+    : null;
+  const isRealCalendarDate = Boolean(
+    dateMatch && parsedDate &&
+    parsedDate.getUTCFullYear() === Number(dateMatch[1]) &&
+    parsedDate.getUTCMonth() === Number(dateMatch[2]) - 1 &&
+    parsedDate.getUTCDate() === Number(dateMatch[3])
+  );
+  if (!isRealCalendarDate) {
+    errors.push('La date officielle de réponse est obligatoire et doit être une date réelle au format AAAA-MM-JJ.');
   }
   const docUrl = draft.supporting_document_url?.trim();
   if (docUrl && !isSafeUrl(docUrl)) {
