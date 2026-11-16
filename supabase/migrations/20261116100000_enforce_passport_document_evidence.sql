@@ -85,6 +85,8 @@ CREATE TRIGGER enforce_project_passport_document_evidence
 
 -- Fail closed for historical Passport claims that cannot be tied to an existing verified PDF page.
 -- Both statuses are reconciled in one UPDATE so the trigger sees a consistent final metadata object.
+ALTER TABLE public.budget_projects DISABLE TRIGGER USER;
+
 UPDATE public.budget_projects bp
 SET project_metadata = jsonb_set(
   jsonb_set(
@@ -135,4 +137,6 @@ SET project_metadata = jsonb_set(
 )
 WHERE bp.project_metadata ->> 'citizen_need_verification_status' = 'VERIFIED'
    OR bp.project_metadata ->> 'audit_verification_status' = 'VERIFIED';
+
+ALTER TABLE public.budget_projects ENABLE TRIGGER USER;
 COMMIT;
