@@ -36,6 +36,25 @@ describe('InstitutionResponse moderated workflow & Principle 8 display', () => {
     expect(invalid.valid).toBe(false);
     expect(invalid.errors.length).toBeGreaterThanOrEqual(5);
 
+    const impossibleDate = validateInstitutionResponseDraft({
+      ca_id: 'ca-test-mod-2024',
+      response_text: 'Précision institutionnelle suffisamment détaillée.',
+      response_date: '2026-02-31',
+      author_name: 'Kouassi Yao',
+      author_title: 'Secrétaire Général',
+    });
+    expect(impossibleDate.valid).toBe(false);
+    expect(impossibleDate.errors[0]).toContain('date officielle');
+
+    const missingDate = validateInstitutionResponseDraft({
+      ca_id: 'ca-test-mod-2024',
+      response_text: 'Précision institutionnelle suffisamment détaillée.',
+      response_date: '',
+      author_name: 'Kouassi Yao',
+      author_title: 'Secrétaire Général',
+    });
+    expect(missingDate.valid).toBe(false);
+
     const valid = validateInstitutionResponseDraft({
       ca_id: 'ca-test-mod-2024',
       response_text:
