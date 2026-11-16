@@ -22,7 +22,7 @@ Avant d'écrire une ligne de code, l'audit direct du dépôt montre que **plusie
 
 ## 2. Découpage en 4 Lots Progressifs (Zéro Réécriture Arbitraire)
 
-### Lot P1 — Alignement OCDS v1.1 & Deep-Link Passeport *(✅ Implémenté — PR #68)*
+### Lot P1 — Alignement OCDS v1.1 & Deep-Link Passeport *(PR #69 ouverte — non intégrée à master)*
 - **Livrables code :**
   1. `src/types/ocds.ts` : Interfaces standardisées OCDS v1.1 (`OcdsReleasePackage`, `OcdsRelease`, `OcdsTender`, `OcdsAward`, `OcdsContract`, `OcdsParty`).
   2. `src/types/administrativeAccount.ts` & `src/types/index.ts` : Ajout optionnel rétrocompatible `procurement_method?`, `bomp_reference?`, `ocid?`.
@@ -31,23 +31,23 @@ Avant d'écrire une ligne de code, l'audit direct du dépôt montre que **plusie
   5. `src/components/ProjectAccountabilityPassport.tsx` : Bloc de comparaison financière 3 colonnes (*Budget voté BP ↔ Marché adjugé DGMP ↔ Ordonnancé CA*) + bouton d'export JSON OCDS + copie du lien Passeport.
   6. `src/utils/__tests__/ocdsMapper.test.tsx` + `src/utils/__tests__/navigation.test.ts`.
 
-### Lot P2 — Horloge Légale CAIDP 30 Jours & Traçabilité Citoyenne *(✅ Implémenté — PR #68)*
+### Lot P2 — Horloge Légale CAIDP 30 Jours & Traçabilité Citoyenne *(PR #70 ouverte ; compression photo PR #71 ouverte — non intégrées)*
 - **Livrables code :**
-  1. `src/utils/caidpDeadlines.ts` : Calcul pur du délai légal Loi n° 2013-867 (`30` jours calendaires), statuts `WITHIN_LEGAL_DELAY` / `DUE_TODAY` / `LEGAL_DELAY_EXPIRED` / `DOCUMENT_PUBLISHED`.
+  1. `src/utils/caidpDeadlines.ts` : calcul du délai de 30 jours calendaires (PR #70, ouverte). La clôture d'une demande exige une correspondance exacte entre le document demandé et une pièce publiée/vérifiée de la même institution ; les contributions citoyennes ne certifient pas l'avancement officiel.
   2. Intégration dans `CaidpAnalyticsManager.tsx` et `InstitutionDetailModal.tsx` (affichage de l'horloge sur les collectivités ayant fait l'objet d'une requête CAIDP).
-  3. Compression adaptative `< 300 Ko` dans `compressAndSanitizeImage` (`src/utils/security.ts`) pour les preuves photo en zone 2G/3G + rappel explicite `Financier != Physique` dans `ProjectCard.tsx`.
+  3. Compression adaptative `< 300 Ko` dans `compressAndSanitizeImage` (`src/utils/security.ts`) pour les preuves photo en zone 2G/3G (PR #71, ouverte) + distinction entre avancement administratif déclaré et constat physique (PR #68/#70, à réconcilier).
   4. `src/utils/__tests__/caidpDeadlines.test.tsx` + `src/utils/__tests__/security.test.ts`.
 
-### Lot P3 — QR Code Chantier & Fiche Imprimable « Budget Citoyen 1 Page (A4) » *(✅ Implémenté — PR #68)*
+### Lot P3 — QR Code Chantier & Fiche Imprimable « Budget Citoyen 1 Page (A4) » *(PR #72 et #73 ouvertes — non intégrées à master)*
 - **Livrables code :**
-  1. Générateur SVG déterministe ISO/IEC 18004 de QR Code (`src/utils/qrCode.ts`, `src/components/common/QrCodeSvg.tsx`) pointant vers `/projets?project=<id>&view=passport` + export `.svg` dans `ProjectAccountabilityPassport.tsx`.
-  2. Composant d'impression dédiée `CitizenOnePageSummary.tsx` (A4 portrait via `@media print` dans `src/index.css` : Qui ? Combien ? Secteurs 2026, 3 projets majeurs, contact RI CAIDP, SHA-256 des sources, QR Code) accessible depuis `InstitutionDetailModal.tsx`.
+  1. Générateur SVG déterministe de QR Code (`src/utils/qrCode.ts`, `src/components/common/QrCodeSvg.tsx`) et lien Passeport : PR #72 (ouverte, non intégrée).
+  2. Composant d'impression `CitizenOnePageSummary.tsx` (fiche A4) : PR #73 (ouverte, non intégrée).
   3. `src/utils/__tests__/qrCode.test.tsx`.
 
-### Lot P4 — Open Data Package Global & Droit de Réponse Institutionnel *(✅ Implémenté — PR #68)*
+### Lot P4 — Open Data Package Global & Droit de Réponse Institutionnel *(PR #69 et #75 ouvertes — non intégrées à master)*
 - **Livrables code :**
-  1. Export global `.ocds.json` par collectivité/exercice (`createFilteredOcdsReleasePackage` dans `src/utils/ocdsMapper.ts`, boutons d'export dans `src/components/Footer.tsx` et `src/pages/DocumentsPage.tsx`, en complément du CSV existant).
-  2. Workflow modéré de soumission/validation de `InstitutionResponse` (`src/services/institutionResponseService.ts`, `src/components/admin/InstitutionResponseManager.tsx`, `src/pages/AdminDashboardPage.tsx`, hydratation Supabase dans `src/data/administrativeAccountsData.ts` et `src/services/administrativeAccountsService.ts`, affichage public filtré `PUBLISHED` conforme au Principe 8 dans `src/components/AdministrativeAccountView.tsx`, tests dans `src/utils/__tests__/institutionResponses.test.tsx`).
+  1. Export global `.ocds.json` par collectivité/exercice : PR #69 (ouverte, non intégrée).
+  2. Workflow modéré de droit de réponse institutionnel : PR #75 (ouverte, non intégrée). La réponse doit rester sourcée, modérée et distincte des constats citoyens.
 
 ---
 
