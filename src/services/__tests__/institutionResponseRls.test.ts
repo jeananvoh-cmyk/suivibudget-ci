@@ -39,6 +39,7 @@ describe('institution response moderation is enforced by PostgreSQL', () => {
       CREATE TABLE public.ca_institution_responses(
         id text primary key,
         response_date date not null default current_date,
+        response_text text not null default 'Test response content',
         response_status text not null CHECK (response_status IN ('PENDING','VALIDATED','PUBLISHED'))
       );
       ALTER TABLE public.ca_institution_responses ENABLE ROW LEVEL SECURITY;
