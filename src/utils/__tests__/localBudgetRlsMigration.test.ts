@@ -53,6 +53,7 @@ describe('RLS hardening — local budget administration', () => {
     expect(hardeningMigration).toContain('AND pd.page_count IS NOT NULL');
     expect(hardeningMigration).toContain('AND source_page_value <= pd.page_count');
     expect(hardeningMigration).toContain('AND NEW.source_page <= d.page_count');
+    expect(hardeningMigration).toContain('OR NEW.page_count IS DISTINCT FROM OLD.page_count');
     expect(hardeningMigration).toContain('AND pd.page_count IS NOT NULL');
     expect(hardeningMigration).toContain('AND source_page_value <= pd.page_count');
     expect(hardeningMigration).toContain('CREATE TRIGGER enforce_budget_revenue_source_evidence');
