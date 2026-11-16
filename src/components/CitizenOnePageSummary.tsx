@@ -106,7 +106,7 @@ export function buildCitizenSummaryData(params: {
   // 3. Deduplicated authentic SHA-256 document fingerprints
   const shaMap = new Map<string, Sha256SourceItem>();
   const registerSha = (title: string | null | undefined, sha: string | null | undefined, pageRef?: string | null) => {
-    if (!sha || typeof sha !== 'string' || !sha.trim()) return;
+    if (!sha || typeof sha !== 'string' || !/^[a-f0-9]{64}$/i.test(sha.trim())) return;
     const normalizedSha = sha.trim().toLowerCase();
     if (!shaMap.has(normalizedSha)) {
       shaMap.set(normalizedSha, {
@@ -156,7 +156,12 @@ export function buildCitizenSummaryData(params: {
     );
   }
   for (const doc of documents) {
-    if (doc.status === 'PUBLISHED' && doc.institution_id === institution.id) {
+    if (
+      doc.status === 'PUBLISHED' &&
+      doc.verification_status === 'VERIFIED' &&
+      doc.checksum_status === 'COMPUTED' &&
+      doc.institution_id === institution.id
+    ) {
       registerSha(doc.title, doc.checksum_sha256, doc.page_count ? `${doc.page_count} p.` : null);
     }
   }
@@ -392,7 +397,7 @@ export const CitizenOnePageSummary: React.FC<CitizenOnePageSummaryProps> = ({
         <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="rounded-xl border border-slate-200 p-3 space-y-2">
             <h2 className="text-xs font-black uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-1">
-              Secteurs 2026 (Projets rattachés : {relatedProjects.length})
+              Secteurs des projets rattachés ({relatedProjects.length})
             </h2>
             {summary.sectorBreakdown.length > 0 ? (
               <ul className="space-y-1 text-[11px]">
