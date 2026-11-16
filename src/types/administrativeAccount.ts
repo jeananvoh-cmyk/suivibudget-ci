@@ -50,6 +50,7 @@ export interface InstitutionResponse {
   supporting_document_url?: string;
   supporting_document_name?: string;
   response_status: 'PENDING' | 'VALIDATED' | 'PUBLISHED';
+  created_at?: string;
 }
 
 /**
@@ -141,6 +142,7 @@ export interface AdministrativeAccount {
   
   // Droit de réponse institutionnel
   institution_response?: InstitutionResponse;
+  institution_responses?: InstitutionResponse[];
   
   notes?: string;
   created_at: string;

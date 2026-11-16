@@ -1,4 +1,4 @@
-import type { AdministrativeAccount, ProcurementMatch } from '../types/administrativeAccount';
+import type { AdministrativeAccount, InstitutionResponse, ProcurementMatch } from '../types/administrativeAccount';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
 import { hydrateAdministrativeAccountFromRow } from '../utils/budgetDocumentDryRun';
 
@@ -11,15 +11,44 @@ export async function refreshPublishedAdministrativeAccounts(): Promise<void> {
     .select('*, operations:ca_investment_operations(*, matches:ca_procurement_matches(*))')
     .eq('status', 'PUBLISHED');
   if (error) throw error;
-  const accounts: AdministrativeAccount[] = (data || []).map(row => hydrateAdministrativeAccountFromRow({
-    ...row,
-    operations: (row.operations || []).map((operation: AdministrativeAccount['operations'][number] & { matches: ProcurementMatch[] }) => ({
-      ...operation,
-      planned_amount: operation.planned_amount != null ? Number(operation.planned_amount) : null,
-      executed_amount: operation.executed_amount != null ? Number(operation.executed_amount) : null,
-      procurement_match: operation.matches?.length === 1 ? operation.matches[0] : undefined,
-    })),
-  }));
+
+  let publishedResponses: InstitutionResponse[] = [];
+  try {
+    const respResult = await supabase
+      .from('ca_institution_responses')
+      .select('*')
+      .eq('response_status', 'PUBLISHED')
+      .order('response_date', { ascending: false });
+    if (!respResult.error && Array.isArray(respResult.data)) {
+      publishedResponses = respResult.data as InstitutionResponse[];
+    }
+  } catch {
+    publishedResponses = [];
+  }
+
+  const responsesByCa = new Map<string, InstitutionResponse[]>();
+  for (const resp of publishedResponses) {
+    if (!resp.ca_id) continue;
+    const list = responsesByCa.get(resp.ca_id) || [];
+    list.push(resp);
+    responsesByCa.set(resp.ca_id, list);
+  }
+
+  const accounts: AdministrativeAccount[] = (data || []).map(row => {
+    const caResponses = responsesByCa.get(row.id) || [];
+    const primaryResponse = caResponses.find(r => !r.operation_id) || caResponses[0];
+    return hydrateAdministrativeAccountFromRow({
+      ...row,
+      institution_response: primaryResponse,
+      institution_responses: caResponses.length > 0 ? caResponses : undefined,
+      operations: (row.operations || []).map((operation: AdministrativeAccount['operations'][number] & { matches: ProcurementMatch[] }) => ({
+        ...operation,
+        planned_amount: operation.planned_amount != null ? Number(operation.planned_amount) : null,
+        executed_amount: operation.executed_amount != null ? Number(operation.executed_amount) : null,
+        procurement_match: operation.matches?.length === 1 ? operation.matches[0] : undefined,
+      })),
+    });
+  });
   ADMINISTRATIVE_ACCOUNTS_DATA.push(...accounts);
 }
 
