@@ -20,7 +20,7 @@ actor_id = (SELECT auth.uid())
 AND private.admin_domain_allowed(entity_type, result_data)
 ```
 
-Migration isolée : `20261115090000_optimize_admin_receipt_read_rls.sql`.  
+Migration isolée : `20261116140000_optimize_admin_receipt_read_rls.sql`.  
 Test PGlite ajouté : vérifie la lecture du reçu propre à l'acteur, le rejet des reçus d'un autre acteur et le maintien du filtre métier.  
 Statut : code poussé dans la PR #76 ; validation CI et replay sur une Preview Branch Supabase réelle encore nécessaires. Aucune application Production.
 
