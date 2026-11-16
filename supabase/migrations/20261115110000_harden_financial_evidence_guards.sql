@@ -10,7 +10,10 @@ GRANT INSERT, UPDATE ON TABLE public.budget_sources, public.budget_revenue_sourc
 -- Recreate the CA trigger so a page-only change cannot bypass source validation.
 DROP TRIGGER IF EXISTS enforce_administrative_account_primary_evidence ON public.administrative_accounts;
 CREATE TRIGGER enforce_administrative_account_primary_evidence
-  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url,
+    status, institution_id, fiscal_year, operating_planned, operating_realized,
+    operating_revenue_realized, investment_planned, investment_realized,
+    investment_revenue_realized, total_planned, total_realized
   ON public.administrative_accounts FOR EACH ROW
   EXECUTE FUNCTION private.enforce_primary_document_evidence();
 
