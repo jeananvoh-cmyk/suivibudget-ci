@@ -218,6 +218,12 @@ describe('RLS hardening — local budget administration', () => {
            'CA primaire de test','migration-primary-ca-doc','https://dgbf.ci/ca-2023.pdf',5,
            'OFFICIAL_DOCUMENT','TO_VERIFY');
       `);
+      const passportEvidence = await db.query<{ need_status: string; audit_status: string }>(
+        `SELECT project_metadata ->> 'citizen_need_verification_status' AS need_status,
+                project_metadata ->> 'audit_verification_status' AS audit_status
+         FROM public.budget_projects WHERE id='migration-passport-valid'`
+      );
+      expect(passportEvidence.rows).toEqual([{ need_status: 'VERIFIED', audit_status: 'VERIFIED' }]);
       await expect(db.query(
         `UPDATE public.administrative_accounts
          SET source_page = NULL
