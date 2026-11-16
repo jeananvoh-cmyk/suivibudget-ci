@@ -25,6 +25,8 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
   const localCsv2026Amount = detailed?.investments.localCsvPhysical2026AmountFcfa;
   const bouakeAmount = detailed?.investments.localPortalBouakePhysical2026AmountFcfa;
   const multiYearAmount = detailed?.investments.multiYearPre2026AmountFcfa;
+  const hasComplete2026Amounts = detailed?.investments.unknownAmount2026ProjectsCount === 0;
+  const hasCompletePre2026Amounts = detailed?.investments.unknownAmountPre2026ProjectsCount === 0;
 
   const proofTarget2026 = detailed?.citizenProofs.target2026 ?? 1000;
   const pendingProofsCount = detailed?.citizenProofs.pendingCount ?? 0;
@@ -87,9 +89,12 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
             </p>
             {state2026Amount !== undefined && localCsv2026Amount !== undefined && (
               <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                Extrait classifié : {formatCompactFCFA(state2026Amount)} État • {formatCompactFCFA(localCsv2026Amount)} local LFI
-                {bouakeCount > 0 && bouakeAmount != null && ` (hors ${formatCompactFCFA(bouakeAmount)} portail Bouaké)`}
-                {multiYearCount > 0 && multiYearAmount != null && multiYearAmount > 0 && ` • hors 2021 : ${formatCompactFCFA(multiYearAmount)}`}
+                {hasComplete2026Amounts
+                ? `Extrait classifié : ${formatCompactFCFA(state2026Amount)} État • ${formatCompactFCFA(localCsv2026Amount)} local LFI`
+                : `Montants 2026 non consolidés : ${detailed?.investments.unknownAmount2026ProjectsCount ?? 0} opération(s) sans montant connu.`}
+                {hasComplete2026Amounts && bouakeCount > 0 && bouakeAmount != null && ` (hors ${formatCompactFCFA(bouakeAmount)} portail Bouaké)`}
+                {hasCompletePre2026Amounts && multiYearCount > 0 && multiYearAmount != null && multiYearAmount > 0 && ` • hors 2021 : ${formatCompactFCFA(multiYearAmount)}`}
+                {!hasCompletePre2026Amounts && multiYearCount > 0 && ` • montants antérieurs non consolidés : ${detailed?.investments.unknownAmountPre2026ProjectsCount ?? 0} opération(s) sans montant connu`}
               </p>
             )}
           </div>
