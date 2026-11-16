@@ -27,6 +27,20 @@ BEGIN
     RETURN NEW;
   END IF;
 
+  IF (
+    NEW.ca_id IS DISTINCT FROM OLD.ca_id
+    OR NEW.operation_id IS DISTINCT FROM OLD.operation_id
+    OR NEW.response_text IS DISTINCT FROM OLD.response_text
+    OR NEW.response_date IS DISTINCT FROM OLD.response_date
+    OR NEW.author_name IS DISTINCT FROM OLD.author_name
+    OR NEW.author_title IS DISTINCT FROM OLD.author_title
+    OR NEW.supporting_document_url IS DISTINCT FROM OLD.supporting_document_url
+    OR NEW.supporting_document_name IS DISTINCT FROM OLD.supporting_document_name
+  ) AND NEW.response_status IS DISTINCT FROM 'PENDING' THEN
+    RAISE EXCEPTION 'Editing institution response content requires returning it to PENDING'
+      USING ERRCODE = '23514';
+  END IF;
+
   IF NEW.response_status IS NOT DISTINCT FROM OLD.response_status THEN
     RETURN NEW;
   END IF;
@@ -52,7 +66,7 @@ DROP TRIGGER IF EXISTS enforce_institution_response_moderation
   ON public.ca_institution_responses;
 
 CREATE TRIGGER enforce_institution_response_moderation
-  BEFORE INSERT OR UPDATE OF response_status
+  BEFORE INSERT OR UPDATE OR DELETE
   ON public.ca_institution_responses
   FOR EACH ROW
   EXECUTE FUNCTION private.enforce_institution_response_moderation();
