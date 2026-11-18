@@ -83,16 +83,26 @@ UPDATE public.administrative_accounts AS aa
   SET verification_status = 'TO_VERIFY'
   WHERE aa.verification_status IN ('OFFICIAL_DOCUMENT', 'VERIFIED')
     AND (
-      aa.source_document_id IS NULL OR aa.source_page IS NULL OR aa.source_url IS NULL
-      OR aa.source_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
+      aa.source_document_id IS NULL OR aa.source_page IS NULL
       OR NOT EXISTS (
         SELECT 1 FROM public.public_documents d
         WHERE d.id = aa.source_document_id
           AND d.status = 'PUBLISHED'
           AND d.verification_status = 'VERIFIED'
           AND d.checksum_status IN ('COMPUTED', 'VERIFIED')
-          AND d.checksum_sha256 IS NOT NULL
-          AND d.source_url = aa.source_url
+          AND d.checksum_sha256 ~ '^[a-f0-9]{64}$'
+          AND (
+            (
+              NOT (aa.source_document_id IS NULL OR aa.source_page IS NULL OR aa.source_url IS NULL)
+              AND aa.source_url ~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
+              AND d.source_url = aa.source_url
+            )
+            OR (
+              COALESCE(d.storage_bucket, 'public_documents') = 'public_documents'
+              AND NULLIF(btrim(d.storage_path), '') IS NOT NULL
+              AND (NULLIF(btrim(aa.source_url), '') IS NULL OR NULLIF(btrim(d.source_url), '') IS NULL OR d.source_url = aa.source_url)
+            )
+          )
       )
     );
 
@@ -352,8 +362,7 @@ BEGIN
   END IF;
 
   IF evidence_status IN ('PRIMARY','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED','Vérifié DGMP') THEN
-    IF source_id IS NULL OR source_url_value IS NULL
-      OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
+    IF source_id IS NULL THEN
       RAISE EXCEPTION 'Primary certification requires a catalogue document ID and institutional HTTPS URL';
     END IF;
     IF source_page_value IS NULL OR source_page_value <= 0 THEN
@@ -368,10 +377,25 @@ BEGIN
         AND pd.checksum_sha256 ~ '^[a-f0-9]{64}$'
         AND pd.page_count IS NOT NULL
         AND source_page_value <= pd.page_count
-        AND pd.source_url = source_url_value
         AND (inst_id IS NULL OR pd.institution_id IS NULL OR pd.institution_id = inst_id)
         AND (fy_value IS NULL OR pd.fiscal_year IS NULL OR pd.fiscal_year = fy_value)
+        AND (
+          (
+            source_url_value IS NOT NULL
+            AND source_url_value ~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
+            AND pd.source_url = source_url_value
+          )
+          OR (
+            COALESCE(pd.storage_bucket, 'public_documents') = 'public_documents'
+            AND NULLIF(btrim(pd.storage_path), '') IS NOT NULL
+            AND (NULLIF(btrim(source_url_value), '') IS NULL OR NULLIF(btrim(pd.source_url), '') IS NULL OR pd.source_url = source_url_value)
+          )
+        )
     ) THEN
+      IF source_url_value IS NULL
+        OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
+        RAISE EXCEPTION 'Primary certification requires a catalogue document ID and institutional HTTPS URL';
+      END IF;
       RAISE EXCEPTION 'Primary certification requires a published, verified catalogue document with SHA-256';
     END IF;
   END IF;

@@ -15,15 +15,15 @@ describe('RLS hardening — local budget administration', () => {
   const migration = readFileSync(
     join(process.cwd(), 'supabase/migrations/20261115070000_enforce_primary_document_provenance.sql'),
     'utf8'
-  );
+  ).replace(/\r\n/g, '\n');
   const hardeningMigration = readFileSync(
     join(process.cwd(), 'supabase/migrations/20261115110000_harden_financial_evidence_guards.sql'),
     'utf8'
-  );
+  ).replace(/\r\n/g, '\n');
   const passportMigration = readFileSync(
     join(process.cwd(), 'supabase/migrations/20261116100000_enforce_passport_document_evidence.sql'),
     'utf8'
-  );
+  ).replace(/\r\n/g, '\n');
 
   it('does not grant privileges from user-editable user_metadata', () => {
     expect(migration).not.toContain("auth.jwt() -> 'user_metadata'");
@@ -386,6 +386,92 @@ describe('RLS hardening — local budget administration', () => {
         `UPDATE public.public_documents
          SET status = 'TO_VERIFY'
          WHERE id = 'migration-primary-ca-doc'`
+      )).resolves.toBeDefined();
+    } finally {
+      await db.close();
+    }
+  }, 60000);
+
+  it('preserves vaulted public_documents primary provenance for Cocody while rejecting unvaulted third-party URLs', async () => {
+    const db = await createProductionSchemaFixture();
+    try {
+      await db.exec(`
+        INSERT INTO auth.users(id,email)
+        VALUES ('00000000-0000-0000-0000-000000000010','admin-vault@example.invalid');
+        INSERT INTO public.profiles(id,email,full_name,role,is_active)
+        VALUES ('00000000-0000-0000-0000-000000000010','admin-vault@example.invalid','Admin vault','ADMIN',true);
+        SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000010',false);
+        SELECT set_config('app.admin_reason','Test coffre-fort Cocody',false);
+        INSERT INTO public.institutions(id,name,type) VALUES ('inst-com-cocody','Commune de Cocody','MAIRIE');
+        ALTER TABLE public.public_documents ADD COLUMN IF NOT EXISTS checksum_status text NOT NULL DEFAULT 'DECLARED';
+
+        INSERT INTO public.public_documents
+          (id,title,category,institution_name,file_url,file_name,status,verification_status,checksum_status,
+           checksum_sha256,source_url,source_name,institution_id,fiscal_year,document_type,page_count,storage_bucket,storage_path)
+        VALUES
+          ('doc-dff4865a-c6a8-418e-8895-626258e409d0','Compte Administratif 2024 — Commune de Cocody','CA','Commune de Cocody',
+           '','COMMUNE DE COCODY.pdf','TO_VERIFY','TO_VERIFY','COMPUTED',
+           '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf',
+           'https://www.cloud.influo.ci/dashboard.php','Mairie de Cocody','inst-com-cocody',2024,'COMPTE_ADMINISTRATIF',
+           44,'public_documents','ca/2024/cocody/ca-2024.pdf'),
+          ('doc-third-party-unvaulted','Document tiers non coffré','CA','Commune de Cocody',
+           'https://example.com/fake.pdf','fake.pdf','TO_VERIFY','TO_VERIFY','COMPUTED',
+           repeat('b',64),
+           'https://example.com/fake.pdf','Source externe','inst-com-cocody',2023,'COMPTE_ADMINISTRATIF',
+           10,'public_documents',NULL);
+
+        UPDATE public.public_documents SET status='VERIFIED' WHERE id IN ('doc-dff4865a-c6a8-418e-8895-626258e409d0','doc-third-party-unvaulted');
+        UPDATE public.public_documents SET status='PUBLISHED' WHERE id IN ('doc-dff4865a-c6a8-418e-8895-626258e409d0','doc-third-party-unvaulted');
+
+        INSERT INTO public.administrative_accounts
+          (id,institution_id,institution_type,institution_name,fiscal_year,status,source_document,
+           source_document_id,source_url,source_page,verification_status,reconciliation_status)
+        VALUES
+          ('ca-cocody-2024','inst-com-cocody','COMMUNE','Commune de Cocody',2024,'PUBLISHED',
+           'COMMUNE DE COCODY.pdf','doc-dff4865a-c6a8-418e-8895-626258e409d0',
+           'https://www.cloud.influo.ci/dashboard.php',40,'VERIFIED','RECONCILED'),
+          ('ca-cocody-2023-unvaulted','inst-com-cocody','COMMUNE','Commune de Cocody',2023,'PUBLISHED',
+           'fake.pdf','doc-third-party-unvaulted',
+           'https://example.com/fake.pdf',2,'VERIFIED','TO_VERIFY');
+      `);
+
+      await db.exec(migration);
+      await db.exec(hardeningMigration);
+      await db.exec(passportMigration);
+
+      const postMigration = await db.query<{ id: string; verification_status: string; source_page: number }>(
+        `SELECT id, verification_status, source_page
+         FROM public.administrative_accounts
+         WHERE id IN ('ca-cocody-2024', 'ca-cocody-2023-unvaulted')
+         ORDER BY id`
+      );
+      expect(postMigration.rows).toEqual([
+        { id: 'ca-cocody-2023-unvaulted', verification_status: 'TO_VERIFY', source_page: 2 },
+        { id: 'ca-cocody-2024', verification_status: 'VERIFIED', source_page: 40 },
+      ]);
+
+      // Reject unvaulted third-party URL on insert
+      await expect(db.query(
+        `INSERT INTO public.administrative_accounts
+          (id,institution_id,institution_type,institution_name,fiscal_year,status,source_document,
+           source_document_id,source_url,source_page,verification_status,reconciliation_status)
+         VALUES
+          ('ca-third-party-rejected','inst-com-cocody','COMMUNE','Commune de Cocody',2023,'PUBLISHED',
+           'fake.pdf','doc-third-party-unvaulted','https://example.com/fake.pdf',2,'VERIFIED','TO_VERIFY')`
+      )).rejects.toThrow('Primary certification requires a catalogue document ID and institutional HTTPS URL');
+
+      // Reject vaulted document when source_page exceeds page_count
+      await expect(db.query(
+        `UPDATE public.administrative_accounts
+         SET source_page = 45
+         WHERE id = 'ca-cocody-2024'`
+      )).rejects.toThrow('Primary certification requires');
+
+      // Accept vaulted Cocody update with source_page <= page_count (40 <= 44)
+      await expect(db.query(
+        `UPDATE public.administrative_accounts
+         SET source_page = 40, verification_status = 'VERIFIED'
+         WHERE id = 'ca-cocody-2024'`
       )).resolves.toBeDefined();
     } finally {
       await db.close();

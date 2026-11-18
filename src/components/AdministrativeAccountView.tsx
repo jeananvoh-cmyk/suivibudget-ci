@@ -3,6 +3,7 @@ import {
   Institution, 
   AdministrativeAccount, 
   CAInvestmentOperation,
+  ProcurementMatch,
   PublicDocument
 } from '../types';
 import { 
@@ -80,15 +81,29 @@ export const getOperationPhysicalStatusLabel = (status: CAInvestmentOperation['c
   return status;
 };
 
+export const getOperationProcurementMatches = (
+  op: Pick<CAInvestmentOperation, 'procurement_match' | 'procurement_matches'>
+): ProcurementMatch[] => {
+  if (op.procurement_matches && op.procurement_matches.length > 0) {
+    return op.procurement_matches;
+  }
+  return op.procurement_match ? [op.procurement_match] : [];
+};
+
 export const matchesProcurementMatchLevel = (
   selectedMatchLevel: 'ALL' | 'STRONG' | 'PARTIAL' | 'NONE',
-  procurement_match?: CAInvestmentOperation['procurement_match'] | null
+  procurement_match?: CAInvestmentOperation['procurement_match'] | ProcurementMatch[] | null
 ): boolean => {
-  return selectedMatchLevel === 'ALL' || (
-    selectedMatchLevel === 'NONE'
-      ? (!procurement_match || procurement_match.match_level === 'NONE')
-      : procurement_match?.match_level === selectedMatchLevel
-  );
+  if (selectedMatchLevel === 'ALL') return true;
+  const matches = Array.isArray(procurement_match)
+    ? procurement_match
+    : procurement_match
+    ? [procurement_match]
+    : [];
+  if (selectedMatchLevel === 'NONE') {
+    return matches.length === 0 || matches.every(m => m.match_level === 'NONE');
+  }
+  return matches.some(m => m.match_level === selectedMatchLevel);
 };
 
 export const filterCaOperations = (
@@ -97,15 +112,22 @@ export const filterCaOperations = (
   selectedSector: string,
   selectedMatchLevel: 'ALL' | 'STRONG' | 'PARTIAL' | 'NONE'
 ): CAInvestmentOperation[] => {
+  const q = search.toLowerCase().trim();
   return (operations || []).filter(op => {
-    const matchesSearch = !search.trim() ||
-      op.title.toLowerCase().includes(search.toLowerCase().trim()) ||
-      (op.location && op.location.toLowerCase().includes(search.toLowerCase().trim())) ||
-      (op.operation_reference && op.operation_reference.toLowerCase().includes(search.toLowerCase().trim())) ||
-      (op.procurement_match?.contractor && op.procurement_match.contractor.toLowerCase().includes(search.toLowerCase().trim()));
+    const opMatches = getOperationProcurementMatches(op);
+    const matchesSearch = !q ||
+      op.title.toLowerCase().includes(q) ||
+      (op.location && op.location.toLowerCase().includes(q)) ||
+      (op.operation_reference && op.operation_reference.toLowerCase().includes(q)) ||
+      opMatches.some(m =>
+        (m.contractor && m.contractor.toLowerCase().includes(q)) ||
+        (m.tender_number && m.tender_number.toLowerCase().includes(q)) ||
+        (m.contract_number && m.contract_number.toLowerCase().includes(q)) ||
+        (m.lot && m.lot.toLowerCase().includes(q))
+      );
 
     const matchesSector = selectedSector === 'ALL' || op.sector === selectedSector;
-    const matchesMatch = matchesProcurementMatchLevel(selectedMatchLevel, op.procurement_match);
+    const matchesMatch = matchesProcurementMatchLevel(selectedMatchLevel, opMatches);
 
     return matchesSearch && matchesSector && matchesMatch;
   });
@@ -193,22 +215,12 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
     : null;
 
   // Filter operations
-  const filteredOperations = (currentCA?.operations || []).filter(op => {
-    const matchesSearch = !opSearch.trim() ||
-      op.title.toLowerCase().includes(opSearch.toLowerCase().trim()) ||
-      (op.location && op.location.toLowerCase().includes(opSearch.toLowerCase().trim())) ||
-      (op.operation_reference && op.operation_reference.toLowerCase().includes(opSearch.toLowerCase().trim())) ||
-      (op.procurement_match?.contractor && op.procurement_match.contractor.toLowerCase().includes(opSearch.toLowerCase().trim()));
-
-    const matchesSector = selectedSector === 'ALL' || op.sector === selectedSector;
-    const matchesMatch = selectedMatchLevel === 'ALL' || (
-      selectedMatchLevel === 'NONE'
-        ? (!op.procurement_match || op.procurement_match.match_level === 'NONE')
-        : op.procurement_match?.match_level === selectedMatchLevel
-    );
-
-    return matchesSearch && matchesSector && matchesMatch;
-  });
+  const filteredOperations = filterCaOperations(
+    currentCA?.operations || [],
+    opSearch,
+    selectedSector,
+    selectedMatchLevel
+  );
 
   const uniqueSectors = Array.from(
     new Set((currentCA?.operations || []).map(op => op.sector).filter(Boolean))
@@ -231,6 +243,14 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
     const headers = ["Reference", "Titre", "Secteur", "Localisation", "Prevu_FCFA", "Realise_FCFA", "Taux_Execution_Pct", "Marche_DGMP", "Attributaire", "Statut_Terrain"];
     const rows = (currentCA.operations || []).map(op => {
       const rate = calculateExecutionRate(op.executed_amount, op.planned_amount, amountPrecision(op, 'executed_amount'), amountPrecision(op, 'planned_amount'));
+      const opMatches = getOperationProcurementMatches(op);
+      const nonEmptyMatches = opMatches.filter(m => m.match_level !== 'NONE');
+      const marketLabels = nonEmptyMatches.length > 0
+        ? nonEmptyMatches.map(m => m.contract_number || m.tender_number || m.verification_status).filter(Boolean).join(' | ')
+        : (opMatches[0]?.contract_number || opMatches[0]?.verification_status || 'Non répertorié');
+      const contractorLabels = nonEmptyMatches.length > 0
+        ? nonEmptyMatches.map(m => m.contractor).filter(Boolean).join(' | ')
+        : (opMatches[0]?.contractor || 'Régie/Gré à gré');
       return [
         `"${op.operation_reference || ''}"`,
         `"${op.title.replace(/"/g, '""')}"`,
@@ -239,8 +259,8 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
         `"${formatReadableRecordAmount(op, 'planned_amount')}"`,
         `"${formatReadableRecordAmount(op, 'executed_amount')}"`,
         `"${rate.formatted}"`,
-        `"${op.procurement_match?.contract_number || op.procurement_match?.verification_status || 'Non répertorié'}"`,
-        `"${op.procurement_match?.contractor || 'Régie/Gré à gré'}"`,
+        `"${marketLabels}"`,
+        `"${contractorLabels}"`,
         `"${getOperationPhysicalStatusLabel(op.citizen_status)}"`
       ].join(';');
     });
@@ -567,11 +587,20 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
       ? (currentCA.operating_revenue_realized || 0) + (currentCA.investment_revenue_realized || 0)
       : null);
 
-  const arithmeticDiffResolved =
-    currentCA.arithmetic_difference ??
-    (totalRevenueResolved != null && currentCA.total_realized != null
+  const computedArithmeticDiff =
+    totalRevenueResolved != null &&
+    currentCA.total_realized != null &&
+    amountPrecision(currentCA, 'total_realized') !== 'UNKNOWN'
       ? totalRevenueResolved - currentCA.total_realized
-      : null);
+      : null;
+
+  const arithmeticDiffResolved =
+    currentCA.arithmetic_difference != null &&
+    !(currentCA.arithmetic_difference === 0 && computedArithmeticDiff != null && computedArithmeticDiff !== 0)
+      ? currentCA.arithmetic_difference
+      : computedArithmeticDiff;
+
+  const isVerifiedCA = currentCA.verification_status !== 'TO_VERIFY';
 
   const isClosingResultUnconfirmed =
     currentCA.surplus_or_deficit == null ||
@@ -590,9 +619,17 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1.5 shadow-2xs">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-                Fiche Financière Citoyenne Contrôlée
+              <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border flex items-center gap-1.5 shadow-2xs ${
+                isVerifiedCA
+                  ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                  : 'bg-amber-100 text-amber-900 border-amber-300'
+              }`}>
+                {isVerifiedCA ? (
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+                ) : (
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-700" />
+                )}
+                {isVerifiedCA ? 'Fiche Financière Citoyenne Contrôlée' : 'Vérification documentaire en cours'}
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-slate-100 text-slate-800 border border-slate-200">
                 Exercice Fiscal {currentCA.fiscal_year}
@@ -606,7 +643,9 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             <p className="text-xs text-brand-blue font-semibold flex items-center gap-1.5">
               <Info className="w-3.5 h-3.5 flex-shrink-0" />
               <span>
-                Données arrêtées par la collectivité et contrôlées à partir du document source officiel.
+                {isVerifiedCA
+                  ? 'Données arrêtées par la collectivité et contrôlées à partir du document source officiel.'
+                  : 'Données en attente de validation documentaire complète à partir du document source.'}
               </span>
             </p>
           </div>
@@ -1158,7 +1197,9 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
         <div className="space-y-3 pt-1">
           {filteredOperations.map((op) => {
             const opRate = calculateExecutionRate(op.executed_amount, op.planned_amount, amountPrecision(op, 'executed_amount'), amountPrecision(op, 'planned_amount'));
-            const match = op.procurement_match;
+            const opMatches = getOperationProcurementMatches(op);
+            const nonEmptyMatches = opMatches.filter(m => m.match_level !== 'NONE');
+            const match = nonEmptyMatches[0] || opMatches[0];
 
             return (
               <div 
@@ -1237,66 +1278,122 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                 {/* Rapprochement Marchés Publics DGMP */}
                 <div className="p-3 rounded-xl border text-xs space-y-2 bg-slate-50/70 border-slate-200">
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
                         Marchés publics rapprochés (DGMP) :
                       </span>
-                      {match?.match_level === 'STRONG' && (
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-700" />
-                          Marché DGMP Retrouvé
+                      {nonEmptyMatches.length > 1 ? (
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase border flex items-center gap-1 ${
+                          nonEmptyMatches.some(m => m.match_level === 'STRONG')
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                            : 'bg-amber-100 text-amber-800 border-amber-300'
+                        }`}>
+                          <CheckCircle2 className="w-3 h-3" />
+                          {nonEmptyMatches.length} lots DGMP rapprochés
                         </span>
-                      )}
-                      {match?.match_level === 'PARTIAL' && (
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1">
-                          <AlertCircle className="w-3 h-3 text-amber-700" />
-                          Rapprochement Partiel
-                        </span>
-                      )}
-                      {(!match || match.match_level === 'NONE') && (
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-slate-200 text-slate-700 border border-slate-300 flex items-center gap-1">
-                          <Info className="w-3 h-3 text-slate-500" />
-                          Non retrouvé sur le portail DGMP
-                        </span>
+                      ) : (
+                        <>
+                          {match?.match_level === 'STRONG' && (
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-700" />
+                              Marché DGMP Retrouvé
+                            </span>
+                          )}
+                          {match?.match_level === 'PARTIAL' && (
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1">
+                              <AlertCircle className="w-3 h-3 text-amber-700" />
+                              Rapprochement Partiel
+                            </span>
+                          )}
+                          {match?.match_level === 'TO_VERIFY' && (
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1">
+                              <AlertCircle className="w-3 h-3 text-amber-700" />
+                              Rapprochement à vérifier
+                            </span>
+                          )}
+                          {(!match || match.match_level === 'NONE') && (
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-slate-200 text-slate-700 border border-slate-300 flex items-center gap-1">
+                              <Info className="w-3 h-3 text-slate-500" />
+                              Non retrouvé sur le portail DGMP
+                            </span>
+                          )}
+                        </>
                       )}
                     </div>
 
-                    {match?.tender_number && (
+                    {nonEmptyMatches.length <= 1 && match?.tender_number && (
                       <span className="text-[11px] font-mono text-slate-600 font-bold">
                         Avis : {match.tender_number}
                       </span>
                     )}
                   </div>
 
-                  {match && match.match_level !== 'NONE' && (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-slate-200/80 text-[11px]">
-                      <div>
-                        <span className="text-slate-400 block font-medium">Contrat / Titulaire :</span>
-                        <strong className="text-slate-900 break-words">{match.contractor || 'Non spécifié'}</strong>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 block font-medium">Montant attribué :</span>
-                        <strong className="text-slate-900 break-words">{formatReadableRecordAmount(match, 'award_amount')}</strong>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 block font-medium">Date d'attribution :</span>
-                        <strong className="text-slate-900 break-words">{match.award_date || 'Exercice clos'}</strong>
-                        {match.source_url && isSafeUrl(match.source_url) && (
-                          <a
-                            href={match.source_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-brand-blue hover:underline inline-flex items-center gap-1 mt-0.5 block font-bold"
-                          >
-                            <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                            <span>Source marché public (DGMP)</span>
-                          </a>
-                        )}
-                      </div>
+                  {nonEmptyMatches.length > 0 && (
+                    <div className="space-y-2">
+                      {nonEmptyMatches.map((lotMatch, idx) => (
+                        <div
+                          key={lotMatch.id || `${op.id}-lot-${idx}`}
+                          className="pt-2 border-t border-slate-200/80 space-y-1.5"
+                        >
+                          {nonEmptyMatches.length > 1 && (
+                            <div className="flex items-center justify-between flex-wrap gap-1.5 text-[11px]">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-bold text-slate-700">
+                                  {lotMatch.lot ? `Lot ${lotMatch.lot}` : `Lot #${idx + 1}`}
+                                </span>
+                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase border ${
+                                  lotMatch.match_level === 'STRONG'
+                                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                    : 'bg-amber-100 text-amber-800 border-amber-300'
+                                }`}>
+                                  {lotMatch.match_level === 'STRONG'
+                                    ? 'Marché DGMP Retrouvé'
+                                    : lotMatch.match_level === 'PARTIAL'
+                                    ? 'Rapprochement Partiel'
+                                    : 'À vérifier'}
+                                </span>
+                              </div>
+                              {(lotMatch.contract_number || lotMatch.tender_number) && (
+                                <span className="font-mono text-slate-600 font-bold">
+                                  {lotMatch.contract_number
+                                    ? `Marché : ${lotMatch.contract_number}`
+                                    : `Avis : ${lotMatch.tender_number}`}
+                                  {lotMatch.contract_number && lotMatch.tender_number ? ` · Avis : ${lotMatch.tender_number}` : ''}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+                            <div>
+                              <span className="text-slate-400 block font-medium">Contrat / Titulaire :</span>
+                              <strong className="text-slate-900 break-words">{lotMatch.contractor || 'Non spécifié'}</strong>
+                            </div>
+                            <div>
+                              <span className="text-slate-400 block font-medium">Montant attribué :</span>
+                              <strong className="text-slate-900 break-words">{formatReadableRecordAmount(lotMatch, 'award_amount')}</strong>
+                            </div>
+                            <div>
+                              <span className="text-slate-400 block font-medium">Date d'attribution :</span>
+                              <strong className="text-slate-900 break-words">{lotMatch.award_date || 'Exercice clos'}</strong>
+                              {lotMatch.source_url && isSafeUrl(lotMatch.source_url) && (
+                                <a
+                                  href={lotMatch.source_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-brand-blue hover:underline inline-flex items-center gap-1 mt-0.5 block font-bold"
+                                >
+                                  <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                                  <span>Source marché public (DGMP)</span>
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
 
-                  {(!match || match.match_level === 'NONE') && (
+                  {nonEmptyMatches.length === 0 && (
                     <p className="text-[11px] text-slate-500 italic">
                       Les travaux exécutés en régie directe municipale ou les commandes sous les seuils d'appel d'offres obligatoires ne figurent pas systématiquement sur le portail centralisé de la DGMP.
                     </p>
@@ -1467,9 +1564,11 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
             </p>
             <div className="text-[11px] text-slate-600 pt-1">
               Statut du contrôle :{' '}
-              <strong className={currentCA.reconciliation_status === 'SOURCE_ANOMALY' ? 'text-amber-800' : 'text-emerald-700'}>
+              <strong className={currentCA.reconciliation_status === 'SOURCE_ANOMALY' || !isVerifiedCA ? 'text-amber-800' : 'text-emerald-700'}>
                 {currentCA.reconciliation_status === 'SOURCE_ANOMALY'
                   ? 'Document officiel avec réserve documentaire (écart arithmétique source signalé)'
+                  : !isVerifiedCA
+                  ? 'Données en attente de validation documentaire'
                   : 'Données transcrites et contrôlées à partir du document source'}
               </strong>
             </div>
