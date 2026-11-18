@@ -1288,6 +1288,81 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
       expect(html).toContain('M-2024-001');
       expect(html).toContain('M-2024-002');
     });
+
+    it('Fix D : retourne Non calculable (jamais +0 FCFA) si total_realized est null ou UNKNOWN malgré arithmetic_difference=0, et évite "0 FCFA (0 FCFA FCFA)"', () => {
+      const testInst: Institution = {
+        id: 'inst-unknown-diff',
+        name: 'Commune Test Diff Inconnue',
+        type: 'MAIRIE',
+        region: 'Lagunes',
+        district: 'Abidjan',
+        budget_functioning_fcfa: null,
+        budget_investment_fcfa: null,
+        total_budget_fcfa: null,
+      };
+
+      const caUnknownRealized: AdministrativeAccount = {
+        id: 'ca-unknown-realized',
+        institution_id: 'inst-unknown-diff',
+        institution_name: 'Commune Test Diff Inconnue',
+        institution_type: 'COMMUNE',
+        fiscal_year: 2024,
+        status: 'PUBLISHED',
+        total_planned: 1_000_000_000,
+        total_realized: null as any,
+        total_revenue_collected: 950_000_000,
+        operating_planned: 600_000_000,
+        operating_realized: null as any,
+        investment_planned: 400_000_000,
+        investment_realized: 0,
+        arithmetic_difference: 0,
+        surplus_or_deficit: null as any,
+        import_provenance: {
+          source: { name: 'CA 2024', reference: 'CA-2024', date: '2025-07-22', date_kind: 'PUBLISHED' },
+          precision: { total_realized: 'UNKNOWN', operating_realized: 'UNKNOWN' },
+        } as any,
+        source_document: 'CA_UNKNOWN.pdf',
+        verification_status: 'VERIFIED',
+        operations: [
+          {
+            id: 'op-zero',
+            ca_id: 'ca-unknown-realized',
+            institution_id: 'inst-unknown-diff',
+            fiscal_year: 2024,
+            operation_reference: 'OP-ZERO',
+            title: 'Opération sans décaissement',
+            sector: 'Voirie',
+            location: 'Centre',
+            planned_amount: 0,
+            executed_amount: 0,
+          },
+        ],
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+      };
+
+      ADMINISTRATIVE_ACCOUNTS_DATA.splice(0, ADMINISTRATIVE_ACCOUNTS_DATA.length, caUnknownRealized);
+      const htmlNullRealized = renderToStaticMarkup(
+        <AdministrativeAccountView institution={testInst} onOpenDocRequest={() => {}} />
+      );
+      expect(htmlNullRealized).toContain('Différence arithmétique (Recettes − Dépenses)</span><strong class="text-sm text-slate-800">Non calculable</strong>');
+      expect(htmlNullRealized).not.toContain('Différence arithmétique (Recettes − Dépenses)</span><strong class="text-sm text-slate-800">+0 FCFA');
+      expect(htmlNullRealized).toContain('0 FCFA (0 FCFA)');
+      expect(htmlNullRealized).not.toContain('0 FCFA FCFA');
+
+      // Cas où total_realized a une valeur numérique mais une précision UNKNOWN
+      const caUnknownPrecision: AdministrativeAccount = {
+        ...caUnknownRealized,
+        id: 'ca-unknown-precision',
+        total_realized: 0,
+      };
+      ADMINISTRATIVE_ACCOUNTS_DATA.splice(0, ADMINISTRATIVE_ACCOUNTS_DATA.length, caUnknownPrecision);
+      const htmlUnknownPrecision = renderToStaticMarkup(
+        <AdministrativeAccountView institution={testInst} onOpenDocRequest={() => {}} />
+      );
+      expect(htmlUnknownPrecision).toContain('Différence arithmétique (Recettes − Dépenses)</span><strong class="text-sm text-slate-800">Non calculable</strong>');
+      expect(htmlUnknownPrecision).not.toContain('Différence arithmétique (Recettes − Dépenses)</span><strong class="text-sm text-slate-800">+0 FCFA');
+    });
   });
 });
 
