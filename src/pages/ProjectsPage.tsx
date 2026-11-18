@@ -5,6 +5,7 @@ import { ProjectCard } from '../components/ProjectCard';
 import { CATEGORIES, getCategoryBadgeClass } from '../data/categories';
 import { dataStore } from '../services/dataStore';
 import { formatCompactFCFA, formatFCFA, formatAmountInWords, getProjectEntityInfo } from '../utils/formatters';
+import { sanitizeCsvCell } from '../utils/security';
 import {
   Camera,
   Search,
@@ -24,6 +25,23 @@ import {
   SlidersHorizontal,
   RotateCcw
 } from 'lucide-react';
+
+export const buildProjectsCsvContent = (projects: readonly BudgetProject[]): string => {
+  const headers = ['ID', 'Intitule', 'Entite_En_Charge', 'Region', 'Secteur', 'Budget_FCFA', 'Statut'];
+  const rows = projects.map(p => {
+    const entity = getProjectEntityInfo(p.commune_name, p.region_name);
+    return [
+      sanitizeCsvCell(p.id),
+      sanitizeCsvCell(p.title),
+      sanitizeCsvCell(entity.entityName),
+      sanitizeCsvCell(p.region_name || ''),
+      sanitizeCsvCell(p.category || ''),
+      sanitizeCsvCell(p.budget_amount_fcfa ?? ''),
+      sanitizeCsvCell(p.current_status)
+    ].join(',');
+  });
+  return [headers.map(sanitizeCsvCell).join(','), ...rows].join('\n');
+};
 
 interface ProjectsPageProps {
   searchQuery: string;
@@ -172,21 +190,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
 
   // Export CSV
   const handleExportCSV = () => {
-    const headers = ['ID', 'Intitule', 'Entite_En_Charge', 'Region', 'Secteur', 'Budget_FCFA', 'Statut'];
-    const rows = sortedProjects.map(p => {
-      const entity = getProjectEntityInfo(p.commune_name, p.region_name);
-      return [
-        p.id,
-        `"${p.title.replace(/"/g, '""')}"`,
-        `"${entity.entityName}"`,
-        `"${p.region_name || ''}"`,
-        `"${p.category || ''}"`,
-        p.budget_amount_fcfa,
-        p.current_status
-      ];
-    });
-
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const csvContent = 'data:text/csv;charset=utf-8,' + buildProjectsCsvContent(sortedProjects);
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);

@@ -969,7 +969,11 @@ class DataStore {
     const tables: AdminEntityTable[] = ['institutions','budget_projects','news_articles','caidp_directory','site_settings'];
     const rows = await Promise.all(tables.map(readAdminRows));
     const baselines=[INSTITUTIONS_DATA,RAW_BUDGET_PROJECTS,INITIAL_ARTICLES,CAIDP_MASTER_DIRECTORY];
-    const hidden=await Promise.all(tables.slice(0,4).map((table,index)=>hiddenBaselineIds(table,baselines[index].map(row=>row.id))));
+    const auth = this.getAuthState();
+    const isStaff = auth.isAuthenticated && ['ADMIN', 'DATA_MANAGER', 'MODERATOR'].includes(auth.role);
+    const hidden = isStaff
+      ? await Promise.all(tables.slice(0,4).map((table,index)=>hiddenBaselineIds(table,baselines[index].map(row=>row.id))))
+      : tables.slice(0,4).map(() => new Set<string>());
     rows[0]=await Promise.all(rows[0].map(row=>resolveAdminMedia(row,'institutions')));
     rows[2]=await Promise.all(rows[2].map(row=>resolveAdminMedia(row,'news_articles')));
     if (generation !== this.entityRefreshGeneration || identity !== this.authState.email) return;

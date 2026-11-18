@@ -323,8 +323,15 @@ export function applyVerifiedDocumentPagination(doc: PublicDocument): PublicDocu
     (isScanned === true || hasTextLayer === false) && doc.ocr_status === 'NOT_APPLICABLE'
       ? 'MANUAL_TRANSCRIPTION'
       : doc.ocr_status;
+  const normalizedDescription =
+    sha === '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf' && typeof doc.description === 'string'
+      ? doc.description
+          .replace(/44\/45 sur 45/g, '45/45 sur 45')
+          .replace(/20\/45 absente/g, '24/45 absente')
+      : doc.description;
   return {
     ...doc,
+    description: normalizedDescription,
     page_count: correctedPageCount,
     physical_page_count: doc.physical_page_count ?? control.physicalPageCount,
     printed_page_count: doc.printed_page_count ?? control.printedPageCount,

@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { sanitizeInput, isSafeUrl, sanitizeCsvCell, sanitizeCoordinates } from '../security';
 import { AuthSecurityService } from '../../services/authSecurity';
 import { RateLimiter } from '../../services/rateLimiter';
+import { buildCaOperationsCsvContent } from '../../components/AdministrativeAccountView';
+import { buildProjectsCsvContent } from '../../pages/ProjectsPage';
+import { buildProspectsCsvContent } from '../../pages/AdminDashboardPage';
 
 const authMock = vi.hoisted(() => ({
   configured: vi.fn(), getSession: vi.fn(), getUser: vi.fn(), signOut: vi.fn(),
@@ -89,6 +92,92 @@ describe('Cybersecurity & Defensive Engineering Test Suite', () => {
     it('handles null and undefined values safely', () => {
       expect(sanitizeCsvCell(null)).toBe('""');
       expect(sanitizeCsvCell(undefined)).toBe('""');
+    });
+
+    it('neutralizes formula triggers (=, +, -, @) and embedded quotes in AdministrativeAccountView, ProjectsPage, and AdminDashboardPage CSV exports', () => {
+      const payloads = [
+        "=CMD|' /C calc'!A0",
+        '+SUM(1,1)',
+        '-1',
+        '@SUM(A1:A10)',
+        'Marché "Grand Centre"',
+      ];
+
+      const caCsv = buildCaOperationsCsvContent({
+        operations: [
+          {
+            id: 'op-inj',
+            ca_id: 'ca-1',
+            institution_id: 'inst-1',
+            fiscal_year: 2024,
+            operation_reference: payloads[2],
+            title: payloads[0],
+            sector: payloads[4],
+            location: payloads[1],
+            planned_amount: 1000,
+            executed_amount: 0,
+            procurement_match: {
+              id: 'm-1',
+              tender_number: payloads[3],
+              contractor: payloads[0],
+              award_amount: 1000,
+              match_level: 'STRONG',
+              source: 'DGMP',
+              verification_status: 'VERIFIED',
+              procurement_object: 'Test',
+            },
+          },
+        ],
+      });
+      expect(caCsv).toContain(`"'-1";"'=CMD|' /C calc'!A0";"Marché ""Grand Centre""";"+SUM(1,1)"`.replace('"+SUM(1,1)"', `"'${payloads[1]}"`));
+      expect(caCsv).toContain(`"'@SUM(A1:A10)";"'=CMD|' /C calc'!A0"`);
+      expect(caCsv).not.toContain(`;"=CMD`);
+      expect(caCsv).not.toContain(`;"+SUM`);
+      expect(caCsv).not.toContain(`;"@SUM`);
+      expect(caCsv).not.toContain('0 FCFA FCFA');
+
+      const projectsCsv = buildProjectsCsvContent([
+        {
+          id: payloads[2],
+          title: payloads[0],
+          commune_name: payloads[1],
+          region_name: payloads[3],
+          category: payloads[4],
+          nature_expense: 'Investissements',
+          budget_amount_fcfa: -1,
+          fiscal_year: 2026,
+          current_status: 'IN_PROGRESS',
+          progress_percentage: 0,
+          created_at: '2026-01-01',
+        },
+      ]);
+      expect(projectsCsv).toContain(`"'-1","'=CMD|' /C calc'!A0","Mairie de +SUM(1,1)","'@SUM(A1:A10)","Marché ""Grand Centre""","'-1","IN_PROGRESS"`);
+      expect(projectsCsv).not.toContain(`,"=CMD`);
+      expect(projectsCsv).not.toContain(`,"@SUM`);
+
+      const prospectsCsv = buildProspectsCsvContent([
+        {
+          id: 'inst-inj',
+          name: payloads[0],
+          type: 'MAIRIE',
+          region: payloads[1],
+          district: payloads[2],
+          leader_name: payloads[3],
+          political_party: payloads[4],
+          website: '=HYPERLINK("http://evil")',
+          facebook_url: '+123',
+          contact_phone: '-225',
+          contact_email: '@admin',
+          budget_functioning_fcfa: null,
+          budget_investment_fcfa: null,
+          total_budget_fcfa: -1,
+        },
+      ]);
+      expect(prospectsCsv).toContain(`"'=CMD|' /C calc'!A0";"'+SUM(1,1)";"'-1";"'@SUM(A1:A10)";"Marché ""Grand Centre"""`);
+      expect(prospectsCsv).toContain(`"'=HYPERLINK(""http://evil"")";"'+123";"'-225";"'@admin";"'-1"`);
+      expect(prospectsCsv).not.toContain(`;"=CMD`);
+      expect(prospectsCsv).not.toContain(`;"+SUM`);
+      expect(prospectsCsv).not.toContain(`;"@admin`);
     });
   });
 
