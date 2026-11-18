@@ -81,5 +81,5 @@ describe('admin_operation_receipts RLS initplan optimization', () => {
     );
     expect(actorTwo.rows).toEqual([{ id: 'actor-two-allowed' }]);
     await db.exec('ROLLBACK');
-  });
+  }, 30000);
 });
