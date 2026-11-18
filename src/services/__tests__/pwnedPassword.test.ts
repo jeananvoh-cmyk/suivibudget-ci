@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { assertPasswordNotPwned, PwnedPasswordError } from '../pwnedPassword';
 
@@ -41,5 +43,21 @@ describe('Pwned Passwords k-anonymity guard', () => {
   it('fails closed on non-success HTTP responses', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('', { status: 503 })));
     await expect(assertPasswordNotPwned('a-new-unique-passphrase-2026')).rejects.toThrow(/indisponible/);
+  });
+
+  it('allows https://api.pwnedpasswords.com in vercel.json CSP connect-src', () => {
+    const vercelConfig = JSON.parse(readFileSync(join(process.cwd(), 'vercel.json'), 'utf8')) as {
+      headers?: Array<{ headers?: Array<{ key: string; value: string }> }>;
+    };
+    const cspHeader = vercelConfig.headers
+      ?.flatMap(rule => rule.headers || [])
+      .find(header => header.key === 'Content-Security-Policy');
+    expect(cspHeader).toBeDefined();
+    const connectSrc = cspHeader!.value
+      .split(';')
+      .map(directive => directive.trim())
+      .find(directive => directive.startsWith('connect-src '));
+    expect(connectSrc).toBeDefined();
+    expect(connectSrc).toContain('https://api.pwnedpasswords.com');
   });
 });
