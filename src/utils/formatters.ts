@@ -9,7 +9,7 @@ export function formatQualifiedFCFA(value: number | null | undefined, precision:
 }
 
 export function amountPrecision(record: { import_provenance?: ImportProvenance; amount_precision?: AmountPrecision }, field: string): AmountPrecision {
-  return record.import_provenance?.precision[field] || record.amount_precision || 'EXACT';
+  return record.import_provenance?.precision?.[field] || record.amount_precision || 'EXACT';
 }
 
 export function formatRecordAmount<T extends { import_provenance?: ImportProvenance; amount_precision?: AmountPrecision }>(record: T, field: keyof T): string {

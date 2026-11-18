@@ -2,7 +2,7 @@ import { supabase, isSupabaseConfigured } from './supabase';
 import { AdministrativeAccount, CAInvestmentOperation, ProcurementMatch } from '../types';
 import type { LocalBudget } from '../types/localBudget';
 import { amountPrecision } from '../utils/formatters';
-import { hydrateAdministrativeAccountFromRow } from '../utils/budgetDocumentDryRun';
+import { hydrateAdministrativeAccountFromRow, sortProcurementMatches } from '../utils/budgetDocumentDryRun';
 
 export async function fetchPublishedLocalBudgets(): Promise<LocalBudget[]> {
   if (!isSupabaseConfigured()) return [];
@@ -75,20 +75,23 @@ export async function fetchAdministrativeAccounts(institutionId: string): Promis
     matches = data || [];
   }
 
-  const matchByOperation = new Map<string, ProcurementMatch>();
+  const matchesByOperation = new Map<string, ProcurementMatch[]>();
   for (const match of matches) {
-    if (!matchByOperation.has(match.operation_id)) {
-      matchByOperation.set(match.operation_id, match as ProcurementMatch);
-    }
+    if (!match.operation_id) continue;
+    const list = matchesByOperation.get(match.operation_id) || [];
+    list.push(match as ProcurementMatch);
+    matchesByOperation.set(match.operation_id, list);
   }
 
   const operationsByCA = new Map<string, CAInvestmentOperation[]>();
   for (const op of operations || []) {
+    const opMatches = sortProcurementMatches(matchesByOperation.get(op.id) || []);
     const mapped: CAInvestmentOperation = {
       ...op,
       planned_amount: op.planned_amount != null ? Number(op.planned_amount) : null,
       executed_amount: op.executed_amount != null ? Number(op.executed_amount) : null,
-      procurement_match: matchByOperation.get(op.id),
+      procurement_match: opMatches[0],
+      procurement_matches: opMatches.length > 0 ? opMatches : undefined,
     } as CAInvestmentOperation;
     const list = operationsByCA.get(op.ca_id) || [];
     list.push(mapped);

@@ -37,7 +37,7 @@
 - **Garde-fous respectés** :
   - `REMOTE_SUPABASE_WRITES = 0` (validé par `npm run verify:supabase:read-only` : `clientInitialized: true`, `allowedMethods: ["GET", "HEAD"]`, `remoteSupabaseWrites: 0`, statut `PASS`).
   - `UNTRACKED_AGENTS_STAGED = 0` : `.agents/`, `scripts/adversarial-stress-m4.mjs`, `scripts/adversarial-stress-m4-rep.mjs` strictement exclus de git.
-  - Aucune fusion automatique effectuée ; réconciliation sans écrasement ni fabrication de données ; intégrité Cocody CA 2024 (44 pages physiques / manquante 20/45) et Bingerville intacte (v1 historique à 4 144 682 000 FCFA archivée, v2 approuvée à 4 046 222 000 FCFA active).
+  - Aucune fusion automatique effectuée ; réconciliation sans écrasement ni fabrication de données ; intégrité Cocody CA 2024 (44 pages physiques / manquante 24/45) et Bingerville intacte (v1 historique à 4 144 682 000 FCFA archivée, v2 approuvée à 4 046 222 000 FCFA active).
   - PRs #69 à #75 préservées et non touchées.
 
 ### Rapport d'Intégrité en 16 Points (Charte & Règles AGENTS.md § 3)
@@ -144,8 +144,8 @@ Une distinction capitale est désormais documentée et garantie par la suite de 
     - Documentation du réglage `password_hibp_enabled` (HaveIBeenPwned k-anonymity), du risque, de la procédure d'activation dans le Dashboard Supabase et des conséquences utilisateur sans modifier la configuration distante.
 - **Chantier P0 — Intégrité documentaire & Pagination contrôlée Cocody CA 2024** :
   - Normalisation déterministe (`applyVerifiedDocumentPagination` dans `src/data/officialPublicDocumentsCatalog.ts`, branchée dans `src/services/dataStore.ts`) pour `doc-dff4865a-c6a8-418e-8895-626258e409d0` (`14 072 943` octets, SHA-256 `941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf`, `storage_path` réel `comptes-administratifs/communes/inst-com-cocody/2024/compte-administratif-2024-v1.pdf`) :
-    - `page_count = 44` (jamais `45`), `physical_page_count = 44`, `printed_page_count = 45`, `missing_printed_pages = ['20/45']`.
-    - Mention explicite dans `DocumentsPage.tsx`, `AdministrativeAccountView.tsx` (en mode pré-publication comme en Rubrique 6) et `ExamineCADocumentModal.tsx` : distinction entre **44 pages physiques PDF** et **numérotation imprimée jusqu'à 44/45 sur 45 annoncées**, et signalement de l'**absence de la page imprimée `20/45` du scan d'origine** sans jamais inventer son contenu.
+    - `page_count = 44` (jamais `45`), `physical_page_count = 44`, `printed_page_count = 45`, `missing_printed_pages = ['24/45']`.
+    - Mention explicite dans `DocumentsPage.tsx`, `AdministrativeAccountView.tsx` (en mode pré-publication comme en Rubrique 6) et `ExamineCADocumentModal.tsx` : distinction entre **44 pages physiques PDF** et **numérotation imprimée jusqu'à 45/45 sur 45 annoncées**, et signalement de l'**absence de la page imprimée `24/45` du scan d'origine** sans jamais inventer son contenu.
     - Alignement de `approval_date = '2025-07-08'` (délibération municipale) et `prefecture_visa_date = '2025-07-22'` (`n° 002/PA/D.CAB`) ainsi que de la concordance patrimoniale (`810 959 095 + 20 000 000 + 535 141 595 = 1 366 100 690 FCFA`).
 - **Validation & Recette** :
   - `npx tsc --noEmit` et `npm run build` : **PASS** (`code 0`).
