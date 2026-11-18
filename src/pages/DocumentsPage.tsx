@@ -560,7 +560,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({ onNavigateToCaidp 
                     <span className="mx-1">•</span>
                     <span>
                       {doc.physical_page_count && doc.printed_page_count
-                        ? `${doc.file_size ? `${doc.file_size} · ` : ''}${doc.physical_page_count} pages physiques PDF (imprimées jusqu'à 44/${doc.printed_page_count})`
+                        ? `${doc.file_size ? `${doc.file_size} · ` : ''}${doc.physical_page_count} pages physiques PDF (imprimées jusqu'à ${doc.printed_page_count}/${doc.printed_page_count})`
                         : (doc.file_size || (doc.page_count ? `${doc.page_count} pages` : 'PDF'))}
                     </span>
                     <div className="text-[10px] text-slate-400 mt-0.5">

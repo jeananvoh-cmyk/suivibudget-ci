@@ -1,6 +1,6 @@
 import type { AdministrativeAccount, ProcurementMatch } from '../types/administrativeAccount';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
-import { hydrateAdministrativeAccountFromRow } from '../utils/budgetDocumentDryRun';
+import { hydrateAdministrativeAccountFromRow, sortProcurementMatches } from '../utils/budgetDocumentDryRun';
 
 export const ADMINISTRATIVE_ACCOUNTS_DATA: AdministrativeAccount[] = [];
 
@@ -13,12 +13,16 @@ export async function refreshPublishedAdministrativeAccounts(): Promise<void> {
   if (error) throw error;
   const accounts: AdministrativeAccount[] = (data || []).map(row => hydrateAdministrativeAccountFromRow({
     ...row,
-    operations: (row.operations || []).map((operation: AdministrativeAccount['operations'][number] & { matches: ProcurementMatch[] }) => ({
-      ...operation,
-      planned_amount: operation.planned_amount != null ? Number(operation.planned_amount) : null,
-      executed_amount: operation.executed_amount != null ? Number(operation.executed_amount) : null,
-      procurement_match: operation.matches?.length === 1 ? operation.matches[0] : undefined,
-    })),
+    operations: (row.operations || []).map((operation: AdministrativeAccount['operations'][number] & { matches: ProcurementMatch[] }) => {
+      const sortedMatches = sortProcurementMatches(operation.matches || []);
+      return {
+        ...operation,
+        planned_amount: operation.planned_amount != null ? Number(operation.planned_amount) : null,
+        executed_amount: operation.executed_amount != null ? Number(operation.executed_amount) : null,
+        procurement_match: sortedMatches[0],
+        procurement_matches: sortedMatches.length > 0 ? sortedMatches : undefined,
+      };
+    }),
   }));
   ADMINISTRATIVE_ACCOUNTS_DATA.push(...accounts);
 }

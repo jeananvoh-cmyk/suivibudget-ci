@@ -87,9 +87,9 @@ Toutes les 21 fonctions `SECURITY DEFINER` des schémas `public` et `private` on
 - **Taille exacte** : `14 072 943` octets
 - **Empreinte SHA-256** : `941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf`
 - **Pagination physique vs pagination imprimée** :
-  - **Pages physiques du fichier PDF** : **`44` pages physiques** (scannées en 2 fascicules de 22 pages chacun : `580b42cd...` pages 1–22 et `796921a9...` pages 23–44). En base distante `public_documents`, `page_count` est actuellement `null` ; le normaliseur déterministe `applyVerifiedDocumentPagination` (`src/data/officialPublicDocumentsCatalog.ts`) renseigne `page_count = 44`, `physical_page_count = 44`, `printed_page_count = 45` et `missing_printed_pages = ['20/45']` dès l'hydratation.
-  - **Pagination imprimée en pied de page** : numérotée jusqu'à **`44/45`** sur **`45` pages annoncées**.
-  - **Page absente du scan d'origine** : la page imprimée **`20/45`** est absente de la reliure scannée d'origine (entre la page PDF 19 imprimée `19/45` et la page PDF 20 imprimée `21/45`) ; son contenu n'est jamais inventé ni interpolé (`contenu non restitué`).
+  - **Pages physiques du fichier PDF** : **`44` pages physiques** (scannées en 2 fascicules de 22 pages chacun : `580b42cd...` pages 1–22 et `796921a9...` pages 23–44). En base distante `public_documents`, `page_count` est actuellement `null` ; le normaliseur déterministe `applyVerifiedDocumentPagination` (`src/data/officialPublicDocumentsCatalog.ts`) renseigne `page_count = 44`, `physical_page_count = 44`, `printed_page_count = 45` et `missing_printed_pages = ['24/45']` dès l'hydratation.
+  - **Pagination imprimée en pied de page** : numérotée jusqu'à **`45/45`** sur **`45` pages annoncées**.
+  - **Page absente du scan d'origine** : la page imprimée **`24/45`** est absente de la reliure scannée d'origine (entre la page PDF 23 imprimée `23/45` et la page PDF 24 imprimée `25/45`) ; son contenu n'est jamais inventé ni interpolé (`contenu non restitué`).
 - **Actes officiels attestés sur la pièce** :
   - Délibération / Arrêté en séance du Conseil Municipal : **8 juillet 2025** (`2025-07-08`)
   - Approbation préfectorale (Préfet d'Abidjan) : **22 juillet 2025** (`2025-07-22`) sous la référence **`n° 002/PA/D.CAB`**
@@ -160,7 +160,7 @@ Conformément aux règles non négociables (`REMOTE_SUPABASE_WRITES = 0`), **auc
       "approval_date": "2025-07-08",
       "prefecture_visa_date": "2025-07-22",
       "verification_status": "OFFICIAL_DOCUMENT",
-      "notes": "Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45 ; 44 pages physiques PDF, numérotation imprimée jusqu'à 44/45 sur 45 annoncées, page imprimée 20/45 absente du scan d'origine). Délibération municipale du 08/07/2025 ; approbation préfectorale n° 002/PA/D.CAB du 22/07/2025. Stade comptable : ORDONNANCE. Report antérieur : 944 FCFA. Résultat cumulé : 2237134734 FCFA. Tableau patrimonial page PDF 43 (imprimée 44/45) : Immobilier 810959095, Incorporel 20000000, Mobilier 535141595 (Total 1366100690 FCFA)."
+      "notes": "Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45 ; 44 pages physiques PDF, numérotation imprimée jusqu'à 45/45 sur 45 annoncées, page imprimée 24/45 absente du scan d'origine). Délibération municipale du 08/07/2025 ; approbation préfectorale n° 002/PA/D.CAB du 22/07/2025. Stade comptable : ORDONNANCE. Report antérieur : 944 FCFA. Résultat cumulé : 2237134734 FCFA. Tableau patrimonial page PDF 43 (imprimée 44/45) : Immobilier 810959095, Incorporel 20000000, Mobilier 535141595 (Total 1366100690 FCFA)."
     },
     "precision": {
       "operating_planned": "EXACT",
