@@ -67,6 +67,42 @@ import {
   ListTodo
 } from 'lucide-react';
 
+export const buildProspectsCsvContent = (prospects: readonly Institution[]): string => {
+  const isSyntheticWebUrl = (url?: string) => !url || url.trim() === '' || url.includes('mairie-mairie') || url.includes('example');
+  const headers = [
+    'Type',
+    'Nom_Collectivite',
+    'Region',
+    'District',
+    'Maire_ou_President',
+    'Parti_Politique',
+    'Statut_Web',
+    'URL_Site_Web',
+    'Page_Facebook',
+    'Telephone',
+    'Email',
+    'Budget_Total_FCFA'
+  ];
+  const rows = prospects.map(p => {
+    const hasRealWeb = !isSyntheticWebUrl(p.website);
+    return [
+      sanitizeCsvCell(p.type),
+      sanitizeCsvCell(p.name || ''),
+      sanitizeCsvCell(p.region || ''),
+      sanitizeCsvCell(p.district || ''),
+      sanitizeCsvCell(p.leader_name || ''),
+      sanitizeCsvCell(p.political_party || ''),
+      sanitizeCsvCell(hasRealWeb ? 'AVEC_SITE_OFFICIEL' : 'SANS_SITE_WEB'),
+      sanitizeCsvCell(p.website || ''),
+      sanitizeCsvCell(p.facebook_url || ''),
+      sanitizeCsvCell(p.contact_phone || p.info_officer_phone || ''),
+      sanitizeCsvCell(p.contact_email || p.info_officer_email || ''),
+      sanitizeCsvCell(p.total_budget_fcfa != null ? p.total_budget_fcfa : ''),
+    ].join(';');
+  });
+  return '\uFEFF' + [headers.map(sanitizeCsvCell).join(';'), ...rows].join('\n');
+};
+
 interface AdminDashboardPageProps {
   onSelectProject?: (project: BudgetProject) => void;
   onOpenShare: (project: BudgetProject) => void;
@@ -662,38 +698,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
   const handleExportProspectsCsv = () => {
     const listToExport = filteredProspects;
-    const headers = [
-      'Type',
-      'Nom_Collectivite',
-      'Region',
-      'District',
-      'Maire_ou_President',
-      'Parti_Politique',
-      'Statut_Web',
-      'URL_Site_Web',
-      'Page_Facebook',
-      'Telephone',
-      'Email',
-      'Budget_Total_FCFA'
-    ];
-    const rows = listToExport.map(p => {
-      const hasRealWeb = !isSyntheticWeb(p.website);
-      return [
-        `"${p.type}"`,
-        `"${(p.name || '').replace(/"/g, '""')}"`,
-        `"${(p.region || '').replace(/"/g, '""')}"`,
-        `"${(p.district || '').replace(/"/g, '""')}"`,
-        `"${(p.leader_name || '').replace(/"/g, '""')}"`,
-        `"${(p.political_party || '').replace(/"/g, '""')}"`,
-        `"${hasRealWeb ? 'AVEC_SITE_OFFICIEL' : 'SANS_SITE_WEB'}"`,
-        `"${(p.website || '').replace(/"/g, '""')}"`,
-        `"${(p.facebook_url || '').replace(/"/g, '""')}"`,
-        `"${(p.contact_phone || p.info_officer_phone || '').replace(/"/g, '""')}"`,
-        `"${(p.contact_email || p.info_officer_email || '').replace(/"/g, '""')}"`,
-        `"${p.total_budget_fcfa != null ? p.total_budget_fcfa : ''}"`,
-      ];
-    });
-    const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+    const csvContent = buildProspectsCsvContent(listToExport);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

@@ -18,7 +18,7 @@ import {
 import { 
   formatFCFA, formatFCFAWithWords, formatQualifiedFCFA, formatRecordAmount, amountPrecision, isExactAmount, formatAmountInWords
 } from '../utils/formatters';
-import { isSafeUrl } from '../utils/security';
+import { isSafeUrl, sanitizeCsvCell } from '../utils/security';
 import { openPublicDocument } from '../services/documentStorageService';
 import { 
   ShieldCheck, 
@@ -133,6 +133,49 @@ export const filterCaOperations = (
   });
 };
 
+export const formatReadableAmount = (value: number | null | undefined) =>
+  value == null || !Number.isFinite(value) ? 'Montant à confirmer' : formatFCFAWithWords(value);
+
+export const formatReadableRecordAmount = <T extends { import_provenance?: any; amount_precision?: any }>(
+  record: T,
+  field: keyof T
+) => {
+  const value = record[field];
+  if (typeof value === 'number' && Number.isFinite(value) && amountPrecision(record, String(field)) !== 'UNKNOWN') {
+    const words = formatAmountInWords(value);
+    return `${formatRecordAmount(record, field)} (${words.endsWith('FCFA') ? words : `${words} FCFA`})`;
+  }
+  return formatRecordAmount(record, field);
+};
+
+export const buildCaOperationsCsvContent = (account: Pick<AdministrativeAccount, 'operations'>): string => {
+  const headers = ["Reference", "Titre", "Secteur", "Localisation", "Prevu_FCFA", "Realise_FCFA", "Taux_Execution_Pct", "Marche_DGMP", "Attributaire", "Statut_Terrain"];
+  const rows = (account.operations || []).map(op => {
+    const rate = calculateExecutionRate(op.executed_amount, op.planned_amount, amountPrecision(op, 'executed_amount'), amountPrecision(op, 'planned_amount'));
+    const opMatches = getOperationProcurementMatches(op);
+    const nonEmptyMatches = opMatches.filter(m => m.match_level !== 'NONE');
+    const marketLabels = nonEmptyMatches.length > 0
+      ? nonEmptyMatches.map(m => m.contract_number || m.tender_number || m.verification_status).filter(Boolean).join(' | ')
+      : (opMatches[0]?.contract_number || opMatches[0]?.verification_status || 'Non répertorié');
+    const contractorLabels = nonEmptyMatches.length > 0
+      ? nonEmptyMatches.map(m => m.contractor).filter(Boolean).join(' | ')
+      : (opMatches[0]?.contractor || 'Régie/Gré à gré');
+    return [
+      sanitizeCsvCell(op.operation_reference || ''),
+      sanitizeCsvCell(op.title),
+      sanitizeCsvCell(op.sector),
+      sanitizeCsvCell(op.location || ''),
+      sanitizeCsvCell(formatReadableRecordAmount(op, 'planned_amount')),
+      sanitizeCsvCell(formatReadableRecordAmount(op, 'executed_amount')),
+      sanitizeCsvCell(rate.formatted),
+      sanitizeCsvCell(marketLabels),
+      sanitizeCsvCell(contractorLabels),
+      sanitizeCsvCell(getOperationPhysicalStatusLabel(op.citizen_status))
+    ].join(';');
+  });
+  return "\uFEFF" + [headers.map(sanitizeCsvCell).join(';'), ...rows].join('\n');
+};
+
 export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps> = ({
   institution,
   onOpenDocRequest,
@@ -149,19 +192,6 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
   useEffect(() => {
     return dataStore.subscribe(() => setStoreTick(t => t + 1));
   }, []);
-
-  const formatReadableAmount = (value: number | null | undefined) =>
-    value == null || !Number.isFinite(value) ? 'Montant à confirmer' : formatFCFAWithWords(value);
-
-  const formatReadableRecordAmount = <T extends { import_provenance?: any; amount_precision?: any }>(
-    record: T,
-    field: keyof T
-  ) => {
-    const value = record[field];
-    return typeof value === 'number' && Number.isFinite(value)
-      ? `${formatRecordAmount(record, field)} (${formatAmountInWords(value)} FCFA)`
-      : formatRecordAmount(record, field);
-  };
 
   const staticAccountsById = getAdministrativeAccountsForInstitution(institution.id) || [];
   const staticAccounts = staticAccountsById.length
@@ -240,32 +270,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
 
   const handleExportCsv = () => {
     if (!currentCA) return;
-    const headers = ["Reference", "Titre", "Secteur", "Localisation", "Prevu_FCFA", "Realise_FCFA", "Taux_Execution_Pct", "Marche_DGMP", "Attributaire", "Statut_Terrain"];
-    const rows = (currentCA.operations || []).map(op => {
-      const rate = calculateExecutionRate(op.executed_amount, op.planned_amount, amountPrecision(op, 'executed_amount'), amountPrecision(op, 'planned_amount'));
-      const opMatches = getOperationProcurementMatches(op);
-      const nonEmptyMatches = opMatches.filter(m => m.match_level !== 'NONE');
-      const marketLabels = nonEmptyMatches.length > 0
-        ? nonEmptyMatches.map(m => m.contract_number || m.tender_number || m.verification_status).filter(Boolean).join(' | ')
-        : (opMatches[0]?.contract_number || opMatches[0]?.verification_status || 'Non répertorié');
-      const contractorLabels = nonEmptyMatches.length > 0
-        ? nonEmptyMatches.map(m => m.contractor).filter(Boolean).join(' | ')
-        : (opMatches[0]?.contractor || 'Régie/Gré à gré');
-      return [
-        `"${op.operation_reference || ''}"`,
-        `"${op.title.replace(/"/g, '""')}"`,
-        `"${op.sector}"`,
-        `"${op.location || ''}"`,
-        `"${formatReadableRecordAmount(op, 'planned_amount')}"`,
-        `"${formatReadableRecordAmount(op, 'executed_amount')}"`,
-        `"${rate.formatted}"`,
-        `"${marketLabels}"`,
-        `"${contractorLabels}"`,
-        `"${getOperationPhysicalStatusLabel(op.citizen_status)}"`
-      ].join(';');
-    });
-
-    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(';'), ...rows].join('\n');
+    const csvContent = "data:text/csv;charset=utf-8," + buildCaOperationsCsvContent(currentCA);
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", encodeURI(csvContent));
     downloadAnchor.setAttribute("download", `operations_ca_${currentCA.institution_name.replace(/\s+/g, '_')}_${currentCA.fiscal_year}.csv`);
@@ -587,16 +592,19 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
       ? (currentCA.operating_revenue_realized || 0) + (currentCA.investment_revenue_realized || 0)
       : null);
 
-  const computedArithmeticDiff =
+  const isArithmeticCalculable =
     totalRevenueResolved != null &&
     currentCA.total_realized != null &&
-    amountPrecision(currentCA, 'total_realized') !== 'UNKNOWN'
-      ? totalRevenueResolved - currentCA.total_realized
-      : null;
+    amountPrecision(currentCA, 'total_realized') !== 'UNKNOWN';
 
-  const arithmeticDiffResolved =
-    currentCA.arithmetic_difference != null &&
-    !(currentCA.arithmetic_difference === 0 && computedArithmeticDiff != null && computedArithmeticDiff !== 0)
+  const computedArithmeticDiff = isArithmeticCalculable
+    ? totalRevenueResolved - currentCA.total_realized!
+    : null;
+
+  const arithmeticDiffResolved = !isArithmeticCalculable
+    ? null
+    : currentCA.arithmetic_difference != null &&
+      !(currentCA.arithmetic_difference === 0 && computedArithmeticDiff !== 0)
       ? currentCA.arithmetic_difference
       : computedArithmeticDiff;
 

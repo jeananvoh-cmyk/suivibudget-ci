@@ -630,6 +630,33 @@ describe('Pilote Réel d\'Ingestion Documentaire et Financière : Cocody 2024', 
     expect(patRealized.immobilier + patRealized.incorporel + patRealized.mobilier).toBe(COCODY_CA_2024_ROW.data.investment_realized);
   });
 
+  it('M2. Normalisation de description Cocody CA 2024 : corrige les mentions obsolètes 44/45 sur 45 et 20/45 absente issues de la base distante', () => {
+    const staleProdDoc: PublicDocument = {
+      id: 'doc-dff4865a-c6a8-418e-8895-626258e409d0',
+      title: 'Compte Administratif 2024 - Mairie de Cocody',
+      category: 'COMPTE_ADMINISTRATIF',
+      institution_name: 'Mairie de Cocody',
+      institution_id: 'inst-com-cocody',
+      year: 2024,
+      description: "Fichier PDF de 44 pages physiques (numérotation imprimée jusqu'à 44/45 sur 45 annoncées ; page imprimée 20/45 absente du scan d'origine, contenu non restitué).",
+      file_url: '',
+      file_name: 'compte-administratif-2024-v1.pdf',
+      file_format: 'PDF',
+      published_at: '2026-10-13T14:13:55.000Z',
+      downloads_count: 12,
+      is_official: true,
+      checksum_sha256: '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf',
+      status: 'PUBLISHED',
+      verification_status: 'VERIFIED',
+    };
+
+    const normalized = applyVerifiedDocumentPagination(staleProdDoc);
+    expect(normalized.description).toContain('45/45 sur 45 annoncées');
+    expect(normalized.description).toContain('24/45 absente du scan');
+    expect(normalized.description).not.toContain('20/45');
+    expect(normalized.description).not.toContain('44/45 sur 45');
+  });
+
   it('N. Hydratation robuste : parse import_provenance JSON, initialise precision manquante, préserve precision des reports et trie procurement_matches multi-lots', () => {
     const hydrated = hydrateAdministrativeAccountFromRow({
       id: 'ca-hydrate-edge',
