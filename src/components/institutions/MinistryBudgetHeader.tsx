@@ -167,7 +167,7 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
             )}
           </div>
           {!compact && lfiBreakdownItems.length > 0 && (
-            <div className="pt-1.5 mt-1 border-t border-sky-200/80 grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px] text-slate-700">
+            <div className="pt-1.5 mt-1 border-t border-sky-200/80 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-slate-700">
               {lfiBreakdownItems.map((item) => (
                 <div key={item.label} className="flex items-center justify-between gap-2">
                   <span>{item.label} :</span>
