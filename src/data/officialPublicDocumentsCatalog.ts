@@ -293,6 +293,8 @@ export interface VerifiedDocumentPaginationControl {
   readonly printedPageCount: number;
   readonly missingPrintedPages: readonly string[];
   readonly paginationNote: string;
+  readonly isScanned?: boolean;
+  readonly hasTextLayer?: boolean;
 }
 
 export const VERIFIED_DOCUMENT_PAGINATION_CONTROLS: Readonly<Record<string, VerifiedDocumentPaginationControl>> = Object.freeze({
@@ -301,8 +303,10 @@ export const VERIFIED_DOCUMENT_PAGINATION_CONTROLS: Readonly<Record<string, Veri
     fileSizeBytes: 14072943,
     physicalPageCount: 44,
     printedPageCount: 45,
-    missingPrintedPages: ['20/45'],
-    paginationNote: "44 pages physiques PDF (numérotation imprimée jusqu'à 44/45 sur 45 annoncées ; page imprimée 20/45 absente du scan d'origine, contenu non restitué).",
+    missingPrintedPages: ['24/45'],
+    paginationNote: "44 pages physiques PDF (numérotation imprimée jusqu'à 45/45 sur 45 annoncées ; page imprimée 24/45 absente du scan d'origine, contenu non restitué).",
+    isScanned: true,
+    hasTextLayer: false,
   },
 });
 
@@ -313,12 +317,28 @@ export function applyVerifiedDocumentPagination(doc: PublicDocument): PublicDocu
   const correctedPageCount = doc.page_count == null || doc.page_count === control.printedPageCount
     ? control.physicalPageCount
     : doc.page_count;
+  const isScanned = control.isScanned ?? doc.is_scanned;
+  const hasTextLayer = control.hasTextLayer ?? doc.has_text_layer;
+  const ocrStatus =
+    (isScanned === true || hasTextLayer === false) && doc.ocr_status === 'NOT_APPLICABLE'
+      ? 'MANUAL_TRANSCRIPTION'
+      : doc.ocr_status;
+  const normalizedDescription =
+    sha === '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf' && typeof doc.description === 'string'
+      ? doc.description
+          .replace(/44\/45 sur 45/g, '45/45 sur 45')
+          .replace(/20\/45 absente/g, '24/45 absente')
+      : doc.description;
   return {
     ...doc,
+    description: normalizedDescription,
     page_count: correctedPageCount,
     physical_page_count: doc.physical_page_count ?? control.physicalPageCount,
     printed_page_count: doc.printed_page_count ?? control.printedPageCount,
-    missing_printed_pages: doc.missing_printed_pages ?? [...control.missingPrintedPages],
-    pagination_note: doc.pagination_note ?? control.paginationNote,
+    missing_printed_pages: control.missingPrintedPages.length ? [...control.missingPrintedPages] : doc.missing_printed_pages,
+    pagination_note: control.paginationNote,
+    is_scanned: isScanned,
+    has_text_layer: hasTextLayer,
+    ocr_status: ocrStatus,
   };
 }

@@ -191,6 +191,13 @@ export interface PublicInvestmentScopeSummary {
   consolidatedPhysicalAllAmountFcfa: number | null;
   physical2026Count: number;
   physical2026AmountFcfa: number;
+  unknownAmount2026ProjectsCount: number;
+  unknownAmountState2026ProjectsCount: number;
+  unknownAmountLocalCsv2026ProjectsCount: number;
+  unknownAmountLocalPortalBouake2026ProjectsCount: number;
+  unknownAmountMunicipal2026ProjectsCount: number;
+  unknownAmountRegional2026ProjectsCount: number;
+  unknownAmountPre2026ProjectsCount: number;
   consolidatedPhysical2026AmountFcfa: number | null;
   statePhysical2026Count: number;
   statePhysical2026AmountFcfa: number;
@@ -571,6 +578,12 @@ export function computePublicIndicators(params: {
   let documentedAmountProjectsCount = 0;
   let unknownAmountProjectsCount = 0;
   let unknownAmount2026ProjectsCount = 0;
+  let unknownAmountState2026ProjectsCount = 0;
+  let unknownAmountLocalCsv2026ProjectsCount = 0;
+  let unknownAmountLocalPortalBouake2026ProjectsCount = 0;
+  let unknownAmountMunicipal2026ProjectsCount = 0;
+  let unknownAmountRegional2026ProjectsCount = 0;
+  let unknownAmountPre2026ProjectsCount = 0;
   let zeroAmountProjectsCount = 0;
 
   for (const { project: p, classification } of classifiedProjects) {
@@ -579,6 +592,22 @@ export function computePublicIndicators(params: {
       unknownAmountProjectsCount += 1;
       if (p.fiscal_year === 2026) {
         unknownAmount2026ProjectsCount += 1;
+        if (isStateProject(p)) {
+          unknownAmountState2026ProjectsCount += 1;
+        } else {
+          if (classification.provenancePool === 'LOCAL_PORTAL_BOUAKE_2026') {
+            unknownAmountLocalPortalBouake2026ProjectsCount += 1;
+          } else {
+            unknownAmountLocalCsv2026ProjectsCount += 1;
+          }
+          if (p.project_tier === 'REGIONAL') {
+            unknownAmountRegional2026ProjectsCount += 1;
+          } else {
+            unknownAmountMunicipal2026ProjectsCount += 1;
+          }
+        }
+      } else {
+        unknownAmountPre2026ProjectsCount += 1;
       }
     } else {
       documentedAmountProjectsCount += 1;
@@ -758,7 +787,7 @@ export function computePublicIndicators(params: {
     stateCatalogPhysical2026: {
       id: 'stateCatalogPhysical2026',
       label: `${physicalClassificationLabel} — État (2026, sous-ensemble extrait)`,
-      value: statePhysical2026AmountFcfa,
+      value: statePhysical2026Count === 0 || unknownAmountState2026ProjectsCount > 0 ? null : statePhysical2026AmountFcfa,
       unit: 'FCFA',
       fiscalYear: 2026,
       scope: 'EXTRACTION CATALOGUE ÉTAT 2026 HORS PROGRAMME 2204040 (NON EXHAUSTIF VS 4 195,7 MDS LFI)',
@@ -773,7 +802,7 @@ export function computePublicIndicators(params: {
     localCsvPhysical2026: {
       id: 'localCsvPhysical2026',
       label: `${physicalClassificationLabel} — Collectivités (extraction LFI 2026)`,
-      value: localCsvPhysical2026AmountFcfa,
+      value: localCsvPhysical2026Count === 0 || unknownAmountLocalCsv2026ProjectsCount > 0 ? null : localCsvPhysical2026AmountFcfa,
       unit: 'FCFA',
       fiscalYear: 2026,
       scope: 'EXTRACTION CSV COLLECTIVITÉS LFI 2026 (DÉDUPLIQUÉE, HORS SALAIRES)',
@@ -788,7 +817,7 @@ export function computePublicIndicators(params: {
     bouakePortalPhysical2026: {
       id: 'bouakePortalPhysical2026',
       label: 'Projets municipaux Bouaké sourcés sur portail communal (hors LFI 2026)',
-      value: localPortalBouakePhysical2026AmountFcfa,
+      value: localPortalBouakePhysical2026Count === 0 || unknownAmountLocalPortalBouake2026ProjectsCount > 0 ? null : localPortalBouakePhysical2026AmountFcfa,
       unit: 'FCFA',
       fiscalYear: 2026,
       scope: 'PORTAIL EXTERNE MAIRIEDEBOUAKE.CI (C2D / AFD / PPP, HORS DOTATION LFI)',
@@ -803,7 +832,7 @@ export function computePublicIndicators(params: {
     multiYearStateCatalogPre2026: {
       id: 'multiYearStateCatalogPre2026',
       label: 'Grand marché pluriannuel de l’État engagé en 2021 (hors exercice 2026)',
-      value: multiYearPre2026AmountFcfa,
+      value: unknownAmountPre2026ProjectsCount > 0 ? null : multiYearPre2026AmountFcfa,
       unit: 'FCFA',
       fiscalYear: 'MULTI_YEAR',
       scope: 'EXERCICE 2021 — AXE SÉGUÉLA-SIFIÉ-TOUBA (HORS LFI 2026)',
@@ -867,6 +896,13 @@ export function computePublicIndicators(params: {
         unknownAmountProjectsCount > 0 ? null : physicalAllAmountFcfa,
       physical2026Count,
       physical2026AmountFcfa,
+      unknownAmount2026ProjectsCount,
+      unknownAmountState2026ProjectsCount,
+      unknownAmountLocalCsv2026ProjectsCount,
+      unknownAmountLocalPortalBouake2026ProjectsCount,
+      unknownAmountMunicipal2026ProjectsCount,
+      unknownAmountRegional2026ProjectsCount,
+      unknownAmountPre2026ProjectsCount,
       consolidatedPhysical2026AmountFcfa:
         unknownAmount2026ProjectsCount > 0 ? null : physical2026AmountFcfa,
       statePhysical2026Count,

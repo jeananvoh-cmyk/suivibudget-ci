@@ -74,6 +74,7 @@ export interface CAInvestmentOperation {
   source_page?: number;          // Page dans le document PDF officiel
   source_reference?: string;
   procurement_match?: ProcurementMatch;
+  procurement_matches?: ProcurementMatch[];
   linked_project_id?: string;    // Référence vers un projet physique dans le catalogue SuiviBudget
   citizen_proofs_count?: number; // Nombre d'observations citoyennes associées
   citizen_status?: ProjectStatus; // État d'avancement physique documenté sur le terrain
@@ -136,7 +137,7 @@ export interface AdministrativeAccount {
   source_page?: number;
   approval_date?: string;        // Date de délibération du Conseil
   prefecture_visa_date?: string; // Date de validation de la tutelle / Trésor
-  verification_status: LocalVerificationStatus;
+  verification_status: LocalVerificationStatus | 'TO_VERIFY' | 'VERIFIED';
   
   // Opérations d'investissement détaillées
   operations: CAInvestmentOperation[];

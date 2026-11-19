@@ -121,6 +121,10 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
   };
 
   const publicIndicators = dataStore.getPublicIndicators();
+  const hasCompleteState2026Amounts = publicIndicators.investments.statePhysical2026Count > 0 && publicIndicators.investments.unknownAmountState2026ProjectsCount === 0;
+  const hasCompleteLocalCsv2026Amounts = publicIndicators.investments.localCsvPhysical2026Count > 0 && publicIndicators.investments.unknownAmountLocalCsv2026ProjectsCount === 0;
+  const hasCompleteBouake2026Amounts = publicIndicators.investments.localPortalBouakePhysical2026Count > 0 && publicIndicators.investments.unknownAmountLocalPortalBouake2026ProjectsCount === 0;
+  const hasCompletePre2026Amounts = publicIndicators.investments.unknownAmountPre2026ProjectsCount === 0;
   const approvedProofsCount = approvedProofs.length;
   const strategicCount = STRATEGIC_PROJECTS_LIST.length;
   const inProgressCount = STRATEGIC_PROJECTS_LIST.filter(p => p.status === 'IN_PROGRESS').length + approvedProofs.filter(p => p.citizen_status_claim === 'IN_PROGRESS').length;
@@ -168,7 +172,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
               Observatoire Citoyen des Investissements & Opérations Publics
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
-              Suivi photographique de terrain, veille contractuelle et observations citoyennes indépendantes sur <strong>{publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée</strong> ({formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa)} côté État extrait et {formatCompactFCFA(publicIndicators.investments.localCsvPhysical2026AmountFcfa)} côté collectivités LFI, hors {publicIndicators.investments.localPortalBouakePhysical2026Count} projets portail Bouaké de {formatCompactFCFA(publicIndicators.investments.localPortalBouakePhysical2026AmountFcfa)} et {publicIndicators.investments.multiYearPre2026Count} marché pluriannuel 2021 de {formatCompactFCFA(publicIndicators.investments.multiYearPre2026AmountFcfa)}).
+              Suivi photographique de terrain, veille contractuelle et observations citoyennes indépendantes sur <strong>{publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée</strong> ({`État : ${hasCompleteState2026Amounts ? formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa) : 'montant non consolidé'} ; collectivités LFI : ${hasCompleteLocalCsv2026Amounts ? formatCompactFCFA(publicIndicators.investments.localCsvPhysical2026AmountFcfa) : 'montant non consolidé'}`}, hors {publicIndicators.investments.localPortalBouakePhysical2026Count} projets portail Bouaké {hasCompleteBouake2026Amounts ? `de ${formatCompactFCFA(publicIndicators.investments.localPortalBouakePhysical2026AmountFcfa)}` : '(montant non consolidé)'} et {publicIndicators.investments.multiYearPre2026Count} marché pluriannuel 2021 {hasCompletePre2026Amounts ? `de ${formatCompactFCFA(publicIndicators.investments.multiYearPre2026AmountFcfa)}` : '(montant non consolidé)'}).
             </p>
           </div>
 

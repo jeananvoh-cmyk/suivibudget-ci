@@ -29,7 +29,7 @@ Le pilote a été couronné d'un succès technique complet :
 
 ### 2.1. Nature et Empreinte du Document
 - **Document source :** Scan officiel de la délibération du Conseil Municipal de la Commune de Cocody relative au Compte Administratif de l'exercice 2024.
-- **Pagination :** `44` pages physiques PDF (numérotation imprimée allant jusqu'à `44/45` sur `45` pages annoncées ; la page imprimée `20/45` est absente du scan d'origine et son contenu n'est pas restitué).
+- **Pagination :** `44` pages physiques PDF (numérotation imprimée allant jusqu'à `45/45` sur `45` pages annoncées ; la page imprimée `24/45` est absente du scan d'origine et son contenu n'est pas restitué).
 - **Fascicules :** 2 tomes (`Cocody_CA_2024_pages_01-22.pdf` et `Cocody_CA_2024_pages_23-44.pdf`).
 - **Empreinte cryptographique globale :**  
   `SHA-256 : 941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf` (`14 072 943` octets)

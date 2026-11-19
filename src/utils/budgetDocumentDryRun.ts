@@ -5,7 +5,7 @@
 
 import type { Institution } from '../types';
 import type { LocalBudget } from '../types/localBudget';
-import type { AdministrativeAccount } from '../types/administrativeAccount';
+import type { AdministrativeAccount, ProcurementMatch } from '../types/administrativeAccount';
 import type {
   DocumentIngestionMetadata,
   ProposedFinancialValue,
@@ -1134,6 +1134,35 @@ function parseAttestedFcfaFromNotes(
   return { amount: parsed, precision };
 }
 
+const PROCUREMENT_MATCH_LEVEL_RANK: Record<string, number> = {
+  STRONG: 0,
+  PARTIAL: 1,
+  TO_VERIFY: 2,
+  NONE: 3,
+};
+
+export function sortProcurementMatches(matches: readonly ProcurementMatch[]): ProcurementMatch[] {
+  return [...matches].sort((a, b) => {
+    const rankA = PROCUREMENT_MATCH_LEVEL_RANK[a.match_level] ?? 4;
+    const rankB = PROCUREMENT_MATCH_LEVEL_RANK[b.match_level] ?? 4;
+    if (rankA !== rankB) return rankA - rankB;
+    const lotCmp = (a.lot || '').localeCompare(b.lot || '', 'fr');
+    if (lotCmp !== 0) return lotCmp;
+    const contractCmp = (a.contract_number || '').localeCompare(b.contract_number || '', 'fr');
+    if (contractCmp !== 0) return contractCmp;
+    const tenderCmp = (a.tender_number || '').localeCompare(b.tender_number || '', 'fr');
+    if (tenderCmp !== 0) return tenderCmp;
+    return (a.id || '').localeCompare(b.id || '', 'fr');
+  });
+}
+
+function normalizeProcurementMatchEntry(match: Record<string, any>): Record<string, any> {
+  return {
+    ...match,
+    award_amount: match.award_amount != null ? Number(match.award_amount) : match.award_amount,
+  };
+}
+
 /**
  * Hydrate un enregistrement `administrative_accounts` issu de Supabase/PostgreSQL
  * en normalisant les colonnes numériques `bigint` et les métadonnées comptables
@@ -1171,25 +1200,54 @@ export function hydrateAdministrativeAccountFromRow<T extends Record<string, any
         executed_amount: op.executed_amount != null ? Number(op.executed_amount) : null
       };
       if (normalizedOp.procurement_match && typeof normalizedOp.procurement_match === 'object') {
-        normalizedOp.procurement_match = {
-          ...normalizedOp.procurement_match,
-          award_amount:
-            normalizedOp.procurement_match.award_amount != null
-              ? Number(normalizedOp.procurement_match.award_amount)
-              : normalizedOp.procurement_match.award_amount
-        };
+        normalizedOp.procurement_match = normalizeProcurementMatchEntry(normalizedOp.procurement_match);
+      }
+      if (Array.isArray(normalizedOp.procurement_matches)) {
+        const sortedMatches = sortProcurementMatches(
+          normalizedOp.procurement_matches
+            .filter((m: unknown): m is Record<string, any> => Boolean(m && typeof m === 'object'))
+            .map(normalizeProcurementMatchEntry) as ProcurementMatch[]
+        );
+        normalizedOp.procurement_matches = sortedMatches.length > 0 ? sortedMatches : undefined;
+        if (!normalizedOp.procurement_match && sortedMatches.length > 0) {
+          normalizedOp.procurement_match = sortedMatches[0];
+        }
+      } else if (normalizedOp.procurement_match && typeof normalizedOp.procurement_match === 'object') {
+        normalizedOp.procurement_matches = [normalizedOp.procurement_match];
       }
       return normalizedOp;
     });
   }
 
-  const provenancePrecision: Record<string, string> =
-    hydrated.import_provenance &&
+  if (typeof hydrated.import_provenance === 'string') {
+    try {
+      const parsed = JSON.parse(hydrated.import_provenance);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        hydrated.import_provenance = parsed;
+      }
+    } catch {
+      hydrated.import_provenance = undefined;
+    }
+  }
+
+  const hasProvenanceObject =
+    Boolean(hydrated.import_provenance) &&
     typeof hydrated.import_provenance === 'object' &&
+    !Array.isArray(hydrated.import_provenance);
+
+  const provenancePrecision: Record<string, string> =
+    hasProvenanceObject &&
     hydrated.import_provenance.precision &&
     typeof hydrated.import_provenance.precision === 'object'
       ? { ...hydrated.import_provenance.precision }
       : {};
+
+  if (hasProvenanceObject) {
+    hydrated.import_provenance = {
+      ...hydrated.import_provenance,
+      precision: { ...provenancePrecision },
+    };
+  }
 
   if (
     hydrated.total_revenue_collected == null &&
@@ -1209,10 +1267,10 @@ export function hydrateAdministrativeAccountFromRow<T extends Record<string, any
         : opRevPrec === 'LOWER_BOUND' || invRevPrec === 'LOWER_BOUND'
         ? 'LOWER_BOUND'
         : 'EXACT';
-    if (hydrated.import_provenance && typeof hydrated.import_provenance === 'object') {
+    if (hasProvenanceObject || combinedRevPrec !== 'EXACT') {
       provenancePrecision.total_revenue_collected = combinedRevPrec;
       hydrated.import_provenance = {
-        ...hydrated.import_provenance,
+        ...(hasProvenanceObject ? hydrated.import_provenance : {}),
         precision: { ...provenancePrecision }
       };
     }
@@ -1236,10 +1294,13 @@ export function hydrateAdministrativeAccountFromRow<T extends Record<string, any
         : null;
     if (prevReported !== null) {
       hydrated.previous_result_reported = prevReported.amount;
-      if (hydrated.import_provenance && typeof hydrated.import_provenance === 'object') {
+      if (
+        (hydrated.import_provenance && typeof hydrated.import_provenance === 'object') ||
+        prevReported.precision !== 'EXACT'
+      ) {
         provenancePrecision.previous_result_reported = prevReported.precision;
         hydrated.import_provenance = {
-          ...hydrated.import_provenance,
+          ...(hydrated.import_provenance && typeof hydrated.import_provenance === 'object' ? hydrated.import_provenance : {}),
           precision: { ...provenancePrecision }
         };
       }
@@ -1254,10 +1315,13 @@ export function hydrateAdministrativeAccountFromRow<T extends Record<string, any
         : null;
     if (cumResult !== null) {
       hydrated.cumulative_result = cumResult.amount;
-      if (hydrated.import_provenance && typeof hydrated.import_provenance === 'object') {
+      if (
+        (hydrated.import_provenance && typeof hydrated.import_provenance === 'object') ||
+        cumResult.precision !== 'EXACT'
+      ) {
         provenancePrecision.cumulative_result = cumResult.precision;
         hydrated.import_provenance = {
-          ...hydrated.import_provenance,
+          ...(hydrated.import_provenance && typeof hydrated.import_provenance === 'object' ? hydrated.import_provenance : {}),
           precision: { ...provenancePrecision }
         };
       }

@@ -83,16 +83,26 @@ UPDATE public.administrative_accounts AS aa
   SET verification_status = 'TO_VERIFY'
   WHERE aa.verification_status IN ('OFFICIAL_DOCUMENT', 'VERIFIED')
     AND (
-      aa.source_document_id IS NULL OR aa.source_page IS NULL OR aa.source_url IS NULL
-      OR aa.source_url !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
+      aa.source_document_id IS NULL OR aa.source_page IS NULL
       OR NOT EXISTS (
         SELECT 1 FROM public.public_documents d
         WHERE d.id = aa.source_document_id
           AND d.status = 'PUBLISHED'
           AND d.verification_status = 'VERIFIED'
           AND d.checksum_status IN ('COMPUTED', 'VERIFIED')
-          AND d.checksum_sha256 IS NOT NULL
-          AND d.source_url = aa.source_url
+          AND d.checksum_sha256 ~ '^[a-f0-9]{64}$'
+          AND (
+            (
+              NOT (aa.source_document_id IS NULL OR aa.source_page IS NULL OR aa.source_url IS NULL)
+              AND aa.source_url ~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
+              AND d.source_url = aa.source_url
+            )
+            OR (
+              COALESCE(d.storage_bucket, 'public_documents') = 'public_documents'
+              AND NULLIF(btrim(d.storage_path), '') IS NOT NULL
+              AND (NULLIF(btrim(aa.source_url), '') IS NULL OR NULLIF(btrim(d.source_url), '') IS NULL OR d.source_url = aa.source_url)
+            )
+          )
       )
     );
 
@@ -112,6 +122,8 @@ UPDATE public.ca_procurement_matches AS cm
           AND d.source_url = cm.source_url
       )
     );
+
+ALTER TABLE public.budget_projects DISABLE TRIGGER USER;
 
 UPDATE public.budget_projects AS bp
   SET data_provenance = 'DECLARED_ADMIN',
@@ -133,6 +145,8 @@ UPDATE public.budget_projects AS bp
           AND d.source_url = bp.source_url
       )
     );
+
+ALTER TABLE public.budget_projects ENABLE TRIGGER USER;
 
 -- Le validateur SQL accepte les nouveaux champs de traçabilité et refuse
 -- toute qualification primaire sans document publié, vérifié et page exacte.
@@ -277,18 +291,25 @@ REVOKE ALL ON FUNCTION private.validate_import_row(jsonb) FROM public, anon, aut
 CREATE OR REPLACE FUNCTION private.enforce_primary_document_evidence()
 RETURNS trigger
 LANGUAGE plpgsql
+SECURITY DEFINER
 SET search_path = ''
 AS $$
 DECLARE
   row_data jsonb := to_jsonb(NEW);
+  old_data jsonb := CASE WHEN TG_OP = 'UPDATE' THEN to_jsonb(OLD) ELSE NULL END;
   source_id text;
   source_url_value text;
   source_page_value integer;
   evidence_status text;
+  old_evidence_status text;
+  inst_id text;
+  fy_value integer;
 BEGIN
   source_id := row_data ->> 'source_document_id';
   source_url_value := COALESCE(row_data ->> 'source_url', row_data ->> 'document_url');
   source_page_value := NULLIF(row_data ->> 'source_page', '')::integer;
+  inst_id := NULLIF(row_data ->> 'institution_id', '');
+  fy_value := NULLIF(row_data ->> 'fiscal_year', '')::integer;
 
   IF TG_TABLE_NAME = 'budget_projects' THEN
     IF row_data ->> 'data_provenance' = 'OFFICIAL_SOURCE'
@@ -300,9 +321,48 @@ BEGIN
   ELSE
     evidence_status := row_data ->> 'verification_status';
   END IF;
+
+  IF TG_OP = 'UPDATE' THEN
+    IF TG_TABLE_NAME = 'budget_projects' THEN
+      IF old_data ->> 'data_provenance' = 'OFFICIAL_SOURCE'
+        OR old_data ->> 'financial_verification_status' IN ('OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED') THEN
+        old_evidence_status := 'PRIMARY';
+      END IF;
+    ELSE
+      old_evidence_status := old_data ->> 'verification_status';
+    END IF;
+  END IF;
+
+  IF TG_OP = 'UPDATE'
+    AND old_evidence_status IN ('PRIMARY','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED','Vérifié DGMP')
+    AND evidence_status IN ('PRIMARY','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED','Vérifié DGMP') THEN
+    IF (TG_TABLE_NAME = 'local_budgets' AND (
+          row_data -> 'total_amount' IS DISTINCT FROM old_data -> 'total_amount'
+          OR row_data -> 'operating_amount' IS DISTINCT FROM old_data -> 'operating_amount'
+          OR row_data -> 'investment_amount' IS DISTINCT FROM old_data -> 'investment_amount'
+        ))
+      OR (TG_TABLE_NAME = 'administrative_accounts' AND (
+          row_data -> 'operating_planned' IS DISTINCT FROM old_data -> 'operating_planned'
+          OR row_data -> 'operating_realized' IS DISTINCT FROM old_data -> 'operating_realized'
+          OR row_data -> 'operating_revenue_realized' IS DISTINCT FROM old_data -> 'operating_revenue_realized'
+          OR row_data -> 'investment_planned' IS DISTINCT FROM old_data -> 'investment_planned'
+          OR row_data -> 'investment_realized' IS DISTINCT FROM old_data -> 'investment_realized'
+          OR row_data -> 'investment_revenue_realized' IS DISTINCT FROM old_data -> 'investment_revenue_realized'
+          OR row_data -> 'total_planned' IS DISTINCT FROM old_data -> 'total_planned'
+          OR row_data -> 'total_realized' IS DISTINCT FROM old_data -> 'total_realized'
+        ))
+      OR (TG_TABLE_NAME = 'ca_procurement_matches' AND (
+          row_data -> 'award_amount' IS DISTINCT FROM old_data -> 'award_amount'
+        ))
+      OR (TG_TABLE_NAME = 'budget_projects' AND (
+          row_data -> 'budget_amount_fcfa' IS DISTINCT FROM old_data -> 'budget_amount_fcfa'
+        )) THEN
+      RAISE EXCEPTION 'Changing a certified financial amount requires resetting verification status for a new review';
+    END IF;
+  END IF;
+
   IF evidence_status IN ('PRIMARY','OFFICIAL_DOCUMENT','OFFICIAL_INSTITUTION','OFFICIAL_SOURCE','VERIFIED','Vérifié DGMP') THEN
-    IF source_id IS NULL OR source_url_value IS NULL
-      OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
+    IF source_id IS NULL THEN
       RAISE EXCEPTION 'Primary certification requires a catalogue document ID and institutional HTTPS URL';
     END IF;
     IF source_page_value IS NULL OR source_page_value <= 0 THEN
@@ -314,9 +374,28 @@ BEGIN
         AND pd.status = 'PUBLISHED'
         AND pd.verification_status = 'VERIFIED'
         AND pd.checksum_status IN ('COMPUTED','VERIFIED')
-        AND pd.checksum_sha256 IS NOT NULL
-        AND pd.source_url = source_url_value
+        AND pd.checksum_sha256 ~ '^[a-f0-9]{64}$'
+        AND pd.page_count IS NOT NULL
+        AND source_page_value <= pd.page_count
+        AND (inst_id IS NULL OR pd.institution_id IS NULL OR pd.institution_id = inst_id)
+        AND (fy_value IS NULL OR pd.fiscal_year IS NULL OR pd.fiscal_year = fy_value)
+        AND (
+          (
+            source_url_value IS NOT NULL
+            AND source_url_value ~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)'
+            AND pd.source_url = source_url_value
+          )
+          OR (
+            COALESCE(pd.storage_bucket, 'public_documents') = 'public_documents'
+            AND NULLIF(btrim(pd.storage_path), '') IS NOT NULL
+            AND (NULLIF(btrim(source_url_value), '') IS NULL OR NULLIF(btrim(pd.source_url), '') IS NULL OR pd.source_url = source_url_value)
+          )
+        )
     ) THEN
+      IF source_url_value IS NULL
+        OR source_url_value !~* '^https://([a-z0-9-]+[.])*(dgbf[.]ci|marchespublics[.]ci|courdescomptes[.]ci|gouv[.]ci)(/|$)' THEN
+        RAISE EXCEPTION 'Primary certification requires a catalogue document ID and institutional HTTPS URL';
+      END IF;
       RAISE EXCEPTION 'Primary certification requires a published, verified catalogue document with SHA-256';
     END IF;
   END IF;
@@ -326,22 +405,27 @@ $$;
 
 DROP TRIGGER IF EXISTS enforce_local_budget_primary_evidence ON public.local_budgets;
 CREATE TRIGGER enforce_local_budget_primary_evidence
-  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, document_url
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, document_url,
+    institution_id, fiscal_year, total_amount, operating_amount, investment_amount
   ON public.local_budgets FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
 
 DROP TRIGGER IF EXISTS enforce_administrative_account_primary_evidence ON public.administrative_accounts;
 CREATE TRIGGER enforce_administrative_account_primary_evidence
-  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_url
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url,
+    status, institution_id, fiscal_year, operating_planned, operating_realized,
+    operating_revenue_realized, investment_planned, investment_realized,
+    investment_revenue_realized, total_planned, total_realized
   ON public.administrative_accounts FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
 
 DROP TRIGGER IF EXISTS enforce_procurement_primary_evidence ON public.ca_procurement_matches;
 CREATE TRIGGER enforce_procurement_primary_evidence
-  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url
+  BEFORE INSERT OR UPDATE OF verification_status, source_document_id, source_page, source_url, award_amount
   ON public.ca_procurement_matches FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
 
 DROP TRIGGER IF EXISTS enforce_budget_project_primary_evidence ON public.budget_projects;
 CREATE TRIGGER enforce_budget_project_primary_evidence
-  BEFORE INSERT OR UPDATE OF financial_verification_status, data_provenance, source_document_id, source_page, source_url
+  BEFORE INSERT OR UPDATE OF financial_verification_status, data_provenance, source_document_id, source_page, source_url,
+    institution_id, fiscal_year, budget_amount_fcfa
   ON public.budget_projects FOR EACH ROW EXECUTE FUNCTION private.enforce_primary_document_evidence();
 
 REVOKE ALL ON FUNCTION private.enforce_primary_document_evidence() FROM public, anon, authenticated, service_role;

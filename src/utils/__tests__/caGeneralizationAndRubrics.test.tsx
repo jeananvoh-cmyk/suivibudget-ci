@@ -94,7 +94,7 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
       expect(cocodyControl).toBeDefined();
       expect(cocodyControl.physicalPageCount).toBe(44);
       expect(cocodyControl.printedPageCount).toBe(45);
-      expect(cocodyControl.missingPrintedPages).toEqual(['20/45']);
+      expect(cocodyControl.missingPrintedPages).toEqual(['24/45']);
 
       if (part1Path && part2Path) {
         const buf1 = readFileSync(part1Path);
@@ -462,7 +462,7 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
         expect(html).toContain('Consulter le document');
         expect(html).toContain('941c399bf290cee4');
         expect(html).toContain('44 pages physiques PDF');
-        expect(html).toContain('20/45 absente du scan');
+        expect(html).toContain('24/45 absente du scan');
         expect(html).not.toContain('Compte Administratif non disponible dans le référentiel public');
       } finally {
         dataStore.getDocuments = originalGetDocs;
@@ -517,7 +517,7 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
       expect(html).toContain('Page 40');
       expect(html).toContain('imprimée 41/45');
       expect(html).toContain('44 pages physiques PDF');
-      expect(html).toContain('20/45 absente du scan');
+      expect(html).toContain('24/45 absente du scan');
       expect(html).toContain('941c399bf290cee4');
     });
   });
@@ -1125,6 +1125,243 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
       // Opérations avec marché DGMP STRONG ou PARTIAL exclues
       expect(html).not.toContain('Construction école primaire avec marché vérifié');
       expect(html).not.toContain('Acquisition ambulance avec rapprochement partiel');
+    });
+
+    it('Fix 1 & 2 : gate les badges sur verification_status !== TO_VERIFY, recalcule arithmetic_difference=0 si Recettes != Dépenses, et préserve 0 si équilibré', () => {
+      const cocodyInst: Institution = {
+        id: 'commune-cocody',
+        name: 'Commune de Cocody',
+        type: 'MAIRIE',
+        region: 'Abidjan',
+        district: 'District Autonome d\'Abidjan',
+        budget_functioning_fcfa: null,
+        budget_investment_fcfa: null,
+        total_budget_fcfa: null
+      };
+
+      const caStaleZeroDiffToVerify: AdministrativeAccount = {
+        id: 'ca-cocody-2024',
+        institution_id: 'commune-cocody',
+        institution_name: 'Commune de Cocody',
+        institution_type: 'COMMUNE',
+        fiscal_year: 2024,
+        status: 'PUBLISHED',
+        total_planned: 22_341_865_000,
+        total_realized: 16_775_223_443,
+        total_revenue_collected: 19_012_357_233,
+        operating_planned: 18_441_235_000,
+        operating_realized: 15_409_122_753,
+        operating_revenue_realized: 17_646_256_543,
+        investment_planned: 3_900_630_000,
+        investment_realized: 1_366_100_690,
+        investment_revenue_realized: 1_366_100_690,
+        surplus_or_deficit: 2_237_133_790,
+        arithmetic_difference: 0,
+        source_document: 'COMMUNE DE COCODY.pdf',
+        verification_status: 'TO_VERIFY',
+        operations: [],
+        created_at: '2025-07-22',
+        updated_at: '2025-07-22',
+      };
+
+      ADMINISTRATIVE_ACCOUNTS_DATA.splice(0, ADMINISTRATIVE_ACCOUNTS_DATA.length, caStaleZeroDiffToVerify);
+      const htmlToVerify = renderToStaticMarkup(
+        <AdministrativeAccountView institution={cocodyInst} onOpenDocRequest={() => {}} />
+      );
+      expect(htmlToVerify).toContain('Vérification documentaire en cours');
+      expect(htmlToVerify).toContain('Données en attente de validation documentaire');
+      expect(htmlToVerify).not.toContain('Fiche Financière Citoyenne Contrôlée');
+      expect(htmlToVerify).toContain('+2 237 133 790 FCFA');
+      expect(htmlToVerify).not.toContain('>Différence arithmétique (Recettes − Dépenses)</span><strong class="text-sm text-slate-800">+0 FCFA');
+
+      const caBalancedZero: AdministrativeAccount = {
+        ...caStaleZeroDiffToVerify,
+        id: 'ca-balanced-zero',
+        total_revenue_collected: 10_000_000_000,
+        total_realized: 10_000_000_000,
+        surplus_or_deficit: 0,
+        arithmetic_difference: 0,
+        verification_status: 'VERIFIED',
+      };
+      ADMINISTRATIVE_ACCOUNTS_DATA.splice(0, ADMINISTRATIVE_ACCOUNTS_DATA.length, caBalancedZero);
+      const htmlBalanced = renderToStaticMarkup(
+        <AdministrativeAccountView institution={cocodyInst} onOpenDocRequest={() => {}} />
+      );
+      expect(htmlBalanced).toContain('Fiche Financière Citoyenne Contrôlée');
+      expect(htmlBalanced).toContain('+0 FCFA');
+    });
+
+    it('Fix 4 : supporte plusieurs lots DGMP par opération et ne jette jamais TypeError si import_provenance n’a pas de clé precision', () => {
+      const multiLotOp: CAInvestmentOperation = {
+        id: 'op-multilot-1',
+        ca_id: 'ca-multilot',
+        institution_id: 'inst-multilot',
+        fiscal_year: 2024,
+        operation_reference: 'OP-ML-01',
+        title: 'Réhabilitation voirie communale (multi-lots)',
+        sector: 'Voirie',
+        location: 'Cocody',
+        planned_amount: 500_000_000,
+        executed_amount: 420_000_000,
+        import_provenance: { source: { name: 'CA 2024', reference: 'CA-2024', date: '2025-07-22', date_kind: 'PUBLISHED' } } as any,
+        procurement_match: {
+          id: 'lot-1',
+          lot: '1',
+          tender_number: 'T 200/2024',
+          contract_number: 'M-2024-001',
+          contractor: 'ENTREPRISE ALPHA BTP',
+          award_amount: 210_000_000,
+          match_level: 'STRONG',
+          source: 'DGMP',
+          verification_status: 'VERIFIED',
+          procurement_object: 'Lot 1 voirie nord',
+        },
+        procurement_matches: [
+          {
+            id: 'lot-1',
+            lot: '1',
+            tender_number: 'T 200/2024',
+            contract_number: 'M-2024-001',
+            contractor: 'ENTREPRISE ALPHA BTP',
+            award_amount: 210_000_000,
+            match_level: 'STRONG',
+            source: 'DGMP',
+            verification_status: 'VERIFIED',
+            procurement_object: 'Lot 1 voirie nord',
+          },
+          {
+            id: 'lot-2',
+            lot: '2',
+            tender_number: 'T 201/2024',
+            contract_number: 'M-2024-002',
+            contractor: 'ENTREPRISE BETA TP',
+            award_amount: 195_000_000,
+            match_level: 'PARTIAL',
+            source: 'DGMP',
+            verification_status: 'VERIFIED',
+            procurement_object: 'Lot 2 voirie sud',
+          },
+        ],
+      };
+
+      expect(filterCaOperations([multiLotOp], 'BETA TP', 'ALL', 'ALL')).toHaveLength(1);
+      expect(filterCaOperations([multiLotOp], 'M-2024-002', 'ALL', 'PARTIAL')).toHaveLength(1);
+
+      const multiInst: Institution = {
+        id: 'inst-multilot',
+        name: 'Commune Multi-Lots',
+        type: 'MAIRIE',
+        region: 'Abidjan',
+        district: 'Abidjan',
+        budget_functioning_fcfa: null,
+        budget_investment_fcfa: null,
+        total_budget_fcfa: null
+      };
+      const multiCA: AdministrativeAccount = {
+        id: 'ca-multilot',
+        institution_id: 'inst-multilot',
+        institution_name: 'Commune Multi-Lots',
+        institution_type: 'COMMUNE',
+        fiscal_year: 2024,
+        status: 'PUBLISHED',
+        total_planned: 500_000_000,
+        total_realized: 420_000_000,
+        operating_planned: 0,
+        operating_realized: 0,
+        investment_planned: 500_000_000,
+        investment_realized: 420_000_000,
+        import_provenance: { source: { name: 'CA 2024', reference: 'CA-2024', date: '2025-07-22', date_kind: 'PUBLISHED' } } as any,
+        source_document: 'CA_MULTILOT.pdf',
+        verification_status: 'OFFICIAL_DOCUMENT',
+        operations: [multiLotOp],
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+      };
+
+      ADMINISTRATIVE_ACCOUNTS_DATA.splice(0, ADMINISTRATIVE_ACCOUNTS_DATA.length, multiCA);
+      const html = renderToStaticMarkup(
+        <AdministrativeAccountView institution={multiInst} onOpenDocRequest={() => {}} />
+      );
+      expect(html).toContain('2 lots DGMP rapprochés');
+      expect(html).toContain('ENTREPRISE ALPHA BTP');
+      expect(html).toContain('ENTREPRISE BETA TP');
+      expect(html).toContain('M-2024-001');
+      expect(html).toContain('M-2024-002');
+    });
+
+    it('Fix D : retourne Non calculable (jamais +0 FCFA) si total_realized est null ou UNKNOWN malgré arithmetic_difference=0, et évite "0 FCFA (0 FCFA FCFA)"', () => {
+      const testInst: Institution = {
+        id: 'inst-unknown-diff',
+        name: 'Commune Test Diff Inconnue',
+        type: 'MAIRIE',
+        region: 'Lagunes',
+        district: 'Abidjan',
+        budget_functioning_fcfa: null,
+        budget_investment_fcfa: null,
+        total_budget_fcfa: null,
+      };
+
+      const caUnknownRealized: AdministrativeAccount = {
+        id: 'ca-unknown-realized',
+        institution_id: 'inst-unknown-diff',
+        institution_name: 'Commune Test Diff Inconnue',
+        institution_type: 'COMMUNE',
+        fiscal_year: 2024,
+        status: 'PUBLISHED',
+        total_planned: 1_000_000_000,
+        total_realized: null as any,
+        total_revenue_collected: 950_000_000,
+        operating_planned: 600_000_000,
+        operating_realized: null as any,
+        investment_planned: 400_000_000,
+        investment_realized: 0,
+        arithmetic_difference: 0,
+        surplus_or_deficit: null as any,
+        import_provenance: {
+          source: { name: 'CA 2024', reference: 'CA-2024', date: '2025-07-22', date_kind: 'PUBLISHED' },
+          precision: { total_realized: 'UNKNOWN', operating_realized: 'UNKNOWN' },
+        } as any,
+        source_document: 'CA_UNKNOWN.pdf',
+        verification_status: 'VERIFIED',
+        operations: [
+          {
+            id: 'op-zero',
+            ca_id: 'ca-unknown-realized',
+            institution_id: 'inst-unknown-diff',
+            fiscal_year: 2024,
+            operation_reference: 'OP-ZERO',
+            title: 'Opération sans décaissement',
+            sector: 'Voirie',
+            location: 'Centre',
+            planned_amount: 0,
+            executed_amount: 0,
+          },
+        ],
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+      };
+
+      ADMINISTRATIVE_ACCOUNTS_DATA.splice(0, ADMINISTRATIVE_ACCOUNTS_DATA.length, caUnknownRealized);
+      const htmlNullRealized = renderToStaticMarkup(
+        <AdministrativeAccountView institution={testInst} onOpenDocRequest={() => {}} />
+      );
+      expect(htmlNullRealized).toContain('Différence arithmétique (Recettes − Dépenses)</span><strong class="text-sm text-slate-800">Non calculable</strong>');
+      expect(htmlNullRealized).not.toContain('Différence arithmétique (Recettes − Dépenses)</span><strong class="text-sm text-slate-800">+0 FCFA');
+      expect(htmlNullRealized).toContain('0 FCFA (0 FCFA)');
+      expect(htmlNullRealized).not.toContain('0 FCFA FCFA');
+
+      // Cas où total_realized a une valeur numérique mais une précision UNKNOWN
+      const caUnknownPrecision: AdministrativeAccount = {
+        ...caUnknownRealized,
+        id: 'ca-unknown-precision',
+        total_realized: 0,
+      };
+      ADMINISTRATIVE_ACCOUNTS_DATA.splice(0, ADMINISTRATIVE_ACCOUNTS_DATA.length, caUnknownPrecision);
+      const htmlUnknownPrecision = renderToStaticMarkup(
+        <AdministrativeAccountView institution={testInst} onOpenDocRequest={() => {}} />
+      );
+      expect(htmlUnknownPrecision).toContain('Différence arithmétique (Recettes − Dépenses)</span><strong class="text-sm text-slate-800">Non calculable</strong>');
+      expect(htmlUnknownPrecision).not.toContain('Différence arithmétique (Recettes − Dépenses)</span><strong class="text-sm text-slate-800">+0 FCFA');
     });
   });
 });

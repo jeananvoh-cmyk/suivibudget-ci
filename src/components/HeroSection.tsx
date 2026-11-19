@@ -24,6 +24,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 }) => {
   const indicators = dataStore.getPublicIndicators();
   const { investments } = indicators;
+  const hasCompleteState2026Amounts = investments.statePhysical2026Count > 0 && investments.unknownAmountState2026ProjectsCount === 0;
+  const hasCompleteLocalCsv2026Amounts = investments.localCsvPhysical2026Count > 0 && investments.unknownAmountLocalCsv2026ProjectsCount === 0;
+  const hasCompleteBouake2026Amounts = investments.localPortalBouakePhysical2026Count > 0 && investments.unknownAmountLocalPortalBouake2026ProjectsCount === 0;
+  const hasCompletePre2026Amounts = investments.unknownAmountPre2026ProjectsCount === 0;
 
   return (
     <div className="bg-white border-b border-slate-200/80 pt-12 pb-16 px-4 sm:px-6 lg:px-8">
@@ -41,7 +45,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* Editorial Summary */}
         <p className="mt-5 text-base sm:text-lg md:text-xl text-slate-600 max-w-4xl mx-auto font-normal leading-relaxed">
-          Explorez en toute transparence les <strong>{investments.physicalAllCount.toLocaleString('fr-FR')} projets et opérations physiques répertoriés selon une classification automatisée</strong> (écoles, santé, eau potable, voirie) : <strong>{formatCompactFCFA(investments.statePhysical2026AmountFcfa)}</strong> côté État ({investments.statePhysical2026Count.toLocaleString('fr-FR')} opérations 2026 extraites sur {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel} d'investissements LFI) et <strong>{formatCompactFCFA(investments.localCsvPhysical2026AmountFcfa)}</strong> côté collectivités LFI ({investments.localCsvPhysical2026Count.toLocaleString('fr-FR')} opérations 2026){investments.localPortalBouakePhysical2026Count > 0 ? `, hors ${investments.localPortalBouakePhysical2026Count} projets portail Bouaké (${formatCompactFCFA(investments.localPortalBouakePhysical2026AmountFcfa)})` : ''}{investments.multiYearPre2026Count > 0 ? ` et ${investments.multiYearPre2026Count} marché pluriannuel 2021 (${formatCompactFCFA(investments.multiYearPre2026AmountFcfa)})` : ''}. Participez au contrôle citoyen avec vos constats de terrain.
+          Explorez en toute transparence les <strong>{investments.physicalAllCount.toLocaleString('fr-FR')} projets et opérations physiques répertoriés selon une classification automatisée</strong> (écoles, santé, eau potable, voirie) : <strong>{hasCompleteState2026Amounts ? formatCompactFCFA(investments.statePhysical2026AmountFcfa) : 'Non consolidé'}</strong> côté État ({investments.statePhysical2026Count.toLocaleString('fr-FR')} opérations 2026 extraites sur {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel} d'investissements LFI) et <strong>{hasCompleteLocalCsv2026Amounts ? formatCompactFCFA(investments.localCsvPhysical2026AmountFcfa) : 'Non consolidé'}</strong> côté collectivités LFI ({investments.localCsvPhysical2026Count.toLocaleString('fr-FR')} opérations 2026){investments.localPortalBouakePhysical2026Count > 0 ? `, hors ${investments.localPortalBouakePhysical2026Count} projets portail Bouaké (${hasCompleteBouake2026Amounts ? formatCompactFCFA(investments.localPortalBouakePhysical2026AmountFcfa) : 'montant non consolidé'})` : ''}{investments.multiYearPre2026Count > 0 ? ` et ${investments.multiYearPre2026Count} marché pluriannuel 2021 (${hasCompletePre2026Amounts ? formatCompactFCFA(investments.multiYearPre2026AmountFcfa) : 'montant non consolidé'})` : ''}. {investments.unknownAmount2026ProjectsCount > 0 ? `Montants 2026 non consolidés : ${investments.unknownAmount2026ProjectsCount} opération(s) sans montant connu.` : ''}{!hasCompletePre2026Amounts && investments.multiYearPre2026Count > 0 ? ` Montants antérieurs non consolidés : ${investments.unknownAmountPre2026ProjectsCount} opération(s) sans montant connu.` : ''} Participez au contrôle citoyen avec vos constats de terrain.
         </p>
 
         {/* Dual Audience Quick Action Links */}

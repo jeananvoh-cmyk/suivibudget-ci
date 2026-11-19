@@ -59,7 +59,7 @@ const COCODY_CA_2024_ROW = {
     approval_date: '2025-07-08',
     prefecture_visa_date: '2025-07-22',
     verification_status: 'DOCUMENT_TO_EXTRACT',
-    notes: "Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45 ; 44 pages physiques PDF, numérotation imprimée jusqu'à 44/45 avec page imprimée 20/45 absente du scan d'origine). Arrêté en Conseil Municipal le 08/07/2025 et approuvé par arrêté préfectoral n° 002/PA/D.CAB le 22/07/2025. Stade comptable : ORDONNANCE. Report antérieur : 944 FCFA. Résultat cumulé : 2237134734 FCFA. Tableau patrimonial page PDF 43 / imprimée 44/45 : Immobilier 810 959 095, Incorporel 20 000 000, Mobilier 535 141 595."
+    notes: "Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45 ; 44 pages physiques PDF, numérotation imprimée jusqu'à 45/45 avec page imprimée 24/45 absente du scan d'origine). Arrêté en Conseil Municipal le 08/07/2025 et approuvé par arrêté préfectoral n° 002/PA/D.CAB le 22/07/2025. Stade comptable : ORDONNANCE. Report antérieur : 944 FCFA. Résultat cumulé : 2237134734 FCFA. Tableau patrimonial page PDF 43 / imprimée 44/45 : Immobilier 810 959 095, Incorporel 20 000 000, Mobilier 535 141 595."
   },
   precision: {
     operating_planned: 'EXACT',
@@ -469,7 +469,7 @@ describe('Pilote Réel d\'Ingestion Documentaire et Financière : Cocody 2024', 
       source_page: 40,
       adoption_date: '2025-07-08',
       evidence_level: 'OFFICIAL_DOCUMENT',
-      notes: "Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45 ; 44 pages physiques PDF, numérotation imprimée jusqu'à 44/45 avec page imprimée 20/45 absente du scan d'origine)."
+      notes: "Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45 ; 44 pages physiques PDF, numérotation imprimée jusqu'à 45/45 avec page imprimée 24/45 absente du scan d'origine)."
     };
     const proposed = buildProposedValuesTemplate('COMPTE_ADMINISTRATIF', {
       operating_planned: 18_441_235_000,
@@ -582,7 +582,7 @@ describe('Pilote Réel d\'Ingestion Documentaire et Financière : Cocody 2024', 
     expect(hydratedPartial.import_provenance.precision.total_revenue_collected).toBe('APPROXIMATE');
   });
 
-  it('M. Contrôle documentaire Cocody CA 2024 : distinction explicite 44 pages physiques PDF vs 45 imprimées, signalement page 20/45 absente et rapprochement patrimonial', () => {
+  it('M. Contrôle documentaire Cocody CA 2024 : distinction explicite 44 pages physiques PDF vs 45 imprimées, signalement page 24/45 absente et rapprochement patrimonial', () => {
     const rawDocWithPrinted45: PublicDocument = {
       id: 'doc-dff4865a-c6a8-418e-8895-626258e409d0',
       title: 'Compte Administratif 2024 - Mairie de Cocody',
@@ -599,6 +599,9 @@ describe('Pilote Réel d\'Ingestion Documentaire et Financière : Cocody 2024', 
       file_size_bytes: 14_072_943,
       file_format: 'PDF',
       page_count: 45,
+      is_scanned: false,
+      has_text_layer: true,
+      ocr_status: 'NOT_APPLICABLE',
       published_at: '2026-10-13T14:13:55.000Z',
       downloads_count: 0,
       is_official: true,
@@ -611,16 +614,79 @@ describe('Pilote Réel d\'Ingestion Documentaire et Financière : Cocody 2024', 
     expect(normalized.page_count).toBe(44);
     expect(normalized.physical_page_count).toBe(44);
     expect(normalized.printed_page_count).toBe(45);
-    expect(normalized.missing_printed_pages).toEqual(['20/45']);
+    expect(normalized.missing_printed_pages).toEqual(['24/45']);
     expect(normalized.pagination_note).toContain('44 pages physiques PDF');
-    expect(normalized.pagination_note).toContain('44/45');
-    expect(normalized.pagination_note).toContain('20/45 absente du scan');
+    expect(normalized.pagination_note).toContain('45/45');
+    expect(normalized.pagination_note).toContain('24/45 absente du scan');
     expect(normalized.pagination_note).toContain('contenu non restitué');
+    expect(normalized.is_scanned).toBe(true);
+    expect(normalized.has_text_layer).toBe(false);
+    expect(normalized.ocr_status).toBe('MANUAL_TRANSCRIPTION');
 
     // Rapprochement indépendant du tableau patrimonial (page PDF 43 / imprimée 44/45) avec l'investissement (page PDF 40 / imprimée 41/45)
     const patPlanned = { immobilier: 3_231_678_000, incorporel: 20_000_000, mobilier: 648_952_000 };
     const patRealized = { immobilier: 810_959_095, incorporel: 20_000_000, mobilier: 535_141_595 };
     expect(patPlanned.immobilier + patPlanned.incorporel + patPlanned.mobilier).toBe(COCODY_CA_2024_ROW.data.investment_planned);
     expect(patRealized.immobilier + patRealized.incorporel + patRealized.mobilier).toBe(COCODY_CA_2024_ROW.data.investment_realized);
+  });
+
+  it('M2. Normalisation de description Cocody CA 2024 : corrige les mentions obsolètes 44/45 sur 45 et 20/45 absente issues de la base distante', () => {
+    const staleProdDoc: PublicDocument = {
+      id: 'doc-dff4865a-c6a8-418e-8895-626258e409d0',
+      title: 'Compte Administratif 2024 - Mairie de Cocody',
+      category: 'COMPTE_ADMINISTRATIF',
+      institution_name: 'Mairie de Cocody',
+      institution_id: 'inst-com-cocody',
+      year: 2024,
+      description: "Fichier PDF de 44 pages physiques (numérotation imprimée jusqu'à 44/45 sur 45 annoncées ; page imprimée 20/45 absente du scan d'origine, contenu non restitué).",
+      file_url: '',
+      file_name: 'compte-administratif-2024-v1.pdf',
+      file_format: 'PDF',
+      published_at: '2026-10-13T14:13:55.000Z',
+      downloads_count: 12,
+      is_official: true,
+      checksum_sha256: '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf',
+      status: 'PUBLISHED',
+      verification_status: 'VERIFIED',
+    };
+
+    const normalized = applyVerifiedDocumentPagination(staleProdDoc);
+    expect(normalized.description).toContain('45/45 sur 45 annoncées');
+    expect(normalized.description).toContain('24/45 absente du scan');
+    expect(normalized.description).not.toContain('20/45');
+    expect(normalized.description).not.toContain('44/45 sur 45');
+  });
+
+  it('N. Hydratation robuste : parse import_provenance JSON, initialise precision manquante, préserve precision des reports et trie procurement_matches multi-lots', () => {
+    const hydrated = hydrateAdministrativeAccountFromRow({
+      id: 'ca-hydrate-edge',
+      institution_id: 'inst-com-cocody',
+      fiscal_year: 2024,
+      total_planned: '1000',
+      total_realized: '800',
+      operating_revenue_realized: '600',
+      investment_revenue_realized: '300',
+      import_provenance: JSON.stringify({ source: { name: 'CA 2024' } }),
+      notes: 'Report antérieur : 944 FCFA (APPROXIMATE). Résultat cumulé : 100944 FCFA (LOWER_BOUND).',
+      operations: [
+        {
+          id: 'op-multi',
+          planned_amount: '500',
+          executed_amount: '400',
+          procurement_matches: [
+            { id: 'm-2', lot: '2', match_level: 'PARTIAL', award_amount: '200000', contractor: 'Beta' },
+            { id: 'm-1', lot: '1', match_level: 'STRONG', award_amount: '300000', contractor: 'Alpha' },
+          ],
+        },
+      ],
+    });
+
+    const ops = (hydrated as any).operations;
+    expect(hydrated.import_provenance?.precision).toBeDefined();
+    expect(hydrated.import_provenance?.precision?.previous_result_reported).toBe('APPROXIMATE');
+    expect(hydrated.import_provenance?.precision?.cumulative_result).toBe('LOWER_BOUND');
+    expect(ops[0].procurement_matches.map((m: any) => m.id)).toEqual(['m-1', 'm-2']);
+    expect(ops[0].procurement_match.id).toBe('m-1');
+    expect(ops[0].procurement_matches[0].award_amount).toBe(300000);
   });
 });

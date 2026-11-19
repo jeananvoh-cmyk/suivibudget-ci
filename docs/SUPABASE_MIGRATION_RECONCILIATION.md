@@ -61,7 +61,7 @@ Le 15 novembre 2026, leurs trois versions ont été inscrites dans `supabase_mig
 
 - La restauration des 26 fichiers canoniques ne modifie pas la base Production et ne prouve pas à elle seule que le bootstrap local reproduit le schéma initial de Production.
 - Le contrôle CLI `supabase migration list --remote` reste à exécuter dès que Supabase CLI sera disponible. L'historique distant a toutefois été relu via le connecteur Supabase après l'opération : 29 versions enregistrées, dont les trois versions bootstrap.
-- Le projet ne possède actuellement aucune branche Supabase de développement. La création d’une Preview Branch peut engendrer des frais (Compute, stockage, egress). La tentative de création a été arrêtée par le mécanisme de confirmation de coût ; aucune branche n’a été créée.
+- Le projet ne possède actuellement aucune branche Supabase de développement. La création d’une Preview Branch a été refusée par Supabase car l’offre actuelle ne permet le branching qu’à partir du plan Pro. Aucun upgrade ni paiement n’a été effectué et aucune branche payante n’a été créée. Pour poursuivre sans frais, les migrations sont rejouées dans une base PostgreSQL éphémère PGlite en CI, sur un fixture issu des métadonnées de Production ; cette validation locale est documentée comme complémentaire et ne prétend pas remplacer une Preview Branch Supabase hébergée.
 - Supabase CLI v3 cible le local par défaut : tout contrôle hébergé doit préciser `--remote`. Toute commande modifiant un projet hébergé doit rester explicitement approuvée.
 - Le CLI Supabase n'étant pas disponible dans l'environnement, l'inscription des trois versions a été réalisée par un INSERT ciblé et idempotent sur `supabase_migrations.schema_migrations` (colonnes `version`, `name` uniquement), après vérification qu'elles étaient absentes. L'opération a été relue immédiatement : 29 versions au total, 3/3 versions bootstrap présentes et `20261115070000` absente. Aucun `db push`, `apply_migration`, changement de schéma ou de données métier, fusion Git ou déploiement Production n'a été effectué.
 
@@ -130,3 +130,34 @@ Ces alertes ne justifient pas une modification aveugle de Production. Les action
 - Aucun changement de schéma ni de données métier en Production ; seule la table de suivi des migrations a reçu les trois enregistrements documentés ci-dessus.
 - Aucun merge Git ni déploiement Production.
 - Les alertes Supabase ont été triées et documentées ; aucun réglage Auth, privilège, index ou politique RLS n'a été changé en Production.
+
+
+## Correctif indépendant — pagination des preuves primaires (16 novembre 2026)
+
+La revue complémentaire a identifié qu'une page source positive n'était pas comparée au nombre de pages physiques du PDF catalogue. Les migrations pré-GO contrôlent désormais :
+- `public_documents.page_count IS NOT NULL` ;
+- `source_page <= page_count` pour les budgets locaux, comptes administratifs, projets et rapprochements de marchés ;
+- la même borne pour les lignes budgétaires et les sources de recettes rattachées au budget parent publié ;
+- l'immutabilité de `page_count` tant qu'un document primaire est référencé par des données financières certifiées.
+
+Les changements de pagination nécessitent donc de déclasser d'abord les données financières dépendantes, puis de les faire vérifier à nouveau. Les assertions correspondantes ont été ajoutées à `localBudgetRlsMigration.test.ts`.
+
+**Dernier commit de correction :** `cf44e666b342148c7125fdf801691e458762d3d8`.
+
+Cette migration reste non appliquée à Supabase Production. CI Quality et replay PGlite doivent être relancés sur le HEAD final ; les runs observés sur les commits intermédiaires ont été annulés lors des pushes successifs.
+
+
+## Correctif Passeport — preuves indépendantes des étapes Besoin et Audit (16 novembre 2026)
+
+La revue du code de `projectPassport.ts` a révélé que les étapes 1 (besoin citoyen) et 6 (audit) pouvaient afficher `VERIFIED_OFFICIAL` à partir de champs JSON déclaratifs (identifiant de document, URL institutionnelle, page et statut manuel), sans prouver que le document existait dans le catalogue documentaire, était publié, vérifié et possédait une empreinte SHA-256.
+
+Correction proposée dans `20261116100000_enforce_passport_document_evidence.sql` :
+- vérification serveur du document primaire réellement présent dans `public_documents` ;
+- contrôle du statut publié/vérifié, du checksum SHA-256, de l'URL institutionnelle exacte et de la collectivité / année ;
+- contrôle obligatoire de `source_page` dans les bornes du PDF (`page_count`) ;
+- déclencheur sur insertion et modification de `project_metadata` ;
+- rétrogradation automatique des anciennes déclarations Besoin/Audit non justifiées vers `TO_VERIFY`, sans modifier les montants.
+
+Le test PGlite `localBudgetRlsMigration.test.ts` rejoue maintenant cette migration après le durcissement financier et vérifie les déclassements et refus de fausses certifications.
+
+**Garde-fou :** migration versionnée uniquement ; aucune application sur Supabase Production. La CI Quality et le replay PGlite doivent réussir sur le HEAD final avant toute revue de fusion.

@@ -25,6 +25,10 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
   const localCsv2026Amount = detailed?.investments.localCsvPhysical2026AmountFcfa;
   const bouakeAmount = detailed?.investments.localPortalBouakePhysical2026AmountFcfa;
   const multiYearAmount = detailed?.investments.multiYearPre2026AmountFcfa;
+  const hasCompleteState2026Amounts = (detailed?.investments.statePhysical2026Count ?? 0) > 0 && detailed?.investments.unknownAmountState2026ProjectsCount === 0;
+  const hasCompleteLocalCsv2026Amounts = (detailed?.investments.localCsvPhysical2026Count ?? 0) > 0 && detailed?.investments.unknownAmountLocalCsv2026ProjectsCount === 0;
+  const hasCompleteBouake2026Amounts = (detailed?.investments.localPortalBouakePhysical2026Count ?? 0) > 0 && detailed?.investments.unknownAmountLocalPortalBouake2026ProjectsCount === 0;
+  const hasCompletePre2026Amounts = detailed?.investments.unknownAmountPre2026ProjectsCount === 0;
 
   const proofTarget2026 = detailed?.citizenProofs.target2026 ?? 1000;
   const pendingProofsCount = detailed?.citizenProofs.pendingCount ?? 0;
@@ -87,9 +91,10 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
             </p>
             {state2026Amount !== undefined && localCsv2026Amount !== undefined && (
               <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                Extrait classifié : {formatCompactFCFA(state2026Amount)} État • {formatCompactFCFA(localCsv2026Amount)} local LFI
-                {bouakeCount > 0 && bouakeAmount != null && ` (hors ${formatCompactFCFA(bouakeAmount)} portail Bouaké)`}
-                {multiYearCount > 0 && multiYearAmount != null && multiYearAmount > 0 && ` • hors 2021 : ${formatCompactFCFA(multiYearAmount)}`}
+                Extrait classifié : {hasCompleteState2026Amounts ? `${formatCompactFCFA(state2026Amount ?? 0)} État` : `État non consolidé (${detailed?.investments.unknownAmountState2026ProjectsCount ?? 0} montant(s) inconnu(s))`} • {hasCompleteLocalCsv2026Amounts ? `${formatCompactFCFA(localCsv2026Amount ?? 0)} local LFI` : `local LFI non consolidé (${detailed?.investments.unknownAmountLocalCsv2026ProjectsCount ?? 0} montant(s) inconnu(s))`}
+                {bouakeCount > 0 && (hasCompleteBouake2026Amounts && bouakeAmount != null ? ` (hors ${formatCompactFCFA(bouakeAmount)} portail Bouaké)` : ` (portail Bouaké non consolidé : ${detailed?.investments.unknownAmountLocalPortalBouake2026ProjectsCount ?? 0} montant(s) inconnu(s))`)}
+                {hasCompletePre2026Amounts && multiYearCount > 0 && multiYearAmount != null && multiYearAmount > 0 && ` • hors 2021 : ${formatCompactFCFA(multiYearAmount)}`}
+                {!hasCompletePre2026Amounts && multiYearCount > 0 && ` • montants antérieurs non consolidés : ${detailed?.investments.unknownAmountPre2026ProjectsCount ?? 0} opération(s) sans montant connu`}
               </p>
             )}
           </div>

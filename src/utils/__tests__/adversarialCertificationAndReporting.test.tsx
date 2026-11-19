@@ -632,6 +632,7 @@ describe('Tests Adversariaux P0/P1 — Certification du Passeport de Redevabilit
     expect(isOfficialPrimarySourceUrl('https://www.marchespublics.ci/avis/2024.pdf')).toBe(true);
     expect(isOfficialPrimarySourceUrl('https://dgbf.gouv.ci/budget/2026.pdf')).toBe(true);
     expect(isOfficialPrimarySourceUrl('https://courdescomptes.ci/rapports/2025.pdf')).toBe(true);
+    expect(isOfficialPrimarySourceUrl('https://gouv.ci/lois/2026.pdf')).toBe(true);
     expect(isOfficialPrimarySourceUrl('https://example.com/avis-officiel.pdf')).toBe(false);
     expect(isOfficialPrimarySourceUrl('http://www.marchespublics.ci/avis.pdf')).toBe(false);
     expect(isOfficialPrimarySourceUrl('https://marchespublics.ci.evil.example/avis.pdf')).toBe(false);

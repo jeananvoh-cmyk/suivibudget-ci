@@ -91,11 +91,16 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   // Public indicators & exact 2026 sector breakdown across 100% of tangible 2026 projects
   const publicIndicators = useMemo(() => dataStore.getPublicIndicators(), [allProjects, stats]);
+  const hasCompleteState2026Amounts = publicIndicators.investments.statePhysical2026Count > 0 && publicIndicators.investments.unknownAmountState2026ProjectsCount === 0;
+  const hasCompleteLocalCsv2026Amounts = publicIndicators.investments.localCsvPhysical2026Count > 0 && publicIndicators.investments.unknownAmountLocalCsv2026ProjectsCount === 0;
+  const hasCompleteBouake2026Amounts = publicIndicators.investments.localPortalBouakePhysical2026Count > 0 && publicIndicators.investments.unknownAmountLocalPortalBouake2026ProjectsCount === 0;
+  const hasCompletePre2026Amounts = publicIndicators.investments.unknownAmountPre2026ProjectsCount === 0;
   const sectorBreakdown2026 = useMemo(
     () => computeSectorBreakdown(allProjects, { fiscalYear: 2026 }),
     [allProjects]
   );
   const sectorData = sectorBreakdown2026.sectors;
+  const hasCompleteSectorTotals = sectorBreakdown2026.consolidatedTotalAmountFcfa !== null;
 
   // 1. SECTION 1 : Grands Projets Stratégiques de l'État en Milliards FCFA
   const { heroFeatured, sideArticles } = useMemo(() => {
@@ -261,7 +266,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Budget Ouvert 2026
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Explorez {publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée ({formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa)} État extrait LFI et {formatCompactFCFA(publicIndicators.investments.localCsvPhysical2026AmountFcfa)} local extrait LFI{publicIndicators.investments.localPortalBouakePhysical2026Count > 0 ? `, hors ${publicIndicators.investments.localPortalBouakePhysical2026Count} projets portail Bouaké` : ''}).
+                Explorez {publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée (État : {hasCompleteState2026Amounts ? formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa) : 'montant non consolidé'} ; collectivités LFI : {hasCompleteLocalCsv2026Amounts ? formatCompactFCFA(publicIndicators.investments.localCsvPhysical2026AmountFcfa) : 'montant non consolidé'}{publicIndicators.investments.localPortalBouakePhysical2026Count > 0 ? `; portail Bouaké : ${hasCompleteBouake2026Amounts ? formatCompactFCFA(publicIndicators.investments.localPortalBouakePhysical2026AmountFcfa) : 'montant non consolidé'}` : ''}).
               </p>
             </div>
             <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-brand-blue">
@@ -326,7 +331,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Où vont les investissements publics en 2026 ?
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-                Répartition en FCFA des {sectorBreakdown2026.totalProjects.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée ({formatCompactFCFA(sectorBreakdown2026.totalAmountFcfa)} — sous-ensemble extrait sur {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel} votés en LFI 2026{sectorBreakdown2026.excludedOtherYearsCount > 0 ? `, hors ${sectorBreakdown2026.excludedOtherYearsCount} marché pluriannuel 2021 de ${formatCompactFCFA(sectorBreakdown2026.excludedOtherYearsAmountFcfa)}` : ''}). {sectorBreakdown2026.methodologyNotice}
+                Répartition sectorielle des {sectorBreakdown2026.totalProjects.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée ({hasCompleteSectorTotals ? formatCompactFCFA(sectorBreakdown2026.consolidatedTotalAmountFcfa!) : `total non consolidé — ${sectorBreakdown2026.unknownAmountProjectsCount} opération(s) sans montant connu`} — sous-ensemble extrait sur {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel} votés en LFI 2026{sectorBreakdown2026.excludedOtherYearsCount > 0 ? `, hors ${sectorBreakdown2026.excludedOtherYearsCount} marché pluriannuel 2021 ${hasCompletePre2026Amounts ? `de ${formatCompactFCFA(sectorBreakdown2026.excludedOtherYearsAmountFcfa)}` : '(montant non consolidé)'}` : ''}). {sectorBreakdown2026.isPartialSum ? 'Les montants et pourcentages incomplets ne sont pas affichés.' : sectorBreakdown2026.methodologyNotice}
               </p>
             </div>
             <button
@@ -338,7 +343,10 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {sectorData.map((sec) => (
+            {sectorData.map((sec) => {
+              const hasSectorAmount = sec.consolidatedAmountFcfa !== null;
+              const hasReliablePercentages = !sectorBreakdown2026.isPartialSum;
+              return (
               <div
                 key={sec.id}
                 onClick={() => {
@@ -359,7 +367,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                       </span>
                     </div>
                     <span className={`px-2.5 py-1 rounded-full text-xs font-black border flex-shrink-0 ${sec.badgeBg}`}>
-                      {sec.pct.toLocaleString('fr-FR', { minimumFractionDigits: sec.pct % 1 === 0 ? 0 : 1, maximumFractionDigits: 1 })} %
+                      {hasReliablePercentages ? `${sec.pct.toLocaleString('fr-FR', { minimumFractionDigits: sec.pct % 1 === 0 ? 0 : 1, maximumFractionDigits: 1 })} %` : 'Part non calculable'}
                     </span>
                   </div>
 
@@ -370,12 +378,12 @@ export const HomePage: React.FC<HomePageProps> = ({
                         Budget suivi 2026
                       </span>
                       <span className="text-[11px] font-mono text-slate-400 font-medium">
-                        {formatFCFA(sec.amountFcfa)}
+                        {hasSectorAmount ? formatFCFA(sec.consolidatedAmountFcfa!) : `Non consolidé — ${sec.unknownAmountCount} opération(s) sans montant connu`}
                       </span>
                     </div>
 
                     <div className="text-xl font-black text-slate-900 tracking-tight">
-                      {sec.amountFcfa === 0 ? '0 FCFA' : `${formatAmountInWords(sec.amountFcfa)} FCFA`}
+                      {hasSectorAmount ? (sec.consolidatedAmountFcfa === 0 ? '0 FCFA' : `${formatAmountInWords(sec.consolidatedAmountFcfa!)} FCFA`) : 'Montant non consolidé'}
                     </div>
 
                     {/* Jauge exacte sans plancher artificiel */}
@@ -383,7 +391,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                       <div className="w-full bg-slate-200/80 h-2 rounded-full overflow-hidden">
                         <div
                           className={`${sec.bgBar} h-full rounded-full transition-all duration-500`}
-                          style={{ width: `${Math.min(100, Math.max(0, sec.pct))}%` }}
+                          style={{ width: `${hasReliablePercentages ? Math.min(100, Math.max(0, sec.pct)) : 0}%` }}
                         />
                       </div>
                     </div>
@@ -403,7 +411,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
