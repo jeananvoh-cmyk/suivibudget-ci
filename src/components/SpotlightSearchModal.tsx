@@ -4,6 +4,8 @@ import { Search, X, Building2, Landmark, User, FileText, ArrowRight, CornerDownL
 import { Institution, BudgetProject } from '../types';
 import { GOVERNMENT_OFFICIALS, OfficialLeader } from '../data/governmentData';
 import { NATIONAL_INSTITUTIONS_DATA } from '../data/nationalBudgetData';
+import { OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
+import { LFI_LOCAL_GRANTS_2026 } from '../data/lfiLocalGrants2026';
 import { formatFCFA, formatAmountInWords } from '../utils/formatters';
 
 interface SpotlightSearchModalProps {
@@ -224,7 +226,17 @@ export const SpotlightSearchModal: React.FC<SpotlightSearchModalProps> = ({
                                   ? "District de Yamoussoukro"
                                   : "District d'Abidjan")
                               : `Région ${m.region}`;
-                            return `${locLabel} • ${m.is_tax_quota_commune ? "Autonomie fiscale DGI" : `Dotation : ${formatFCFA(m.total_budget_fcfa)} (${formatAmountInWords(m.total_budget_fcfa)})`}`;
+                            const bp = OFFICIAL_PRIMITIVE_BUDGETS[m.id];
+                            const lfi = LFI_LOCAL_GRANTS_2026[m.id];
+                            const budgetSummary = bp
+                              ? `BP rapporté : ${formatFCFA(bp.total_voted_fcfa)}`
+                              : 'BP : aucune source en ligne';
+                            const lfiSummary = lfi?.status === 'VERIFIED_LFI' && lfi.total_cp_fcfa != null
+                              ? ` • Dotation LFI 2026 : ${formatFCFA(lfi.total_cp_fcfa)}`
+                              : lfi?.status === 'NO_NOMINATIVE_LFI_LINE'
+                              ? ' • LFI 2204040 : aucune ligne nominative'
+                              : '';
+                            return `${locLabel} • ${budgetSummary}${lfiSummary}`;
                           })()}
                         </div>
                       </div>
@@ -259,7 +271,17 @@ export const SpotlightSearchModal: React.FC<SpotlightSearchModalProps> = ({
                           {r.name}
                         </div>
                         <div className="text-[11px] text-slate-500">
-                          Chef-lieu : {r.departement} • Budget : {formatFCFA(r.total_budget_fcfa)} ({formatAmountInWords(r.total_budget_fcfa)} FCFA)
+                          {(() => {
+                            const bp = OFFICIAL_PRIMITIVE_BUDGETS[r.id];
+                            const lfi = LFI_LOCAL_GRANTS_2026[r.id];
+                            const bpLabel = bp
+                              ? `BP rapporté : ${formatFCFA(bp.total_voted_fcfa)}`
+                              : 'BP : aucune source en ligne';
+                            const lfiLabel = lfi?.status === 'VERIFIED_LFI' && lfi.total_cp_fcfa != null
+                              ? ` • Dotation LFI 2026 : ${formatFCFA(lfi.total_cp_fcfa)}`
+                              : '';
+                            return `Chef-lieu : ${r.departement} • ${bpLabel}${lfiLabel}`;
+                          })()}
                         </div>
                       </div>
                     </div>

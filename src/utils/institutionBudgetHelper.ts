@@ -3,6 +3,7 @@ import { DOCUMENT_CONTROLS } from '../data/officialPublicDocumentsCatalog';
 import { formatFCFA, formatAmountInWords } from './formatters';
 import { OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
 import { NATIONAL_DIRECT_ALLOCATIONS_2026 } from '../data/nationalBudgetData';
+import { LFI_LOCAL_GRANTS_2026 } from '../data/lfiLocalGrants2026';
 import legalCP from '../../docs/references/2026/ministry-reconciliation/LFI_ARTICLES_14_15_LEGAL_VOTED_CP_35.json';
 
 export const LFI_2026_DOCUMENT = {
@@ -24,6 +25,13 @@ export const ANNEXE_6_EPN_2026_DOCUMENT = {
   reference: "Annexe 6 LFI 2026 • État récapitulatif ASS • DGBF",
   url: "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-6-Budgets-des-EPN-2026.pdf",
   sha256: "3186dc17e1ba51ba1b69b3eed8ee3e40083a8eb0ddd56861dfdd0aa4b8c9bb2e",
+};
+
+export const ANNEXE_8_LOCAL_TRANSFERS_2026_DOCUMENT = {
+  title: "Annexe 8 — Concours financiers aux collectivités territoriales et aux districts autonomes 2026",
+  reference: "Annexe 8 LFI 2026 • Concours aux collectivités • DGBF",
+  url: "https://www.dgbf.ci/wp-content/uploads/2025/12/Annexe-8-Concours-financiers-aux-collectivites-territoriales-et-aux-districts-autonomes-2026.pdf",
+  sha256: "b3c2d9b90d847fdefb20d100c606cba0b6430e00f94306da6377ce56014128fc",
 };
 
 type AuditedFinancialClaim = {
@@ -886,11 +894,31 @@ export interface BudgetPresentationAmount {
   source: DocumentaryProvenance | null;
 }
 
+export interface LfiLocalGrantPresentation {
+  status: 'VERIFIED_LFI' | 'NO_NOMINATIVE_LFI_LINE';
+  total_cp_fcfa: number | null;
+  operating_cp_fcfa: number;
+  salaries_cp_fcfa: number;
+  canteens_cp_fcfa: number;
+  investment_cp_fcfa: number;
+  annexe4_supplement_fcfa: number;
+  annexe8_supplement_fcfa: number;
+  label: string;
+  lfi_action_code: string | null;
+  annexe4_action_codes: readonly string[];
+  annexe8_action_codes: readonly string[];
+  annexe8_source_url: string | null;
+  annexe8_pdf_page: number | null;
+  source: DocumentaryProvenance;
+  note: string;
+}
+
 export interface InstitutionBudgetPresentation {
   institution_id: string;
   fiscal_year: number;
   reference: BudgetPresentationAmount;
   supplements: BudgetPresentationAmount[];
+  lfi_grant?: LfiLocalGrantPresentation | null;
   section_code: string | null;
   program_code: string | null;
   aggregation: 'UNIQUE_SECTION' | 'SHARED_SECTION' | 'INCLUDED_IN_PARENT' | 'SEPARATE_SCOPE';
@@ -1280,6 +1308,73 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
       });
     }
   }
+  if (local) {
+    const lfiRecord = LFI_LOCAL_GRANTS_2026[id];
+    const hasGrantEvidence = Boolean(institution.state_grant_evidence);
+    const hasValidGrantEvidence = hasGrantEvidence && recorded != null && isValidStateGrantEvidence(institution.state_grant_evidence, id, recorded);
+    if (lfiRecord) {
+      if (
+        lfiRecord.status === 'VERIFIED_LFI' &&
+        (recorded == null || recorded === lfiRecord.total_cp_fcfa) &&
+        (!hasGrantEvidence || hasValidGrantEvidence)
+      ) {
+        const refParts: string[] = [];
+        if (lfiRecord.lfi_action_code) refParts.push(`LFI 2026 • Action ${lfiRecord.lfi_action_code}`);
+        if (lfiRecord.annexe4_action_codes.length > 0) refParts.push(`Annexe 4 (${lfiRecord.annexe4_action_codes.length} action(s))`);
+        if (lfiRecord.annexe8_action_codes.length > 0) refParts.push(`Annexe 8 (${lfiRecord.annexe8_action_codes.join(', ')})`);
+        result.lfi_grant = {
+          status: 'VERIFIED_LFI',
+          total_cp_fcfa: lfiRecord.total_cp_fcfa,
+          operating_cp_fcfa: lfiRecord.operating_cp_fcfa,
+          salaries_cp_fcfa: lfiRecord.salaries_cp_fcfa,
+          canteens_cp_fcfa: lfiRecord.canteens_cp_fcfa,
+          investment_cp_fcfa: lfiRecord.investment_cp_fcfa,
+          annexe4_supplement_fcfa: lfiRecord.annexe4_supplement_fcfa,
+          annexe8_supplement_fcfa: lfiRecord.annexe8_supplement_fcfa,
+          label: 'Dotation / Concours de l’État (LFI 2026) — distincte du budget primitif',
+          lfi_action_code: lfiRecord.lfi_action_code,
+          annexe4_action_codes: lfiRecord.annexe4_action_codes,
+          annexe8_action_codes: lfiRecord.annexe8_action_codes,
+          annexe8_source_url: lfiRecord.annexe8_action_codes.length > 0 ? ANNEXE_8_LOCAL_TRANSFERS_2026_DOCUMENT.url : null,
+          annexe8_pdf_page: lfiRecord.annexe8_pdf_page,
+          source: {
+            document_title: LFI_2026_DOCUMENT.title,
+            document_reference: refParts.join(' · ') || LFI_2026_DOCUMENT.reference,
+            source_url: LFI_2026_DOCUMENT.url,
+            pdf_page: lfiRecord.lfi_pdf_page,
+            sha256: LFI_2026_DOCUMENT.sha256,
+            table_or_line: lfiRecord.source_name ? `Ligne nominative : ${lfiRecord.source_name}` : null,
+          },
+          note: lfiRecord.note,
+        };
+      } else if (lfiRecord.status === 'NO_NOMINATIVE_LFI_LINE' && recorded == null && !hasGrantEvidence) {
+        result.lfi_grant = {
+          status: 'NO_NOMINATIVE_LFI_LINE',
+          total_cp_fcfa: null,
+          operating_cp_fcfa: 0,
+          salaries_cp_fcfa: 0,
+          canteens_cp_fcfa: 0,
+          investment_cp_fcfa: 0,
+          annexe4_supplement_fcfa: 0,
+          annexe8_supplement_fcfa: 0,
+          label: 'Dotation de l’État (LFI 2026) — aucune ligne nominative dans le programme 2204040',
+          lfi_action_code: null,
+          annexe4_action_codes: [],
+          annexe8_action_codes: [],
+          annexe8_source_url: null,
+          annexe8_pdf_page: null,
+          source: {
+            document_title: LFI_2026_DOCUMENT.title,
+            document_reference: 'Programme 2204040 (pp. 200-207) — aucune ligne nominative identifiée',
+            source_url: LFI_2026_DOCUMENT.url,
+            pdf_page: 207,
+            sha256: LFI_2026_DOCUMENT.sha256,
+          },
+          note: lfiRecord.note,
+        };
+      }
+    }
+  }
   if (id === 'inst-cour-supreme') result.notice = 'Aucune section LFI autonome pour la Cour Suprême. Les sections 114 (Cassation), 118 (Conseil d’État) et 115 (Cour des comptes) sont distinctes.';
   return result;
 }
@@ -1292,7 +1387,24 @@ export function exportInstitutionBudget(institution: Partial<Institution>, forma
     return `"${(/^[\s]*[=+@-]/.test(text) ? "'" + text : text).replace(/"/g, '""')}"`;
   };
   const headers = ['identifiant', 'nom', 'exercice', 'role', 'nature', 'montant_fcfa', 'precision', 'verification', 'section', 'programme', 'aggregation', 'source_url', 'page_pdf', 'document', 'sha256', 'limites'];
-  const rows = [view.reference, ...view.supplements].map((amount, index) => [
+  const lfiSupplement: BudgetPresentationAmount | null = view.lfi_grant?.status === 'VERIFIED_LFI' && view.lfi_grant.total_cp_fcfa != null
+    ? {
+        amount_fcfa: view.lfi_grant.total_cp_fcfa,
+        label: view.lfi_grant.label,
+        precision: 'EXACT',
+        verification: 'VERIFIED_AMOUNT',
+        source: view.lfi_grant.source,
+      }
+    : null;
+  const normalizedSupplements = lfiSupplement
+    ? [
+        lfiSupplement,
+        ...view.supplements.filter(
+          (item) => !(item.source == null && item.verification === 'TO_VERIFY' && item.amount_fcfa === lfiSupplement.amount_fcfa),
+        ),
+      ]
+    : view.supplements;
+  const rows = [view.reference, ...normalizedSupplements].map((amount, index) => [
     view.institution_id, institution.name, view.fiscal_year, index === 0 ? 'REFERENCE' : 'COMPLEMENT_NON_ADDITIF',
     amount.label, amount.amount_fcfa, amount.precision, amount.verification, view.section_code, view.program_code,
     index === 0 ? view.aggregation : 'SEPARATE_SCOPE', amount.source?.source_url, amount.source?.pdf_page, amount.source?.document_title, amount.source?.sha256, view.notice,

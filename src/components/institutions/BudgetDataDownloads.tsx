@@ -24,7 +24,12 @@ export const BudgetDataDownloads: React.FC<{ scope: Scope }> = ({ scope }) => {
           <h2 className="text-sm font-black text-slate-900">Données budgétaires 2026 — consultation et export</h2>
           <p className="text-xs text-slate-700">
             {info.documented} / {info.total} fiches avec montant de référence ({info.label}).
-            Les montants manquants ne sont jamais remplacés par zéro.
+            {(scope === 'COMMUNE' || scope === 'CONSEIL_REGIONAL') && (
+              <span>
+                {' '}En attente des BP définitifs, {scope === 'COMMUNE' ? '192 / 201 communes' : '31 / 31 conseils régionaux'} disposent de dotations de l’État sourcées dans la LFI 2026.
+              </span>
+            )}
+            {' '}Les montants manquants ne sont jamais remplacés par zéro.
           </p>
           <p className="text-[11px] text-slate-600 leading-relaxed">
             Crédits de sections de la Loi de finances et budgets primitifs locaux sont des natures
