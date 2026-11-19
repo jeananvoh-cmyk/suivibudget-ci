@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type { ApecDecision, ApecEvent, ApecContribution } from '../types';
 import { createApecCycle, loadApec, loadApecHistory, recordApecDecision, submitApecContribution, submitApecNeed, publishApecNeed, withdrawApecNeed } from '../services/apecService';
 import { supabase } from '../services/supabase';
+import { assertPasswordNotPwned, PwnedPasswordError } from '../services/pwnedPassword';
 
 const labels: Record<string,string> = {
   SUBMITTED:'Besoin reçu', TO_VERIFY:'À vérifier', VERIFIED:'Vérifié — reste une contribution citoyenne', REJECTED:'Non retenu après vérification',
@@ -57,7 +58,7 @@ export function ApecParticipation({ institutionId, fiscalYear }: { institutionId
     const form=event.currentTarget;
     setBusy(true); setMessage('');
     try { setMessage(await operation(new FormData(form))); form.reset(); setRevision(v=>v+1); }
-    catch { setMessage('Action refusée ou service indisponible. Vérifiez les informations, le statut et les sources, puis réessayez.'); }
+    catch (error) { setMessage(error instanceof PwnedPasswordError ? error.message : 'Action refusée ou service indisponible. Vérifiez les informations, le statut et les sources, puis réessayez.'); }
     finally { setBusy(false); }
   }
   const sourceFields=<>
@@ -84,6 +85,7 @@ export function ApecParticipation({ institutionId, fiscalYear }: { institutionId
       {!data.signedIn && <details><summary className="min-h-[44px] cursor-pointer font-semibold focus-visible:outline">Se connecter pour participer</summary>
         <form className="space-y-3" onSubmit={e=>void run(e,async f=>{
           const credentials={email:String(f.get('email')),password:String(f.get('password'))};
+          if(createAccount) await assertPasswordNotPwned(credentials.password);
           const result=createAccount ? await supabase.auth.signUp(credentials) : await supabase.auth.signInWithPassword(credentials);
           if(result.error) throw result.error;
           return createAccount && !result.data.session ? 'Consultez votre messagerie pour confirmer votre inscription si une confirmation est requise, puis connectez-vous.' : 'Connexion établie.';

@@ -1284,3 +1284,24 @@ NEXT_EXECUTABLE_TASK : validation finale humaine de la PR corrective dépendante
   - Branche : `fix/recette-prod-modal-escape-hero-overflow` (PR #57 ouverte sur `master`).
 - **PROCHAINE ACTION** : Revue ChatGPT de la PR #57 et relance du déploiement Vercel après réinitialisation du quota quotidien.
 
+
+
+## PRE_GO_REMEDIATION_20261115 — branche corrective dédiée
+
+- Branche : `fix/pre-go-complete-20261115`, créée depuis le HEAD #77 `320ae4c81396b6d25973848d8e6f0811965ff808`.
+- Rapport courant : `docs/audits/PRE_GO_REMEDIATION_20261115.md`. Ce bloc supersède les anciens statuts de sécurité de ce handoff lorsque ceux-ci contredisent les Advisors Production du 15/11/2026.
+- Correctifs versionnés dans cette branche : contrôle gratuit HIBP k-anonymity dans les parcours de création de compte citoyen et de changement de mot de passe administrateur ; wrappers RPC publics SECURITY INVOKER avec implémentations SECURITY DEFINER déplacées dans le schéma non exposé `private` ; suppression de la lecture publique directe de `site_settings`. L'optimisation RLS `auth.uid()` est isolée dans la PR #76 pour éviter une migration en doublon ; les dix index FK sont différés après triage faute de bénéfice mesuré.
+- Tests ciblés ajoutés dans cette branche : `pwnedPassword.test.ts` et `preGoRpcHardening.test.ts`. Le test RLS ciblé est porté par la PR #76.
+- **Limite Auth à ne pas masquer :** la protection native Supabase Auth contre les mots de passe compromis est Pro+ selon la documentation Supabase. Le contrôle HIBP côté application est une défense en profondeur, pas une barrière serveur équivalente ; un appel direct à l'API Auth peut le contourner et les mots de passe existants ne sont pas rétro-vérifiés. Aucun paiement ni changement de réglage Production.
+- La migration `20261116150000_move_staff_rpcs_to_private.sql` n'est pas appliquée en Production. La migration RLS `20261116140000_optimize_admin_receipt_read_rls.sql` est portée séparément par la PR #76. Les deux changements doivent passer leur CI et une revue indépendante avant toute migration hébergée.
+- Supabase Production reste en lecture seule. Aucun merge, aucun déploiement, aucune modification de configuration Auth.
+- **GO : NO-GO maintenu** tant que CI, replay PGlite complet, revue indépendante, preuve binaire indépendante du PDF Cocody, justification de l'opération dépassant le montant prévu et arbitrage du risque HIBP serveur ne sont pas clos.
+
+
+## PRE_GO_CI_RESULT_20261115
+
+- CI #514 : **SUCCESS** sur `0bea7d68b5d43b07a143cf74147083493728b980` — 75/75 fichiers, 989/989 tests, build production PASS, build Review PASS.
+- Le test PGlite des huit wrappers RPC et de la révocation des politiques publiques legacy `projects`/`sources` passe ; le test HIBP k-anonymity passe. Le test RLS initplan est validé séparément dans la PR #76 ; aucun index FK additionnel n'est créé dans cette branche.
+- Le dernier commit documentaire de cette branche suit ce SHA. Une nouvelle exécution CI doit donc être attendue sur le HEAD actualisé avant de déclarer la branche entièrement validée.
+- Les alertes Supabase en Production ne sont pas réputées résolues : aucune migration hébergée n'a été appliquée.
+- **NO-GO maintenu** : pas de fusion, pas de migration Production, pas de déploiement Production.
