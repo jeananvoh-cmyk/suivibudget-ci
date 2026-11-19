@@ -14,6 +14,29 @@ import type {
 } from '../types/budgetCycle';
 
 /**
+ * Vérifie qu'une URL de preuve primaire appartient à un domaine institutionnel ivoirien autorisé.
+ * Les URL HTTPS de domaines tiers ne sont jamais suffisantes pour attribuer OFFICIAL_DOCUMENT.
+ */
+export function isOfficialPrimaryEvidenceUrl(value?: string | null): boolean {
+  if (!value) return false;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || url.username || url.password) return false;
+    const host = url.hostname.toLowerCase().replace(/^www\./, '');
+    return host === 'dgbf.ci'
+      || host.endsWith('.dgbf.ci')
+      || host === 'marchespublics.ci'
+      || host.endsWith('.marchespublics.ci')
+      || host === 'courdescomptes.ci'
+      || host.endsWith('.courdescomptes.ci')
+      || host.endsWith('.gouv.ci');
+  } catch {
+    return false;
+  }
+}
+
+
+/**
  * Normalise le type de document pour l'identification et le calcul d'empreinte déterministe
  * Établit l'équivalence canonique entre vocabulaires (ex: BUDGET_PRIMITIF <-> PRIMITIF_ADOPTE)
  * tout en préservant strictement les distinctions entre actes distincts (BM1 vs BM2, BS, virements...).
@@ -402,8 +425,22 @@ export function runDocumentDryRun(
   }
 
   // Contrôle de la page source (Item 9)
-  if (metadata.source_page !== undefined && metadata.source_page <= 0) {
+  if (metadata.source_page !== undefined &&
+      (!Number.isInteger(metadata.source_page) || metadata.source_page <= 0)) {
     errors.push('Page source invalide : Le numéro de page doit être un entier strictement positif.');
+  }
+
+  // Une qualification primaire est impossible sans URL institutionnelle autorisée et page précise.
+  if (metadata.evidence_level === 'OFFICIAL_DOCUMENT' || metadata.evidence_level === 'OFFICIAL_INSTITUTION') {
+    if (!isOfficialPrimaryEvidenceUrl(metadata.source_url)) {
+      errors.push('Preuve primaire invalide : une URL HTTPS d’un domaine institutionnel ivoirien autorisé est obligatoire.');
+    }
+    if (!metadata.source_document_id?.trim()) {
+      errors.push('Preuve primaire incomplète : l’identifiant du document vérifié dans le catalogue est obligatoire.');
+    }
+    if (!Number.isInteger(metadata.source_page) || (metadata.source_page ?? 0) <= 0) {
+      errors.push('Preuve primaire incomplète : la page exacte du document est obligatoire.');
+    }
   }
 
   // 4. Détection déterministe des doublons par fingerprint documentaire (Items 7 & 8)
@@ -738,6 +775,9 @@ export function buildStandardImportEnvelope(
   if (metadata.source_page) {
     dataObj.source_page = metadata.source_page;
   }
+  if (metadata.source_document_id) {
+    dataObj.source_document_id = metadata.source_document_id;
+  }
 
   const sourceObj: { 
     name: string; 
@@ -762,7 +802,13 @@ export function buildStandardImportEnvelope(
   let kind: 'BP' | 'CA' = 'BP';
   if (metadata.document_type === 'COMPTE_ADMINISTRATIF') {
     kind = 'CA';
-    dataObj.verification_status = metadata.evidence_level ?? 'OFFICIAL_DOCUMENT';
+    const rawEvidence = metadata.evidence_level;
+    dataObj.verification_status =
+      rawEvidence == null
+        ? 'DOCUMENT_TO_EXTRACT'
+        : rawEvidence === 'AIP_REPORTED' || rawEvidence === 'AIP_VERIFIED'
+          ? 'SECONDARY_TO_CORROBORATE'
+          : rawEvidence;
     dataObj.accounting_stage = 'ORDONNANCE';
     if (metadata.adoption_date) dataObj.approval_date = metadata.adoption_date;
     if (metadata.source_date) dataObj.prefecture_visa_date = metadata.source_date;
@@ -799,7 +845,15 @@ export function buildStandardImportEnvelope(
     }
 
     if (metadata.adoption_date) dataObj.adoption_date = metadata.adoption_date;
-    dataObj.verification_status = metadata.evidence_level ?? 'OFFICIAL_DOCUMENT';
+    // Le schéma PostgreSQL local_budgets en production n'inclut pas encore 'AIP_REPORTED' dans sa contrainte CHECK ;
+    // toute source AIP secondaire rapportée sans délibération primaire est persistée comme 'SECONDARY_TO_CORROBORATE'.
+    const rawEvidence = metadata.evidence_level;
+    dataObj.verification_status =
+      rawEvidence == null
+        ? 'DOCUMENT_TO_EXTRACT'
+        : rawEvidence === 'AIP_REPORTED' || rawEvidence === 'AIP_VERIFIED'
+          ? 'SECONDARY_TO_CORROBORATE'
+          : rawEvidence;
     // Confiance par défaut qualifiée (Item 10)
     dataObj.confidence_level = metadata.source_date_kind === 'PUBLISHED' ? 'MEDIUM' : 'LOW';
     if (metadata.notes) dataObj.notes = metadata.notes;
@@ -854,6 +908,7 @@ const CA_PIPELINE_MONEY_FIELDS = [
 const CA_PIPELINE_ALLOWED_FIELDS = [
   ...CA_PIPELINE_MONEY_FIELDS,
   'source_page',
+  'source_document_id',
   'approval_date',
   'prefecture_visa_date',
   'notes',
@@ -869,6 +924,8 @@ const BP_PIPELINE_MONEY_FIELDS = [
 const BP_PIPELINE_ALLOWED_FIELDS = [
   ...BP_PIPELINE_MONEY_FIELDS,
   'budget_type',
+  'source_page',
+  'source_document_id',
   'version_number',
   'adoption_date',
   'tutelle_approval_date',

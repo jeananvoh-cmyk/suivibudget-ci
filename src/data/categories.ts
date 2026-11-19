@@ -12,7 +12,7 @@ export const CATEGORIES: CategoryOption[] = [
     name: 'Toutes les catégories',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     iconName: 'LayoutGrid',
-    description: 'Ensemble des 4 354 projets et dotations d\'investissements',
+    description: 'Ensemble des projets physiques et lignes d\'investissements répertoriés (État et collectivités)',
   },
   {
     id: 'Éducation',

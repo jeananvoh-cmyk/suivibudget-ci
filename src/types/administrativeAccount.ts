@@ -32,6 +32,8 @@ export interface ProcurementMatch {
   match_level: ProcurementMatchLevel;
   source: string;                // Bulletin Officiel DGMP / Portail Marchés Publics
   source_url?: string;
+  source_document_id?: string;    // Identifiant stable du document primaire DGMP contrôlé
+  source_page?: number;           // Page exacte de l'avis dans le document primaire
   verification_status: string;
   notes?: string;
 }

@@ -37,12 +37,12 @@ beforeAll(async () => {
   for(const pilot of CA_PILOT_FIXTURES) await db.query("insert into public.institutions values ($1,$2,'MAIRIE')",[pilot.institution_id,pilot.institution_name]);
   await db.exec("insert into public.institutions values ('inst-com-cocody','Mairie de Cocody','MAIRIE')");
   for(const [file,names] of [
-    ['20260928_local_budgets_referential.sql',['local_budgets']],
-    ['20260928_administrative_accounts.sql',['administrative_accounts','ca_investment_operations','ca_procurement_matches']],
+    ['20260928010000_local_budgets_referential.sql',['local_budgets']],
+    ['20260928000000_administrative_accounts.sql',['administrative_accounts','ca_investment_operations','ca_procurement_matches']],
   ] as const){const sql=readFileSync(`supabase/migrations/${file}`,'utf8');for(const name of names) await db.exec(sql.match(new RegExp(`CREATE TABLE IF NOT EXISTS public\\.${name} \\([\\s\\S]*?\\n\\);`))![0]);}
-  const migration=readFileSync('supabase/migrations/20261001091748_controlled_data_import.sql','utf8');
+  const migration=readFileSync('supabase/migrations/20261001093613_controlled_data_import.sql','utf8');
   await db.exec(migration);
-  await db.exec(readFileSync('supabase/migrations/20261001144423_import_console_qualified_amounts.sql','utf8'));
+  await db.exec(readFileSync('supabase/migrations/20261001150911_import_console_qualified_amounts.sql','utf8'));
 }, 60000);
 afterAll(async()=>{await db?.close();});
 
@@ -126,7 +126,7 @@ describe('Controlled real data import',()=>{
   }));
   it('stages existing Cocody source with unknown breakdown, publishes sourced Bingerville BP',()=>isolated(async()=>{
     const budgets=['inst-com-cocody','inst-com-bingerville'].map(id=>LOCAL_BUDGETS_REFERENTIAL.find(b=>b.institution_id===id&&b.fiscal_year===2026)!);
-    const rows=budgets.map(b=>({kind:'BP',institution_id:b.institution_id,institution_type:b.institution_type,fiscal_year:b.fiscal_year,source:{name:b.primary_source_label,reference:b.primary_source_url,date:b.updated_at.slice(0,10),date_kind:'RECORDED',url:b.primary_source_url},data:{budget_type:b.budget_type,version_number:b.version_number,total_amount:b.total_amount,operating_amount:b.institution_id==='inst-com-cocody'?null:b.operating_amount,investment_amount:b.institution_id==='inst-com-cocody'?null:b.investment_amount,verification_status:b.verification_status,confidence_level:b.confidence_level},precision:{total_amount:b.amount_precision,operating_amount:b.institution_id==='inst-com-cocody'?'UNKNOWN':b.amount_precision,investment_amount:b.institution_id==='inst-com-cocody'?'UNKNOWN':b.amount_precision}}));
+    const rows=budgets.map(b=>({kind:'BP',institution_id:b.institution_id,institution_type:b.institution_type,fiscal_year:b.fiscal_year,source:{name:b.primary_source_label,reference:b.primary_source_url,date:b.updated_at.slice(0,10),date_kind:'RECORDED',url:b.primary_source_url},data:{budget_type:b.budget_type,version_number:b.version_number,total_amount:b.total_amount,operating_amount:b.institution_id==='inst-com-cocody'?null:b.operating_amount,investment_amount:b.institution_id==='inst-com-cocody'?null:b.investment_amount,verification_status:b.verification_status==='AIP_REPORTED'?'SECONDARY_TO_CORROBORATE':b.verification_status,confidence_level:b.confidence_level},precision:{total_amount:b.amount_precision,operating_amount:b.institution_id==='inst-com-cocody'?'UNKNOWN':b.amount_precision,investment_amount:b.institution_id==='inst-com-cocody'?'UNKNOWN':b.amount_precision}}));
     const p=await stage(rows);expect(p.counts.imported).toBe(2);
     const ids=p.rows.map((r:any)=>r.id);await review(ids,'VERIFY');const published=await review(ids,'PUBLISH');
     expect(published.rows[0].status).toBe('PUBLISHED');expect(published.rows[1].status).toBe('PUBLISHED');

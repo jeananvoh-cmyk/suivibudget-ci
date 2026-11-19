@@ -312,7 +312,7 @@ describe('Financial Integrity & Data Sanitation (LOT 1)', () => {
   });
 
   describe('Database Schema & Migration Integrity (LOT 1 Clôture Définitive)', () => {
-    const migrationSql = readFileSync('supabase/migrations/20261005100000_drop_default_zero_institutions_budget.sql', 'utf8');
+    const migrationSql = readFileSync('supabase/migrations/20261005121837_drop_default_zero_institutions_budget.sql', 'utf8');
     const schemaSql = readFileSync('supabase/schema.sql', 'utf8');
     const supabaseSchemaSql = readFileSync('supabase_schema.sql', 'utf8');
 
@@ -438,7 +438,9 @@ describe('Financial Integrity & Data Sanitation (LOT 1)', () => {
       expect(bingervilleRef!.total_amount).toBe(4_046_222_000);
       expect(bingervilleRef!.operating_amount).toBe(1_877_888_000);
       expect(bingervilleRef!.investment_amount).toBe(2_168_334_000);
-      expect(bingervilleRef!.verification_status).toBe('AIP_VERIFIED');
+      expect(bingervilleRef!.verification_status).toBe('AIP_REPORTED');
+      expect(bingervilleRef!.source_role).toBe('SECONDARY');
+      expect(bingervilleRef!.sources[0].role).toBe('SECONDARY');
       expect(bingervilleRef!.status).toBe('PUBLISHED');
 
       // 2. Tiassalé CA 2024 : anomalie de source vérifiée

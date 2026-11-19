@@ -645,7 +645,7 @@ describe('Validation Schéma & Migration SQL Locale (PGlite)', () => {
     `);
 
     // Appliquer la migration de support multi-fascicules
-    const migrationPath = resolve('supabase/migrations/20261013200000_multipart_ca_documents.sql');
+    const migrationPath = resolve('supabase/migrations/20261026184038_multipart_ca_convergence_pr63.sql');
     const migrationSql = readFileSync(migrationPath, 'utf8');
     await db.exec(migrationSql);
   }, 60000);

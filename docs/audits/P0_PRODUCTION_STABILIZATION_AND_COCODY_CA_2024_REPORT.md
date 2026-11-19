@@ -27,14 +27,14 @@
 2. **Privilèges effectifs (`relacl` et `USAGE` sur `private`)** :
    - Sur le schéma `private`, `revoke all on schema private from public, anon, authenticated, service_role;` est appliqué.
    - Sur les deux tables, `relacl` en base vaut `{postgres=arwdDxtm/postgres}` : ni `anon`, ni `authenticated`, ni `service_role` ne disposent de privilèges `SELECT`, `INSERT`, `UPDATE` ou `DELETE` directs.
-3. **Activation de RLS sans politique permissive (`supabase/migrations/20261026213000_security_definer_hardening.sql`)** :
+3. **Activation de RLS sans politique permissive (`supabase/migrations/20261113011327_security_definer_hardening_20261026213000.sql`)** :
    - `alter table private.admin_document_file_checks enable row level security;`
    - `alter table private.document_delivery_receipts enable row level security;`
    - `revoke all on table private.admin_document_file_checks from public, anon, authenticated, service_role;`
    - `revoke all on table private.document_delivery_receipts from public, anon, authenticated, service_role;`
    - **0 politique permissive factice ajoutée** : tout accès non-propriétaire est refusé par défaut (`default-deny`), tandis que les fonctions serveur `SECURITY DEFINER` détenues par `postgres` (`public.admin_confirm_document_integrity`, `private.admin_file_checked`, `private.admin_original_unreferenced`, `public.record_document_delivery`) continuent de fonctionner normalement en tant que propriétaire des tables.
 
-### 1.3 Audit complet des 21 fonctions `SECURITY DEFINER` (`supabase/migrations/20261026213000_security_definer_hardening.sql`)
+### 1.3 Audit complet des 21 fonctions `SECURITY DEFINER` (`supabase/migrations/20261113011327_security_definer_hardening_20261026213000.sql`)
 
 Toutes les 21 fonctions `SECURITY DEFINER` des schémas `public` et `private` ont `proowner = postgres` et `search_path = ''`. Les contrôles et durcissements appliqués sont :
 
@@ -193,7 +193,7 @@ Conformément aux règles non négociables (`REMOTE_SUPABASE_WRITES = 0`), **auc
 
 | Jalon | Statut | Justification |
 |---|---|---|
-| **Prêt pour revue indépendante (`READY_FOR_INDEPENDENT_REVIEW`)** | **OUI** | Code, migration `20261026213000_security_definer_hardening.sql`, tests PGlite/Vitest (`912/912`), recette navigateur (`16/16`) et lot Cocody 2024 vérifiés et poussés sur la PR #65. |
+| **Prêt pour revue indépendante (`READY_FOR_INDEPENDENT_REVIEW`)** | **OUI** | Code, migration `20261113011327_security_definer_hardening_20261026213000.sql`, tests PGlite/Vitest (`912/912`), recette navigateur (`16/16`) et lot Cocody 2024 vérifiés et poussés sur la PR #65. |
 | **Prêt pour fusion (`READY_FOR_MERGE`)** | **OUI (après approbation propriétaire)** | CI GitHub Actions `Quality` et déploiement Vercel Preview au vert (`SUCCESS`), aucun conflit avec `master`. |
-| **Prêt pour migration backend (`READY_FOR_BACKEND_MIGRATION`)** | **OUI (sur action propriétaire)** | `supabase/migrations/20261026213000_security_definer_hardening.sql` est idempotente, purement sécuritaire (`ENABLE ROW LEVEL SECURITY`, `CREATE OR REPLACE FUNCTION`, `REVOKE ALL`), sans modification destructive de table ni de données. |
+| **Prêt pour migration backend (`READY_FOR_BACKEND_MIGRATION`)** | **OUI (sur action propriétaire)** | `supabase/migrations/20261113011327_security_definer_hardening_20261026213000.sql` est idempotente, purement sécuritaire (`ENABLE ROW LEVEL SECURITY`, `CREATE OR REPLACE FUNCTION`, `REVOKE ALL`), sans modification destructive de table ni de données. |
 | **Prêt pour publication production Cocody 2024 (`READY_FOR_PRODUCTION_PUBLICATION`)** | **EN ATTENTE D'AUTORISATION PROPRIÉTAIRE** | Lot JSON certifié prêt à être soumis dans `import_data_batch` -> `review_data_import('VERIFY')` -> `review_data_import('PUBLISH', true)` par un opérateur `ADMIN` / `DATA_MANAGER`. |

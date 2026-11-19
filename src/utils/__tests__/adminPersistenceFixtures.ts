@@ -48,7 +48,7 @@ const manager = '00000000-0000-0000-0000-000000000002';
 const moderator = '00000000-0000-0000-0000-000000000003';
 const citizen = '00000000-0000-0000-0000-000000000004';
 let db!: PGlite;
-const migration = readFileSync(resolve('supabase/migrations/20261013165625_admin_dashboard_persistence_hardening.sql'),'utf8');
+const migration = readFileSync(resolve('supabase/migrations/20261026183930_admin_dashboard_persistence_hardening_pr63.sql'),'utf8');
 
 async function session<T>(id: string | null, run: () => Promise<T>, commit = false): Promise<T> {
   await db.exec('begin');
@@ -126,7 +126,7 @@ async function initialize() {
       values ('cocody-reference','Cocody 2024','CA','Cocody','','ca.pdf','historical',2024,2024,'COMPTE_ADMINISTRATIF','ca-v1.pdf',repeat('a',64));
     insert into public.citizen_proofs(id,project_id,image_url,comment,verification_status,citizen_name,citizen_whatsapp,citizen_user_id) values('pending-proof','project','photo','Observation','PENDING','Identité privée isolée','+000000','${citizen}');
   `);
-  const budgets = readFileSync(resolve('supabase/migrations/20260928_local_budgets_referential.sql'),'utf8');
+  const budgets = readFileSync(resolve('supabase/migrations/20260928010000_local_budgets_referential.sql'),'utf8');
   await db.exec('create table public.projects(id text primary key)');
   for (const table of ['local_budgets','budget_lines']) {
     const sql=budgets.match(new RegExp('CREATE TABLE IF NOT EXISTS public\\.'+table+' \\([\\s\\S]*?\\n\\);'))?.[0];
@@ -141,17 +141,17 @@ async function initialize() {
     insert into public.local_budgets(id,institution_id,institution_type,institution_name,fiscal_year,budget_type,status,total_amount)
       values ('isolated-bp','historical','COMMUNE','Historique',2024,'PRIMITIF_ADOPTE','PUBLISHED',300);
   `);
-  const publication = readFileSync(resolve('supabase/migrations/20260929121225_publication_boundaries.sql'),'utf8');
+  const publication = readFileSync(resolve('supabase/migrations/20260930030614_publication_boundaries.sql'),'utf8');
   const auditFunction = publication.match(/create or replace function public.enforce_document_publication_audit\(\)[\s\S]*?\$\$;/)?.[0];
   if (!auditFunction) throw new Error('Publication fixture missing');
   await db.exec(auditFunction);
   await db.exec('create trigger enforce_document_publication_audit_trigger before insert or update on public.public_documents for each row execute function public.enforce_document_publication_audit()');
-  await db.exec(readFileSync(resolve('supabase/migrations/20260930030840_public_proof_projection_boundary.sql'),'utf8'));
+  await db.exec(readFileSync(resolve('supabase/migrations/20260930031058_public_proof_projection_boundary.sql'),'utf8'));
   const hardeningMigration = [
-    '20261026213727_security_definer_hardening_20261026213000.sql',
     '20261113011327_security_definer_hardening_20261026213000.sql',
-    '20261026213000_security_definer_hardening.sql'
-  ].find(name => existsSync(resolve(`supabase/migrations/${name}`))) || '20261026213727_security_definer_hardening_20261026213000.sql';
+    '20261113011327_security_definer_hardening_20261026213000.sql',
+    '20261113011327_security_definer_hardening_20261026213000.sql'
+  ].find(name => existsSync(resolve(`supabase/migrations/${name}`))) || '20261113011327_security_definer_hardening_20261026213000.sql';
   const hardening = readFileSync(resolve(`supabase/migrations/${hardeningMigration}`),'utf8');
   await db.exec(migration);
   await db.exec(migration);

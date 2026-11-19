@@ -97,6 +97,17 @@ export interface StateGrantDocumentaryEvidence {
   };
 }
 
+export type PrimitiveBudgetSourceType = 'OFFICIAL_PRIMARY' | 'SECONDARY_MEDIA' | 'OTHER';
+
+export type PrimitiveBudgetVerificationStatus =
+  | 'OFFICIAL_DOCUMENT'
+  | 'SECONDARY_SOURCE'
+  | 'VERIFIED'
+  | 'REPORTED'
+  | 'APPROXIMATE'
+  | 'LOWER_BOUND'
+  | 'UNVERIFIED';
+
 export interface PrimitiveBudgetInfo {
   audit_id?: string;
   fiscal_year?: number;
@@ -107,11 +118,15 @@ export interface PrimitiveBudgetInfo {
   voted_date: string;
   source: string;
   source_url?: string;
+  source_type?: PrimitiveBudgetSourceType;
+  source_title?: string;
+  publication_date?: string;
   projects_count?: number;
   session_notes?: string;
+  verification_note?: string;
   precision?: 'EXACT' | 'APPROXIMATE' | 'LOWER_BOUND' | 'UPPER_BOUND' | 'UNKNOWN';
   editor_source?: string;
-  verification_status?: 'OFFICIAL_DOCUMENT' | 'SECONDARY_SOURCE';
+  verification_status?: PrimitiveBudgetVerificationStatus;
   pdf_page?: number;
   sha256?: string;
   document_reference?: string;
@@ -200,7 +215,16 @@ export interface BudgetProject {
   financial_verification_status?: 'TO_VERIFY' | 'VERIFIED';
   financial_verified_by?: string | null;
   financial_verified_at?: string | null;
-  data_provenance?: 'OFFICIAL_SOURCE' | 'DECLARED_ADMIN';
+  data_provenance?:
+    | 'OFFICIAL_SOURCE'
+    | 'OFFICIAL_PRIMARY_SOURCE'
+    | 'OFFICIAL_SECONDARY_SOURCE'
+    | 'AUTOMATED_EXTRACTION'
+    | 'DECLARED_ADMIN'
+    | 'CITIZEN_OBSERVATION'
+    | 'SUIVIBUDGET_CALCULATION'
+    | 'INSTITUTION_RESPONSE'
+    | 'UNKNOWN';
   revision?: number;
   publication_status?: 'DRAFT' | 'IN_REVIEW' | 'PUBLISHED' | 'ARCHIVED';
   archived_at?: string | null;
@@ -210,6 +234,15 @@ export interface BudgetProject {
   source_url?: string;
   citizen_need_origin?: string;
   initiative_source?: string;
+  citizen_need_verification_status?: 'TO_VERIFY' | 'VERIFIED' | 'UNVERIFIED';
+  citizen_need_source_document_id?: string;
+  citizen_need_source_url?: string;
+  citizen_need_source_page?: number;
+  audit_report_reference?: string;
+  audit_source_document_id?: string;
+  audit_source_url?: string;
+  audit_source_page?: number;
+  audit_verification_status?: 'TO_VERIFY' | 'VERIFIED' | 'UNVERIFIED';
   id: string;
   institution_id?: string;
   institution_name?: string;
@@ -291,7 +324,8 @@ export interface ImpactStats {
   totalBudgetLines: number;
   totalInvestmentsFcfa: number;
   verifiedProofsCount: number;
-  proofsVerificationRate: number;
+  proofsVerificationRate: number | null;
+  detailed?: import('../utils/publicIndicators').PublicIndicatorsSnapshot;
 }
 
 export interface NewsArticle {

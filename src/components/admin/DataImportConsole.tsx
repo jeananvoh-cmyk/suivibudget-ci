@@ -10,6 +10,7 @@ import { isSafeUrl } from '../../utils/security';
 import type { Institution, PublicDocument } from '../../types';
 import type {
   DocumentIngestionMetadata,
+  DocumentEvidenceLevel,
   ProposedFinancialValue,
   BudgetDocumentCategory,
   DocumentDryRunResult
@@ -92,9 +93,10 @@ export function DataImportConsole({ role, initialDocument }: DataImportConsolePr
   );
   const [adoptionDate, setAdoptionDate] = useState<string>(initialDocument?.adoption_date || '');
   const [sourceDateKind, setSourceDateKind] = useState<'PUBLISHED' | 'ACCESSED' | 'RECORDED'>('RECORDED');
-  const [sourceUrl, setSourceUrl] = useState<string>(initialDocument?.file_url || '');
-  const [sourcePage, setSourcePage] = useState<number | undefined>(initialDocument?.page_count ? 1 : undefined);
-  const [evidenceLevel, setEvidenceLevel] = useState<'OFFICIAL_DOCUMENT' | 'OFFICIAL_INSTITUTION' | 'AIP_VERIFIED' | 'SECONDARY_TO_CORROBORATE'>('OFFICIAL_DOCUMENT');
+  const [sourceUrl, setSourceUrl] = useState<string>(initialDocument?.source_url || '');
+  const [sourceDocumentId, setSourceDocumentId] = useState<string>(initialDocument?.id || '');
+  const [sourcePage, setSourcePage] = useState<number | undefined>(undefined);
+  const [evidenceLevel, setEvidenceLevel] = useState<DocumentEvidenceLevel>('DOCUMENT_TO_EXTRACT');
   const [amountSemantics, setAmountSemantics] = useState<'DELTA' | 'REVISED_TOTAL' | 'UNKNOWN'>('DELTA');
   const [notes, setNotes] = useState<string>('');
 
@@ -250,6 +252,7 @@ export function DataImportConsole({ role, initialDocument }: DataImportConsolePr
       source_date: sourceDate,
       source_date_kind: sourceDateKind,
       source_url: sourceUrl || undefined,
+      source_document_id: sourceDocumentId || undefined,
       source_page: sourcePage,
       evidence_level: evidenceLevel,
       adoption_date: adoptionDate || undefined,
@@ -283,6 +286,7 @@ export function DataImportConsole({ role, initialDocument }: DataImportConsolePr
       source_date: sourceDate,
       source_date_kind: sourceDateKind,
       source_url: sourceUrl || undefined,
+      source_document_id: sourceDocumentId || undefined,
       source_page: sourcePage,
       evidence_level: evidenceLevel,
       adoption_date: adoptionDate || undefined,
@@ -540,9 +544,11 @@ export function DataImportConsole({ role, initialDocument }: DataImportConsolePr
                   setDryRunResult(null);
                 }}
               >
+                <option value="DOCUMENT_TO_EXTRACT">Non qualifié — document à extraire / vérifier</option>
                 <option value="OFFICIAL_DOCUMENT">Document officiel primaire</option>
                 <option value="OFFICIAL_INSTITUTION">Institution publique officielle</option>
-                <option value="AIP_VERIFIED">Dépêche AIP vérifiée</option>
+                <option value="AIP_REPORTED">Dépêche AIP rapportée (source secondaire)</option>
+                <option value="AIP_VERIFIED">Dépêche AIP vérifiée (historique)</option>
                 <option value="SECONDARY_TO_CORROBORATE">Source secondaire à corroborer</option>
               </select>
             </div>
@@ -591,6 +597,22 @@ export function DataImportConsole({ role, initialDocument }: DataImportConsolePr
                 value={sourceReference}
                 onChange={e => {
                   setSourceReference(e.target.value);
+                  setDryRunResult(null);
+                }}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold uppercase text-slate-600">
+                Identifiant du document vérifié dans le catalogue
+              </label>
+              <input
+                type="text"
+                placeholder="ID public_documents (doc-...)"
+                className={input}
+                value={sourceDocumentId}
+                onChange={e => {
+                  setSourceDocumentId(e.target.value);
                   setDryRunResult(null);
                 }}
               />

@@ -1,5 +1,7 @@
 import React from 'react';
 import { ArrowRight, ExternalLink } from 'lucide-react';
+import { dataStore } from '../../services/dataStore';
+import { formatCompactFCFA } from '../../utils/formatters';
 
 interface AnnuaireIndexPageProps {
   onNavigateToSection: (section: 'MINISTRIES' | 'INSTITUTIONS' | 'REGULATORS' | 'MUNICIPAL' | 'REGIONAL') => void;
@@ -116,7 +118,7 @@ export const AnnuaireIndexPage: React.FC<AnnuaireIndexPageProps> = ({
           {/* Citizen Focus Bridge */}
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
             <span className="text-slate-700 font-medium leading-relaxed">
-              Sur ce budget global, <strong>3 461,00 Milliards FCFA</strong> sont alloués aux <strong>Investissements Publics & Chantiers</strong> (7 162 projets suivis par les citoyens sur cette plateforme).
+              La LFI n° 2025-987 vote <strong>4 195,7 Milliards FCFA</strong> d'investissements publics (dépenses en capital État) dont <strong>224,7 Milliards FCFA</strong> de transferts aux collectivités territoriales (Art. 21). Sur le sous-ensemble extrait classifié par règle automatisée : <strong>{dataStore.getPublicIndicators().investments.statePhysical2026Count.toLocaleString('fr-FR')} opérations de l'État</strong> ({formatCompactFCFA(dataStore.getPublicIndicators().investments.statePhysical2026AmountFcfa)}) et <strong>{dataStore.getPublicIndicators().investments.localCsvPhysical2026Count.toLocaleString('fr-FR')} opérations locales LFI</strong> ({formatCompactFCFA(dataStore.getPublicIndicators().investments.localCsvPhysical2026AmountFcfa)}), hors {dataStore.getPublicIndicators().investments.localPortalBouakePhysical2026Count} projets du portail Bouaké ({formatCompactFCFA(dataStore.getPublicIndicators().investments.localPortalBouakePhysical2026AmountFcfa)}) et {dataStore.getPublicIndicators().investments.multiYearPre2026Count} grand marché pluriannuel 2021 ({formatCompactFCFA(dataStore.getPublicIndicators().investments.multiYearPre2026AmountFcfa)}). Le total consolidé des budgets propres votés des 232 collectivités reste non consolidé publiquement à ce stade.
             </span>
           </div>
 

@@ -66,7 +66,7 @@ Le retrait d’un document primaire remet les projets déclarés et lignes publi
 
 ## 6. Modèle de données et migration
 
-Migration préparée : `supabase/migrations/20261013165625_admin_dashboard_persistence_hardening.sql`.
+Migration préparée : `supabase/migrations/20261026183930_admin_dashboard_persistence_hardening_pr63.sql`.
 
 Ajouts : révisions, publication/archivage, métadonnées limitées aux profils non financiers, contrôles de provenance et contrôleurs serveur, relations documentaires, `admin_tasks`, `admin_audit_events`, RPCs de mutation/lot/visibilité/opérateurs/version, bucket privé `admin_media`.
 
@@ -147,7 +147,7 @@ src/utils/__tests__/projectPassport.test.ts
 src/utils/__tests__/realPilotChain.test.ts
 src/utils/projectPassport.ts
 supabase/functions/admin-media-url/index.ts
-supabase/migrations/20261013165625_admin_dashboard_persistence_hardening.sql
+supabase/migrations/20261026183930_admin_dashboard_persistence_hardening_pr63.sql
 ```
 
 Diff figé : 3319 lignes ajoutées / 2270 supprimées.

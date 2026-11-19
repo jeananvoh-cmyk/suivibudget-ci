@@ -9,15 +9,15 @@ const moderator = '00000000-0000-0000-0000-000000000003';
 const manager = '00000000-0000-0000-0000-000000000004';
 let db: PGlite;
 const migrationNames = [
-  '20260929121408_document_metadata_versions.sql',
-  '20260929121225_publication_boundaries.sql',
-  '20260929141800_grant_schema_privileges.sql',
-  '20260930030840_public_proof_projection_boundary.sql',
-  '20260930033244_foundation_http_access.sql',
-  '20260930153716_least_privilege_passport_boundary.sql',
-  '20260930223840_apec_participation_cycle.sql',
-  '20261001043805_apec_moderated_publication.sql',
-  '20261002010000_grant_anon_published_local_budgets.sql',
+  '20260930030522_document_metadata_versions.sql',
+  '20260930030614_publication_boundaries.sql',
+  '20260930030702_grant_schema_privileges.sql',
+  '20260930031058_public_proof_projection_boundary.sql',
+  '20260930144753_foundation_http_access.sql',
+  '20260930153938_least_privilege_passport_boundary.sql',
+  '20261001040746_apec_participation_cycle.sql',
+  '20261001044508_apec_moderated_publication.sql',
+  '20261002090824_grant_anon_published_local_budgets.sql',
 ];
 const migrations = () => migrationNames.map(name => readFileSync(resolve('supabase/migrations', name), 'utf8'));
 
@@ -332,7 +332,7 @@ describe('Publication boundaries applied to PostgreSQL', () => {
 
   it('reapplies historical publication boundary repairs without drift errors', async () => {
     for (const sql of migrations().slice(0,6)) await db.exec(sql);
-    await db.exec(readFileSync(resolve('supabase/migrations', '20261002010000_grant_anon_published_local_budgets.sql'), 'utf8'));
+    await db.exec(readFileSync(resolve('supabase/migrations', '20261002090824_grant_anon_published_local_budgets.sql'), 'utf8'));
   });
 
   it('only exposes a published CA and its financial, operation and procurement children', async () => {

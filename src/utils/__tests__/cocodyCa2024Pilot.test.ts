@@ -58,7 +58,7 @@ const COCODY_CA_2024_ROW = {
     source_page: 40,
     approval_date: '2025-07-08',
     prefecture_visa_date: '2025-07-22',
-    verification_status: 'OFFICIAL_DOCUMENT',
+    verification_status: 'DOCUMENT_TO_EXTRACT',
     notes: "Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45 ; 44 pages physiques PDF, numérotation imprimée jusqu'à 44/45 avec page imprimée 20/45 absente du scan d'origine). Arrêté en Conseil Municipal le 08/07/2025 et approuvé par arrêté préfectoral n° 002/PA/D.CAB le 22/07/2025. Stade comptable : ORDONNANCE. Report antérieur : 944 FCFA. Résultat cumulé : 2237134734 FCFA. Tableau patrimonial page PDF 43 / imprimée 44/45 : Immobilier 810 959 095, Incorporel 20 000 000, Mobilier 535 141 595."
   },
   precision: {
@@ -126,8 +126,8 @@ beforeAll(async () => {
   ]);
 
   for (const [file, names] of [
-    ['20260928_local_budgets_referential.sql', ['local_budgets']],
-    ['20260928_administrative_accounts.sql', ['administrative_accounts', 'ca_investment_operations', 'ca_procurement_matches']],
+    ['20260928010000_local_budgets_referential.sql', ['local_budgets']],
+    ['20260928000000_administrative_accounts.sql', ['administrative_accounts', 'ca_investment_operations', 'ca_procurement_matches']],
   ] as const) {
     const sql = readFileSync(`supabase/migrations/${file}`, 'utf8');
     for (const name of names) {
@@ -135,9 +135,9 @@ beforeAll(async () => {
     }
   }
 
-  const migration1 = readFileSync('supabase/migrations/20261001091748_controlled_data_import.sql', 'utf8');
+  const migration1 = readFileSync('supabase/migrations/20261001093613_controlled_data_import.sql', 'utf8');
   await db.exec(migration1);
-  const migration2 = readFileSync('supabase/migrations/20261001144423_import_console_qualified_amounts.sql', 'utf8');
+  const migration2 = readFileSync('supabase/migrations/20261001150911_import_console_qualified_amounts.sql', 'utf8');
   await db.exec(migration2);
 }, 60000);
 
@@ -290,7 +290,7 @@ describe('Pilote Réel d\'Ingestion Documentaire et Financière : Cocody 2024', 
     expect(pub.investment_planned).toBe(3_900_630_000);
     expect(pub.investment_realized).toBe(1_366_100_690);
     expect(pub.surplus_or_deficit).toBe(2_237_133_790);
-    expect(pub.verification_status).toBe('OFFICIAL_DOCUMENT');
+    expect(pub.verification_status).toBe('DOCUMENT_TO_EXTRACT');
     expect(pub.import_provenance.source.name).toBe(COCODY_CA_2024_ROW.source.name);
     expect(pub.import_provenance.precision.total_realized).toBe('EXACT');
   }));
@@ -323,7 +323,7 @@ describe('Pilote Réel d\'Ingestion Documentaire et Financière : Cocody 2024', 
       source_date: '2025-07-22',
       source_date_kind: 'PUBLISHED',
       source_page: 40,
-      evidence_level: 'OFFICIAL_DOCUMENT',
+      evidence_level: 'DOCUMENT_TO_EXTRACT',
       notes: 'Pilotage Cocody 2024'
     };
 
@@ -373,7 +373,7 @@ describe('Pilote Réel d\'Ingestion Documentaire et Financière : Cocody 2024', 
     expect(envelope.institution_type).toBe('COMMUNE');
     expect(envelope.data.total_planned).toBe(22_341_865_000);
     expect(envelope.data.total_realized).toBe(16_775_223_443);
-    expect(envelope.data.verification_status).toBe('OFFICIAL_DOCUMENT');
+    expect(envelope.data.verification_status).toBe('DOCUMENT_TO_EXTRACT');
     expect(envelope.precision.total_realized).toBe('EXACT');
   });
 

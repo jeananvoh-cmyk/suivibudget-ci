@@ -42,7 +42,13 @@ export function formatCompactFCFA(amount: number | null | undefined): string {
     return 'Montant à confirmer';
   }
   if (amount >= 1_000_000_000) {
-    const milliards = (amount / 1_000_000_000).toFixed(1).replace('.', ',');
+    const rounded = Number((amount / 1_000_000_000).toFixed(1));
+    const milliards = new Intl.NumberFormat('fr-FR', {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    })
+      .format(rounded)
+      .replace(/[\u202F\u00A0]/g, ' ');
     return `${milliards} Milliards FCFA`;
   }
   if (amount >= 1_000_000) {

@@ -1,8 +1,136 @@
+## 15 novembre 2026 — Mission Finale de Conformité et de Préparation à la Production PR #68 : Spécifications Indépendantes des 6 Étapes du Passeport Citoyen, Sommes Partielles Qualifiées, Sécurité PII et Recette de Production
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/68 (`fix/reconcile-public-indicators` ciblant `master` `c9bd106bf37e8e24e9e2d334cb43de51e2c94224`).
+- **HEAD initial audité** : `1813de0879880ccc063181f72fc54e1133d4fd2e` (puis `5546c2dd1df5f4ad1b7ff542fc10ad3ea7767573`).
+- **Garde-fous respectés** :
+  - `REMOTE_SUPABASE_WRITES = 0` (`npm run verify:supabase:read-only` -> `PASS`).
+  - `UNTRACKED_AGENTS_STAGED = 0` (`.agents/`, `scripts/adversarial-stress-m4.mjs`, `scripts/adversarial-stress-m4-rep.mjs` exclus).
+  - Aucune fusion, aucun déploiement Vercel de production, aucune écriture Supabase Production.
+- **Corrections livrées par blocs sur `fix/reconcile-public-indicators`** :
+  1. **Bloc 1 (`0f3a5ba` + `5526b16`) — Provenance stricte et séparation étanche des 6 étapes du Passeport de Redevabilité (`src/types/index.ts`, `src/utils/projectPassport.ts`, `src/components/ProjectAccountabilityPassport.tsx`, `src/components/ProjectCard.tsx`, `src/components/ProjectDetailModal.tsx`)** :
+     - Suppression définitive du raccourci binaire `project.data_provenance === 'DECLARED_ADMIN' ? 'UNVERIFIED_INPUT' : 'OFFICIAL_SOURCE'`.
+     - Classification explicite `PassportProvenanceClass` en 8 catégories : `OFFICIAL_PRIMARY_SOURCE`, `OFFICIAL_SECONDARY_SOURCE`, `AUTOMATED_EXTRACTION`, `DECLARED_ADMIN`, `CITIZEN_OBSERVATION`, `SUIVIBUDGET_CALCULATION`, `INSTITUTION_RESPONSE`, `UNKNOWN`.
+     - Définition explicite de `STAGE_CERTIFICATION_SPECIFICATIONS` et des 6 fonctions de vérification indépendantes : `checkVerifiedNeedEvidence`, `checkVerifiedBudgetEvidence`, `checkVerifiedProcurementEvidence`, `checkVerifiedExecutionEvidence`, `checkVerifiedPhysicalEvidence`, `checkVerifiedAuditEvidence`.
+     - Correction de l'anomalie de l'étape 1 (`NEED_PROGRAMMING`) qui utilisait auparavant `hasVerifiedBudgetEvidence` pour obtenir `VERIFIED_OFFICIAL`, et de l'étape 6 (`AUDIT_ACCOUNTABILITY`) qui héritait auparavant de `hasVerifiedExecutionEvidence`. Désormais, aucune étape n'hérite du statut `VERIFIED_OFFICIAL` d'une autre étape, et les rapprochements algorithmiques par mots-clés (`!isExactNormalizedTitle && !isExplicitLink`) restent en `PROBABLE_MATCH` sans jamais devenir `VERIFIED_OFFICIAL`.
+  2. **Bloc 2 (`ae9efde` + `f3e08eb`) — Rapports financiers, indicateurs sectoriels et élimination des faux zéros (`src/components/BudgetReportsView.tsx`, `src/utils/publicIndicators.ts`, `src/components/InstitutionDetailModal.tsx`, `src/pages/ProjectsPage.tsx`, `src/components/CommuneComparatorModal.tsx`)** :
+     - Suppression de toutes les coercitions `budget_amount_fcfa ?? 0` / `|| 0` et `total_budget_fcfa ?? 0`.
+     - Exposition dans `computeBudgetReportStats`, `computeSectorBreakdown` et `computePublicIndicators` de : `documentedAmountProjectsCount`, `unknownAmountProjectsCount`, `zeroAmountProjectsCount`, `isPartialSum`, `consolidatedTotalAmountFcfa: number | null` et `partialSumNotice`.
+  3. **Bloc 3 (`1ceccdd` + `5526b16` + `f3e08eb`) — Suite de 15 tests adversariaux et non-régression sans skip (`src/utils/__tests__/adversarialCertificationAndReporting.test.tsx`, `src/utils/__tests__/projectPassport.test.ts`, `src/utils/__tests__/caGeneralizationAndRubrics.test.tsx`)** :
+     - Couverture unitaire et SSR (`renderToStaticMarkup`) des 10 scénarios obligatoires de la Section 3 (certification indépendante des 6 étapes) + sommes partielles (`null` vs `0`) + protection PII citoyenne (`publicCitizenProof`).
+     - Élimination du dernier `context.skip()` dans `caGeneralizationAndRubrics.test.tsx` (`0` test ignoré sur l'ensemble de la suite).
+- **Validation technique & financière** :
+  - `npx vitest run` : **70/70 fichiers PASS, 968/968 tests PASS, 0 skipped** (`code 0`).
+  - `npx tsc --noEmit` : **0 erreur** (`code 0`).
+  - `npm run build` : **PASS** (`1770 modules transformed`).
+  - `npm run build:review` : **PASS** (`39 modules transformed`).
+  - `npm run verify:supabase:read-only` : **PASS** (`remoteSupabaseWrites: 0`).
+  - Audit multi-viewports Playwright (`1440×900` desktop et `375×812` mobile, `overflowX: false` sur les 10 parcours publics).
+- **Verdict Final** : **`READY FOR MERGE & CONTROLLED PRODUCTION`**
+- **NEXT_EXECUTABLE_TASK** : Fusion manuelle autorisée de la PR #68 sur `master` suivie de la vérification post-déploiement en lecture seule.
+
+---
+
+## 14 novembre 2026 — Clôture Technique & Financière PR #68 : Réconciliation des Indicateurs Publics, Harmonisation des Sources du Référentiel Local et Vérification Dual-Référentiel
+
+- **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/68 (`fix/reconcile-public-indicators` ciblant `master` `c9bd106bf37e8e24e9e2d334cb43de51e2c94224`).
+- **Titre PR** : `fix(indicators): fiabilisation documentaire, harmonisation des sources du référentiel local et réconciliation LFI 2026 des indicateurs publics`
+- **Garde-fous respectés** :
+  - `REMOTE_SUPABASE_WRITES = 0` (validé par `npm run verify:supabase:read-only` : `clientInitialized: true`, `allowedMethods: ["GET", "HEAD"]`, `remoteSupabaseWrites: 0`, statut `PASS`).
+  - `UNTRACKED_AGENTS_STAGED = 0` : `.agents/`, `scripts/adversarial-stress-m4.mjs`, `scripts/adversarial-stress-m4-rep.mjs` strictement exclus de git.
+  - Aucune fusion automatique effectuée ; réconciliation sans écrasement ni fabrication de données ; intégrité Cocody CA 2024 (44 pages physiques / manquante 20/45) et Bingerville intacte (v1 historique à 4 144 682 000 FCFA archivée, v2 approuvée à 4 046 222 000 FCFA active).
+  - PRs #69 à #75 préservées et non touchées.
+
+### Rapport d'Intégrité en 16 Points (Charte & Règles AGENTS.md § 3)
+
+1. **Understanding before data dump** : Partition intégrale et documentée des 7 169 lignes brutes du catalogue (`RAW_BUDGET_PROJECTS`, 3 611,6 Mds FCFA bruts). Le moteur `computePublicIndicators` filtre désormais strictement `(classification.category === 'PROJECT_PHYSICAL' || classification.isPhysicalProject)` et élimine les chevauchements et doublons, garantissant 3 279 lignes physiques réconciliées (1 332,6 Mds FCFA) quel que soit le point d'entrée, sans déverser de données brutes ou non vérifiées sur les écrans citoyens.
+2. **Provenance by default** : Chaque indicateur public majeur remonte à sa source légale primaire : Loi de finances n° 2025-987 du 19 décembre 2025 (Articles 1, 6, 7, 8, 13, 16, 21), dépêches secondaires identifiées pour les BP de presse, et observations citoyennes étiquetées `CITIZEN_OBSERVATION` avec statut de modération `APPROVED`. **Harmonisation M2** : Dans `localBudgetsReferential.ts`, 100 % des 48 entrées 2026 sont désormais étiquetées `source_role: 'SECONDARY'` et `sources[i].role: 'SECONDARY'` (`0` source secondaire en rôle `PRIMARY`), et le statut trompeur `AIP_VERIFIED` a été remplacé par `AIP_REPORTED` (34 dépêches AIP) et `SECONDARY_TO_CORROBORATE` (14 articles de presse générale : 13 Fraternité Matin / KOACI + Cocody Abidjan.net), avec `0` `OFFICIAL_DOCUMENT` et `0` erreur `ERR_SOURCE_VERIFICATION_MISMATCH`.
+3. **Complete accountability cycle** : Le cycle complet est respecté : prévision LFI 2026 (4 195,7 Mds investissements) → ventilation par pool et secteur → fiches de projets répertoriés → recueil des constats de terrain modérés → reddition des comptes (comptes administratifs publiés).
+4. **No participation black hole** : Chaque observation citoyenne soumise dispose d'un identifiant unique, d'un statut traçable (`PENDING`, `APPROVED`, `REJECTED`), d'un horodatage et d'un affichage observable sur l'Observatoire citoyen.
+5. **Participation is not representativeness** : Les constats citoyens affichés sur l'Observatoire et dans les bannières d'impact sont explicitement qualifiés de contributions territoriales sentinelles qualitatives et ne sont jamais présentés comme un échantillon statistique représentatif.
+6. **Digital + field** : Complémentarité assurée entre le recueil des données documentaires d'État (DGBF / LFI 2026) et les observations de terrain documentées par les sentinelles locales et associations de proximité.
+7. **Financial != Physical** : Règle d'or rigoureusement respectée : une dépense budgétisée ou ordonnancée ne préjuge en rien d'un avancement physique. L'ensemble des 3 279 projets physiques porte la mention obligatoire *"classification automatisée — à vérifier sur pièce"*, et les photos citoyennes portent le badge *"Observation terrain documentée (modération staff)"* et non plus *"Constat terrain vérifié"*. Nettoyage sémantique généralisé dans `ProjectsPage`, `ObservatoryPage`, `HomePage`, `HeroSection`, `Footer` et `InstitutionDetailModal` où le terme non certifié "chantiers" a été systématiquement remplacé par "opérations" ou "projets".
+8. **Right of reply** : La structure d'accueil du droit de réponse institutionnel (`INSTITUTION_RESPONSE`) est préservée et clairement distinguée des constats citoyens dans les fiches projets et les modales.
+9. **Absence of data != data of absence** : Les 185 collectivités territoriales (sur les 232) dont les budgets primitifs 2026 ne sont pas publics portent le statut `NOT_AVAILABLE` / `UNVERIFIED`. Aucun montant nul ni moyenne fictive n'est injecté.
+10. **Project Accountability Passport** : Les fiches du passeport de projet maintiennent le statut `PENDING_DOCUMENTATION` / `UNVERIFIED_INPUT` pour les extractions de catalogue sans pièce justificative primaire, interdisant toute promotion infondée en `VERIFIED_OFFICIAL`.
+11. **Political neutrality** : Neutralité réaffirmée : aucun classement partisan entre mairies ou régions ; présentation ordonnée selon les nomenclatures budgétaires et géographiques officielles de la République de Côte d'Ivoire.
+12. **Budget calendar drives participation** : Les modules d'engagement et de signalement citoyen sont alignés sur le calendrier budgétaire de l'exercice 2026 et les phases de passation et d'exécution des marchés.
+13. **Information must enable action** : Chaque écran fournit des leviers concrets : consultation du texte légal source, filtrage territorial par commune/région, téléchargement du CSV réconcilié, dépôt d'une observation citoyenne ou orientation vers une demande CAIDP.
+14. **Close the feedback loop** : Les statistiques de traitement des signalements citoyens sont transparentes et complètes, exposant le nombre de contributions soumises, en attente, approuvées en modération et rejetées.
+15. **Impact > traffic** : Élimination définitive des approximations sensationnalistes et des montants fantômes historiques au profit d'une réconciliation comptable stricte et auditable.
+16. **Extensible architecture, focused product** : Périmètre produit rigoureusement circonscrit aux 232 collectivités territoriales (201 communes + 31 conseils régionaux) et 2 districts autonomes présentés séparément, avec architecture sous-jacente prête pour les ministères et institutions nationales.
+
+### Décomposition Rigoureuse des Collectivités 2026 : 46 vs 47 vs 48
+
+Une distinction capitale est désormais documentée et garantie par la suite de tests unitaires dual-référentiel (`src/utils/__tests__/dualReferentialVerification.test.ts`) :
+- **46 (`OFFICIAL_PRIMITIVE_BUDGETS`)** : Le catalogue officiel canonique (`src/data/officialPrimitiveBudgets.ts`) contient exactement **46 budgets primitifs 2026** (30 communes + 16 conseils régionaux, 0 district). Ces 46 collectivités constituent le socle consolidé officiel.
+- **47 collectivités territoriales distinctes en 2026** : Dans le référentiel étendu (`src/data/localBudgetsReferential.ts`), il existe exactement **47 collectivités territoriales distinctes** pour l'exercice 2026. Ce décompte correspond aux **46 collectivités du socle officiel + la commune de Tiassalé** (`inst-com-tiassale`), dont le budget primitif 2026 est documenté sous statut `APPROXIMATE` (enveloppe globale déclarée dans la presse de 1 760 000 000 FCFA avec ventilation fonctionnement/investissement `null`).
+- **48 enregistrements budgétaires 2026 (`LOCAL_BUDGETS_REFERENTIAL`)** : Le tableau contient au total **48 enregistrements** pour l'exercice 2026. Ce total s'explique par la gestion versionnée de la commune pilote de Bingerville :
+  - `lbud-bingerville-2026-v1` : Version initiale non-courante (`is_current_version: false`), votée par le conseil municipal le 20/11/2025 pour un montant de 4 144 682 000 FCFA (fonctionnement : 1 475 739 000 FCFA, investissement : 2 668 943 000 FCFA). Statut harmonisé en `AIP_REPORTED`, `source_role: 'SECONDARY'`.
+  - `lbud-bingerville-2026-v2` : Version approuvée courante (`is_current_version: true`), adoptée pour un montant de 4 046 222 000 FCFA (fonctionnement : 1 877 888 000 FCFA, investissement : 2 168 334 000 FCFA).
+  - Les 46 autres collectivités n'ont qu'une seule version 2026 (`is_current_version: true`).
+  - Ainsi, les enregistrements avec `is_current_version: true` sont au nombre de **47**, et le total brut d'enregistrements 2026 est de **48**.
+
+### Tableau Réconciliation Avant / Après
+
+| Indicateur / Composant | Avant Clôture PR #68 | Après Réconciliation & Clôture | Gain Méthodologique & Intégrité |
+| :--- | :--- | :--- | :--- |
+| **Harmonisation des Rôles de Sources (`localBudgetsReferential.ts`)** | Plus de 40 entrées de presse/AIP portaient `source_role: 'PRIMARY'` ou `sources[i].role: 'PRIMARY'`. | **0** entrée de source secondaire ne porte `PRIMARY`. 100% des 48 entrées 2026 ont `source_role: 'SECONDARY'` et `sources[i].role: 'SECONDARY'`. | Respect strict du Principe 2 : une source secondaire (AIP, presse) ne peut jamais être déclarée `PRIMARY`. |
+| **Statut de Vérification des Sources de Presse** | Les dépêches AIP portaient le statut trompeur `AIP_VERIFIED` et Bingerville v1 portait `OFFICIAL_DOCUMENT`. | Remplacé par `AIP_REPORTED` pour les **34 dépêches AIP** et `SECONDARY_TO_CORROBORATE` pour les **14 articles de presse générale** (13 Fraternité Matin / KOACI + Cocody Abidjan.net), avec **0** erreur `ERR_SOURCE_VERIFICATION_MISMATCH` (`validateAllLocalBudgets`) et **0** modification de migration Supabase (`supabase/migrations/20260928_local_budgets_referential.sql` identique à `origin/master`, mapping `AIP_REPORTED -> SECONDARY_TO_CORROBORATE` côté persistance `local_budgets`). | Élimination de toute sur-qualification de fiabilité sans document officiel primaire ni dérive de schéma DB. |
+| **Double Référentiel Local & Décomposition 46 vs 47 vs 48** | Confusion possible entre le socle officiel de 46 BP et le référentiel local étendu. | Dual-référentiel explicité et couvert par 22 tests unitaires : 46 socle officiel (`officialPrimitiveBudgets.ts`), 47 collectivités distinctes (+ Tiassalé), 48 enregistrements (+ Bingerville v1 archivée). | Clarté mathématique et comptable vérifiable par n'importe quel auditeur. |
+| **Filtrage source `computePublicIndicators`** | Filtrait uniquement les doublons/chevauchements ; renvoyait 5 144 lignes si appelé avec `RAW_BUDGET_PROJECTS`. | Filtre explicitement `(category === 'PROJECT_PHYSICAL' \|\| isPhysicalProject)` ; renvoie exactement **3 279** lignes physiques (1 332,6 Mds FCFA). | Règle R1 & AC1 satisfaites à 100% : exclusion absolue des équipements (816), études (107), fonctionnement (28), transferts (2 087) et indéterminés (761). |
+| **Cohérence `dataStore.ts`** | Cohérence 1:1 dépendante d'un pré-filtrage interne dans `dataStore.ts`. | Cohérence 1:1 blindée à la source dans `publicIndicators.ts`, vérifiée par test unitaire dédié. | Résilience totale contre tout appelant externe ou refactoring futur. |
+| **Nettoyage sémantique UI ("opérations" vs "chantiers")** | Lignes automatisées assimilées à des "chantiers" dans `ProjectsPage`, `ObservatoryPage`, `HomePage`, `HeroSection`, `Footer`, `InstitutionDetailModal`, `CommuneComparatorModal`, `Header`, `MinistriesPage`, `budgetCatalogClassification`, `index.html`, `manifest.json`, `llms.txt`. | Termes remplacés par "Opérations & Projets", "Opérations répertoriées", "Investissements & Opérations Publics", "observations citoyennes modérées (sans certification d'audit ou d'ingénierie)", etc. Fallback `dataStore.ts` corrigé en "Source déclarée". | Respect strict du Principe 7 (Financial != Physical) dans tous les parcours utilisateurs et métadonnées. |
+| **SpotlightSearchModal (`SpotlightSearchModal.tsx:167`)** | Texte : *"201 communes, 33 régions, membres du gouvernement et 4 586 chantiers publics"*. | Texte : *"201 communes, 31 conseils régionaux, 2 districts autonomes, membres du gouvernement et opérations répertoriées"*. | Conformité stricte à la Charte territoriale (232 collectivités + 2 districts) et suppression des reliquats obsolètes ("33 régions", "4 586 chantiers"). |
+| **Rapports d'Étape (`BudgetReportsView.tsx:100, 192, 227-230, 258, 305, 364`)** | Affichait *"33 Régions"*, *"234 Collectivités"* (201 Mairies & 33 Régions), *"Données Officielles Vérifiées"*, *"Grands Chantiers"*, *"Nombre de Chantiers"* et claim *"100 % issues de la LFI 2026"*. | Remplacé par *"201 Communes, 31 Conseils Régionaux & 2 Districts Autonomes 2026"*, *"232 Collectivités (201 Communes & 31 Conseils Régionaux (+ 2 Districts))"*, badge *"Classification automatisée — à vérifier sur pièce"*, *"Grands Projets & Opérations de l'État"*, colonne *"Opérations répertoriées"* et avertissement d'extraction de catalogue. | Élimination complète des reliquats territoriaux et des claims de certification non vérifiée sur pièce (Principes 2, 7, 16). |
+| **Contrôle citoyen (`StatImpactBanner.tsx`)** | Affichage partiel du nombre de preuves approuvées sans détails sur la modération. | Affichage explicite des 6 statuts : `{verifiedCount}` modérés (APPROVED), **0 vérification indépendante certifiée**, `{pendingProofsCount}` en attente, Objectif 2026 : **1 000**. | Transparence absolue : distinction entre modération éditoriale et certification d'audit. |
+| **Observatoire citoyen (`ObservatoryPage.tsx:331`)** | Badge photo : *"Constat terrain vérifié"*. | Badge photo : *"Observation terrain documentée (modération staff)"*. Grille des 6 statuts citoyenne intégrée. | Élimination de toute confusion entre constat staff/citoyen et certification officielle (P7). |
+| **Accueil (`HomePage.tsx:308, 397`)** | *"constats citoyens validés"*, *"{sec.count} chantiers"*. | *"constats citoyens modérés"*, *"{sec.count} opérations répertoriées"*. | Clarté sémantique et élimination de claims physiques non certifiés. |
+| **Budgets primitifs 2026 (46 vs 47 vs 232)** | Risque de confusion entre 46 BP de presse et 47 BP avec Tiassalé. | Documenté et sécurisé : 46 BP dans `officialPrimitiveBudgets.ts`, 47 dans `localBudgetsReferential.ts` (+Tiassalé), 100% presse secondaire, 0 document primaire PDF, total national = `null` (`NOT_CONSOLIDATED`). | Interdiction formelle de sommer des montants approximatifs ou de créer un faux total national. |
+| **9 Montants nationaux** | Risque de réapparition des 6 montants obsolètes (`3 461`, `3 453,8`, `1 611,1`, `195,1`, `1 806,2`, `1 910,9` Mds). | Traçabilité intégrale dans le code et les tests ; 6 montants interdits par regex (`forbiddenPatterns`) ; seuls `17 350,2 Mds` et `4 195,7 Mds` (LFI 2026) et `104,7 Mds` (pluriannuel 2021 isolé) sont autorisés. | Éradication complète des montants fantômes historiques. |
+| **Robustesse de la suite de tests** | Timeouts par défaut (5 000ms) et seuil 25 000ms sensibles à la contention CPU multi-threads sous exécution concurrente (`npm test`). | Timeouts durcis à 35 000ms sur Test 1, 45 000ms sur Tests 9 & 10 dans `publicIndicators.test.tsx`, et 30 000ms sur `it.each` dans `caGeneralizationAndRubrics.test.tsx:48`. | 100% de succès déterministe sous CI et exécution parallèle complète (69/69 fichiers, 953/953 tests PASS, code 0). |
+
+### Vérifications & Recette d'Intégrité
+
+- **Tests unitaires et d'intégration (`npm test`)** :
+  ```text
+  Test Files  69 passed (69)
+  Tests       953 passed (953)
+  Duration    83.25s (transform 11.77s, setup 0ms, import 74.43s, tests 125.37s, environment 21ms)
+  ```
+- **Tests ciblés (`npx vitest run src/utils/__tests__/dualReferentialVerification.test.ts src/utils/__tests__/dataImport.test.ts src/utils/__tests__/publicIndicators.test.tsx`)** :
+  ```text
+  Test Files  3 passed (3)
+  Tests       57 passed (57)  [dualReferentialVerification: 22/22, dataImport: 20/20, publicIndicators: 15/15]
+  Duration    19.93s (transform 4.58s, setup 0ms, import 11.23s, tests 18.44s, environment 1ms)
+  ```
+- **Compilation TypeScript & Build de production (`npm run build`)** :
+  ```text
+  ✓ 1770 modules transformed.
+  ✓ built in 23.12s (0 erreur TypeScript, code 0)
+  ```
+- **Build de revue (`npm run build:review`)** :
+  ```text
+  ✓ 39 modules transformed.
+  ✓ built in 2.78s (code 0)
+  ```
+- **Garde-fou Supabase en lecture seule (`npm run verify:supabase:read-only`)** :
+  ```json
+  {"clientInitialized":true,"credential":"anon","allowedMethods":["GET","HEAD"],"results":[{"table":"institutions","status":200,"ok":true,"rows":1,"errorCode":null},{"table":"public_documents","status":200,"ok":true,"rows":1,"errorCode":null},{"table":"local_budgets","status":200,"ok":true,"rows":1,"errorCode":null}],"remoteSupabaseWrites":0,"status":"PASS"}
+  ```
+
+### Verdict Final
+
+**`READY FOR FINAL REVIEW`**
+
+- **NEXT_EXECUTABLE_TASK** : Revue finale par l'auditeur indépendant / autorité de fusion, validation du déploiement Vercel Preview, et fusion de la PR #68 sur `master`.
+
+---
+
 ## 27 octobre 2026 — Corrections Post-Audit P0 : Sécurité Supabase (`private` RLS & 21 `SECURITY DEFINER`), Pagination Contrôlée Cocody CA 2024 et Stabilisation PR #65 (Antigravity)
 
 - **PR GitHub** : https://github.com/jeananvoh-cmyk/suivibudget-ci/pull/65 (`codex/p0-production-cocody-2024` ciblant `master` `901a2033084c5aa1ca76bc4ce4625e1884d48ab9`).
 - **Garde-fou respecté** : `REMOTE_SUPABASE_WRITES = 0` (aucune écriture ni réexécution de migration sur `cdesuvcozcetdtvibgqs`).
-- **Chantier P0 — Sécurité Supabase (`supabase/migrations/20261026213000_security_definer_hardening.sql`)** :
+- **Chantier P0 — Sécurité Supabase (`supabase/migrations/20261113011327_security_definer_hardening_20261026213000.sql`)** :
   - **Tables du schéma `private`** (`private.admin_document_file_checks`, `private.document_delivery_receipts`) :
     - Vérification que le schéma `private` n'est pas exposé dans l'API PostgREST (`public`, `storage`, `graphql_public`) et que `relacl` vaut `{postgres=arwdDxtm/postgres}`.
     - Activation de RLS (`ENABLE ROW LEVEL SECURITY`) sur les deux tables avec **0 politique permissive** (refus par défaut pour tout rôle non-propriétaire) et `REVOKE ALL ON TABLE ... FROM public, anon, authenticated, service_role`, tout en préservant le fonctionnement des fonctions serveur détenues par `postgres` (`admin_confirm_document_integrity`, `admin_file_checked`, `admin_original_unreferenced`, `record_document_delivery`).
@@ -24,7 +152,7 @@
   - `npx vitest run` : **PASS** (`66/66` fichiers, `912/912` tests).
   - Recette navigateur `scripts/verify-admin-persistence-browser.cjs` : **PASS** (`16/16` scénarios Chromium E2E, viewports `360/640/768/1024/1440 px`, `0` erreur console/API, `0` fuite externe).
   - Rapport complet et lot JSON certifié prêt pour import : `docs/audits/P0_PRODUCTION_STABILIZATION_AND_COCODY_CA_2024_REPORT.md`.
-- **NEXT_EXECUTABLE_TASK** : Approbation et fusion de la PR #65 par le propriétaire, application de `20261026213000_security_definer_hardening.sql`, activation de `Prevent use of leaked passwords` dans Supabase Auth, puis import/publication contrôlée du lot certifié du CA 2024 de Cocody via `import_data_batch` -> `review_data_import`.
+- **NEXT_EXECUTABLE_TASK** : Approbation et fusion de la PR #65 par le propriétaire, application de `20261113011327_security_definer_hardening_20261026213000.sql`, activation de `Prevent use of leaked passwords` dans Supabase Auth, puis import/publication contrôlée du lot certifié du CA 2024 de Cocody via `import_data_batch` -> `review_data_import`.
 
 ## 26 octobre 2026 — Clôture C/D/E/F et limites explicites
 
@@ -59,7 +187,7 @@ Validation : 50 tests SQL/RLS/Edge avant modification ; test supplémentaire de 
 
 - Base relue : `aa874ef864142ab86313ff6f8ac4fd112d3850f0`, PR ouverte vers master, 9 commits devant / 0 derrière. Changements locaux préexistants repris sans écrasement.
 - Compteur : RPC `record_document_delivery`, service_role uniquement, mise à jour atomique de `downloads_count`, reçus privés/idempotence 24 h et limite 20/minute par empreinte d'adresse relayée. L'Edge vérifie les octets SHA-256 avant de rendre le fichier. La mesure porte sur la réponse fichier délivrée, pas sur sa réception complète. Consultations, liens externes, refus et erreurs exclus ; aucun incrément navigateur. Le frontend relit la base et préserve le catalogue national.
-- Migration `20261016090000_document_delivery_counter.sql` PREPARED, non appliquée. Convergence du schéma admin conservée ; backfill non committé de fausses attestations supprimé et test corrigé. Relecture réelle des octets requise pour les documents historiques DECLARED. Aucun statut de publication ni montant de production modifié.
+- Migration `20261026184048_document_delivery_counter_pr63.sql` PREPARED, non appliquée. Convergence du schéma admin conservée ; backfill non committé de fausses attestations supprimé et test corrigé. Relecture réelle des octets requise pour les documents historiques DECLARED. Aucun statut de publication ni montant de production modifié.
 - Validation : 904/904 tests, 66 suites ; 50 tests ciblés SQL/RLS/Edge et TypeScript PASS. Build production PASS (1766 modules ; avertissement de taille des données préexistant). PostgreSQL PGlite réel ; Auth/Storage/transport simulés. Les requêtes parallèles passent sur une instance PGlite ; ce n'est pas une recette de plusieurs sessions Supabase distantes.
 - UX/UI Documents : contrôle navigateur NOT_STARTED pour ce bloc. Recette Supabase complète BLOCKED : Docker absent, aucun environnement distant de test autorisé. Production : écritures 0, migrations 0, déploiements 0, fusion 0.
 - NEXT_EXECUTABLE_TASK : pousser ce bloc après build, remplacer le comptage PDF par un analyseur réel et vérifier les deux fascicules Cocody présents localement. Ne pas réimporter Bingerville.
@@ -173,7 +301,7 @@ Validation : 50 tests SQL/RLS/Edge avant modification ; test supplémentaire de 
      - Diagnostic : la colonne `verified_by` est de type `UUID references profiles(id)` sous PostgreSQL. L'envoi d'une chaîne textuelle telle que `'Administrateur'` provoquait `invalid input syntax for type uuid: "Administrateur"`.
      - Correction : validation regex du format UUID (`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`). Seul un UUID valide (`userId`) est transmis, sinon `null`/`undefined` est passé pour laisser le trigger PostgreSQL assigner `auth.uid()`.
   5. **Schéma & Migration SQL Locale (PGlite)** :
-     - Validation sous PGlite (WASM) de la migration `supabase/migrations/20261013200000_multipart_ca_documents.sql`.
+     - Validation sous PGlite (WASM) de la migration `supabase/migrations/20261026184038_multipart_ca_convergence_pr63.sql`.
      - Vérification de la rétrocompatibilité (défauts `is_multipart = false`, `parts_count = null`, `ocr_status = 'NOT_APPLICABLE'`).
      - Vérification de la contrainte `chk_pubdocs_ocr_status`.
 - **Validation Globale** :
@@ -209,7 +337,7 @@ Validation : 50 tests SQL/RLS/Edge avant modification ; test supplémentaire de 
      - Mise à jour instantanée de l'état React local de la matrice des 232 collectivités sans nécessiter de rechargement de page.
      - Badges multi-parties dans le tableau d'administration.
 - **Migration SQL** :
-  - `supabase/migrations/20261013200000_multipart_ca_documents.sql` : colonnes `is_multipart`, `parts_count`, `document_parts` (JSONB), `is_scanned`, `has_text_layer`, `ocr_status` (`CHECK (ocr_status IN ('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'MANUAL_TRANSCRIPTION', 'FAILED'))`).
+  - `supabase/migrations/20261026184038_multipart_ca_convergence_pr63.sql` : colonnes `is_multipart`, `parts_count`, `document_parts` (JSONB), `is_scanned`, `has_text_layer`, `ocr_status` (`CHECK (ocr_status IN ('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'MANUAL_TRANSCRIPTION', 'FAILED'))`).
 - **Tests & Validation** :
   - Suite dédiée multi-parties & cycle : `src/utils/__tests__/caMultipartAndValidation.test.ts` (**14/14 tests passés**).
   - Suite pilote Cocody 2024 : `src/utils/__tests__/cocodyCa2024Pilot.test.ts` (**11/11 tests passés**).
@@ -677,7 +805,7 @@ Les **quatre reliquats historiques non entièrement expliqués** sont documenté
     - `src/pages/AdminDashboardPage.tsx` : Suppression de l'auto-split 55%/45% dans `handleSaveQuickWeb`, `handleSaveInstitution` et dans les formulaires de saisie de budget primitif.
     - `src/data/communesData.ts` : Suppression du fallback `c.functioningRatio || 0.35` affecté arbitrairement aux 188 communes hors Abidjan. Les communes sans ratio documenté ont désormais `budget_functioning_fcfa: null` et `budget_investment_fcfa: null`.
 - **2. Schéma Supabase, Suppression de DEFAULT 0 & Assainissement Legacy Ciblé** :
-  - Migration locale complétée : `supabase/migrations/20261005100000_drop_default_zero_institutions_budget.sql` :
+  - Migration locale complétée : `supabase/migrations/20261005121837_drop_default_zero_institutions_budget.sql` :
     - `ALTER TABLE public.institutions ALTER COLUMN total_budget_fcfa DROP DEFAULT;`
     - `ALTER TABLE public.institutions ALTER COLUMN budget_functioning_fcfa DROP DEFAULT;`
     - `ALTER TABLE public.institutions ALTER COLUMN budget_investment_fcfa DROP DEFAULT;`
@@ -901,7 +1029,7 @@ Les **quatre reliquats historiques non entièrement expliqués** sont documenté
   - **C. Publication canonique Supabase** : **EFFECTUÉE**.
 - **Traçage du flux de bout en bout et ruptures identifiées/corrigées** :
   - Flux : Supabase `local_budgets` → `administrativeAccountsService.fetchPublishedLocalBudgets` → `dataStore.initSupabaseSync` / `enrichInstitutionsWithBudgets` → `dataStore.institutions` / `primitive_budget` → `InstitutionDetailModal` / `MunicipalitiesPage` → Rendu citoyen.
-  - **Rupture DDL (Base de données)** : Le rôle `anon` ne disposait pas de `GRANT SELECT ON public.local_budgets TO anon;` (omis lors de `20260929141800_grant_schema_privileges.sql`), causant un HTTP 401 / code `42501 permission denied for table local_budgets` pour les citoyens non connectés malgré la policy RLS `USING (status = 'PUBLISHED')`.
+  - **Rupture DDL (Base de données)** : Le rôle `anon` ne disposait pas de `GRANT SELECT ON public.local_budgets TO anon;` (omis lors de `20260930030702_grant_schema_privileges.sql`), causant un HTTP 401 / code `42501 permission denied for table local_budgets` pour les citoyens non connectés malgré la policy RLS `USING (status = 'PUBLISHED')`.
     - Migration additive rédigée : `supabase/migrations/20261002010000_grant_anon_published_local_budgets.sql` (`GRANT SELECT ON public.local_budgets TO anon;`).
     - Test PGlite ajouté dans `src/utils/__tests__/publicationDatabase.test.ts` garantissant que `anon` lit les budgets `PUBLISHED` mais que les budgets non publiés (`VERIFIED`, `TO_VERIFY`, `DRAFT`) restent strictement invisibles.
   - **Rupture Synchronisation Frontend (`dataStore.ts`)** : `initSupabaseSync` mettait à jour `this.localBudgets` mais ne ré-enrichissait pas `this.institutions`. Ajout de la méthode `enrichInstitutionsWithBudgets()` appelée après la récupération des budgets distants et dans `saveLocalBudget`.
@@ -936,7 +1064,7 @@ Les **quatre reliquats historiques non entièrement expliqués** sont documenté
 - #8 contrôlée brièvement puis fusionnée au SHA attendu ; master synchronisé sans perte à 8e934d1. Post-merge ciblé : 16 tests pipeline PASS.
 - Console ADMIN/DATA_MANAGER : JSON/JSONL, simulation obligatoire, rapport ligne par ligne, pagination, source/provenance et historique privés. VERIFY / REJECT / PUBLISH séparés ; confirmation explicite contrôlée aussi en SQL. Aucun service_role client, RLS inchangée.
 - BP / CA / opérations / DGMP et Passport : EXACT, Environ, Plus de, Montant à confirmer ; UNKNOWN reste null, zéro exact distinct. Pas de taux/écart calculé sur montants incertains, aucune réalisation physique inférée.
-- Migration locale `20261001144423_import_console_qualified_amounts.sql` APPLIED une seule fois sous version distante `20261001150911`. Montants nullables sans suppression de données, provenance par champ conservée. Ne rejouer aucune version APPLIED, notamment 20261001093613 et 20261001044508.
+- Migration locale `20261001150911_import_console_qualified_amounts.sql` APPLIED une seule fois sous version distante `20261001150911`. Montants nullables sans suppression de données, provenance par champ conservée. Ne rejouer aucune version APPLIED, notamment 20261001093613 et 20261001044508.
 - Validation finale : 174 tests / 11 fichiers, TypeScript + build PASS (1726 modules), six HTTP/RLS PASS. RLS active, RPC refusée à anon/service_role et profil contrôlé pour authenticated. Base préservée : staging/journal/BP=0, CA/opérations/DGMP=3 chacun. Aucun import réel.
 - UX/UI VALIDATED sur console, CA/opérations/DGMP, historique BP et Passport : huit largeurs 360/375/390/430/768/1280/1440/1920, aucune erreur JS ni débordement ; captures mobile/desktop inspectées. Parcours privés avec API interceptée localement, refus MODERATOR et confirmation de publication vérifiés.
 - Advisors inchangés : six RPC SECURITY DEFINER intentionnelles protégées par profiles/search_path/grants ([règle 0029](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable)) ; [protection Auth des mots de passe compromis](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) toujours désactivée. Bundles de données volumineux préexistants.
@@ -1021,16 +1149,16 @@ Les blocs suivants sont historiques ; leurs anciennes interdictions de fusion et
 ## MIGRATIONS_REMOTE / REMOTE_SCHEMA_STATE
 | Fichier local | Version distante | État |
 | --- | --- | --- |
-| 20260929121408_document_metadata_versions.sql | 20260930030522 | APPLIED |
-| 20260929121225_publication_boundaries.sql | 20260930030614 | APPLIED |
-| 20260929141800_grant_schema_privileges.sql | 20260930030702 | APPLIED |
-| 20260930030840_public_proof_projection_boundary.sql | 20260930031058 | APPLIED |
-| 20260930033244_foundation_http_access.sql | 20260930144753 | APPLIED |
-| 20260930153716_least_privilege_passport_boundary.sql | 20260930153938 | APPLIED |
-| 20260930223840_apec_participation_cycle.sql | 20261001040746 | APPLIED |
-| 20261001043805_apec_moderated_publication.sql | 20261001044508 | APPLIED |
-| 20261001091748_controlled_data_import.sql | 20261001093613 | APPLIED |
-| 20261001144423_import_console_qualified_amounts.sql | 20261001150911 | APPLIED |
+| 20260930030522_document_metadata_versions.sql | 20260930030522 | APPLIED |
+| 20260930030614_publication_boundaries.sql | 20260930030614 | APPLIED |
+| 20260930030702_grant_schema_privileges.sql | 20260930030702 | APPLIED |
+| 20260930031058_public_proof_projection_boundary.sql | 20260930031058 | APPLIED |
+| 20260930144753_foundation_http_access.sql | 20260930144753 | APPLIED |
+| 20260930153938_least_privilege_passport_boundary.sql | 20260930153938 | APPLIED |
+| 20261001040746_apec_participation_cycle.sql | 20261001040746 | APPLIED |
+| 20261001044508_apec_moderated_publication.sql | 20261001044508 | APPLIED |
+| 20261001093613_controlled_data_import.sql | 20261001093613 | APPLIED |
+| 20261001150911_import_console_qualified_amounts.sql | 20261001150911 | APPLIED |
 | 20261002010000_grant_anon_published_local_budgets.sql | 20261002090824 | APPLIED |
 
 Les quatre premières migrations n’ont pas été rejouées. Les horodatages distants sont attribués par l’outil ; ne pas rejouer sur la seule différence de préfixe. Schéma metadata, vue publique, triggers, grants et RLS contrôlés.

@@ -27,7 +27,7 @@ import {
 import { dataStore } from '../services/dataStore';
 import { publicCitizenIdentity } from '../review/domain/citizen';
 import { ProjectAccountabilityPassport } from './ProjectAccountabilityPassport';
-import { findMatchingCaOperation, findMatchingDgmpProcurement } from '../utils/projectPassport';
+import { classifyProjectProvenance, findMatchingCaOperation, findMatchingDgmpProcurement } from '../utils/projectPassport';
 
 interface ProjectDetailModalProps {
   project: BudgetProject | null;
@@ -67,6 +67,28 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   const actionInfo = getProjectTypeActionInfo(project.title, project.category, project.scope_level);
   const tier = getProjectTier(project);
   const tierBadge = getProjectTierBadge(tier);
+  const provenanceClass = classifyProjectProvenance(project);
+  const hasFiniteBudget = typeof project.budget_amount_fcfa === 'number' && Number.isFinite(project.budget_amount_fcfa);
+  const budgetBoxTitle =
+    provenanceClass === 'OFFICIAL_PRIMARY_SOURCE'
+      ? 'Budget public prévu'
+      : provenanceClass === 'OFFICIAL_SECONDARY_SOURCE'
+        ? 'Budget rapporté (source secondaire)'
+        : provenanceClass === 'AUTOMATED_EXTRACTION'
+          ? 'Montant extrait (catalogue)'
+          : provenanceClass === 'DECLARED_ADMIN'
+            ? 'Budget prévu déclaré'
+            : 'Montant répertorié (origine à documenter)';
+  const sourceRoleLabel =
+    provenanceClass === 'OFFICIAL_PRIMARY_SOURCE'
+      ? 'Source officielle primaire'
+      : provenanceClass === 'OFFICIAL_SECONDARY_SOURCE'
+        ? 'Source secondaire'
+        : provenanceClass === 'AUTOMATED_EXTRACTION'
+          ? 'Extraction de catalogue'
+          : provenanceClass === 'DECLARED_ADMIN'
+            ? 'Saisie déclarative'
+            : 'Source renseignée';
 
   const hasSpecificNeighborhood = !!project.locality_village_neighborhood &&
     !project.title.toLowerCase().includes(project.locality_village_neighborhood.toLowerCase());
@@ -80,10 +102,13 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   };
 
   const handleWhatsAppShare = () => {
+    const budgetShareValue = hasFiniteBudget
+      ? `${formatFCFA(project.budget_amount_fcfa)} (${formatAmountInWords(project.budget_amount_fcfa)} FCFA)`
+      : 'Montant à confirmer';
     const text = encodeURIComponent(
       ` *SUIVI CITOYEN - ${actionInfo.shareCategoryLabel}*\n\n` +
       ` *Intitulé :* ${project.title}\n` +
-      ` *${project.data_provenance==='DECLARED_ADMIN' ? 'Budget prévu déclaré' : 'Budget public prévu'} :* ${formatFCFA(project.budget_amount_fcfa)} (${formatAmountInWords(project.budget_amount_fcfa)} FCFA)\n` +
+      ` *${budgetBoxTitle} :* ${budgetShareValue}\n` +
       `*Autorité Responsable :* ${entityInfo.entityName}\n` +
       `*Localisation :* ${project.region_name || project.commune_name}\n\n` +
       `Citoyens et riverains, suivez la réalisation effective sur la plateforme citoyenne : ${window.location.origin}/projets?project=${encodeURIComponent(project.id)}`
@@ -250,18 +275,20 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                 <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl flex flex-col justify-between">
                   <div>
                     <span className="text-xs font-black tracking-wider text-slate-500 uppercase">
-                      {project.data_provenance==='DECLARED_ADMIN' ? 'Budget prévu déclaré' : 'Budget public prévu'}
+                      {budgetBoxTitle}
                     </span>
                     <div className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
                       {formatFCFA(project.budget_amount_fcfa)}
                     </div>
-                    <div className="text-xs sm:text-sm font-bold text-slate-600 mt-1">
-                      ({formatAmountInWords(project.budget_amount_fcfa)} FCFA)
-                    </div>
+                    {hasFiniteBudget && (
+                      <div className="text-xs sm:text-sm font-bold text-slate-600 mt-1">
+                        ({formatAmountInWords(project.budget_amount_fcfa)} FCFA)
+                      </div>
+                    )}
                   </div>
                   <div className="text-[11px] text-slate-500 mt-3 pt-3 border-t border-slate-200 flex items-center justify-between">
-                    <span>Source officielle</span>
-                    <span className="font-semibold text-slate-800">{project.source || 'Loi de Finances (DGBF)'}</span>
+                    <span>{sourceRoleLabel}</span>
+                    <span className="font-semibold text-slate-800">{project.source || 'Source non documentée'}</span>
                   </div>
                 </div>
 
@@ -359,7 +386,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   <span>Méthodologie Civique Suivi Budget CI : « Double Regard »</span>
                 </div>
                 <p className="leading-relaxed">
-                  Le pourcentage affiché est la <strong>déclaration administrative officielle</strong> de l'autorité publique ou du bailleur de fonds. Sur le terrain, nos observateurs citoyens et riverains n'ont pas à deviner un pourcentage d'ingénierie : ils attestent de jalons factuels (présence du panneau légal, ouvriers et engins actifs, gros œuvre en cours, ou clôture du chantier).
+                  Le pourcentage affiché est la <strong>déclaration administrative officielle</strong> de l'autorité publique ou du bailleur de fonds. Sur le terrain, nos observateurs citoyens et riverains n'ont pas à deviner un pourcentage d'ingénierie : ils attestent de jalons factuels (présence du panneau légal, ouvriers et engins actifs, gros œuvre en cours, ou fin des travaux).
                 </p>
               </div>
 
@@ -541,7 +568,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   </div>
                   <div className="space-y-1 max-w-md mx-auto">
                     <h4 className="text-sm font-bold text-slate-900">
-                      Aucun constat citoyen pour ce chantier
+                      Aucun constat citoyen pour cette opération
                     </h4>
                     <p className="text-xs text-slate-500 leading-relaxed">
                       Vous êtes dans la commune ou à proximité du site ? Filmez ou photographiez l'état actuel des travaux pour informer la communauté !

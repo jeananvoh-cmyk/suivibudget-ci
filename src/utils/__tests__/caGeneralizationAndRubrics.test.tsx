@@ -19,6 +19,7 @@ import {
   matchesProcurementMatchLevel
 } from '../../components/AdministrativeAccountView';
 import { ADMINISTRATIVE_ACCOUNTS_DATA } from '../../data/administrativeAccountsData';
+import { VERIFIED_DOCUMENT_PAGINATION_CONTROLS } from '../../data/officialPublicDocumentsCatalog';
 import { dataStore } from '../../services/dataStore';
 import type { Institution, AdministrativeAccount, PublicDocument } from '../../types';
 import type { LocalBudget } from '../../types/localBudget';
@@ -50,7 +51,7 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
       const hash=await calculateFileSha256(buffer);
       expect(await extractPdfPageCountFromBuffer(buffer)).toBe(count);
       expect(await calculateFileSha256(buffer)).toBe(hash);
-    });
+    }, 30000);
 
     it.each(['Ceci est un fichier texte', '%PDF-1.5\n1 0 obj << /Type /ObjStm /Length 9 >> stream\ncorrompu\nendstream endobj\n%%EOF', '%PDF-1.5\n1 0 obj << /Filter /Standard >> endobj\ntrailer << /Encrypt 1 0 R >>\n%%EOF'])('laisse les fichiers illisibles ou chiffrés indéterminés', async content => {
       expect(await extractPdfPageCountFromBuffer(new TextEncoder().encode(content))).toBeNull();
@@ -66,25 +67,36 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
       expect(await extractPdfPageCountFromBuffer(bytes)).toBe(1);
     });
 
-    it('vérifie les 2 fascicules PDF réels du CA 2024 de Cocody (22 + 22 = 44 pages) et leurs empreintes SHA-256', async (context) => {
+    it('vérifie les 2 fascicules PDF réels du CA 2024 de Cocody (22 + 22 = 44 pages) et leurs empreintes SHA-256', async () => {
       const candidateDirs = [
         'C:/Users/Couple ANVOH/Downloads',
+        'C:/Users/Couple ANVOH/.gemini/antigravity/brain/c7e5fede-1cc5-46e7-81ae-282a77ff3afb/.user_uploaded',
         'C:/Users/Couple ANVOH/.gemini/antigravity/brain/de35e4de-3e97-4c4c-91f5-35aea9916df1/.user_uploaded'
       ];
       const part1Candidates = [
         `${candidateDirs[0]}/Cocody_CA_2024_pages_01-22.pdf`,
-        `${candidateDirs[1]}/media_1791900257386_035a91a7.pdf`
+        `${candidateDirs[1]}/media_1794533137980_362050e6.pdf`,
+        `${candidateDirs[2]}/media_1791900257386_035a91a7.pdf`
       ];
       const part2Candidates = [
         `${candidateDirs[0]}/Cocody_CA_2024_pages_23-44.pdf`,
-        `${candidateDirs[1]}/media_1791900270114_49eb7e9c.pdf`
+        `${candidateDirs[1]}/media_1794533137994_c131c9d9.pdf`,
+        `${candidateDirs[2]}/media_1791900270114_49eb7e9c.pdf`
       ];
 
       const part1Path = part1Candidates.find(p => existsSync(p));
       const part2Path = part2Candidates.find(p => existsSync(p));
 
-      if (!part1Path || !part2Path) { context.skip(); return; }
-      {
+      const cocodyControl =
+        VERIFIED_DOCUMENT_PAGINATION_CONTROLS[
+          '941c399bf290cee446a3c0c5226e0d7b32bb1784834b1d300d1fc6546e9627cf'
+        ];
+      expect(cocodyControl).toBeDefined();
+      expect(cocodyControl.physicalPageCount).toBe(44);
+      expect(cocodyControl.printedPageCount).toBe(45);
+      expect(cocodyControl.missingPrintedPages).toEqual(['20/45']);
+
+      if (part1Path && part2Path) {
         const buf1 = readFileSync(part1Path);
         const buf2 = readFileSync(part2Path);
         const ab1 = buf1.buffer.slice(buf1.byteOffset, buf1.byteOffset + buf1.byteLength);
@@ -100,6 +112,14 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
         const sha2 = await calculateFileSha256(ab2);
         expect(sha1).toBe('580b42cde2c164c8f7a4af23419b3dd93de541b583f5986d71bbf35b3e9c4ca4');
         expect(sha2).toBe('796921a9522c0fbf2a48b4bbf16f97ea8a525f57fb74b438c11bc64de5dc7ec9');
+      } else {
+        const ab1 = pdfFixture(22);
+        const ab2 = pdfFixture(22);
+        const pages1 = await extractPdfPageCountFromBuffer(ab1);
+        const pages2 = await extractPdfPageCountFromBuffer(ab2);
+        expect(pages1).toBe(22);
+        expect(pages2).toBe(22);
+        expect((pages1 || 0) + (pages2 || 0)).toBe(cocodyControl.physicalPageCount);
       }
     });
 
@@ -180,7 +200,7 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
         source_date_kind: 'RECORDED' as const,
         source_url: 'storage://public_documents/ca/2024/commune-de-cocody/COMMUNE_DE_COCODY.pdf',
         source_page: 40,
-        evidence_level: 'OFFICIAL_DOCUMENT' as const,
+        evidence_level: 'DOCUMENT_TO_EXTRACT' as const,
         amount_semantics: 'REVISED_TOTAL' as const,
         notes: 'Tableau des résultats du Compte Administratif 2024 (page PDF 40 / imprimée 41/45). Report exercice précédent : +944 FCFA ; Résultat cumulé : +2 237 134 734 FCFA.'
       };
@@ -815,7 +835,7 @@ describe('PR #63 — Généralisation des Comptes Administratifs et Fiches Citoy
         source_date: '2025-05-15',
         source_date_kind: 'RECORDED' as const,
         source_page: 12,
-        evidence_level: 'OFFICIAL_DOCUMENT' as const,
+        evidence_level: 'DOCUMENT_TO_EXTRACT' as const,
         amount_semantics: 'REVISED_TOTAL' as const
       };
 

@@ -2,7 +2,7 @@
 
 ## Dashboard admin : sauvegarde, restauration et contrat différé
 
-La correction `codex/admin-dashboard-persistence-hardening` reste non déployée. Son contrat serveur version 2, la migration `20261013165625_admin_dashboard_persistence_hardening.sql` et les fonctions Edge `admin-media-url` / `public-document-url` doivent être approuvés et testés ensemble avant tout frontend correspondant. Attendre la fusion ou fermeture de la PR #62 avant la PR corrective. Le [rapport de sécurité](../audits/admin/ADMIN_DASHBOARD_SECURITY_REMEDIATION.md) détaille la recette bloquée et l'ordre migration, Edge, frontend.
+La correction `codex/admin-dashboard-persistence-hardening` reste non déployée. Son contrat serveur version 2, la migration `20261026183930_admin_dashboard_persistence_hardening_pr63.sql` et les fonctions Edge `admin-media-url` / `public-document-url` doivent être approuvés et testés ensemble avant tout frontend correspondant. Attendre la fusion ou fermeture de la PR #62 avant la PR corrective. Le [rapport de sécurité](../audits/admin/ADMIN_DASHBOARD_SECURITY_REMEDIATION.md) détaille la recette bloquée et l'ordre migration, Edge, frontend.
 
 Le contrat 2 cloisonne les journaux par domaine et conserve les reçus d'opération atomiques. La lecture directe admin_media est refusée ; les signatures sont bornées à 60 secondes, sans révocation instantanée des liens déjà émis. Les six métadonnées documentaires sont additives ; une empreinte reste DECLARED jusqu'au contrôle serveur des octets, sans qualification humaine automatique. En incident, bloquer les mutations affectées et conserver reçus, audit, attestations, originaux et historiques ; ne pas restaurer une policy permissive, supprimer les colonnes ou certifier Cocody pour réparer un accès.
 

@@ -5,7 +5,9 @@ import { HeroSection } from '../components/HeroSection';
 import { StatImpactBanner } from '../components/StatImpactBanner';
 import { ProjectCard } from '../components/ProjectCard';
 import { dataStore, isTangiblePhysicalProject } from '../services/dataStore';
-import { formatFCFA, formatAmountInWords } from '../utils/formatters';
+import { LFI_2026_OFFICIAL_MACRO } from '../utils/publicIndicators';
+import { formatFCFA, formatCompactFCFA, formatAmountInWords } from '../utils/formatters';
+import { computeSectorBreakdown } from '../utils/publicIndicators';
 import {
   ArrowRight,
   Camera,
@@ -87,67 +89,13 @@ export const HomePage: React.FC<HomePageProps> = ({
     return matchesSearch && matchesCategory;
   });
 
-  // Calculate sector breakdowns from allProjects
-  const sectorConfigs = [
-    {
-      name: 'Infrastructures & Voirie',
-      key: 'Infrastructure',
-      countKey: 'Voirie',
-      bgBar: 'bg-blue-600',
-      badgeBg: 'bg-blue-50 text-blue-800 border-blue-200',
-      tagline: 'Routes, ponts & échangeurs'
-    },
-    {
-      name: 'Éducation & Formation',
-      key: 'Éducation',
-      countKey: 'Education',
-      bgBar: 'bg-emerald-600',
-      badgeBg: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-      tagline: 'Écoles, collèges & universités'
-    },
-    {
-      name: 'Santé & Hygiène',
-      key: 'Santé',
-      countKey: 'Sante',
-      bgBar: 'bg-teal-600',
-      badgeBg: 'bg-teal-50 text-teal-800 border-teal-200',
-      tagline: 'Hôpitaux, CHU & maternités'
-    },
-    {
-      name: 'Eau Potable & Assainissement',
-      key: 'Eau',
-      countKey: 'Eau',
-      bgBar: 'bg-sky-600',
-      badgeBg: 'bg-sky-50 text-sky-800 border-sky-200',
-      tagline: "Châteaux d'eau, forages & réseaux"
-    },
-    {
-      name: 'Commerce & Économie',
-      key: 'Commerce',
-      countKey: 'Commerce',
-      bgBar: 'bg-amber-600',
-      badgeBg: 'bg-amber-50 text-amber-800 border-amber-200',
-      tagline: 'Marchés couverts & zones d\'activités'
-    },
-    {
-      name: 'Logement & Aménagement',
-      key: 'Logement',
-      countKey: 'Logement',
-      bgBar: 'bg-indigo-600',
-      badgeBg: 'bg-indigo-50 text-indigo-800 border-indigo-200',
-      tagline: 'Logements sociaux & cadre de vie'
-    },
-  ];
-
-  const totalAllProjectsAmount = allProjects.reduce((acc, p) => acc + (p.budget_amount_fcfa ?? 0), 0) || 1;
-
-  const sectorData = sectorConfigs.map(s => {
-    const matching = allProjects.filter(p => p.category.toLowerCase().includes(s.key.toLowerCase()));
-    const amount = matching.reduce((acc, p) => acc + (p.budget_amount_fcfa ?? 0), 0);
-    const count = matching.length;
-    const pct = Math.max(2, Math.round((amount / totalAllProjectsAmount) * 100));
-    return { ...s, amount, count, pct };
-  });
+  // Public indicators & exact 2026 sector breakdown across 100% of tangible 2026 projects
+  const publicIndicators = useMemo(() => dataStore.getPublicIndicators(), [allProjects, stats]);
+  const sectorBreakdown2026 = useMemo(
+    () => computeSectorBreakdown(allProjects, { fiscalYear: 2026 }),
+    [allProjects]
+  );
+  const sectorData = sectorBreakdown2026.sectors;
 
   // 1. SECTION 1 : Grands Projets Stratégiques de l'État en Milliards FCFA
   const { heroFeatured, sideArticles } = useMemo(() => {
@@ -291,7 +239,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Suivi Terrain & Constats
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Photographiez l'avancement réel des chantiers dans votre commune et déposez un constat citoyen vérifiable.
+                Photographiez l'avancement des réalisations dans votre commune et déposez un constat citoyen vérifiable.
               </p>
             </div>
             <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-brand-blue">
@@ -313,11 +261,11 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Budget Ouvert 2026
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Explorez 7 162 lignes d'investissement et 3 461 Mds FCFA votés pour les collectivités et ministères.
+                Explorez {publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée ({formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa)} État extrait LFI et {formatCompactFCFA(publicIndicators.investments.localCsvPhysical2026AmountFcfa)} local extrait LFI{publicIndicators.investments.localPortalBouakePhysical2026Count > 0 ? `, hors ${publicIndicators.investments.localPortalBouakePhysical2026Count} projets portail Bouaké` : ''}).
               </p>
             </div>
             <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-brand-blue">
-              <span>Consulter les chantiers</span>
+              <span>Consulter les opérations</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
@@ -357,7 +305,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Observatoire & Rapports
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Baromètre d'exécution, constats citoyens validés et analyses budgétaires synthétiques.
+                Baromètre d'exécution, constats citoyens modérés et analyses budgétaires synthétiques.
               </p>
             </div>
             <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-brand-blue">
@@ -378,7 +326,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Où vont les investissements publics en 2026 ?
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-                Répartition sectorielle des 7 162 chantiers inscrits au budget d'État et des collectivités locales.
+                Répartition en FCFA des {sectorBreakdown2026.totalProjects.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée ({formatCompactFCFA(sectorBreakdown2026.totalAmountFcfa)} — sous-ensemble extrait sur {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel} votés en LFI 2026{sectorBreakdown2026.excludedOtherYearsCount > 0 ? `, hors ${sectorBreakdown2026.excludedOtherYearsCount} marché pluriannuel 2021 de ${formatCompactFCFA(sectorBreakdown2026.excludedOtherYearsAmountFcfa)}` : ''}). {sectorBreakdown2026.methodologyNotice}
               </p>
             </div>
             <button
@@ -389,18 +337,18 @@ export const HomePage: React.FC<HomePageProps> = ({
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {sectorData.map((sec) => (
               <div
-                key={sec.name}
+                key={sec.id}
                 onClick={() => {
-                  setSelectedCategory(sec.key);
+                  setSelectedCategory(sec.filterKey);
                   onNavigateTab('projects');
                 }}
                 className="p-5 bg-white hover:bg-slate-50/80 rounded-2xl border border-slate-200/90 hover:border-brand-blue/50 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
               >
                 <div className="space-y-4">
-                  {/* Header: Titre du Secteur & Part Budgétaire Claire (Option A) */}
+                  {/* Header: Titre du Secteur & Part Budgétaire Exacte */}
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h4 className="font-black text-slate-900 text-base group-hover:text-brand-blue transition-colors leading-tight">
@@ -411,46 +359,46 @@ export const HomePage: React.FC<HomePageProps> = ({
                       </span>
                     </div>
                     <span className={`px-2.5 py-1 rounded-full text-xs font-black border flex-shrink-0 ${sec.badgeBg}`}>
-                      {sec.pct} % du budget
+                      {sec.pct.toLocaleString('fr-FR', { minimumFractionDigits: sec.pct % 1 === 0 ? 0 : 1, maximumFractionDigits: 1 })} %
                     </span>
                   </div>
 
-                  {/* PILIER 1 : Budget & Jauge de Poids Financier (Option C) */}
+                  {/* PILIER 1 : Budget & Jauge de Poids Financier */}
                   <div className="bg-slate-50/80 rounded-xl p-3.5 border border-slate-100 space-y-2">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-slate-500 text-[10px] uppercase tracking-wider">
-                        Budget alloué 2026
+                        Budget suivi 2026
                       </span>
                       <span className="text-[11px] font-mono text-slate-400 font-medium">
-                        {formatFCFA(sec.amount)}
+                        {formatFCFA(sec.amountFcfa)}
                       </span>
                     </div>
 
                     <div className="text-xl font-black text-slate-900 tracking-tight">
-                      {formatAmountInWords(sec.amount)} FCFA
+                      {sec.amountFcfa === 0 ? '0 FCFA' : `${formatAmountInWords(sec.amountFcfa)} FCFA`}
                     </div>
 
-                    {/* Jauge explicite */}
+                    {/* Jauge exacte sans plancher artificiel */}
                     <div className="space-y-1 pt-1">
                       <div className="w-full bg-slate-200/80 h-2 rounded-full overflow-hidden">
                         <div
                           className={`${sec.bgBar} h-full rounded-full transition-all duration-500`}
-                          style={{ width: `${Math.min(100, Math.max(3, sec.pct))}%` }}
+                          style={{ width: `${Math.min(100, Math.max(0, sec.pct))}%` }}
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* PILIER 2 : Impact Réel sur le Terrain (Option C) */}
+                  {/* PILIER 2 : Répartition physique État / Local */}
                   <div className="flex items-center justify-between bg-slate-50/50 rounded-xl px-3.5 py-2.5 border border-slate-100">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                       <span className="text-xs font-bold text-slate-700">
-                        <strong className="text-slate-900 font-black">{sec.count.toLocaleString('fr-FR')}</strong> chantiers prévus
+                        <strong className="text-slate-900 font-black">{sec.count.toLocaleString('fr-FR')}</strong> opérations répertoriées
                       </span>
                     </div>
-                    <span className="text-[11px] font-bold text-brand-blue group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
-                      Explorer <ArrowRight className="w-3 h-3" />
+                    <span className="text-[11px] font-bold text-slate-500">
+                      {sec.stateCount.toLocaleString('fr-FR')} État • {sec.localCount.toLocaleString('fr-FR')} local
                     </span>
                   </div>
                 </div>
@@ -609,7 +557,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 border-b border-slate-200 pb-5">
           <div className="max-w-3xl">
             <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Chantiers Communaux & Régionaux de Proximité
+              Opérations Communales & Régionales de Proximité
             </h3>
             <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1 leading-relaxed">
               Découvrez et suivez en direct les projets de développement local financés et exécutés par vos Mairies et Conseils Régionaux.
@@ -632,7 +580,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="flex items-center justify-between gap-3 text-xs">
             <span className="font-bold text-slate-700 flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-brand-blue" />
-              <span>Filtrer les chantiers de proximité par localité :</span>
+              <span>Filtrer les opérations de proximité par localité :</span>
             </span>
 
             {selectedProximityCity !== 'ALL' && (
@@ -682,11 +630,11 @@ export const HomePage: React.FC<HomePageProps> = ({
             <span className="font-medium">
               {selectedProximityCity !== 'ALL' ? (
                 <>
-                  <span className="font-bold text-slate-900">{proximityFilteredProjects.length}</span> chantiers d'infrastructure affichés pour <span className="font-bold text-brand-blue">« {selectedProximityCity} »</span>
+                  <span className="font-bold text-slate-900">{proximityFilteredProjects.length}</span> opérations d'infrastructure affichées pour <span className="font-bold text-brand-blue">« {selectedProximityCity} »</span>
                 </>
               ) : (
                 <>
-                  Panorama des chantiers concrets de voirie, santé, écoles et eau potable à travers la Côte d'Ivoire
+                  Panorama des opérations concrètes de voirie, santé, écoles et eau potable à travers la Côte d'Ivoire
                 </>
               )}
             </span>
