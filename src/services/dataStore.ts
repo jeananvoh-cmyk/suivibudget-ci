@@ -463,6 +463,11 @@ class DataStore {
     this.institutions = this.institutions.map(inst => {
       const budgets = this.getLocalBudgets(inst.id);
       const current = budgets.find(b => b.fiscal_year === 2026 && b.is_current_version) || budgets.find(b => b.fiscal_year === 2026);
+      const baselinePrimitive = OFFICIAL_PRIMITIVE_BUDGETS[inst.id];
+      const genericLabels = new Set(['AIP', 'KOACI', 'Fraternité Matin']);
+      const rawLabel = current?.primary_source_label?.trim();
+      const descriptiveTitle = baselinePrimitive?.source_title
+        || (rawLabel && !genericLabels.has(rawLabel) ? rawLabel : baselinePrimitive?.source || rawLabel || (current as any)?.import_provenance?.source?.name || 'Source déclarée');
       return {
         ...inst,
         local_budgets: budgets,
@@ -470,13 +475,15 @@ class DataStore {
           total_voted_fcfa: current.total_amount,
           investment_voted_fcfa: current.investment_amount ?? null,
           functioning_voted_fcfa: current.operating_amount ?? null,
-          voted_date: current.adoption_date || '2026',
-          source: current.primary_source_label || (current as any).import_provenance?.source?.name || 'Source déclarée',
-          source_url: current.primary_source_url,
+          voted_date: baselinePrimitive?.voted_date || current.adoption_date || '2026',
+          publication_date: current.publication_date || baselinePrimitive?.publication_date,
+          source: rawLabel || (current as any).import_provenance?.source?.name || 'Source déclarée',
+          source_title: descriptiveTitle,
+          source_url: current.primary_source_url || baselinePrimitive?.source_url,
           precision: current.amount_precision,
           session_notes: current.session_notes || current.notes,
           projects_count: current.projects_count,
-        } : (OFFICIAL_PRIMITIVE_BUDGETS[inst.id] || inst.primitive_budget)
+        } : (baselinePrimitive || inst.primitive_budget)
       };
     });
   }

@@ -5,7 +5,7 @@ import { BudgetDataDownloads } from '../../components/institutions/BudgetDataDow
 import React, { useState } from 'react';
 import { Search, ChevronDown, ArrowRight, FileText, ArrowRightLeft, Globe, Info, Eye, EyeOff } from 'lucide-react';
 import { Institution, BudgetProject } from '../../types';
-import { getInstitutionLeaderGender } from '../../utils/formatters';
+import { getInstitutionLeaderGender, formatInstitutionDisplayName } from '../../utils/formatters';
 import { getProjectsForInstitution } from '../../utils/institutionProjects';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
 import { CommuneComparatorModal } from '../../components/CommuneComparatorModal';
@@ -503,7 +503,7 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                       )}
                     </div>
                     <h3 className="text-lg sm:text-xl font-black text-slate-900 group-hover:text-brand-blue transition-colors leading-snug">
-                      {inst.name}
+                      {formatInstitutionDisplayName(inst.name)}
                     </h3>
                     {inst.leader_name && (
                       <div className="text-xs text-slate-600 font-bold mt-0.5">

@@ -14,6 +14,7 @@ import {
 } from '../institutionBudgetHelper';
 import { BudgetReferenceHeader } from '../../components/institutions/MinistryBudgetHeader';
 import { LeaderPortrait } from '../../components/LeaderPortrait';
+import { formatInstitutionDisplayName } from '../formatters';
 
 describe('Dotations de l’État (LFI 2026) & visibilité BP en ligne des collectivités', () => {
   it('couvre exactement les 234 entités (225 sourcées LFI/Annexe 4/Annexe 8 + 9 sans ligne nominative 2204040)', () => {
@@ -125,6 +126,16 @@ describe('Dotations de l’État (LFI 2026) & visibilité BP en ligne des collec
     const fallbackPortrait = renderToStaticMarkup(createElement(LeaderPortrait, { name: '', title: 'Maire' }));
     expect(fallbackPortrait).toContain('Collectivité');
     expect(fallbackPortrait).not.toContain('Élu local');
+
+    // 7. Élision française & libellé complet sur BP rapporté (Agboville)
+    expect(formatInstitutionDisplayName('Mairie de Agboville')).toBe('Mairie d’Agboville');
+    expect(formatInstitutionDisplayName('Mairie de Yamoussoukro')).toBe('Mairie de Yamoussoukro');
+    expect(formatInstitutionDisplayName('Mairie de Hire')).toBe('Mairie de Hire');
+    const agboville = ALL_COMMUNES_DATA.find((c) => c.id === 'inst-com-agboville')!;
+    const compactAgboville = renderToStaticMarkup(createElement(BudgetReferenceHeader, { institution: agboville, compact: true }));
+    expect(compactAgboville).toContain('AIP — Budget primitif 2026 (Mairie d’Agboville)');
+    expect(compactAgboville).toContain('Concours État · hors budget propre (BP)');
+    expect(compactAgboville).not.toContain('BP/BS/BM');
   });
 
   it('n’attribue jamais une fausse dotation LFI si un montant arbitraire est injecté', () => {

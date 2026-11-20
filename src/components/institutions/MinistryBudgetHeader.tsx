@@ -1,7 +1,7 @@
 import React from 'react';
 import { ShieldCheck, Sparkles } from 'lucide-react';
 import { MinistryBudget } from '../../types/ministryBudget';
-import { formatFCFA, formatAmountInWords, formatQualifiedFCFA } from '../../utils/formatters';
+import { formatFCFA, formatAmountInWords, formatQualifiedFCFA, formatInstitutionDisplayName } from '../../utils/formatters';
 import { Institution } from '../../types';
 import { BudgetPresentationAmount, resolveInstitutionBudgetPresentation, exportInstitutionBudget } from '../../utils/institutionBudgetHelper';
 import { ProvenanceLink } from '../common/ProvenanceLink';
@@ -77,8 +77,8 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
       <p className="text-[11px] text-slate-600">{statusLabels[amount.verification]}</p>
       {amount.source?.source_url && (
         <a href={`${amount.source.source_url}${amount.source.pdf_page ? `#page=${amount.source.pdf_page}` : ''}`} target="_blank" rel="noopener noreferrer"
-          onClick={event => event.stopPropagation()} className="inline-block text-xs underline text-brand-blue focus-visible:outline focus-visible:outline-2 rounded break-words">
-          {amount.source.document_title}{amount.source.pdf_page ? ` · PDF p. ${amount.source.pdf_page}` : ''}
+          onClick={event => event.stopPropagation()} className="inline-flex items-center gap-1 py-0.5 text-xs underline text-brand-blue focus-visible:outline focus-visible:outline-2 rounded break-words">
+          {formatInstitutionDisplayName(amount.source.document_title)}{amount.source.pdf_page ? ` · PDF p. ${amount.source.pdf_page}` : ''}
         </a>
       )}
     </div>
@@ -132,7 +132,7 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
               Dotation de l’État (LFI 2026)
             </span>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-900 border border-sky-200">
-              {view.reference.amount_fcfa == null ? 'Disponible en attente du BP définitif' : 'Périmètre distinct du BP'}
+              {view.reference.amount_fcfa == null ? 'Disponible en attente du BP définitif' : 'Concours État · hors budget propre (BP)'}
             </span>
           </div>
           <p className={`${compact ? 'text-sm' : 'text-lg sm:text-xl'} font-black text-sky-950 break-words`}>

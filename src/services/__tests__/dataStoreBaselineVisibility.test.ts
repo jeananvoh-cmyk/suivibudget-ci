@@ -73,6 +73,8 @@ describe('dataStore refreshAdminEntities baseline visibility guard', () => {
     expect(abobo?.leader_name).toBe('KAMISSOKO KANDIA');
     expect(abobo?.leader_photo_url).toBeTruthy();
     expect(abobo?.political_party).toBe('RHDP');
+    const agboville = dataStore.getInstitutions().find(i => i.id === 'inst-com-agboville');
+    expect(agboville?.primitive_budget?.source_title).toBe('AIP — Budget primitif 2026 (Mairie de Agboville)');
   });
 
   it('does not call admin_baseline_visibility for authenticated CITIZEN users', async () => {
