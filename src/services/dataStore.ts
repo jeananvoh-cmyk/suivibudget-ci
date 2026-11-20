@@ -463,6 +463,11 @@ class DataStore {
     this.institutions = this.institutions.map(inst => {
       const budgets = this.getLocalBudgets(inst.id);
       const current = budgets.find(b => b.fiscal_year === 2026 && b.is_current_version) || budgets.find(b => b.fiscal_year === 2026);
+      const baselinePrimitive = OFFICIAL_PRIMITIVE_BUDGETS[inst.id];
+      const genericLabels = new Set(['AIP', 'KOACI', 'Fraternité Matin']);
+      const rawLabel = current?.primary_source_label?.trim();
+      const descriptiveTitle = baselinePrimitive?.source_title
+        || (rawLabel && !genericLabels.has(rawLabel) ? rawLabel : baselinePrimitive?.source || rawLabel || (current as any)?.import_provenance?.source?.name || 'Source déclarée');
       return {
         ...inst,
         local_budgets: budgets,
@@ -470,13 +475,15 @@ class DataStore {
           total_voted_fcfa: current.total_amount,
           investment_voted_fcfa: current.investment_amount ?? null,
           functioning_voted_fcfa: current.operating_amount ?? null,
-          voted_date: current.adoption_date || '2026',
-          source: current.primary_source_label || (current as any).import_provenance?.source?.name || 'Source déclarée',
-          source_url: current.primary_source_url,
+          voted_date: baselinePrimitive?.voted_date || current.adoption_date || '2026',
+          publication_date: current.publication_date || baselinePrimitive?.publication_date,
+          source: rawLabel || (current as any).import_provenance?.source?.name || 'Source déclarée',
+          source_title: descriptiveTitle,
+          source_url: current.primary_source_url || baselinePrimitive?.source_url,
           precision: current.amount_precision,
           session_notes: current.session_notes || current.notes,
           projects_count: current.projects_count,
-        } : (OFFICIAL_PRIMITIVE_BUDGETS[inst.id] || inst.primitive_budget)
+        } : (baselinePrimitive || inst.primitive_budget)
       };
     });
   }
@@ -985,11 +992,25 @@ class DataStore {
     const institutions = rows[0].map(row => ({ ...pickAdminFields(row, [...institutionFields,'id','revision','publication_status','archived_at','leader_photo_display_url']),
       ...((row.profile_metadata || {}) as object),
       budget_functioning_fcfa: null, budget_investment_fcfa: null, total_budget_fcfa: null } as unknown as Institution));
-    this.institutions = merge(enrichWithPrimitiveBudgets(INSTITUTIONS_DATA.filter(row=>!hidden[0].has(row.id))), institutions.map(row => {
-      const baseline = INSTITUTIONS_DATA.find(i => i.id === row.id);
-      return baseline ? { ...row, budget_functioning_fcfa: baseline.budget_functioning_fcfa,
-        budget_investment_fcfa: baseline.budget_investment_fcfa, total_budget_fcfa: baseline.total_budget_fcfa } : row;
-    }));
+    const baselineInstitutions = enrichWithPrimitiveBudgets(INSTITUTIONS_DATA.filter(row=>!hidden[0].has(row.id)));
+    const baselineById = new Map(baselineInstitutions.map(row => [row.id, row]));
+    const mergeInstitutionWithBaseline = (remote: Institution): Institution => {
+      const baseline = baselineById.get(remote.id);
+      if (!baseline) return remote;
+      const merged: Record<string, unknown> = { ...baseline };
+      for (const [key, value] of Object.entries(remote as unknown as Record<string, unknown>)) {
+        if (value !== null && value !== undefined && value !== '') {
+          merged[key] = value;
+        }
+      }
+      merged.budget_functioning_fcfa = baseline.budget_functioning_fcfa;
+      merged.budget_investment_fcfa = baseline.budget_investment_fcfa;
+      merged.total_budget_fcfa = baseline.total_budget_fcfa;
+      return merged as unknown as Institution;
+    };
+    const mergedById = new Map(baselineInstitutions.map(row => [row.id, row]));
+    institutions.forEach(row => mergedById.set(row.id, mergeInstitutionWithBaseline(row)));
+    this.institutions = [...mergedById.values()];
     this.enrichInstitutionsWithBudgets();
     this.projects = merge(getClassifiedPhysicalProjects(RAW_BUDGET_PROJECTS.filter(row=>!hidden[1].has(row.id))), rows[1].map(row => ({...row, ...((row.project_metadata || {}) as object)}) as unknown as BudgetProject));
     this.articles = merge(INITIAL_ARTICLES.filter(row=>!hidden[2].has(row.id)), rows[2].map(row => ({ ...row,

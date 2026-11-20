@@ -6,7 +6,7 @@ import { GOVERNMENT_OFFICIALS, OfficialLeader } from '../data/governmentData';
 import { NATIONAL_INSTITUTIONS_DATA } from '../data/nationalBudgetData';
 import { OFFICIAL_PRIMITIVE_BUDGETS } from '../data/officialPrimitiveBudgets';
 import { LFI_LOCAL_GRANTS_2026 } from '../data/lfiLocalGrants2026';
-import { formatFCFA, formatAmountInWords } from '../utils/formatters';
+import { formatFCFA, formatAmountInWords, formatInstitutionDisplayName } from '../utils/formatters';
 
 interface SpotlightSearchModalProps {
   isOpen: boolean;
@@ -215,7 +215,7 @@ export const SpotlightSearchModal: React.FC<SpotlightSearchModalProps> = ({
                       </div>
                       <div>
                         <div className="text-xs font-bold text-slate-900 group-hover:text-brand-blue transition-colors">
-                          {m.name}
+                          {formatInstitutionDisplayName(m.name)}
                         </div>
                         <div className="text-[11px] text-slate-500">
                           {(() => {
@@ -268,7 +268,7 @@ export const SpotlightSearchModal: React.FC<SpotlightSearchModalProps> = ({
                       </div>
                       <div>
                         <div className="text-xs font-bold text-slate-900 group-hover:text-brand-orange transition-colors">
-                          {r.name}
+                          {formatInstitutionDisplayName(r.name)}
                         </div>
                         <div className="text-[11px] text-slate-500">
                           {(() => {

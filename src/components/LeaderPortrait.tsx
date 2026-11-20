@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Building2 } from 'lucide-react';
 
 interface LeaderPortraitProps {
   photoUrl?: string;
@@ -19,7 +20,8 @@ export const LeaderPortrait: React.FC<LeaderPortraitProps> = ({
 }) => {
   const [hasError, setHasError] = useState(false);
 
-  const cleanInitials = (name || '')
+  const trimmedName = (name || '').trim();
+  const cleanInitials = trimmedName
     .replace(/^(M\.|Mme|Dr|S\.E\.M\.|Nanan|Le Maire|Président)\s+/i, '')
     .split(' ')
     .filter(Boolean)
@@ -32,11 +34,20 @@ export const LeaderPortrait: React.FC<LeaderPortraitProps> = ({
     return (
       <div 
         className={`relative flex-shrink-0 aspect-square rounded-2xl overflow-hidden bg-slate-100 border-2 border-slate-200/80 shadow-xs flex items-center justify-center ${sizeClass} ${className}`}
-        title={title ? `${title} : ${name}` : name}
+        title={title && trimmedName ? `${title} : ${trimmedName}` : trimmedName || title}
       >
-        <div className="text-center p-2">
-          <span className="font-black text-slate-500 text-sm tracking-wider">{cleanInitials}</span>
-          <div className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">Élu local</div>
+        <div className="text-center p-2 flex flex-col items-center justify-center">
+          {trimmedName ? (
+            <>
+              <span className="font-black text-slate-500 text-sm tracking-wider">{cleanInitials}</span>
+              <div className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">Élu local</div>
+            </>
+          ) : (
+            <>
+              <Building2 className="w-5 h-5 text-slate-400" aria-hidden="true" />
+              <div className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">Collectivité</div>
+            </>
+          )}
         </div>
       </div>
     );

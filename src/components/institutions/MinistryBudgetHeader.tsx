@@ -1,7 +1,7 @@
 import React from 'react';
 import { ShieldCheck, Sparkles } from 'lucide-react';
 import { MinistryBudget } from '../../types/ministryBudget';
-import { formatFCFA, formatAmountInWords, formatQualifiedFCFA } from '../../utils/formatters';
+import { formatFCFA, formatAmountInWords, formatQualifiedFCFA, formatInstitutionDisplayName } from '../../utils/formatters';
 import { Institution } from '../../types';
 import { BudgetPresentationAmount, resolveInstitutionBudgetPresentation, exportInstitutionBudget } from '../../utils/institutionBudgetHelper';
 import { ProvenanceLink } from '../common/ProvenanceLink';
@@ -59,16 +59,16 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
   const isLocalEntity = ['MAIRIE', 'REGION', 'DISTRICT'].includes(institution.type || '');
   const statusLabels = {
     VERIFIED_AMOUNT: 'Montant recoupé dans le document',
-    SECONDARY_SOURCE: 'Source en ligne vérifiable (publication secondaire — délibération PDF attendue)',
+    SECONDARY_SOURCE: 'Source en ligne vérifiable (publication secondaire — délibération officielle attendue)',
     TO_VERIFY: 'À vérifier',
-    UNKNOWN: isLocalEntity ? 'Aucune source en ligne disponible pour le BP' : 'Non documenté',
+    UNKNOWN: isLocalEntity ? 'Aucune source en ligne disponible pour ce budget prévisionnel' : 'Non documenté',
   };
-  const renderAmount = (amount: BudgetPresentationAmount, isReference = false) => (
+  const renderAmount = (amount: BudgetPresentationAmount) => (
     <div className="space-y-1 min-w-0">
       <p className="text-xs font-bold text-slate-700">{amount.label} · {view.fiscal_year}</p>
       <p className={`${compact ? 'text-sm' : 'text-xl sm:text-2xl'} font-black text-slate-900 break-words`}>
         {amount.amount_fcfa == null
-          ? (isReference && isLocalEntity ? 'Non documenté (aucune source en ligne)' : 'Non documenté')
+          ? 'Non documenté'
           : amount.precision === 'UNKNOWN'
             ? formatFCFA(amount.amount_fcfa)
             : formatQualifiedFCFA(amount.amount_fcfa, amount.precision)}
@@ -77,8 +77,8 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
       <p className="text-[11px] text-slate-600">{statusLabels[amount.verification]}</p>
       {amount.source?.source_url && (
         <a href={`${amount.source.source_url}${amount.source.pdf_page ? `#page=${amount.source.pdf_page}` : ''}`} target="_blank" rel="noopener noreferrer"
-          onClick={event => event.stopPropagation()} className="inline-block text-xs underline text-brand-blue focus-visible:outline focus-visible:outline-2 rounded break-words">
-          {amount.source.document_title}{amount.source.pdf_page ? ` · PDF p. ${amount.source.pdf_page}` : ''}
+          onClick={event => event.stopPropagation()} className="inline-flex items-center gap-1 py-0.5 text-xs underline text-brand-blue focus-visible:outline focus-visible:outline-2 rounded break-words">
+          {formatInstitutionDisplayName(amount.source.document_title)}{amount.source.pdf_page ? ` · PDF p. ${amount.source.pdf_page}` : ''}
         </a>
       )}
     </div>
@@ -124,7 +124,7 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 space-y-3 text-slate-800 min-w-0" aria-label="Comprendre le budget de référence">
       {!compact && <h3 className="font-black text-sm">Comprendre — budget de référence</h3>}
-      {renderAmount(view.reference, true)}
+      {renderAmount(view.reference)}
       {lfi?.status === 'VERIFIED_LFI' && lfi.total_cp_fcfa != null && (
         <div className="rounded-xl border border-sky-200 bg-sky-50/70 p-2.5 sm:p-3 space-y-1.5 min-w-0">
           <div className="flex flex-wrap items-center justify-between gap-1.5">
@@ -132,7 +132,7 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
               Dotation de l’État (LFI 2026)
             </span>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-900 border border-sky-200">
-              {view.reference.amount_fcfa == null ? 'Disponible en attente du BP définitif' : 'Périmètre distinct du BP'}
+              {view.reference.amount_fcfa == null ? 'Disponible en attente du BP définitif' : 'Concours État · hors budget propre (BP)'}
             </span>
           </div>
           <p className={`${compact ? 'text-sm' : 'text-lg sm:text-xl'} font-black text-sky-950 break-words`}>
@@ -179,9 +179,22 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
         </div>
       )}
       {lfi?.status === 'NO_NOMINATIVE_LFI_LINE' && (
-        <p className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-[11px] text-slate-700 leading-relaxed">
-          Dotation État (LFI 2026) : aucune ligne nominative identifiée dans le programme 2204040 (ne prouve pas l’absence de concours).
-        </p>
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-[11px] text-slate-700 leading-relaxed space-y-1">
+          <p>
+            <strong className="text-slate-900">Dotation de l’État (LFI 2026) :</strong> aucune ligne nominative identifiée dans le bloc des concours aux collectivités (pp. 200–207) — cela ne prouve pas l’absence de concours financiers.
+          </p>
+          {lfi.source.source_url && (
+            <a
+              href={`${lfi.source.source_url}${lfi.source.pdf_page ? `#page=${lfi.source.pdf_page}` : ''}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={event => event.stopPropagation()}
+              className="inline-block underline font-semibold text-brand-blue focus-visible:outline focus-visible:outline-2 rounded"
+            >
+              Vérifier dans la Loi de Finances 2026 · PDF p. {lfi.source.pdf_page ?? 207}
+            </a>
+          )}
+        </div>
       )}
       <p className="text-xs text-slate-600 leading-relaxed" role="note">{view.notice}</p>
       {!compact && (
