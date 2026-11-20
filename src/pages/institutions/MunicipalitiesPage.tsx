@@ -454,7 +454,7 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                 <div className="flex items-start gap-4 mb-3">
                   <LeaderPortrait
                     photoUrl={inst.leader_photo_display_url || inst.leader_photo_url}
-                    name={inst.leader_name || inst.name}
+                    name={inst.leader_name || ''}
                     title={inst.leader_title || 'Maire'}
                     sizeClass="w-20 h-20 sm:w-24 sm:h-24 min-w-[5rem] max-w-[5rem] sm:min-w-[6rem] sm:max-w-[6rem]"
                   />

@@ -985,11 +985,25 @@ class DataStore {
     const institutions = rows[0].map(row => ({ ...pickAdminFields(row, [...institutionFields,'id','revision','publication_status','archived_at','leader_photo_display_url']),
       ...((row.profile_metadata || {}) as object),
       budget_functioning_fcfa: null, budget_investment_fcfa: null, total_budget_fcfa: null } as unknown as Institution));
-    this.institutions = merge(enrichWithPrimitiveBudgets(INSTITUTIONS_DATA.filter(row=>!hidden[0].has(row.id))), institutions.map(row => {
-      const baseline = INSTITUTIONS_DATA.find(i => i.id === row.id);
-      return baseline ? { ...row, budget_functioning_fcfa: baseline.budget_functioning_fcfa,
-        budget_investment_fcfa: baseline.budget_investment_fcfa, total_budget_fcfa: baseline.total_budget_fcfa } : row;
-    }));
+    const baselineInstitutions = enrichWithPrimitiveBudgets(INSTITUTIONS_DATA.filter(row=>!hidden[0].has(row.id)));
+    const baselineById = new Map(baselineInstitutions.map(row => [row.id, row]));
+    const mergeInstitutionWithBaseline = (remote: Institution): Institution => {
+      const baseline = baselineById.get(remote.id);
+      if (!baseline) return remote;
+      const merged: Record<string, unknown> = { ...baseline };
+      for (const [key, value] of Object.entries(remote as unknown as Record<string, unknown>)) {
+        if (value !== null && value !== undefined && value !== '') {
+          merged[key] = value;
+        }
+      }
+      merged.budget_functioning_fcfa = baseline.budget_functioning_fcfa;
+      merged.budget_investment_fcfa = baseline.budget_investment_fcfa;
+      merged.total_budget_fcfa = baseline.total_budget_fcfa;
+      return merged as unknown as Institution;
+    };
+    const mergedById = new Map(baselineInstitutions.map(row => [row.id, row]));
+    institutions.forEach(row => mergedById.set(row.id, mergeInstitutionWithBaseline(row)));
+    this.institutions = [...mergedById.values()];
     this.enrichInstitutionsWithBudgets();
     this.projects = merge(getClassifiedPhysicalProjects(RAW_BUDGET_PROJECTS.filter(row=>!hidden[1].has(row.id))), rows[1].map(row => ({...row, ...((row.project_metadata || {}) as object)}) as unknown as BudgetProject));
     this.articles = merge(INITIAL_ARTICLES.filter(row=>!hidden[2].has(row.id)), rows[2].map(row => ({ ...row,

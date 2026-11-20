@@ -13,6 +13,7 @@ import {
   exportInstitutionBudget,
 } from '../institutionBudgetHelper';
 import { BudgetReferenceHeader } from '../../components/institutions/MinistryBudgetHeader';
+import { LeaderPortrait } from '../../components/LeaderPortrait';
 
 describe('Dotations de l’État (LFI 2026) & visibilité BP en ligne des collectivités', () => {
   it('couvre exactement les 234 entités (225 sourcées LFI/Annexe 4/Annexe 8 + 9 sans ligne nominative 2204040)', () => {
@@ -86,8 +87,9 @@ describe('Dotations de l’État (LFI 2026) & visibilité BP en ligne des collec
     // 2. Commune sans aucune source en ligne pour le BP + dotation LFI sourcée (Doropo)
     const doropo = ALL_COMMUNES_DATA.find((c) => c.id === 'inst-com-doropo')!;
     const compactDoropo = renderToStaticMarkup(createElement(BudgetReferenceHeader, { institution: doropo, compact: true }));
-    expect(compactDoropo).toContain('Non documenté (aucune source en ligne)');
-    expect(compactDoropo).toContain('Aucune source en ligne disponible pour le BP');
+    expect(compactDoropo).toContain('Non documenté');
+    expect(compactDoropo).toContain('Aucune source en ligne disponible pour ce budget prévisionnel');
+    expect(compactDoropo).not.toContain('Non documenté (aucune source en ligne)');
     expect(compactDoropo).toContain('Disponible en attente du BP définitif');
     expect(compactDoropo).toContain('644 104 527');
 
@@ -110,13 +112,19 @@ describe('Dotations de l’État (LFI 2026) & visibilité BP en ligne des collec
     const cocody = ALL_COMMUNES_DATA.find((c) => c.id === 'inst-com-cocody')!;
     const compactCocody = renderToStaticMarkup(createElement(BudgetReferenceHeader, { institution: cocody, compact: true }));
     expect(compactCocody).toContain('Source en ligne vérifiable');
-    expect(compactCocody).toContain('aucune ligne nominative identifiée dans le programme 2204040');
+    expect(compactCocody).toContain('aucune ligne nominative identifiée dans le bloc des concours aux collectivités');
+    expect(compactCocody).toContain(`${LFI_2026_DOCUMENT.url}#page=207`);
 
     // 5. Conseil Régional sans BP en ligne + dotation LFI sourcée (Iffou)
     const iffou = ALL_REGIONS_DATA.find((r) => r.id === 'inst-reg-conseil-regional-de-l-iffou')!;
     const compactIffou = renderToStaticMarkup(createElement(BudgetReferenceHeader, { institution: iffou, compact: true }));
-    expect(compactIffou).toContain('Aucune source en ligne disponible pour le BP');
+    expect(compactIffou).toContain('Aucune source en ligne disponible pour ce budget prévisionnel');
     expect(compactIffou).toContain('2 515 468 416');
+
+    // 6. Portrait sans nom d'élu affiche Collectivité et jamais de fausses initiales de mairie
+    const fallbackPortrait = renderToStaticMarkup(createElement(LeaderPortrait, { name: '', title: 'Maire' }));
+    expect(fallbackPortrait).toContain('Collectivité');
+    expect(fallbackPortrait).not.toContain('Élu local');
   });
 
   it('n’attribue jamais une fausse dotation LFI si un montant arbitraire est injecté', () => {

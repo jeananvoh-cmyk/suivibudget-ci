@@ -1199,7 +1199,7 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
     },
     supplements: [], section_code: null, program_code: null, aggregation: 'SEPARATE_SCOPE',
     notice: local
-      ? 'Budget primitif propre non documenté. Les concours de l’État ne le remplacent pas. BP, BS et BM décrivent des prévisions ; le compte administratif (CA) décrit l’exécution.'
+      ? 'Les concours de l’État ne remplacent pas le budget propre voté par la collectivité. Budget primitif et budget modificatif sont des prévisions ; le compte administratif décrit l’exécution.'
       : regulatorScope
         ? regulatorScope.notice
         : institution.type === 'AUTORITE_REGULATION'
@@ -1357,7 +1357,7 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
           investment_cp_fcfa: 0,
           annexe4_supplement_fcfa: 0,
           annexe8_supplement_fcfa: 0,
-          label: 'Dotation de l’État (LFI 2026) — aucune ligne nominative dans le programme 2204040',
+          label: 'Dotation de l’État (LFI 2026) — aucune ligne nominative dans le bloc des concours aux collectivités',
           lfi_action_code: null,
           annexe4_action_codes: [],
           annexe8_action_codes: [],
@@ -1365,7 +1365,7 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
           annexe8_pdf_page: null,
           source: {
             document_title: LFI_2026_DOCUMENT.title,
-            document_reference: 'Programme 2204040 (pp. 200-207) — aucune ligne nominative identifiée',
+            document_reference: 'Loi de Finances 2026, bloc des concours aux collectivités (pp. 200-207) — aucune ligne nominative identifiée',
             source_url: LFI_2026_DOCUMENT.url,
             pdf_page: 207,
             sha256: LFI_2026_DOCUMENT.sha256,
