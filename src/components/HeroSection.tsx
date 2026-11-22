@@ -43,9 +43,45 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           Rendre chaque Franc public <span className="text-brand-blue">visible & utile</span> à chaque citoyen
         </h1>
 
-        {/* Editorial Summary */}
-        <p className="mt-5 text-base sm:text-lg md:text-xl text-slate-600 max-w-4xl mx-auto font-normal leading-relaxed">
-          Explorez en toute transparence les <strong>{investments.physicalAllCount.toLocaleString('fr-FR')} projets et opérations physiques répertoriés selon une classification automatisée</strong> (écoles, santé, eau potable, voirie) : <strong>{hasCompleteState2026Amounts ? formatCompactFCFA(investments.statePhysical2026AmountFcfa) : 'Non consolidé'}</strong> côté État ({investments.statePhysical2026Count.toLocaleString('fr-FR')} opérations 2026 extraites sur {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel} d'investissements LFI) et <strong>{hasCompleteLocalCsv2026Amounts ? formatCompactFCFA(investments.localCsvPhysical2026AmountFcfa) : 'Non consolidé'}</strong> côté collectivités LFI ({investments.localCsvPhysical2026Count.toLocaleString('fr-FR')} opérations 2026){investments.localPortalBouakePhysical2026Count > 0 ? `, hors ${investments.localPortalBouakePhysical2026Count} projets portail Bouaké (${hasCompleteBouake2026Amounts ? formatCompactFCFA(investments.localPortalBouakePhysical2026AmountFcfa) : 'montant non consolidé'})` : ''}{investments.multiYearPre2026Count > 0 ? ` et ${investments.multiYearPre2026Count} marché pluriannuel 2021 (${hasCompletePre2026Amounts ? formatCompactFCFA(investments.multiYearPre2026AmountFcfa) : 'montant non consolidé'})` : ''}. {investments.unknownAmount2026ProjectsCount > 0 ? `Montants 2026 non consolidés : ${investments.unknownAmount2026ProjectsCount} opération(s) sans montant connu.` : ''}{!hasCompletePre2026Amounts && investments.multiYearPre2026Count > 0 ? ` Montants antérieurs non consolidés : ${investments.unknownAmountPre2026ProjectsCount} opération(s) sans montant connu.` : ''} Participez au contrôle citoyen avec vos constats de terrain.
+        {/* Editorial Summary — niveau 1 : comprendre en moins de 10 secondes */}
+        <p className="mt-5 text-base sm:text-lg md:text-xl text-slate-600 max-w-3xl mx-auto font-normal leading-relaxed">
+          Suivez <strong className="text-slate-900">{investments.physicalAllCount.toLocaleString('fr-FR')} projets publics</strong> (écoles, centres de santé, eau potable, routes…) et signalez ce que vous constatez sur le terrain.
+        </p>
+
+        {/* Chiffres clés — niveau 2 */}
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto text-left">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 min-w-0">
+            <p className="text-lg sm:text-xl font-black text-slate-900 break-words">
+              {hasCompleteState2026Amounts ? formatCompactFCFA(investments.statePhysical2026AmountFcfa) : 'Non consolidé'}
+            </p>
+            <p className="text-xs sm:text-sm text-slate-600 leading-snug">
+              {investments.statePhysical2026Count.toLocaleString('fr-FR')} projets de l’État prévus en 2026
+            </p>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 min-w-0">
+            <p className="text-lg sm:text-xl font-black text-slate-900 break-words">
+              {hasCompleteLocalCsv2026Amounts ? formatCompactFCFA(investments.localCsvPhysical2026AmountFcfa) : 'Non consolidé'}
+            </p>
+            <p className="text-xs sm:text-sm text-slate-600 leading-snug">
+              {investments.localCsvPhysical2026Count.toLocaleString('fr-FR')} projets prévus en 2026 pour les communes et régions
+            </p>
+          </div>
+        </div>
+
+        {/* Note de transparence — niveau 3 */}
+        <p className="mt-3 text-xs sm:text-sm text-slate-500 max-w-2xl mx-auto leading-relaxed">
+          Montants votés dans la Loi de finances 2026, qui prévoit {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel} d’investissements de l’État. Projets classés automatiquement par secteur (classification automatisée, non certifiée).
+          {(investments.localPortalBouakePhysical2026Count > 0 || investments.multiYearPre2026Count > 0) && (
+            <>
+              {' '}Ne sont pas comptés dans ces deux montants :
+              {investments.localPortalBouakePhysical2026Count > 0 && ` ${investments.localPortalBouakePhysical2026Count} projets de Bouaké (${hasCompleteBouake2026Amounts ? formatCompactFCFA(investments.localPortalBouakePhysical2026AmountFcfa) : 'montant non consolidé'})`}
+              {investments.localPortalBouakePhysical2026Count > 0 && investments.multiYearPre2026Count > 0 && ' et'}
+              {investments.multiYearPre2026Count > 0 && ` ${investments.multiYearPre2026Count} marché lancé en 2021 (${hasCompletePre2026Amounts ? formatCompactFCFA(investments.multiYearPre2026AmountFcfa) : 'montant non consolidé'})`}
+              .
+            </>
+          )}
+          {investments.unknownAmount2026ProjectsCount > 0 && ` Montants 2026 non consolidés : ${investments.unknownAmount2026ProjectsCount} opération(s) sans montant connu.`}
+          {!hasCompletePre2026Amounts && investments.multiYearPre2026Count > 0 && ` Montants antérieurs non consolidés : ${investments.unknownAmountPre2026ProjectsCount} opération(s) sans montant connu.`}
         </p>
 
         {/* Dual Audience Quick Action Links */}

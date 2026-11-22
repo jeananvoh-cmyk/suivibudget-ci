@@ -486,7 +486,7 @@ describe('Public Indicators Reconciliation & Traceability', () => {
       const bannerHtml = renderToStaticMarkup(<StatImpactBanner stats={stats} />);
       expect(bannerHtml).toContain('Collectivités Référencées');
       expect(bannerHtml).toContain('201 communes + 31 conseils régionaux');
-      expect(bannerHtml).toContain('47 BP 2026 cités');
+      expect(bannerHtml).toContain('47 ont annoncé leur budget 2026 en ligne');
       expect(bannerHtml).toContain('4 195,7 Mds FCFA');
       expect(bannerHtml).toContain('classification automatisée');
       expect(bannerHtml).toContain('Objectif 2026 :');
