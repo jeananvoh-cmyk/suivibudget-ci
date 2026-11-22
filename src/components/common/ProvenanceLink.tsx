@@ -44,7 +44,7 @@ export const ProvenanceLink: React.FC<ProvenanceLinkProps> = ({
         title={`Consulter le document source officiel (${source})`}
       >
         <span>{source}</span>
-        {pageReference && <span>· {pageReference}</span>}
+        {pageReference && <span>({pageReference})</span>}
         <ExternalLink className="w-2.5 h-2.5 flex-shrink-0 text-slate-400" />
       </a>
     );
@@ -83,7 +83,6 @@ export const ProvenanceLink: React.FC<ProvenanceLinkProps> = ({
     return (
       <div className={`inline-flex items-center gap-1.5 text-[11px] ${className}`}>
         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${badge.bg}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
           <span>{badge.label}</span>
         </span>
         {sourceUrl ? (
@@ -92,7 +91,7 @@ export const ProvenanceLink: React.FC<ProvenanceLinkProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             className="text-brand-blue hover:text-brand-blue/80 hover:underline font-semibold inline-flex items-center gap-1 transition-colors"
-            title={`${source} • Exercice ${fiscalYear}`}
+            title={`${source} (Exercice ${fiscalYear})`}
           >
             <span>{documentReference || source}</span>
             <ExternalLink className="w-3 h-3" />

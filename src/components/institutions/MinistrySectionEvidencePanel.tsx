@@ -120,7 +120,7 @@ export const MinistrySectionEvidencePanel: React.FC<Props> = ({ institutionId })
                   {supplement.actions.map(action => (
                     <div key={action.code} className="flex flex-wrap justify-between gap-2">
                       <span>{action.code} — {action.name}</span>
-                      <span className="font-semibold">{formatFCFA(action.cp_fcfa)} ·{' '}
+                      <span className="font-semibold">{formatFCFA(action.cp_fcfa)},{' '}
                         <a href={`${LFI_URL}#page=${action.lfi_pdf_page}`} className="underline text-brand-blue"
                           target="_blank" rel="noopener noreferrer">LFI p. {action.lfi_pdf_page}</a>
                       </span>

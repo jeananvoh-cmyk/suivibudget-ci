@@ -138,16 +138,16 @@ export const LocalBudgetHistoryView: React.FC<LocalBudgetHistoryViewProps> = ({
 
                   <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-[11px] space-y-1 text-slate-600">
                     <div className="flex flex-wrap justify-between gap-2">
-                      <span>• Fonctionnement réalisé :</span>
+                      <span>Fonctionnement réalisé :</span>
                       <strong className="text-slate-900">{formatRecordAmount(ca, 'operating_realized')}</strong>
                     </div>
                     <div className="flex justify-between">
-                      <span>• Investissement réalisé :</span>
+                      <span>Investissement réalisé :</span>
                       <strong className="text-slate-900">{formatRecordAmount(ca, 'investment_realized')}</strong>
                     </div>
                     {ca.surplus_or_deficit != null && (
                       <div className="flex justify-between pt-1 border-t border-slate-200">
-                        <span>• Solde de clôture :</span>
+                        <span>Solde de clôture :</span>
                         <strong className={ca.surplus_or_deficit >= 0 ? "text-emerald-700" : "text-rose-700"}>
                           {ca.surplus_or_deficit >= 0 ? '+' : ''}{formatRecordAmount(ca, 'surplus_or_deficit')}
                         </strong>
@@ -214,11 +214,11 @@ export const LocalBudgetHistoryView: React.FC<LocalBudgetHistoryViewProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                   <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-wrap justify-between gap-2 items-center">
-                    <span className="text-slate-600">• Fonctionnement :</span>
+                    <span className="text-slate-600">Fonctionnement :</span>
                     <strong className="text-slate-900">{formatRecordAmount(b, 'operating_amount')}{isExactAmount(b, 'operating_amount') && isExactAmount(b, 'total_amount') && b.operating_percentage != null ? ` (${b.operating_percentage.toFixed(1)} %)` : ''}</strong>
                   </div>
                   <div className="p-2.5 bg-emerald-50/50 rounded-xl border border-emerald-200 flex flex-wrap justify-between gap-2 items-center">
-                    <span className="text-emerald-800">• Investissement :</span>
+                    <span className="text-emerald-800">Investissement :</span>
                     <strong className="text-emerald-950">{formatRecordAmount(b, 'investment_amount')}{isExactAmount(b, 'investment_amount') && isExactAmount(b, 'total_amount') && b.investment_percentage != null ? ` (${b.investment_percentage.toFixed(1)} %)` : ''}</strong>
                   </div>
                 </div>

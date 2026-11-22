@@ -51,7 +51,7 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
             </p>
             {bp2026Count !== undefined && caPublishedCount !== undefined && (
               <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                {bp2026Count} ont annoncé leur budget 2026 en ligne • {caPublishedCount} ont publié leurs dépenses réelles 2024
+                {bp2026Count} ont annoncé leur budget 2026 en ligne, {caPublishedCount} ont publié leurs dépenses réelles 2024
               </p>
             )}
           </div>
@@ -71,7 +71,7 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
             </p>
             {state2026Count !== undefined && localCsv2026Count !== undefined && (
               <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                {state2026Count.toLocaleString('fr-FR')} de l’État • {localCsv2026Count.toLocaleString('fr-FR')} des communes et régions{bouakeCount > 0 ? ` • ${bouakeCount} à Bouaké` : ''}{multiYearCount > 0 ? ` • ${multiYearCount} lancé en 2021` : ''}
+                {(state2026Count + localCsv2026Count).toLocaleString('fr-FR')} de la Loi de finances 2026 ({state2026Count.toLocaleString('fr-FR')} État, {localCsv2026Count.toLocaleString('fr-FR')} communes et régions){bouakeCount > 0 ? `, ${bouakeCount} à Bouaké` : ''}{multiYearCount > 0 ? ` et ${multiYearCount} lancé en 2021` : ''}
               </p>
             )}
           </div>
@@ -91,11 +91,11 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
             </p>
             {state2026Amount !== undefined && localCsv2026Amount !== undefined && (
               <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                Projets suivis ici : {hasCompleteState2026Amounts ? `${formatCompactFCFA(state2026Amount ?? 0)} (État)` : `État non consolidé (${detailed?.investments.unknownAmountState2026ProjectsCount ?? 0} montant(s) inconnu(s))`} • {hasCompleteLocalCsv2026Amounts ? `${formatCompactFCFA(localCsv2026Amount ?? 0)} (communes et régions)` : `communes et régions non consolidé (${detailed?.investments.unknownAmountLocalCsv2026ProjectsCount ?? 0} montant(s) inconnu(s))`}.
+                Projets suivis ici : {hasCompleteState2026Amounts ? `${formatCompactFCFA(state2026Amount ?? 0)} (État)` : `État non consolidé (${detailed?.investments.unknownAmountState2026ProjectsCount ?? 0} montant(s) inconnu(s))`} et {hasCompleteLocalCsv2026Amounts ? `${formatCompactFCFA(localCsv2026Amount ?? 0)} (communes et régions)` : `communes et régions non consolidé (${detailed?.investments.unknownAmountLocalCsv2026ProjectsCount ?? 0} montant(s) inconnu(s))`}.
                 {(bouakeCount > 0 || (multiYearCount > 0 && hasCompletePre2026Amounts && multiYearAmount != null && multiYearAmount > 0)) && ' Non comptés :'}
-                {bouakeCount > 0 && (hasCompleteBouake2026Amounts && bouakeAmount != null ? ` Bouaké ${formatCompactFCFA(bouakeAmount)}` : ` Bouaké (non consolidé : ${detailed?.investments.unknownAmountLocalPortalBouake2026ProjectsCount ?? 0} montant(s) inconnu(s))`)}
-                {hasCompletePre2026Amounts && multiYearCount > 0 && multiYearAmount != null && multiYearAmount > 0 && `${bouakeCount > 0 ? ' •' : ''} marché de 2021 ${formatCompactFCFA(multiYearAmount)}`}
-                {!hasCompletePre2026Amounts && multiYearCount > 0 && ` • montants antérieurs non consolidés : ${detailed?.investments.unknownAmountPre2026ProjectsCount ?? 0} opération(s) sans montant connu`}
+                {bouakeCount > 0 && (hasCompleteBouake2026Amounts && bouakeAmount != null ? ` Bouaké (${formatCompactFCFA(bouakeAmount)})` : ` Bouaké (non consolidé : ${detailed?.investments.unknownAmountLocalPortalBouake2026ProjectsCount ?? 0} montant(s) inconnu(s))`)}
+                {hasCompletePre2026Amounts && multiYearCount > 0 && multiYearAmount != null && multiYearAmount > 0 && `${bouakeCount > 0 ? ' et' : ''} marché de 2021 (${formatCompactFCFA(multiYearAmount)})`}
+                {!hasCompletePre2026Amounts && multiYearCount > 0 && `, montants antérieurs non consolidés : ${detailed?.investments.unknownAmountPre2026ProjectsCount ?? 0} opération(s) sans montant connu`}
               </p>
             )}
           </div>
@@ -123,7 +123,7 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
                   : 'Collecte citoyenne ouverte — aucun constat publié'}
             </p>
             <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-              {verifiedCount} modéré{verifiedCount > 1 ? 's' : ''} (APPROVED) • 0 vérification indépendante certifiée • {pendingProofsCount} en attente
+              {verifiedCount} modéré{verifiedCount > 1 ? 's' : ''} (APPROVED), 0 vérification indépendante certifiée, {pendingProofsCount} en attente
             </p>
           </div>
         </div>

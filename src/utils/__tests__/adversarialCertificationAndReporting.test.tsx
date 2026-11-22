@@ -329,7 +329,7 @@ describe('Tests Adversariaux P0/P1 — Certification du Passeport de Redevabilit
     const reportHtml = renderToStaticMarkup(<BudgetReportsView projectsOverride={projectsWithNull} />);
     expect(reportHtml).toContain('Somme partielle — Total consolidé non disponible');
     expect(reportHtml).toContain('Somme des Montants Renseignés (Partielle)');
-    expect(reportHtml).toContain('1 avec montant renseigné • 2 sans montant connu');
+    expect(reportHtml).toContain('1 avec montant renseigné, 2 sans montant connu');
     expect(reportHtml).toContain('Montant non documenté (1 inconnu(s))');
 
     // Vérification transversale dans CommuneComparatorModal : null ne devient pas 0 dans l'écart de dotation

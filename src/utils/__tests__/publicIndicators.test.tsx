@@ -45,6 +45,7 @@ import type { BudgetProject, CitizenProof, Institution } from '../../types';
 import { HeroSection } from '../../components/HeroSection';
 import { StatImpactBanner } from '../../components/StatImpactBanner';
 import { HomePage } from '../../pages/HomePage';
+import { ProjectsPage } from '../../pages/ProjectsPage';
 import { ObservatoryPage } from '../../pages/ObservatoryPage';
 import { AnnuaireIndexPage } from '../../pages/institutions/AnnuaireIndexPage';
 import { Footer } from '../../components/Footer';
@@ -497,12 +498,15 @@ describe('Public Indicators Reconciliation & Traceability', () => {
       );
       expect(footerHtml).toContain('17 350,2 Mrds');
       expect(footerHtml).toContain('Auto. CSV');
+      expect(heroHtml).not.toContain('•');
+      expect(bannerHtml).not.toContain('•');
+      expect(footerHtml).not.toContain('•');
     },
     25000
   );
 
   it(
-    'renders aligned sector breakdown and disclaimers on HomePage',
+    'renders aligned sector breakdown, zero bullet markers, and exact 1:1 sector filtering on ProjectsPage',
     () => {
       const homeHtml = renderToStaticMarkup(
         <HomePage
@@ -517,6 +521,25 @@ describe('Public Indicators Reconciliation & Traceability', () => {
       expect(homeHtml).toContain('classification automatisée');
       expect(homeHtml).toContain('Administration &amp; Équipements Publics');
       expect(homeHtml).toContain('Énergie, Sécurité, Culture &amp; Environnement');
+      expect(homeHtml).toContain(`${(3274).toLocaleString('fr-FR')} issus de la Loi de finances 2026`);
+      expect(homeHtml).not.toContain('•');
+
+      const breakdown2026 = computeSectorBreakdown(dataStore.getProjects(), { fiscalYear: 2026 });
+      for (const sec of breakdown2026.sectors) {
+        const projectsHtml = renderToStaticMarkup(
+          <ProjectsPage
+            searchQuery=""
+            setSearchQuery={() => {}}
+            selectedSector={sec.id}
+            selectedYear={2026}
+            onSelectProject={() => {}}
+            onOpenSendProof={() => {}}
+            onOpenShare={() => {}}
+          />
+        );
+        expect(projectsHtml).toContain(`Secteur : ${sec.name.replace(/&/g, '&amp;')}`);
+        expect(projectsHtml).toContain(`(${sec.count.toLocaleString('fr-FR')} opérations`);
+      }
     },
     45000
   );

@@ -232,11 +232,11 @@ export const SpotlightSearchModal: React.FC<SpotlightSearchModalProps> = ({
                               ? `BP rapporté : ${formatFCFA(bp.total_voted_fcfa)}`
                               : 'BP : aucune source en ligne';
                             const lfiSummary = lfi?.status === 'VERIFIED_LFI' && lfi.total_cp_fcfa != null
-                              ? ` • Dotation LFI 2026 : ${formatFCFA(lfi.total_cp_fcfa)}`
+                              ? `, Dotation Loi de finances 2026 : ${formatFCFA(lfi.total_cp_fcfa)}`
                               : lfi?.status === 'NO_NOMINATIVE_LFI_LINE'
-                              ? ' • LFI 2204040 : aucune ligne nominative'
+                              ? ', aucune ligne nominative en Loi de finances 2026'
                               : '';
-                            return `${locLabel} • ${budgetSummary}${lfiSummary}`;
+                            return `${locLabel} — ${budgetSummary}${lfiSummary}`;
                           })()}
                         </div>
                       </div>
@@ -278,9 +278,9 @@ export const SpotlightSearchModal: React.FC<SpotlightSearchModalProps> = ({
                               ? `BP rapporté : ${formatFCFA(bp.total_voted_fcfa)}`
                               : 'BP : aucune source en ligne';
                             const lfiLabel = lfi?.status === 'VERIFIED_LFI' && lfi.total_cp_fcfa != null
-                              ? ` • Dotation LFI 2026 : ${formatFCFA(lfi.total_cp_fcfa)}`
+                              ? `, Dotation Loi de finances 2026 : ${formatFCFA(lfi.total_cp_fcfa)}`
                               : '';
-                            return `Chef-lieu : ${r.departement} • ${bpLabel}${lfiLabel}`;
+                            return `Chef-lieu : ${r.departement} — ${bpLabel}${lfiLabel}`;
                           })()}
                         </div>
                       </div>
@@ -351,7 +351,7 @@ export const SpotlightSearchModal: React.FC<SpotlightSearchModalProps> = ({
                           {inst.name}
                         </div>
                         <div className="text-[11px] text-slate-500">
-                          RI : {inst.info_officer_name} • {inst.address}
+                          RI : {inst.info_officer_name}, {inst.address}
                         </div>
                       </div>
                     </div>
@@ -385,8 +385,7 @@ export const SpotlightSearchModal: React.FC<SpotlightSearchModalProps> = ({
                           {p.title}
                         </div>
                         <div className="text-[11px] text-slate-500 flex items-center gap-2">
-                          <span>{p.commune_name || p.region_name}</span>
-                          <span>•</span>
+                          <span>{p.commune_name || p.region_name} :</span>
                           <span className="font-black text-slate-900">{formatFCFA(p.budget_amount_fcfa)}</span> <span className="text-brand-blue font-bold">({formatAmountInWords(p.budget_amount_fcfa)})</span>
                         </div>
                       </div>

@@ -5,9 +5,8 @@ import { HeroSection } from '../components/HeroSection';
 import { StatImpactBanner } from '../components/StatImpactBanner';
 import { ProjectCard } from '../components/ProjectCard';
 import { dataStore, isTangiblePhysicalProject } from '../services/dataStore';
-import { LFI_2026_OFFICIAL_MACRO } from '../utils/publicIndicators';
+import { LFI_2026_OFFICIAL_MACRO, computeSectorBreakdown, PublicSectorId } from '../utils/publicIndicators';
 import { formatFCFA, formatCompactFCFA, formatAmountInWords } from '../utils/formatters';
-import { computeSectorBreakdown } from '../utils/publicIndicators';
 import {
   ArrowRight,
   Camera,
@@ -47,6 +46,7 @@ interface HomePageProps {
   onSelectProject: (project: BudgetProject) => void;
   onOpenSendProof: (project?: BudgetProject) => void;
   onOpenShare: (project: BudgetProject) => void;
+  onSelectSector?: (sectorId: PublicSectorId) => void;
   onNavigateTab: (tab: 'institutions' | 'projects' | 'observatory') => void;
 }
 
@@ -56,6 +56,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   onSelectProject,
   onOpenSendProof,
   onOpenShare,
+  onSelectSector,
   onNavigateTab,
   onOpenPrivateSentinel,
 }) => {
@@ -99,7 +100,13 @@ export const HomePage: React.FC<HomePageProps> = ({
     () => computeSectorBreakdown(allProjects, { fiscalYear: 2026 }),
     [allProjects]
   );
-  const sectorData = sectorBreakdown2026.sectors;
+  const sectorData = useMemo(
+    () => [...sectorBreakdown2026.sectors].sort((a, b) => b.amountFcfa - a.amountFcfa),
+    [sectorBreakdown2026]
+  );
+  const lfi2026Count = publicIndicators.investments.statePhysical2026Count + publicIndicators.investments.localCsvPhysical2026Count;
+  const lfi2026AmountFcfa = publicIndicators.investments.statePhysical2026AmountFcfa + publicIndicators.investments.localCsvPhysical2026AmountFcfa;
+  const hasCompleteLfi2026Amounts = hasCompleteState2026Amounts && hasCompleteLocalCsv2026Amounts;
   const hasCompleteSectorTotals = sectorBreakdown2026.consolidatedTotalAmountFcfa !== null;
 
   // 1. SECTION 1 : Grands Projets Stratégiques de l'État en Milliards FCFA
@@ -266,7 +273,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Budget Ouvert 2026
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Retrouvez les {publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets publics prévus en 2026 (écoles, santé, routes…), avec leur montant et leur source. État : {hasCompleteState2026Amounts ? formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa) : 'montant non consolidé'} • communes et régions : {hasCompleteLocalCsv2026Amounts ? formatCompactFCFA(publicIndicators.investments.localCsvPhysical2026AmountFcfa) : 'montant non consolidé'}{publicIndicators.investments.localPortalBouakePhysical2026Count > 0 ? ` • Bouaké : ${hasCompleteBouake2026Amounts ? formatCompactFCFA(publicIndicators.investments.localPortalBouakePhysical2026AmountFcfa) : 'montant non consolidé'}` : ''}. Classement par secteur automatique (classification automatisée).
+                Retrouvez les {publicIndicators.investments.physical2026Count.toLocaleString('fr-FR')} projets publics suivis en 2026 ({lfi2026Count.toLocaleString('fr-FR')} issus de la Loi de finances 2026 : {hasCompleteState2026Amounts ? formatCompactFCFA(publicIndicators.investments.statePhysical2026AmountFcfa) : 'montant non consolidé'} pour l’État et {hasCompleteLocalCsv2026Amounts ? formatCompactFCFA(publicIndicators.investments.localCsvPhysical2026AmountFcfa) : 'montant non consolidé'} pour les communes et régions{publicIndicators.investments.localPortalBouakePhysical2026Count > 0 ? `, plus ${publicIndicators.investments.localPortalBouakePhysical2026Count} projets municipaux de Bouaké pour ${hasCompleteBouake2026Amounts ? formatCompactFCFA(publicIndicators.investments.localPortalBouakePhysical2026AmountFcfa) : 'montant non consolidé'}` : ''}). Classement par secteur automatique (classification automatisée).
               </p>
             </div>
             <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-brand-blue">
@@ -331,7 +338,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Où vont les investissements publics en 2026 ?
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-                Répartition sectorielle des {sectorBreakdown2026.totalProjects.toLocaleString('fr-FR')} projets et opérations physiques 2026 répertoriés selon une classification automatisée ({hasCompleteSectorTotals ? formatCompactFCFA(sectorBreakdown2026.consolidatedTotalAmountFcfa!) : `total non consolidé — ${sectorBreakdown2026.unknownAmountProjectsCount} opération(s) sans montant connu`} — sous-ensemble extrait sur {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel} votés en LFI 2026{sectorBreakdown2026.excludedOtherYearsCount > 0 ? `, hors ${sectorBreakdown2026.excludedOtherYearsCount} marché pluriannuel 2021 ${hasCompletePre2026Amounts ? `de ${formatCompactFCFA(sectorBreakdown2026.excludedOtherYearsAmountFcfa)}` : '(montant non consolidé)'}` : ''}). {sectorBreakdown2026.isPartialSum ? 'Les montants et pourcentages incomplets ne sont pas affichés.' : sectorBreakdown2026.methodologyNotice}
+                Répartition par secteur des {sectorBreakdown2026.totalProjects.toLocaleString('fr-FR')} projets publics suivis en 2026 : {lfi2026Count.toLocaleString('fr-FR')} issus de la Loi de finances 2026 ({hasCompleteLfi2026Amounts ? formatCompactFCFA(lfi2026AmountFcfa) : 'montant non consolidé'}, sous-ensemble des {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel} d’investissements votés){publicIndicators.investments.localPortalBouakePhysical2026Count > 0 ? ` et ${publicIndicators.investments.localPortalBouakePhysical2026Count} projets municipaux de Bouaké (${hasCompleteBouake2026Amounts ? formatCompactFCFA(publicIndicators.investments.localPortalBouakePhysical2026AmountFcfa) : 'montant non consolidé'}, hors Loi de finances)` : ''}, soit {hasCompleteSectorTotals ? `${formatCompactFCFA(sectorBreakdown2026.consolidatedTotalAmountFcfa!)} au total` : `total non consolidé (${sectorBreakdown2026.unknownAmountProjectsCount} opération(s) sans montant connu)`}{sectorBreakdown2026.excludedOtherYearsCount > 0 ? `, hors ${sectorBreakdown2026.excludedOtherYearsCount} chantier lancé en 2021 (${hasCompletePre2026Amounts ? formatCompactFCFA(sectorBreakdown2026.excludedOtherYearsAmountFcfa) : 'montant non consolidé'})` : ''}. Classement par secteur automatique (classification automatisée). {sectorBreakdown2026.isPartialSum ? 'Les montants et pourcentages incomplets ne sont pas affichés.' : sectorBreakdown2026.methodologyNotice}
               </p>
             </div>
             <button
@@ -347,15 +354,20 @@ export const HomePage: React.FC<HomePageProps> = ({
               const hasSectorAmount = sec.consolidatedAmountFcfa !== null;
               const hasReliablePercentages = !sectorBreakdown2026.isPartialSum;
               return (
-              <div
+              <button
+                type="button"
                 key={sec.id}
                 onClick={() => {
-                  setSelectedCategory(sec.filterKey);
-                  onNavigateTab('projects');
+                  if (onSelectSector) {
+                    onSelectSector(sec.id);
+                  } else {
+                    setSelectedCategory(sec.filterKey);
+                    onNavigateTab('projects');
+                  }
                 }}
-                className="p-5 bg-white hover:bg-slate-50/80 rounded-2xl border border-slate-200/90 hover:border-brand-blue/50 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
+                className="w-full text-left p-5 bg-white hover:bg-slate-50/80 rounded-2xl border border-slate-200/90 hover:border-brand-blue/50 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-blue"
               >
-                <div className="space-y-4">
+                <div className="space-y-4 w-full">
                   {/* Header: Titre du Secteur & Part Budgétaire Exacte */}
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -398,19 +410,20 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </div>
 
                   {/* PILIER 2 : Répartition physique État / Local */}
-                  <div className="flex items-center justify-between bg-slate-50/50 rounded-xl px-3.5 py-2.5 border border-slate-100">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      <span className="text-xs font-bold text-slate-700">
-                        <strong className="text-slate-900 font-black">{sec.count.toLocaleString('fr-FR')}</strong> opérations répertoriées
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-bold text-slate-500">
-                      {sec.stateCount.toLocaleString('fr-FR')} État • {sec.localCount.toLocaleString('fr-FR')} local
+                  <div className="flex items-center justify-between gap-2 bg-slate-50/50 rounded-xl px-3.5 py-2.5 border border-slate-100">
+                    <span className="text-xs font-bold text-slate-700">
+                      <strong className="text-slate-900 font-black">{sec.count.toLocaleString('fr-FR')}</strong> opérations répertoriées
+                    </span>
+                    <span className="text-[11px] font-bold text-slate-500 text-right">
+                      {sec.stateCount.toLocaleString('fr-FR')} État, {sec.localCount.toLocaleString('fr-FR')} local
                     </span>
                   </div>
                 </div>
-              </div>
+                <div className="pt-3 mt-3 border-t border-slate-100 w-full flex items-center justify-between text-xs font-bold text-brand-blue">
+                  <span>Voir la liste du secteur</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </button>
               );
             })}
           </div>

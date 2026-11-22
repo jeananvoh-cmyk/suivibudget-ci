@@ -412,17 +412,16 @@ export const BudgetReportsView: React.FC<{ projectsOverride?: BudgetProject[] }>
         <div className="border-b-2 border-slate-900 pb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="space-y-1">
             <div className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
-              RÉPUBLIQUE DE CÔTE D'IVOIRE • OBSERVATOIRE CITOYEN DES PROJETS PUBLICS
+              RÉPUBLIQUE DE CÔTE D'IVOIRE — OBSERVATOIRE CITOYEN DES PROJETS PUBLICS
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               {getReportTitle()}
             </h1>
-            <div className="flex items-center gap-4 text-xs font-bold text-slate-500 pt-1">
+            <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-500 pt-1">
               <span className="flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" />
                 <span>Exercice Budgétaire : 2026</span>
               </span>
-              <span>•</span>
               <span>Source : Loi de Finances 2026 (DGBF) & Suivi Terrain Citoyen</span>
             </div>
           </div>
@@ -437,7 +436,6 @@ export const BudgetReportsView: React.FC<{ projectsOverride?: BudgetProject[] }>
         {/* 1. SYNTHÈSE EXÉCUTIVE DES CHIFFRES CLÉS */}
         <div className="space-y-4">
           <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-brand-orange"></span>
             <span>1. Synthèse Exécutive & Volumes Budgétaires</span>
           </h3>
 
@@ -486,12 +484,12 @@ export const BudgetReportsView: React.FC<{ projectsOverride?: BudgetProject[] }>
                 {stats.totalProjects.toLocaleString('fr-FR')} recensés
               </span>
               <span className="text-[11px] text-slate-600 block font-semibold">
-                {stats.documentedProjectsCount.toLocaleString('fr-FR')} avec montant renseigné •{' '}
+                {stats.documentedProjectsCount.toLocaleString('fr-FR')} avec montant renseigné,{' '}
                 {stats.unknownAmountProjectsCount.toLocaleString('fr-FR')} sans montant connu
-                {stats.zeroAmountProjectsCount > 0 ? ` • ${stats.zeroAmountProjectsCount} à 0 FCFA documenté` : ''}
+                {stats.zeroAmountProjectsCount > 0 ? `, ${stats.zeroAmountProjectsCount} à 0 FCFA documenté` : ''}
               </span>
               <span className="text-[10px] text-slate-500 block mt-0.5">
-                {stats.nationalCount} Nationaux • {stats.localCount} Locaux
+                {stats.nationalCount} Nationaux, {stats.localCount} Locaux
               </span>
             </div>
 
@@ -621,7 +619,7 @@ export const BudgetReportsView: React.FC<{ projectsOverride?: BudgetProject[] }>
                           ? `${formatFCFA(cat.documentedAmount)}${cat.isPartial ? ' (somme partielle)' : ''}`
                           : 'Montant inconnu'}
                         {cat.percentageOfDocumented !== null
-                          ? ` • ${cat.percentageOfDocumented.toFixed(1)} %${cat.isPercentagePartial ? ' (des renseignés)' : ''}`
+                          ? ` (${cat.percentageOfDocumented.toFixed(1)} %${cat.isPercentagePartial ? ' des renseignés' : ''})`
                           : ''}
                       </span>
                     </div>

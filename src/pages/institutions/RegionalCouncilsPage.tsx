@@ -131,7 +131,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
               }`}
             >
-              Femmes <span className="ml-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded-md">{femaleRegionsCount} • {femaleRegionsPct}%</span>
+              Femmes <span className="ml-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded-md">{femaleRegionsCount} ({femaleRegionsPct}%)</span>
             </button>
             <button
               type="button"
@@ -145,7 +145,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
               }`}
             >
-              Hommes <span className="ml-1 text-[11px] font-semibold text-blue-800 bg-blue-100/80 px-1.5 py-0.5 rounded-md">{maleRegionsCount} • {maleRegionsPct}%</span>
+              Hommes <span className="ml-1 text-[11px] font-semibold text-blue-800 bg-blue-100/80 px-1.5 py-0.5 rounded-md">{maleRegionsCount} ({maleRegionsPct}%)</span>
             </button>
           </div>
 

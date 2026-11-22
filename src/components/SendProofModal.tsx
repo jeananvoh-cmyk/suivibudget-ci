@@ -310,7 +310,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
         const { latitude, longitude } = position.coords;
         const { lat, lng } = sanitizeCoordinates(latitude, longitude);
         const coordsStr = `Position GPS : ${lat.toFixed(3)}°N, ${Math.abs(lng).toFixed(3)}°O`;
-        setLocality((prev) => (prev ? `${prev} • ${coordsStr}` : coordsStr));
+        setLocality((prev) => (prev ? `${prev}, ${coordsStr}` : coordsStr));
         setIsLocating(false);
         setGpsSuccess(true);
         setTimeout(() => setGpsSuccess(false), 3000);
@@ -648,7 +648,7 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                           <MapPin className="w-3.5 h-3.5 text-brand-orange" />
                           {selectedProject.commune_name || selectedProject.region_name} (Région {selectedProject.region_name})
                         </span>
-                        <span>•</span>
+                        <span className="text-slate-400">—</span>
                         <span className="text-slate-500 font-semibold">
                           {selectedProject.ministry_name || 'Collectivité Territoriale'}
                         </span>
@@ -705,11 +705,11 @@ export const SendProofModal: React.FC<SendProofModalProps> = ({
                                 <div className="text-xs font-bold text-slate-900 group-hover:text-brand-blue line-clamp-1">
                                   {p.title}
                                 </div>
-                                <div className="text-[11px] text-slate-500 flex items-center gap-2">
+                                <div className="text-[11px] text-slate-500 flex items-center gap-2 flex-wrap">
                                   <span className="font-semibold text-slate-700">{p.commune_name || p.region_name}</span>
-                                  <span>•</span>
+                                  <span className="text-slate-300">|</span>
                                   <span>{p.category}</span>
-                                  <span>•</span>
+                                  <span className="text-slate-300">|</span>
                                   <span className="font-bold text-brand-blue">{formatFCFA(p.budget_amount_fcfa)}</span>
                                 </div>
                               </div>

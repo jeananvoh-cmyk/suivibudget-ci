@@ -1,11 +1,30 @@
 import { ActiveTab } from '../types';
+import type { PublicSectorId } from './publicIndicators';
 
 export type AnnuaireSection = 'INDEX' | 'MINISTRIES' | 'INSTITUTIONS' | 'REGULATORS' | 'MUNICIPAL' | 'REGIONAL';
+
+export const VALID_PROJECT_SECTORS: ReadonlySet<PublicSectorId> = new Set<PublicSectorId>([
+  'INFRASTRUCTURE',
+  'WATER',
+  'ADMINISTRATION',
+  'EDUCATION',
+  'HOUSING',
+  'ECONOMY_AGRI',
+  'HEALTH',
+  'OTHER',
+]);
+
+export interface ProjectRouteFilters {
+  sector?: PublicSectorId | null;
+  fiscalYear?: number | 'ALL';
+}
 
 export interface RouteState {
   tab: ActiveTab;
   section: AnnuaireSection;
   projectId: string | null;
+  sector: PublicSectorId | null;
+  fiscalYear: number | 'ALL';
   needsCanonicalRedirect: boolean;
 }
 
@@ -13,7 +32,7 @@ export interface RouteState {
  * Returns a clean, modern, path-based URL for any platform state.
  * E.g.
  * - home -> '/'
- * - projects -> '/projets' or '/projets?project=123'
+ * - projects -> '/projets', '/projets?project=123', or '/projets?secteur=INFRASTRUCTURE&annee=2026'
  * - institutions -> '/institutions'
  * - institutions (MINISTRIES) -> '/institutions/ministeres'
  * - institutions (MUNICIPAL) -> '/institutions/mairies'
@@ -23,13 +42,24 @@ export interface RouteState {
 export function getCleanPath(
   tab: ActiveTab, 
   section: AnnuaireSection = 'INDEX', 
-  projectId: string | null = null
+  projectId: string | null = null,
+  projectFilters?: ProjectRouteFilters
 ): string {
   switch (tab) {
     case 'home':
       return '/';
-    case 'projects':
-      return projectId ? `/projets?project=${encodeURIComponent(projectId)}` : '/projets';
+    case 'projects': {
+      if (projectId) return `/projets?project=${encodeURIComponent(projectId)}`;
+      const params = new URLSearchParams();
+      if (projectFilters?.sector && VALID_PROJECT_SECTORS.has(projectFilters.sector)) {
+        params.set('secteur', projectFilters.sector);
+      }
+      if (typeof projectFilters?.fiscalYear === 'number') {
+        params.set('annee', String(projectFilters.fiscalYear));
+      }
+      const qs = params.toString();
+      return qs ? `/projets?${qs}` : '/projets';
+    }
     case 'institutions':
       switch (section) {
         case 'MINISTRIES':
@@ -67,10 +97,14 @@ export function parseRoute(pathname: string, search: string): RouteState {
   const tabParam = params.get('tab');
   const viewParam = params.get('view');
   const projectParam = params.get('project');
+  const rawSectorParam = params.get('secteur')?.toUpperCase() as PublicSectorId | undefined;
+  const rawYearParam = params.get('annee');
 
   let tab: ActiveTab = 'home';
   let section: AnnuaireSection = 'INDEX';
   let projectId: string | null = projectParam || null;
+  let sector: PublicSectorId | null = rawSectorParam && VALID_PROJECT_SECTORS.has(rawSectorParam) ? rawSectorParam : null;
+  let fiscalYear: number | 'ALL' = rawYearParam && /^\d{4}$/.test(rawYearParam) ? Number(rawYearParam) : 'ALL';
   let needsCanonicalRedirect = false;
 
   // 1. Modern clean path matching
@@ -127,10 +161,15 @@ export function parseRoute(pathname: string, search: string): RouteState {
     projectId = projectParam;
   }
 
+  if (tab !== 'projects') {
+    sector = null;
+    fiscalYear = 'ALL';
+  }
+
   // Also if someone entered alias paths like /accueil or /projects (English), redirect to canonical
   if (['/accueil', '/home', '/projects', '/observatory', '/budgets'].includes(normalizedPath)) {
     needsCanonicalRedirect = true;
   }
 
-  return { tab, section, projectId, needsCanonicalRedirect };
+  return { tab, section, projectId, sector, fiscalYear, needsCanonicalRedirect };
 }

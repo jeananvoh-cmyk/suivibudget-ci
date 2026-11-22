@@ -182,7 +182,7 @@ export const NationalInstitutionsPage: React.FC<NationalInstitutionsPageProps> =
               <div className="space-y-2 max-w-xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-400/20 text-amber-300 border border-amber-400/30">
                   <span>RÉPUBLIQUE DE CÔTE D'IVOIRE</span>
-                  <span>•</span>
+                  <span className="text-amber-200/70">|</span>
                   <span className="text-amber-200">Union - Discipline - Travail</span>
                 </div>
 

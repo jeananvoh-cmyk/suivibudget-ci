@@ -450,9 +450,9 @@ export const Footer: React.FC<FooterProps> = ({
           
           <div className="flex items-center gap-2 text-slate-600 text-center sm:text-left flex-wrap justify-center sm:justify-start">
             <span className="font-semibold text-slate-800">© {new Date().getFullYear()} SuiviBudget CI</span>
-            <span className="text-slate-400">•</span>
+            <span className="text-slate-300">|</span>
             <span>Données ouvertes et réutilisables</span>
-            <span className="text-slate-400">•</span>
+            <span className="text-slate-300">|</span>
             <a 
               href="https://creativecommons.org/licenses/by/4.0/deed.fr" 
               target="_blank" 

@@ -11,7 +11,8 @@ import { ProjectDetailModal } from './components/ProjectDetailModal';
 import { OfficialDocRequestModal } from './components/OfficialDocRequestModal';
 import { Footer } from './components/Footer';
 import { CookieBanner } from './components/CookieBanner';
-import { getCleanPath, parseRoute, AnnuaireSection } from './utils/navigation';
+import { getCleanPath, parseRoute, AnnuaireSection, ProjectRouteFilters } from './utils/navigation';
+import type { PublicSectorId } from './utils/publicIndicators';
 
 // Lazy-loaded Pages for code splitting & ultra-fast initial bundle
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
@@ -37,6 +38,8 @@ export function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>(initialRoute.tab);
   const [annuaireView, setAnnuaireView] = useState<AnnuaireSection>(initialRoute.section);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedProjectSector, setSelectedProjectSector] = useState<PublicSectorId | null>(initialRoute.sector);
+  const [selectedProjectYear, setSelectedProjectYear] = useState<number | 'ALL'>(initialRoute.fiscalYear);
   
   // Modal states
   const [isSpotlightOpen, setIsSpotlightOpen] = useState(false);
@@ -63,11 +66,25 @@ export function App() {
   const navigateTo = (
     tab: ActiveTab, 
     section: AnnuaireSection = 'INDEX', 
-    projectId: string | null = null
+    projectId: string | null = null,
+    projectFilters?: ProjectRouteFilters
   ) => {
     setActiveTab(tab);
     setAnnuaireView(section);
-    const cleanUrl = getCleanPath(tab, section, projectId);
+    const nextSector = tab === 'projects'
+      ? (projectFilters !== undefined ? (projectFilters.sector ?? null) : (projectId ? selectedProjectSector : null))
+      : null;
+    const nextYear = tab === 'projects'
+      ? (projectFilters !== undefined ? (projectFilters.fiscalYear ?? 'ALL') : (projectId ? selectedProjectYear : 'ALL'))
+      : 'ALL';
+    if (tab === 'projects' && projectFilters !== undefined) {
+      setSelectedProjectSector(nextSector);
+      setSelectedProjectYear(nextYear);
+    } else if (tab !== 'projects' || !projectId) {
+      setSelectedProjectSector(nextSector);
+      setSelectedProjectYear(nextYear);
+    }
+    const cleanUrl = getCleanPath(tab, section, projectId, tab === 'projects' ? { sector: nextSector, fiscalYear: nextYear } : undefined);
     window.history.pushState({}, '', cleanUrl);
 
     // Update SEO dynamically
@@ -115,7 +132,7 @@ export function App() {
   useEffect(() => {
     const route = parseRoute(window.location.pathname, window.location.search);
     if (route.needsCanonicalRedirect) {
-      const cleanUrl = getCleanPath(route.tab, route.section, route.projectId);
+      const cleanUrl = getCleanPath(route.tab, route.section, route.projectId, { sector: route.sector, fiscalYear: route.fiscalYear });
       window.history.replaceState({}, '', cleanUrl);
     }
   }, []);
@@ -126,6 +143,8 @@ export function App() {
       const route = parseRoute(window.location.pathname, window.location.search);
       setActiveTab(route.tab);
       setAnnuaireView(route.section);
+      setSelectedProjectSector(route.sector);
+      setSelectedProjectYear(route.fiscalYear);
       setSelectedProject(route.projectId ? dataStore.getProjectById(route.projectId) || null : null);
     };
     window.addEventListener('popstate', handlePopState);
@@ -257,6 +276,11 @@ export function App() {
               onSelectProject={(p) => handleSelectProject(p)}
               onOpenSendProof={(p) => handleOpenSendProof(p)}
               onOpenShare={(p) => handleOpenShare(p)}
+              onSelectSector={(sectorId) => {
+                setSearchQuery('');
+                navigateTo('projects', 'INDEX', null, { sector: sectorId, fiscalYear: 2026 });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
               onNavigateTab={(tab) => {
                 handleTabChange(tab);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -278,6 +302,18 @@ export function App() {
             <ProjectsPage
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
+              selectedSector={selectedProjectSector}
+              selectedYear={selectedProjectYear}
+              onChangeSector={(nextSector) => {
+                const nextYear = nextSector ? selectedProjectYear : 'ALL';
+                setSelectedProjectSector(nextSector);
+                setSelectedProjectYear(nextYear);
+                window.history.replaceState({}, '', getCleanPath('projects', 'INDEX', null, { sector: nextSector, fiscalYear: nextYear }));
+              }}
+              onChangeYear={(nextYear) => {
+                setSelectedProjectYear(nextYear);
+                window.history.replaceState({}, '', getCleanPath('projects', 'INDEX', null, { sector: selectedProjectSector, fiscalYear: nextYear }));
+              }}
               onSelectProject={(p) => handleSelectProject(p)}
               onOpenSendProof={(p) => handleOpenSendProof(p)}
               onOpenShare={(p) => handleOpenShare(p)}

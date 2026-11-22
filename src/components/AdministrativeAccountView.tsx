@@ -1366,7 +1366,7 @@ export const AdministrativeAccountView: React.FC<AdministrativeAccountViewProps>
                                   {lotMatch.contract_number
                                     ? `Marché : ${lotMatch.contract_number}`
                                     : `Avis : ${lotMatch.tender_number}`}
-                                  {lotMatch.contract_number && lotMatch.tender_number ? ` · Avis : ${lotMatch.tender_number}` : ''}
+                                  {lotMatch.contract_number && lotMatch.tender_number ? `, Avis : ${lotMatch.tender_number}` : ''}
                                 </span>
                               )}
                             </div>
