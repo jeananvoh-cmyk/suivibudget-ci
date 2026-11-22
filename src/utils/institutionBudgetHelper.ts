@@ -1199,7 +1199,7 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
     },
     supplements: [], section_code: null, program_code: null, aggregation: 'SEPARATE_SCOPE',
     notice: local
-      ? 'Les concours de l’État ne remplacent pas le budget propre voté par la collectivité. Budget primitif et budget modificatif sont des prévisions ; le compte administratif décrit l’exécution.'
+      ? 'Les aides de l’État ne remplacent pas le budget voté par la collectivité. Ce sont des prévisions ; les dépenses réelles figurent au compte administratif.'
       : regulatorScope
         ? regulatorScope.notice
         : institution.type === 'AUTORITE_REGULATION'
@@ -1253,7 +1253,7 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
     result.notice = isPrimaryDoc
       ? 'Budget primitif voté documenté par une source primaire vérifiée. Budget primitif et budget modificatif sont des prévisions ; le compte administratif décrit l’exécution.'
       : verification === 'TO_VERIFY' ? 'Preuve déclarée non auditée : le document et la ligne budgétaire doivent être contrôlés avant certification. Le budget primitif est une prévision ; le compte administratif décrit l’exécution.'
-      : 'La part des recettes propres et des concours de l’État ne se déduit pas de ce total. Budget primitif et budget modificatif sont des prévisions ; le compte administratif décrit l’exécution.';
+      : 'Prévision annoncée en ligne : la part entre impôts locaux et aide de l’État reste à confirmer ; les dépenses réelles figurent au compte administratif.';
     if (isBalancedExact) {
       result.functioning_fcfa = primitive.functioning_voted_fcfa;
       result.investment_fcfa = primitive.investment_voted_fcfa;
@@ -1357,7 +1357,7 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
           investment_cp_fcfa: 0,
           annexe4_supplement_fcfa: 0,
           annexe8_supplement_fcfa: 0,
-          label: 'Dotation de l’État (LFI 2026) — aucune ligne nominative dans le bloc des concours aux collectivités',
+          label: 'Dotation de l’État (Loi de finances 2026) — aucune ligne nominative dans le bloc des concours aux collectivités',
           lfi_action_code: null,
           annexe4_action_codes: [],
           annexe8_action_codes: [],
