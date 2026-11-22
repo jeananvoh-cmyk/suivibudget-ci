@@ -51,7 +51,7 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
             </p>
             {bp2026Count !== undefined && caPublishedCount !== undefined && (
               <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                {bp2026Count} BP 2026 cités • {caPublishedCount} CA 2024 publiés
+                {bp2026Count} ont annoncé leur budget 2026 en ligne • {caPublishedCount} ont publié leurs dépenses réelles 2024
               </p>
             )}
           </div>
@@ -60,18 +60,18 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
         {/* Card 2: Projets Physiques Répertoriés (Classification automatisée non certifiée) */}
         <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between">
           <div className="mb-4">
-            <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Projets Physiques (Auto.)</span>
+            <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Projets publics suivis</span>
           </div>
           <div>
             <div className="text-3xl font-black text-slate-900 tracking-tight">
               {physicalAllCount.toLocaleString('fr-FR')}
             </div>
             <p className="text-xs text-slate-600 font-semibold mt-1.5 leading-snug">
-              Projets et opérations physiques répertoriés selon une classification automatisée
+              Écoles, santé, eau, routes… classés par secteur (classification automatisée)
             </p>
             {state2026Count !== undefined && localCsv2026Count !== undefined && (
               <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                {state2026Count.toLocaleString('fr-FR')} État LFI • {localCsv2026Count.toLocaleString('fr-FR')} local LFI{bouakeCount > 0 ? ` • ${bouakeCount} Bouaké` : ''}{multiYearCount > 0 ? ` • ${multiYearCount} ex. 2021` : ''}
+                {state2026Count.toLocaleString('fr-FR')} de l’État • {localCsv2026Count.toLocaleString('fr-FR')} des communes et régions{bouakeCount > 0 ? ` • ${bouakeCount} à Bouaké` : ''}{multiYearCount > 0 ? ` • ${multiYearCount} lancé en 2021` : ''}
               </p>
             )}
           </div>
@@ -80,20 +80,21 @@ export const StatImpactBanner: React.FC<StatImpactBannerProps> = ({ stats }) => 
         {/* Card 3: Investissements LFI 2026 & Périmètre Extrait */}
         <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between">
           <div className="mb-4">
-            <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Investissements LFI 2026</span>
+            <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Investissements de l’État 2026</span>
           </div>
           <div>
             <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               {LFI_2026_OFFICIAL_MACRO.investmentsMilliardsLabel}
             </div>
             <p className="text-xs text-slate-600 font-semibold mt-1.5 leading-snug">
-              Dépenses en capital État (Loi n° 2025-987)
+              Votés dans la Loi de finances 2026 (Loi n° 2025-987)
             </p>
             {state2026Amount !== undefined && localCsv2026Amount !== undefined && (
               <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                Extrait classifié : {hasCompleteState2026Amounts ? `${formatCompactFCFA(state2026Amount ?? 0)} État` : `État non consolidé (${detailed?.investments.unknownAmountState2026ProjectsCount ?? 0} montant(s) inconnu(s))`} • {hasCompleteLocalCsv2026Amounts ? `${formatCompactFCFA(localCsv2026Amount ?? 0)} local LFI` : `local LFI non consolidé (${detailed?.investments.unknownAmountLocalCsv2026ProjectsCount ?? 0} montant(s) inconnu(s))`}
-                {bouakeCount > 0 && (hasCompleteBouake2026Amounts && bouakeAmount != null ? ` (hors ${formatCompactFCFA(bouakeAmount)} portail Bouaké)` : ` (portail Bouaké non consolidé : ${detailed?.investments.unknownAmountLocalPortalBouake2026ProjectsCount ?? 0} montant(s) inconnu(s))`)}
-                {hasCompletePre2026Amounts && multiYearCount > 0 && multiYearAmount != null && multiYearAmount > 0 && ` • hors 2021 : ${formatCompactFCFA(multiYearAmount)}`}
+                Projets suivis ici : {hasCompleteState2026Amounts ? `${formatCompactFCFA(state2026Amount ?? 0)} (État)` : `État non consolidé (${detailed?.investments.unknownAmountState2026ProjectsCount ?? 0} montant(s) inconnu(s))`} • {hasCompleteLocalCsv2026Amounts ? `${formatCompactFCFA(localCsv2026Amount ?? 0)} (communes et régions)` : `communes et régions non consolidé (${detailed?.investments.unknownAmountLocalCsv2026ProjectsCount ?? 0} montant(s) inconnu(s))`}.
+                {(bouakeCount > 0 || (multiYearCount > 0 && hasCompletePre2026Amounts && multiYearAmount != null && multiYearAmount > 0)) && ' Non comptés :'}
+                {bouakeCount > 0 && (hasCompleteBouake2026Amounts && bouakeAmount != null ? ` Bouaké ${formatCompactFCFA(bouakeAmount)}` : ` Bouaké (non consolidé : ${detailed?.investments.unknownAmountLocalPortalBouake2026ProjectsCount ?? 0} montant(s) inconnu(s))`)}
+                {hasCompletePre2026Amounts && multiYearCount > 0 && multiYearAmount != null && multiYearAmount > 0 && `${bouakeCount > 0 ? ' •' : ''} marché de 2021 ${formatCompactFCFA(multiYearAmount)}`}
                 {!hasCompletePre2026Amounts && multiYearCount > 0 && ` • montants antérieurs non consolidés : ${detailed?.investments.unknownAmountPre2026ProjectsCount ?? 0} opération(s) sans montant connu`}
               </p>
             )}
