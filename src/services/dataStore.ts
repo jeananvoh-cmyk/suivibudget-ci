@@ -483,6 +483,7 @@ class DataStore {
           precision: current.amount_precision,
           session_notes: current.session_notes || current.notes,
           projects_count: current.projects_count,
+          ...(baselinePrimitive?.corroborating_sources?.length ? { corroborating_sources: baselinePrimitive.corroborating_sources } : {}),
         } : (baselinePrimitive || inst.primitive_budget)
       };
     });
