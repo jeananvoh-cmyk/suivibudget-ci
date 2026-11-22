@@ -1,9 +1,10 @@
 import { matchesSmartSearch, normalizeSearchText } from '../utils/searchHelpers';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { BudgetProject } from '../types';
 import { ProjectCard } from '../components/ProjectCard';
-import { CATEGORIES, getCategoryBadgeClass } from '../data/categories';
+import { getCategoryBadgeClass } from '../data/categories';
 import { dataStore } from '../services/dataStore';
+import { PUBLIC_SECTOR_DEFINITIONS, PublicSectorId, normalizeSectorCategory } from '../utils/publicIndicators';
 import { formatCompactFCFA, formatFCFA, formatAmountInWords, getProjectEntityInfo } from '../utils/formatters';
 import { sanitizeCsvCell } from '../utils/security';
 import {
@@ -46,6 +47,10 @@ export const buildProjectsCsvContent = (projects: readonly BudgetProject[]): str
 interface ProjectsPageProps {
   searchQuery: string;
   setSearchQuery: (q: string) => void;
+  selectedSector?: PublicSectorId | null;
+  selectedYear?: number | 'ALL';
+  onChangeSector?: (sector: PublicSectorId | null) => void;
+  onChangeYear?: (year: number | 'ALL') => void;
   onSelectProject: (project: BudgetProject) => void;
   onOpenSendProof: (project: BudgetProject) => void;
   onOpenShare: (project: BudgetProject) => void;
@@ -54,13 +59,18 @@ interface ProjectsPageProps {
 export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   searchQuery,
   setSearchQuery,
+  selectedSector: controlledSector,
+  selectedYear: controlledYear,
+  onChangeSector,
+  onChangeYear,
   onSelectProject,
   onOpenSendProof,
   onOpenShare,
 }) => {
   const allProjects = dataStore.getProjects();
   const [selectedScope, setSelectedScope] = useState<'LOCAL' | 'NATIONAL' | 'ALL'>('ALL');
-  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [internalSector, setInternalSector] = useState<PublicSectorId | null>(controlledSector ?? null);
+  const [internalYear, setInternalYear] = useState<number | 'ALL'>(controlledYear ?? 'ALL');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [selectedRegion, setSelectedRegion] = useState<string>('ALL');
   const [onlyPhysical, setOnlyPhysical] = useState<boolean>(true); // Youth friendly default: filter out pure salaries/provisions
@@ -68,7 +78,38 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   const [viewMode, setViewMode] = useState<'GRID' | 'TABLE'>('GRID');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const activeFiltersCount = (selectedCategory !== 'ALL' ? 1 : 0) +
+  const activeSector: PublicSectorId | null = controlledSector !== undefined ? controlledSector : internalSector;
+  const activeYear: number | 'ALL' = controlledYear !== undefined ? controlledYear : internalYear;
+  const activeSectorDef = activeSector ? PUBLIC_SECTOR_DEFINITIONS.find((s) => s.id === activeSector) ?? null : null;
+
+  const setSector = (sector: PublicSectorId | null) => {
+    setInternalSector(sector);
+    onChangeSector?.(sector);
+    setCurrentPage(1);
+  };
+
+  const setYear = (year: number | 'ALL') => {
+    setInternalYear(year);
+    onChangeYear?.(year);
+    setCurrentPage(1);
+  };
+
+  useEffect(() => {
+    if (controlledSector !== undefined) {
+      setInternalSector(controlledSector);
+      setCurrentPage(1);
+    }
+  }, [controlledSector]);
+
+  useEffect(() => {
+    if (controlledYear !== undefined) {
+      setInternalYear(controlledYear);
+      setCurrentPage(1);
+    }
+  }, [controlledYear]);
+
+  const activeFiltersCount = (activeSector !== null ? 1 : 0) +
+    (activeYear !== 'ALL' ? 1 : 0) +
     (selectedRegion !== 'ALL' ? 1 : 0) +
     (sortBy !== 'amount-desc' ? 1 : 0);
 
@@ -81,8 +122,10 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
            titleLow.startsWith('provision pour investissement');
   };
 
-  // Base scope pools (dynamically reactive to onlyPhysical toggle)
-  const activePool = onlyPhysical ? allProjects.filter(p => !isAbstractProject(p)) : allProjects;
+  // Base pools scoped to physical toggle, selected year, and selected sector so tab counts stay 100% consistent
+  const activePool = (onlyPhysical ? allProjects.filter(p => !isAbstractProject(p)) : allProjects)
+    .filter((p) => (activeYear === 'ALL' || p.fiscal_year === activeYear))
+    .filter((p) => (activeSector === null || normalizeSectorCategory(p.category) === activeSector));
   const localProjectsTotal = activePool.filter(p => p.scope_level !== 'NATIONAL');
   const nationalProjectsTotal = activePool.filter(p => p.scope_level === 'NATIONAL');
 
@@ -147,12 +190,6 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
       searchQuery
     );
 
-    // Category filter
-    const matchesCategory =
-      selectedCategory === 'ALL' ||
-      normalizeSearchText(p.category) === normalizeSearchText(selectedCategory) ||
-      normalizeSearchText(p.category).includes(normalizeSearchText(selectedCategory));
-
     // Status filter
     const matchesStatus =
       selectedStatus === 'ALL' || p.current_status === selectedStatus;
@@ -162,7 +199,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
       selectedRegion === 'ALL' ||
       normalizeSearchText(p.region_name) === normalizeSearchText(selectedRegion);
 
-    return matchesSearch && matchesCategory && matchesStatus && matchesRegion;
+    return matchesSearch && matchesStatus && matchesRegion;
   });
 
   const sortedProjects = [...filteredProjects].sort((a, b) => {
@@ -499,25 +536,89 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
             </div>
           </div>
 
-          {/* Categories Filter (Collapsible on Mobile, always visible on Desktop) */}
-          <div className={`${showMobileFilters ? 'block' : 'hidden lg:block'} pt-2 border-t border-slate-100`}>
+          {/* Active Sector & Year Banner (when redirected from HomePage or filtering by sector) */}
+          {(activeSectorDef || activeYear !== 'ALL') && (
+            <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-2xl bg-blue-50/90 border border-blue-200 px-3.5 py-2.5 text-xs">
+              <div className="flex flex-wrap items-center gap-2 text-slate-800">
+                <span className="font-black text-brand-blue">
+                  {activeSectorDef ? `Secteur : ${activeSectorDef.name}` : 'Tous les secteurs'}
+                </span>
+                {activeYear !== 'ALL' && (
+                  <span className="px-2 py-0.5 rounded-full bg-white text-slate-700 border border-blue-200 font-bold">
+                    Exercice {activeYear}
+                  </span>
+                )}
+                <span className="text-slate-600 font-semibold">
+                  ({filteredProjects.length.toLocaleString('fr-FR')} opérations{totalBudgetFiltered !== null ? `, ${formatFCFA(totalBudgetFiltered)}` : ''})
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {activeYear !== 'ALL' ? (
+                  <button
+                    type="button"
+                    onClick={() => setYear('ALL')}
+                    className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold transition-colors cursor-pointer"
+                  >
+                    Inclure toutes les années
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setYear(2026)}
+                    className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold transition-colors cursor-pointer"
+                  >
+                    Limiter à 2026
+                  </button>
+                )}
+                {activeSectorDef && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSector(null);
+                      setYear('ALL');
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-brand-blue hover:bg-brand-blue-dark text-white font-bold transition-colors cursor-pointer"
+                  >
+                    Tous les secteurs
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Unified 8 Sectors Filter (100% aligned with HomePage sector cards) */}
+          <div className={`${showMobileFilters || activeSector !== null ? 'block' : 'hidden lg:block'} pt-2 border-t border-slate-100`}>
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              {CATEGORIES.map((cat) => {
-                const isSelected = selectedCategory === cat.id;
+              <button
+                type="button"
+                onClick={() => {
+                  setSector(null);
+                  setYear('ALL');
+                }}
+                aria-pressed={activeSector === null}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                  activeSector === null
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60'
+                }`}
+              >
+                Tous les secteurs
+              </button>
+              {PUBLIC_SECTOR_DEFINITIONS.map((sec) => {
+                const isSelected = activeSector === sec.id;
                 return (
                   <button
-                    key={cat.id}
-                    onClick={() => {
-                      setSelectedCategory(cat.id);
-                      setCurrentPage(1);
-                    }}
+                    key={sec.id}
+                    type="button"
+                    onClick={() => setSector(sec.id)}
+                    aria-pressed={isSelected}
                     className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-slate-900 text-white shadow-sm'
+                        ? 'bg-brand-blue text-white shadow-sm'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60'
                     }`}
                   >
-                    {cat.name}
+                    {sec.name}
                   </button>
                 );
               })}
@@ -538,7 +639,8 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
           <button
             onClick={() => {
               setSearchQuery('');
-              setSelectedCategory('ALL');
+              setSector(null);
+              setYear('ALL');
               setSelectedRegion('ALL');
               setSelectedStatus('ALL');
               setOnlyPhysical(true);

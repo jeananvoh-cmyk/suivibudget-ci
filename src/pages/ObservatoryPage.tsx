@@ -201,7 +201,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
             }`}
           >
             <Camera className="w-4 h-4 text-brand-orange" />
-            <span>Galerie ({strategicCount} dossier stratégique • {approvedProofsCount} constat{approvedProofsCount > 1 ? 's' : ''} citoyen{approvedProofsCount > 1 ? 's' : ''})</span>
+            <span>Galerie ({strategicCount} dossier stratégique, {approvedProofsCount} constat{approvedProofsCount > 1 ? 's' : ''} citoyen{approvedProofsCount > 1 ? 's' : ''})</span>
           </button>
 
           <button
@@ -237,7 +237,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                 </div>
 
                 <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold self-start sm:self-auto border border-slate-200/70">
-                  {strategicCount} enquête stratégique • {approvedProofsCount} / {publicIndicators.citizenProofs.target2026.toLocaleString('fr-FR')} constats publiés
+                  {strategicCount} enquête stratégique, {approvedProofsCount} / {publicIndicators.citizenProofs.target2026.toLocaleString('fr-FR')} constats publiés
                 </span>
               </div>
 
@@ -325,7 +325,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                      Grand Chantier de l'État • Fiche d'Enquête Approfondie
+                      Grand Chantier de l'État — Fiche d'Enquête Approfondie
                     </span>
                     <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600 text-[10px] font-medium">
                       {activeStrategicProject.fundingSource}
@@ -896,7 +896,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-900">
-                    Veille Citoyenne de Proximité • Opérations Communales & Régionales
+                    Veille Citoyenne de Proximité : Opérations Communales & Régionales
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Constats photographiques des sentinelles citoyennes dans les collectivités territoriales (Poro, Gbêkê, etc.).
@@ -1133,8 +1133,7 @@ export const ObservatoryPage: React.FC<ObservatoryPageProps> = ({
 
                               <div className="flex items-center gap-1 text-xs text-slate-500 mt-1">
                                 <MapPin className="w-3.5 h-3.5 text-brand-orange flex-shrink-0" />
-                                <span className="font-bold text-slate-700">{proof.commune_name}</span>
-                                <span>•</span>
+                                <span className="font-bold text-slate-700">{proof.commune_name},</span>
                                 <span>{formatDateFR(proof.created_at)}</span>
                               </div>
                             </div>

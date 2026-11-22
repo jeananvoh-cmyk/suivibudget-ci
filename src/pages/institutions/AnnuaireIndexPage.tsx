@@ -39,7 +39,7 @@ export const AnnuaireIndexPage: React.FC<AnnuaireIndexPageProps> = ({
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-6">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200 mb-2">
-                <span>Loi de Finances 2026 • République de Côte d'Ivoire</span>
+                <span>Loi de Finances 2026 — République de Côte d'Ivoire</span>
               </div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-slate-900">
                 Budget Général de l'État : <span className="text-slate-900">17 350,2 Milliards FCFA</span>

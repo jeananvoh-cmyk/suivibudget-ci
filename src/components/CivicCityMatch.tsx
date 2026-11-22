@@ -35,7 +35,7 @@ export const CivicCityMatch: React.FC<CivicCityMatchProps> = ({
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 text-amber-900 text-xs font-black uppercase tracking-wider mb-2">
             <Trophy className="w-3.5 h-3.5 text-brand-orange" />
-            <span>Gamification Collective • Fierté Territoriale</span>
+            <span>Gamification Collective — Fierté Territoriale</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-sans">
             Le Match des Villes : Baromètre de Vigilance Citoyenne
@@ -122,7 +122,7 @@ export const CivicCityMatch: React.FC<CivicCityMatchProps> = ({
                   #{city.rank} {city.name}
                 </span>
                 <span className="text-[10px] text-slate-500 font-medium">
-                  {city.proofsCount} constats • {city.score}%
+                  {city.proofsCount} constats, {city.score}%
                 </span>
               </div>
               <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-blue group-hover:translate-x-0.5 transition-all" />

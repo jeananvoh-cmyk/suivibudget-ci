@@ -305,7 +305,7 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
               }`}
             >
-              Femmes <span className="ml-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded-md">{femaleMairiesCount} • {femaleMairiesPct}%</span>
+              Femmes <span className="ml-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded-md">{femaleMairiesCount} ({femaleMairiesPct}%)</span>
             </button>
             <button
               type="button"
@@ -319,7 +319,7 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
               }`}
             >
-              Hommes <span className="ml-1 text-[11px] font-semibold text-blue-800 bg-blue-100/80 px-1.5 py-0.5 rounded-md">{maleMairiesCount} • {maleMairiesPct}%</span>
+              Hommes <span className="ml-1 text-[11px] font-semibold text-blue-800 bg-blue-100/80 px-1.5 py-0.5 rounded-md">{maleMairiesCount} ({maleMairiesPct}%)</span>
             </button>
           </div>
 
@@ -379,10 +379,10 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
         <div className="flex items-center justify-between text-xs text-slate-500 font-semibold px-2">
           <div>
             Affichage de <span className="text-brand-blue font-black">{paginatedMairies.length}</span> sur <span className="font-bold text-slate-800">{sortedMairies.length}</span> commune(s)
-            {selectedDistrictFilter !== 'ALL' && <span> • District : <strong className="text-slate-800">{selectedDistrictFilter}</strong></span>}
-            {selectedRegionFilter !== 'ALL' && <span> • Région : <strong className="text-slate-800">{selectedRegionFilter}</strong></span>}
-            {selectedLetterFilter !== 'ALL' && <span> • Lettre : <strong className="text-brand-blue">{selectedLetterFilter}</strong></span>}
-            {searchQuery && <span> • Recherche : « <strong className="text-slate-800">{searchQuery}</strong> »</span>}
+            {selectedDistrictFilter !== 'ALL' && <span> — District : <strong className="text-slate-800">{selectedDistrictFilter}</strong></span>}
+            {selectedRegionFilter !== 'ALL' && <span> — Région : <strong className="text-slate-800">{selectedRegionFilter}</strong></span>}
+            {selectedLetterFilter !== 'ALL' && <span> — Lettre : <strong className="text-brand-blue">{selectedLetterFilter}</strong></span>}
+            {searchQuery && <span> — Recherche : « <strong className="text-slate-800">{searchQuery}</strong> »</span>}
           </div>
           {(selectedDistrictFilter !== 'ALL' || selectedRegionFilter !== 'ALL' || selectedLetterFilter !== 'ALL' || searchQuery) && (
             <button
@@ -466,12 +466,12 @@ export const MunicipalitiesPage: React.FC<MunicipalitiesPageProps> = ({
                       </span>
                       {isPeripheralAbidjan && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
-                          Grand Abidjan • Commune Périphérique (DGE)
+                          Grand Abidjan — Commune Périphérique (DGE)
                         </span>
                       )}
                       {isAttecoube && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-200">
-                          Grand Abidjan • 6 Chantiers Prioritaires (200 M)
+                          Grand Abidjan — 6 Chantiers Prioritaires (200 M)
                         </span>
                       )}
                       {inst.political_party && (

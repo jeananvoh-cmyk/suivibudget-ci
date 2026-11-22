@@ -244,7 +244,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
         </div>
         <div className="space-y-2 text-center md:text-left flex-1">
           <span className="inline-block px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-brand-blue/10 text-brand-blue">
-            Pouvoir Exécutif • République de Côte d'Ivoire
+            Pouvoir Exécutif, République de Côte d'Ivoire
           </span>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight font-sans">
             Ministères de la République
@@ -292,7 +292,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
               }`}
             >
-              Femmes <span className="ml-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded-md">6 • 17%</span>
+              Femmes <span className="ml-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded-md">6 (17%)</span>
             </button>
             <button
               type="button"
@@ -303,7 +303,7 @@ export const MinistriesPage: React.FC<MinistriesPageProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
               }`}
             >
-              Hommes <span className="ml-1 text-[11px] font-semibold text-blue-800 bg-blue-100/80 px-1.5 py-0.5 rounded-md">29 • 83%</span>
+              Hommes <span className="ml-1 text-[11px] font-semibold text-blue-800 bg-blue-100/80 px-1.5 py-0.5 rounded-md">29 (83%)</span>
             </button>
           </div>
 

@@ -22,7 +22,7 @@ export const STRATEGIC_INFRASTRUCTURE_PROJECTS: BudgetProject[] = [
     official_progress_source: 'MEER / AGEROUTE (Taux officiel déclaré : 80%)',
     partner_or_donor: 'Trésor Public (100% Fonds Propres de l\'État)',
     master_builder: 'Ministère de l\'Équipement et de l\'Entretien Routier (AGEROUTE)',
-    contractor_name: 'PORTEO BTP (Maîtrise d\'ouvrage déléguée : AGEROUTE • Contrôle : Cabinet 2HCI)',
+    contractor_name: 'PORTEO BTP (Maîtrise d\'ouvrage déléguée : AGEROUTE, Contrôle : Cabinet 2HCI)',
     image_url: '/images/seguela_touba_route_1.png',
     target_delivery_date: '2025-2026',
     locality_village_neighborhood: 'Axe Séguéla - Sifié - Pont sur le Sassandra - Touba (126 km)',
@@ -215,6 +215,7 @@ const LFI_2026_ANNEX_DOCUMENT_URL =
 
 export const NATIONAL_BUDGET_PROJECTS: BudgetProject[] = (officialNationalProjects2026 as unknown as BudgetProject[]).map(p => ({
   ...p,
+  details: p.details ? p.details.replace(/\s*•\s*/g, ' — ') : p.details,
   scope_level: 'NATIONAL' as const,
   project_tier: 'STATE' as const,
   master_builder: p.ministry_name || 'État Central (Ministère Sectoriel)',

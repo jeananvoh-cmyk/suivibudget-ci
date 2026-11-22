@@ -16,7 +16,7 @@ export const MinistryBudgetHeader: React.FC<MinistryBudgetHeaderProps> = ({ budg
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs text-[11px] font-bold text-emerald-300 border border-white/15">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Nomenclature Officielle Budget-Programmes • DGBF</span>
+          <span>Nomenclature Officielle Budget-Programmes (DGBF)</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 flex items-center gap-1">
@@ -65,7 +65,7 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
   };
   const renderAmount = (amount: BudgetPresentationAmount) => (
     <div className="space-y-1 min-w-0">
-      <p className="text-xs font-bold text-slate-700">{amount.label} · {view.fiscal_year}</p>
+      <p className="text-xs font-bold text-slate-700">{amount.label} ({view.fiscal_year})</p>
       <p className={`${compact ? 'text-sm' : 'text-xl sm:text-2xl'} font-black text-slate-900 break-words`}>
         {amount.amount_fcfa == null
           ? 'Non documenté'
@@ -78,7 +78,7 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
       {amount.source?.source_url && (
         <a href={`${amount.source.source_url}${amount.source.pdf_page ? `#page=${amount.source.pdf_page}` : ''}`} target="_blank" rel="noopener noreferrer"
           onClick={event => event.stopPropagation()} className="inline-flex items-center gap-1 py-0.5 text-xs underline text-brand-blue focus-visible:outline focus-visible:outline-2 rounded break-words">
-          {formatInstitutionDisplayName(amount.source.document_title)}{amount.source.pdf_page ? ` · PDF p. ${amount.source.pdf_page}` : ''}
+          {formatInstitutionDisplayName(amount.source.document_title)}{amount.source.pdf_page ? ` (PDF p. ${amount.source.pdf_page})` : ''}
         </a>
       )}
       {amount.corroborating_sources?.map((item) => (
@@ -158,7 +158,7 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
                 onClick={event => event.stopPropagation()}
                 className="underline font-semibold text-brand-blue focus-visible:outline focus-visible:outline-2 rounded"
               >
-                Loi de Finances 2026{lfi.source.pdf_page ? ` · PDF p. ${lfi.source.pdf_page}` : ''}
+                Loi de Finances 2026{lfi.source.pdf_page ? ` (PDF p. ${lfi.source.pdf_page})` : ''}
               </a>
             )}
             {lfi.annexe8_source_url && (
@@ -169,7 +169,7 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
                 onClick={event => event.stopPropagation()}
                 className="underline font-semibold text-brand-blue focus-visible:outline focus-visible:outline-2 rounded"
               >
-                Annexe 8 DGBF 2026{lfi.annexe8_pdf_page ? ` · PDF p. ${lfi.annexe8_pdf_page}` : ''}
+                Annexe 8 DGBF 2026{lfi.annexe8_pdf_page ? ` (PDF p. ${lfi.annexe8_pdf_page})` : ''}
               </a>
             )}
             {!compact && lfi.lfi_action_code && (
@@ -201,7 +201,7 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
               onClick={event => event.stopPropagation()}
               className="inline-block underline font-semibold text-brand-blue focus-visible:outline focus-visible:outline-2 rounded"
             >
-              Vérifier dans la Loi de Finances 2026 · PDF p. {lfi.source.pdf_page ?? 207}
+              Vérifier dans la Loi de Finances 2026 (PDF p. {lfi.source.pdf_page ?? 207})
             </a>
           )}
         </div>

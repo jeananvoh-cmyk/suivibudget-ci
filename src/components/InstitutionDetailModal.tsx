@@ -584,13 +584,13 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
 
                   {isPeripheralAbidjan && (
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
-                      Grand Abidjan • Commune Périphérique (DGE)
+                      Grand Abidjan — Commune Périphérique (DGE)
                     </span>
                   )}
 
                   {isAttecoube && (
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-200">
-                      Grand Abidjan • 6 Chantiers Prioritaires (200 M)
+                      Grand Abidjan — 6 Chantiers Prioritaires (200 M)
                     </span>
                   )}
 
@@ -608,7 +608,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                 {institution.leader_name && (
                   <div className="flex items-center gap-1.5 text-xs text-slate-700 truncate">
                     <span className="font-bold text-slate-900">{institution.leader_name}</span>
-                    <span className="text-slate-400">•</span>
+                    <span className="text-slate-400">—</span>
                     <span className="text-slate-500 font-medium truncate">{institution.leader_title || 'Premier Responsable'}</span>
                   </div>
                 )}
@@ -805,7 +805,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-black text-sky-950 uppercase text-[10px] tracking-wider">
-                        Grand Abidjan • Concours Direct de l'État (Dotation Globale d'Équipement - DGE)
+                        Grand Abidjan — Concours Direct de l'État (Dotation Globale d'Équipement - DGE)
                       </span>
                       <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-sky-200/70 text-sky-900 border border-sky-300">
                         LFI 2026
@@ -826,7 +826,7 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-black text-amber-950 uppercase text-[10px] tracking-wider">
-                        Grand Abidjan • Opérations Prioritaires de Développement Local (Ministères Techniques)
+                        Grand Abidjan — Opérations Prioritaires de Développement Local (Ministères Techniques)
                       </span>
                       <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-200 text-amber-900 border border-amber-300">
                         200 000 000 FCFA

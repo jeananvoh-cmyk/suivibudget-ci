@@ -431,7 +431,7 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-brand-blue border border-blue-200/80">
                   <ShieldCheck className="w-3 h-3 text-brand-blue flex-shrink-0" />
-                  <span>Loi n°2013-867 • Accès aux documents publics</span>
+                  <span>Loi n°2013-867 — Accès aux documents publics</span>
                 </span>
                 <span className="text-[10px] font-semibold text-slate-500 hidden sm:inline-block">
                   Délai légal garanti : <strong className="text-brand-blue font-bold">{legalDelayDays} jours</strong>
@@ -979,7 +979,7 @@ export const OfficialDocRequestModal: React.FC<OfficialDocRequestModalProps> = (
                 {/* Discreet footer reference */}
                 <div className="pt-2 text-[9px] text-slate-400 flex items-center justify-between border-t border-slate-100 print:border-none">
                   <span>Réf. demandeur : <strong className="font-mono text-slate-600">{referenceNumber}</strong></span>
-                  <span>Plateforme civique SuiviBudget Côte d'Ivoire (suivibudget.ci) • En application de la Loi n° 2013-867</span>
+                  <span>Plateforme civique SuiviBudget Côte d'Ivoire (suivibudget.ci) — En application de la Loi n° 2013-867</span>
                 </div>
 
               </div>

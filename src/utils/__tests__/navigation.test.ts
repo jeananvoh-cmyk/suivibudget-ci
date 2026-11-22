@@ -7,9 +7,11 @@ describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
       expect(getCleanPath('home')).toBe('/');
     });
 
-    it('generates clean path for projects list and single project', () => {
+    it('generates clean path for projects list, sector filters, and single project', () => {
       expect(getCleanPath('projects')).toBe('/projets');
       expect(getCleanPath('projects', 'INDEX', 'proj-123')).toBe('/projets?project=proj-123');
+      expect(getCleanPath('projects', 'INDEX', null, { sector: 'INFRASTRUCTURE', fiscalYear: 2026 })).toBe('/projets?secteur=INFRASTRUCTURE&annee=2026');
+      expect(getCleanPath('projects', 'INDEX', null, { sector: 'ADMINISTRATION', fiscalYear: 'ALL' })).toBe('/projets?secteur=ADMINISTRATION');
     });
 
     it('generates clean path for all institutions sections', () => {
@@ -34,6 +36,8 @@ describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
         tab: 'home',
         section: 'INDEX',
         projectId: null,
+        sector: null,
+        fiscalYear: 'ALL',
         needsCanonicalRedirect: false,
       });
 
@@ -41,6 +45,26 @@ describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
         tab: 'projects',
         section: 'INDEX',
         projectId: null,
+        sector: null,
+        fiscalYear: 'ALL',
+        needsCanonicalRedirect: false,
+      });
+
+      expect(parseRoute('/projets', '?secteur=INFRASTRUCTURE&annee=2026')).toEqual({
+        tab: 'projects',
+        section: 'INDEX',
+        projectId: null,
+        sector: 'INFRASTRUCTURE',
+        fiscalYear: 2026,
+        needsCanonicalRedirect: false,
+      });
+
+      expect(parseRoute('/projets', '?secteur=INVALIDE&annee=abc')).toEqual({
+        tab: 'projects',
+        section: 'INDEX',
+        projectId: null,
+        sector: null,
+        fiscalYear: 'ALL',
         needsCanonicalRedirect: false,
       });
 
@@ -48,6 +72,8 @@ describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
         tab: 'projects',
         section: 'INDEX',
         projectId: 'proj-456',
+        sector: null,
+        fiscalYear: 'ALL',
         needsCanonicalRedirect: false,
       });
 
@@ -55,6 +81,8 @@ describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
         tab: 'institutions',
         section: 'INDEX',
         projectId: null,
+        sector: null,
+        fiscalYear: 'ALL',
         needsCanonicalRedirect: false,
       });
 
@@ -62,6 +90,8 @@ describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
         tab: 'institutions',
         section: 'MINISTRIES',
         projectId: null,
+        sector: null,
+        fiscalYear: 'ALL',
         needsCanonicalRedirect: false,
       });
 
@@ -69,6 +99,8 @@ describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
         tab: 'institutions',
         section: 'MUNICIPAL',
         projectId: null,
+        sector: null,
+        fiscalYear: 'ALL',
         needsCanonicalRedirect: false,
       });
 
@@ -76,6 +108,8 @@ describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
         tab: 'observatory',
         section: 'INDEX',
         projectId: null,
+        sector: null,
+        fiscalYear: 'ALL',
         needsCanonicalRedirect: false,
       });
 
@@ -83,6 +117,8 @@ describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
         tab: 'documents',
         section: 'INDEX',
         projectId: null,
+        sector: null,
+        fiscalYear: 'ALL',
         needsCanonicalRedirect: false,
       });
 
@@ -90,6 +126,8 @@ describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
         tab: 'admin',
         section: 'INDEX',
         projectId: null,
+        sector: null,
+        fiscalYear: 'ALL',
         needsCanonicalRedirect: false,
       });
 
@@ -97,6 +135,8 @@ describe('Clean Path Routing Engine (BudgIT-Style Clean URLs)', () => {
         tab: 'admin',
         section: 'INDEX',
         projectId: null,
+        sector: null,
+        fiscalYear: 'ALL',
         needsCanonicalRedirect: false,
       });
     });

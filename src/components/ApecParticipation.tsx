@@ -78,10 +78,10 @@ export function ApecParticipation({ institutionId, fiscalYear }: { institutionId
         {!data.publicNeeds.length && <p className="text-sm text-slate-600">Aucun résumé publié pour cet exercice. Cela ne signifie pas qu’aucun besoin n’a été exprimé.</p>}
         {data.publicNeeds.map(n=><article key={n.need_id} className="space-y-2 rounded-xl border border-slate-200 p-3 break-words">
           <h5 className="font-semibold">{n.title}</h5><p className="whitespace-pre-wrap text-sm">{n.summary}</p>
-          <p className="text-xs text-slate-600">Contribution citoyenne · Résumé relu le {new Date(n.reviewed_at).toLocaleDateString('fr-FR')}<br/>Source publique : {n.source_reference} · {n.source_date}</p>
+          <p className="text-xs text-slate-600">Contribution citoyenne — Résumé relu le {new Date(n.reviewed_at).toLocaleDateString('fr-FR')}<br/>Source publique : {n.source_reference} ({n.source_date})</p>
         </article>)}
       </div>
-      {data.cycles.map(c=><p key={c.id} className="text-sm break-words"><strong>{c.title}</strong> — {c.status==='OPEN'?'Ouvert':'Clos'} · {c.fiscal_year}<br/>Source : {c.source_reference} · {c.source_date}</p>)}
+      {data.cycles.map(c=><p key={c.id} className="text-sm break-words"><strong>{c.title}</strong> — {c.status==='OPEN'?'Ouvert':'Clos'} ({c.fiscal_year})<br/>Source : {c.source_reference} ({c.source_date})</p>)}
       {!data.signedIn && <details><summary className="min-h-[44px] cursor-pointer font-semibold focus-visible:outline">Se connecter pour participer</summary>
         <form className="space-y-3" onSubmit={e=>void run(e,async f=>{
           const credentials={email:String(f.get('email')),password:String(f.get('password'))};
@@ -108,13 +108,13 @@ export function ApecParticipation({ institutionId, fiscalYear }: { institutionId
         </form></details>}
       {data.signedIn && <label className="block">{data.canManage?'Besoins à suivre':'Mes besoins'}<select value={selected} onChange={e=>setSelected(e.target.value)} className={inputClass}><option value="">Choisir un besoin</option>{data.needs.map(n=><option key={n.id} value={n.id}>{n.title}</option>)}</select></label>}
       {need && <div className="space-y-4 break-words">
-        <p><strong>{need.title}</strong><br/>{need.description}</p><p className="text-sm">Identifiant : {need.id}<br/>{labels[need.status]} · {labels[need.verification_status]}<br/>Source citoyenne : {need.source_reference} · {need.source_date}</p>
-        <p className="text-sm">Priorité : {need.priority ?? 'Non définie'} · Projet : {need.project_id ?? 'Non relié'} · Budget : {need.local_budget_id ?? 'Non relié'}</p>
+        <p><strong>{need.title}</strong><br/>{need.description}</p><p className="text-sm">Identifiant : {need.id}<br/>{labels[need.status]}, {labels[need.verification_status]}<br/>Source citoyenne : {need.source_reference} ({need.source_date})</p>
+        <p className="text-sm">Priorité : {need.priority ?? 'Non définie'}, Projet : {need.project_id ?? 'Non relié'}, Budget : {need.local_budget_id ?? 'Non relié'}</p>
         {data.cycles.some(c=>c.id===need.cycle_id && c.status==='OPEN') && need.verification_status!=='REJECTED' && <details><summary className="min-h-[44px] cursor-pointer font-semibold focus-visible:outline">Ajouter une contribution</summary>
           <form className="space-y-3" onSubmit={e=>void run(e,async f=>{const id=await submitApecContribution({need_id:need.id,body:String(f.get('body')),source_reference:String(f.get('source')),source_date:String(f.get('date'))});return `Contribution reçue : ${id}. À vérifier.`;})}>
             <label className="block">Contribution factuelle<textarea name="body" required minLength={3} maxLength={4000} className={inputClass}/></label>{sourceFields}<button disabled={busy} className={buttonClass}>Envoyer la contribution</button>
           </form></details>}
-        {contributions.map(c=><p key={c.id} className="rounded-lg bg-slate-50 p-3 text-sm">{c.body}<br/>Contribution {c.id} · {labels[c.verification_status]}<br/>Source : {c.source_reference} · {c.source_date}</p>)}
+        {contributions.map(c=><p key={c.id} className="rounded-lg bg-slate-50 p-3 text-sm">{c.body}<br/>Contribution {c.id} ({labels[c.verification_status]})<br/>Source : {c.source_reference} ({c.source_date})</p>)}
         {data.canManage && <details><summary className="min-h-[44px] cursor-pointer font-semibold focus-visible:outline">Documenter une décision ou une réponse</summary>
           <form className="space-y-3" onSubmit={e=>void run(e,async f=>{await recordApecDecision({needId:need.id,action,body:String(f.get('body')),source:String(f.get('source')),date:String(f.get('date')),priority:f.get('priority')?Number(f.get('priority')):undefined,projectId:String(f.get('project')||''),budgetId:String(f.get('budget')||''),contributionId:String(f.get('contribution')||'')});return 'Décision et source ajoutées à l’historique.';})}>
             <label className="block">Action<select value={action} onChange={e=>setAction(e.target.value as ApecDecision)} className={inputClass}>{(['VERIFY','REJECT','PRIORITIZE','LINK','FOLLOW_UP','RESPONSE','VERIFY_CONTRIBUTION','REJECT_CONTRIBUTION'] as const).map(a=><option key={a} value={a}>{labels[a]}</option>)}</select></label>
@@ -140,7 +140,7 @@ export function ApecParticipation({ institutionId, fiscalYear }: { institutionId
           </form>}
         </details>}
         <h4 className="font-bold">Historique du besoin</h4>
-        <ol className="space-y-3">{events.map(e=><li key={e.id} className="rounded-lg border border-slate-200 p-3 text-sm"><strong>{labels[e.kind]}</strong> · {new Date(e.created_at).toLocaleString('fr-FR')}<p>{e.body}</p><p>Source : {e.source_reference} · {e.source_date}</p><p>{e.provenance==='INSTITUTION_RESPONSE'?'Réponse institutionnelle, sans validation indépendante':e.provenance==='CITIZEN_OBSERVATION'?'Contribution citoyenne':'Traitement documenté par SuiviBudget'}</p>{e.kind==='LINK' && <p>Projet : {e.decision_data.project_id || 'Non relié'} · Budget : {e.decision_data.local_budget_id || 'Non relié'}</p>}{e.kind==='PRIORITIZE' && <p>Rang : {e.decision_data.priority}</p>}</li>)}</ol>
+        <ol className="space-y-3">{events.map(e=><li key={e.id} className="rounded-lg border border-slate-200 p-3 text-sm"><strong>{labels[e.kind]}</strong> — {new Date(e.created_at).toLocaleString('fr-FR')}<p>{e.body}</p><p>Source : {e.source_reference} ({e.source_date})</p><p>{e.provenance==='INSTITUTION_RESPONSE'?'Réponse institutionnelle, sans validation indépendante':e.provenance==='CITIZEN_OBSERVATION'?'Contribution citoyenne':'Traitement documenté par SuiviBudget'}</p>{e.kind==='LINK' && <p>Projet : {e.decision_data.project_id || 'Non relié'}, Budget : {e.decision_data.local_budget_id || 'Non relié'}</p>}{e.kind==='PRIORITIZE' && <p>Rang : {e.decision_data.priority}</p>}</li>)}</ol>
       </div>}
     </>}
     <p role="status" className="break-words text-sm">{message}</p>
