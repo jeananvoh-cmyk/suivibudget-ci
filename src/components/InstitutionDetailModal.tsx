@@ -1,7 +1,7 @@
 import { BudgetReferenceHeader } from './institutions/MinistryBudgetHeader';
 import React, { useState, useEffect, useRef } from 'react';
 import { Institution, BudgetProject, BudgetLineItem } from '../types';
-import { formatFCFA, formatAmountInWords, getProjectTier, getProjectTierBadge } from '../utils/formatters';
+import { formatFCFA, formatAmountInWords, getProjectTier, getProjectTierBadge, formatInstitutionDisplayName } from '../utils/formatters';
 import { getProjectsForInstitution } from '../utils/institutionProjects';
 import { X, Globe, ExternalLink, MapPin, Phone, Mail, Building2, FileText, ArrowRight, ShieldCheck, User, CheckCircle2, Share2, Layers, Search, Filter, GraduationCap, Briefcase, FolderOpen, History } from 'lucide-react';
 import { OfficialDocRequestModal } from './OfficialDocRequestModal';
@@ -601,8 +601,8 @@ export const InstitutionDetailModal: React.FC<InstitutionDetailModalProps> = ({
                   )}
                 </div>
 
-                <h2 className="text-base sm:text-xl font-black text-slate-900 leading-snug line-clamp-2" title={institution.name}>
-                  {institution.name}
+                <h2 className="text-base sm:text-xl font-black text-slate-900 leading-snug line-clamp-2" title={formatInstitutionDisplayName(institution.name)}>
+                  {formatInstitutionDisplayName(institution.name)}
                 </h2>
 
                 {institution.leader_name && (

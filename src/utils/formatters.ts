@@ -595,3 +595,15 @@ export function getInstitutionLeaderGender(inst: Institution): 'M' | 'F' {
 
   return 'M';
 }
+
+/**
+ * Formate proprement les noms d'entités françaises à l'affichage
+ * (ex: "Mairie de Agboville" -> "Mairie d’Agboville") sans altérer les IDs ni le référentiel brut.
+ */
+export function formatInstitutionDisplayName(name?: string | null): string {
+  if (!name) return '';
+  return name.replace(
+    /\b(de)\s+(?=[AEIOUÀÂÉÈÊËÎÏÔÖÙÛÜaeiouàâéèêëîïôöùûü])/g,
+    (_match, prep: string) => (prep[0] === 'D' ? 'D’' : 'd’')
+  );
+}

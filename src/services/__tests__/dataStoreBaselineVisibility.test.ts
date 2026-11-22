@@ -43,7 +43,10 @@ describe('dataStore refreshAdminEntities baseline visibility guard', () => {
         eq: () => builder,
         range: () => Promise.resolve({
           data: table === 'institutions'
-            ? [{ id: 'inst-public-remote', name: 'Commune Publique Distante', type: 'MAIRIE', region: 'Lagunes', district: 'Lagunes', revision: 1, publication_status: 'PUBLISHED', profile_metadata: {} }]
+            ? [
+                { id: 'inst-public-remote', name: 'Commune Publique Distante', type: 'MAIRIE', region: 'Lagunes', district: 'Lagunes', revision: 1, publication_status: 'PUBLISHED', profile_metadata: {} },
+                { id: 'inst-com-abobo', name: "Mairie d'Abobo", type: 'MAIRIE', region: 'Abidjan', district: "District Autonome d'Abidjan", leader_name: null, leader_title: null, leader_photo_url: null, political_party: null, website: null, revision: 1, publication_status: 'PUBLISHED', profile_metadata: {} },
+              ]
             : [],
           error: null,
         }),
@@ -66,6 +69,12 @@ describe('dataStore refreshAdminEntities baseline visibility guard', () => {
     const baselineRpcCalls = mockSupabase.rpc.mock.calls.filter(([name]) => name === 'admin_baseline_visibility');
     expect(baselineRpcCalls).toHaveLength(0);
     expect(dataStore.getInstitutions().some(i => i.id === 'inst-public-remote')).toBe(true);
+    const abobo = dataStore.getInstitutions().find(i => i.id === 'inst-com-abobo');
+    expect(abobo?.leader_name).toBe('KAMISSOKO KANDIA');
+    expect(abobo?.leader_photo_url).toBeTruthy();
+    expect(abobo?.political_party).toBe('RHDP');
+    const agboville = dataStore.getInstitutions().find(i => i.id === 'inst-com-agboville');
+    expect(agboville?.primitive_budget?.source_title).toBe('AIP — Budget primitif 2026 (Mairie de Agboville)');
   });
 
   it('does not call admin_baseline_visibility for authenticated CITIZEN users', async () => {

@@ -3,7 +3,7 @@ import { BudgetDataDownloads } from '../../components/institutions/BudgetDataDow
 import React, { useState } from 'react';
 import { Search, ChevronDown, ArrowRight, FileText, Globe, Info, Eye, EyeOff } from 'lucide-react';
 import { Institution, BudgetProject } from '../../types';
-import { getInstitutionLeaderGender } from '../../utils/formatters';
+import { getInstitutionLeaderGender, formatInstitutionDisplayName } from '../../utils/formatters';
 import { assessInstitutionBudget } from '../../utils/institutionBudgetHelper';
 import { getProjectsForInstitution } from '../../utils/institutionProjects';
 import { OfficialDocRequestModal } from '../../components/OfficialDocRequestModal';
@@ -230,7 +230,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                 <div className="flex items-start gap-4 mb-3">
                   <LeaderPortrait
                     photoUrl={inst.leader_photo_display_url || inst.leader_photo_url}
-                    name={inst.leader_name || inst.name}
+                    name={inst.leader_name || ''}
                     title={inst.leader_title || 'Président'}
                     sizeClass="w-20 h-20 sm:w-24 sm:h-24 min-w-[5rem] max-w-[5rem] sm:min-w-[6rem] sm:max-w-[6rem]"
                   />
@@ -269,7 +269,7 @@ export const RegionalCouncilsPage: React.FC<RegionalCouncilsPageProps> = ({
                       )}
                     </div>
                     <h3 className="text-lg sm:text-xl font-black text-slate-900 group-hover:text-brand-blue transition-colors leading-snug">
-                      {inst.name}
+                      {formatInstitutionDisplayName(inst.name)}
                     </h3>
                     {inst.leader_name && (
                       <div className="text-xs text-slate-600 font-bold mt-0.5">
