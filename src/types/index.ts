@@ -130,6 +130,8 @@ export interface PrimitiveBudgetInfo {
   pdf_page?: number;
   sha256?: string;
   document_reference?: string;
+  /** Autres publications en ligne confirmant le montant (ex. dépêche AIP donnant un montant arrondi). */
+  corroborating_sources?: ReadonlyArray<{ title: string; url: string; note?: string }>;
 }
 
 export interface BudgetLineItem {

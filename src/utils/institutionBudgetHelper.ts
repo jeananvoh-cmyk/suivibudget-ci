@@ -892,6 +892,7 @@ export interface BudgetPresentationAmount {
   precision: 'EXACT' | 'APPROXIMATE' | 'LOWER_BOUND' | 'UPPER_BOUND' | 'UNKNOWN';
   verification: 'VERIFIED_AMOUNT' | 'SECONDARY_SOURCE' | 'TO_VERIFY' | 'UNKNOWN';
   source: DocumentaryProvenance | null;
+  corroborating_sources?: ReadonlyArray<{ title: string; url: string; note?: string }>;
 }
 
 export interface LfiLocalGrantPresentation {
@@ -1249,6 +1250,7 @@ export function resolveInstitutionBudgetPresentation(institution: Partial<Instit
         pdf_page: isPrimaryDoc ? primitive.pdf_page! : null,
         sha256: isPrimaryDoc ? primitive.sha256! : null,
       },
+      ...(primitive.corroborating_sources?.length ? { corroborating_sources: primitive.corroborating_sources } : {}),
     };
     result.notice = isPrimaryDoc
       ? 'Budget primitif voté documenté par une source primaire vérifiée. Budget primitif et budget modificatif sont des prévisions ; le compte administratif décrit l’exécution.'
