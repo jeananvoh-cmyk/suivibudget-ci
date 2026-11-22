@@ -45,7 +45,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* Editorial Summary — niveau 1 : comprendre en moins de 10 secondes */}
         <p className="mt-5 text-base sm:text-lg md:text-xl text-slate-600 max-w-3xl mx-auto font-normal leading-relaxed">
-          Suivez <strong className="text-slate-900">{investments.physicalAllCount.toLocaleString('fr-FR')} projets publics</strong> (écoles, centres de santé, eau potable, routes…) et signalez ce que vous constatez sur le terrain.
+          Suivez <strong className="text-slate-900">{investments.physicalAllCount.toLocaleString('fr-FR')} projets publics</strong> (écoles, centres de santé, eau potable, routes…).
         </p>
 
         {/* Chiffres clés — niveau 2 */}
@@ -82,6 +82,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           )}
           {investments.unknownAmount2026ProjectsCount > 0 && ` Montants 2026 non consolidés : ${investments.unknownAmount2026ProjectsCount} opération(s) sans montant connu.`}
           {!hasCompletePre2026Amounts && investments.multiYearPre2026Count > 0 && ` Montants antérieurs non consolidés : ${investments.unknownAmountPre2026ProjectsCount} opération(s) sans montant connu.`}
+          {' '}Participez au contrôle citoyen avec vos constats de terrain.
         </p>
 
         {/* Dual Audience Quick Action Links */}
