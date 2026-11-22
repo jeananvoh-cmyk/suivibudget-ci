@@ -135,7 +135,12 @@ describe('Dotations de l’État (LFI 2026) & visibilité BP en ligne des collec
     expect(formatInstitutionDisplayName('Mairie de Hire')).toBe('Mairie de Hire');
     const agboville = ALL_COMMUNES_DATA.find((c) => c.id === 'inst-com-agboville')!;
     const compactAgboville = renderToStaticMarkup(createElement(BudgetReferenceHeader, { institution: agboville, compact: true }));
-    expect(compactAgboville).toContain('AIP — Budget primitif 2026 (Mairie d’Agboville)');
+    expect(compactAgboville).toContain('Ivoirexpress — Budget primitif 2026 (Mairie d’Agboville), 22 juin 2026');
+    expect(compactAgboville).toContain('https://ivoirexpress.ci/2026/06/22/mairie-dagboville-le-premier-budget-modificatif-2026-fixe-a-3-088-862-000-f-cfa/');
+    expect(compactAgboville).toContain('Confirmé par :');
+    expect(compactAgboville).toContain('AIP — Budget modificatif d’Agboville, 19 juin 2026');
+    expect(compactAgboville).toContain('https://www.aip.ci/electionpresidentielle2025/article.php?id=379819');
+    expect(compactAgboville).toContain('montant arrondi : 2,894 milliards FCFA');
     expect(compactAgboville).toContain('Dotation de l’État (Loi de finances 2026)');
     expect(compactAgboville).toContain('Ne pas additionner ci-dessus');
     expect(compactAgboville).toContain('Prévision annoncée en ligne : la part entre impôts locaux et aide de l’État reste à confirmer');

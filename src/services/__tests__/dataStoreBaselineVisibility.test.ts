@@ -74,7 +74,7 @@ describe('dataStore refreshAdminEntities baseline visibility guard', () => {
     expect(abobo?.leader_photo_url).toBeTruthy();
     expect(abobo?.political_party).toBe('RHDP');
     const agboville = dataStore.getInstitutions().find(i => i.id === 'inst-com-agboville');
-    expect(agboville?.primitive_budget?.source_title).toBe('AIP — Budget primitif 2026 (Mairie de Agboville)');
+    expect(agboville?.primitive_budget?.source_title).toBe('Ivoirexpress — Budget primitif 2026 (Mairie d’Agboville), 22 juin 2026');
   });
 
   it('does not call admin_baseline_visibility for authenticated CITIZEN users', async () => {

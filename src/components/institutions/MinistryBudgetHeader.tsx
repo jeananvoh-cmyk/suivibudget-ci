@@ -81,6 +81,16 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
           {formatInstitutionDisplayName(amount.source.document_title)}{amount.source.pdf_page ? ` · PDF p. ${amount.source.pdf_page}` : ''}
         </a>
       )}
+      {amount.corroborating_sources?.map((item) => (
+        <p key={item.url} className="text-[11px] text-slate-600 break-words">
+          Confirmé par :{' '}
+          <a href={item.url} target="_blank" rel="noopener noreferrer"
+            onClick={event => event.stopPropagation()} className="underline text-brand-blue focus-visible:outline focus-visible:outline-2 rounded">
+            {formatInstitutionDisplayName(item.title)}
+          </a>
+          {item.note ? ` (${item.note})` : ''}
+        </p>
+      ))}
     </div>
   );
   const visibleSupplements = view.supplements.filter((amount) => !(
