@@ -81,7 +81,8 @@ describe('Dotations de l’État (LFI 2026) & visibilité BP en ligne des collec
     expect(compactAbengourou).toContain('3 781 160 000');
     expect(compactAbengourou).toContain('Source en ligne vérifiable');
     expect(compactAbengourou).toContain(OFFICIAL_PRIMITIVE_BUDGETS['inst-com-abengourou'].source_url);
-    expect(compactAbengourou).toContain('Dotation de l’État (LFI 2026)');
+    expect(compactAbengourou).toContain('Dotation de l’État (Loi de finances 2026)');
+    expect(compactAbengourou).not.toContain('Dotation de l’État (LFI 2026)');
     expect(compactAbengourou).toContain('842 432 822');
     expect(compactAbengourou).toContain(`${LFI_2026_DOCUMENT.url}#page=206`);
 
@@ -91,7 +92,8 @@ describe('Dotations de l’État (LFI 2026) & visibilité BP en ligne des collec
     expect(compactDoropo).toContain('Non documenté');
     expect(compactDoropo).toContain('Aucune source en ligne disponible pour ce budget prévisionnel');
     expect(compactDoropo).not.toContain('Non documenté (aucune source en ligne)');
-    expect(compactDoropo).toContain('Disponible en attente du BP définitif');
+    expect(compactDoropo).toContain('En attendant le budget voté');
+    expect(compactDoropo).toContain('Les aides de l’État ne remplacent pas le budget voté par la collectivité.');
     expect(compactDoropo).toContain('644 104 527');
 
     const fullDoropo = renderToStaticMarkup(createElement(BudgetReferenceHeader, { institution: doropo, compact: false }));
@@ -134,7 +136,9 @@ describe('Dotations de l’État (LFI 2026) & visibilité BP en ligne des collec
     const agboville = ALL_COMMUNES_DATA.find((c) => c.id === 'inst-com-agboville')!;
     const compactAgboville = renderToStaticMarkup(createElement(BudgetReferenceHeader, { institution: agboville, compact: true }));
     expect(compactAgboville).toContain('AIP — Budget primitif 2026 (Mairie d’Agboville)');
-    expect(compactAgboville).toContain('Concours État · hors budget propre (BP)');
+    expect(compactAgboville).toContain('Dotation de l’État (Loi de finances 2026)');
+    expect(compactAgboville).toContain('Ne pas additionner ci-dessus');
+    expect(compactAgboville).toContain('Prévision annoncée en ligne : la part entre impôts locaux et aide de l’État reste à confirmer');
     expect(compactAgboville).not.toContain('BP/BS/BM');
   });
 

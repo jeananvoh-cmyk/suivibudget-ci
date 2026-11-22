@@ -129,10 +129,10 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
         <div className="rounded-xl border border-sky-200 bg-sky-50/70 p-2.5 sm:p-3 space-y-1.5 min-w-0">
           <div className="flex flex-wrap items-center justify-between gap-1.5">
             <span className="text-[11px] font-black text-sky-950">
-              Dotation de l’État (LFI 2026)
+              Dotation de l’État (Loi de finances 2026)
             </span>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-900 border border-sky-200">
-              {view.reference.amount_fcfa == null ? 'Disponible en attente du BP définitif' : 'Concours État · hors budget propre (BP)'}
+              {view.reference.amount_fcfa == null ? 'En attendant le budget voté' : 'Ne pas additionner ci-dessus'}
             </span>
           </div>
           <p className={`${compact ? 'text-sm' : 'text-lg sm:text-xl'} font-black text-sky-950 break-words`}>
@@ -181,7 +181,7 @@ export const BudgetReferenceHeader: React.FC<{ institution: Partial<Institution>
       {lfi?.status === 'NO_NOMINATIVE_LFI_LINE' && (
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-[11px] text-slate-700 leading-relaxed space-y-1">
           <p>
-            <strong className="text-slate-900">Dotation de l’État (LFI 2026) :</strong> aucune ligne nominative identifiée dans le bloc des concours aux collectivités (pp. 200–207) — cela ne prouve pas l’absence de concours financiers.
+            <strong className="text-slate-900">Dotation de l’État (Loi de finances 2026) :</strong> aucune ligne nominative identifiée dans le bloc des concours aux collectivités (pp. 200–207) — cela ne prouve pas l’absence de concours financiers.
           </p>
           {lfi.source.source_url && (
             <a
